@@ -70,8 +70,8 @@ export default function Participations() {
 
   //                 const response = await axelard({ cmd: `axelard q tss ${tssType} ${key_chain} ${key_role} -oj`, cache: true, cache_timeout: 15 })
 
-  //                 if (convertToJson(response?.data?.stdout)) {
-  //                   let keyIds = convertToJson(response.data.stdout)
+  //                 if (convertToJson(response?.stdout)) {
+  //                   let keyIds = convertToJson(response.stdout)
 
   //                   if (keyIds) {
   //                     keyIds = Array.isArray(keyIds) ? keyIds : [keyIds]
