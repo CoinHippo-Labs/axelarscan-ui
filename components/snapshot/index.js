@@ -330,7 +330,7 @@ export default function Snapshot({ height }) {
                   ))}
                 </div>
             ),
-            headerClassName: 'justify-end text-right',
+            headerClassName: 'whitespace-nowrap justify-end text-right',
           },
           {
             Header: 'Keygen',
