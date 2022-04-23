@@ -10,7 +10,7 @@ This is the frontend of [Axelarscan](https://axelarscan.io), which displays the 
 - [Blocks](https://axelarscan.io/blocks) - List of the latest blocks produced in the network.
 - [Transactions](https://axelarscan.io/transactions) - List of the latest transactions in. the network.
 - [Participations](https://axelarscan.io/participations) displays the information on keys generation and signed events.
-- [Transfers](https://axelarscan.io/transfers) - The statistics of cross-chain transfers through the Axelar network. There's also the link to the [cross-chain portal](https://crosschain.axelarscan.io/) to view each transfer.
+- [Transfers](https://axelarscan.io/transfers) displays the statistics of cross-chain transfers happening through the Axelar network. Visitors can also navigate to the [cross-chain portal](https://github.com/CoinHippo-Labs/axelarscan-crosschain-ui) from this page to view each transfer in detail.
 - [Assets](https://axelarscan.io/assets) - List of the assets and chains supported on the Axelar network
 
 ## Follow us
