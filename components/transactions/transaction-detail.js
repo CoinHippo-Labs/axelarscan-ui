@@ -143,7 +143,7 @@ export default function TransactionDetail({ data }) {
                   <Copy text={data.sender} />
                 </div>
                 :
-                '-'
+                <span>-</span>
             :
             <div className="skeleton w-60 h-6 mt-1" />
           }
