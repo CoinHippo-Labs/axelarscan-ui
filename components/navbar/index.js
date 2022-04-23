@@ -464,16 +464,29 @@ export default function Navbar() {
       return supply && BigNumber(supply.toString()).shiftedBy(-contract.contract_decimals).toNumber()
     }
 
+    const getBalance = async (chain, contract) => {
+      let balance
+      if (chain && contract) {
+        const provider_urls = chain.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || []
+        const provider = new providers.FallbackProvider(provider_urls)
+        const _contract = new Contract(contract.contract_address, ['function balanceOf(address owner) view returns (uint256)'], provider)
+        balance = await _contract.balanceOf(chain.gateway_address)
+      }
+      console.log(balance)
+      return balance && BigNumber(balance.toString()).shiftedBy(-contract.contract_decimals).toNumber()
+    }
+
     const getData = async (chain, assets) => {
       if (!controller.signal.aborted) {
         if (assets) {
           for (let i = 0; i < assets.length; i++) {
-            const contract = (!assets[i]?.is_staging || staging) && assets[i]?.contracts?.find(contract => contract?.chain_id === chain.chain_id && !contract?.is_native)
+            const contract = (!assets[i]?.is_staging || staging) && assets[i]?.contracts?.find(contract => contract?.chain_id === chain.chain_id/* && !contract?.is_native*/)
             if (contract) {
-              const supply = await getContractSupply(chain, contract)
+              const supply = !contract.is_native ? await getContractSupply(chain, contract) : 0
+              const balance = await getBalance(chain, contract)
               dispatch({
                 type: TVL_DATA,
-                value: { [`${chain.id}_${contract.contract_address}`]: supply },
+                value: { [`${chain.id}_${contract.contract_address}`]: supply + balance },
               })
             }
           }

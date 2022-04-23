@@ -707,7 +707,7 @@ export default function Transfers() {
           </div>
         </Widget>
         <Widget
-          title={<span className="text-black dark:text-white text-base font-semibold">TVL</span>}
+          title={<span className="text-black dark:text-white text-base font-semibold">TVL on EVMs</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Total Value Locked on Axelar Network</span>}
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
         >
@@ -1108,7 +1108,7 @@ export default function Transfers() {
             />
           </Widget>
           <Widget
-            title={<span className="text-black dark:text-white text-base font-semibold">TVL</span>}
+            title={<span className="text-black dark:text-white text-base font-semibold">TVL on EVMs</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Total Value Locked on Axelar Network</span>}
             right={assetSelect && crosschainTVLData?.updated_at && (
               <div className="min-w-max text-right space-y-1.5 -mt-0.5">
