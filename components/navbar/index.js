@@ -264,7 +264,7 @@ export default function Navbar() {
                   response = await allValidatorsBroadcaster(response?.data, null, denoms_data)
                   if (response?.data?.length > 0) {
                     const vs = response.data
-                    if (!['/evm-votes'].includes(pathname)) {
+                    if (['/validators', '/validators/[status]', '/validator/[address]'].includes(pathname)) {
                       response = await getHeartbeats({
                         _source: false,
                         aggs: {
@@ -304,6 +304,12 @@ export default function Navbar() {
                         v.heartbeats_uptime = heartbeats_uptime
                         vs[i] = v
                       }
+
+                      response.data = vs
+                      dispatch({
+                        type: VALIDATORS_DATA,
+                        value: response.data,
+                      })
 
                       response = await getEvmVotes({
                         aggs: {
