@@ -124,7 +124,7 @@ export default function Navbar() {
             value: response,
           })
 
-          if (!is_interval || ['/validator/[address]'].includes(pathname)) {
+          if (!is_interval) {
             setLoadValidatorsTrigger(moment().valueOf())
           }
         }
