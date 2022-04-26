@@ -478,7 +478,6 @@ export default function Navbar() {
         const _contract = new Contract(contract.contract_address, ['function balanceOf(address owner) view returns (uint256)'], provider)
         balance = await _contract.balanceOf(chain.gateway_address)
       }
-      console.log(balance)
       return balance && BigNumber(balance.toString()).shiftedBy(-contract.contract_decimals).toNumber()
     }
 

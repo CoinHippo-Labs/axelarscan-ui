@@ -86,6 +86,7 @@ export default function Validator({ address }) {
             }
 
             response = await getHeartbeats({
+              _source: false,
               aggs: {
                 heartbeats: {
                   terms: { field: 'sender.keyword' },
@@ -100,14 +101,14 @@ export default function Validator({ address }) {
                 bool: {
                   must: [
                     { match: { sender: data.broadcaster_address } },
-                    { range: { height: { gte: data.start_proxy_height || data.start_height, lte: Number(status_data.latest_block_height) } } },
+                    { range: { height: { gt: firstHeartbeatBlock(Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)), lte: Number(status_data.latest_block_height) } } },
                   ],
                 },
               },
             })
 
             const _last = lastHeartbeatBlock(Number(status_data.latest_block_height))
-            const _first = firstHeartbeatBlock(data?.start_proxy_height || data?.start_height)
+            const _first = firstHeartbeatBlock(Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)) + 1
 
             const totalHeartbeats = Math.floor((_last - _first) / Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)) + 1
             _health.total_heartbeats = totalHeartbeats
