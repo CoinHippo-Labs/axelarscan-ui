@@ -26,7 +26,6 @@ export default function Block({ height }) {
 
         if (!controller.signal.aborted) {
           const response = await getBlock(height)
-
           setBlock({ data: response?.data || {}, height })
         }
       }

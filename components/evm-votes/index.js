@@ -201,7 +201,7 @@ export default function EVMVotes({ className }) {
                         <Img
                           src={chain.explorer.icon}
                           alt=""
-                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                          className="w-4 min-w-max h-4 rounded-full opacity-60 hover:opacity-100"
                         />
                         :
                         <TiArrowRight size={16} className="transform -rotate-45" />

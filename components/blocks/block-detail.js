@@ -99,7 +99,15 @@ export default function BlockDetail({ data, validator_data }) {
                 </div>
               </div>
               :
-              null
+              data.proposer_address ?
+                <div className="flex items-center space-x-1">
+                  <span className="text-gray-500">
+                    {process.env.NEXT_PUBLIC_PREFIX_CONSENSUS}{ellipseAddress(data.proposer_address?.replace(process.env.NEXT_PUBLIC_PREFIX_CONSENSUS, ''), 8)}
+                  </span>
+                  <Copy text={data.proposer_address} />
+                </div>
+                :
+                null
             :
             <div className="flex items-start space-x-2">
               <div className="skeleton w-6 h-6 rounded-full" />
