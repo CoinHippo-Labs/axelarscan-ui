@@ -122,6 +122,10 @@ export default function PageTitle() {
       title = 'Search voting records'
       subtitle = 'EVM Votes'
       break
+    case '/gmp':
+      title = 'Search GMP'
+      subtitle = 'General Message Passing'
+      break
     case '/transfers':
       title = 'Cross-Chain'
       subtitle = 'Asset Transfers'

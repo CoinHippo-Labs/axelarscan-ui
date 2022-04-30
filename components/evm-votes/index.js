@@ -195,13 +195,13 @@ export default function EVMVotes({ className }) {
                       href={`${chain.explorer.url}${chain.explorer.transaction_path?.replace('{tx}', props.value)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center text-blue-600 dark:text-white"
+                      className="min-w-max flex items-center text-blue-600 dark:text-white"
                     >
                       {chain.explorer.icon ?
                         <Img
                           src={chain.explorer.icon}
                           alt=""
-                          className="w-4 min-w-max h-4 rounded-full opacity-60 hover:opacity-100"
+                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                         />
                         :
                         <TiArrowRight size={16} className="transform -rotate-45" />

@@ -506,7 +506,7 @@ export default function Validator({ address }) {
                 bool: {
                   must: [
                     { match: { sender: v.broadcaster_address } },
-                    { range: { poll_start_height: { gte: Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS) } } },
+                    { range: { height: { gte: Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS) } } },
                   ],
                 },
               },
