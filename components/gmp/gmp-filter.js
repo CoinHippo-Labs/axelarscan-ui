@@ -20,17 +20,7 @@ export default function VotesFilter({ applied = false, disabled = false, initial
       name: 'txHash',
       type: 'text',
       placeholder: 'Tx Hash',
-    },
-    {
-      label: 'Method',
-      name: 'event',
-      type: 'select',
-      placeholder: 'Select event',
-      options: [
-        { value: '', title: 'Any' },
-        { value: 'ContractCall', title: 'callContract' },
-        { value: 'ContractCallWithToken', title: 'callContractWithToken' },
-      ],
+      fullWidth: true,
     },
     {
       label: 'Source Chain',
@@ -57,22 +47,15 @@ export default function VotesFilter({ applied = false, disabled = false, initial
       ),
     },
     {
-      label: 'Source Address',
-      name: 'sourceAddress',
-      type: 'text',
-      placeholder: 'Source Address',
-    },
-    {
-      label: 'Contract Address',
-      name: 'contractAddress',
-      type: 'text',
-      placeholder: 'Contract Address',
-    },
-    {
-      label: 'Time',
-      name: 'time',
-      type: 'datetime-range',
-      placeholder: 'Select time',
+      label: 'Method',
+      name: 'event',
+      type: 'select',
+      placeholder: 'Select event',
+      options: [
+        { value: '', title: 'Any' },
+        { value: 'ContractCall', title: 'callContract' },
+        { value: 'ContractCallWithToken', title: 'callContractWithToken' },
+      ],
     },
     {
       label: 'Status',
@@ -88,10 +71,39 @@ export default function VotesFilter({ applied = false, disabled = false, initial
       ],
     },
     {
+      label: 'Source Address',
+      name: 'sourceAddress',
+      type: 'text',
+      placeholder: 'Source Address',
+      fullWidth: true,
+    },
+    {
+      label: 'Contract Address',
+      name: 'contractAddress',
+      type: 'text',
+      placeholder: 'Contract Address',
+      fullWidth: true,
+    },
+    {
+      label: 'Time',
+      name: 'time',
+      type: 'datetime-range',
+      placeholder: 'Select time',
+      fullWidth: true,
+    },
+    {
+      label: 'Sender Address',
+      name: 'senderAddress',
+      type: 'text',
+      placeholder: 'Sender Address',
+      fullWidth: true,
+    },
+    {
       label: 'Relayer Address',
       name: 'relayerAddress',
       type: 'text',
       placeholder: 'Relayer Address',
+      fullWidth: true,
     },
   ]
 
@@ -113,9 +125,9 @@ export default function VotesFilter({ applied = false, disabled = false, initial
       </>}
       buttonClassName={`${applied ? 'bg-indigo-600 dark:bg-indigo-600 text-white font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white'} rounded-3xl shadow flex items-center justify-center text-base space-x-1.5 py-1.5 px-3`}
       title="GMP Filter"
-      body={<div className="form mt-2 -mb-3">
+      body={<div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
         {items.map((item, i) => (
-          <div key={i} className="form-element">
+          <div key={i} className={`${item.fullWidth ? 'sm:col-span-2' : ''} form-element`}>
             {item.label && (
               <div className="form-label text-gray-600 dark:text-gray-400 font-medium">{item.label}</div>
             )}

@@ -550,6 +550,44 @@ export default function Transaction() {
                       <div className="skeleton w-60 h-4 lg:h-6 mt-1" />
                     }
                   </div>
+                  {i < 2 && (
+                    <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
+                      <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Sender Address:</span>
+                      {transaction ?
+                        t?.transaction?.from || t?.receipt?.from ?
+                          <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                            <Copy
+                              text={t?.transaction?.from || t?.receipt?.from}
+                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
+                                {ellipseAddress(t?.transaction?.from || t?.receipt?.from, 8)}
+                              </span>}
+                            />
+                            {fromChain?.explorer?.url && (
+                              <a
+                                href={`${fromChain.explorer.url}${fromChain.explorer.address_path?.replace('{address}', t?.transaction?.from || t?.receipt?.from)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white"
+                              >
+                                {fromChain.explorer.icon ?
+                                  <Img
+                                    src={fromChain.explorer.icon}
+                                    alt=""
+                                    className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
+                                  />
+                                  :
+                                  <TiArrowRight size={20} className="transform -rotate-45" />
+                                }
+                              </a>
+                            )}
+                          </div>
+                          :
+                          <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                        :
+                        <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
+                      }
+                    </div>
+                  )}
                   <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
                     <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">{i < 2 ? 'Source' : 'Relayer'} Address:</span>
                     {transaction ?
