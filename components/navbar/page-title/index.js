@@ -126,6 +126,20 @@ export default function PageTitle() {
       title = 'Search GMP'
       subtitle = 'General Message Passing'
       break
+    case '/gmp/[tx]':
+      title = 'General Message Passing'
+      subtitle = (
+        <div className="flex items-center space-x-2 xl:space-x-0">
+          <span className="xl:hidden uppercase text-sm xl:text-lg">
+            {ellipseAddress(tx, 16)}
+          </span>
+          <span className="hidden xl:block uppercase text-sm xl:text-lg xl:pr-2">
+            {ellipseAddress(tx, 24)}
+          </span>
+          <Copy size={20} text={tx} />
+        </div>
+      )
+      break
     case '/transfers':
       title = 'Cross-Chain'
       subtitle = 'Asset Transfers'

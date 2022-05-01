@@ -57,10 +57,10 @@ export default function VotesFilter({ applied = false, disabled = false, initial
       ),
     },
     {
-      label: 'Sender Address',
+      label: 'Source Address',
       name: 'sourceAddress',
       type: 'text',
-      placeholder: 'Sender Address',
+      placeholder: 'Source Address',
     },
     {
       label: 'Contract Address',

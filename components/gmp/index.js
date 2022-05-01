@@ -5,10 +5,12 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
+import { BigNumber as EthersBigNumber, constants } from 'ethers'
+import BigNumber from 'bignumber.js'
 import {Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
+import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa'
 
 import GMPFilter from './gmp-filter'
 import Datatable from '../datatable'
@@ -16,16 +18,19 @@ import Copy from '../copy'
 import Popover from '../popover'
 
 import { search } from '../../lib/api/gmp'
-import { chain_manager } from '../../lib/object/chain'
+import { chain_manager, chainTitle } from '../../lib/object/chain'
 import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
 
 const PAGE_SIZE = 100
 const MAX_PAGE = 50
 
-export default function GMP({ className }) {
-  const { preferences, chains } = useSelector(state => ({ preferences: state.preferences, chains: state.chains }), shallowEqual)
+BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
+
+export default function GMP({ addTokenToMetaMask, className }) {
+  const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
 
   const router = useRouter()
   const { pathname, asPath } = { ...router }
@@ -69,16 +74,15 @@ export default function GMP({ className }) {
 
         let data = page === 0 ? [] : _.cloneDeep(gmps?.data), _page = page
         const size = PAGE_SIZE
-        const queryParams = { ...gmpsFilter }
-        const searchParams = { ...gmpsFilter }
-        if (gmpsFilter?.time?.length > 1) {
-          queryParams = { ...queryParams, fromTime: gmpsFilter.time[0].valueOf(), to: gmpsFilter.time[1].valueOf() }
-          searchParams = { ...searchParams, fromTime: gmpsFilter.time[0].unix(), to: gmpsFilter.time[1].unix() }
+        const _gmpsFilter = Object.fromEntries(Object.entries({ ...gmpsFilter }).filter(([k, v]) => v))
+        const queryParams = { ..._gmpsFilter }
+        const searchParams = { ..._gmpsFilter }
+        if (_gmpsFilter?.time?.length > 1) {
+          queryParams = { ...queryParams, fromTime: _gmpsFilter.time[0].valueOf(), to: _gmpsFilter.time[1].valueOf() }
+          searchParams = { ...searchParams, fromTime: _gmpsFilter.time[0].unix(), to: _gmpsFilter.time[1].unix() }
         }
 
-        if (Object.values(queryParams).filter(v => v).length > 0) {
-          router.push(`${pathname}?${Object.entries(queryParams).filter(([k, v]) => v).map(([k, v]) => `${k}=${v}`).join('&')}`)
-        }
+        router.push(`${pathname}${Object.keys(queryParams).length > 0 ? '?' : ''}${Object.entries(queryParams).map(([k, v]) => `${k}=${v}`).join('&')}`)
 
         while (_page <= page) {
           if (!controller.signal.aborted) {
@@ -111,7 +115,7 @@ export default function GMP({ className }) {
       clearInterval(interval)
     }
   }, [gmpsTrigger])
-console.log(gmps)
+
   return (
     <>
       <div className="flex items-center justify-end -mt-12 mb-4 mr-2">
@@ -128,235 +132,381 @@ console.log(gmps)
       </div>
       <Datatable
         columns={[
-          // {
-          //   Header: 'Transaction ID',
-          //   accessor: 'transaction_id',
-          //   disableSortBy: true,
-          //   Cell: props => {
-          //     const chain = chains_data?.find(c => c?.id === props.row.original.sender_chain)
-          //     return !props.row.original.skeleton ?
-          //       <div className="flex items-center space-x-1 mb-4">
-          //         <Copy
-          //           text={props.value}
-          //           copyTitle={<span className="uppercase text-gray-400 dark:text-gray-600 text-2xs font-medium">
-          //             {ellipseAddress(props.value, 8)}
-          //           </span>}
-          //         />
-          //         {chain?.explorer?.url && (
-          //           <a
-          //             href={`${chain.explorer.url}${chain.explorer.transaction_path?.replace('{tx}', props.value)}`}
-          //             target="_blank"
-          //             rel="noopener noreferrer"
-          //             className="min-w-max flex items-center text-blue-600 dark:text-white"
-          //           >
-          //             {chain.explorer.icon ?
-          //               <Img
-          //                 src={chain.explorer.icon}
-          //                 alt=""
-          //                 className="w-4 min-w-fit h-4 rounded-full opacity-60 hover:opacity-100"
-          //               />
-          //               :
-          //               <TiArrowRight size={16} className="transform -rotate-45" />
-          //             }
-          //           </a>
-          //         )}
-          //       </div>
-          //       :
-          //       <div className="skeleton w-48 h-4 mb-4" />
-          //   },
-          // },
-          // {
-          //   Header: 'Poll ID',
-          //   accessor: 'poll_id',
-          //   disableSortBy: true,
-          //   Cell: props => (
-          //     !props.row.original.skeleton ?
-          //       <Copy
-          //         text={props.value}
-          //         copyTitle={<span className="uppercase text-gray-400 dark:text-gray-600 text-2xs font-medium">
-          //           {ellipseAddress(props.value, 16)}
-          //         </span>}
-          //       />
-          //       :
-          //       <div className="skeleton w-48 h-4" />
-          //   ),
-          // },
-          // {
-          //   Header: 'Height',
-          //   accessor: 'height',
-          //   disableSortBy: true,
-          //   Cell: props => (
-          //     !props.row.original.skeleton ?
-          //       <Link href={`/block/${props.value}`}>
-          //         <a className="text-blue-500 dark:text-gray-400 font-medium">
-          //           {numberFormat(props.value, '0,0')}
-          //         </a>
-          //       </Link>
-          //       :
-          //       <div className="skeleton w-16 h-4" />
-          //   ),
-          // },
-          // {
-          //   Header: 'Chain',
-          //   accessor: 'sender_chain',
-          //   disableSortBy: true,
-          //   Cell: props => (
-          //     !props.row.original.skeleton ?
-          //       props.value ?
-          //         <img
-          //           alt=""
-          //           src={chain_manager.image(props.value, chains_data)}
-          //           className="w-6 h-6 rounded-full -mt-0.5"
-          //         />
-          //         :
-          //         '-'
-          //       :
-          //       <div className="skeleton w-6 h-6 rounded-full -mt-0.5" />
-          //   ),
-          // },
-          // {
-          //   Header: 'Voter',
-          //   accessor: 'sender',
-          //   disableSortBy: true,
-          //   Cell: props => {
-          //     const validator_data = validators_data?.find(v => v?.broadcaster_address === props.value)
+          {
+            Header: 'Tx Hash',
+            accessor: 'call.transactionHash',
+            disableSortBy: true,
+            Cell: props => {
+              const chain = props.row.original.call?.chain
+              const chain_data = chains_data?.find(c => c?.id === chain)
+              return !props.row.original.skeleton ?
+                <>
+                  <div className="min-w-max flex items-center space-x-1">
+                    <Link href={`/gmp/${props.value}`}>
+                      <a className="text-blue-500 dark:text-blue-400 text-xs font-medium">
+                        {ellipseAddress(props.value, 8)}
+                      </a>
+                    </Link>
+                    <Copy text={props.value} />
+                    {chain_data?.explorer?.url && (
+                      <a
+                        href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', props.value)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="min-w-max text-blue-600 dark:text-white"
+                      >
+                        {chain_data.explorer.icon ?
+                          <Img
+                            src={chain_data.explorer.icon}
+                            alt=""
+                            className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                          />
+                          :
+                          <TiArrowRight size={16} className="transform -rotate-45" />
+                        }
+                      </a>
+                    )}
+                  </div>
+                </>
+                :
+                <div className="skeleton w-32 h-5" />
+            },
+          },
+          {
+            Header: 'Source',
+            accessor: 'call.returnValues.sender',
+            disableSortBy: true,
+            Cell: props => {
+              const chain = props.row.original.call?.chain
+              const chain_data = chains_data?.find(c => c?.id === chain)
+              return !props.row.original.skeleton ?
+                props.value ?
+                  <div className="min-w-max">
+                    <div className="flex items-center space-x-1">
+                      <Copy
+                        text={props.value}
+                        copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
+                          {ellipseAddress(props.value, 8)}
+                        </span>}
+                      />
+                      {chain_data?.explorer?.url && (
+                        <a
+                          href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', props.value)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          {chain_data.explorer.icon ?
+                            <Img
+                              src={chain_data.explorer.icon}
+                              alt=""
+                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                            />
+                            :
+                            <TiArrowRight size={16} className="transform -rotate-45" />
+                          }
+                        </a>
+                      )}
+                    </div>
+                    {chain_data && (
+                      <div className="flex items-center space-x-2 mt-1.5">
+                        <Img
+                          src={chain_data.image}
+                          alt=""
+                          className="w-6 h-6 rounded-full"
+                        />
+                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(chain_data)}</span>
+                      </div>
+                    )}
+                  </div>
+                  :
+                  <span className="text-gray-400 dark:text-gray-600 font-light">Unknown</span>
+                :
+                <div className="space-y-2.5">
+                  <div className="skeleton w-32 h-5" />
+                  <div className="skeleton w-24 h-4" />
+                </div>
+            },
+          },
+          {
+            Header: 'Method',
+            accessor: 'call.event',
+            disableSortBy: true,
+            Cell: props => {
+              const from_chain = props.row.original.call?.chain
+              const to_chain = props.row.original.call?.returnValues?.destinationChain?.toLowerCase()
+              const from_chain_data = chains_data?.find(c => c?.id === from_chain)
+              const to_chain_data = chains_data?.find(c => c?.id === to_chain)
+              const asset = assets_data?.find(a => a?.symbol?.toLowerCase() === props.row.original.call?.returnValues?.symbol?.toLowerCase())
+              const from_contract = asset?.contracts?.find(c => c.chain_id === from_chain_data?.chain_id)
+              const to_contract = asset?.contracts?.find(c => c.chain_id === to_chain_data?.chain_id)
+              const addToMetaMaskButton = from_contract && (
+                <button
+                  onClick={() => addTokenToMetaMask(to_chain_data?.chain_id, { ...asset, ...from_contract })}
+                  className="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center py-1.5 px-2"
+                >
+                  <Img
+                    src="/logos/wallets/metamask.png"
+                    alt=""
+                    className="w-4 h-4"
+                  />
+                </button>
+              )
+              return !props.row.original.skeleton ?
+                <div className="min-w-max">
+                  <div className="max-w-min bg-blue-100 dark:bg-blue-800 border border-blue-500 dark:border-blue-700 rounded-lg py-0.5 px-2 mb-1.5">
+                    {props.value === 'ContractCall' ?
+                      'callContract'
+                      :
+                      props.value === 'ContractCallWithToken' ?
+                        'callContractWithToken'
+                        :
+                        props.value
+                    }
+                  </div>
+                  {asset && (
+                    <>
+                      <div className="flex items-center space-x-2 mb-1.5">
+                        <div className="min-w-max max-w-min bg-gray-100 dark:bg-gray-900 rounded-2xl flex items-center space-x-2 py-1 px-3">
+                          {asset?.image && (
+                            <Img
+                              src={asset.image}
+                              alt=""
+                              className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                            />
+                          )}
+                          <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
+                            <span className="font-mono mr-1.5">
+                              {props.row.original.call?.returnValues?.amount ?
+                                numberFormat(BigNumber(EthersBigNumber.from(props.row.original.call.returnValues.amount).toString())
+                                  .shiftedBy(-(from_contract?.contract_decimals || to_contract?.contract_decimals || 6)).toNumber()
+                                , '0,0.00000000', true)
+                                :
+                                '-'
+                              }
+                            </span>
+                            <span className="normal-case">
+                              {ellipseAddress(asset?.symbol || props.row.original.call?.returnValues?.symbol, 12)}
+                            </span>
+                          </span>
+                        </div>
+                        {addToMetaMaskButton && (
+                          <Popover
+                            placement="top"
+                            title={<span className="normal-case text-xs">Add token</span>}
+                            content={<div className="w-36 text-xs">Add <span className="font-semibold">{asset.symbol}</span> to MetaMask</div>}
+                            titleClassName="py-1"
+                          >
+                            {addToMetaMaskButton}
+                          </Popover>
+                        )}
+                      </div>
+                      {from_contract && (
+                        <div className="flex items-center space-x-1">
+                          <Copy
+                            size={14}
+                            text={from_contract.contract_address}
+                            copyTitle={<span className="normal-case text-gray-600 dark:text-gray-400 text-2xs font-medium">
+                              {ellipseAddress(from_contract.contract_address, 8)}
+                            </span>}
+                          />
+                          {from_chain_data?.explorer?.url && (
+                            <a
+                              href={`${from_chain_data.explorer.url}${from_chain_data.explorer[`contract${from_contract.contract_address === constants.AddressZero ? '_0' : ''}_path`]?.replace('{address}', from_contract.contract_address)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              {from_chain_data.explorer.icon ?
+                                <Img
+                                  src={from_chain_data.explorer.icon}
+                                  alt=""
+                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                />
+                                :
+                                <TiArrowRight size={16} className="transform -rotate-45" />
+                              }
+                            </a>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+                :
+                <div className="space-y-2.5">
+                  <div className="skeleton w-32 h-5" />
+                  <div className="skeleton w-24 h-4" />
+                </div>
+            },
+          },
+          {
+            Header: 'Destination Contract',
+            accessor: 'call.returnValues.destinationContractAddress',
+            disableSortBy: true,
+            Cell: props => {
+              const chain = props.row.original.call?.returnValues?.destinationChain?.toLowerCase()
+              const chain_data = chains_data?.find(c => c?.id === chain)
+              return !props.row.original.skeleton ?
+                props.value ?
+                  <div className="min-w-max">
+                    <div className="flex items-center space-x-1">
+                      <Copy
+                        text={props.value}
+                        copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
+                          {ellipseAddress(props.value, 8)}
+                        </span>}
+                      />
+                      {chain_data?.explorer?.url && (
+                        <a
+                          href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', props.value)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          {chain_data.explorer.icon ?
+                            <Img
+                              src={chain_data.explorer.icon}
+                              alt=""
+                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                            />
+                            :
+                            <TiArrowRight size={16} className="transform -rotate-45" />
+                          }
+                        </a>
+                      )}
+                    </div>
+                    {chain_data && (
+                      <div className="flex items-center space-x-2 mt-1.5">
+                        <Img
+                          src={chain_data.image}
+                          alt=""
+                          className="w-6 h-6 rounded-full"
+                        />
+                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(chain_data)}</span>
+                      </div>
+                    )}
+                  </div>
+                  :
+                  <span className="text-gray-400 dark:text-gray-600 font-light">Unknown</span>
+                :
+                <div className="space-y-2.5">
+                  <div className="skeleton w-32 h-5" />
+                  <div className="skeleton w-24 h-4" />
+                </div>
+            },
+          },
+          {
+            Header: 'Status',
+            accessor: 'status',
+            disableSortBy: true,
+            Cell: props => {
+              const from_chain = props.row.original.call?.chain
+              const to_chain = props.row.original.call?.returnValues?.destinationChain?.toLowerCase()
+              const from_chain_data = chains_data?.find(c => c?.id === from_chain)
+              const to_chain_data = chains_data?.find(c => c?.id === to_chain)
+              const steps = [
+                { id: 'call', title: 'Contract Call', chain: from_chain_data },
+                { id: 'gas_paid', title: 'Gas Paid',chain: from_chain_data },
+                { id: 'approved', title: 'Call Approved', chain: to_chain_data },
+                { id: 'executed', title: 'Executed', chain: to_chain_data },
+              ]
+              const current_step = props.row.original.executed || props.row.original.error ?
+                4 : props.row.original.approved ?
+                3 : props.row.original.gas_paid ?
+                2 : 1
 
-          //     return !props.row.original.skeleton ?
-          //       validator_data ?
-          //         <div className={`min-w-max flex items-${props.value ? 'start' : 'center'} space-x-2 -mt-0.5`}>
-          //           <Link href={`/validator/${validator_data.operator_address}`}>
-          //             <a>
-          //               {validator_data.description?.image ?
-          //                 <img
-          //                   src={validator_data.description.image}
-          //                   alt=""
-          //                   className="w-6 h-6 rounded-full"
-          //                 />
-          //                 :
-          //                 <div className="skeleton w-6 h-6 rounded-full" />
-          //               }
-          //             </a>
-          //           </Link>
-          //           <div className="flex flex-col">
-          //             {validator_data.description?.moniker && (
-          //               <Link href={`/validator/${validator_data.operator_address}`}>
-          //                 <a className="text-blue-600 dark:text-white font-medium">
-          //                   {ellipseAddress(validator_data.description.moniker, 16) || validator_data.operator_address}
-          //                 </a>
-          //               </Link>
-          //             )}
-          //             <span className="flex items-center space-x-1">
-          //               <Link href={`/validator/${validator_data.operator_address}`}>
-          //                 <a className="text-gray-400 dark:text-gray-600 font-light">
-          //                   {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
-          //                 </a>
-          //               </Link>
-          //               <Copy text={validator_data.operator_address} />
-          //             </span>
-          //           </div>
-          //         </div>
-          //         :
-          //         <div className="flex items-center space-x-1">
-          //           <Link href={`/account/${props.value}`}>
-          //             <a className="text-blue-600 dark:text-white font-medium">
-          //               {ellipseAddress(props.value)}
-          //             </a>
-          //           </Link>
-          //           <Copy text={props.value} />
-          //         </div>
-          //       :
-          //       <div className="flex items-start space-x-2 -mt-0.5">
-          //         <div className="skeleton w-6 h-6 rounded-full" />
-          //         <div className="flex flex-col space-y-1.5">
-          //           <div className="skeleton w-24 h-4" />
-          //           <div className="skeleton w-32 h-3" />
-          //         </div>
-          //       </div>
-          //   },
-          // },
-          // {
-          //   Header: 'Vote',
-          //   accessor: 'confirmed',
-          //   disableSortBy: true,
-          //   Cell: props => (
-          //     !props.row.original.skeleton ?
-          //       <div className="flex flex-col space-y-1">
-          //         <div className="flex items-center space-x-1">
-          //           {props.value ?
-          //             <span className="flex items-center text-green-600 dark:text-green-400 space-x-1">
-          //               <FaCheckCircle size={16} />
-          //               <span className="font-semibold">Yes</span>
-          //             </span>
-          //             :
-          //             <span className="flex items-center text-red-600 dark:text-red-400 space-x-1">
-          //               <FaTimesCircle size={16} />
-          //               <span className="font-semibold">No</span>
-          //             </span>
-          //           }
-          //         </div>
-          //         {props.row.original.vote_confirmed ?
-          //           <div className="max-w-min bg-green-100 dark:bg-green-600 rounded-lg border border-green-600 text-2xs font-medium p-1">
-          //             Succeed
-          //           </div>
-          //           :
-          //           !props.row.original.poll_initial ?
-          //             <div className="max-w-min bg-gray-100 dark:bg-gray-900 rounded-lg text-gray-400 dark:text-gray-600 text-2xs font-medium py-1 px-1.5">
-          //               Concluded
-          //             </div>
-          //             :
-          //             null
-          //         }
-          //       </div>
-          //       :
-          //       <div className="skeleton w-12 h-4" />
-          //   ),
-          // },
-          // {
-          //   Header: 'Tx Hash',
-          //   accessor: 'txhash',
-          //   disableSortBy: true,
-          //   Cell: props => (
-          //     !props.row.original.skeleton ?
-          //       <div className="flex items-center space-x-1">
-          //         <Link href={`/tx/${props.value}`}>
-          //           <a className="uppercase text-blue-600 dark:text-white font-medium">
-          //             {ellipseAddress(Array.isArray(props.value) ? _.last(props.value) : props.value)}
-          //           </a>
-          //         </Link>
-          //         <Copy text={Array.isArray(props.value) ? _.last(props.value) : props.value} />
-          //       </div>
-          //       :
-          //       <div className="skeleton w-48 h-4" />
-          //   ),
-          // },
-          // {
-          //   Header: 'Time',
-          //   accessor: 'created_at.ms',
-          //   disableSortBy: true,
-          //   Cell: props => (
-          //     !props.row.original.skeleton ?
-          //       <Popover
-          //         placement="top"
-          //         title={<span className="normal-case">TX Time</span>}
-          //         content={<div className="w-36 text-xs">{moment(Array.isArray(props.value) ? _.last(props.value) : props.value).format('MMM D, YYYY h:mm:ss A')}</div>}
-          //         titleClassName="h-8"
-          //         className="ml-auto"
-          //       >
-          //         <div className="text-right">
-          //           <span className="normal-case text-gray-400 dark:text-gray-600 font-normal">
-          //             {Number(moment().diff(moment(Array.isArray(props.value) ? _.last(props.value) : props.value), 'second')) > 59 ?
-          //               moment(Array.isArray(props.value) ? _.last(props.value) : props.value).fromNow()
-          //               :
-          //               <>{moment().diff(moment(Array.isArray(props.value) ? _.last(props.value) : props.value), 'second')}s ago</>
-          //             }
-          //           </span>
-          //         </div>
-          //       </Popover>
-          //       :
-          //       <div className="skeleton w-24 h-4 ml-auto" />
-          //   ),
-          //   headerClassName: 'justify-end text-right',
-          // },
+              return !props.row.original.skeleton ?
+                <div className="min-w-max flex flex-col space-y-2 mb-4">
+                  {steps.map((step, i) => (
+                    <div key={i} className="flex items-center space-x-1.5">
+                      {props.row.original[step.id] ?
+                        <FaCheckCircle size={20} className="text-green-500" />
+                        :
+                        i === current_step ?
+                          step.id === 'executed' && props.row.original.error ?
+                            <FaTimesCircle size={20} className="text-red-500" />
+                            :
+                            <Loader type="Puff" color={theme === 'dark' ? 'white' : '#9CA3AF'} width="20" height="20" />
+                          :
+                          <FaClock size={20} className="text-gray-200 dark:text-gray-800" />
+                      }
+                      <div key={i} className="flex items-center space-x-1">
+                        {props.row.original[step.id]?.transactionHash ?
+                          <Copy
+                            size={16}
+                            text={props.row.original[step.id]?.transactionHash}
+                            copyTitle={<span className="uppercase text-gray-800 dark:text-gray-200 text-xs font-semibold">{step.title}</span>}
+                          />
+                          :
+                          <span className="uppercase text-gray-600 dark:text-gray-400 text-xs">{step.title}</span>
+                        }
+                        {props.row.original[step.id]?.transactionHash && step.chain?.explorer?.url && (
+                          <a
+                            href={`${step.chain.explorer.url}${step.chain.explorer.transaction_path?.replace('{tx}', props.row.original[step.id].transactionHash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {step.chain.explorer.icon ?
+                              <Img
+                                src={step.chain.explorer.icon}
+                                alt=""
+                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              />
+                              :
+                              <TiArrowRight size={16} className="transform -rotate-45" />
+                            }
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                :
+                <div className="flex-col space-y-2 mb-4">
+                  {[...Array(4).keys()].map(i => (
+                    <div key={i} className="skeleton w-32 h-5" />
+                  ))}
+                </div>
+            },
+          },
+          {
+            Header: 'Updated',
+            accessor: 'call.block_timestamp',
+            disableSortBy: true,
+            Cell: props => {
+              const timestamp = (props.row.original.executed?.block_timestamp ?
+                props.row.original.executed.block_timestamp : props.row.original.error?.block_timestamp ?
+                props.row.original.error.block_timestamp : props.row.original.approved?.block_timestamp ?
+                props.row.original.approved.block_timestamp : props.row.original.gas_paid?.block_timestamp ?
+                props.row.original.gas_paid.block_timestamp : props.row.original.call?.block_timestamp ?
+                props.row.original.call.block_timestamp : 0) * 1000
+              return !props.row.original.skeleton ?
+                timestamp && (
+                  <Popover
+                    placement="top"
+                    title={<span className="normal-case">Updated at</span>}
+                    content={<div className="w-36 text-xs">{moment(timestamp).format('MMM D, YYYY h:mm:ss A')}</div>}
+                    titleClassName="h-8"
+                    className="ml-auto"
+                  >
+                    <div className="text-right">
+                      <span className="normal-case text-gray-400 dark:text-gray-600 font-normal">
+                        {Number(moment().diff(moment(timestamp), 'second')) > 59 ?
+                          moment(timestamp).fromNow()
+                          :
+                          <>{moment().diff(moment(timestamp), 'second')}s ago</>
+                        }
+                      </span>
+                    </div>
+                  </Popover>
+                )
+                :
+                <div className="skeleton w-20 h-5 ml-auto" />
+            },
+            headerClassName: 'justify-end text-right',
+          },
         ]}
         data={gmps ?
           gmps.data?.map((v, i) => { return { ...v, i } }) || []
