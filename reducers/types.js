@@ -18,3 +18,7 @@ export const ENV_DATA = 'env_data'
 export const VALIDATORS_DATA = 'validators_data'
 export const VALIDATORS_CHAINS_DATA = 'validators_chains_data'
 export const JAILED_SYNC_DATA = 'jailed_sync_data'
+
+// wallet
+export const WALLET_DATA = 'wallet_data'
+export const WALLET_RESET = 'wallet_reset'

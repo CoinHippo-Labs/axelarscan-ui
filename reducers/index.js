@@ -11,6 +11,7 @@ import env from './env'
 import validators from './validators'
 import validators_chains from './validators-chains'
 import jailed_sync from './jailed-sync'
+import wallet from './wallet'
 
 export default combineReducers({
   preferences,
@@ -24,4 +25,5 @@ export default combineReducers({
   validators,
   validators_chains,
   jailed_sync,
+  wallet,
 })

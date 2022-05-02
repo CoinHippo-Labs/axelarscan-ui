@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
@@ -10,24 +10,31 @@ import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
-import { FaCheckCircle, FaTimesCircle, FaQuestion } from 'react-icons/fa'
+import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa'
 import { BsFileEarmarkX } from 'react-icons/bs'
 
 import Copy from '../copy'
 import Widget from '../widget'
 import Popover from '../popover'
+import Notification from '../notifications'
+import Wallet from '../wallet'
 
 import { search } from '../../lib/api/gmp'
 import { chainTitle } from '../../lib/object/chain'
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { numberFormat, ellipseAddress, sleep } from '../../lib/utils'
+import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
+import { WALLET_DATA } from '../../reducers/types'
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
 export default function Transaction() {
-  const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
+  const dispatch = useDispatch()
+  const { preferences, chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { wallet_data } = { ...wallet }
+  const { default_chain_id, chain_id, web3_provider, address, signer } = { ...wallet_data }
 
   const router = useRouter()
   const { query } = { ...router }
@@ -37,6 +44,9 @@ export default function Transaction() {
   const [web3, setWeb3] = useState(null)
   const [chainId, setChainId] = useState(null)
   const [addTokenData, setAddTokenData] = useState(null)
+  const [executeResponse, setExecuteResponse] = useState(null)
+  const [executeResponseCountDown, setExecuteResponseCountDown] = useState(null)
+  const [executing, setExecuting] = useState(null)
 
   useEffect(() => {
     if (!web3) {
@@ -44,9 +54,22 @@ export default function Transaction() {
     }
     else {
       try {
-        web3.currentProvider._handleChainChanged = e => {
+        web3.currentProvider.handleChainChanged = async e => {
           try {
             setChainId(Web3.utils.hexToNumber(e?.chainId))
+
+            const web3Provider = new providers.Web3Provider(provider)
+            const signer = web3Provider.getSigner()
+            const address = await signer.getAddress()
+            dispatch({
+              type: WALLET_DATA,
+              value: {
+                chain_id: Web3.utils.hexToNumber(e?.chainId),
+                web3_provider: web3Provider,
+                address,
+                signer,
+              },
+            })
           } catch (error) {}
         }
       } catch (error) {}
@@ -75,13 +98,39 @@ export default function Transaction() {
       setTransaction(null)
     }
 
-    getData()
+    if (!executing) {
+      getData()
+    }
 
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
-  }, [tx])
+  }, [tx, executing])
+
+  useEffect(() => {
+    if (typeof executeResponseCountDown === 'number') {
+      if (executeResponseCountDown === 0) {
+        setExecuteResponse(null)
+      }
+      else {
+        const interval = setInterval(() => {
+          if (executeResponseCountDown - 1 > -1) {
+            setExecuteResponseCountDown(executeResponseCountDown - 1)
+          }
+        }, 1000)
+        return () => clearInterval(interval)
+      }
+    }
+  }, [executeResponseCountDown])
+
+  useEffect(() => {
+    if (['success'].includes(executeResponse?.status)) {
+      if (!executeResponseCountDown) {
+        setExecuteResponseCountDown(10)
+      }
+    }
+  }, [executeResponse])
 
   const addTokenToMetaMask = async (chain_id, contract) => {
     if (web3 && contract) {
@@ -131,6 +180,94 @@ export default function Transaction() {
     }
   }
 
+  const saveGMP = async (tx_hash, event, chain, contract_address, relayer_address, error) => {
+    if (process.env.NEXT_PUBLIC_GMP_API_URL && event && chain && contract_address) {
+      // initial params
+      const params = {
+        method: 'saveGMP',
+        event: {
+          event: `${error ? 'errorE' : 'e'}xecute${event.event?.endsWith('WithMint') ? 'WithToken' : ''}`,
+          transactionHash: tx_hash,
+          sourceTransactionHash: event.returnValues?.sourceTxHash,
+          sourceChain: event.returnValues?.sourceChain,
+          from: relayer_address,
+          error,
+        },
+        chain,
+        contractAddress: contract_address,
+      }
+      // request api
+      await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, {
+        method: 'POST',
+        body: JSON.stringify(params),
+      }).catch(error => { return null })
+    }
+  }
+
+  const execute = async data => {
+    setExecuting(true)
+    setExecuteResponse(null)
+    if (signer && data) {
+      try {
+        setExecuteResponse({ status: 'pending', message: 'Executing' })
+        const contract = new web3.eth.Contract(IAxelarExecutable.abi, data.call?.returnValues?.destinationContractAddress);
+        if (data.call?.event === 'ContractCall') {
+          contract.methods.execute(
+            data.approved?.returnValues?.commandId,
+            data.approved?.returnValues?.sourceChain,
+            data.approved?.returnValues?.sourceAddress,
+            data.call?.returnValues?.payload,
+          ).send({ from: address })
+          .on('transactionHash', hash => {
+            setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
+          })
+          .on('receipt', receipt => {
+            setExecuteResponse({ status: 'success', message: 'Execute successful', tx_hash: receipt?.transactionHash })
+            setExecuting(false)
+            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
+          })
+          .on('error', async (error, receipt) => {
+            setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message, tx_hash: receipt?.transactionHash })
+            setExecuting(false)
+            await sleep(3 * 1000)
+            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
+          })
+        }
+        else if (data.call?.event === 'ContractCallWithToken') {
+          contract.methods.executeWithToken(
+            data.approved?.returnValues?.commandId,
+            data.approved?.returnValues?.sourceChain,
+            data.approved?.returnValues?.sourceAddress,
+            data.call?.returnValues?.payload,
+            data.approved?.returnValues?.symbol,
+            EthersBigNumber.from(data.approved?.returnValues?.amount).toString(),
+          ).send({ from: address })
+          .on('transactionHash', hash => {
+            setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
+          })
+          .on('receipt', receipt => {
+            setExecuteResponse({ status: 'success', message: 'Execute successful', tx_hash: receipt?.transactionHash })
+            setExecuting(false)
+            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
+          })
+          .on('error', async (error, receipt) => {
+            setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message, tx_hash: receipt?.transactionHash })
+            setExecuting(false)
+            await sleep(3 * 1000)
+            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
+          })
+        }
+        else {
+          setExecuteResponse({ status: 'failed', message: 'No response' })
+          setExecuting(false)
+        }
+      } catch (error) {
+        setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message })
+        setExecuting(false)
+      }
+    }
+  }
+
   const { data } = { ...transaction }
   const { call, gas_paid, approved, executed, error } = { ...data }
 
@@ -153,13 +290,70 @@ export default function Transaction() {
     </button>
   )
 
+  const mustSwitchChain = typeof chain_id === 'number' && chain_id !== toChain?.chain_id
+  const executeButton = call?.returnValues?.payload && approved && !executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 5) && (
+    <div className="flex items-center space-x-2">
+      {web3_provider && !mustSwitchChain && (
+        <button
+          onClick={() => execute(data)}
+          className={`bg-green-400 hover:bg-green-500 dark:bg-green-600 dark:hover:bg-green-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-1 px-2 sm:px-3`}
+        >
+          {executing && (
+            <Loader type="Oval" color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mb-0.5" />
+          )}
+          <span>Execute</span>
+        </button>
+      )}
+      <Wallet
+        connectChainId={mustSwitchChain && (toChain?.chain_id || default_chain_id)}
+      />
+    </div>
+  )
+
   return (
     <div className="max-w-6.5xl mb-3 mx-auto">
+      {executeResponse && (
+        <Notification
+          hideButton={true}
+          outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
+          innerClassNames={`${executeResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : executeResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
+          animation="animate__animated animate__fadeInDown"
+          icon={executeResponse.status === 'failed' ?
+            <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
+            :
+            executeResponse.status === 'success' ?
+              <FaCheckCircle className="w-4 h-4 stroke-current mr-2" />
+              :
+              <FaClock className="w-4 h-4 stroke-current mr-2" />
+          }
+          content={<span className="flex flex-wrap items-center">
+            <span className="mr-1.5">{executeResponse.message}</span>
+            {executeResponse.status === 'pending' && (
+              <Loader type="TailSpin" color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mr-1.5" />
+            )}
+            {toChain?.explorer?.url && executeResponse.tx_hash && (
+              <a
+                href={`${toChain.explorer.url}${toChain.explorer.transaction_path?.replace('{tx}', executeResponse.tx_hash)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center font-semibold mx-1.5"
+              >
+                <span>View on {toChain.explorer.name}</span>
+                <TiArrowRight size={20} className="transform -rotate-45" />
+              </a>
+            )}
+            {['success'].includes(executeResponse.status) && typeof executeResponseCountDown === 'number' && (
+              <span className="font-mono">(close in {executeResponseCountDown}s)</span>
+            )}
+          </span>}
+        />
+      )}
       {!transaction || data ?
         <>
           <div className="mt-2 xl:mt-4">
             <Widget
               title={<div className="leading-4 uppercase text-gray-400 dark:text-gray-600 text-sm sm:text-base font-semibold mb-2">General Message Passing</div>}
+              right={executeButton}
               className="overflow-x-auto border-0 shadow-md rounded-2xl ml-auto px-5 lg:px-3 xl:px-5"
             >
               <div className="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between space-y-8 sm:space-y-0 my-2">
@@ -241,7 +435,10 @@ export default function Transaction() {
                         {gas_paid ?
                           <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
                           :
-                          <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
+                          executed ?
+                            <FaCheckCircle size={14} className="text-gray-400 dark:text-gray-500 dark:text-white" />
+                            :
+                            <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
                         }
                         <div className={`uppercase ${gas_paid ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{gas_paid ? 'Gas Paid' : 'No Gas Paid'}</div>
                       </a>
@@ -378,7 +575,10 @@ export default function Transaction() {
                         {executed ?
                           <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
                           :
-                          <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
+                          error ?
+                            <FaTimesCircle size={14} className="text-red-700 dark:text-white" />
+                            :
+                            <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
                         }
                         <div className={`uppercase ${executed ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{executed ? 'Executed' : 'Not Executed'}</div>
                       </a>
@@ -665,10 +865,10 @@ export default function Transaction() {
                       <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Error:</span>
                       {transaction ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                          <div className="max-w-min bg-red-100 dark:bg-red-800 border border-red-500 dark:border-red-700 rounded-lg py-0.5 px-2 mb-1.5 mx-auto">
-                            {error.code}
+                          <div className="max-w-min bg-red-100 dark:bg-red-800 border border-red-500 dark:border-red-700 rounded-lg py-0.5 px-2 mx-auto">
+                            {error.error?.code}
                           </div>
-                          <span className="text-red-500">{error.body?.replaceAll('"""', '') || error.reason}</span>
+                          <span className="text-red-500">{error.error?.body?.replaceAll('"""', '') || error.error?.reason}</span>
                         </div>
                         :
                         <div className="skeleton w-72 h-4 lg:h-6 mt-1" />

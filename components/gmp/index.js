@@ -424,12 +424,12 @@ export default function GMP({ addTokenToMetaMask, className }) {
                         <FaCheckCircle size={20} className="text-green-500" />
                         :
                         i === current_step ?
+                          <Loader type="Puff" color={theme === 'dark' ? 'white' : '#9CA3AF'} width="20" height="20" />
+                          :
                           step.id === 'executed' && props.row.original.error ?
                             <FaTimesCircle size={20} className="text-red-500" />
                             :
-                            <Loader type="Puff" color={theme === 'dark' ? 'white' : '#9CA3AF'} width="20" height="20" />
-                          :
-                          <FaClock size={20} className="text-gray-200 dark:text-gray-800" />
+                            <FaClock size={20} className="text-gray-200 dark:text-gray-800" />
                       }
                       <div key={i} className="flex items-center space-x-1">
                         {props.row.original[step.id]?.transactionHash ?
