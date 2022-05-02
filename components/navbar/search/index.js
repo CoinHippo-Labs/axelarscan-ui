@@ -7,20 +7,22 @@ import { FiSearch } from 'react-icons/fi'
 import { type } from '../../../lib/object/id'
 
 export default function Search() {
-  const router = useRouter()
-
   const [inputSearch, setInputSearch] = useState('')
 
-  const inputSearchRef = useRef()
+  const router = useRouter()
 
+  const inputSearchRef = useRef()
   const { handleSubmit } = useForm()
 
   const onSubmit = () => {
     if (type(inputSearch)) {
-      router.push(`/${type(inputSearch)}/${inputSearch}`)
-
+      if (type(inputSearch) === 'gmp_address') {
+        router.push(`/gmp?senderAddress=${inputSearch}`)
+      }
+      else {
+        router.push(`/${type(inputSearch)}/${inputSearch}`)
+      }
       setInputSearch('')
-
       inputSearchRef?.current?.blur()
     }
   }
