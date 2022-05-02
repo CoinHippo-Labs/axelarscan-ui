@@ -54,7 +54,7 @@ export default function Transaction() {
     }
     else {
       try {
-        web3.currentProvider.handleChainChanged = async e => {
+        web3.currentProvider._handleChainChanged = async e => {
           try {
             setChainId(Web3.utils.hexToNumber(e?.chainId))
 

@@ -242,7 +242,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
               const to_contract = asset?.contracts?.find(c => c.chain_id === to_chain_data?.chain_id)
               const addToMetaMaskButton = from_contract && (
                 <button
-                  onClick={() => addTokenToMetaMask(to_chain_data?.chain_id, { ...asset, ...from_contract })}
+                  onClick={() => addTokenToMetaMask(from_chain_data?.chain_id, { ...asset, ...from_contract })}
                   className="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center py-1.5 px-2"
                 >
                   <Img
