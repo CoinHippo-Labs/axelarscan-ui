@@ -45,9 +45,9 @@ export default function GMP({ addTokenToMetaMask, className }) {
     if (asPath && !gmpsFilter) {
       const query = paramsToObject(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
       if (query) {
-        let filter = { ...query }
+        const filter = { ...query }
         if (filter.fromTime && filter.toTime) {
-          time: [moment(Number(filter.fromTime)), moment(Number(filter.toTime))]
+          filter.time = [moment(Number(filter.fromTime)), moment(Number(filter.toTime))]
         }
         setGmpsFilter(filter)
       }
@@ -75,11 +75,13 @@ export default function GMP({ addTokenToMetaMask, className }) {
         let data = page === 0 ? [] : _.cloneDeep(gmps?.data), _page = page
         const size = PAGE_SIZE
         const _gmpsFilter = Object.fromEntries(Object.entries({ ...gmpsFilter }).filter(([k, v]) => v))
-        const queryParams = { ..._gmpsFilter }
-        const searchParams = { ..._gmpsFilter }
+        let queryParams = { ..._gmpsFilter }
+        let searchParams = { ..._gmpsFilter }
         if (_gmpsFilter?.time?.length > 1) {
-          queryParams = { ...queryParams, fromTime: _gmpsFilter.time[0].valueOf(), to: _gmpsFilter.time[1].valueOf() }
-          searchParams = { ...searchParams, fromTime: _gmpsFilter.time[0].unix(), to: _gmpsFilter.time[1].unix() }
+          queryParams = { ...queryParams, fromTime: _gmpsFilter.time[0].valueOf(), toTime: _gmpsFilter.time[1].valueOf() }
+          searchParams = { ...searchParams, fromTime: _gmpsFilter.time[0].unix(), toTime: _gmpsFilter.time[1].unix() }
+          delete queryParams.time
+          delete searchParams.time
         }
 
         router.push(`${pathname}${Object.keys(queryParams).length > 0 ? '?' : ''}${Object.entries(queryParams).map(([k, v]) => `${k}=${v}`).join('&')}`)

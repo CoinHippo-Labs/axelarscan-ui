@@ -5,7 +5,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import Web3 from 'web3'
-import { BigNumber as EthersBigNumber, constants, utils } from 'ethers'
+import { BigNumber as EthersBigNumber, constants, providers, utils } from 'ethers'
 import BigNumber from 'bignumber.js'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
@@ -34,7 +34,7 @@ export default function Transaction() {
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
-  const { default_chain_id, chain_id, web3_provider, address, signer } = { ...wallet_data }
+  const { default_chain_id, chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
 
   const router = useRouter()
   const { query } = { ...router }
@@ -58,23 +58,25 @@ export default function Transaction() {
           try {
             setChainId(Web3.utils.hexToNumber(e?.chainId))
 
-            const web3Provider = new providers.Web3Provider(provider)
-            const signer = web3Provider.getSigner()
-            const address = await signer.getAddress()
-            dispatch({
-              type: WALLET_DATA,
-              value: {
-                chain_id: Web3.utils.hexToNumber(e?.chainId),
-                web3_provider: web3Provider,
-                address,
-                signer,
-              },
-            })
+            if (provider) {
+              const web3Provider = new providers.Web3Provider(provider)
+              const signer = web3Provider.getSigner()
+              const address = await signer.getAddress()
+              dispatch({
+                type: WALLET_DATA,
+                value: {
+                  chain_id: Web3.utils.hexToNumber(e?.chainId),
+                  web3_provider: web3Provider,
+                  address,
+                  signer,
+                },
+              })
+            }
           } catch (error) {}
         }
       } catch (error) {}
     }
-  }, [web3])
+  }, [web3, provider])
 
   useEffect(() => {
     if (addTokenData?.chain_id === chainId && addTokenData?.contract) {
