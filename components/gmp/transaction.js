@@ -312,6 +312,24 @@ export default function Transaction() {
     </div>
   )
 
+  const call_timestamp = (call?.block_timestamp || 0) * 1000
+  const executed_timestamp = (executed?.block_timestamp || 0) * 1000
+  const time_spent = call_timestamp && executed_timestamp && moment(executed_timestamp).diff(moment(call_timestamp), 'seconds')
+  const time_spent_component = time_spent > 0 && (
+    <div className="flex items-center space-x-1">
+      <span className="whitespace-nowrap text-gray-400 dark:text-gray-500">
+        time spent:
+      </span>
+      <span className="whitespace-nowrap font-semibold">
+        {time_spent < 60 ?
+          `${time_spent}s` : time_spent < 60 * 60 ?
+          `${Math.floor(time_spent / 60)} min${time_spent % 60 > 0 ? ` ${time_spent % 60}s` : ''}` : time_spent < 24 * 60 * 60 ?
+          moment.utc(time_spent * 1000).format('HH:mm:ss') : `moment(executed_timestamp).diff(moment(call_timestamp), 'days') day`
+        }
+      </span>
+    </div>
+  )
+
   return (
     <div className="max-w-6.5xl mb-3 mx-auto">
       {executeResponse && (
@@ -355,7 +373,7 @@ export default function Transaction() {
           <div className="mt-2 xl:mt-4">
             <Widget
               title={<div className="leading-4 uppercase text-gray-400 dark:text-gray-600 text-sm sm:text-base font-semibold mb-2">General Message Passing</div>}
-              right={executeButton}
+              right={executeButton || time_spent_component}
               className="overflow-x-auto border-0 shadow-md rounded-2xl ml-auto px-5 lg:px-3 xl:px-5"
             >
               <div className="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between space-y-8 sm:space-y-0 my-2">

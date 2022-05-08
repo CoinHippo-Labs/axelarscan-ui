@@ -418,6 +418,10 @@ export default function GMP({ addTokenToMetaMask, className }) {
                 3 : props.row.original.gas_paid ?
                 2 : 1
 
+              const call_timestamp = (props.row.original.call?.block_timestamp || 0) * 1000
+              const executed_timestamp = (props.row.original.executed?.block_timestamp || 0) * 1000
+              const time_spent = call_timestamp && executed_timestamp && moment(executed_timestamp).diff(moment(call_timestamp), 'seconds')
+
               return !props.row.original.skeleton ?
                 <div className="min-w-max flex flex-col space-y-2 mb-4">
                   {steps.map((step, i) => (
@@ -464,6 +468,20 @@ export default function GMP({ addTokenToMetaMask, className }) {
                       </div>
                     </div>
                   ))}
+                  {time_spent > 0 && (
+                    <div className="flex items-center space-x-1">
+                      <span className="whitespace-nowrap text-gray-400 dark:text-gray-500">
+                        time spent:
+                      </span>
+                      <span className="whitespace-nowrap font-semibold">
+                        {time_spent < 60 ?
+                          `${time_spent}s` : time_spent < 60 * 60 ?
+                          `${Math.floor(time_spent / 60)} min${time_spent % 60 > 0 ? ` ${time_spent % 60}s` : ''}` : time_spent < 24 * 60 * 60 ?
+                          moment.utc(time_spent * 1000).format('HH:mm:ss') : `moment(executed_timestamp).diff(moment(call_timestamp), 'days') day`
+                        }
+                      </span>
+                    </div>
+                  )}
                 </div>
                 :
                 <div className="flex-col space-y-2 mb-4">
