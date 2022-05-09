@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import { MdOutlineScreenSearchDesktop } from 'react-icons/md'
+import { MdOutlineScreenSearchDesktop, MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
 import SectionTitle from '../../section-title'
 import Copy from '../../copy'
@@ -80,10 +81,30 @@ export default function PageTitle() {
       subtitle = 'Blocks'
       break
     case '/block/[height]':
-      title = 'Block'
+      title = (
+        <div className="flex items-center space-x-2">
+          <span>Block</span>
+          {height && (
+            <>
+              <Link href={`/block/${Number(height) - 1}`}>
+                <a className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-lg p-1.5">
+                  <MdNavigateBefore size={20} />
+                </a>
+              </Link>
+              <Link href={`/block/${Number(height) + 1}`}>
+                <a className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 rounded-lg p-1.5">
+                  <MdNavigateNext size={20} />
+                </a>
+              </Link>
+            </>
+          )}
+          <a>
+          </a>
+        </div>
+      )
       subtitle = (
         <span className="font-mono">
-          # {numberFormat(height, '0,0')}
+          {numberFormat(height, '0,0')}
         </span>
       )
       break
