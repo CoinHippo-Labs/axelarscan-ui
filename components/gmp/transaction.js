@@ -12,6 +12,9 @@ import Loader from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
 import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa'
 import { BsFileEarmarkX } from 'react-icons/bs'
+import { BiEditAlt, BiSave } from 'react-icons/bi'
+import { RiCloseCircleFill } from 'react-icons/ri'
+import { MdRefresh } from 'react-icons/md'
 
 import Copy from '../copy'
 import Widget from '../widget'
@@ -47,6 +50,9 @@ export default function Transaction() {
   const [executeResponse, setExecuteResponse] = useState(null)
   const [executeResponseCountDown, setExecuteResponseCountDown] = useState(null)
   const [executing, setExecuting] = useState(null)
+  const [txHashExecutedEditing, setTxHashExecutedEditing] = useState(false)
+  const [txHashExecutedSaving, setTxHashExecutedSaving] = useState(false)
+  const [txHashExecuted, setTxHashExecuted] = useState(null)
 
   useEffect(() => {
     if (!web3) {
@@ -98,9 +104,10 @@ export default function Transaction() {
 
     if (transaction?.tx !== tx) {
       setTransaction(null)
+      resetEditTxHashExecuted()
     }
 
-    if (!executing) {
+    if (!executing && !txHashExecutedEditing) {
       getData()
     }
 
@@ -108,7 +115,7 @@ export default function Transaction() {
     return () => {
       clearInterval(interval)
     }
-  }, [tx, executing])
+  }, [tx, executing, txHashExecutedEditing])
 
   useEffect(() => {
     if (typeof executeResponseCountDown === 'number') {
@@ -203,7 +210,15 @@ export default function Transaction() {
         method: 'POST',
         body: JSON.stringify(params),
       }).catch(error => { return null })
+      resetEditTxHashExecuted()
     }
+  }
+
+  const resetEditTxHashExecuted = () => {
+    setTxHashExecutedEditing(false)
+    setTxHashExecuted(null)
+    setTxHashExecutedSaving(false)
+    setExecuteResponse(null)
   }
 
   const execute = async data => {
@@ -223,16 +238,17 @@ export default function Transaction() {
           .on('transactionHash', hash => {
             setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
           })
-          .on('receipt', receipt => {
+          .on('receipt', async receipt => {
             setExecuteResponse({ status: 'success', message: 'Execute successful', tx_hash: receipt?.transactionHash })
+            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
+            await sleep(2 * 1000)
             setExecuting(false)
-            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
           })
           .on('error', async (error, receipt) => {
             setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message, tx_hash: receipt?.transactionHash })
+            await sleep(2 * 1000)
+            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
             setExecuting(false)
-            await sleep(3 * 1000)
-            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
           })
         }
         else if (data.call?.event === 'ContractCallWithToken') {
@@ -247,16 +263,17 @@ export default function Transaction() {
           .on('transactionHash', hash => {
             setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
           })
-          .on('receipt', receipt => {
+          .on('receipt', async receipt => {
             setExecuteResponse({ status: 'success', message: 'Execute successful', tx_hash: receipt?.transactionHash })
+            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
+            await sleep(2 * 1000)
             setExecuting(false)
-            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
           })
           .on('error', async (error, receipt) => {
             setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message, tx_hash: receipt?.transactionHash })
+            await sleep(2 * 1000)
+            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
             setExecuting(false)
-            await sleep(3 * 1000)
-            saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
           })
         }
         else {
@@ -301,7 +318,7 @@ export default function Transaction() {
           className={`bg-green-400 hover:bg-green-500 dark:bg-green-600 dark:hover:bg-green-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-1 px-2 sm:px-3`}
         >
           {executing && (
-            <Loader type="Oval" color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mb-0.5" />
+            <Loader type="Oval" color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" />
           )}
           <span>Execute</span>
         </button>
@@ -681,29 +698,97 @@ export default function Transaction() {
                 className="border-0 shadow-md rounded-2xl p-5 lg:px-3 xl:px-5"
               >
                 <div className="w-full flex flex-col space-y-4">
-                  <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
+                  <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2">
                     <span className="md:w-20 xl:w-40 whitespace-nowrap text-xs lg:text-base font-semibold">
                       TX Hash:
                     </span>
                     {transaction ?
-                      t?.transactionHash ?
-                        <div className="flex items-center">
-                          {(i < 2 ? fromChain : toChain)?.explorer?.url ?
-                            <a
-                              href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.transaction_path?.replace('{tx}', t.transactionHash)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white text-xs lg:text-base font-medium mr-1.5"
-                            >
-                              {ellipseAddress(t.transactionHash, 16)}
-                            </a>
+                      <>
+                        {(i < 3 || !txHashExecutedEditing) && t?.transactionHash && (
+                          <div className="flex items-center">
+                            {(i < 2 ? fromChain : toChain)?.explorer?.url ?
+                              <a
+                                href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.transaction_path?.replace('{tx}', t.transactionHash)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white text-xs lg:text-base font-medium mr-1.5"
+                              >
+                                {ellipseAddress(t.transactionHash, 16)}
+                              </a>
+                              :
+                              <span className="text-xs lg:text-base mr-1.5">{ellipseAddress(t.transactionHash, 16)}</span>
+                            }
+                            <Copy size={18} text={t.transactionHash} />
+                            {i === 3 && !t.block_timestamp && (
+                              <button
+                                disabled={txHashExecutedSaving}
+                                onClick={async () => {
+                                  setTxHashExecutedSaving(true)
+                                  await saveGMP(t.transactionHash, approved, approved?.chain, approved?.contract_address, address)
+                                }}
+                                className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white ml-1"
+                              >
+                                {txHashExecutedSaving ?
+                                  <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
+                                  :
+                                  <MdRefresh size={20} />
+                                }
+                              </button>
+                            )}
+                          </div>
+                        )}
+                        <div className="flex items-center space-x-2">
+                          {i === 3 && txHashExecutedEditing ?
+                            <input
+                              disabled={txHashExecutedSaving}
+                              placement="Tx Hash"
+                              value={txHashExecuted}
+                              onChange={e => setTxHashExecuted(e.target.value)}
+                              className="bg-gray-50 dark:bg-gray-800 rounded text-base py-1 px-2"
+                            />
                             :
-                            <span className="text-xs lg:text-base mr-1.5">{ellipseAddress(t.transactionHash, 16)}</span>
+                            !t?.transactionHash && (
+                              <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                            )
                           }
-                          <Copy size={18} text={t.transactionHash} />
+                          {i === 3 && approved && address && (
+                            <div className="flex items-center space-x-1">
+                              {txHashExecutedEditing ?
+                                <>
+                                  <button
+                                    disabled={txHashExecutedSaving}
+                                    onClick={() => resetEditTxHashExecuted()}
+                                    className="text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-500"
+                                  >
+                                    <RiCloseCircleFill size={20} />
+                                  </button>
+                                  <button
+                                    disabled={!txHashExecuted || txHashExecutedSaving}
+                                    onClick={async () => {
+                                      setTxHashExecutedSaving(true)
+                                      await saveGMP(txHashExecuted, approved, approved.chain, approved.contract_address, address)
+                                    }}
+                                    className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white"
+                                  >
+                                    {txHashExecutedSaving ?
+                                      <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
+                                      :
+                                      <BiSave size={20} />
+                                    }
+                                  </button>
+                                </>
+                                :
+                                <button
+                                  onClick={() => setTxHashExecutedEditing(true)}
+                                  className="text-white hover:text-gray-400 dark:text-gray-900 dark:hover:text-gray-500"
+                                >
+                                  <BiEditAlt size={20} />
+                                </button>
+                              }
+                            </div>
+                          )}
                         </div>
-                        :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                      </>
                       :
                       <div className="skeleton w-72 h-4 lg:h-6 mt-1" />
                     }
@@ -880,14 +965,54 @@ export default function Transaction() {
                       <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
                     }
                   </div>
+                  {i === 3 && (
+                    <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
+                      <span className="md:w-20 xl:w-40 min-w-max text-xs lg:text-base font-semibold">Receiver Address:</span>
+                      {transaction ?
+                        call?.transaction?.from ?
+                          <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                            <Copy
+                              text={call.transaction.from}
+                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
+                                {ellipseAddress(call.transaction.from, 8)}
+                              </span>}
+                            />
+                            {toChain?.explorer?.url && (
+                              <a
+                                href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', call.transaction.from)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white"
+                              >
+                                {toChain.explorer.icon ?
+                                  <Img
+                                    src={toChain.explorer.icon}
+                                    alt=""
+                                    className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
+                                  />
+                                  :
+                                  <TiArrowRight size={20} className="transform -rotate-45" />
+                                }
+                              </a>
+                            )}
+                          </div>
+                          :
+                          <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                        :
+                        <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
+                      }
+                    </div>
+                  )}
                   {i === 3 && !executed && error && (
                     <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
                       <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Error:</span>
                       {transaction ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                          <div className="max-w-min bg-red-100 dark:bg-red-800 border border-red-500 dark:border-red-700 rounded-lg py-0.5 px-2 mx-auto">
-                            {error.error?.code}
-                          </div>
+                          {error.error?.code && (
+                            <div className="max-w-min bg-red-100 dark:bg-red-800 border border-red-500 dark:border-red-700 rounded-lg py-0.5 px-2 mx-auto">
+                              {error.error.code}
+                            </div>
+                          )}
                           <span className="text-red-500">{error.error?.body?.replaceAll('"""', '') || error.error?.reason}</span>
                         </div>
                         :
