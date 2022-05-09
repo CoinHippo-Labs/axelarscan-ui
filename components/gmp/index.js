@@ -100,6 +100,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
         }
 
         setGmps({ data })
+        setGmpsTrigger(false)
 
         if (page && !is_interval) {
           setMoreLoading(false)
