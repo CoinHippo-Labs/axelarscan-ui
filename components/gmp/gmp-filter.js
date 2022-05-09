@@ -123,7 +123,7 @@ export default function VotesFilter({ applied = false, disabled = false, initial
         }
         <span>Filter{applied && 'ed'}</span>
       </>}
-      buttonClassName={`${applied ? 'bg-indigo-600 dark:bg-indigo-600 text-white font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white'} rounded-3xl shadow flex items-center justify-center text-base space-x-1.5 py-1.5 px-3`}
+      buttonClassName={`${applied ? 'bg-indigo-600 dark:bg-indigo-600 text-white font-semibold' : 'bg-gray-100 hover:bg-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white'} rounded-3xl shadow inline-flex items-center justify-center text-base space-x-1.5 py-1.5 px-3`}
       title="GMP Filter"
       body={<div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
         {items.map((item, i) => (

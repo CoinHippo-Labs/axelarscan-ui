@@ -72,7 +72,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
           }
         }
 
-        let data = page === 0 ? [] : _.cloneDeep(gmps?.data), _page = page
+        let data = page === 0 ? [] : _.cloneDeep(gmps?.data), _page = page, total
         const size = PAGE_SIZE
         const _gmpsFilter = Object.fromEntries(Object.entries({ ...gmpsFilter }).filter(([k, v]) => v))
         let queryParams = { ..._gmpsFilter }
@@ -95,11 +95,12 @@ export default function GMP({ addTokenToMetaMask, className }) {
             }
             const response = await search(params)
             data = _.orderBy(_.uniqBy(_.concat(data || [], response?.data || []), 'call.id'), ['call.block_timestamp'], ['desc'])
+            total = response?.total
             _page++
           }
         }
 
-        setGmps({ data })
+        setGmps({ data, total })
         setGmpsTrigger(false)
 
         if (page && !is_interval) {
@@ -121,7 +122,12 @@ export default function GMP({ addTokenToMetaMask, className }) {
 
   return (
     <>
-      <div className="flex items-center justify-end -mt-12 mb-4 mr-2">
+      <div className="sm:flex items-center justify-end text-right space-x-3 -mt-14 mb-4 mr-2">
+        {gmps?.total && (
+          <div className="font-semibold mb-1 sm:mb-0">
+            Result: {numberFormat(gmps.total, '0,0')}
+          </div>
+        )}
         <GMPFilter
           applied={Object.values(gmpsFilter || {}).filter(v => v).length > 0}
           disabled={!chains_data}
