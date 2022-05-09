@@ -477,7 +477,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                         {time_spent < 60 ?
                           `${time_spent}s` : time_spent < 60 * 60 ?
                           `${Math.floor(time_spent / 60)} min${time_spent % 60 > 0 ? ` ${time_spent % 60}s` : ''}` : time_spent < 24 * 60 * 60 ?
-                          moment.utc(time_spent * 1000).format('HH:mm:ss') : `moment(executed_timestamp).diff(moment(call_timestamp), 'days') day`
+                          moment.utc(time_spent * 1000).format('HH:mm:ss') : `${moment(executed_timestamp).diff(moment(call_timestamp), 'days')} day`
                         }
                       </span>
                     </div>
