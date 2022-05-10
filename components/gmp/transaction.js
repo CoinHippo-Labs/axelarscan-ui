@@ -310,7 +310,7 @@ export default function Transaction() {
   )
 
   const mustSwitchChain = typeof chain_id === 'number' && chain_id !== toChain?.chain_id
-  const executeButton = call?.returnValues?.payload && approved && !executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 5) && (
+  const executeButton = call?.returnValues?.payload && approved && !executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
     <div className="flex items-center space-x-2">
       {web3_provider && !mustSwitchChain && (
         <button
