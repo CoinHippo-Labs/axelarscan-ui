@@ -21,7 +21,7 @@ import { search } from '../../lib/api/gmp'
 import { chain_manager, chainTitle } from '../../lib/object/chain'
 import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
 
-const PAGE_SIZE = 100
+const PAGE_SIZE = 50
 const MAX_PAGE = 50
 
 BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
