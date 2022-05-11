@@ -116,7 +116,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const getData = async is_interval => {
-      if (!status_data || is_interval) {
+      if ((!status_data || is_interval) && !['/gmp', '/gmp/[tx]'].includes(pathname)) {
         const response = await getStatus(null, is_interval && status_data)
         if (response) {
           dispatch({
@@ -230,14 +230,16 @@ export default function Navbar() {
       }
     }
 
-    getData()
+    if (!['/gmp', '/gmp/[tx]'].includes(pathname)) {
+      getData()
+    }
   }, [denoms_data])
 
   useEffect(() => {
     const controller = new AbortController()
 
     const getData = async () => {
-      if (denoms_data && status_data) {
+      if (denoms_data && status_data && !['/gmp', '/gmp/[tx]'].includes(pathname)) {
         if (!controller.signal.aborted) {
           let response
           switch (pathname) {
@@ -546,7 +548,9 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-      <SubNavbar />
+      {!['/gmp', '/gmp/[tx]'].includes(pathname) && (
+        <SubNavbar />
+      )}
       {false && (['/evm-votes', '/transfers'].includes(pathname) || pathname.startsWith('/validator')) && (
         <div className="w-full bg-red-100 dark:bg-red-500 border border-red-500 overflow-x-auto flex items-center justify-center text-xs py-1.5">
           {pathname.startsWith('/validator') ?
