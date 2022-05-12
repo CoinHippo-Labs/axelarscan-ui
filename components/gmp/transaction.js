@@ -310,7 +310,7 @@ export default function Transaction() {
   )
 
   const mustSwitchChain = typeof chain_id === 'number' && chain_id !== toChain?.chain_id
-  const executeButton = call?.returnValues?.payload && approved && !executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
+  const executeButton = call?.returnValues?.payload && approved && !executed && !data?.is_executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
     <div className="flex items-center space-x-2">
       {web3_provider && !mustSwitchChain && (
         <button
@@ -609,7 +609,7 @@ export default function Transaction() {
                         rel="noopener noreferrer"
                         className={`min-w-max max-w-min h-6 bg-gray-100 dark:bg-${executed ? 'green-600' : 'blue-600'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}
                       >
-                        {executed ?
+                        {executed || data?.is_executed ?
                           <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
                           :
                           error ?

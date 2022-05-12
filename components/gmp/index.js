@@ -433,7 +433,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                 <div className="min-w-max flex flex-col space-y-2 mb-4">
                   {steps.map((step, i) => (
                     <div key={i} className="flex items-center space-x-1.5">
-                      {props.row.original[step.id] ?
+                      {props.row.original[step.id] || (i === 3 && props.row.original.is_executed) ?
                         <FaCheckCircle size={20} className="text-green-500" />
                         :
                         i === current_step ?
