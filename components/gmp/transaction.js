@@ -617,7 +617,7 @@ export default function Transaction() {
                             :
                             <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
                         }
-                        <div className={`uppercase ${executed ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{executed ? 'Executed' : 'Not Executed'}</div>
+                        <div className={`uppercase ${executed ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{executed || data?.is_executed ? 'Executed' : 'Not Executed'}</div>
                       </a>
                       {executed?.transactionHash && (
                         <Copy text={executed.transactionHash} />

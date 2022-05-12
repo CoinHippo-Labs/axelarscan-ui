@@ -123,7 +123,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
   return (
     <>
       <div className="sm:flex items-center justify-end text-right space-x-3 -mt-14 mb-4 mr-2">
-        {gmps?.total && (
+        {gmps?.total > 0 && (
           <div className="font-semibold mb-1 sm:mb-0">
             Result: {numberFormat(gmps.total, '0,0')}
           </div>
