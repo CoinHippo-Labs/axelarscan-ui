@@ -604,7 +604,7 @@ export default function Transaction() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <a
-                        href={toChain?.explorer?.url ? `${toChain.explorer.url}${executed ? toChain.explorer.transaction_path?.replace('{tx}', executed.transactionHash) : toChain.explorer.address_path?.replace('{address}', call?.returnValues?.sender)}` : null}
+                        href={toChain?.explorer?.url ? `${toChain.explorer.url}${executed ? toChain.explorer.transaction_path?.replace('{tx}', executed.transactionHash) : toChain.explorer.address_path?.replace('{address}', call?.transaction?.from || call?.receipt?.from || call?.returnValues?.sender)}` : null}
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`min-w-max max-w-min h-6 bg-gray-100 dark:bg-${executed ? 'green-600' : 'blue-600'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}
@@ -818,8 +818,8 @@ export default function Transaction() {
                     <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Status:</span>
                     {transaction ?
                       <div className={`max-w-min h-6 bg-gray-100 dark:bg-${t ? t?.receipt?.status ? 'green-600' : 'red-700' : 'blue-700'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}>
-                        {t ?
-                          t.receipt?.status ?
+                        {t || data?.is_executed ?
+                          t?.receipt?.status || data?.is_executed ?
                             <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
                             :
                             <FaTimesCircle size={14} className="text-red-700 dark:text-white" />
@@ -827,8 +827,8 @@ export default function Transaction() {
                           <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
                         }
                         <div className={`whitespace-nowrap uppercase ${t ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>
-                          {t ?
-                            t.receipt?.status ?
+                          {t || data?.is_executed ?
+                            t?.receipt?.status || data?.is_executed ?
                               'Success'
                               :
                               'Error'
