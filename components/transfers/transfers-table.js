@@ -6,7 +6,7 @@ import Datatable from '../datatable'
 import Copy from '../copy'
 
 import { currency_symbol } from '../../lib/object/currency'
-import { numberFormat, randImage } from '../../lib/utils'
+import { numberFormat, rand_image } from '../../lib/utils'
 
 export default function TransfersTable({ data, className = '' }) {
   return (
@@ -34,7 +34,7 @@ export default function TransfersTable({ data, className = '' }) {
               !props.row.original.skeleton ?
                 <div className={`min-w-max flex items-start space-x-2 my-0.5`}>
                   <Img
-                    src={props.row.original.asset?.image || randImage(props.row.original.i)}
+                    src={props.row.original.asset?.image || rand_image(props.row.original.i)}
                     alt=""
                     className="w-6 h-6 rounded-full"
                   />
@@ -65,7 +65,7 @@ export default function TransfersTable({ data, className = '' }) {
               !props.row.original.skeleton ?
                 <div className="min-w-max flex items-center space-x-2.5 -my-0.5">
                   <Img
-                    src={props.row.original.from_chain?.image || randImage(props.row.original.i)}
+                    src={props.row.original.from_chain?.image || rand_image(props.row.original.i)}
                     alt=""
                     className="w-7 h-7 rounded-full"
                   />
@@ -87,7 +87,7 @@ export default function TransfersTable({ data, className = '' }) {
               !props.row.original.skeleton ?
                 <div className="min-w-max flex items-center space-x-2.5 -my-0.5">
                   <Img
-                    src={props.row.original.to_chain?.image || randImage(props.row.original.i)}
+                    src={props.row.original.to_chain?.image || rand_image(props.row.original.i)}
                     alt=""
                     className="w-7 h-7 rounded-full"
                   />

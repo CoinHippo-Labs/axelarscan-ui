@@ -1,11 +1,11 @@
 import { COSMOS_CHAINS_DATA } from './types'
 
-export default function data(
+export default = (
   state = {
     [`${COSMOS_CHAINS_DATA}`]: null,
   },
   action
-) {
+) => {
   switch (action.type) {
     case COSMOS_CHAINS_DATA:
       return {

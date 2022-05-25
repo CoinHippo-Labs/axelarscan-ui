@@ -10,8 +10,17 @@ This is the frontend of [Axelarscan](https://axelarscan.io), which displays the 
 - [Blocks](https://axelarscan.io/blocks) - List of the latest blocks produced in the network.
 - [Transactions](https://axelarscan.io/transactions) - List of the latest transactions in. the network.
 - [Participations](https://axelarscan.io/participations) displays the information on keys generation and signed events.
-- [Transfers](https://axelarscan.io/transfers) displays the statistics of cross-chain transfers happening through the Axelar network. Visitors can also navigate to the [cross-chain portal](https://github.com/CoinHippo-Labs/axelarscan-crosschain-ui) from this page to view each transfer in detail.
+- [Transfers](https://axelarscan.io/transfers) displays the statistics of cross-chain transfers happening through the Axelar network.
 - [Assets](https://axelarscan.io/assets) - List of the assets and chains supported on the Axelar network
+
+### Prerequisites
+node >= 16.0.0
+
+## Run on [localhost:3000](http://localhost:3000)
+```bash
+yarn
+yarn dev
+```
 
 ## License
 [Next.js](https://github.com/vercel/next.js/blob/canary/license.md) is MIT licensed

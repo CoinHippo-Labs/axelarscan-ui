@@ -1,32 +1,31 @@
 import Head from 'next/head'
 import Router from 'next/router'
 import { Provider } from 'react-redux'
-
 import NProgress from 'nprogress'
 
 import { useStore } from '../store'
 import Layout from '../layouts'
-
 import 'antd/dist/antd.css'
-import '../styles/global.css'
-import '../styles/tailwind.css'
+import '../styles/globals.css'
 import '../styles/animate.css'
 import '../styles/layout.css'
-import '../styles/components/navbar.css'
-import '../styles/components/nprogress.css'
-import '../styles/components/skeleton.css'
+import '../styles/tailwind.css'
 import '../styles/components/button.css'
 import '../styles/components/dropdown.css'
-import '../styles/components/table.css'
-import '../styles/components/modals.css'
 import '../styles/components/forms.css'
-import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
+import '../styles/components/modals.css'
+import '../styles/components/navbar.css'
+import '../styles/components/notifications.css'
+import '../styles/components/nprogress.css'
+import '../styles/components/recharts.css'
+import '../styles/components/skeleton.css'
+import '../styles/components/table.css'
 
 Router.events.on('routeChangeStart', () => NProgress.start())
 Router.events.on('routeChangeComplete', () => NProgress.done())
 Router.events.on('routeChangeError', () => NProgress.done())
 
-export default function App({ Component, pageProps }) {
+export default = ({ Component, pageProps }) => {
   const store = useStore(pageProps.initialReduxState)
 
   return (
@@ -43,7 +42,7 @@ export default function App({ Component, pageProps }) {
       <Provider store={store}>
         <Layout>
           <div id="portal" />
-          <Component {...pageProps} />
+          <Component { ...pageProps } />
         </Layout>
       </Provider>
     </>

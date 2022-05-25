@@ -7,7 +7,7 @@ import { BiServer } from 'react-icons/bi'
 
 import Widget from '../widget'
 
-import { denomer } from '../../lib/object/denom'
+import { denom_manager } from '../../lib/object/denom'
 import { chain_manager } from '../../lib/object/chain'
 import { numberFormat } from '../../lib/utils'
 
@@ -43,9 +43,9 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
     return {
       ...c,
       num_maintain_validators: maintainValidators?.length,
-      maintain_staking: denoms_data && maintainValidators && denomer.amount(_.sumBy(maintainValidators, 'tokens'), 'uaxl', denoms_data),
-      total_staking: denoms_data && activeValidators && denomer.amount(_.sumBy(activeValidators, 'tokens'), 'uaxl', denoms_data),
-      denom: denoms_data && denomer.symbol(denoms_data?.[0]?.id, denoms_data),
+      maintain_staking: denoms_data && maintainValidators && denom_manager.amount(_.sumBy(maintainValidators, 'tokens'), 'uaxl', denoms_data),
+      total_staking: denoms_data && activeValidators && denom_manager.amount(_.sumBy(activeValidators, 'tokens'), 'uaxl', denoms_data),
+      denom: denoms_data && denom_manager.symbol(denoms_data?.[0]?.id, denoms_data),
     }
   }).map(c => {
     return {

@@ -1,29 +1,29 @@
 import { combineReducers } from 'redux'
 
 import preferences from './preferences'
-import chains from './chains'
+import evm_chains from './evm-chains'
 import cosmos_chains from './cosmos-chains'
 import assets from './assets'
-import denoms from './denoms'
-import tvl from './tvl'
+import ens from './ens'
+import chain from './chain'
 import status from './status'
-import env from './env'
 import validators from './validators'
 import validators_chains from './validators-chains'
-import jailed_sync from './jailed-sync'
+import rpc_providers from './rpc-providers'
 import wallet from './wallet'
+import chain_id from './chain-id'
 
 export default combineReducers({
   preferences,
-  chains,
+  evm_chains,
   cosmos_chains,
   assets,
-  denoms,
-  tvl,
+  ens,
+  chain,
   status,
-  env,
   validators,
   validators_chains,
-  jailed_sync,
+  rpc_providers,
   wallet,
+  chain_id,
 })

@@ -9,7 +9,7 @@ import TransactionRawLogs from './transaction-raw-logs'
 import Widget from '../widget'
 
 import { transaction as getTransaction } from '../../lib/api/cosmos'
-import { numberFormat, convertToJson } from '../../lib/utils'
+import { numberFormat, to_json } from '../../lib/utils'
 
 export default function Transaction({ tx }) {
   const { denoms } = useSelector(state => ({ denoms: state.denoms }), shallowEqual)

@@ -11,7 +11,7 @@ import Datatable from '../datatable'
 import Copy from '../copy'
 import Popover from '../popover'
 
-import { blocks as getBlocks } from '../../lib/api/opensearch'
+import { blocks as getBlocks } from '../../lib/api/index'
 import { numberFormat, ellipseAddress } from '../../lib/utils'
 
 const LATEST_SIZE = 100

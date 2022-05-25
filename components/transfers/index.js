@@ -18,9 +18,9 @@ import Widget from '../widget'
 import Copy from '../copy'
 import Popover from '../popover'
 
-import { crosschainTxs } from '../../lib/api/opensearch'
+import { transfers } from '../../lib/api/index'
 import { chainTitle, getChain, chain_manager } from '../../lib/object/chain'
-import { getDenom, denomer } from '../../lib/object/denom'
+import { getDenom, denom_manager } from '../../lib/object/denom'
 import { currency, currency_symbol } from '../../lib/object/currency'
 import { numberFormat, ellipseAddress } from '../../lib/utils'
 
@@ -50,7 +50,7 @@ export default function Transfers() {
         let response, data
 
         if (!controller.signal.aborted) {
-          response = await crosschainTxs({
+          response = await transfers({
             aggs: {
               from_chains: {
                 terms: { field: 'send.sender_chain.keyword', size: 10000 },
@@ -98,9 +98,9 @@ export default function Transfers() {
             from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
             to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denomer.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            avg_amount: denomer.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            max_amount: denomer.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0
@@ -193,7 +193,7 @@ export default function Transfers() {
         let response, data
 
         if (!controller.signal.aborted) {
-          response = await crosschainTxs({
+          response = await transfers({
             aggs: {
               assets: {
                 terms: { field: 'send.denom.keyword', size: 10000 },
@@ -241,15 +241,15 @@ export default function Transfers() {
             ...t,
             to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denomer.amount(t?.amount, asset?.id, denoms_data),
-            avg_amount: denomer.amount(t?.avg_amount, asset?.id, denoms_data),
-            max_amount: denomer.amount(t?.max_amount, asset?.id, denoms_data),
+            amount: denom_manager.amount(t?.amount, asset?.id, denoms_data),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, denoms_data),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, denoms_data),
             times: t?.times?.map(time => {
               return {
                 ...time,
-                amount: denomer.amount(time?.amount, asset?.id, denoms_data),
-                avg_amount: denomer.amount(time?.avg_amount, asset?.id, denoms_data),
-                max_amount: denomer.amount(time?.max_amount, asset?.id, denoms_data),
+                amount: denom_manager.amount(time?.amount, asset?.id, denoms_data),
+                avg_amount: denom_manager.amount(time?.avg_amount, asset?.id, denoms_data),
+                max_amount: denom_manager.amount(time?.max_amount, asset?.id, denoms_data),
               }
             }),
           }
@@ -357,7 +357,7 @@ export default function Transfers() {
         let response
 
         if (!controller.signal.aborted) {
-          response = await crosschainTxs({
+          response = await transfers({
             aggs: {
               from_chains: {
                 terms: { field: 'send.sender_chain.keyword', size: 10000 },
@@ -400,8 +400,8 @@ export default function Transfers() {
             from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
             to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denomer.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            avg_amount: denomer.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0
@@ -435,7 +435,7 @@ export default function Transfers() {
         total_transfers = _.orderBy(_total_transfers, ['tx'], ['desc'])
 
         if (!controller.signal.aborted) {
-          response = await crosschainTxs({
+          response = await transfers({
             aggs: {
               from_chains: {
                 terms: { field: 'send.sender_chain.keyword', size: 10000 },
@@ -469,7 +469,7 @@ export default function Transfers() {
             from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
             to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            max_amount: denomer.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0

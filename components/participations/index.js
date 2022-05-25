@@ -8,9 +8,9 @@ import KeysTable from './keys-table'
 
 import { keygenSummary } from '../../lib/api/query'
 import { axelard } from '../../lib/api/executor'
-import { successKeygens as getSuccessKeygens, failedKeygens as getFailedKeygens, signAttempts as getSignAttempts } from '../../lib/api/opensearch'
+import { keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { getName, convertToJson } from '../../lib/utils'
+import { getName, to_json } from '../../lib/utils'
 
 export default function Participations() {
   const { chains, denoms, validators, validators_chains } = useSelector(state => ({ chains: state.chains, denoms: state.denoms, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
@@ -70,8 +70,8 @@ export default function Participations() {
 
   //                 const response = await axelard({ cmd: `axelard q tss ${tssType} ${key_chain} ${key_role} -oj`, cache: true, cache_timeout: 15 })
 
-  //                 if (convertToJson(response?.stdout)) {
-  //                   let keyIds = convertToJson(response.stdout)
+  //                 if (to_json(response?.stdout)) {
+  //                   let keyIds = to_json(response.stdout)
 
   //                   if (keyIds) {
   //                     keyIds = Array.isArray(keyIds) ? keyIds : [keyIds]
@@ -113,7 +113,10 @@ export default function Participations() {
       let response, data
 
       if (!controller.signal.aborted) {
-        response = await getSuccessKeygens({ size: 1000, sort: [{ height: 'desc' }] })
+        response = await getKeygens({
+          size: 1000,
+          sort: [{ height: 'desc' }],
+        }, true)
         data = response?.data || []
 
         for (let i = 0; i < data.length; i++) {
@@ -149,7 +152,10 @@ export default function Participations() {
       }
 
       if (!controller.signal.aborted) {
-        response = await getFailedKeygens({ size: 1000, sort: [{ height: 'desc' }] })
+        response = await getKeygens({
+          size: 1000,
+          sort: [{ height: 'desc' }],
+        }, false)
         data = response?.data || []
 
         for (let i = 0; i < data.length; i++) {

@@ -14,7 +14,7 @@ import Datatable from '../datatable'
 import { ProgressBarWithText } from '../progress-bars'
 import Copy from '../copy'
 
-import { historical } from '../../lib/api/opensearch'
+import { historical } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
 import { numberFormat, getName, ellipseAddress } from '../../lib/utils'
 

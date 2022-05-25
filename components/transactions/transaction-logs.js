@@ -7,7 +7,7 @@ import { BsArrowRight } from 'react-icons/bs'
 import Copy from '../copy'
 
 import { type } from '../../lib/object/id'
-import { numberFormat, getName, ellipseAddress, convertToJson } from '../../lib/utils'
+import { numberFormat, getName, ellipseAddress, to_json } from '../../lib/utils'
 
 export default function TransactionLogs({ data }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
@@ -21,7 +21,7 @@ export default function TransactionLogs({ data }) {
   return (
     <div className="flex flex-col space-y-4 mt-3">
       {(data ?
-        (data.activities || []).map((a, i) => { return { ...a, i, outPointInfo: convertToJson(a.outPointInfo) } })
+        (data.activities || []).map((a, i) => { return { ...a, i, outPointInfo: to_json(a.outPointInfo) } })
         :
         [...Array(1).keys()].map(i => { return { i, skeleton: true } })
       ).map((a, i) => {

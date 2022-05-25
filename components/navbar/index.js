@@ -19,12 +19,12 @@ import PageTitle from './page-title'
 import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { status as getStatus } from '../../lib/api/rpc'
 import { stakingParams, stakingPool, bankSupply, slashingParams, distributionParams, mintInflation, communityPool, allValidators, validatorProfile, allValidatorsStatus, allValidatorsBroadcaster, chainMaintainer } from '../../lib/api/cosmos'
-import { heartbeats as getHeartbeats, evmVotes as getEvmVotes } from '../../lib/api/opensearch'
+import { heartbeats as getHeartbeats, evm_votes as getEvmVotes } from '../../lib/api/index'
 import { simplePrice } from '../../lib/api/coingecko'
 import { currency } from '../../lib/object/currency'
-import { denomer } from '../../lib/object/denom'
+import { denom_manager } from '../../lib/object/denom'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
-import { randImage } from '../../lib/utils'
+import { rand_image } from '../../lib/utils'
 
 import { THEME, CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, DENOMS_DATA, TVL_DATA, STATUS_DATA, ENV_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA } from '../../reducers/types'
 
@@ -155,7 +155,7 @@ export default function Navbar() {
               type: ENV_DATA,
               value: {
                 bank_supply: Object.fromEntries(Object.entries(response?.amount || {}).map(([key, value]) => {
-                  return [key, key === 'denom' ? denomer.symbol(value, denoms_data) : denomer.amount(value, response.amount.denom, denoms_data)]
+                  return [key, key === 'denom' ? denom_manager.symbol(value, denoms_data) : denom_manager.amount(value, response.amount.denom, denoms_data)]
                 })),
               },
             })
@@ -168,7 +168,7 @@ export default function Navbar() {
             type: ENV_DATA,
             value: {
               staking_pool: Object.fromEntries(Object.entries(response?.pool || {}).map(([key, value]) => {
-                return [key, denomer.amount(value, denoms_data?.[0]?.id, denoms_data)]
+                return [key, denom_manager.amount(value, denoms_data?.[0]?.id, denoms_data)]
               })),
             },
           })
@@ -221,7 +221,7 @@ export default function Navbar() {
             value: {
               community_pool: response?.pool?.map(_pool => {
                 return Object.fromEntries(Object.entries(_pool || {}).map(([key, value]) => {
-                  return [key, key === 'denom' ? denomer.symbol(value, denoms_data) : denomer.amount(value, _pool.denom, denoms_data)]
+                  return [key, key === 'denom' ? denom_manager.symbol(value, denoms_data) : denom_manager.amount(value, _pool.denom, denoms_data)]
                 }))
               }) || [],
             },
@@ -273,7 +273,7 @@ export default function Navbar() {
                           heartbeats: {
                             terms: { field: 'sender.keyword', size: 10000 },
                             aggs: {
-                              heightgroup: {
+                              period_height: {
                                 terms: { field: 'height_group', size: 100000 },
                               },
                             },
@@ -437,7 +437,7 @@ export default function Navbar() {
                   }
                 }
               }
-              v.description.image = v.description.image || (v.description.moniker?.toLowerCase().startsWith('axelar-core-') ? '/logos/chains/axelar.png' : randImage(i))
+              v.description.image = v.description.image || (v.description.moniker?.toLowerCase().startsWith('axelar-core-') ? '/logos/chains/axelar.png' : rand_image(i))
               data[i] = v
               if (updated) {
                 dispatch({

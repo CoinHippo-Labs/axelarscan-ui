@@ -10,8 +10,8 @@ import TransactionsTable from '../transactions/transactions-table'
 import Widget from '../widget'
 
 import { allBankBalances, allStakingDelegations, allStakingUnbonding, distributionRewards, distributionCommissions, transactionsByEvents, transactionsByEventsPaging } from '../../lib/api/cosmos'
-import { transactions as getTransactions, linkedAddresses } from '../../lib/api/opensearch'
-import { denomer } from '../../lib/object/denom'
+import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
+import { denom_manager } from '../../lib/object/denom'
 import { numberFormat, sleep } from '../../lib/utils'
 
 export default function Account({ address }) {
@@ -53,8 +53,8 @@ export default function Account({ address }) {
               balances: response.data?.map(b => {
                 return {
                   ...b,
-                  denom: denomer.symbol(b.denom, denoms_data),
-                  amount: denomer.amount(b.amount, b.denom, denoms_data),
+                  denom: denom_manager.symbol(b.denom, denoms_data),
+                  amount: denom_manager.amount(b.amount, b.denom, denoms_data),
                 }
               }),
             }
@@ -72,10 +72,10 @@ export default function Account({ address }) {
                   return {
                     ...d?.delegation,
                     validator_data: d?.delegation && (validators_data?.find(v => v.operator_address === d.delegation.validator_address) || {}),
-                    shares: d.delegation?.shares && (isNaN(d.delegation.shares) ? -1 : denomer.amount(d.delegation.shares, d.balance?.denom, denoms_data)),
+                    shares: d.delegation?.shares && (isNaN(d.delegation.shares) ? -1 : denom_manager.amount(d.delegation.shares, d.balance?.denom, denoms_data)),
                     ...d.balance,
-                    denom: denomer.symbol(d?.balance?.denom, denoms_data),
-                    amount: d.balance?.amount && (isNaN(d.balance.amount) ? -1 : denomer.amount(d.balance.amount, d.balance.denom, denoms_data)),
+                    denom: denom_manager.symbol(d?.balance?.denom, denoms_data),
+                    amount: d.balance?.amount && (isNaN(d.balance.amount) ? -1 : denom_manager.amount(d.balance.amount, d.balance.denom, denoms_data)),
                   }
                 }),
               }
@@ -95,8 +95,8 @@ export default function Account({ address }) {
                     entries: undefined,
                     ...e,
                     creation_height: Number(e?.creation_height),
-                    initial_balance: denomer.amount(Number(e?.initial_balance), denoms_data?.[0]?.id, denoms_data),
-                    balance: denomer.amount(Number(e?.balance), denoms_data?.[0]?.id, denoms_data),
+                    initial_balance: denom_manager.amount(Number(e?.initial_balance), denoms_data?.[0]?.id, denoms_data),
+                    balance: denom_manager.amount(Number(e?.balance), denoms_data?.[0]?.id, denoms_data),
                   }
                 })),
               }
@@ -111,8 +111,8 @@ export default function Account({ address }) {
                 ...account_data,
                 rewards: {
                   ...response,
-                  rewards: response.rewards && Object.entries(_.groupBy(response.rewards.flatMap(r => r.reward).map(r => { return { ...r, denom: denomer.symbol(r.denom, denoms_data), amount: r.amount && (isNaN(r.amount) ? -1 : denomer.amount(r.amount, r.denom, denoms_data)) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
-                  total: response.total && Object.entries(_.groupBy(response.total.map(t => { return { ...t, denom: denomer.symbol(t.denom, denoms_data), amount: t.amount && denomer.amount(t.amount, t.denom, denoms_data) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
+                  rewards: response.rewards && Object.entries(_.groupBy(response.rewards.flatMap(r => r.reward).map(r => { return { ...r, denom: denom_manager.symbol(r.denom, denoms_data), amount: r.amount && (isNaN(r.amount) ? -1 : denom_manager.amount(r.amount, r.denom, denoms_data)) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
+                  total: response.total && Object.entries(_.groupBy(response.total.map(t => { return { ...t, denom: denom_manager.symbol(t.denom, denoms_data), amount: t.amount && denom_manager.amount(t.amount, t.denom, denoms_data) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
                 },
               }
             }
@@ -128,8 +128,8 @@ export default function Account({ address }) {
                   commission: response?.commission?.commission?.map(c => {
                     return {
                       ...c,
-                      denom: denomer.symbol(c.denom, denoms_data),
-                      amount: c.amount && (isNaN(c.amount) ? -1 : denomer.amount(c.amount, c.denom, denoms_data)),
+                      denom: denom_manager.symbol(c.denom, denoms_data),
+                      amount: c.amount && (isNaN(c.amount) ? -1 : denom_manager.amount(c.amount, c.denom, denoms_data)),
                     }
                   }),
                 }
@@ -139,7 +139,7 @@ export default function Account({ address }) {
         }
         else {
           if (!controller.signal.aborted) {
-            const response = await linkedAddresses({
+            const response = await deposit_addresses({
               query: {
                 // match: { _id: address.toLowerCase() },
                 match: { deposit_address: address.toLowerCase() },
@@ -156,7 +156,7 @@ export default function Account({ address }) {
                 linked_addresses: response?.data?.map(l => {
                   return {
                     ...l,
-                    denom: denomer.symbol(l.asset, denoms_data),
+                    denom: denom_manager.symbol(l.asset, denoms_data),
                     asset: denoms_data?.find(d => d?.id === l.asset),
                     from_chain: chains_data?.find(c => c?.id === l.sender_chain) || cosmos_chains_data?.find(c => c?.id === l.sender_chain),
                     to_chain: chains_data?.find(c => c?.id === l.recipient_chain) || cosmos_chains_data?.find(c => c?.id === l.recipient_chain),

@@ -10,7 +10,7 @@ import { BiServer } from 'react-icons/bi'
 
 import Widget from '../widget'
 
-import { historical } from '../../lib/api/opensearch'
+import { historical } from '../../lib/api/index'
 import { block as getBlock } from '../../lib/api/cosmos'
 import { numberFormat } from '../../lib/utils'
 

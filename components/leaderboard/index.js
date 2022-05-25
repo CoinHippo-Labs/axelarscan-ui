@@ -13,7 +13,7 @@ import Widget from '../widget'
 import Datatable from '../datatable'
 import Copy from '../copy'
 
-import { historical } from '../../lib/api/opensearch'
+import { historical } from '../../lib/api/index'
 import { numberFormat, ellipseAddress } from '../../lib/utils'
 
 const snapshot_block_size = Number(process.env.NEXT_PUBLIC_SNAPSHOT_BLOCK_SIZE)

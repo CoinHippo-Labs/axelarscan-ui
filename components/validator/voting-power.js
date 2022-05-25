@@ -5,7 +5,7 @@ import _ from 'lodash'
 import Widget from '../widget'
 import Copy from '../copy'
 
-import { denomer } from '../../lib/object/denom'
+import { denom_manager } from '../../lib/object/denom'
 import { numberFormat } from '../../lib/utils'
 
 export default function VotingPower({ data }) {
@@ -22,9 +22,9 @@ export default function VotingPower({ data }) {
         <div className="flex items-center sm:justify-center mt-5 mb-6">
           <div className="w-60 h-32 bg-gray-900 dark:bg-black rounded-lg flex items-center justify-center">
             <div className="flex flex-col text-center space-y-1">
-              <span className="text-white text-2xl font-semibold">{numberFormat(data.voting_power || Math.floor(denomer.amount(data.tokens, denoms_data?.[0]?.id, denoms_data)), '0,0')}</span>
+              <span className="text-white text-2xl font-semibold">{numberFormat(data.voting_power || Math.floor(denom_manager.amount(data.tokens, denoms_data?.[0]?.id, denoms_data)), '0,0')}</span>
               {env_data?.staking_pool?.bonded_tokens && (
-                <span className="text-gray-200 dark:text-gray-200 text-sm">(~ {numberFormat(Math.floor(denomer.amount(data.tokens, denoms_data?.[0]?.id, denoms_data)) * 100 / Math.floor(env_data.staking_pool.bonded_tokens), '0,0.00')}%)</span>
+                <span className="text-gray-200 dark:text-gray-200 text-sm">(~ {numberFormat(Math.floor(denom_manager.amount(data.tokens, denoms_data?.[0]?.id, denoms_data)) * 100 / Math.floor(env_data.staking_pool.bonded_tokens), '0,0.00')}%)</span>
               )}
             </div>
           </div>
@@ -42,8 +42,8 @@ export default function VotingPower({ data }) {
               <span>{numberFormat(data.self_delegation * 100 / data.delegator_shares, '0,0.00')}%</span>
               <span className="text-gray-500 space-x-1">
                 <span>(~</span>
-                <span>{numberFormat(Math.floor(denomer.amount(data.self_delegation, denoms_data?.[0]?.id, denoms_data)), '0,0')}</span>
-                <span className="uppercase">{env_data?.staking_params && denomer.symbol(env_data.staking_params.bond_denom, denoms_data)})</span>
+                <span>{numberFormat(Math.floor(denom_manager.amount(data.self_delegation, denoms_data?.[0]?.id, denoms_data)), '0,0')}</span>
+                <span className="uppercase">{env_data?.staking_params && denom_manager.symbol(env_data.staking_params.bond_denom, denoms_data)})</span>
               </span>
             </span>
             :
@@ -54,7 +54,7 @@ export default function VotingPower({ data }) {
           <span className="font-semibold">Delegator Shares</span>
           {data ?
             <span className="text-gray-500 dark:text-gray-400">
-              {numberFormat(denomer.amount(data.delegator_shares, denoms_data?.[0]?.id, denoms_data), '0,0')}
+              {numberFormat(denom_manager.amount(data.delegator_shares, denoms_data?.[0]?.id, denoms_data), '0,0')}
             </span>
             :
             <div className="skeleton w-20 h-6" />
@@ -74,7 +74,7 @@ export default function VotingPower({ data }) {
           <span className="font-semibold">Tokens</span>
           {data ?
             <span className="text-gray-500 dark:text-gray-400">
-              {numberFormat(Math.floor(denomer.amount(data.tokens, denoms_data?.[0]?.id, denoms_data)), '0,0')}
+              {numberFormat(Math.floor(denom_manager.amount(data.tokens, denoms_data?.[0]?.id, denoms_data)), '0,0')}
             </span>
             :
             <div className="skeleton w-20 h-6" />

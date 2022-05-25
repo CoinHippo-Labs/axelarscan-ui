@@ -14,7 +14,7 @@ import Datatable from '../datatable'
 import Copy from '../copy'
 import Popover from '../popover'
 
-import { transactions as getTransactions } from '../../lib/api/opensearch'
+import { transactions as getTransactions } from '../../lib/api/index'
 import { paramsToObject, numberFormat, getName, ellipseAddress, sleep } from '../../lib/utils'
 
 const LATEST_SIZE = 100

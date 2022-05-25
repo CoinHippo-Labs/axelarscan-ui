@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import Widget from '../widget'
 
-import { numberFormat, getName, convertToJson } from '../../lib/utils'
+import { numberFormat, getName, to_json } from '../../lib/utils'
 
 export default function ProposalDetail({ data }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
@@ -84,9 +84,9 @@ export default function ProposalDetail({ data }) {
               <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
                 <span className="w-40 lg:w-64 text-xs lg:text-base font-semibold">{getName(data.type)}:</span>
                 <div className="text-xs lg:text-base">
-                  {typeof convertToJson(data.content.plan.info) === 'object' ?
+                  {typeof to_json(data.content.plan.info) === 'object' ?
                     <div className="max-h-96 overflow-y-auto">
-                      <ReactJson src={convertToJson(data.content.plan.info)} theme={theme === 'dark' ? 'harmonic' : 'rjv-default'} />
+                      <ReactJson src={to_json(data.content.plan.info)} theme={theme === 'dark' ? 'harmonic' : 'rjv-default'} />
                     </div>
                     :
                     <span className="bg-gray-100 dark:bg-gray-800 rounded capitalize text-gray-900 dark:text-gray-100 font-semibold px-2 py-1">
@@ -103,13 +103,13 @@ export default function ProposalDetail({ data }) {
             <span className="w-40 lg:w-64 text-xs lg:text-base font-semibold">{c.key}:</span>
             <div className="text-xs lg:text-base">
               {c.subspace ?
-                typeof convertToJson(c.value) === 'object' ?
+                typeof to_json(c.value) === 'object' ?
                   <div className="space-y-2">
                     <span className="bg-gray-100 dark:bg-gray-800 rounded capitalize text-gray-900 dark:text-gray-100 font-semibold px-2 py-1">
                       {getName(c.subspace)}
                     </span>
                     <div className="max-h-96 overflow-y-auto">
-                      <ReactJson src={convertToJson(c.value)} theme={theme === 'dark' ? 'harmonic' : 'rjv-default'} />
+                      <ReactJson src={to_json(c.value)} theme={theme === 'dark' ? 'harmonic' : 'rjv-default'} />
                     </div>
                   </div>
                   :

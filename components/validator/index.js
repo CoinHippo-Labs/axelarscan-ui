@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import moment from 'moment'
-import toRegexRange from 'to-regex-range'
 
 import Information from './information'
 import CosmosGeneric from './cosmos-generic'
@@ -20,10 +19,10 @@ import Widget from '../widget'
 
 import { getUptime, uptimeForJailedInfoSync, jailedInfo, getHeartbeat } from '../../lib/api/query'
 import { validatorSets, allBankBalances, allDelegations, distributionRewards, distributionCommissions } from '../../lib/api/cosmos'
-import { getKeygensByValidator } from '../../lib/api/executor'
-import { heartbeats as getHeartbeats, evmVotes as getEvmVotes, successKeygens as getSuccessKeygens, failedKeygens as getFailedKeygens, signAttempts as getSignAttempts } from '../../lib/api/opensearch'
+import { keygens_by_validator } from '../../lib/api/executor'
+import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { denomer } from '../../lib/object/denom'
+import { denom_manager } from '../../lib/object/denom'
 import { blocksPerHeartbeat, blockFraction, lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
 import { getName } from '../../lib/utils'
 
@@ -78,7 +77,7 @@ export default function Validator({ address }) {
             if (data.broadcaster_address) {
               response = await allBankBalances(data.broadcaster_address)
               if (response?.data) {
-                _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => { return { amount: denomer.amount(b.amount, b.denom, denoms_data), denom: denomer.symbol(b.denom, denoms_data) } }))
+                _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => { return { amount: denom_manager.amount(b.amount, b.denom, denoms_data), denom: denom_manager.symbol(b.denom, denoms_data) } }))
               }
             }
             else {
@@ -91,7 +90,7 @@ export default function Validator({ address }) {
                 heartbeats: {
                   terms: { field: 'sender.keyword' },
                   aggs: {
-                    heightgroup: {
+                    period_height: {
                       terms: { field: 'height_group', size: 100000 },
                     },
                   },
@@ -179,10 +178,10 @@ export default function Validator({ address }) {
               return {
                 ...d.delegation,
                 self: d.delegation.delegator_address === validator.data?.delegator_address,
-                shares: d.delegation && denomer.amount(d.delegation.shares, d.balance?.denom, denoms_data),
+                shares: d.delegation && denom_manager.amount(d.delegation.shares, d.balance?.denom, denoms_data),
                 ...d.balance,
-                denom: denomer.symbol(d.balance?.denom, denoms_data),
-                amount: d.balance && denomer.amount(d.balance.amount, d.balance.denom, denoms_data),
+                denom: denom_manager.symbol(d.balance?.denom, denoms_data),
+                amount: d.balance && denom_manager.amount(d.balance.amount, d.balance.denom, denoms_data),
               }
             }) || [], ['self', 'shares'], ['desc', 'desc'])
             setDelegations({ data: _delegations, address })
@@ -195,8 +194,8 @@ export default function Validator({ address }) {
               _rewards.push({
                 ...response,
                 name: 'Distribution Rewards',
-                rewards: response.rewards && Object.entries(_.groupBy(response.rewards.flatMap(r => r.reward).map(r => { return { ...r, denom: denomer.symbol(r.denom, denoms_data), amount: r.amount && (isNaN(r.amount) ? -1 : denomer.amount(r.amount, r.denom, denoms_data)) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
-                total: response.total && Object.entries(_.groupBy(response.total.map(t => { return { ...t, denom: denomer.symbol(t.denom, denoms_data), amount: t.amount && denomer.amount(t.amount, t.denom, denoms_data) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
+                rewards: response.rewards && Object.entries(_.groupBy(response.rewards.flatMap(r => r.reward).map(r => { return { ...r, denom: denom_manager.symbol(r.denom, denoms_data), amount: r.amount && (isNaN(r.amount) ? -1 : denom_manager.amount(r.amount, r.denom, denoms_data)) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
+                total: response.total && Object.entries(_.groupBy(response.total.map(t => { return { ...t, denom: denom_manager.symbol(t.denom, denoms_data), amount: t.amount && denom_manager.amount(t.amount, t.denom, denoms_data) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
               })
             }
 
@@ -208,8 +207,8 @@ export default function Validator({ address }) {
                 total: response?.commission?.commission?.map(c => {
                   return {
                     ...c,
-                    denom: denomer.symbol(c.denom, denoms_data),
-                    amount: c.amount && (isNaN(c.amount) ? -1 : denomer.amount(c.amount, c.denom, denoms_data)),
+                    denom: denom_manager.symbol(c.denom, denoms_data),
+                    amount: c.amount && (isNaN(c.amount) ? -1 : denom_manager.amount(c.amount, c.denom, denoms_data)),
                   }
                 }),
               })
@@ -569,14 +568,17 @@ export default function Validator({ address }) {
       if (address) {
         let response, keygens_data, signs_data, total_participated_signs, total_not_participated_signs
         if (!controller.signal.aborted) {
-          response = await getKeygensByValidator(address)
+          response = await keygens_by_validator(address)
           if (response) {
             setKeyShares({ data: response, address })
           }
         }
 
         if (!controller.signal.aborted) {
-          response = await getSuccessKeygens({ size: 1000, sort: [{ height: 'desc' }] })
+          response = await getKeygens({
+            size: 1000,
+            sort: [{ height: 'desc' }],
+          }, true)
           let data = Array.isArray(response?.data) ? response.data : []
           for (let i = 0; i < data.length; i++) {
             const keygen = data[i]
@@ -591,7 +593,10 @@ export default function Validator({ address }) {
           }
           keygens_data = _.orderBy(_.concat(keygens_data || [], data.filter(k => k.participated || k.not_participated)), ['height'], ['desc'])
 
-          response = await getFailedKeygens({ size: 1000, sort: [{ height: 'desc' }] })
+          response = await getKeygens({
+            size: 1000,
+            sort: [{ height: 'desc' }],
+          }, false)
           data = Array.isArray(response?.data) ? response.data : []
           for (let i = 0; i < data.length; i++) {
             const keygen = data[i]

@@ -15,7 +15,7 @@ import Datatable from '../datatable'
 import Copy from '../copy'
 import Popover from '../popover'
 
-import { evmVotes as getEvmVotes } from '../../lib/api/opensearch'
+import { evm_votes as getEvmVotes } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
 import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
 

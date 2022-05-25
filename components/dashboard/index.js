@@ -16,10 +16,10 @@ import BlocksTable from '../blocks/blocks-table'
 import TransactionsTable from '../transactions/transactions-table'
 import Widget from '../widget'
 
-import { consensusState } from '../../lib/api/rpc'
-import { crosschainTxs } from '../../lib/api/opensearch'
+import { consensus_state } from '../../lib/api/rpc'
+import { transfers } from '../../lib/api/index'
 import { getChain, chain_manager } from '../../lib/object/chain'
-import { getDenom, denomer } from '../../lib/object/denom'
+import { getDenom, denom_manager } from '../../lib/object/denom'
 import { hexToBech32 } from '../../lib/object/key'
 import { currency } from '../../lib/object/currency'
 import { numberFormat } from '../../lib/utils'
@@ -53,7 +53,7 @@ export default function Dashboard() {
 
     const getData = async () => {
       if (!controller.signal.aborted) {
-        const response = await consensusState()
+        const response = await consensus_state()
         setConsensusStateData(response)
       }
     }
@@ -91,7 +91,7 @@ export default function Dashboard() {
           avg_block_time: status_data && moment(status_data.latest_block_time).diff(moment(status_data.earliest_block_time_for_cal || status_data.earliest_block_time), 'seconds') / (Number(status_data.latest_block_height) - Number(status_data.earliest_block_height_for_cal || status_data.earliest_block_height)),
           active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v.status)).length,
           total_validators: validators_data?.length,
-          denom: denomer.symbol(env_data?.staking_params?.bond_denom, denoms_data),
+          denom: denom_manager.symbol(env_data?.staking_params?.bond_denom, denoms_data),
           online_voting_power_now: env_data?.staking_pool && numberFormat(Math.floor(env_data.staking_pool.bonded_tokens), '0,0.00a'),
           online_voting_power_now_percentage: env_data?.staking_pool && env_data.bank_supply && (Math.floor(env_data.staking_pool.bonded_tokens) * 100 / env_data.bank_supply.amount),
           total_voting_power: env_data?.bank_supply && numberFormat(env_data.bank_supply.amount, '0,0.00a'),
@@ -110,7 +110,7 @@ export default function Dashboard() {
         let response, data
 
         if (!controller.signal.aborted) {
-          response = await crosschainTxs({
+          response = await transfers({
             aggs: {
               from_chains: {
                 terms: { field: 'send.sender_chain.keyword', size: 10000 },
@@ -158,9 +158,9 @@ export default function Dashboard() {
             from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
             to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denomer.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            avg_amount: denomer.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            max_amount: denomer.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0
