@@ -3,7 +3,7 @@ import { FiX } from 'react-icons/fi'
 
 import Portal from '../portal'
 
-export default function Notifications({
+export default ({
   visible = true,
   outerClassNames,
   innerClassNames,
@@ -14,7 +14,7 @@ export default function Notifications({
   content,
   hideButton,
   onClose,
-}) {
+}) => {
   const [open, setOpen] = useState(visible)
 
   const show = () => setOpen(true)

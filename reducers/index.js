@@ -7,6 +7,7 @@ import assets from './assets'
 import ens from './ens'
 import chain from './chain'
 import status from './status'
+import tvl from './tvl'
 import validators from './validators'
 import validators_chains from './validators-chains'
 import rpc_providers from './rpc-providers'
@@ -21,6 +22,7 @@ export default combineReducers({
   ens,
   chain,
   status,
+  tvl,
   validators,
   validators_chains,
   rpc_providers,

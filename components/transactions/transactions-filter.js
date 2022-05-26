@@ -5,7 +5,7 @@ import moment from 'moment'
 import { DatePicker } from 'antd'
 import { VscFilterFilled, VscFilter } from 'react-icons/vsc'
 
-import Modal from '../modals/modal-confirm'
+import Modal from '../modals'
 
 export default function TransactionsFilter({ applied = false, disabled = false, initialFilter, updateFilter, types }) {
   const [filter, setFilter] = useState(initialFilter)

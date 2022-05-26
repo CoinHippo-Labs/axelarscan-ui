@@ -19,7 +19,7 @@ export default function DelegationsTable({ data }) {
                     <span className="block lg:hidden font-medium mr-1">{ellipseAddress(props.value, 10)}</span>
                     <span className="hidden lg:block xl:hidden font-medium mr-1">{ellipseAddress(props.value, 16)}</span>
                     <span className="hidden xl:block font-medium mr-1">{ellipseAddress(props.value, 24)}</span>
-                    <Copy text={props.value} className="mr-1" />
+                    <Copy value={props.value} className="mr-1" />
                     {props.row.original.self && (
                       <span className="bg-indigo-600 rounded-full capitalize text-white text-xs font-semibold px-2 py-0.5">
                         Self

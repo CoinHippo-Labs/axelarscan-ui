@@ -46,7 +46,7 @@ export default function VotesTable({ data, className = '' }) {
                           {ellipseAddress(props.value, 16)}
                         </a>
                       </Link>
-                      <Copy text={props.value} />
+                      <Copy value={props.value} />
                     </span>
                   </div>
                 </div>
@@ -92,7 +92,7 @@ export default function VotesTable({ data, className = '' }) {
                           {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(props.row.original.validator_data?.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                         </a>
                       </Link>
-                      <Copy text={props.row.original.validator_data?.operator_address} />
+                      <Copy value={props.row.original.validator_data?.operator_address} />
                     </span>
                   </div>
                 </div>

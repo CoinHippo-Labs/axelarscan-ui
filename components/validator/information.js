@@ -79,7 +79,7 @@ export default function Information({ data }) {
               <span className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 space-x-1">
                 <span className="lg:hidden">{ellipseAddress(data.operator_address, 16)}</span>
                 <span className="hidden lg:block">{ellipseAddress(data.operator_address, 32)}</span>
-                <Copy size={18} text={data.operator_address} />
+                <Copy size={18} value={data.operator_address} />
               </span>
             </div>
           )
@@ -101,7 +101,7 @@ export default function Information({ data }) {
                     {ellipseAddress(data.delegator_address, 24)}
                   </a>
                 </Link>
-                <Copy size={18} text={data.delegator_address} />
+                <Copy size={18} value={data.delegator_address} />
               </span>
             </div>
           )
@@ -115,7 +115,7 @@ export default function Information({ data }) {
               <span className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 space-x-1">
                 <span className="lg:hidden">{ellipseAddress(data.consensus_address, 16)}</span>
                 <span className="hidden lg:block">{ellipseAddress(data.consensus_address, 32)}</span>
-                <Copy size={18} text={data.consensus_address} />
+                <Copy size={18} value={data.consensus_address} />
               </span>
             </div>
           )
@@ -137,7 +137,7 @@ export default function Information({ data }) {
                     {ellipseAddress(data.broadcaster_address, 24)}
                   </a>
                 </Link>
-                <Copy size={18} text={data.broadcaster_address} />
+                <Copy size={18} value={data.broadcaster_address} />
               </span>
             </div>
           )

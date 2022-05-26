@@ -60,7 +60,7 @@ export default function Summary({ data }) {
                             {ellipseAddress(data.latest_block.operator_address, 16)}
                           </a>
                         </Link>
-                        <Copy size={14} text={data.latest_block.operator_address} />
+                        <Copy size={14} value={data.latest_block.operator_address} />
                       </span>*/}
                     </div>
                   </div>

@@ -93,7 +93,7 @@ export default function ValidatorsTable({ status }) {
                           {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(props.row.original.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                         </a>
                       </Link>
-                      <Copy text={props.row.original.operator_address} />
+                      <Copy value={props.row.original.operator_address} />
                     </span>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export default function ValidatorsTable({ status }) {
                     <div className="w-40 mt-0.5 ml-auto">
                       <ProgressBarWithText
                         width={props.value}
-                        text={<div className="text-white mx-1" style={{ fontSize: '.55rem' }}>
+                        value={<div className="text-white mx-1" style={{ fontSize: '.55rem' }}>
                           {numberFormat(props.value, '0,0.00')}%
                         </div>}
                         color="bg-green-500 dark:bg-green-700 rounded"
@@ -229,7 +229,7 @@ export default function ValidatorsTable({ status }) {
                     <div className="w-40 mt-0.5 ml-auto">
                       <ProgressBarWithText
                         width={props.value}
-                        text={<div className="text-white mx-1" style={{ fontSize: '.55rem' }}>
+                        value={<div className="text-white mx-1" style={{ fontSize: '.55rem' }}>
                           {numberFormat(props.value, '0,0.00')}%
                         </div>}
                         color="bg-green-500 dark:bg-green-700 rounded"

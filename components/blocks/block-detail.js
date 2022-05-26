@@ -34,7 +34,7 @@ export default function BlockDetail({ data, validator_data }) {
           {data ?
             <span className="flex items-center space-x-1">
               <span>{ellipseAddress(data.hash, 16)}</span>
-              <Copy text={data.hash} />
+              <Copy value={data.hash} />
             </span>
             :
             <div className="skeleton w-60 h-4" />
@@ -94,7 +94,7 @@ export default function BlockDetail({ data, validator_data }) {
                         {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                       </a>
                     </Link>
-                    <Copy text={data.operator_address} />
+                    <Copy value={data.operator_address} />
                   </span>
                 </div>
               </div>
@@ -104,7 +104,7 @@ export default function BlockDetail({ data, validator_data }) {
                   <span className="text-gray-500">
                     {process.env.NEXT_PUBLIC_PREFIX_CONSENSUS}{ellipseAddress(data.proposer_address?.replace(process.env.NEXT_PUBLIC_PREFIX_CONSENSUS, ''), 8)}
                   </span>
-                  <Copy text={data.proposer_address} />
+                  <Copy value={data.proposer_address} />
                 </div>
                 :
                 null

@@ -1,24 +1,46 @@
 import { useState, useEffect, useRef } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
-import Portal from '../portal'
 import { FiX } from 'react-icons/fi'
 
-export default function Modal({ id = 'portal', hidden, clickOutSideDisabled, buttonTitle, disabled, onClick, buttonClassName, title, icon, body, cancelButtonTitle, cancelDisabled = false, onCancel, cancelButtonClassName, confirmButtonTitle, confirmDisabled = false, onConfirm, onConfirmHide = true, confirmButtonClassName, onClose, noButtons, modalClassName = '' }) {
+import Portal from '../portal'
+
+export default = ({
+  id = 'portal',
+  hidden,
+  disabled,
+  onClick,
+  buttonTitle,
+  buttonClassName,
+  title,
+  icon,
+  body,
+  noCancelOnClickOutside = false,
+  cancelDisabled = false,
+  onCancel,
+  cancelButtonTitle,
+  cancelButtonClassName,
+  confirmDisabled = false,
+  onConfirm,
+  onConfirmHide = true,
+  confirmButtonTitle,
+  confirmButtonClassName,
+  onClose,
+  noButtons,
+  modalClassName = '',
+}) => {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
-  const modalRef = useRef(null)
-
   const [open, setOpen] = useState(false)
+
+  const modalRef = useRef(null)
 
   const show = () => {
     if (onClick) {
       onClick(true)
     }
-
     setOpen(true)
   }
-
   const hide = () => {
     if (typeof hidden !== 'boolean') {
       setOpen(false)
@@ -26,23 +48,20 @@ export default function Modal({ id = 'portal', hidden, clickOutSideDisabled, but
   }
 
   useEffect(() => {
-    const handleClickOutside = event => {
-      if (!clickOutSideDisabled) {
-        if (!modalRef || !modalRef.current) return false
-        if (!open || modalRef.current.contains(event.target)) return false
-
-        if (!cancelDisabled) {
-          setOpen(!open)
-
-          if (onClose) {
-            onClose()
-          }
+    const handleClickOutside = e => {
+      if (!modalRef || !modalRef.current) return false
+      if (!open || modalRef.current.contains(e.target)) return false
+      if (!cancelDisabled) {
+        setOpen(!open)
+        if (onClose) {
+          onClose()
         }
       }
     }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    if (!noCancelOnClickOutside) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [modalRef, open, cancelDisabled])
 
   useEffect(() => {
@@ -65,8 +84,8 @@ export default function Modal({ id = 'portal', hidden, clickOutSideDisabled, but
         <Portal selector={`#${id}`}>
           <div className="modal-backdrop fade-in" />
           <div data-background={theme} className={`modal show ${theme === 'dark' ? 'dark' : ''}`}>
-            <div ref={modalRef} className={`w-full max-w-sm lg:max-w-lg relative lg:my-4 mx-auto ${modalClassName}`}>
-              <div className="w-full bg-white dark:bg-gray-900 relative outline-none rounded-lg shadow-lg border-0 border-gray-200 dark:border-gray-700 flex flex-col text-gray-900 dark:text-white">
+            <div ref={modalRef} className={`w-full ${modalClassName.includes('max-w-') ? '' : 'max-w-sm lg:max-w-lg'} relative lg:my-4 mx-auto ${modalClassName}`}>
+              <div className="w-full bg-white dark:bg-slate-900 relative outline-none rounded-lg shadow-lg border-0 flex flex-col">
                 <div className="relative flex-auto p-4">
                   <div className="flex items-start justify-start space-x-4 p-2">
                     {icon && (
@@ -79,7 +98,7 @@ export default function Modal({ id = 'portal', hidden, clickOutSideDisabled, but
                   </div>
                 </div>
                 {!noButtons && (
-                  <div className={`border-t border-gray-200 dark:border-gray-700 border-solid rounded-b flex items-center justify-end space-x-${cancelButtonClassName?.includes('hidden') ? 0 : 2} p-4`}>
+                  <div className={`border-t border-slate-200 dark:border-slate-800 border-solid rounded-b flex items-center justify-end space-x-${cancelButtonClassName?.includes('hidden') ? 0 : 2} py-4 px-6`}>
                     <button
                       type="button"
                       disabled={cancelDisabled}
@@ -87,7 +106,7 @@ export default function Modal({ id = 'portal', hidden, clickOutSideDisabled, but
                         if (onCancel) onCancel()
                         hide()
                       }}
-                      className={cancelButtonClassName || 'btn btn-default btn-rounded bg-white hover:bg-gray-100 dark:bg-gray-900 dark:hover:bg-gray-800 text-gray-900 dark:text-white'}
+                      className={cancelButtonClassName || 'btn btn-default btn-rounded bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800'}
                     >
                       {cancelButtonTitle || 'Cancel'}
                     </button>

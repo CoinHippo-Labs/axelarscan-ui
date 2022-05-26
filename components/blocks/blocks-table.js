@@ -134,7 +134,7 @@ export default function BlocksTable({ n, className = '' }) {
                             {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(props.row.original.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                           </a>
                         </Link>
-                        <Copy text={props.row.original.operator_address} />
+                        <Copy value={props.row.original.operator_address} />
                       </span>
                     </div>
                   </div>

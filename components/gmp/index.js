@@ -156,7 +156,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                         {ellipseAddress(props.value, 8)}
                       </a>
                     </Link>
-                    <Copy text={props.value} />
+                    <Copy value={props.value} />
                     {chain_data?.explorer?.url && (
                       <a
                         href={`${chain_data.explorer.url}${chain_data.explorer.transaction_path?.replace('{tx}', props.value)}`}
@@ -193,7 +193,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                   <div className="min-w-max">
                     <div className="flex items-center space-x-1">
                       <Copy
-                        text={props.value}
+                        value={props.value}
                         copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
                           {ellipseAddress(props.value, 8)}
                         </span>}
@@ -314,7 +314,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                         <div className="flex items-center space-x-1">
                           <Copy
                             size={14}
-                            text={from_contract.contract_address}
+                            value={from_contract.contract_address}
                             copyTitle={<span className="normal-case text-gray-600 dark:text-gray-400 text-2xs font-medium">
                               {ellipseAddress(from_contract.contract_address, 8)}
                             </span>}
@@ -361,7 +361,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                   <div className="min-w-max">
                     <div className="flex items-center space-x-1">
                       <Copy
-                        text={props.value}
+                        value={props.value}
                         copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
                           {ellipseAddress(props.value, 8)}
                         </span>}
@@ -448,7 +448,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                         {props.row.original[step.id]?.transactionHash ?
                           <Copy
                             size={16}
-                            text={props.row.original[step.id]?.transactionHash}
+                            value={props.row.original[step.id]?.transactionHash}
                             copyTitle={<span className="uppercase text-gray-800 dark:text-gray-200 text-xs font-semibold">{step.title}</span>}
                           />
                           :

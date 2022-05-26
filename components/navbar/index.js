@@ -1,72 +1,69 @@
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+// import { heartbeats as getHeartbeats, evm_votes as getEvmVotes } from '../../lib/api/index'
+// import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
 
+import { useRouter } from 'next/router'
+import { useEffect } from 'react'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { providers, constants, Contract } from 'ethers'
-import BigNumber from 'bignumber.js'
-import { FiMoon, FiSun } from 'react-icons/fi'
+import { Bignumber, Contract, constants, providers, utils } from 'ethers'
 
 import Logo from './logo'
-import DropdownNavigation from './navigation/dropdown'
-import Navigation from './navigation'
+import DropdownNavigations from './navigations/dropdown'
+import Navigations from './navigations'
 import Search from './search'
-import Network from './network'
+import Environments from './environments'
+import Theme from './theme'
 import SubNavbar from './sub-navbar'
-import PageTitle from './page-title'
-
 import { chains as getChains, assets as getAssets } from '../../lib/api/config'
+import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { status as getStatus } from '../../lib/api/rpc'
-import { stakingParams, stakingPool, bankSupply, slashingParams, distributionParams, mintInflation, communityPool, allValidators, validatorProfile, allValidatorsStatus, allValidatorsBroadcaster, chainMaintainer } from '../../lib/api/cosmos'
-import { heartbeats as getHeartbeats, evm_votes as getEvmVotes } from '../../lib/api/index'
-import { simplePrice } from '../../lib/api/coingecko'
-import { currency } from '../../lib/object/currency'
+import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, all_validators, chain_maintainer, validatorProfile, allValidatorsStatus, allValidatorsBroadcaster } from '../../lib/api/cosmos'
+import { ens as getEns } from '../../lib/api/ens'
+import { coin } from '../../lib/api/coingecko'
+import { type } from '../../lib/object/id'
 import { denom_manager } from '../../lib/object/denom'
-import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
-import { rand_image } from '../../lib/utils'
+import { equals_ignore_case } from '../../lib/utils'
+import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
 
-import { THEME, CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, DENOMS_DATA, TVL_DATA, STATUS_DATA, ENV_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA } from '../../reducers/types'
-
-BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
-
-export default function Navbar() {
+export default () => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, denoms, status, validators } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, denoms: state.denoms, status: state.status, validators: state.validators }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { chains_data } = { ...chains }
+  const { evm_chains, cosmos_chains, assets, ens, chain, _status, tvl, validators, rpc_providers } = useSelector(state => ({ evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, ens: state.ens, chain: state.chain, _status: state.status, tvl: state.tvl, validators: state.validators, rpc_providers: state.rpc_providers }), shallowEqual)
+  const { evm_chains_data } = { ...evm_chains }
+  const { cosmos_chains_data } = { ...cosmos_chains }
   const { assets_data } = { ...assets }
-  const { denoms_data } = { ...denoms }
-  const { status_data } = { ...status }
+  const { ens_data } = { ...ens }
+  const { chain_data } = { ...chain }
+  const { status_data } = { ..._status }
+  const { tvl_data } = { ...tvl }
   const { validators_data } = { ...validators }
+  const { rpcs } = { ...rpc_providers }
 
   const router = useRouter()
   const { pathname, query } = { ...router }
+  const { status, address } = { ...query }
 
-  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+  const [validatorsTrigger, setValidatorsTrigger] = useState(null)
 
-  const [loadValidatorsTrigger, setLoadValidatorsTrigger] = useState(null)
-  const [loadProfileTrigger, setLoadProfileTrigger] = useState(null)
-
+  // chains
   useEffect(() => {
     const getData = async () => {
       const response = await getChains()
       if (response) {
         dispatch({
-          type: CHAINS_DATA,
+          type: EVM_CHAINS_DATA,
           value: response.evm,
         })
-
         dispatch({
           type: COSMOS_CHAINS_DATA,
           value: response.cosmos,
         })
       }
     }
-
     getData()
   }, [])
 
+  // assets
   useEffect(() => {
     const getData = async () => {
       const response = await getAssets()
@@ -75,171 +72,271 @@ export default function Navbar() {
           type: ASSETS_DATA,
           value: response,
         })
+      }
+    }
+    getData()
+  }, [])
 
-        const resPrice = await simplePrice({
-          ids: response.map(d => d?.coingecko_id).filter(id => id).join(','),
-          vs_currencies: currency,
-          include_market_cap: true,
-          include_24hr_vol: true,
-          include_24hr_change: true,
-          include_last_updated_at: true,
-        })
-
-        for (let i = 0; i < response.length; i++) {
-          const denom = response[i]
-          if (resPrice?.[denom.coingecko_id]) {
-            denom.token_data = resPrice[denom.coingecko_id]
+  // price
+  useEffect(() => {
+    const getData = async is_interval => {
+      if (assets_data) {
+        let updated_ids = is_interval ? [] : assets_data.filter(a => a?.price).map(a => a.id)
+        if (updated_ids.length < assets_data.length) {
+          let updated = false
+          const denoms = assets_data.filter(a => a?.id && !updated_ids.includes(a.id)).map(a => a.id)
+          if (denoms.length > 0) {
+            const response = await getAssetsPrice({ denoms })
+            response?.forEach(t => {
+              const asset_index = assets_data.findIndex(a => equals_ignore_case(a?.id, t?.denom))
+              if (asset_index > -1) {
+                const asset = assets_data[asset_index]
+                asset.price = t?.price || asset.price
+                assets_data[asset_index] = asset
+                updated_ids = _.uniq(_.concat(updated_ids, asset.id))
+                updated = true
+              }
+            })
           }
-          response[i] = denom
-          if (denom.id === 'uaxl') {
+          if (updated) {
             dispatch({
-              type: ENV_DATA,
-              value: { token_data: { ...denom.token_data } },
+              type: ASSETS_DATA,
+              value: _.cloneDeep(assets_data),
             })
           }
         }
-
-        dispatch({
-          type: DENOMS_DATA,
-          value: response,
-        })
       }
     }
-
     getData()
-
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
+    const interval = setInterval(() => getData(true), 5 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
-  }, [])
+  }, [assets_data])
 
+  // status
   useEffect(() => {
     const getData = async is_interval => {
-      if ((!status_data || is_interval) && !['/gmp', '/gmp/[tx]'].includes(pathname)) {
+      if (!status_data || is_interval) {
         const response = await getStatus(null, is_interval && status_data)
         if (response) {
           dispatch({
             type: STATUS_DATA,
             value: response,
           })
-
           if (!is_interval) {
-            setLoadValidatorsTrigger(moment().valueOf())
+            setValidatorsTrigger(moment().valueOf())
           }
         }
       }
     }
-
     getData()
-
-    const interval = setInterval(() => getData(true), 7.5 * 1000)
+    const interval = setInterval(() => getData(true), 6 * 1000)
     return () => {
       clearInterval(interval)
     }
   }, [status_data])
 
+  // chain
   useEffect(() => {
     const getData = async () => {
-      if (denoms_data) {
-        let response = await stakingParams()
+      if (cosmos_chains_data && assets_data) {
+        const chain_data = cosmos_chains_data.find(c => equals_ignore_case(c?.id, 'axelarnet'))
+        dispatch({
+          type: CHAIN_DATA,
+          value: { ...chain_data },
+        })
+        if (chain_data?.coingecko_id) {
+          const response = await coin(chain_data.coingecko_id)
+          chain_data.token_data = !response?.error && response
+          dispatch({
+            type: CHAIN_DATA,
+            value: { ...chain_data },
+          })
+        }
+        let response = await staking_params()
         if (response) {
           dispatch({
-            type: ENV_DATA,
-            value: { staking_params: response?.params || {} },
+            type: CHAIN_DATA,
+            value: { staking_params: { ...response?.params } },
           })
-
           if (response?.params?.bond_denom) {
-            response = await bankSupply(response.params.bond_denom)
+            response = await bank_supply(response.params.bond_denom)
             dispatch({
-              type: ENV_DATA,
+              type: CHAIN_DATA,
               value: {
-                bank_supply: Object.fromEntries(Object.entries(response?.amount || {}).map(([key, value]) => {
-                  return [key, key === 'denom' ? denom_manager.symbol(value, denoms_data) : denom_manager.amount(value, response.amount.denom, denoms_data)]
-                })),
+                bank_supply: Object.fromEntries(
+                  Object.entries({ ...response?.amount }).map(([k, v]) =>
+                    [k, k === 'denom' ? denom_manager.symbol(v, assets_data) : denom_manager.amount(v, response.amount.denom, assets_data)]
+                  )
+                ),
               },
             })
           }
         }
-
-        response = await stakingPool()
+        response = await staking_pool()
         if (response) {
           dispatch({
-            type: ENV_DATA,
+            type: CHAIN_DATA,
             value: {
-              staking_pool: Object.fromEntries(Object.entries(response?.pool || {}).map(([key, value]) => {
-                return [key, denom_manager.amount(value, denoms_data?.[0]?.id, denoms_data)]
-              })),
+              staking_pool: Object.fromEntries(
+                Object.entries({ ...response?.pool }).map(([k, v]) =>
+                  [k, denom_manager.amount(v, assets_data[0]?.id, assets_data)]
+                )
+              ),
             },
           })
         }
-
+        response = await slashing_params()
+        if (response) {
+          dispatch({
+            type: CHAIN_DATA,
+            value: { slashing_params: { ...response?.params } },
+          })
+        }
+        response = await distribution_params()
+        if (response) {
+          dispatch({
+            type: CHAIN_DATA,
+            value: { distribution_params: { ...response?.params } },
+          })
+        }
         const res = await fetch(process.env.NEXT_PUBLIC_RELEASES_URL)
         response = await res.text()
         if (response?.includes('`axelar-core` version')) {
-          response = response.split('\n').filter(line => line?.includes('`axelar-core` version'))
+          response = response.split('\n').filter(l => l?.includes('`axelar-core` version'))
           dispatch({
-            type: ENV_DATA,
-            value: { ...Object.fromEntries([_.head(response).split('|').map(s => s?.trim().split('`').join('').split(' ').join('_')).filter(s => s)]) },
+            type: CHAIN_DATA,
+            value: { ...Object.fromEntries(
+              [_.head(response).split('|').map(s => s?.trim().split('`').join('').split(' ').join('_')).filter(s => s)]
+            ) },
           })
         }
         else {
           dispatch({
-            type: ENV_DATA,
+            type: CHAIN_DATA,
             value: { 'axelar-core_version': '-' },
-          })
-        }
-
-        response = await slashingParams()
-        if (response) {
-          dispatch({
-            type: ENV_DATA,
-            value: { slashing_params: response?.params || {} },
-          })
-        }
-
-        response = await distributionParams()
-        if (response) {
-          dispatch({
-            type: ENV_DATA,
-            value: { distribution_params: response?.params || {} },
-          })
-        }
-
-        response = await mintInflation()
-        if (response) {
-          dispatch({
-            type: ENV_DATA,
-            value: { inflation: Number(response?.inflation || 0) },
-          })
-        }
-
-        response = await communityPool()
-        if (response) {
-          dispatch({
-            type: ENV_DATA,
-            value: {
-              community_pool: response?.pool?.map(_pool => {
-                return Object.fromEntries(Object.entries(_pool || {}).map(([key, value]) => {
-                  return [key, key === 'denom' ? denom_manager.symbol(value, denoms_data) : denom_manager.amount(value, _pool.denom, denoms_data)]
-                }))
-              }) || [],
-            },
           })
         }
       }
     }
+    getData()
+  }, [cosmos_chains_data, assets_data])
 
-    if (!['/gmp', '/gmp/[tx]'].includes(pathname)) {
-      getData()
+  // rpcs
+  useEffect(() => {
+    const init = async => {
+      if (evm_chains_data) {
+        const _rpcs = {}
+        for (let i = 0; i < evm_chains_data.length; i++) {
+          const chain_data = evm_chains_data[i]
+          if (!chain_data?.disabled) {
+            const chain_id = chain_data?.chain_id
+            const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
+            _rpcs[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
+          }
+        }
+        if (!rpcs) {
+          dispatch({
+            type: RPCS,
+            value: _rpcs,
+          })
+        }
+      }
     }
-  }, [denoms_data])
+    init()
+  }, [evm_chains_data])
 
+  // ens
+  useEffect(() => {
+    const getData = async () => {
+      if (['evm_address'].includes(type(address))) {
+        const addresses = [address].filter(a => a && !ens_data?.[a])
+        const ens_data = await getEns(addresses)
+        if (ens_data) {
+          dispatch({
+            type: ENS_DATA,
+            value: ens_data,
+          })
+        }
+      }
+    }
+    getData()
+  }, [address])
+
+  // tvl
   useEffect(() => {
     const controller = new AbortController()
+    const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+    const getContractSupply = async (contract_data, rpc) => {
+      let supply
+      if (contract_data && rpc) {
+        const { contract_address, decimals } = { ...contract_data }
+        const contract = new Contract(contract_address, ['function totalSupply() view returns (uint256)'], rpc)
+        supply = await contract.totalSupply()
+      }
+      return Number(utils.formatUnits(BigNumber.from((supply || 0).toString()), decimals))
+    }
+    const getBalance = async (address, contract_data, rpc) => {
+      let balance
+      if (address && contract_data && rpc) {
+        const { contract_address, decimals } = { ...contract_data }
+        if (contract_address === constants.AddressZero) {
+          balance = await rpc.getBalance(address)
+        }
+        else {
+          const contract = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], rpc)
+          balance = await contract.balanceOf(address)
+        }
+      }
+      return Number(utils.formatUnits(BigNumber.from((balance || 0).toString()), decimals))
+    }
+    const getChainData = async (chain_id, rpc) => {
+      if (!controller.signal.aborted) {
+        if (chain_id && rpc && assets_data) {
+          const chain_data = evm_chains_data?.find(c => c?.chain_id === chain_id)
+          if (chain_data) {
+            for (let i = 0; i < assets_data.length; i++) {
+              const asset_data = assets_data[i]
+              if (asset_data) {
+                const contract_data = (!asset_data.is_staging || staging) && asset_data.contracts?.find(c => c?.chain_id === chain_id)
+                if (contract_data) {
+                  const supply = !contract_data.is_native ? await getContractSupply(contract_data, rpc) : 0
+                  const balance = await getBalance(chain_data.gateway_address, contract_data, rpc)
+                  dispatch({
+                    type: TVL_DATA,
+                    value: { [`${chain_data.id}_${asset_data.id}`]: supply + balance },
+                  })
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    const getData = is_interval => {
+      if (assets_data && rpcs) {
+        if (['/[address]', '/[tx]'].findIndex(p => pathname?.includes(p)) < 0 && (!tvl_data || is_interval)) {
+          Object.entries(rpcs).forEach(([k, v]) => getChainData(k, v))
+        }
+      }
+    }
+    getData()
+    const interval = setInterval(() => getData(true), 60 * 1000)
+    return () => {
+      controller?.abort()
+      clearInterval(interval)
+    }
+  }, [assets_data, rpcs, pathname])
 
+  // validators
+  useEffect(() => {
+    const controller = new AbortController()
     const getData = async () => {
-      if (denoms_data && status_data && !['/gmp', '/gmp/[tx]'].includes(pathname)) {
+      if (assets_data?.findIndex(a => a?.price) > -1 &&
+        status_data &&
+        ['/address', '/transfers', '/gmp'].findIndex(p => pathname?.startsWith(p)) < 0
+      ) {
         if (!controller.signal.aborted) {
           let response
           switch (pathname) {
@@ -253,7 +350,7 @@ export default function Navbar() {
             case '/tx/[tx]':
             case '/evm-votes':
             case '/participations':
-              response = await allValidators(null, validators_data, query.status || (query.address ? null : 'active'), query.address, Number(status_data.latest_block_height), denoms_data)
+              response = await all_validators(null, validators_data, status || (address ? null : 'active'), address, Number(status_data.latest_block_height), assets_data)
               if (response) {
                 if (!validators_data) {
                   dispatch({
@@ -359,14 +456,13 @@ export default function Navbar() {
                   }
                 }
 
-                response = await allValidatorsStatus(response?.data || [])
+                response = await all_validators(response?.data || [])
               }
               break
             default:
               response = await allValidators(null, validators_data, null, null, null, denoms_data)
               break
           }
-
           if (response) {
             dispatch({
               type: VALIDATORS_DATA,
@@ -377,22 +473,20 @@ export default function Navbar() {
         }
       }
     }
-
     getData()
-
     const interval = setInterval(() => getData(), 5 * 60 * 1000)
     return () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [denoms_data, pathname, loadValidatorsTrigger])
+  }, [assets_data, pathname, validatorsTrigger])
 
+  // chain maintainner
   useEffect(() => {
     const controller = new AbortController()
-
-    const getData = async (id, chains) => {
+    const getChainData = async (id, chains_data) => {
       if (!controller.signal.aborted) {
-        const response = await chainMaintainer(id, chains)
+        const response = await chain_maintainer(id, chains_data)
         if (response) {
           dispatch({
             type: VALIDATORS_CHAINS_DATA,
@@ -401,166 +495,39 @@ export default function Navbar() {
         }
       }
     }
-
-    const getMaintainersData = () => {
-      if (chains_data && ['/validators', '/validator/[address]', '/participations'].includes(pathname)) {
-        chains_data.map(c => c?.id).forEach(id => getData(id, chains_data))
+    const getData = () => {
+      const is_validator_path = ['/validator', '/participations', '/proposals'].findIndex(p => pathname?.includes(p)) > -1
+      if (evm_chains_data && is_validator_path) {
+        evm_chains_data.map(c => c?.id).forEach(id => getChainData(id, evm_chains_data))
       }
     }
-
-    getMaintainersData()
-
-    const interval = setInterval(() => getMaintainersData(), 5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
-  }, [chains_data, pathname])
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const getData = async () => {
-      if (loadProfileTrigger && validators_data?.findIndex(v => v?.description && !v.description.image) > -1) {
-        const data = _.cloneDeep(validators_data)
-        for (let i = 0; i < data.length; i++) {
-          if (!controller.signal.aborted) {
-            const v = data[i]
-            let updated = false
-            if (v?.description) {
-              if (v.description.identity && !v.description.image) {
-                const responseProfile = await validatorProfile({ key_suffix: v.description.identity })
-                if (responseProfile?.them?.[0]?.pictures?.primary?.url) {
-                  v.description.image = responseProfile.them[0].pictures.primary?.url
-                  if (!query.address || (['/validator/[address]'].includes(pathname) && query.address?.toLowerCase() === v.operator_address?.toLowerCase()) || ['/account/[address]'].includes(pathname)) {
-                    updated = true
-                  }
-                }
-              }
-              v.description.image = v.description.image || (v.description.moniker?.toLowerCase().startsWith('axelar-core-') ? '/logos/chains/axelar.png' : rand_image(i))
-              data[i] = v
-              if (updated) {
-                dispatch({
-                  type: VALIDATORS_DATA,
-                  value: data,
-                })
-              }
-            }
-          }
-        }
-      }
-    }
-
     getData()
-
-    return () => {
-      controller?.abort()
-    }
-  }, [loadProfileTrigger])
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const getContractSupply = async (chain, contract) => {
-      let supply
-      if (chain && contract) {
-        const provider_urls = chain.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || []
-        const provider = new providers.FallbackProvider(provider_urls)
-        const _contract = new Contract(contract.contract_address, ['function totalSupply() view returns (uint256)'], provider)
-        supply = await _contract.totalSupply()
-      }
-      return supply && BigNumber(supply.toString()).shiftedBy(-contract.contract_decimals).toNumber()
-    }
-
-    const getBalance = async (chain, contract) => {
-      let balance
-      if (chain && contract) {
-        const provider_urls = chain.provider_params?.[0]?.rpcUrls?.filter(rpc => rpc && !rpc.startsWith('wss://') && !rpc.startsWith('ws://')).map(rpc => new providers.JsonRpcProvider(rpc)) || []
-        const provider = new providers.FallbackProvider(provider_urls)
-        const _contract = new Contract(contract.contract_address, ['function balanceOf(address owner) view returns (uint256)'], provider)
-        balance = await _contract.balanceOf(chain.gateway_address)
-      }
-      return balance && BigNumber(balance.toString()).shiftedBy(-contract.contract_decimals).toNumber()
-    }
-
-    const getData = async (chain, assets) => {
-      if (!controller.signal.aborted) {
-        if (assets) {
-          for (let i = 0; i < assets.length; i++) {
-            const contract = (!assets[i]?.is_staging || staging) && assets[i]?.contracts?.find(contract => contract?.chain_id === chain.chain_id/* && !contract?.is_native*/)
-            if (contract) {
-              const supply = !contract.is_native ? await getContractSupply(chain, contract) : 0
-              const balance = await getBalance(chain, contract)
-              dispatch({
-                type: TVL_DATA,
-                value: { [`${chain.id}_${contract.contract_address}`]: supply + balance },
-              })
-            }
-          }
-        }
-      }
-    }
-
-    const getTVLData = () => {
-      if (chains_data && assets_data) {
-        if (['/transfers'].includes(pathname)) {
-          chains_data.forEach(c => getData(c, assets_data))
-        }
-      }
-    }
-
-    getTVLData()
-
-    const interval = setInterval(() => getTVLData(), 60 * 1000)
+    const interval = setInterval(() => getData(), 5 * 60 * 1000)
     return () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [chains_data, assets_data, pathname])
+  }, [evm_chains_data, pathname])
 
   return (
     <>
-      <div className="navbar border-b">
-        <div className="navbar-inner w-full flex items-center">
-          <Logo />
-          <DropdownNavigation />
-          <Navigation />
-          <div className="flex items-center ml-auto">
+      <div className="navbar">
+        <div className="navbar-inner w-full sm:h-20 flex items-center justify-between">
+          <div className="flex items-center">
+            <Logo />
+            <DropdownNavigations />
+          </div>
+          <div className="flex items-center justify-center">
+            <Navigations />
+          </div>
+          <div className="flex items-center justify-end">
             <Search />
-            <Network />
-            <button
-              onClick={() => {
-                dispatch({
-                  type: THEME,
-                  value: theme === 'light' ? 'dark' : 'light',
-                })
-              }}
-              className="w-10 sm:w-12 h-16 btn-transparent flex items-center justify-center"
-            >
-              <div className="w-6 h-6 flex items-center justify-center">
-                {theme === 'light' ? (
-                  <FiMoon size={16} />
-                ) : (
-                  <FiSun size={16} />
-                )}
-              </div>
-            </button>
+            <Environments />
+            <Theme />
           </div>
         </div>
       </div>
-      {!['/gmp', '/gmp/[tx]'].includes(pathname) && (
-        <SubNavbar />
-      )}
-      {false && (['/evm-votes', '/transfers'].includes(pathname) || pathname.startsWith('/validator')) && (
-        <div className="w-full bg-red-100 dark:bg-red-500 border border-red-500 overflow-x-auto flex items-center justify-center text-xs py-1.5">
-          {pathname.startsWith('/validator') ?
-            <><span className="font-semibold mr-1.5">Reindexing in progress:</span>this may cause a slight delay in heartbeats and EVM votes updates displayed on this page.</>
-            :
-            <><span className="font-semibold mr-1.5">Reindexing in progress:</span>the data will be updated shortly.</>
-          }
-        </div>
-      )}
-      <PageTitle />
+      <SubNavbar />
     </>
   )
 }

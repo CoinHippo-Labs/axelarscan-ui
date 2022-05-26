@@ -1,10 +1,9 @@
-import { useState, useEffect, forwardRef, useRef } from 'react'
-
+import { useEffect, useRef, forwardRef } from 'react'
 import { useTable, useSortBy, usePagination, useRowSelect } from 'react-table'
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import { BiLeftArrowAlt, BiRightArrowAlt } from 'react-icons/bi'
 
-import { PageWithText, Pagination } from '../pagination'
+import { PageWithText, Pagination } from '../paginations'
 
 const IndeterminateCheckbox = forwardRef(({ indeterminate, ...rest }, ref) => {
   const defaultRef = useRef()
@@ -18,15 +17,22 @@ const IndeterminateCheckbox = forwardRef(({ indeterminate, ...rest }, ref) => {
     <input
       ref={resolvedRef}
       type="checkbox"
-      {...rest}
+      { ...rest }
       className="form-checkbox w-4 h-4"
     />
   )
 })
 
-export default function Datatable({ columns, data, rowSelectEnable = false, noPagination = false, defaultPageSize = 10, noRecordPerPage = false, className = '' }) {
+export default = ({
+  columns,
+  data,
+  rowSelectEnable = false,
+  defaultPageSize = 10,
+  noPagination = false,
+  noRecordPerPage = false,
+  className = '',
+}) => {
   const tableRef = useRef()
-
   const {
     getTableProps,
     getTableBodyProps,
@@ -52,7 +58,7 @@ export default function Datatable({ columns, data, rowSelectEnable = false, noPa
       stateReducer: (newState, action, prevState) => action.type.startsWith('reset') ? prevState : newState,
     },
     useSortBy,
-    /*noPagination ? false : */usePagination,
+    usePagination,
     useRowSelect,
     hooks => {
       hooks.visibleColumns.push(columns => [
@@ -66,7 +72,7 @@ export default function Datatable({ columns, data, rowSelectEnable = false, noPa
           )
         } : undefined,
         ...columns
-      ].filter(column => column))
+      ].filter(c => c))
     }
   )
 
@@ -80,25 +86,24 @@ export default function Datatable({ columns, data, rowSelectEnable = false, noPa
 
   return (
     <>
-      <table ref={tableRef} { ...getTableProps() } className={`table rounded-2xl ${className}`}>
+      <table ref={tableRef} { ...getTableProps() } className={`table rounded-lg ${className}`}>
         <thead>
-          {headerGroups.map(headerGroup => (
-            <tr { ...headerGroup.getHeaderGroupProps() }>
-              {headerGroup.headers.map((column, i) => (
-                <th { ...column.getHeaderProps(column.getSortByToggleProps()) } className={`${column.className} ${i === 0 ? 'rounded-tl-xl' : i === headerGroup.headers.length - 1 ? 'rounded-tr-xl' : ''}`}>
-                  <div className={`flex flex-row items-center ${column.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${column.headerClassName || ''}`}>
-                    <span>{column.render('Header')}</span>
-                    <span className={`ml-${column.isSorted ? 2 : 0}`}>
-                      {column.isSorted ? (
-                        column.isSortedDesc ? (
-                          <FiChevronDown className="stroke-current text-2xs" />
-                        ) : (
-                          <FiChevronUp className="stroke-current text-2xs" />
-                        )
-                      ) : (
-                        ''
-                      )}
+          {headerGroups.map(hg => (
+            <tr { ...hg.getHeaderGroupProps() }>
+              {hg.headers.map((c, i) => (
+                <th { ...c.getHeaderProps(c.getSortByToggleProps()) } className={`${c.className} ${i === 0 ? 'rounded-tl-lg' : i === hg.headers.length - 1 ? 'rounded-tr-lg' : ''}`}>
+                  <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
+                    <span>
+                      {c.render('Header')}
                     </span>
+                    {c.isSorted && (
+                      <span className="ml-2">
+                        {c.isSortedDesc ?
+                          <FiChevronDown className="stroke-current text-2xs" /> :
+                          <FiChevronUp className="stroke-current text-2xs" />
+                        }
+                      </span>
+                    )}
                   </div>
                 </th>
               ))}
@@ -110,24 +115,28 @@ export default function Datatable({ columns, data, rowSelectEnable = false, noPa
             prepareRow(row)
             return (
               <tr { ...row.getRowProps() }>
-                {row.cells.map((cell, j) => (<td { ...cell.getCellProps() } className={headerGroups[0]?.headers[j]?.className}>{cell.render('Cell')}</td>))}
+                {row.cells.map((cell, j) => (
+                  <td { ...cell.getCellProps() } className={headerGroups[0]?.headers[j]?.className}>
+                    {cell.render('Cell')}
+                  </td>
+                ))}
               </tr>
             )
           })}
         </tbody>
       </table>
       {!noPagination && data?.length > 0 && (
-        <div className={`flex flex-col sm:flex-row items-center justify-${noRecordPerPage ? 'center' : 'between'} my-4 mx-3`}>
+        <div className={`flex flex-col sm:flex-row items-center justify-${noRecordPerPage ? 'center' : 'between'} my-4`}>
           {!noRecordPerPage && (
             <select
               disabled={loading}
               value={pageSize}
               onChange={event => setPageSize(Number(event.target.value))}
-              className="form-select dark:bg-gray-800 outline-none border-gray-200 dark:border-gray-800 shadow-none focus:shadow-none rounded-lg text-xs"
+              className="form-select dark:bg-slate-900 outline-none border-slate-200 dark:border-slate-900 appearance-none shadow-none focus:shadow-none rounded-lg text-xs p-2 pl-3.5"
             >
-              {[10, 25, 50, 100].map(pageSize => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
+              {[10, 25, 50, 100].map((s, i) => (
+                <option key={i} value={s}>
+                  Show {s}
                 </option>
               ))}
             </select>
@@ -146,8 +155,8 @@ export default function Datatable({ columns, data, rowSelectEnable = false, noPa
                   active={pageIndex + 1}
                   previous={noRecordPerPage ? <BiLeftArrowAlt size={16} /> : 'Previous'}
                   next={noRecordPerPage ? <BiRightArrowAlt size={16} /> : 'Next'}
-                  onClick={_page => {
-                    gotoPage(_page - 1)
+                  onClick={p => {
+                    gotoPage(p - 1)
                     tableRef.current.scrollIntoView() 
                   }}
                   icons={noRecordPerPage ? true : false}

@@ -134,7 +134,7 @@ export default function Assets() {
           {chain.gateway_address ?
             <>
               <Copy
-                text={chain.gateway_address}
+                value={chain.gateway_address}
                 copyTitle={<span className="text-xs font-normal">
                   {ellipseAddress(chain.gateway_address, 10)}
                 </span>}
@@ -195,7 +195,7 @@ export default function Assets() {
                       {contract.contract_address ?
                         <>
                           <Copy
-                            text={contract.contract_address}
+                            value={contract.contract_address}
                             copyTitle={<span className="text-xs font-normal">
                               {ellipseAddress(contract.contract_address, 8)}
                             </span>}

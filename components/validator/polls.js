@@ -86,7 +86,7 @@ export default function Polls({ data, validator_data }) {
                 <div className="flex items-center space-x-1.5">
                   <span className="font-semibold">Poll ID:</span>
                   <Copy
-                    text={poll.poll_id}
+                    value={poll.poll_id}
                     copyTitle={<span className="text-gray-500 text-xs">
                       {ellipseAddress(poll.poll_id, 20)}
                     </span>}

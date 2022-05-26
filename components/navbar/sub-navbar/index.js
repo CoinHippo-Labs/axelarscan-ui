@@ -1,160 +1,390 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
-
-import { Img } from 'react-image'
+import { FiBox, FiClock, FiGift } from 'react-icons/fi'
 import { BiServer } from 'react-icons/bi'
-import { FiBox, FiGift, FiClock } from 'react-icons/fi'
-import { AiOutlineNumber } from 'react-icons/ai'
-import { FaSignature } from 'react-icons/fa'
 import { HiOutlineExternalLink } from 'react-icons/hi'
+import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
+import Copy from '../../copy'
+import EnsProfile from '../../ens-profile'
 import { currency, currency_symbol } from '../../../lib/object/currency'
-import { numberFormat } from '../../../lib/utils'
+import { number_format, ellipse } from '../../../lib/utils'
 
-export default function SubNavbar() {
-  const { status, denoms, env } = useSelector(state => ({ status: state.status, denoms: state.denoms, env: state.env }), shallowEqual)
+export default = () => {
+  const { status, _chain } = useSelector(state => ({ status: state.status, _chain: state.chain }), shallowEqual)
   const { status_data } = { ...status }
-  const { denoms_data } = { ...denoms }
-  const { env_data } = { ...env }
+  const { chain_data } = { ..._chain }
 
   const router = useRouter()
-  const { pathname } = { ...router }
+  const { pathname, query } = { ...router }
+  const { status, height, address, tx, id } = { ...query }
 
-  const denom = denoms_data?.find(d => d?.id === 'uaxl')
+  const { token_data } = { ...chain_data }
+  let title, subtitle
+  switch (pathname) {
+    case '/':
+      title = 'Overview'
+      break
+    case '/validators':
+    case '/validators/[status]':
+      title = 'Validators'
+      break
+    case '/validator/[address]':
+      title = 'Validator'
+      subtitle = (
+        <Copy
+          value={address}
+          title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
+            <span className="xl:hidden">
+              {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+            </span>
+          </span>}
+          size={18}
+        />
+      )
+      break
+    case '/account/[address]':
+      title = 'Account'
+      subtitle = (
+        <Copy
+          value={address}
+          title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
+            <span className="xl:hidden">
+              {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+            </span>
+          </span>}
+          size={18}
+        />
+      )
+      break
+    case '/evm-votes':
+      title = 'EVM votes'
+      break
+    case '/participations':
+      title = 'Participations'
+      break
+    case '/blocks':
+      title = 'Latest Blocks'
+      break
+    case '/block/[height]':
+      title `Block: ${number_format(height, '0,0')}`
+      subtitle = (
+        <div className="flex items-center space-x-2">
+          <Link href={`/block/${Number(height) - 1}`}>
+            <a className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg p-1.5">
+              <MdNavigateBefore size={20} />
+            </a>
+          </Link>
+          <Link href={`/block/${Number(height) + 1}`}>
+            <a className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg p-1.5">
+              <MdNavigateNext size={20} />
+            </a>
+          </Link>
+        </div>
+      )
+      break
+    case '/transactions':
+    case '/transactions/search':
+      title = 'Transactions'
+      subtitle = (
+        <div className="flex items-center space-x-1">
+          {[
+            { title: 'Latest', path: '/transactions' },
+            { title: 'Search', path: '/transactions/search' },
+          ].map((r, i) => (
+            <div
+              key={i}
+              onClick={() => router.push(r.path)}
+              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+            >
+              <span className="font-semibold">
+                {r.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )
+      break
+    case '/tx/[tx]':
+      title = 'Transaction'
+      subtitle = (
+        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+          <span className="xl:hidden">
+            {ellipse(tx, 16)}
+          </span>
+          <span className="hidden xl:block">
+            {ellipse(tx, 24)}
+          </span>
+          <Copy value={tx} size={18} />
+        </div>
+      )
+      break
+    case '/address/[address]':
+      title = (
+        <EnsProfile
+          address={address}
+          fallback={<span>Address</span>}
+        />
+      )
+      subtitle = (
+        <Copy
+          value={address}
+          title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
+            <span className="xl:hidden">
+              {ellipse(address, 12)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(address, 16)}
+            </span>
+          </span>}
+          size={18}
+        />
+      )
+      break
+    case 'gmp':
+    case 'gmp/search':
+      title = 'General Message Passing'
+      break
+    case 'gmp/[tx]':
+      title = 'General Message Passing'
+      subtitle = (
+        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+          <span className="xl:hidden">
+            {ellipse(tx, 16)}
+          </span>
+          <span className="hidden xl:block">
+            {ellipse(tx, 24)}
+          </span>
+          <Copy value={tx} size={18} />
+        </div>
+      )
+      break
+    case 'transfers':
+    case 'transfers/search':
+      title = 'Cross-chain Transfers'
+      break
+    case 'transfers/[tx]':
+      title = 'Cross-chain Transfers'
+      subtitle = (
+        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+          <span className="xl:hidden">
+            {ellipse(tx, 16)}
+          </span>
+          <span className="hidden xl:block">
+            {ellipse(tx, 24)}
+          </span>
+          <Copy value={tx} size={18} />
+        </div>
+      )
+      break
+    case '/assets':
+      title = 'EVM assets'
+      break
+    case '/proposals':
+      title = 'Proposals'
+      break
+    case '/proposal/[id]':
+      title `Proposal: ${number_format(id, '0,0')}`
+      break
+    default:
+      break
+  }
+
+  const is_validator_path = ['/validator', '/participations', '/proposals'].findIndex(p => pathname?.includes(p)) > -1
 
   return (
-    <div className="w-full bg-gray-100 dark:bg-gray-900 overflow-x-auto flex items-center py-2 px-2 sm:px-4">
-      <div className="flex items-center space-x-1.5 mr-4">
-        <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1">
-          <span>Latest</span>
-          <FiBox size={14} className="mb-0.5" />
-          :
-        </div>
-        {status_data ?
-          status_data.latest_block_height ?
-            <Link href={`/block/${status_data.latest_block_height}`}>
-              <a className="font-mono text-blue-600 dark:text-white font-semibold">
-                {numberFormat(status_data?.latest_block_height, '0,0')}
-              </a>
-            </Link>
+    <div className="w-full overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
+      <div className="flex flex-col space-y-1">
+        {title && (
+          <div className="text-base font-bold">
+            {title}
+          </div>
+        )}
+        {subtitle && (
+          <div className="text-slate-400 dark:text-slate-500 text-sm">
+            {subtitle}
+          </div>
+        )}
+      </div>
+      {token_data && (
+        <div className="bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center space-x-1.5 ml-4 py-2 px-3">
+          <div className="min-w-max flex items-center space-x-1.5">
+            <span className="uppercase font-bold">
+              {token_data.symbol}
+            </span>
+          </div>
+          {typeof token_data.market_data?.current_price?.[currency] === 'number' ?
+            <span className="font-mono font-semibold">
+              {currency_symbol}{number_format(token_data.market_data.current_price[currency], '0,0.00000000')}
+            </span>
             :
             <span>-</span>
-          :
-          <div className="skeleton w-16 h-4" />
-        }
-      </div>
-      <div className="flex items-center space-x-1.5 mr-4">
-        <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1">
-          <span>Max</span>
-          <BiServer size={16} className="mb-0.5" />
-          :
+          }
+          {typeof token_data.market_data?.price_change_percentage_24h_in_currency?.[currency] === 'number' && (
+            <span className={`text-${token_data.market_data.price_change_percentage_24h_in_currency[currency] < 0 ? 'red' : 'green'}-500 font-medium`}>
+              {number_format(token_data.market_data.price_change_percentage_24h_in_currency[currency], '+0,0.000')}%
+            </span>
+          )}
         </div>
-        {env_data?.staking_params ?
-          env_data.staking_params.max_validators ?
-            <Link href="/validators">
-              <a className="font-mono text-blue-600 dark:text-white font-semibold">
-                {numberFormat(env_data.staking_params.max_validators, '0,0')}
-              </a>
-            </Link>
-            :
-            <span>-</span>
-          :
-          <div className="skeleton w-8 h-4" />
-        }
-      </div>
-      <div className="flex items-center space-x-1.5 mr-4">
-        <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1">
-          <span className="whitespace-nowrap">Axelar Core</span>
-          :
-        </div>
-        {env_data?.['axelar-core_version'] ?
-          <span className="font-mono font-semibold">{env_data['axelar-core_version']}</span>
-          :
-          <div className="skeleton w-12 h-4" />
-        }
-      </div>
+      )}
       <span className="sm:ml-auto" />
-      {pathname?.startsWith('/validator') || pathname?.startsWith('/proposal') || pathname?.startsWith('/evm-votes') ?
+      {status_data && (
+        <div className="flex items-center space-x-1.5 ml-4">
+          <FiBox size={14} className="mb-0.5" />
+          {status_data.latest_block_height ?
+            <Link href={`/block/${status_data.latest_block_height}`}>
+              <a className="font-mono text-blue-600 dark:text-white font-bold">
+                {number_format(status_data?.latest_block_height, '0,0')}
+              </a>
+            </Link>
+            :
+            <span>
+              -
+            </span>
+          }
+        </div>
+      )}
+      {is_validator_path && (
         <>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span className="whitespace-nowrap">Max Missed</span>
-              :
-            </div>
-            {env_data?.slashing_params ?
-              env_data.slashing_params.signed_blocks_window && env_data.slashing_params.min_signed_per_window ?
-                <span className="font-mono font-semibold">{numberFormat(Number(env_data.slashing_params.signed_blocks_window) - (Number(env_data.slashing_params.min_signed_per_window) * Number(env_data.slashing_params.signed_blocks_window)), '0,0')}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-12 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Jail</span>
-              <FiClock size={14} className="mb-0.5" />
-              :
-            </div>
-            {env_data?.slashing_params ?
-              env_data.slashing_params.downtime_jail_duration ?
-                <span className="font-mono font-semibold">{env_data.slashing_params.downtime_jail_duration}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-12 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Slash</span>
-              <AiOutlineNumber size={12} />
-              :
-            </div>
-            {env_data?.slashing_params ?
-              env_data.slashing_params.slash_fraction_downtime ?
-                <span className="font-mono font-semibold">{numberFormat(env_data.slashing_params.slash_fraction_downtime, '0,0.00000000')}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-12 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Double</span>
-              <FaSignature size={14} className="mb-0.5" />
-              :
-            </div>
-            {env_data?.slashing_params ?
-              env_data.slashing_params.slash_fraction_double_sign ?
-                <span className="font-mono font-semibold">{numberFormat(env_data.slashing_params.slash_fraction_double_sign, '0,0.00000000')}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-12 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Unbonding</span>
-              <FiClock size={14} className="mb-0.5" />
-              :
-            </div>
-            {env_data?.staking_params ?
-              env_data.staking_params.unbonding_time ?
-                <span className="font-mono font-semibold">{env_data.staking_params.unbonding_time}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-12 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Proposals</span>
-            </div>
+          {chain_data?.staking_params && (
+            <>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <div className="flex items-center space-x-1">
+                  <span className="font-semibold">
+                    Max
+                  </span>
+                  <BiServer size={16} className="mb-0.5" />
+                </div>
+                {chain_data.staking_params.max_validators ?
+                  <Link href="/validators">
+                    <a className="font-mono text-blue-600 dark:text-white font-bold">
+                      {number_format(chain_data.staking_params.max_validators, '0,0')}
+                    </a>
+                  </Link>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <span className="font-semibold">
+                  Unbonding
+                </span>
+                {chain_data.staking_params.unbonding_time ?
+                  <span className="font-mono font-bold">
+                    {chain_data.staking_params.unbonding_time}
+                  </span>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+            </>
+          )}
+          {chain_data?.slashing_params && (
+            <>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <span className="font-semibold">
+                  Max Missed
+                </span>
+                {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
+                  <span className="font-mono font-bold">
+                    {number_format(Number(chain_data.slashing_params.signed_blocks_window) - (Number(chain_data.slashing_params.min_signed_per_window) * Number(chain_data.slashing_params.signed_blocks_window)), '0,0')}
+                  </span>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <div className="flex items-center space-x-1">
+                  <span className="font-semibold">
+                    Jail
+                  </span>
+                  <FiClock size={16} className="mb-0.5" />
+                </div>
+                {chain_data.slashing_params.downtime_jail_duration ?
+                  <span className="font-mono font-bold">
+                    {chain_data.slashing_params.downtime_jail_duration}
+                  </span>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <span className="font-semibold">
+                  x2 Sign
+                </span>
+                {chain_data.slashing_params.slash_fraction_double_sign ?
+                  <span className="font-mono font-bold">
+                    {number_format(chain_data.slashing_params.slash_fraction_double_sign, '0,0.00000000')}
+                  </span>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+            </>
+          )}
+          {chain_data?.distribution_params && (
+            <>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <div className="flex items-center space-x-1">
+                  <span className="font-semibold">
+                    Proposer
+                  </span>
+                  <FiGift size={16} className="mb-0.5" />
+                </div>
+                {chain_data.distribution_params.base_proposer_reward ?
+                  <div className="whitespace-nowrap space-x-1">
+                    <span className="font-mono font-bold">
+                      {number_format(Number(chain_data.distribution_params.base_proposer_reward) * 100, '0,0.00')}%
+                    </span>
+                    {!isNaN(chain_data.distribution_params.bonus_proposer_reward) && (
+                      <span className="font-mono font-medium">
+                        (+{number_format(Number(chain_data.distribution_params.bonus_proposer_reward) * 100, '0,0.00')}%)
+                      </span>
+                    )}
+                  </div>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+              <div className="flex items-center space-x-1.5 ml-4">
+                <span className="whitespace-nowrap font-semibold">
+                  Community Tax
+                </span>
+                {chain_data.distribution_params.community_tax ?
+                  <span className="font-mono font-bold">
+                    {number_format(Number(chain_data.distribution_params.community_tax) * 100, '0,0.00')}%
+                  </span>
+                  :
+                  <span>
+                    -
+                  </span>
+                }
+              </div>
+            </>
+          )}
+          <div className="flex items-center space-x-1.5 ml-4">
+            <span className="font-semibold">
+              Proposals
+            </span>
             <Link href="/proposals">
               <a className="text-blue-600 dark:text-white">
                 <HiOutlineExternalLink size={16} />
@@ -162,113 +392,7 @@ export default function SubNavbar() {
             </Link>
           </div>
         </>
-        :
-        <>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              {denom?.image && (
-                <Img
-                  src={denom.image}
-                  alt=""
-                  className="w-5 h-5"
-                />
-              )}
-              <span>Price</span>
-              :
-            </div>
-            {env_data?.token_data ?
-              env_data.token_data[currency] ?
-                <span className="font-mono font-semibold">{currency_symbol}{numberFormat(env_data.token_data[currency], '0,0.00000000')}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-12 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>MCap</span>
-              :
-            </div>
-            {env_data?.token_data ?
-              env_data.token_data[`${currency}_market_cap`] ?
-                <span className="font-mono font-semibold">{currency_symbol}{numberFormat(env_data.token_data[`${currency}_market_cap`], '0,0')}</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-16 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Proposer</span>
-              <FiGift size={14} className="mb-0.5" />
-              :
-            </div>
-            {env_data?.distribution_params ?
-              env_data.distribution_params.base_proposer_reward ?
-                <div className="whitespace-nowrap space-x-1">
-                  <span className="font-mono font-semibold">{numberFormat(Number(env_data.distribution_params.base_proposer_reward) * 100, '0,0.00')}%</span>
-                  {!isNaN(env_data.distribution_params.bonus_proposer_reward) && (
-                    <span className="font-mono text-gray-600 dark:text-gray-400 text-2xs font-normal">
-                      (+{numberFormat(Number(env_data.distribution_params.bonus_proposer_reward) * 100, '0,0.00')}% Bonus)
-                    </span>
-                  )}
-                </div>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-16 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Inflation</span>
-              :
-            </div>
-            {typeof env_data?.inflation === 'number' ?
-              <span className="font-mono font-semibold">{numberFormat(env_data.inflation * 100, '0,0.00')}%</span>
-              :
-              <div className="skeleton w-8 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5 mr-4">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span>Tax</span>
-              :
-            </div>
-            {env_data?.distribution_params ?
-              env_data.distribution_params.community_tax ?
-                <span className="font-mono font-semibold">{numberFormat(Number(env_data.distribution_params.community_tax) * 100, '0,0.00')}%</span>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-8 h-4" />
-            }
-          </div>
-          <div className="flex items-center space-x-1.5">
-            <div className="flex items-center text-gray-500 dark:text-gray-500 space-x-1.5">
-              <span className="whitespace-nowrap">Community Pool</span>
-              :
-            </div>
-            {env_data?.community_pool ?
-              env_data.community_pool.length > 0 ?
-                <div className="space-x-2">
-                  {env_data.community_pool.map((_pool, i) => (
-                    <span key={i} className="space-x-1">
-                      <span className="font-mono font-semibold">{numberFormat(_pool?.amount, '0,0.00000000')}</span>
-                      <span className="font-semibold">{_pool?.denom}</span>
-                    </span>
-                  ))}
-                </div>
-                :
-                <span>-</span>
-              :
-              <div className="skeleton w-16 h-4" />
-            }
-          </div>
-        </>
-      }
+      )}
     </div>
   )
 }

@@ -399,7 +399,7 @@ export default function Transaction() {
                     <div className="min-w-max">
                       <div className="flex items-center space-x-1">
                       <Copy
-                        text={call.returnValues.sender}
+                        value={call.returnValues.sender}
                         copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
                           {ellipseAddress(call.returnValues.sender, 8)}
                         </span>}
@@ -459,7 +459,7 @@ export default function Transaction() {
                         <div className={`uppercase ${call ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{call ? 'Call' : 'Calling'}</div>
                       </a>
                       {call?.transactionHash && (
-                        <Copy text={call.transactionHash} />
+                        <Copy value={call.transactionHash} />
                       )}
                     </div>
                     <div className="flex items-center space-x-1">
@@ -480,7 +480,7 @@ export default function Transaction() {
                         <div className={`uppercase ${gas_paid ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{gas_paid ? 'Gas Paid' : 'No Gas Paid'}</div>
                       </a>
                       {gas_paid?.transactionHash && (
-                        <Copy text={gas_paid.transactionHash} />
+                        <Copy value={gas_paid.transactionHash} />
                       )}
                     </div>
                   </div>
@@ -545,7 +545,7 @@ export default function Transaction() {
                         </div>
                         <div className="flex items-center justify-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                           <Copy
-                            text={call.contract_address}
+                            value={call.contract_address}
                             copyTitle={<span className="normal-case text-gray-600 dark:text-gray-400 text-xs font-medium">
                               {ellipseAddress(call.contract_address, 8)}
                             </span>}
@@ -599,7 +599,7 @@ export default function Transaction() {
                         <div className={`uppercase ${approved ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{approved ? 'Approved' : 'Not Approved'}</div>
                       </a>
                       {approved?.transactionHash && (
-                        <Copy text={approved.transactionHash} />
+                        <Copy value={approved.transactionHash} />
                       )}
                     </div>
                     <div className="flex items-center space-x-1">
@@ -620,7 +620,7 @@ export default function Transaction() {
                         <div className={`uppercase ${executed ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{executed || data?.is_executed ? 'Executed' : 'Not Executed'}</div>
                       </a>
                       {executed?.transactionHash && (
-                        <Copy text={executed.transactionHash} />
+                        <Copy value={executed.transactionHash} />
                       )}
                     </div>
                   </div>
@@ -635,7 +635,7 @@ export default function Transaction() {
                     <div className="min-w-max">
                       <div className="flex items-center space-x-1">
                         <Copy
-                          text={call.returnValues.destinationContractAddress}
+                          value={call.returnValues.destinationContractAddress}
                           copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
                             {ellipseAddress(call.returnValues.destinationContractAddress, 8)}
                           </span>}
@@ -718,7 +718,7 @@ export default function Transaction() {
                               :
                               <span className="text-xs lg:text-base mr-1.5">{ellipseAddress(t.transactionHash, 16)}</span>
                             }
-                            <Copy size={18} text={t.transactionHash} />
+                            <Copy size={18} value={t.transactionHash} />
                             {i === 3 && !t.block_timestamp && (
                               <button
                                 disabled={txHashExecutedSaving}
@@ -862,7 +862,7 @@ export default function Transaction() {
                         t?.transaction?.from || t?.receipt?.from ?
                           <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                             <Copy
-                              text={t?.transaction?.from || t?.receipt?.from}
+                              value={t?.transaction?.from || t?.receipt?.from}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
                                 {ellipseAddress(t?.transaction?.from || t?.receipt?.from, 8)}
                               </span>}
@@ -899,7 +899,7 @@ export default function Transaction() {
                       (i < 2 ? call?.returnValues?.sender : (t?.transaction?.from || t?.from)) ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                           <Copy
-                            text={(i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from))}
+                            value={(i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from))}
                             copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
                               {ellipseAddress((i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from)), 8)}
                             </span>}
@@ -935,7 +935,7 @@ export default function Transaction() {
                       (i < 3 ? t?.contract_address : call?.returnValues?.destinationContractAddress) ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                           <Copy
-                            text={i < 3 ? t.contract_address : call.returnValues.destinationContractAddress}
+                            value={i < 3 ? t.contract_address : call.returnValues.destinationContractAddress}
                             copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
                               {ellipseAddress(i < 3 ? t.contract_address : call.returnValues.destinationContractAddress, 8)}
                             </span>}
@@ -972,7 +972,7 @@ export default function Transaction() {
                         call?.transaction?.from ?
                           <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                             <Copy
-                              text={call.transaction.from}
+                              value={call.transaction.from}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
                                 {ellipseAddress(call.transaction.from, 8)}
                               </span>}
@@ -1034,7 +1034,7 @@ export default function Transaction() {
                       <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
                         {call.returnValues.payloadHash}
                       </div>
-                      <Copy size={20} text={call.returnValues.payloadHash} className="mt-4" />
+                      <Copy size={20} value={call.returnValues.payloadHash} className="mt-4" />
                     </div>
                     :
                     <span className="text-xs lg:text-base">-</span>
@@ -1054,7 +1054,7 @@ export default function Transaction() {
                       <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
                         {call.returnValues.payload}
                       </div>
-                      <Copy size={20} text={call.returnValues.payload} className="mt-4" />
+                      <Copy size={20} value={call.returnValues.payload} className="mt-4" />
                     </div>
                     :
                     <span className="text-xs lg:text-base">-</span>

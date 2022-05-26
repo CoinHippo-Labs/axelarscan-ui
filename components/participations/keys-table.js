@@ -39,7 +39,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                   <div className="flex items-center text-gray-900 dark:text-gray-100 space-x-1">
                     {['keygen_failed'].includes(page) ? <MdCancel size={16} className="text-red-500" /> : <FiKey size={16} />}
                     <span className="font-medium">{ellipseAddress(props.value, ['validator-keygen', 'validator-sign'].includes(page) ? 8 : ['validator'].includes(page) ? 12 : 20)}</span>
-                    {props.value && (<Copy text={props.value} />)}
+                    {props.value && (<Copy value={props.value} />)}
                   </div>
                   {['sign_success', 'sign_failed'].includes(page) && props.row.original.sig_id && (
                     <>
@@ -47,7 +47,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                       <div className="flex items-center text-gray-900 dark:text-gray-100 space-x-1">
                         {['sign_failed'].includes(page) ? <MdCancel size={16} className="text-red-500" /> : <FaSignature size={16} />}
                         <span className="font-medium">{ellipseAddress(props.row.original.sig_id, 16)}</span>
-                        <Copy text={props.row.original.sig_id} />
+                        <Copy value={props.row.original.sig_id} />
                       </div>
                     </>
                   )}
@@ -249,7 +249,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                                   {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator.address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                                 </a>
                               </Link>
-                              <Copy text={validator.address} />
+                              <Copy value={validator.address} />
                             </span>
                             {!(validator.description?.moniker) && (
                               <span className="flex items-center space-x-1.5">
@@ -351,7 +351,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                                   {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator.address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                                 </a>
                               </Link>
-                              <Copy text={validator.address} />
+                              <Copy value={validator.address} />
                             </span>
                             {!(validator.description?.moniker) && (
                               <span className="flex items-center space-x-1.5">

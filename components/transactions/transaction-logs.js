@@ -48,7 +48,7 @@ export default function TransactionLogs({ data }) {
                                 {ellipseAddress(a.sender, 16)}
                               </a>
                             </Link>
-                            <Copy text={a.sender} />
+                            <Copy value={a.sender} />
                           </div>
                           <span className="text-xs font-semibold">{a.sender_name || 'Sender'}</span>
                         </>
@@ -70,7 +70,7 @@ export default function TransactionLogs({ data }) {
                                 {ellipseAddress(a.depositor, 16)}
                               </a>
                             </Link>
-                            <Copy text={a.depositor} />
+                            <Copy value={a.depositor} />
                           </div>
                           <span className="text-xs font-semibold">{a.depositor_name || 'Depositor'}</span>
                         </>
@@ -161,7 +161,7 @@ export default function TransactionLogs({ data }) {
                             <div className="flex items-center text-xs space-x-1">
                               <span className="font-semibold">Out Point:</span>
                               <span className="text-gray-400 dark:text-gray-600">{ellipseAddress(a.outPointInfo.out_point)}</span>
-                              <Copy text={a.outPointInfo.out_point} />
+                              <Copy value={a.outPointInfo.out_point} />
                             </div>
                           )}
                           {a.outPointInfo.amount && (
@@ -174,7 +174,7 @@ export default function TransactionLogs({ data }) {
                             <div className="flex items-center text-xs space-x-1">
                               <span className="font-semibold">Address:</span>
                               <span className="text-gray-400 dark:text-gray-600">{ellipseAddress(a.outPointInfo.address)}</span>
-                              <Copy text={a.outPointInfo.address} />
+                              <Copy value={a.outPointInfo.address} />
                             </div>
                           )}
                         </>
@@ -198,7 +198,7 @@ export default function TransactionLogs({ data }) {
                                     {ellipseAddress(recipient, 16)}
                                   </a>
                                 </Link>
-                                <Copy text={recipient} />
+                                <Copy value={recipient} />
                               </div>
                             ))
                             :
@@ -208,7 +208,7 @@ export default function TransactionLogs({ data }) {
                                   {ellipseAddress(a.recipient, 16)}
                                 </a>
                               </Link>
-                              <Copy text={a.recipient} />
+                              <Copy value={a.recipient} />
                             </div>
                           }
                           <span className="text-xs font-semibold">{a.recipient_name || 'Recipient'}</span>
@@ -231,7 +231,7 @@ export default function TransactionLogs({ data }) {
                                 {ellipseAddress(a.validator, 16)}
                               </a>
                             </Link>
-                            <Copy text={a.validator} />
+                            <Copy value={a.validator} />
                           </div>
                           <span className="text-xs">{a.validator_name || 'Validator'}</span>
                         </>

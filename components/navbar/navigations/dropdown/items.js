@@ -1,22 +1,34 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import _ from 'lodash'
 import HeadShake from 'react-reveal/HeadShake'
+import { RiDashboardLine } from 'react-icons/ri'
 import { FaHandPointLeft } from 'react-icons/fa'
 import { TiArrowRight } from 'react-icons/ti'
 
-import menus from './menus'
+import menus from '../menus'
 
-export default = () => {
+export default = ({ onClick }) => {
   const router = useRouter()
   const { pathname } = { ...router }
 
+  const _menus = _.concat(menus[0]?.path !== '/' ?
+    {
+      id: 'dashboard',
+      title: 'Dashboard',
+      path: '/',
+      icon: <RiDashboardLine size={16} className="stroke-current" />,
+    } : [],
+    menus
+  )
+
   return (
-    <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
+    <div className="flex flex-wrap">
       {menus.filter(m => m?.path).map((m, i) => {
         const item = (
           <>
             {m.icon}
-            <span className="whitespace-nowrap">
+            <span className="text-xs">
               {m.title}
             </span>
           </>
@@ -26,13 +38,14 @@ export default = () => {
             <FaHandPointLeft size={20} />
           </HeadShake> : m.external ?
           <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-3`
+        const className = `dropdown-item w-full bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 p-3`
         return m.external ?
           <a
             key={i}
             href={m.path}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={onClick}
             className={className}
           >
             {item}
@@ -40,7 +53,10 @@ export default = () => {
           </a>
           :
           <Link key={i} href={m.path}>
-            <a className={className}>
+            <a
+              onClick={onClick}
+              className={className}
+            >
               {item}
               {right_icon}
             </a>

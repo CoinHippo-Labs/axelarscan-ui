@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Web3Modal from 'web3modal'
 import { providers, utils } from 'ethers'
-import { Img } from 'react-image'
 
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
 
@@ -11,30 +10,48 @@ const providerOptions = {}
 const getNetwork = chain_id => {
   return {
     1: 'mainnet',
+    56: 'binance',
     137: 'matic',
+    42161: 'arbitrum',
+    10: 'optimism',
     43114: 'avalanche-fuji-mainnet',
     250: 'fantom',
+    100: 'xdai',
     1284: 'moonbeam',
+    1285: 'moonriver',
+    // 122: 'fuse',
+    // 2001: 'milkomeda',
+    // 288: 'boba',
+    1666600000: 'harmony-shard1',
+    // 192837465: 'gather',
+    25: 'cronos',
+    // 9001: 'evmos',
     3: 'ropsten',
+    4: 'rinkeby',
+    5: 'goerli',
+    42: 'kovan',
+    97: 'binance-testnet',
     80001: 'mumbai',
+    421611: 'arbitrum-rinkeby',
+    69: 'optimism-kovan',
     43113: 'avalanche-fuji-testnet',
     // 4002: 'fantom-tesnet',
     // 1287: 'moonbase',
+    // 2221: 'kava-alpha',
   }[chain_id]
 }
 
 let web3Modal
 
-export default function Wallet({
+export default = ({
   mainController = false,
   hidden = false,
   disabled = false, 
   connectChainId,
-  connectButton,
-  disconnectButton,
   onSwitch,
   children,
-}) {
+  className = '',
+}) => {
   const dispatch = useDispatch()
   const { preferences, chains, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
@@ -72,10 +89,13 @@ export default function Wallet({
     }
   }, [web3Modal])
 
-  useEffect(async () => {
-    if (web3Modal) {
-      await web3Modal.updateTheme(theme)
+  useEffect(() => {
+    const update = async () => {
+      if (web3Modal) {
+        await web3Modal.updateTheme(theme)
+      }
     }
+    update()
   }, [theme])
 
   const connect = useCallback(async () => {
@@ -173,7 +193,7 @@ export default function Wallet({
   return !hidden && (
     <>
       {web3_provider ?
-        !mainController && connectChainId ?
+        !mainController && connectChainId && connectChainId !== chain_id ?
           <button
             disabled={disabled}
             onClick={() => {
@@ -182,9 +202,10 @@ export default function Wallet({
                 onSwitch()
               }
             }}
+            className={className}
           >
             {children || (
-              <div className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg whitespace-nowrap font-medium py-1 px-2">
+              <div className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg whitespace-nowrap font-medium py-1 px-2">
                 Switch Network
               </div>
             )}
@@ -193,9 +214,10 @@ export default function Wallet({
           <button
             disabled={disabled}
             onClick={disconnect}
+            className={className}
           >
             {children || (
-              <div className="bg-gray-100 hover:bg-gray-200 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg whitespace-nowrap font-medium py-1 px-2">
+              <div className="bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 rounded-lg whitespace-nowrap text-white font-medium py-1 px-2">
                 Disconnect
               </div>
             )}
@@ -204,15 +226,11 @@ export default function Wallet({
         <button
           disabled={disabled}
           onClick={connect}
+          className={className}
         >
           {children || (
-            <div className="min-w-max bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg whitespace-nowrap flex items-center text-white font-medium space-x-1.5 py-1 px-2">
-              <span>Connect</span>
-              <Img
-                src="/logos/wallets/metamask.png"
-                alt=""
-                className="w-4 h-4"
-              />
+            <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 rounded-lg whitespace-nowrap text-white font-medium py-1 px-2">
+              Connect
             </div>
           )}
         </button>

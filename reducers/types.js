@@ -14,6 +14,7 @@ export const ENS_DATA = 'ens_data'
 // status
 export const CHAIN_DATA = 'chain_data'
 export const STATUS_DATA = 'status_data'
+export const TVL_DATA = 'tvl_data'
 
 // validators
 export const VALIDATORS_DATA = 'validators_data'

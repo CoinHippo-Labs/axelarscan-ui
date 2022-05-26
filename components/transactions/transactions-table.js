@@ -235,7 +235,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                       {ellipseAddress(Array.isArray(props.value) ? _.last(props.value) : props.value)}
                     </a>
                   </Link>
-                  <Copy text={Array.isArray(props.value) ? _.last(props.value) : props.value} />
+                  <Copy value={Array.isArray(props.value) ? _.last(props.value) : props.value} />
                 </div>
                 :
                 <div className="skeleton w-48 h-4 mb-4" />
@@ -330,7 +330,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                             {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                           </a>
                         </Link>
-                        <Copy text={validator_data.operator_address} />
+                        <Copy value={validator_data.operator_address} />
                       </span>
                     </div>
                   </div>
@@ -342,7 +342,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                           {ellipseAddress(props.value)}
                         </a>
                       </Link>
-                      <Copy text={props.value} />
+                      <Copy value={props.value} />
                     </div>
                     :
                     '-'

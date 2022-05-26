@@ -81,7 +81,7 @@ export default function AccountDetail({ address, data }) {
                         {props.row.original.contract_address && (
                           <span className="flex items-center space-x-1">
                             <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
-                            <Copy text={props.row.original.contract_address} />
+                            <Copy value={props.row.original.contract_address} />
                           </span>
                         )}
                         {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
@@ -183,7 +183,7 @@ export default function AccountDetail({ address, data }) {
                             {props.row.original.contract_address && (
                               <span className="flex items-center space-x-1">
                                 <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
-                                <Copy text={props.row.original.contract_address} />
+                                <Copy value={props.row.original.contract_address} />
                               </span>
                             )}
                             {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
@@ -283,7 +283,7 @@ export default function AccountDetail({ address, data }) {
                             {props.row.original.contract_address && (
                               <span className="flex items-center space-x-1">
                                 <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
-                                <Copy text={props.row.original.contract_address} />
+                                <Copy value={props.row.original.contract_address} />
                               </span>
                             )}
                             {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
@@ -369,7 +369,7 @@ export default function AccountDetail({ address, data }) {
                             {ellipseAddress(props.value, 8)}
                           </a>
                         </Link>
-                        <Copy text={props.value} />
+                        <Copy value={props.value} />
                       </div>
                       :
                       <div className="skeleton w-32 h-4" />
@@ -402,7 +402,7 @@ export default function AccountDetail({ address, data }) {
                         <div className="min-w-max">
                           <div className="flex items-center space-x-1">
                             <Copy
-                              text={props.value}
+                              value={props.value}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
                                 {ellipseAddress(props.value, 8)}
                               </span>}
@@ -458,7 +458,7 @@ export default function AccountDetail({ address, data }) {
                         <div className="min-w-max">
                           <div className="flex items-center space-x-1">
                             <Copy
-                              text={props.value}
+                              value={props.value}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
                                 {ellipseAddress(props.value, 8)}
                               </span>}
@@ -596,7 +596,7 @@ export default function AccountDetail({ address, data }) {
                                 {ellipseAddress(props.row.original.validator_address, 16)}
                               </a>
                             </Link>
-                            <Copy text={props.row.original.validator_address} />
+                            <Copy value={props.row.original.validator_address} />
                           </span>
                         </div>
                       </div>
@@ -627,7 +627,7 @@ export default function AccountDetail({ address, data }) {
                           {props.row.original.contract_address && (
                             <span className="flex items-center space-x-1">
                               <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
-                              <Copy text={props.row.original.contract_address} />
+                              <Copy value={props.row.original.contract_address} />
                             </span>
                           )}
                           {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
@@ -746,7 +746,7 @@ export default function AccountDetail({ address, data }) {
                                 {ellipseAddress(props.row.original.validator_address, 16)}
                               </a>
                             </Link>
-                            <Copy text={props.row.original.validator_address} />
+                            <Copy value={props.row.original.validator_address} />
                           </span>
                         </div>
                       </div>

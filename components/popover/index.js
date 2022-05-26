@@ -1,7 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { usePopper } from 'react-popper'
 
-export default function Popover({ placement, title, content, children, className = '', titleClassName = '', contentClassName = '' }) {
+export default ({
+  placement,
+  disabled = false,
+  onClick,
+  title,
+  content,
+  children,
+  className = '',
+  titleClassName = '',
+  contentClassName = '',
+}) => {
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)
@@ -25,33 +35,17 @@ export default function Popover({ placement, title, content, children, className
   )
 
   useEffect(() => {
-    const handleClickOutside = event => {
-      if (
-        hidden ||
-        buttonRef.current.contains(event.target) ||
-        popoverRef.current.contains(event.target)
-      ) {
-        return false
-      }
+    const handleClickOutside = e => {
+      if (hidden || buttonRef.current.contains(e.target) || popoverRef.current.contains(e.target)) return false
       setHidden(!hidden)
     }
 
-    const handleMouseEnter = event => {
-      if (
-        buttonRef.current.contains(event.target) ||
-        popoverRef.current.contains(event.target)
-      ) {
-        setHidden(false)
-      }
+    const handleMouseEnter = e => {
+      if (buttonRef.current.contains(e.target) || popoverRef.current.contains(e.target)) setHidden(false)
     }
 
-    const handleMouseLeave = event => {
-      if (
-        buttonRef.current.contains(event.target) ||
-        popoverRef.current.contains(event.target)
-      ) {
-        setHidden(true)
-      }
+    const handleMouseLeave = e => {
+      if (buttonRef.current.contains(e.target) || popoverRef.current.contains(e.target)) setHidden(true)
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -68,26 +62,32 @@ export default function Popover({ placement, title, content, children, className
     }
   }, [hidden, popoverRef, buttonRef])
 
-  const handlePopoverClick = () => setHidden(!hidden)
-
   return (
     <div className="flex">
       <button
         ref={buttonRef}
-        onClick={handlePopoverClick}
+        disabled={disabled}
+        onClick={() => {
+          setHidden(!hidden)
+          if (onClick) {
+            onClick()
+          }
+        }}
         className={`btn btn-rounded ${className}`}
       >
         {children}
       </button>
       <div ref={popoverRef} { ...attributes.popper } style={styles.popper}>
         <div
-          className={`w-auto no-underline break-words rounded-lg shadow-lg z-10 bg-white dark:bg-black border-0 border-gray-200 dark:border-gray-900 text-gray-900 dark:text-white text-sm font-normal ${hidden ? 'hidden' : 'block'}`}
+          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded-lg shadow-lg border-0 border-slate-200 dark:border-slate-900 z-10 no-underline break-words text-sm font-normal`}
           style={styles.offset}
         >
-          <div className={`bg-gray-100 dark:bg-black border-b border-solid border-gray-200 dark:border-gray-900 rounded-t-lg uppercase text-gray-900 dark:text-white font-semibold mb-0 p-2 ${titleClassName}`}>
+          <div className={`bg-slate-100 dark:bg-black rounded-t-lg border-b border-solid border-slate-200 dark:border-slate-900 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
             {title}
           </div>
-          <div className={`p-2 ${contentClassName}`}>{content}</div>
+          <div className={`p-2 ${contentClassName}`}>
+            {content}
+          </div>
         </div>
       </div>
     </div>

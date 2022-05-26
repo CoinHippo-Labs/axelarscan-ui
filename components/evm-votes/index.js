@@ -185,7 +185,7 @@ export default function EVMVotes({ className }) {
               return !props.row.original.skeleton ?
                 <div className="flex items-center space-x-1 mb-4">
                   <Copy
-                    text={props.value}
+                    value={props.value}
                     copyTitle={<span className="uppercase text-gray-400 dark:text-gray-600 text-2xs font-medium">
                       {ellipseAddress(props.value, 8)}
                     </span>}
@@ -220,7 +220,7 @@ export default function EVMVotes({ className }) {
             Cell: props => (
               !props.row.original.skeleton ?
                 <Copy
-                  text={props.value}
+                  value={props.value}
                   copyTitle={<span className="uppercase text-gray-400 dark:text-gray-600 text-2xs font-medium">
                     {ellipseAddress(props.value, 16)}
                   </span>}
@@ -299,7 +299,7 @@ export default function EVMVotes({ className }) {
                             {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                           </a>
                         </Link>
-                        <Copy text={validator_data.operator_address} />
+                        <Copy value={validator_data.operator_address} />
                       </span>
                     </div>
                   </div>
@@ -310,7 +310,7 @@ export default function EVMVotes({ className }) {
                         {ellipseAddress(props.value)}
                       </a>
                     </Link>
-                    <Copy text={props.value} />
+                    <Copy value={props.value} />
                   </div>
                 :
                 <div className="flex items-start space-x-2 -mt-0.5">
@@ -371,7 +371,7 @@ export default function EVMVotes({ className }) {
                       {ellipseAddress(Array.isArray(props.value) ? _.last(props.value) : props.value)}
                     </a>
                   </Link>
-                  <Copy text={Array.isArray(props.value) ? _.last(props.value) : props.value} />
+                  <Copy value={Array.isArray(props.value) ? _.last(props.value) : props.value} />
                 </div>
                 :
                 <div className="skeleton w-48 h-4" />

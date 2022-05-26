@@ -1,10 +1,9 @@
 import { FiBox } from 'react-icons/fi'
 import { BiServer, BiFileBlank, BiMessageDots, BiCode, BiCoinStack } from 'react-icons/bi'
-import { RiRadioButtonLine, RiKeyLine } from 'react-icons/ri'
+import { RiKeyLine } from 'react-icons/ri'
 import { MdOutlineHowToVote } from 'react-icons/md'
-import { HiCode } from 'react-icons/hi'
 
-export const navigations = [
+export default = [
   {
     id: 'validators',
     title: 'Validators',
@@ -52,22 +51,5 @@ export const navigations = [
     title: 'Assets',
     path: '/assets',
     icon: <BiCoinStack size={20} className="stroke-current" />,
-  },
-]
-
-export const environments = [
-  {
-    id: 'mainnet',
-    title: 'Mainnet',
-    path: process.env.NEXT_PUBLIC_SITE_URL?.replace('testnet.', ''),
-    external: true,
-    icon: <RiRadioButtonLine size={20} className="stroke-current" />,
-  },
-  {
-    id: 'testnet',
-    title: 'Testnet',
-    path: process.env.NEXT_PUBLIC_SITE_URL?.replace('staging.', '').replace('://', `://${process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ? 'testnet.' : ''}`),
-    external: true,
-    icon: <HiCode size={20} className="stroke-current" />,
   },
 ]

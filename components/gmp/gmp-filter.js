@@ -6,7 +6,7 @@ import moment from 'moment'
 import { DatePicker } from 'antd'
 import { VscFilterFilled, VscFilter } from 'react-icons/vsc'
 
-import Modal from '../modals/modal-confirm'
+import Modal from '../modals'
 
 export default function VotesFilter({ applied = false, disabled = false, initialFilter, updateFilter }) {
   const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)

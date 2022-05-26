@@ -23,7 +23,7 @@ export default function TransactionDetail({ data }) {
           {data ?
             <div className="flex items-start sm:items-center text-xs lg:text-base">
               <span className="break-all uppercase sm:pr-1.5">{data.txhash}</span>
-              {data.txhash && (<Copy text={data.txhash} />)}
+              {data.txhash && (<Copy value={data.txhash} />)}
             </div>
             :
             <div className="skeleton w-60 h-6 mt-1" />
@@ -128,7 +128,7 @@ export default function TransactionDetail({ data }) {
                         {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                       </a>
                     </Link>
-                    <Copy text={validator_data.operator_address} />
+                    <Copy value={validator_data.operator_address} />
                   </span>
                 </div>
               </div>
@@ -140,7 +140,7 @@ export default function TransactionDetail({ data }) {
                       {ellipseAddress(data.sender)}
                     </a>
                   </Link>
-                  <Copy text={data.sender} />
+                  <Copy value={data.sender} />
                 </div>
                 :
                 <span>-</span>
@@ -158,7 +158,7 @@ export default function TransactionDetail({ data }) {
                     {ellipseAddress(data.from.key, 16)}
                   </a>
                 </Link>
-                <Copy text={data.from.key} />
+                <Copy value={data.from.key} />
               </div>
               {data.from.name && (
                 <span className="text-xs">{data.from.name}</span>
@@ -178,7 +178,7 @@ export default function TransactionDetail({ data }) {
                     {ellipseAddress(data.to.key, 16)}
                   </a>
                 </Link>
-                <Copy text={data.to.key} />
+                <Copy value={data.to.key} />
               </div>
               {data.to.name && (
                 <span className="text-xs">{data.to.name}</span>

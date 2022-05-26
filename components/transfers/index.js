@@ -763,7 +763,7 @@ export default function Transfers() {
                                 {c.contract?.contract_address ?
                                   <>
                                     <Copy
-                                      text={c.contract.contract_address}
+                                      value={c.contract.contract_address}
                                       copyTitle={<span className="text-xs font-normal">
                                         {ellipseAddress(c.contract.contract_address, 6)}
                                       </span>}
