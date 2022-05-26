@@ -9,7 +9,7 @@ import AccountDetail from './account-detail'
 import TransactionsTable from '../transactions/transactions-table'
 import Widget from '../widget'
 
-import { allBankBalances, allStakingDelegations, allStakingUnbonding, distributionRewards, distributionCommissions, transactionsByEvents, transactionsByEventsPaging } from '../../lib/api/cosmos'
+import { allBankBalances, allStakingDelegations, allStakingUnbonding, distributionRewards, distributionCommissions, transactions_by_events, transactions_by_events_paging } from '../../lib/api/cosmos'
 import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
 import { denom_manager } from '../../lib/object/denom'
 import { numberFormat, sleep } from '../../lib/utils'
@@ -205,7 +205,7 @@ export default function Account({ address }) {
 
         if (address.length >= 65) {
           if (!controller.signal.aborted) {
-            const response = await transactionsByEvents(`transfer.sender='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`transfer.sender='${address}'`, null, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[0] = response
@@ -213,7 +213,7 @@ export default function Account({ address }) {
             }
           }
           if (!controller.signal.aborted) {
-            const response = await transactionsByEvents(`transfer.recipient='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`transfer.recipient='${address}'`, null, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[1] = response
@@ -221,7 +221,7 @@ export default function Account({ address }) {
             }
           }
           if (!controller.signal.aborted) {
-            const response = await transactionsByEvents(`message.sender='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`message.sender='${address}'`, null, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[2] = response
@@ -229,7 +229,7 @@ export default function Account({ address }) {
             }
           }
           if (!controller.signal.aborted && address.length >= 65) {
-            const response = await transactionsByEvents(`link.depositAddress='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`link.depositAddress='${address}'`, null, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[3] = response
@@ -285,7 +285,7 @@ export default function Account({ address }) {
             if (address.length >= 65) {
               if (Number(key) === 0) {
                 if (value.offset > 0) {
-                  const response = await transactionsByEventsPaging(`transfer.sender='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
+                  const response = await transactions_by_events_paging(`transfer.sender='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
 
                   if (response?.data?.length > 0) {
                     data[0] = response
@@ -295,7 +295,7 @@ export default function Account({ address }) {
               }
               else if (Number(key) === 1) {
                 if (value.offset > 0) {
-                  const response = await transactionsByEventsPaging(`transfer.recipient='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
+                  const response = await transactions_by_events_paging(`transfer.recipient='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
 
                   if (response?.data?.length > 0) {
                     data[1] = response
@@ -305,7 +305,7 @@ export default function Account({ address }) {
               }
               else if (Number(key) === 2) {
                 if (value.offset > 0) {
-                  const response = await transactionsByEventsPaging(`message.sender='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
+                  const response = await transactions_by_events_paging(`message.sender='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
 
                   if (response?.data?.length > 0) {
                     data[2] = response
@@ -315,7 +315,7 @@ export default function Account({ address }) {
               }
               else if (Number(key) === 3) {
                 if (value.offset > 0 && address.length >= 65) {
-                  const response = await transactionsByEventsPaging(`link.depositAddress='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
+                  const response = await transactions_by_events_paging(`link.depositAddress='${address}'`, value.data, value.offset || (value.total - value.data.length), denoms_data)
 
                   if (response?.data?.length > 0) {
                     data[3] = response

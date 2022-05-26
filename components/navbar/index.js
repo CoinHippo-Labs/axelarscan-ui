@@ -18,7 +18,7 @@ import SubNavbar from './sub-navbar'
 import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { status as getStatus } from '../../lib/api/rpc'
-import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, all_validators, chain_maintainer, validatorProfile, allValidatorsStatus, allValidatorsBroadcaster } from '../../lib/api/cosmos'
+import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
 import { ens as getEns } from '../../lib/api/ens'
 import { coin } from '../../lib/api/coingecko'
 import { type } from '../../lib/object/id'
@@ -335,7 +335,7 @@ export default () => {
     const getData = async () => {
       if (assets_data?.findIndex(a => a?.price) > -1 &&
         status_data &&
-        ['/address', '/transfers', '/gmp'].findIndex(p => pathname?.startsWith(p)) < 0
+        ['/address', '/transfers', '/gmp', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
       ) {
         if (!controller.signal.aborted) {
           let response
@@ -344,12 +344,12 @@ export default () => {
             case '/validators/[status]':
             case '/validator/[address]':
             case '/account/[address]':
+            case '/evm-votes':
+            case '/participations':
             case '/block/[height]':
             case '/transactions':
             case '/transactions/search':
             case '/tx/[tx]':
-            case '/evm-votes':
-            case '/participations':
               response = await all_validators(null, validators_data, status || (address ? null : 'active'), address, Number(status_data.latest_block_height), assets_data)
               if (response) {
                 if (!validators_data) {
@@ -358,9 +358,8 @@ export default () => {
                     value: response?.data || [],
                   })
                 }
-
                 if (!['/participations'].includes(pathname)) {
-                  response = await allValidatorsBroadcaster(response?.data, null, denoms_data)
+                  response = await all_validators_broadcaster(response?.data, null, assets_data)
                   if (response?.data?.length > 0) {
                     const vs = response.data
                     if (['/validators', '/validators/[status]', '/validator/[address]'].includes(pathname)) {
@@ -447,7 +446,6 @@ export default () => {
                         vs[i] = v
                       }
                     }
-
                     response.data = vs
                     dispatch({
                       type: VALIDATORS_DATA,
@@ -455,12 +453,11 @@ export default () => {
                     })
                   }
                 }
-
-                response = await all_validators(response?.data || [])
+                response = await all_validators_status(response?.data || [])
               }
               break
             default:
-              response = await allValidators(null, validators_data, null, null, null, denoms_data)
+              response = await all_validators(null, validators_data, null, null, null, assets_data)
               break
           }
           if (response) {
@@ -468,7 +465,6 @@ export default () => {
               type: VALIDATORS_DATA,
               value: response?.data || [],
             })
-            setLoadProfileTrigger(moment().valueOf())
           }
         }
       }
