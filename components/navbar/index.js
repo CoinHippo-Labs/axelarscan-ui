@@ -1,6 +1,3 @@
-// import { heartbeats as getHeartbeats, evm_votes as getEvmVotes } from '../../lib/api/index'
-// import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
-
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
@@ -17,12 +14,14 @@ import Theme from './theme'
 import SubNavbar from './sub-navbar'
 import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
+import { coin } from '../../lib/api/coingecko'
 import { status as getStatus } from '../../lib/api/rpc'
 import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
 import { ens as getEns } from '../../lib/api/ens'
-import { coin } from '../../lib/api/coingecko'
+import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { denom_manager } from '../../lib/object/denom'
+import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
 import { equals_ignore_case } from '../../lib/utils'
 import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
 
@@ -350,7 +349,8 @@ export default () => {
             case '/transactions':
             case '/transactions/search':
             case '/tx/[tx]':
-              response = await all_validators(null, validators_data, status || (address ? null : 'active'), address, Number(status_data.latest_block_height), assets_data)
+              const latest_block = Number(status_data.latest_block_height)
+              response = await all_validators(null, validators_data, status || (address ? null : 'active'), address, latest_block, assets_data)
               if (response) {
                 if (!validators_data) {
                   dispatch({
@@ -361,90 +361,100 @@ export default () => {
                 if (!['/participations'].includes(pathname)) {
                   response = await all_validators_broadcaster(response?.data, null, assets_data)
                   if (response?.data?.length > 0) {
-                    const vs = response.data
+                    let vs = response.data
                     if (['/validators', '/validators/[status]', '/validator/[address]'].includes(pathname)) {
+                      const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
+                      const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
+                      const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
+                      const last = lastHeartbeatBlock(latest_block)
                       response = await getHeartbeats({
                         _source: false,
+                        query: {
+                          bool: {
+                            must: [
+                              { range: { height: {
+                                gte: first,
+                                lte: latest_block,
+                              } } },
+                            ],
+                          },
+                        },
                         aggs: {
                           heartbeats: {
-                            terms: { field: 'sender.keyword', size: 10000 },
+                            terms: { field: 'sender.keyword', size: 1000 },
                             aggs: {
                               period_height: {
-                                terms: { field: 'height_group', size: 100000 },
+                                terms: { field: 'period_height', size: 1000 },
                               },
                             },
                           },
                         },
-                        query: {
-                          bool: {
-                            must: [
-                              { range: { height: { gte: firstHeartbeatBlock(Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)), lte: Number(status_data.latest_block_height) } } },
-                            ],
-                          },
-                        },
                       })
-
                       for (let i = 0; i < vs.length; i++) {
                         const v = vs[i]
-                        const _last = lastHeartbeatBlock(Number(status_data.latest_block_height))
-                        // const _first = firstHeartbeatBlock(v?.start_proxy_height || v?.start_height)
-                        let _first = Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
-                        _first = _first >= 0 ? firstHeartbeatBlock(_first) : firstHeartbeatBlock(_first)
-
-                        const totalHeartbeats = Math.floor((_last - _first) / Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)) + 1
-                        const up_heartbeats = response?.data?.[v?.broadcaster_address] || 0
-
-                        let missed_heartbeats = totalHeartbeats - up_heartbeats
-                        missed_heartbeats = missed_heartbeats < 0 ? 0 : missed_heartbeats
-
-                        let heartbeats_uptime = totalHeartbeats > 0 ? up_heartbeats * 100 / totalHeartbeats : 0
-                        heartbeats_uptime = heartbeats_uptime > 100 ? 100 : heartbeats_uptime
-                        v.heartbeats_uptime = heartbeats_uptime
+                        const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
+                        const up = response?.data?.[v?.broadcaster_address] || 0
+                        let uptime = total > 0 ? up * 100 / total : 0
+                        uptime = uptime > 100 ? 100 : uptime
+                        v.heartbeats_uptime = uptime
                         vs[i] = v
                       }
-
                       response.data = vs
                       dispatch({
                         type: VALIDATORS_DATA,
                         value: response.data,
                       })
 
+                      const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
                       response = await getEvmVotes({
+                        query: {
+                          range: { height: {
+                            gte: latest_block - num_evm_votes_blocks,
+                          } },
+                        },
                         aggs: {
-                          votes: {
-                            terms: { field: 'sender.keyword', size: 10000 },
+                          voters: {
+                            terms: { field: 'voter.keyword', size: 1000 },
                             aggs: {
                               chains: {
                                 terms: { field: 'sender_chain.keyword', size: 1000 },
                                 aggs: {
-                                  confirms: {
-                                    terms: { field: 'confirmed' },
+                                  votes: {
+                                    terms: { field: 'vote' },
                                   },
                                 },
                               },
                             },
                           },
-                          all_votes: {
-                            terms: { field: 'sender_chain.keyword', size: 10000 },
-                            aggs: {
-                              polls: {
-                                cardinality: { field: 'poll_id.keyword' },
-                              },
-                            },
-                          },
                         },
-                        query: { range: { poll_start_height: { gte: Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS) } } },
                       })
-
                       for (let i = 0; i < vs.length; i++) {
                         const v = vs[i]
-                        v.votes = response?.data?.[v?.broadcaster_address] || {}
-                        v.total_votes = v.votes?.total || 0
-                        v.total_yes_votes = _.sum(Object.entries(v.votes?.chains || {}).map(c => Object.entries(c[1]?.confirms || {}).find(cf => cf[0] === 'true')?.[1] || 0))
-                        v.total_no_votes = _.sum(Object.entries(v.votes?.chains || {}).map(c => Object.entries(c[1]?.confirms || {}).find(cf => cf[0] === 'false')?.[1] || 0))
-                        v.total_polls = response?.all_data || {}
+                        v.votes = { ...response?.data?.[v?.broadcaster_address] }
+                        v.total_votes = v.votes.total || 0
+                        const get_votes = vote => _.sum(Object.entries({ ...v.votes?.chains }).map(c => Object.entries({ ...c[1]?.votes }).find(_v => _v[0] === vote?.toString())?.[1] || 0))
+                        v.total_yes_votes = get_votes(true)
+                        v.total_no_votes = get_votes(false)
                         vs[i] = v
                       }
+                      response = await getEvmPolls({
+                        query: {
+                          range: { height: {
+                            gte: latest_block - num_evm_votes_blocks,
+                          } },
+                        },
+                        track_total_hits: true,
+                      })
+                      const total_polls = response?.total || _.maxBy(vs, 'total_votes')?.total_votes || 0
+                      vs = vs.map(v => {
+                        return {
+                          ...v,
+                          total_votes: v?.total_votes > total_polls ? total_polls : v?.total_votes,
+                          total_yes_votes: v?.total_yes_votes > total_polls ? total_polls : v?.total_yes_votes,
+                          total_no_votes: v?.total_no_votes > total_polls ? total_polls : v?.total_no_votes,
+                          total_polls,
+                        }
+                      })
                     }
                     response.data = vs
                     dispatch({

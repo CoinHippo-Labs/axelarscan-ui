@@ -91,7 +91,7 @@ export default function Validator({ address }) {
                   terms: { field: 'sender.keyword' },
                   aggs: {
                     period_height: {
-                      terms: { field: 'height_group', size: 100000 },
+                      terms: { field: 'period_height', size: 100000 },
                     },
                   },
                 },
