@@ -40,16 +40,16 @@ export default = [
     path: '/gmp',
     icon: <BiMessageDots size={20} className="stroke-current" />,
   },
-  /*{
+  {
     id: 'transfers',
     title: 'Transfers',
     path: '/transfers',
     icon: <BiCode size={20} className="stroke-current" />,
-  },*/
+  },
   {
     id: 'assets',
     title: 'Assets',
     path: '/assets',
     icon: <BiCoinStack size={20} className="stroke-current" />,
   },
-]
+].filter(m => process.env.NEXT_PUBLIC_GMP_API_URL || !['gmp', 'transfers', 'assets'].includes(m?.id))

@@ -55,7 +55,7 @@ export default = () => {
           input_type = 'transfer'
         }
         else if (input_type === 'evm_tx') {
-          input_type = 'gmp'
+          input_type = process.env.NEXT_PUBLIC_GMP_API_URL ? 'gmp' : 'tx'
         }
       }
       if (input_type === 'address') {
