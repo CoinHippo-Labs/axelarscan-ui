@@ -152,7 +152,7 @@ export default function Transaction() {
               options: {
                 address: contract.contract_address,
                 symbol: contract.symbol,
-                decimals: contract.contract_decimals,
+                decimals: contract.decimals,
                 image: `${contract.image?.startsWith('/') ? process.env.NEXT_PUBLIC_SITE_URL : ''}${contract.image}`,
               },
             },
@@ -519,7 +519,7 @@ export default function Transaction() {
                                   <span className="font-mono mr-1.5">
                                     {call.returnValues?.amount ?
                                       numberFormat(BigNumber(EthersBigNumber.from(call.returnValues.amount).toString())
-                                        .shiftedBy(-(fromContract?.contract_decimals || toContract?.contract_decimals || 6)).toNumber()
+                                        .shiftedBy(-(fromContract?.decimals || toContract?.decimals || 6)).toNumber()
                                       , '0,0.00000000', true)
                                       :
                                       '-'

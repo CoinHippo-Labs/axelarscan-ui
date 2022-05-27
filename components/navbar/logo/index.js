@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
-import { Img as Image } from 'react-image'
 
-export default = () => {
+import Image from '../../image'
+
+export default () => {
   const { status } = useSelector(state => ({ status: state.status }), shallowEqual)
   const { status_data } = { ...status }
 

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react'
 import Items from './items'
 import menus from './menus'
 
-export default = () => {
+export default () => {
   const [hidden, setHidden] = useState(true)
 
   const buttonRef = useRef(null)

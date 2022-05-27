@@ -3,7 +3,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import { HiCheckCircle } from 'react-icons/hi'
 import { BiCopy } from 'react-icons/bi'
 
-export default = ({
+export default ({
   value,
   title,
   size = 16,

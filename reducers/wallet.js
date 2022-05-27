@@ -9,7 +9,7 @@ const initial_wallet_data = {
   signer: null,
 }
 
-export default = (
+export default (
   state = {
     [`${WALLET_DATA}`]: initial_wallet_data,
   },

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 
-import Dashboard from '../components/dashboard'
+// import Dashboard from '../components/dashboard'
 import { is_route_exist } from '../lib/routes'
 
 export default () => {
@@ -19,6 +19,6 @@ export default () => {
     router.push(is_route_exist(_asPath) ? asPath : '/')
   }
   return !ssr && (
-    <Dashboard />
+    <div />/*<Dashboard />*/
   )
 }

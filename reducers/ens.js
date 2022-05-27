@@ -1,6 +1,6 @@
 import { ENS_DATA } from './types'
 
-export default = (
+export default (
   state = {
     [`${ENS_DATA}`]: null,
   },

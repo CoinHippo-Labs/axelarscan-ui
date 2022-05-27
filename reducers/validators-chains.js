@@ -1,6 +1,6 @@
 import { VALIDATORS_CHAINS_DATA } from './types'
 
-export default = (
+export default (
   state = {
     [`${VALIDATORS_CHAINS_DATA}`]: null,
   },

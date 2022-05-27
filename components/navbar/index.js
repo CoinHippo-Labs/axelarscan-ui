@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
@@ -334,7 +334,7 @@ export default () => {
     const getData = async () => {
       if (assets_data?.findIndex(a => a?.price) > -1 &&
         status_data &&
-        ['/address', '/transfers', '/gmp', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
+        ['/address', '/gmp', '/transfers', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
       ) {
         if (!controller.signal.aborted) {
           let response

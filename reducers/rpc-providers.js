@@ -1,6 +1,6 @@
 import { RPCS } from './types'
 
-export default = (
+export default (
   state = {
     [`${RPCS}`]: null,
   },

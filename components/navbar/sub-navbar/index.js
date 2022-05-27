@@ -11,9 +11,9 @@ import EnsProfile from '../../ens-profile'
 import { currency, currency_symbol } from '../../../lib/object/currency'
 import { number_format, ellipse } from '../../../lib/utils'
 
-export default = () => {
-  const { status, _chain } = useSelector(state => ({ status: state.status, _chain: state.chain }), shallowEqual)
-  const { status_data } = { ...status }
+export default () => {
+  const { _status, _chain } = useSelector(state => ({ _status: state.status, _chain: state.chain }), shallowEqual)
+  const { status_data } = { ..._status }
   const { chain_data } = { ..._chain }
 
   const router = useRouter()
@@ -235,21 +235,15 @@ export default = () => {
         </div>
       )}
       <span className="sm:ml-auto" />
-      {status_data && (
-        <div className="flex items-center space-x-1.5 ml-4">
-          <FiBox size={14} className="mb-0.5" />
-          {status_data.latest_block_height ?
-            <Link href={`/block/${status_data.latest_block_height}`}>
-              <a className="font-mono text-blue-600 dark:text-white font-bold">
-                {number_format(status_data?.latest_block_height, '0,0')}
-              </a>
-            </Link>
-            :
-            <span>
-              -
+      {status_data?.latest_block_height && (
+        <Link href={`/block/${status_data.latest_block_height}`}>
+          <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
+            <FiBox size={14} className="mb-0.5" />
+            <span className="font-mono font-bold">
+              {number_format(status_data.latest_block_height, '0,0')}
             </span>
-          }
-        </div>
+          </a>
+        </Link>
       )}
       {is_validator_path && (
         <>

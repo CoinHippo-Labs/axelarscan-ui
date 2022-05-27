@@ -288,7 +288,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                             <span className="font-mono mr-1.5">
                               {props.row.original.call?.returnValues?.amount ?
                                 numberFormat(BigNumber(EthersBigNumber.from(props.row.original.call.returnValues.amount).toString())
-                                  .shiftedBy(-(from_contract?.contract_decimals || to_contract?.contract_decimals || 6)).toNumber()
+                                  .shiftedBy(-(from_contract?.decimals || to_contract?.decimals || 6)).toNumber()
                                 , '0,0.00000000', true)
                                 :
                                 '-'

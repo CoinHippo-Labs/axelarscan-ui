@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
-import { Img as Image } from 'react-image'
 import { Puff } from 'react-loader-spinner'
 
+import Image from '../image'
 import { validator_profile } from '../../lib/api/cosmos'
 import { loader_color, rand_image } from '../../lib/utils'
 

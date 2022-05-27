@@ -1,6 +1,6 @@
 import { TVL_DATA } from './types'
 
-export default = (
+export default (
   state = {
     [`${TVL_DATA}`]: null,
   },

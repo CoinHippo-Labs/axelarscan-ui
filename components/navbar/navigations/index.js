@@ -6,12 +6,12 @@ import { TiArrowRight } from 'react-icons/ti'
 
 import menus from './menus'
 
-export default = () => {
+export default () => {
   const router = useRouter()
   const { pathname } = { ...router }
 
   return (
-    <div className="hidden xl:flex items-center space-x-0 xl:space-x-2 mx-auto">
+    <div className="hidden xl:flex items-center space-x-0 xl:space-x-1 mx-auto">
       {menus.filter(m => m?.path).map((m, i) => {
         const item = (
           <>
@@ -23,10 +23,10 @@ export default = () => {
         )
         const right_icon = m.emphasize ?
           <HeadShake duration={1500} forever>
-            <FaHandPointLeft size={20} />
+            <FaHandPointLeft size={18} />
           </HeadShake> : m.external ?
-          <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-3`
+          <TiArrowRight size={18} className="transform -rotate-45" /> : null
+        const className = `bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white text-xs ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-2`
         return m.external ?
           <a
             key={i}

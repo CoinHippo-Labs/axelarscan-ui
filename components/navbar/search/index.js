@@ -10,7 +10,7 @@ import { type } from '../../../lib/object/id'
 import { equals_ignore_case } from '../../../lib/utils'
 import { ENS_DATA } from '../../../reducers/types'
 
-export default = () => {
+export default () => {
   const dispatch = useDispatch()
   const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
   const { ens_data } = { ...ens }

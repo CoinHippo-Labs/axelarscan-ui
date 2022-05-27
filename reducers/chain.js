@@ -1,6 +1,6 @@
 import { CHAIN_DATA } from './types'
 
-export default = (
+export default (
   state = {
     [`${CHAIN_DATA}`]: null,
   },

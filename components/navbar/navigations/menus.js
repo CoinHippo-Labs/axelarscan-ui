@@ -1,55 +1,61 @@
 import { FiBox } from 'react-icons/fi'
 import { BiServer, BiFileBlank, BiMessageDots, BiCode, BiCoinStack } from 'react-icons/bi'
-import { RiKeyLine } from 'react-icons/ri'
+import { RiKeyLine, RiStackLine } from 'react-icons/ri'
 import { MdOutlineHowToVote } from 'react-icons/md'
 
-export default = [
+export default [
   {
     id: 'validators',
     title: 'Validators',
     path: '/validators',
-    icon: <BiServer size={20} className="stroke-current" />,
+    icon: <BiServer size={18} className="stroke-current" />,
   },
   {
     id: 'evm_votes',
-    title: 'EVM Votes',
+    title: 'Votes',
     path: '/evm-votes',
-    icon: <MdOutlineHowToVote size={20} className="stroke-current" />,
+    icon: <MdOutlineHowToVote size={18} className="stroke-current" />,
   },
   {
     id: 'blocks',
     title: 'Blocks',
     path: '/blocks',
-    icon: <FiBox size={20} className="stroke-current" />,
+    icon: <FiBox size={18} className="stroke-current" />,
   },
   {
     id: 'transactions',
-    title: 'Transactions',
+    title: 'TXs',
     path: '/transactions',
-    icon: <BiFileBlank size={20} className="stroke-current" />,
+    icon: <BiFileBlank size={18} className="stroke-current" />,
   },
   {
     id: 'participations',
-    title: 'Participations',
+    title: 'Keygen',
     path: '/participations',
-    icon: <RiKeyLine size={20} className="stroke-current" />,
+    icon: <RiKeyLine size={18} className="stroke-current" />,
   },
   {
     id: 'gmp',
     title: 'GMP',
     path: '/gmp',
-    icon: <BiMessageDots size={20} className="stroke-current" />,
+    icon: <BiMessageDots size={18} className="stroke-current" />,
   },
   {
     id: 'transfers',
     title: 'Transfers',
     path: '/transfers',
-    icon: <BiCode size={20} className="stroke-current" />,
+    icon: <BiCode size={18} className="stroke-current" />,
+  },
+  {
+    id: 'batches',
+    title: 'Batches',
+    path: '/batches',
+    icon: <RiStackLine size={18} className="stroke-current" />,
   },
   {
     id: 'assets',
     title: 'Assets',
     path: '/assets',
-    icon: <BiCoinStack size={20} className="stroke-current" />,
+    icon: <BiCoinStack size={18} className="stroke-current" />,
   },
 ].filter(m => process.env.NEXT_PUBLIC_GMP_API_URL || !['gmp', 'transfers', 'assets'].includes(m?.id))

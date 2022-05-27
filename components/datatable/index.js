@@ -23,7 +23,7 @@ const IndeterminateCheckbox = forwardRef(({ indeterminate, ...rest }, ref) => {
   )
 })
 
-export default = ({
+export default ({
   columns,
   data,
   rowSelectEnable = false,

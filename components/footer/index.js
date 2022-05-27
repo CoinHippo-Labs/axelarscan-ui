@@ -1,9 +1,10 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
-import { Img as Image } from 'react-image'
 import { FaHeart } from 'react-icons/fa'
 
-export default = () => {
+import Image from '../image'
+
+export default () => {
   const { preferences, chain } = useSelector(state => ({ preferences: state.preferences, chain: state.chain }), shallowEqual)
   const { theme } = { ...preferences }
   const { chain_data } = { ...chain }
@@ -34,7 +35,9 @@ export default = () => {
               />
             </div>
           </div>
-          <span>Axelar Core</span>
+          <span className="font-semibold">
+            Axelar Core
+          </span>
         </a>
         {chain_data?.['axelar-core_version'] && (
           <span className="text-slate-400 dark:text-white font-semibold">

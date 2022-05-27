@@ -1,6 +1,6 @@
 import { EVM_CHAINS_DATA } from './types'
 
-export default = (
+export default (
   state = {
     [`${EVM_CHAINS_DATA}`]: null,
   },

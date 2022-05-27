@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import menus from './menus'
 
-export default = ({ onClick }) => {
+export default ({ onClick }) => {
   return (
     <>
       <div className="dropdown-title">
@@ -13,7 +13,7 @@ export default = ({ onClick }) => {
           const item = (
             <>
               {e.icon}
-              <span className="leading-4 text-2xs font-medium">
+              <span className="leading-4 text-xs font-medium">
                 {e.title}
               </span>
             </>
@@ -30,7 +30,7 @@ export default = ({ onClick }) => {
             e.external ?
               <a
                 key={i}
-                href={e.url}
+                href={e.path}
                 onClick={onClick}
                 className="dropdown-item w-1/2 flex items-center justify-start space-x-1.5 p-2"
               >

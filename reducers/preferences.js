@@ -1,6 +1,6 @@
 import { THEME } from './types'
 
-export default = (
+export default (
   state = {
     [`${THEME}`]: 'light',
   },

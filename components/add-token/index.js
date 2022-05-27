@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Web3 from 'web3'
 import { providers } from 'ethers'
-import { Img as Image } from 'react-image'
 
+import Image from '../image'
 import { WALLET_DATA, CHAIN_ID } from '../../reducers/types'
 
 export default ({ token_data }) => {
@@ -72,7 +72,7 @@ export default ({ token_data }) => {
               options: {
                 address: contract.contract_address,
                 symbol: contract.symbol,
-                decimals: contract.contract_decimals,
+                decimals: contract.decimals,
                 image: contract.image ? `${contract.image.startsWith('/') ? process.env.NEXT_PUBLIC_SITE_URL : ''}${contract.image}` : undefined,
               },
             },

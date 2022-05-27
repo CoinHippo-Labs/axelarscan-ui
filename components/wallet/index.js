@@ -43,7 +43,7 @@ const getNetwork = chain_id => {
 
 let web3Modal
 
-export default = ({
+export default ({
   mainController = false,
   hidden = false,
   disabled = false, 

@@ -1,6 +1,6 @@
 import { ASSETS_DATA } from './types'
 
-export default = (
+export default (
   state = {
     [`${ASSETS_DATA}`]: null,
   },

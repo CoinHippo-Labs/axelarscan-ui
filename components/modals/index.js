@@ -4,7 +4,7 @@ import { FiX } from 'react-icons/fi'
 
 import Portal from '../portal'
 
-export default = ({
+export default ({
   id = 'portal',
   hidden,
   disabled,
