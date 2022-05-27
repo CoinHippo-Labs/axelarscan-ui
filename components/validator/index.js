@@ -24,7 +24,7 @@ import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, keygens as getKe
 import { chain_manager } from '../../lib/object/chain'
 import { denom_manager } from '../../lib/object/denom'
 import { blocksPerHeartbeat, blockFraction, lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
-import { getName } from '../../lib/utils'
+import { name } from '../../lib/utils'
 
 import { JAILED_SYNC_DATA } from '../../reducers/types'
 
@@ -584,7 +584,7 @@ export default function Validator({ address }) {
             const keygen = data[i]
             data[i] = {
               ...keygen,
-              key_chain: keygen.key_chain || (keygen?.key_id?.split('-').length > 1 && getName(keygen.key_id.split('-')[0])),
+              key_chain: keygen.key_chain || (keygen?.key_id?.split('-').length > 1 && name(keygen.key_id.split('-')[0])),
               key_role: keygen.key_role || (keygen?.key_id?.split('-').length > 2 && `${keygen.key_id.split('-')[1].toUpperCase()}_KEY`),
               participated: keygen.snapshot_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
               not_participated: keygen.snapshot_non_participant_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
@@ -602,7 +602,7 @@ export default function Validator({ address }) {
             const keygen = data[i]
             data[i] = {
               ...keygen,
-              key_chain: keygen.key_chain || (keygen?.key_id?.split('-').length > 1 && getName(keygen.key_id.split('-')[0])),
+              key_chain: keygen.key_chain || (keygen?.key_id?.split('-').length > 1 && name(keygen.key_id.split('-')[0])),
               key_role: keygen.key_role || (keygen?.key_id?.split('-').length > 2 && `${keygen.key_id.split('-')[1].toUpperCase()}_KEY`),
               participated: keygen.snapshot_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
               not_participated: keygen.snapshot_non_participant_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
@@ -627,7 +627,7 @@ export default function Validator({ address }) {
             const sign = data[i]
             data[i] = {
               ...sign,
-              key_chain: sign.key_chain || (sign?.key_id?.split('-').length > 1 && getName(sign.key_id.split('-')[0])),
+              key_chain: sign.key_chain || (sign?.key_id?.split('-').length > 1 && name(sign.key_id.split('-')[0])),
               key_role: sign.key_role || (sign?.key_id?.split('-').length > 2 && `${sign.key_id.split('-')[1].toUpperCase()}_KEY`),
               participated: sign.participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
               not_participated: sign.non_participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
@@ -649,7 +649,7 @@ export default function Validator({ address }) {
             const sign = data[i]
             data[i] = {
               ...sign,
-              key_chain: sign.key_chain || (sign?.key_id?.split('-').length > 1 && getName(sign.key_id.split('-')[0])),
+              key_chain: sign.key_chain || (sign?.key_id?.split('-').length > 1 && name(sign.key_id.split('-')[0])),
               key_role: sign.key_role || (sign?.key_id?.split('-').length > 2 && `${sign.key_id.split('-')[1].toUpperCase()}_KEY`),
               participated: sign.participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
               not_participated: sign.non_participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
@@ -743,7 +743,7 @@ export default function Validator({ address }) {
                   onClick={() => setTab(t)}
                   className={`max-w-min sm:max-w-max md:max-w-min lg:max-w-max btn btn-default btn-rounded cursor-pointer whitespace-nowrap bg-trasparent ${t === tab ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 text-white dark:hover:text-gray-100'}`}
                 >
-                  {getName(t)}
+                  {name(t)}
                 </div>
               ))}
             </div>}

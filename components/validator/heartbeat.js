@@ -9,7 +9,7 @@ import { FiKey } from 'react-icons/fi'
 import Widget from '../widget'
 import Popover from '../popover'
 
-import { numberFormat, getName } from '../../lib/utils'
+import { number_format, name } from '../../lib/utils'
 
 export default function Heartbeat({ data, validator_data }) {
   return (
@@ -17,10 +17,10 @@ export default function Heartbeat({ data, validator_data }) {
       title={<div className="flex items-center space-x-1">
         <span className="text-lg font-medium">Heartbeat</span>
         {data && (
-          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 mt-0.5">({numberFormat(data.filter(_heartbeat => _heartbeat.up).length, '0,0')} / {numberFormat(data.length, '0,0')})</span>
+          <span className="whitespace-nowrap text-gray-400 dark:text-gray-600 mt-0.5">({number_format(data.filter(_heartbeat => _heartbeat.up).length, '0,0')} / {number_format(data.length, '0,0')})</span>
         )}
       </div>}
-      right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600 sm:mr-1 xl:mr-1.5">Latest {numberFormat(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS, '0,0')} Blocks</span>}
+      right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600 sm:mr-1 xl:mr-1.5">Latest {number_format(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
     >
       <div className="flex flex-wrap items-center my-1 -ml-0.5">
@@ -33,7 +33,7 @@ export default function Heartbeat({ data, validator_data }) {
               key={i}
               placement="top"
               title={<div className="flex items-center justify-between space-x-2">
-                <span className="font-bold">Block: {numberFormat(block.height, '0,0')}</span>
+                <span className="font-bold">Block: {number_format(block.height, '0,0')}</span>
                 <Link href={`/block/${block.height}`}>
                   <a className="flex items-center text-blue-600 dark:text-white ml-auto">
                     <span className="text-xs">Go to Block</span>
@@ -51,7 +51,7 @@ export default function Heartbeat({ data, validator_data }) {
                             <span>Ineligibilities</span>
                           </span>
                           {ineligibilities.map((ineligibility, i) => (
-                            <span key={i} className={`max-w-min bg-${['tombstoned', 'jailed'].includes(ineligibility) ? 'red' : 'yellow'}-500 rounded-xl whitespace-nowrap capitalize text-white font-semibold px-2 py-1`}>{getName(ineligibility)}</span>
+                            <span key={i} className={`max-w-min bg-${['tombstoned', 'jailed'].includes(ineligibility) ? 'red' : 'yellow'}-500 rounded-xl whitespace-nowrap capitalize text-white font-semibold px-2 py-1`}>{name(ineligibility)}</span>
                           ))}
                         </div>
                       )}
@@ -90,7 +90,7 @@ export default function Heartbeat({ data, validator_data }) {
               className="w-7 h-7"
             >
               <div
-                title={numberFormat(block.height, '0,0')}
+                title={number_format(block.height, '0,0')}
                 className={`w-6 md:w-6 h-6 md:h-6 ${block.up ? ineligibilities.length > 0 ? ineligibilities.findIndex(ineligibility => ['tombstoned', 'jailed'].includes(ineligibility)) > -1 ? 'bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-700' : 'bg-gray-400 dark:bg-gray-700'} rounded m-1`}
               />
             </Popover>

@@ -22,7 +22,7 @@ import { getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { hexToBech32 } from '../../lib/object/key'
 import { currency } from '../../lib/object/currency'
-import { numberFormat } from '../../lib/utils'
+import { number_format } from '../../lib/utils'
 
 export default function Dashboard() {
   const { chains, cosmos_chains, assets, denoms, status, env, validators } = useSelector(state => ({ chains: state.chains, cosmos_chains: state.cosmos_chains, assets: state.assets, denoms: state.denoms, status: state.status, env: state.env, validators: state.validators }), shallowEqual)
@@ -92,9 +92,9 @@ export default function Dashboard() {
           active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v.status)).length,
           total_validators: validators_data?.length,
           denom: denom_manager.symbol(env_data?.staking_params?.bond_denom, denoms_data),
-          online_voting_power_now: env_data?.staking_pool && numberFormat(Math.floor(env_data.staking_pool.bonded_tokens), '0,0.00a'),
+          online_voting_power_now: env_data?.staking_pool && number_format(Math.floor(env_data.staking_pool.bonded_tokens), '0,0.00a'),
           online_voting_power_now_percentage: env_data?.staking_pool && env_data.bank_supply && (Math.floor(env_data.staking_pool.bonded_tokens) * 100 / env_data.bank_supply.amount),
-          total_voting_power: env_data?.bank_supply && numberFormat(env_data.bank_supply.amount, '0,0.00a'),
+          total_voting_power: env_data?.bank_supply && number_format(env_data.bank_supply.amount, '0,0.00a'),
         })
       }
     }
@@ -293,7 +293,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex items-center space-x-1">
                         <span className="font-mono uppercase text-gray-800 dark:text-gray-100 text-base font-semibold">
-                          {numberFormat(t.tx, t.tx >= 100000 ? '0,0.00a' : '0,0')}
+                          {number_format(t.tx, t.tx >= 100000 ? '0,0.00a' : '0,0')}
                         </span>
                       </div>
                     </div>
@@ -321,7 +321,7 @@ export default function Dashboard() {
                 <span>total</span>
                 {transfersData ?
                   <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono text-white font-semibold py-0.5 px-1.5">
-                    {numberFormat(_.sumBy(transfersData.data, 'tx'), '0,0')}
+                    {number_format(_.sumBy(transfersData.data, 'tx'), '0,0')}
                   </div>
                   :
                   <div className="skeleton w-12 h-6" />
@@ -409,7 +409,7 @@ export default function Dashboard() {
                 <span>total</span>
                 {supportedChains ?
                   <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono text-white font-semibold py-0.5 px-1.5">
-                    {numberFormat(supportedChains.length, '0,0')}
+                    {number_format(supportedChains.length, '0,0')}
                   </div>
                   :
                   <div className="skeleton w-12 h-6" />

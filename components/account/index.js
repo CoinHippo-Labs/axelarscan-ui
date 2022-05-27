@@ -12,7 +12,7 @@ import Widget from '../widget'
 import { allBankBalances, allStakingDelegations, allStakingUnbonding, distributionRewards, distributionCommissions, transactions_by_events, transactions_by_events_paging } from '../../lib/api/cosmos'
 import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
 import { denom_manager } from '../../lib/object/denom'
-import { numberFormat, sleep } from '../../lib/utils'
+import { number_format, sleep } from '../../lib/utils'
 
 export default function Account({ address }) {
   const { preferences, chains, cosmos_chains, denoms, env, validators } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, cosmos_chains: state.cosmos_chains, denoms: state.denoms, env: state.env, validators: state.validators }), shallowEqual)
@@ -387,7 +387,7 @@ export default function Account({ address }) {
                 style={{ textTransform: 'none', fontSize: '.7rem' }}
               >
                 <span>{key === 'undefined' ? 'Failed' : key?.endsWith('Request') ? key.replace('Request', '') : key}</span>
-                <span className="text-2xs text-indigo-600 dark:text-indigo-400 font-bold mt-0.5"> {numberFormat(value, '0,0')}</span>
+                <span className="text-2xs text-indigo-600 dark:text-indigo-400 font-bold mt-0.5"> {number_format(value, '0,0')}</span>
               </div>
             ))}
           </div>

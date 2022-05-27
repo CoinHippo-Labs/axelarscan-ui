@@ -10,7 +10,7 @@ import Copy from '../copy'
 
 import { chainTitle } from '../../lib/object/chain'
 import { currency, currency_symbol } from '../../lib/object/currency'
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function AccountDetail({ address, data }) {
   const { env } = useSelector(state => ({ env: state.env }), shallowEqual)
@@ -28,11 +28,11 @@ export default function AccountDetail({ address, data }) {
               {data.total?.length > 0 ?
                 data.total.map((total, i) => (
                   <span key={i} className="bg-gray-100 dark:bg-gray-900 rounded font-medium space-x-1 my-1 px-2 py-1">
-                    <span>{numberFormat(total.amount, '0,0.00000000')}</span>
-                    <span className="whitespace-nowrap uppercase font-light">{ellipseAddress(total.denom, 12)}</span>
+                    <span>{number_format(total.amount, '0,0.00000000')}</span>
+                    <span className="whitespace-nowrap uppercase font-light">{ellipse(total.denom, 12)}</span>
                     {env_data?.token_data && env_data.staking_params?.bond_denom === total.denom && (
                       <span className="text-gray-500">
-                        ({currency_symbol}{numberFormat(total.amount * env_data.token_data[currency], '0,0.00000000')})
+                        ({currency_symbol}{number_format(total.amount * env_data.token_data[currency], '0,0.00000000')})
                       </span>
                     )}
                   </span>
@@ -59,7 +59,7 @@ export default function AccountDetail({ address, data }) {
                 sortType: (rowA, rowB) => rowA.original.i > rowB.original.i ? 1 : -1,
                 Cell: props => (
                   !props.row.original.skeleton ?
-                    numberFormat(props.value + 1, '0,0')
+                    number_format(props.value + 1, '0,0')
                     :
                     <div className="skeleton w-4 h-3" />
                 ),
@@ -73,21 +73,21 @@ export default function AccountDetail({ address, data }) {
                     <div className={`min-w-max flex items-${props.row.original.contract_address ? 'start' : 'center'} space-x-2`}>
                       <div className="flex flex-col">
                         <span className="flex items-center space-x-1">
-                          <span className="uppercase font-semibold">{ellipseAddress(props.value, 8)}</span>
+                          <span className="uppercase font-semibold">{ellipse(props.value, 8)}</span>
                           {props.row.original.symbol && (
                             <span className="uppercase text-gray-400 dark:text-gray-600">{props.row.original.symbol}</span>
                           )}
                         </span>
                         {props.row.original.contract_address && (
                           <span className="flex items-center space-x-1">
-                            <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
+                            <span className="font-light">{ellipse(props.row.original.contract_address)}</span>
                             <Copy value={props.row.original.contract_address} />
                           </span>
                         )}
                         {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
                           <span className="text-gray-400 dark:text-gray-600">
                             {currency_symbol}
-                            {numberFormat(env_data.token_data[currency], '0,0.00000000')}
+                            {number_format(env_data.token_data[currency], '0,0.00000000')}
                           </span>
                         )}
                       </div>
@@ -111,11 +111,11 @@ export default function AccountDetail({ address, data }) {
                     <div className="flex flex-col justify-center text-left sm:text-right">
                       {props.value > -1 ?
                         <>
-                          <span className="font-medium">{numberFormat(props.value, '0,0.00000000')}</span>
+                          <span className="font-medium">{number_format(props.value, '0,0.00000000')}</span>
                           {env_data?.token_data && env_data.staking_params?.bond_denom === props.row.original.denom && (
                             <span className="text-gray-400 dark:text-gray-600">
                               {currency_symbol}
-                              {numberFormat(props.value * env_data.token_data[currency], '0,0.00000000')}
+                              {number_format(props.value * env_data.token_data[currency], '0,0.00000000')}
                             </span>
                           )}
                         </>
@@ -161,7 +161,7 @@ export default function AccountDetail({ address, data }) {
                     sortType: (rowA, rowB) => rowA.original.i > rowB.original.i ? 1 : -1,
                     Cell: props => (
                       !props.row.original.skeleton ?
-                        numberFormat(props.value + 1, '0,0')
+                        number_format(props.value + 1, '0,0')
                         :
                         <div className="skeleton w-4 h-3" />
                     ),
@@ -175,21 +175,21 @@ export default function AccountDetail({ address, data }) {
                         <div className={`min-w-max flex items-${props.row.original.contract_address ? 'start' : 'center'} space-x-2`}>
                           <div className="flex flex-col">
                             <span className="flex items-center space-x-1">
-                              <span className="uppercase font-semibold">{ellipseAddress(props.value, 8)}</span>
+                              <span className="uppercase font-semibold">{ellipse(props.value, 8)}</span>
                               {props.row.original.symbol && (
                                 <span className="uppercase text-gray-400 dark:text-gray-600">{props.row.original.symbol}</span>
                               )}
                             </span>
                             {props.row.original.contract_address && (
                               <span className="flex items-center space-x-1">
-                                <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
+                                <span className="font-light">{ellipse(props.row.original.contract_address)}</span>
                                 <Copy value={props.row.original.contract_address} />
                               </span>
                             )}
                             {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
                               <span className="text-gray-400 dark:text-gray-600">
                                 {currency_symbol}
-                                {numberFormat(env_data.token_data[currency], '0,0.00000000')}
+                                {number_format(env_data.token_data[currency], '0,0.00000000')}
                               </span>
                             )}
                           </div>
@@ -213,11 +213,11 @@ export default function AccountDetail({ address, data }) {
                         <div className="flex flex-col justify-center text-left sm:text-right">
                           {props.value > -1 ?
                             <>
-                              <span className="font-medium">{numberFormat(props.value, '0,0.00000000')}</span>
+                              <span className="font-medium">{number_format(props.value, '0,0.00000000')}</span>
                               {env_data?.token_data && env_data.staking_params?.bond_denom === props.row.original.denom && (
                                 <span className="text-gray-400 dark:text-gray-600">
                                   {currency_symbol}
-                                  {numberFormat(props.value * env_data.token_data[currency], '0,0.00000000')}
+                                  {number_format(props.value * env_data.token_data[currency], '0,0.00000000')}
                                 </span>
                               )}
                             </>
@@ -261,7 +261,7 @@ export default function AccountDetail({ address, data }) {
                     sortType: (rowA, rowB) => rowA.original.i > rowB.original.i ? 1 : -1,
                     Cell: props => (
                       !props.row.original.skeleton ?
-                        numberFormat(props.value + 1, '0,0')
+                        number_format(props.value + 1, '0,0')
                         :
                         <div className="skeleton w-4 h-3" />
                     ),
@@ -275,21 +275,21 @@ export default function AccountDetail({ address, data }) {
                         <div className={`min-w-max flex items-${props.row.original.contract_address ? 'start' : 'center'} space-x-2`}>
                           <div className="flex flex-col">
                             <span className="flex items-center space-x-1">
-                              <span className="uppercase font-semibold">{ellipseAddress(props.value, 8)}</span>
+                              <span className="uppercase font-semibold">{ellipse(props.value, 8)}</span>
                               {props.row.original.symbol && (
                                 <span className="uppercase text-gray-400 dark:text-gray-600">{props.row.original.symbol}</span>
                               )}
                             </span>
                             {props.row.original.contract_address && (
                               <span className="flex items-center space-x-1">
-                                <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
+                                <span className="font-light">{ellipse(props.row.original.contract_address)}</span>
                                 <Copy value={props.row.original.contract_address} />
                               </span>
                             )}
                             {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
                               <span className="text-gray-400 dark:text-gray-600">
                                 {currency_symbol}
-                                {numberFormat(env_data.token_data[currency], '0,0.00000000')}
+                                {number_format(env_data.token_data[currency], '0,0.00000000')}
                               </span>
                             )}
                           </div>
@@ -313,11 +313,11 @@ export default function AccountDetail({ address, data }) {
                         <div className="flex flex-col justify-center text-left sm:text-right">
                           {props.value > -1 ?
                             <>
-                              <span className="font-medium">{numberFormat(props.value, '0,0.00000000')}</span>
+                              <span className="font-medium">{number_format(props.value, '0,0.00000000')}</span>
                               {env_data?.token_data && env_data.staking_params?.bond_denom === props.row.original.denom && (
                                 <span className="text-gray-400 dark:text-gray-600">
                                   {currency_symbol}
-                                  {numberFormat(props.value * env_data.token_data[currency], '0,0.00000000')}
+                                  {number_format(props.value * env_data.token_data[currency], '0,0.00000000')}
                                 </span>
                               )}
                             </>
@@ -366,7 +366,7 @@ export default function AccountDetail({ address, data }) {
                       <div className="flex items-center space-x-1">
                         <Link href={`/tx/${props.value}`}>
                           <a className="uppercase text-xs text-blue-600 dark:text-white font-medium">
-                            {ellipseAddress(props.value, 8)}
+                            {ellipse(props.value, 8)}
                           </a>
                         </Link>
                         <Copy value={props.value} />
@@ -383,7 +383,7 @@ export default function AccountDetail({ address, data }) {
                     !props.row.original.skeleton ?
                       <Link href={`/block/${props.value}`}>
                         <a className="text-xs text-blue-500 dark:text-gray-400 font-medium">
-                          {numberFormat(props.value, '0,0')}
+                          {number_format(props.value, '0,0')}
                         </a>
                       </Link>
                       :
@@ -404,7 +404,7 @@ export default function AccountDetail({ address, data }) {
                             <Copy
                               value={props.value}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                                {ellipseAddress(props.value, 8)}
+                                {ellipse(props.value, 8)}
                               </span>}
                             />
                             {chain?.explorer?.url && (
@@ -460,7 +460,7 @@ export default function AccountDetail({ address, data }) {
                             <Copy
                               value={props.value}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                                {ellipseAddress(props.value, 8)}
+                                {ellipse(props.value, 8)}
                               </span>}
                             />
                             {chain?.explorer?.url && (
@@ -515,7 +515,7 @@ export default function AccountDetail({ address, data }) {
                           className="w-5 h-5 rounded-full"
                         />
                         <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
-                          <span className="normal-case">{props.row.original.asset?.symbol || ellipseAddress(props.value, 8)}</span>
+                          <span className="normal-case">{props.row.original.asset?.symbol || ellipse(props.value, 8)}</span>
                         </span>
                       </div>
                       :
@@ -555,7 +555,7 @@ export default function AccountDetail({ address, data }) {
                   sortType: (rowA, rowB) => rowA.original.i > rowB.original.i ? 1 : -1,
                   Cell: props => (
                     !props.row.original.skeleton ?
-                      numberFormat(props.value + 1, '0,0')
+                      number_format(props.value + 1, '0,0')
                       :
                       <div className="skeleton w-4 h-3" />
                   ),
@@ -593,7 +593,7 @@ export default function AccountDetail({ address, data }) {
                           <span className="flex items-center space-x-1">
                             <Link href={`/validator/${props.row.original.validator_address}`}>
                               <a className="text-gray-500 font-light">
-                                {ellipseAddress(props.row.original.validator_address, 16)}
+                                {ellipse(props.row.original.validator_address, 16)}
                               </a>
                             </Link>
                             <Copy value={props.row.original.validator_address} />
@@ -619,21 +619,21 @@ export default function AccountDetail({ address, data }) {
                       <div className={`min-w-max flex items-${props.row.original.contract_address ? 'start' : 'center'} space-x-2`}>
                         <div className="flex flex-col">
                           <span className="flex items-center space-x-1">
-                            <span className="uppercase font-semibold">{ellipseAddress(props.value, 8)}</span>
+                            <span className="uppercase font-semibold">{ellipse(props.value, 8)}</span>
                             {props.row.original.symbol && (
                               <span className="uppercase text-gray-400 dark:text-gray-600">{props.row.original.symbol}</span>
                             )}
                           </span>
                           {props.row.original.contract_address && (
                             <span className="flex items-center space-x-1">
-                              <span className="font-light">{ellipseAddress(props.row.original.contract_address)}</span>
+                              <span className="font-light">{ellipse(props.row.original.contract_address)}</span>
                               <Copy value={props.row.original.contract_address} />
                             </span>
                           )}
                           {env_data?.token_data && env_data.staking_params?.bond_denom === props.value && (
                             <span className="text-gray-400 dark:text-gray-600">
                               {currency_symbol}
-                              {numberFormat(env_data.token_data[currency], '0,0.00000000')}
+                              {number_format(env_data.token_data[currency], '0,0.00000000')}
                             </span>
                           )}
                         </div>
@@ -657,11 +657,11 @@ export default function AccountDetail({ address, data }) {
                       <div className="flex flex-col justify-center text-left sm:text-right">
                         {props.value > -1 ?
                           <>
-                            <span className="font-medium">{numberFormat(props.value, '0,0.00000000')}</span>
+                            <span className="font-medium">{number_format(props.value, '0,0.00000000')}</span>
                             {env_data?.token_data && env_data.staking_params?.bond_denom === props.row.original.denom && (
                               <span className="text-gray-400 dark:text-gray-600">
                                 {currency_symbol}
-                                {numberFormat(props.value * env_data.token_data[currency], '0,0.00000000')}
+                                {number_format(props.value * env_data.token_data[currency], '0,0.00000000')}
                               </span>
                             )}
                           </>
@@ -705,7 +705,7 @@ export default function AccountDetail({ address, data }) {
                   sortType: (rowA, rowB) => rowA.original.i > rowB.original.i ? 1 : -1,
                   Cell: props => (
                     !props.row.original.skeleton ?
-                      numberFormat(props.value + 1, '0,0')
+                      number_format(props.value + 1, '0,0')
                       :
                       <div className="skeleton w-4 h-3" />
                   ),
@@ -743,7 +743,7 @@ export default function AccountDetail({ address, data }) {
                           <span className="flex items-center space-x-1">
                             <Link href={`/validator/${props.row.original.validator_address}`}>
                               <a className="text-gray-500 font-light">
-                                {ellipseAddress(props.row.original.validator_address, 16)}
+                                {ellipse(props.row.original.validator_address, 16)}
                               </a>
                             </Link>
                             <Copy value={props.row.original.validator_address} />
@@ -768,7 +768,7 @@ export default function AccountDetail({ address, data }) {
                     !props.row.original.skeleton ?
                       <Link href={`/block/${props.value}`}>
                         <a className="text-blue-600 dark:text-white font-medium">
-                          {numberFormat(props.value, '0,0')}
+                          {number_format(props.value, '0,0')}
                         </a>
                       </Link>
                       :
@@ -784,13 +784,13 @@ export default function AccountDetail({ address, data }) {
                       <div className="text-left sm:text-right">
                         <span className="font-medium">
                           {props.value > -1 ?
-                            numberFormat(props.value, '0,0.00000000')
+                            number_format(props.value, '0,0.00000000')
                             :
                             '-'
                           }
                           /
                           {props.row.original.initial_balance > -1 ?
-                            numberFormat(props.row.original.initial_balance, '0,0.00000000')
+                            number_format(props.row.original.initial_balance, '0,0.00000000')
                             :
                             '-'
                           }

@@ -7,7 +7,7 @@ import { FaCheckCircle, FaClock, FaTimesCircle } from 'react-icons/fa'
 import Widget from '../widget'
 import Copy from '../copy'
 
-import { numberFormat, getName, ellipseAddress } from '../../lib/utils'
+import { number_format, name, ellipse } from '../../lib/utils'
 
 export default function TransactionDetail({ data }) {
   const { validators } = useSelector(state => ({ validators: state.validators }), shallowEqual)
@@ -56,7 +56,7 @@ export default function TransactionDetail({ data }) {
               <div className="text-xs lg:text-base">
                 <Link href={`/block/${data.height}`}>
                   <a className="text-blue-600 dark:text-white">
-                    {numberFormat(data.height, '0,0')}
+                    {number_format(data.height, '0,0')}
                   </a>
                 </Link>
               </div>
@@ -85,7 +85,7 @@ export default function TransactionDetail({ data }) {
               <div className="text-xs lg:text-base">
                 {data.type ?
                   <span className="bg-gray-100 dark:bg-gray-800 rounded-lg capitalize text-gray-900 dark:text-gray-100 font-semibold px-2 py-1">
-                    {getName(data.type)}
+                    {name(data.type)}
                   </span>
                   :
                   '-'
@@ -118,14 +118,14 @@ export default function TransactionDetail({ data }) {
                   {validator_data.description?.moniker && (
                     <Link href={`/validator/${validator_data.operator_address}`}>
                       <a className="text-blue-600 dark:text-white font-medium">
-                        {ellipseAddress(validator_data.description.moniker, 16) || validator_data.operator_address}
+                        {ellipse(validator_data.description.moniker, 16) || validator_data.operator_address}
                       </a>
                     </Link>
                   )}
                   <span className="flex items-center space-x-1">
                     <Link href={`/validator/${validator_data.operator_address}`}>
                       <a className="text-gray-400 dark:text-gray-600 font-light">
-                        {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                        {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                       </a>
                     </Link>
                     <Copy value={validator_data.operator_address} />
@@ -137,7 +137,7 @@ export default function TransactionDetail({ data }) {
                 <div className="flex items-center space-x-1">
                   <Link href={`/account/${data.sender}`}>
                     <a className="text-blue-600 dark:text-white font-medium">
-                      {ellipseAddress(data.sender)}
+                      {ellipse(data.sender)}
                     </a>
                   </Link>
                   <Copy value={data.sender} />
@@ -155,7 +155,7 @@ export default function TransactionDetail({ data }) {
               <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
                 <Link href={`/${data.from.type === 'validator' ? 'validator' : 'account'}/${data.from.key}`}>
                   <a className="uppercase text-blue-600 dark:text-white font-medium">
-                    {ellipseAddress(data.from.key, 16)}
+                    {ellipse(data.from.key, 16)}
                   </a>
                 </Link>
                 <Copy value={data.from.key} />
@@ -175,7 +175,7 @@ export default function TransactionDetail({ data }) {
               <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
                 <Link href={`/${data.from.type === 'validator' ? 'validator' : 'account'}/${data.to.key}`}>
                   <a className="uppercase text-blue-600 dark:text-white font-medium">
-                    {ellipseAddress(data.to.key, 16)}
+                    {ellipse(data.to.key, 16)}
                   </a>
                 </Link>
                 <Copy value={data.to.key} />
@@ -194,7 +194,7 @@ export default function TransactionDetail({ data }) {
             <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
               {typeof data.value === 'number' ?
                 <span className="flex items-center justify-end space-x-1">
-                  <span>{numberFormat(data.value, '0,0.00000000')}</span>
+                  <span>{number_format(data.value, '0,0.00000000')}</span>
                   <span className="uppercase font-medium">{data.symbol}</span>
                 </span>
                 :
@@ -211,7 +211,7 @@ export default function TransactionDetail({ data }) {
             <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
               {typeof data.fee === 'number' ?
                 <span className="flex items-center justify-end space-x-1">
-                  <span>{data.fee ? numberFormat(data.fee, '0,0.00000000') : 'No Fee'}</span>
+                  <span>{data.fee ? number_format(data.fee, '0,0.00000000') : 'No Fee'}</span>
                   {data.fee > 0 && (
                     <span className="uppercase font-medium">{data.symbol}</span>
                   )}
@@ -230,7 +230,7 @@ export default function TransactionDetail({ data }) {
             <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
               {typeof data.gas_price === 'number' ?
                 <span className="flex items-center justify-end space-x-1">
-                  <span>{numberFormat(data.gas_price, '0,0.00000000')}</span>
+                  <span>{number_format(data.gas_price, '0,0.00000000')}</span>
                   <span className="uppercase font-medium">{data.symbol}</span>
                 </span>
                 :
@@ -246,7 +246,7 @@ export default function TransactionDetail({ data }) {
           {data ?
             <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
               {typeof data.gas_used === 'number' ?
-                <span>{numberFormat(data.gas_used, '0,0.00000000')}</span>
+                <span>{number_format(data.gas_used, '0,0.00000000')}</span>
                 :
                 '-'
               }
@@ -260,7 +260,7 @@ export default function TransactionDetail({ data }) {
           {data ?
             <div className="flex flex-wrap items-center text-xs lg:text-base space-x-1">
               {typeof data.gas_limit === 'number' ?
-                <span>{numberFormat(data.gas_limit, '0,0.00000000')}</span>
+                <span>{number_format(data.gas_limit, '0,0.00000000')}</span>
                 :
                 '-'
               }

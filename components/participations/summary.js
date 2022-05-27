@@ -9,7 +9,7 @@ import Widget from '../widget'
 
 import { denom_manager } from '../../lib/object/denom'
 import { chain_manager } from '../../lib/object/chain'
-import { numberFormat } from '../../lib/utils'
+import { number_format } from '../../lib/utils'
 
 const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, failedSignAttempts }) => {
   const { chains, denoms, validators, validators_chains } = useSelector(state => ({ chains: state.chains, denoms: state.denoms, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
@@ -70,7 +70,7 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
                     <div className="grid grid-flow-row grid-cols-2 gap-2">
                       {value.map((_key, i) => (
                         <span key={i} className="h-8 text-3xl lg:text-2xl xl:text-3xl font-semibold">
-                          {_key.min_keygen_threshold?.denominator > 0 ? numberFormat(_key.min_keygen_threshold.numerator * 100 / _key.min_keygen_threshold.denominator, '0,0.00') : '-'}
+                          {_key.min_keygen_threshold?.denominator > 0 ? number_format(_key.min_keygen_threshold.numerator * 100 / _key.min_keygen_threshold.denominator, '0,0.00') : '-'}
                           <span className="text-lg font-normal">%</span>
                         </span>
                       ))}
@@ -79,7 +79,7 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
                 ))
                 :
                 <span className="h-8 text-3xl font-semibold">
-                  {typeof data.active_keygen_threshold === 'number' ? numberFormat(data.active_keygen_threshold, '0,0.00') : 'N/A'}
+                  {typeof data.active_keygen_threshold === 'number' ? number_format(data.active_keygen_threshold, '0,0.00') : 'N/A'}
                   <span className="text-lg font-normal">%</span>
                 </span>
               :
@@ -122,7 +122,7 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
                     <div className="grid grid-flow-row grid-cols-2 gap-2">
                       {value.map((_key, i) => (
                         <span key={i} className="h-8 text-3xl lg:text-2xl xl:text-3xl font-semibold">
-                          {_key.safety_threshold?.denominator > 0 ? numberFormat(_key.safety_threshold.numerator * 100 / _key.safety_threshold.denominator, '0,0.00') : '-'}
+                          {_key.safety_threshold?.denominator > 0 ? number_format(_key.safety_threshold.numerator * 100 / _key.safety_threshold.denominator, '0,0.00') : '-'}
                           <span className="text-lg font-normal">%</span>
                         </span>
                       ))}
@@ -164,13 +164,13 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
         <span className="flex flex-col space-y-1 mt-1.5">
           <div className="flex flex-row space-x-1.5">
             {typeof successKeygens === 'number' ?
-              <span className="h-8 text-3xl font-semibold">{numberFormat(successKeygens, '0,0')}</span>
+              <span className="h-8 text-3xl font-semibold">{number_format(successKeygens, '0,0')}</span>
               :
               <div className="skeleton w-12 h-7 mt-1" />
             }
             <span className="h-8 text-gray-600 dark:text-gray-400 text-3xl font-light">/</span>
             {typeof failedKeygens === 'number' ?
-              <span className="h-8 text-3xl font-semibold">{numberFormat(failedKeygens, '0,0')}</span>
+              <span className="h-8 text-3xl font-semibold">{number_format(failedKeygens, '0,0')}</span>
               :
               <div className="skeleton w-12 h-7 mt-1" />
             }
@@ -189,13 +189,13 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
         <span className="flex flex-col space-y-1 mt-1.5">
           <div className="flex flex-row space-x-1.5">
             {typeof successSignAttempts === 'number' ?
-              <span className="h-8 text-3xl font-semibold">{numberFormat(successSignAttempts, '0,0')}</span>
+              <span className="h-8 text-3xl font-semibold">{number_format(successSignAttempts, '0,0')}</span>
               :
               <div className="skeleton w-12 h-7 mt-1" />
             }
             <span className="h-8 text-gray-600 dark:text-gray-400 text-3xl font-light">/</span>
             {typeof failedSignAttempts === 'number' ?
-              <span className="h-8 text-3xl font-semibold">{numberFormat(failedSignAttempts, '0,0')}</span>
+              <span className="h-8 text-3xl font-semibold">{number_format(failedSignAttempts, '0,0')}</span>
               :
               <div className="skeleton w-12 h-7 mt-1" />
             }
@@ -227,7 +227,7 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
                   <div className="uppercase text-gray-400 dark:text-gray-600 text-xs">Threshold</div>
                   <div className="grid grid-flow-row grid-cols-2 gap-2">
                     <span key={i} className="h-8 text-3xl lg:text-2xl xl:text-3xl font-semibold">
-                      {c?.params?.voting_threshold?.denominator > 0 ? numberFormat(c.params.voting_threshold.numerator * 100 / c.params.voting_threshold.denominator, '0,0.00') : '-'}
+                      {c?.params?.voting_threshold?.denominator > 0 ? number_format(c.params.voting_threshold.numerator * 100 / c.params.voting_threshold.denominator, '0,0.00') : '-'}
                       <span className="text-lg font-normal">%</span>
                     </span>
                   </div>
@@ -237,11 +237,11 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
                   <div className="grid grid-flow-row grid-cols-1 gap-2">
                     {typeof c.staking_percentage === 'number' ?
                       <span className="h-8 flex items-center text-3xl lg:text-2xl xl:text-3xl font-semibold">
-                        <span>{numberFormat(c.staking_percentage, '0,0.00')}</span>
+                        <span>{number_format(c.staking_percentage, '0,0.00')}</span>
                         <span className="text-lg font-normal mr-1 pt-2">%</span>
                         <span className="flex items-center text-gray-400 dark:text-gray-600 text-2xs space-x-1 pt-2">
                           (
-                          <span>{numberFormat(c.num_maintain_validators, '0,0')} / {numberFormat(activeValidators?.length, '0,0')}</span>
+                          <span>{number_format(c.num_maintain_validators, '0,0')} / {number_format(activeValidators?.length, '0,0')}</span>
                           <BiServer size={12} className="stroke-current" className="mb-0.5" />
                           )
                         </span>
@@ -256,9 +256,9 @@ const Summary = ({ data, successKeygens, failedKeygens, successSignAttempts, fai
                 <div className="col-span-1">
                   {typeof c.staking_percentage === 'number' ?
                     <span className="text-gray-400 dark:text-gray-600 text-xs font-normal mt-1">
-                      <span className="uppercase mr-1">{numberFormat(c.maintain_staking, '0,0.00a')}</span>
+                      <span className="uppercase mr-1">{number_format(c.maintain_staking, '0,0.00a')}</span>
                       <span className="mr-1">/</span>
-                      <span className="uppercase mr-1">{numberFormat(c.total_staking, '0,0.00a')}</span>
+                      <span className="uppercase mr-1">{number_format(c.total_staking, '0,0.00a')}</span>
                       <span className="uppercase font-medium mr-1">{c.denom}</span>
                     </span>
                     :

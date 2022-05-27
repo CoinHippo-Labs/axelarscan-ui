@@ -67,35 +67,26 @@ export default () => {
     const getData = async () => {
       const response = await getAssets()
       if (response) {
-        dispatch({
-          type: ASSETS_DATA,
-          value: response,
-        })
-      }
-    }
-    getData()
-  }, [])
-
-  // price
-  useEffect(() => {
-    const getData = async is_interval => {
-      if (assets_data) {
-        let updated_ids = is_interval ? [] : assets_data.filter(a => a?.price).map(a => a.id)
+        const assets_data = response
+        // price
+        let updated_ids = assets_data.filter(a => a?.price).map(a => a.id)
         if (updated_ids.length < assets_data.length) {
           let updated = false
           const denoms = assets_data.filter(a => a?.id && !updated_ids.includes(a.id)).map(a => a.id)
           if (denoms.length > 0) {
             const response = await getAssetsPrice({ denoms })
-            response?.forEach(t => {
-              const asset_index = assets_data.findIndex(a => equals_ignore_case(a?.id, t?.denom))
-              if (asset_index > -1) {
-                const asset = assets_data[asset_index]
-                asset.price = t?.price || asset.price
-                assets_data[asset_index] = asset
-                updated_ids = _.uniq(_.concat(updated_ids, asset.id))
-                updated = true
-              }
-            })
+            if (response) {
+              response.forEach(t => {
+                const asset_index = assets_data.findIndex(a => equals_ignore_case(a?.id, t?.denom))
+                if (asset_index > -1) {
+                  const asset = assets_data[asset_index]
+                  asset.price = t?.price || asset.price
+                  assets_data[asset_index] = asset
+                  updated_ids = _.uniq(_.concat(updated_ids, asset.id))
+                  updated = true
+                }
+              })
+            }
           }
           if (updated) {
             dispatch({
@@ -107,11 +98,7 @@ export default () => {
       }
     }
     getData()
-    const interval = setInterval(() => getData(true), 5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
-  }, [assets_data])
+  }, [])
 
   // status
   useEffect(() => {
@@ -332,7 +319,7 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (assets_data?.findIndex(a => a?.price) > -1 &&
+      if (assets_data &&
         status_data &&
         ['/address', '/gmp', '/transfers', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
       ) {

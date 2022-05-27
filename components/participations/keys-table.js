@@ -14,7 +14,7 @@ import { IoCaretUpOutline, IoCaretDownOutline } from 'react-icons/io5'
 import Datatable from '../datatable'
 import Copy from '../copy'
 
-import { numberFormat, getName, ellipseAddress } from '../../lib/utils'
+import { number_format, name, ellipse } from '../../lib/utils'
 
 const COLLAPSE_VALIDATORS_SIZE = 5
 
@@ -38,7 +38,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                 <div className="my-1">
                   <div className="flex items-center text-gray-900 dark:text-gray-100 space-x-1">
                     {['keygen_failed'].includes(page) ? <MdCancel size={16} className="text-red-500" /> : <FiKey size={16} />}
-                    <span className="font-medium">{ellipseAddress(props.value, ['validator-keygen', 'validator-sign'].includes(page) ? 8 : ['validator'].includes(page) ? 12 : 20)}</span>
+                    <span className="font-medium">{ellipse(props.value, ['validator-keygen', 'validator-sign'].includes(page) ? 8 : ['validator'].includes(page) ? 12 : 20)}</span>
                     {props.value && (<Copy value={props.value} />)}
                   </div>
                   {['sign_success', 'sign_failed'].includes(page) && props.row.original.sig_id && (
@@ -46,7 +46,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                       <div className="text-gray-400 dark:text-gray-600 text-xs font-normal mt-2">Signature ID</div>
                       <div className="flex items-center text-gray-900 dark:text-gray-100 space-x-1">
                         {['sign_failed'].includes(page) ? <MdCancel size={16} className="text-red-500" /> : <FaSignature size={16} />}
-                        <span className="font-medium">{ellipseAddress(props.row.original.sig_id, 16)}</span>
+                        <span className="font-medium">{ellipse(props.row.original.sig_id, 16)}</span>
                         <Copy value={props.row.original.sig_id} />
                       </div>
                     </>
@@ -114,7 +114,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                   {props.value ?
                     <Link href={`/block/${props.value}`}>
                       <a className="text-blue-600 dark:text-white">
-                        {numberFormat(props.value, '0,0')}
+                        {number_format(props.value, '0,0')}
                       </a>
                     </Link>
                     :
@@ -137,7 +137,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                     <>
                       <Link href={`/block/${props.value}`}>
                         <a className="text-blue-600 dark:text-white font-medium">
-                          {numberFormat(props.value, '0,0')}
+                          {number_format(props.value, '0,0')}
                         </a>
                       </Link>
                       {/*props.row.original.timestamp && (
@@ -164,8 +164,8 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                 <div className="flex flex-col text-right space-y-0.5 my-1">
                   {typeof props.value === 'number' ?
                     <>
-                      <span className="font-semibold">{numberFormat(props.value, '0,0')} / {numberFormat(props.row.original.num_total_shares, '0,0')}</span>
-                      <span className="text-gray-400 dark:text-gray-500 text-xs">({numberFormat(props.value * 100 / props.row.original.num_total_shares, '0,0.00')}%)</span>
+                      <span className="font-semibold">{number_format(props.value, '0,0')} / {number_format(props.row.original.num_total_shares, '0,0')}</span>
+                      <span className="text-gray-400 dark:text-gray-500 text-xs">({number_format(props.value * 100 / props.row.original.num_total_shares, '0,0.00')}%)</span>
                     </>
                     :
                     '-'
@@ -186,8 +186,8 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                 <div className="flex flex-col text-right space-y-0.5 my-1">
                   {props.value > -1 ?
                     <>
-                      <span className="font-semibold">{numberFormat(props.value + 1, '0,0')} / {numberFormat(_.sumBy(props.row.original.validator_shares || props.row.original.validators, 'share'), '0,0')}</span>
-                      <span className="text-gray-400 dark:text-gray-500 text-xs">({numberFormat((props.value + 1) * 100 / _.sumBy(props.row.original.validator_shares || props.row.original.validators, 'share'), '0,0.00')}%)</span>
+                      <span className="font-semibold">{number_format(props.value + 1, '0,0')} / {number_format(_.sumBy(props.row.original.validator_shares || props.row.original.validators, 'share'), '0,0')}</span>
+                      <span className="text-gray-400 dark:text-gray-500 text-xs">({number_format((props.value + 1) * 100 / _.sumBy(props.row.original.validator_shares || props.row.original.validators, 'share'), '0,0.00')}%)</span>
                     </>
                     :
                     '-'
@@ -215,9 +215,9 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                       {['keygen_success', 'keygen_failed', 'sign_success', 'sign_failed'].includes(page) && (
                         <div className="space-x-1.5">
                           <span className="font-medium">Participants:</span>
-                          <span className="font-medium">{numberFormat(props.value.length, '0,0')}</span>
+                          <span className="font-medium">{number_format(props.value.length, '0,0')}</span>
                           {props.value.findIndex(validator => typeof validator.share === 'number') > -1 && (
-                            <span className="font-bold">[{numberFormat(_.sumBy(props.value, 'share'), '0,0')}]</span>
+                            <span className="font-bold">[{number_format(_.sumBy(props.value, 'share'), '0,0')}]</span>
                           )}
                         </div>
                       )}
@@ -228,7 +228,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                               <span className="flex items-center space-x-1.5">
                                 <Link href={`/validator/${validator.address}`}>
                                   <a className="text-blue-600 dark:text-white font-medium">
-                                    {ellipseAddress(validator.description.moniker, 16)}
+                                    {ellipse(validator.description.moniker, 16)}
                                   </a>
                                 </Link>
                                 {validator.status && !(['BOND_STATUS_BONDED'].includes(validator.status)) && (
@@ -246,7 +246,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                             <span className="flex items-center space-x-1">
                               <Link href={`/validator/${validator.address}`}>
                                 <a className={`${validator.description?.moniker ? 'text-gray-400 dark:text-gray-600' : 'text-blue-600 dark:text-white font-medium'}`}>
-                                  {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator.address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                                  {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(validator.address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                                 </a>
                               </Link>
                               <Copy value={validator.address} />
@@ -267,7 +267,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                             )}
                           </div>
                           {typeof validator.share === 'number' && (
-                            <span className="text-gray-600 dark:text-gray-400 font-semibold">[{numberFormat(validator.share, '0,0')}]</span>
+                            <span className="text-gray-600 dark:text-gray-400 font-semibold">[{number_format(validator.share, '0,0')}]</span>
                           )}
                         </div>
                       ))}
@@ -278,11 +278,11 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                         >
                           <span>See {keyIdsSeeMore.includes(props.row.original.id) ? 'Less' : 'More'}</span>
                           {!(keyIdsSeeMore.includes(props.row.original.id)) && (
-                            <span>({numberFormat(props.value.length - COLLAPSE_VALIDATORS_SIZE, '0,0')})</span>
+                            <span>({number_format(props.value.length - COLLAPSE_VALIDATORS_SIZE, '0,0')})</span>
                           )}
                           {keyIdsSeeMore.includes(props.row.original.id) ? <IoCaretUpOutline /> : <IoCaretDownOutline />}
                           {!(keyIdsSeeMore.includes(props.row.original.id)) && props.value.findIndex(validator => typeof validator.share === 'number') > -1 && (
-                            <span>[{numberFormat(_.sumBy(_.slice(props.value, COLLAPSE_VALIDATORS_SIZE), 'share'), '0,0')}]</span>
+                            <span>[{number_format(_.sumBy(_.slice(props.value, COLLAPSE_VALIDATORS_SIZE), 'share'), '0,0')}]</span>
                           )}
                         </div>
                       )}
@@ -317,9 +317,9 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                       {['keygen_success', 'keygen_failed', 'sign_success', 'sign_failed'].includes(page) && (
                         <div className="space-x-1.5">
                           <span className="font-medium">Non-Participants:</span>
-                          <span className="font-medium">{numberFormat(props.value.length, '0,0')}</span>
+                          <span className="font-medium">{number_format(props.value.length, '0,0')}</span>
                           {props.value.findIndex(validator => typeof validator.share === 'number') > -1 && (
-                            <span className="font-bold">[{numberFormat(_.sumBy(props.value, 'share'), '0,0')}]</span>
+                            <span className="font-bold">[{number_format(_.sumBy(props.value, 'share'), '0,0')}]</span>
                           )}
                         </div>
                       )}
@@ -330,7 +330,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                               <span className="flex items-center space-x-1.5">
                                 <Link href={`/validator/${validator.address}`}>
                                   <a className="text-blue-600 dark:text-white font-medium">
-                                    {ellipseAddress(validator.description.moniker, 16)}
+                                    {ellipse(validator.description.moniker, 16)}
                                   </a>
                                 </Link>
                                 {validator.status && !(['BOND_STATUS_BONDED'].includes(validator.status)) && (
@@ -348,7 +348,7 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                             <span className="flex items-center space-x-1">
                               <Link href={`/validator/${validator.address}`}>
                                 <a className={`${validator.description?.moniker ? 'text-gray-400 dark:text-gray-600' : 'text-blue-600 dark:text-white font-medium'}`}>
-                                  {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator.address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                                  {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(validator.address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                                 </a>
                               </Link>
                               <Copy value={validator.address} />
@@ -371,14 +371,14 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                               <div className="flex flex-wrap items-center">
                                 {Object.entries(validator.tss_illegibility_info).filter(([key, value]) => value).map(([key, value]) => (
                                   <span key={key} className="max-w-min bg-gray-100 dark:bg-gray-800 rounded-xl capitalize text-gray-800 dark:text-gray-200 text-xs font-semibold mt-0.5 mr-0.5 px-1.5 py-0.5">
-                                    {getName(key)}
+                                    {name(key)}
                                   </span>
                                 ))}
                               </div>
                             )}
                           </div>
                           {typeof validator.share === 'number' && (
-                            <span className="text-gray-600 dark:text-gray-400 font-semibold">[{numberFormat(validator.share, '0,0')}]</span>
+                            <span className="text-gray-600 dark:text-gray-400 font-semibold">[{number_format(validator.share, '0,0')}]</span>
                           )}
                         </div>
                       ))}
@@ -389,11 +389,11 @@ export default function KeysTable({ data, corruption_signing_threshold, page, cl
                         >
                           <span>See {keyIdsSeeMoreForNon.includes(props.row.original.id) ? 'Less' : 'More'}</span>
                           {!(keyIdsSeeMoreForNon.includes(props.row.original.id)) && (
-                            <span>({numberFormat(props.value.length - COLLAPSE_VALIDATORS_SIZE, '0,0')})</span>
+                            <span>({number_format(props.value.length - COLLAPSE_VALIDATORS_SIZE, '0,0')})</span>
                           )}
                           {keyIdsSeeMoreForNon.includes(props.row.original.id) ? <IoCaretUpOutline /> : <IoCaretDownOutline />}
                           {!(keyIdsSeeMoreForNon.includes(props.row.original.id)) && props.value.findIndex(validator => typeof validator.share === 'number') > -1 && (
-                            <span>[{numberFormat(_.sumBy(_.slice(props.value, COLLAPSE_VALIDATORS_SIZE), 'share'), '0,0')}]</span>
+                            <span>[{number_format(_.sumBy(_.slice(props.value, COLLAPSE_VALIDATORS_SIZE), 'share'), '0,0')}]</span>
                           )}
                         </div>
                       )}

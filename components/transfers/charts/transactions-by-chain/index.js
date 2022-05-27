@@ -18,7 +18,7 @@ import Loader from 'react-loader-spinner'
 
 import { chainTitle } from '../../../../lib/object/chain'
 import { currency_symbol } from '../../../../lib/object/currency'
-import { numberFormat } from '../../../../lib/utils'
+import { number_format } from '../../../../lib/utils'
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active) {
@@ -38,7 +38,7 @@ const CustomTooltip = ({ active, payload, label }) => {
           <div className="flex flex-col items-start space-y-1">
             <div className="flex items-center space-x-1.5">
               {data?.tx > 0 && (
-                <span className="font-mono text-xs font-semibold">{numberFormat(data.tx, '0,0')}</span>
+                <span className="font-mono text-xs font-semibold">{number_format(data.tx, '0,0')}</span>
               )}
               <span className="text-gray-400 dark:text-gray-500 text-xs font-medium">{!data?.tx && 'No '}Transaction{data?.tx !== 1 ? 's' : ''}</span>
             </div>
@@ -79,7 +79,7 @@ export default function TransactionsByChain({ txsData }) {
         return {
           ...d,
           chain: d?.chain || d?.to_chain,
-          tx_string: `${numberFormat(d?.tx, d?.tx >= 1000000 ? '0,0.00a' : '0,0')}`.toUpperCase(),
+          tx_string: `${number_format(d?.tx, d?.tx >= 1000000 ? '0,0.00a' : '0,0')}`.toUpperCase(),
         }
       })
 

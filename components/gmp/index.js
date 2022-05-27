@@ -19,7 +19,7 @@ import Popover from '../popover'
 
 import { search } from '../../lib/api/gmp'
 import { chain_manager, chainTitle } from '../../lib/object/chain'
-import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
+import { paramsToObject, number_format, ellipse, sleep } from '../../lib/utils'
 
 const PAGE_SIZE = 50
 const MAX_PAGE = 50
@@ -125,7 +125,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
       <div className="sm:flex items-center justify-end text-right space-x-3 -mt-14 mb-4 mr-2">
         {gmps?.total > 0 && (
           <div className="font-semibold mb-1 sm:mb-0">
-            Result: {numberFormat(gmps.total, '0,0')}
+            Result: {number_format(gmps.total, '0,0')}
           </div>
         )}
         <GMPFilter
@@ -153,7 +153,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                   <div className="min-w-max flex items-center space-x-1">
                     <Link href={`/gmp/${props.value}`}>
                       <a className="text-blue-500 dark:text-blue-400 text-xs font-medium">
-                        {ellipseAddress(props.value, 8)}
+                        {ellipse(props.value, 8)}
                       </a>
                     </Link>
                     <Copy value={props.value} />
@@ -195,7 +195,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                       <Copy
                         value={props.value}
                         copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                          {ellipseAddress(props.value, 8)}
+                          {ellipse(props.value, 8)}
                         </span>}
                       />
                       {chain_data?.explorer?.url && (
@@ -287,7 +287,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                           <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
                             <span className="font-mono mr-1.5">
                               {props.row.original.call?.returnValues?.amount ?
-                                numberFormat(BigNumber(EthersBigNumber.from(props.row.original.call.returnValues.amount).toString())
+                                number_format(BigNumber(EthersBigNumber.from(props.row.original.call.returnValues.amount).toString())
                                   .shiftedBy(-(from_contract?.decimals || to_contract?.decimals || 6)).toNumber()
                                 , '0,0.00000000', true)
                                 :
@@ -295,7 +295,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                               }
                             </span>
                             <span className="normal-case">
-                              {ellipseAddress(asset?.symbol || props.row.original.call?.returnValues?.symbol, 12)}
+                              {ellipse(asset?.symbol || props.row.original.call?.returnValues?.symbol, 12)}
                             </span>
                           </span>
                         </div>
@@ -316,7 +316,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                             size={14}
                             value={from_contract.contract_address}
                             copyTitle={<span className="normal-case text-gray-600 dark:text-gray-400 text-2xs font-medium">
-                              {ellipseAddress(from_contract.contract_address, 8)}
+                              {ellipse(from_contract.contract_address, 8)}
                             </span>}
                           />
                           {from_chain_data?.explorer?.url && (
@@ -363,7 +363,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                       <Copy
                         value={props.value}
                         copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                          {ellipseAddress(props.value, 8)}
+                          {ellipse(props.value, 8)}
                         </span>}
                       />
                       {chain_data?.explorer?.url && (

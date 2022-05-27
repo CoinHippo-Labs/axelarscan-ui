@@ -6,7 +6,7 @@ import Datatable from '../datatable'
 import Copy from '../copy'
 
 import { currency_symbol } from '../../lib/object/currency'
-import { numberFormat, rand_image } from '../../lib/utils'
+import { number_format, rand_image } from '../../lib/utils'
 
 export default function TransfersTable({ data, className = '' }) {
   return (
@@ -20,7 +20,7 @@ export default function TransfersTable({ data, className = '' }) {
             Cell: props => (
               !props.row.original.skeleton ?
                 <div className="my-1">
-                  {numberFormat((props.flatRows?.indexOf(props.row) > -1 ? props.flatRows.indexOf(props.row) : props.value) + 1, '0,0')}
+                  {number_format((props.flatRows?.indexOf(props.row) > -1 ? props.flatRows.indexOf(props.row) : props.value) + 1, '0,0')}
                 </div>
                 :
                 <div className="skeleton w-4 h-4 my-1" />
@@ -109,7 +109,7 @@ export default function TransfersTable({ data, className = '' }) {
               !props.row.original.skeleton ?
                 <div className="text-right my-1">
                   {props.value ?
-                    <span className="font-semibold">{numberFormat(props.value, '0,0')}</span>
+                    <span className="font-semibold">{number_format(props.value, '0,0')}</span>
                     :
                     '-'
                   }
@@ -129,12 +129,12 @@ export default function TransfersTable({ data, className = '' }) {
                   {props.value ?
                     <div className="flex flex-col space-y-1.5">
                       <span className="text-xs space-x-1.5">
-                        <span className="font-mono uppercase font-semibold">{numberFormat(props.value, props.value >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                        <span className="font-mono uppercase font-semibold">{number_format(props.value, props.value >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                         <span className="text-gray-400 dark:text-gray-600">{props.row.original.asset?.symbol}</span>
                       </span>
                       {props.row.original.value > 0 && (
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-2xs font-medium">
-                          {currency_symbol}{numberFormat(props.row.original.value, '0,0.00')}
+                          {currency_symbol}{number_format(props.row.original.value, '0,0.00')}
                         </span>
                       )}
                     </div>
@@ -160,12 +160,12 @@ export default function TransfersTable({ data, className = '' }) {
                   {props.value ?
                     <div className="flex flex-col space-y-1.5">
                       <span className="text-xs space-x-1.5">
-                        <span className="font-mono uppercase font-semibold">{numberFormat(props.value, props.value >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                        <span className="font-mono uppercase font-semibold">{number_format(props.value, props.value >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                         <span className="text-gray-400 dark:text-gray-600">{props.row.original.asset?.symbol}</span>
                       </span>
                       {props.row.original.avg_value > 0 && (
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-2xs font-medium">
-                          {currency_symbol}{numberFormat(props.row.original.avg_value, '0,0.00')}
+                          {currency_symbol}{number_format(props.row.original.avg_value, '0,0.00')}
                         </span>
                       )}
                     </div>
@@ -191,12 +191,12 @@ export default function TransfersTable({ data, className = '' }) {
                   {props.value ?
                     <div className="flex flex-col space-y-1.5">
                       <span className="text-xs space-x-1.5">
-                        <span className="font-mono uppercase font-semibold">{numberFormat(props.value, props.value >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                        <span className="font-mono uppercase font-semibold">{number_format(props.value, props.value >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                         <span className="text-gray-400 dark:text-gray-600">{props.row.original.asset?.symbol}</span>
                       </span>
                       {props.row.original.max_value > 0 && (
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-2xs font-medium">
-                          {currency_symbol}{numberFormat(props.row.original.max_value, '0,0.00')}
+                          {currency_symbol}{number_format(props.row.original.max_value, '0,0.00')}
                         </span>
                       )}
                     </div>

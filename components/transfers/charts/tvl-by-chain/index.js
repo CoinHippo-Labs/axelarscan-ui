@@ -18,7 +18,7 @@ import Loader from 'react-loader-spinner'
 
 import { chainTitle } from '../../../../lib/object/chain'
 import { currency_symbol } from '../../../../lib/object/currency'
-import { numberFormat } from '../../../../lib/utils'
+import { number_format } from '../../../../lib/utils'
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active) {
@@ -37,12 +37,12 @@ const CustomTooltip = ({ active, payload, label }) => {
           </div>
           <div className="flex flex-col items-start space-y-1">
             <div className="flex items-center space-x-1">
-              <span className="font-mono text-xs font-semibold">{numberFormat(data?.amount, '0,0.00000000')}</span>
+              <span className="font-mono text-xs font-semibold">{number_format(data?.amount, '0,0.00000000')}</span>
               <span className="text-gray-400 dark:text-gray-500 text-xs">{data.asset?.symbol}</span>
             </div>
             {data?.value > 0 && (
               <span className="font-mono text-gray-400 dark:text-gray-500 text-2xs font-medium">
-                ({currency_symbol}{numberFormat(data.value, '0,0.00')})
+                ({currency_symbol}{number_format(data.value, '0,0.00')})
               </span>
             )}
           </div>
@@ -74,8 +74,8 @@ export default function TVLByChain({ tvlData }) {
       _data = _data.map(d => {
         return {
           ...d,
-          amount_string: `${numberFormat(d?.amount, d?.amount >= 1000000 ? '0,0.00a' : '0,0')}`.toUpperCase(),
-          value_string: `${currency_symbol}${numberFormat(d?.value, d?.value >= 1000000 ? '0,0.00a' : '0,0')}`.toUpperCase(),
+          amount_string: `${number_format(d?.amount, d?.amount >= 1000000 ? '0,0.00a' : '0,0')}`.toUpperCase(),
+          value_string: `${currency_symbol}${number_format(d?.value, d?.value >= 1000000 ? '0,0.00a' : '0,0')}`.toUpperCase(),
         }
       })
 

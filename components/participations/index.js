@@ -10,7 +10,7 @@ import { keygenSummary } from '../../lib/api/query'
 import { axelard } from '../../lib/api/executor'
 import { keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { getName, to_json } from '../../lib/utils'
+import { name, to_json } from '../../lib/utils'
 
 export default function Participations() {
   const { chains, denoms, validators, validators_chains } = useSelector(state => ({ chains: state.chains, denoms: state.denoms, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)

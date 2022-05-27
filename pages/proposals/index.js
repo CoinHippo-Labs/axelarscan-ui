@@ -1,9 +1,9 @@
-import ProposalsTable from '../../components/proposals/proposals-table'
+import Proposals from '../../components/proposals'
 
-export default function Proposals() {
+export default () => {
   return (
-    <div className="max-w-7xl my-2 xl:my-4 mx-auto">
-      <ProposalsTable className="no-border" />
+    <div className="max-w-8xl mx-auto">
+      <Proposals />
     </div>
   )
 }

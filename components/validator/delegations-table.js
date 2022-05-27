@@ -1,7 +1,7 @@
 import Datatable from '../datatable'
 import Copy from '../copy'
 
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function DelegationsTable({ data }) {
   return (
@@ -16,9 +16,9 @@ export default function DelegationsTable({ data }) {
               !props.row.original.skeleton ?
                 props.value ?
                   <div className="flex items-center">
-                    <span className="block lg:hidden font-medium mr-1">{ellipseAddress(props.value, 10)}</span>
-                    <span className="hidden lg:block xl:hidden font-medium mr-1">{ellipseAddress(props.value, 16)}</span>
-                    <span className="hidden xl:block font-medium mr-1">{ellipseAddress(props.value, 24)}</span>
+                    <span className="block lg:hidden font-medium mr-1">{ellipse(props.value, 10)}</span>
+                    <span className="hidden lg:block xl:hidden font-medium mr-1">{ellipse(props.value, 16)}</span>
+                    <span className="hidden xl:block font-medium mr-1">{ellipse(props.value, 24)}</span>
                     <Copy value={props.value} className="mr-1" />
                     {props.row.original.self && (
                       <span className="bg-indigo-600 rounded-full capitalize text-white text-xs font-semibold px-2 py-0.5">
@@ -40,7 +40,7 @@ export default function DelegationsTable({ data }) {
               !props.row.original.skeleton ?
                 typeof props.value === 'number' ?
                   <span className="flex items-center space-x-1">
-                    <span>{numberFormat(props.value, '0,0.00000000')}</span>
+                    <span>{number_format(props.value, '0,0.00000000')}</span>
                     {props.row.original.denom && (
                       <span className="uppercase font-medium">{props.row.original.denom}</span>
                     )}

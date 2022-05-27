@@ -12,7 +12,7 @@ import Copy from '../copy'
 import Popover from '../popover'
 
 import { blocks as getBlocks } from '../../lib/api/index'
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 const LATEST_SIZE = 100
 const MAX_PAGE = 10
@@ -77,7 +77,7 @@ export default function BlocksTable({ n, className = '' }) {
               !props.row.original.skeleton ?
                 <Link href={`/block/${props.value}`}>
                   <a className="text-blue-600 dark:text-white font-medium">
-                    {numberFormat(props.value, '0,0')}
+                    {number_format(props.value, '0,0')}
                   </a>
                 </Link>
                 :
@@ -92,7 +92,7 @@ export default function BlocksTable({ n, className = '' }) {
               !props.row.original.skeleton ?
                 <Link href={`/block/${props.row.original.height}`}>
                   <a className="uppercase text-gray-600 dark:text-gray-400 font-medium">
-                    {ellipseAddress(props.value, n ? 6 : 10)}
+                    {ellipse(props.value, n ? 6 : 10)}
                   </a>
                 </Link>
                 :
@@ -124,14 +124,14 @@ export default function BlocksTable({ n, className = '' }) {
                       {props.row.original.proposer_name && (
                         <Link href={`/validator/${props.row.original.operator_address}`}>
                           <a className="text-blue-600 dark:text-white font-medium">
-                            {ellipseAddress(props.row.original.proposer_name, 16) || props.row.original.operator_address}
+                            {ellipse(props.row.original.proposer_name, 16) || props.row.original.operator_address}
                           </a>
                         </Link>
                       )}
                       <span className="flex items-center space-x-1">
                         <Link href={`/validator/${props.row.original.operator_address}`}>
                           <a className="text-gray-500 font-light">
-                            {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(props.row.original.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                            {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(props.row.original.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                           </a>
                         </Link>
                         <Copy value={props.row.original.operator_address} />
@@ -158,7 +158,7 @@ export default function BlocksTable({ n, className = '' }) {
               !props.row.original.skeleton ?
                 <div className="text-right">
                   {props.value > -1 ?
-                    <span>{numberFormat(props.value, '0,0')}</span>
+                    <span>{number_format(props.value, '0,0')}</span>
                     :
                     '-'
                   }
@@ -178,7 +178,7 @@ export default function BlocksTable({ n, className = '' }) {
                   placement="top"
                   title={<div className="flex items-center space-x-1">
                     <span>Block:</span>
-                    <span className="font-mono">{numberFormat(props.row.original.height, '0,0')}</span>
+                    <span className="font-mono">{number_format(props.row.original.height, '0,0')}</span>
                   </div>}
                   content={<div className="w-36 text-xs">{moment(props.value).format('MMM D, YYYY h:mm:ss A')}</div>}
                   titleClassName="h-8"

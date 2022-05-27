@@ -1,7 +1,7 @@
 import Widget from '../widget'
 import Copy from '../copy'
 
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function AxelarSpecific({ data, keygens, signs, rewards }) {
   const keygenParticipated = keygens && keygens.filter(k => k?.participated).length
@@ -22,8 +22,8 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
           <span className="font-semibold">Keygen Participated</span>
           {keygens ?
             <span className="flex items-center text-gray-500 dark:text-gray-400 space-x-1.5">
-              <span>{numberFormat(keygenParticipated, '0,0')}</span>
-              <span>({numberFormat((totalKeygen > 0 ? keygenParticipated / totalKeygen : 0) * 100, '0,0.00')}%)</span>
+              <span>{number_format(keygenParticipated, '0,0')}</span>
+              <span>({number_format((totalKeygen > 0 ? keygenParticipated / totalKeygen : 0) * 100, '0,0.00')}%)</span>
             </span>
             :
             <div className="skeleton w-28 h-6" />
@@ -33,8 +33,8 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
           <span className="font-semibold">Keygen Not Participated</span>
           {keygens ?
             <span className="flex items-center text-gray-500 dark:text-gray-400 space-x-1.5">
-              <span>{numberFormat(keygenNotParticipated, '0,0')}</span>
-              <span>({numberFormat((totalKeygen > 0 ? keygenNotParticipated / totalKeygen : 0) * 100, '0,0.00')}%)</span>
+              <span>{number_format(keygenNotParticipated, '0,0')}</span>
+              <span>({number_format((totalKeygen > 0 ? keygenNotParticipated / totalKeygen : 0) * 100, '0,0.00')}%)</span>
             </span>
             :
             <div className="skeleton w-28 h-6" />
@@ -44,8 +44,8 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
           <span className="font-semibold">Sign Participated</span>
           {signs ?
             <span className="flex items-center text-gray-500 dark:text-gray-400 space-x-1.5">
-              <span>{numberFormat(signParticipated, '0,0')}</span>
-              <span>({numberFormat((totalSign > 0 ? signParticipated / totalSign : 0) * 100, '0,0.00')}%)</span>
+              <span>{number_format(signParticipated, '0,0')}</span>
+              <span>({number_format((totalSign > 0 ? signParticipated / totalSign : 0) * 100, '0,0.00')}%)</span>
             </span>
             :
             <div className="skeleton w-28 h-6" />
@@ -55,8 +55,8 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
           <span className="font-semibold">Sign Not Participated</span>
           {signs ?
             <span className="flex items-center text-gray-500 dark:text-gray-400 space-x-1.5">
-              <span>{numberFormat(signNotParticipated, '0,0')}</span>
-              <span>({numberFormat((totalSign > 0 ? signNotParticipated / totalSign : 0) * 100, '0,0.00')}%)</span>
+              <span>{number_format(signNotParticipated, '0,0')}</span>
+              <span>({number_format((totalSign > 0 ? signNotParticipated / totalSign : 0) * 100, '0,0.00')}%)</span>
             </span>
             :
             <div className="skeleton w-28 h-6" />
@@ -74,9 +74,9 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
                       <div className="flex items-center">
                         {reward?.rewards_per_stake?.map((_reward, j) => (
                           <span key={j} className="bg-gray-100 dark:bg-gray-800 rounded flex items-center font-medium space-x-1 px-2 py-1 mr-2">
-                            <span>{numberFormat(_reward.amount_per_stake, '0,0.000')}</span>
-                            <span className="uppercase font-light">{ellipseAddress(_reward.denom, 16)}</span>
-                            <span className="whitespace-nowrap text-xs font-light">({numberFormat(_reward.amount, '0,0.000')} / {numberFormat(_reward.stake, '0,0.000')})</span>
+                            <span>{number_format(_reward.amount_per_stake, '0,0.000')}</span>
+                            <span className="uppercase font-light">{ellipse(_reward.denom, 16)}</span>
+                            <span className="whitespace-nowrap text-xs font-light">({number_format(_reward.amount, '0,0.000')} / {number_format(_reward.stake, '0,0.000')})</span>
                           </span>
                         ))}
                       </div>

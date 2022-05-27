@@ -13,7 +13,7 @@ import Popover from '../popover'
 import Copy from '../copy'
 
 import { chain_manager } from '../../lib/object/chain'
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function Polls({ data, validator_data }) {
   const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
@@ -21,10 +21,10 @@ export default function Polls({ data, validator_data }) {
 
   return (
     <Widget
-      title={<span className="text-sm sm:text-lg font-medium">Polls in the latest {numberFormat(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS, '0,0')} Blocks</span>}
+      title={<span className="text-sm sm:text-lg font-medium">Polls in the latest {number_format(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS, '0,0')} Blocks</span>}
       right={<span className="whitespace-nowrap text-xs sm:text-base text-gray-400 dark:text-gray-600 sm:mr-1 xl:mr-1.5">
         <span className="hidden sm:inline-flex mr-1">Maximum</span>
-        <span>Display: {numberFormat(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS, '0,0')} Polls</span>
+        <span>Display: {number_format(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS, '0,0')} Polls</span>
       </span>}
       className="dark:border-gray-900"
     >
@@ -41,7 +41,7 @@ export default function Polls({ data, validator_data }) {
               key={i}
               placement="top"
               title={<div className="flex items-center justify-between space-x-2">
-                <span className="font-bold">Block: {numberFormat(poll.height, '0,0')}</span>
+                <span className="font-bold">Block: {number_format(poll.height, '0,0')}</span>
                 <Link href={`/block/${poll.height}`}>
                   <a className="flex items-center text-blue-600 dark:text-white ml-auto">
                     <span className="text-xs">Go to Block</span>
@@ -88,7 +88,7 @@ export default function Polls({ data, validator_data }) {
                   <Copy
                     value={poll.poll_id}
                     copyTitle={<span className="text-gray-500 text-xs">
-                      {ellipseAddress(poll.poll_id, 20)}
+                      {ellipse(poll.poll_id, 20)}
                     </span>}
                   />
                   <Link href={`/evm-votes?poll_id=${poll.poll_id}`}>
@@ -138,7 +138,7 @@ export default function Polls({ data, validator_data }) {
               className="w-7 h-7"
             >
               <div
-                title={numberFormat(poll.height, '0,0')}
+                title={number_format(poll.height, '0,0')}
                 className={`w-6 md:w-6 h-6 md:h-6 ${vote?.confirmed ? 'bg-green-600 dark:bg-green-700' : vote && !vote.confirmed ? 'bg-red-600 dark:bg-red-700' : 'bg-gray-400 dark:bg-gray-700'} rounded m-1`}
               />
             </Popover>

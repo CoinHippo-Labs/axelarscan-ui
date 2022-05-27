@@ -15,7 +15,7 @@ import Copy from '../copy'
 import Popover from '../popover'
 
 import { transactions as getTransactions } from '../../lib/api/index'
-import { paramsToObject, numberFormat, getName, ellipseAddress, sleep } from '../../lib/utils'
+import { paramsToObject, number_format, name, ellipse, sleep } from '../../lib/utils'
 
 const LATEST_SIZE = 100
 const MAX_PAGE = 50
@@ -201,7 +201,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
               style={{ textTransform: 'none', fontSize: '.7rem' }}
             >
               <span>{key === 'undefined' ? 'Failed' : key?.endsWith('Request') ? key.replace('Request', '') : key}</span>
-              <span className="text-2xs text-indigo-600 dark:text-indigo-400 font-bold"> {numberFormat(value, '0,0')}</span>
+              <span className="text-2xs text-indigo-600 dark:text-indigo-400 font-bold"> {number_format(value, '0,0')}</span>
             </div>
           ))}
         </div>
@@ -232,7 +232,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                 <div className="flex items-center space-x-1 mb-4">
                   <Link href={`/tx/${props.value}`}>
                     <a className="uppercase text-blue-600 dark:text-white font-medium">
-                      {ellipseAddress(Array.isArray(props.value) ? _.last(props.value) : props.value)}
+                      {ellipse(Array.isArray(props.value) ? _.last(props.value) : props.value)}
                     </a>
                   </Link>
                   <Copy value={Array.isArray(props.value) ? _.last(props.value) : props.value} />
@@ -249,7 +249,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
               !props.row.original.skeleton ?
                 <Link href={`/block/${props.value}`}>
                   <a className="text-blue-500 dark:text-gray-400 font-medium">
-                    {numberFormat(props.value, '0,0')}
+                    {number_format(props.value, '0,0')}
                   </a>
                 </Link>
                 :
@@ -264,7 +264,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
               !props.row.original.skeleton ?
                 props.value ?
                   <span className={`bg-gray-100 dark:bg-gray-${location === 'index' ? 900 : 800} rounded-lg capitalize text-gray-900 dark:text-gray-100 font-semibold px-2 py-1`}>
-                    {getName(props.value)}
+                    {name(props.value)}
                   </span>
                   :
                   '-'
@@ -320,14 +320,14 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                       {validator_data.description?.moniker && (
                         <Link href={`/validator/${validator_data.operator_address}`}>
                           <a className="text-blue-600 dark:text-white font-medium">
-                            {ellipseAddress(validator_data.description.moniker, 16) || validator_data.operator_address}
+                            {ellipse(validator_data.description.moniker, 16) || validator_data.operator_address}
                           </a>
                         </Link>
                       )}
                       <span className="flex items-center space-x-1">
                         <Link href={`/validator/${validator_data.operator_address}`}>
                           <a className="text-gray-400 dark:text-gray-600 font-light">
-                            {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                            {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                           </a>
                         </Link>
                         <Copy value={validator_data.operator_address} />
@@ -339,7 +339,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                     <div className="flex items-center space-x-1">
                       <Link href={`/account/${props.value}`}>
                         <a className="text-blue-600 dark:text-white font-medium">
-                          {ellipseAddress(props.value)}
+                          {ellipse(props.value)}
                         </a>
                       </Link>
                       <Copy value={props.value} />
@@ -365,15 +365,15 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                 <div className="text-right">
                   {typeof props.value === 'number' ?
                     <span className="flex items-center justify-end space-x-1">
-                      <span>{numberFormat(props.value, '0,0.00000000')}</span>
-                      <span className="uppercase font-medium">{ellipseAddress(props.row.original.symbol, 12)}</span>
+                      <span>{number_format(props.value, '0,0.00000000')}</span>
+                      <span className="uppercase font-medium">{ellipse(props.row.original.symbol, 12)}</span>
                     </span>
                     :
                     props.row.original.activities?.findIndex(a => a.amount) > -1 ?
                       props.row.original.activities.filter(a => a.amount).map((a, i) => (
                         <div key={i} className="flex items-center justify-end space-x-1">
-                          <span>{numberFormat(a.amount, '0,0.00000000')}</span>
-                          <span className="uppercase font-medium">{ellipseAddress(a.symbol || a.denom, 10)}</span>
+                          <span>{number_format(a.amount, '0,0.00000000')}</span>
+                          <span className="uppercase font-medium">{ellipse(a.symbol || a.denom, 10)}</span>
                         </div>
                       ))
                       :
@@ -415,7 +415,7 @@ export default function TransactionsTable({ data, noLoad, location, className = 
                 <div className="text-right">
                   {typeof props.value === 'number' ?
                     <span className="flex items-center justify-end space-x-1">
-                      <span>{props.value ? numberFormat(props.value, '0,0.00000000') : 'No Fee'}</span>
+                      <span>{props.value ? number_format(props.value, '0,0.00000000') : 'No Fee'}</span>
                       {props.value > 0 && (
                         <span className="uppercase font-medium">{props.row.original.symbol}</span>
                       )}

@@ -7,7 +7,7 @@ import Linkify from 'react-linkify'
 import Widget from '../widget'
 import Copy from '../copy'
 
-import { numberFormat, getName, ellipseAddress } from '../../lib/utils'
+import { number_format, name, ellipse } from '../../lib/utils'
 
 export default function Information({ data }) {
   return (
@@ -23,7 +23,7 @@ export default function Information({ data }) {
             :
             <div className="skeleton w-8 md:w-12 h-8 md:h-12 rounded-full" />
           }
-          <span className="break-all text-gray-900 dark:text-gray-100 text-base sm:text-lg font-semibold">{data.description?.moniker || ellipseAddress(data.operator_address, 16)}</span>
+          <span className="break-all text-gray-900 dark:text-gray-100 text-base sm:text-lg font-semibold">{data.description?.moniker || ellipse(data.operator_address, 16)}</span>
         </div>
         :
         <div className="flex items-center space-x-3">
@@ -59,7 +59,7 @@ export default function Information({ data }) {
             <div className="flex flex-wrap sm:justify-end">
               {Object.entries(data.tss_illegibility_info).filter(([key, value]) => value).map(([key, value]) => (
                 <span key={key} className="max-w-min bg-gray-100 dark:bg-gray-800 rounded-xl whitespace-nowrap capitalize text-gray-800 dark:text-gray-200 text-xs font-semibold px-1.5 py-0.5 my-1 ml-0 sm:ml-2 mr-2 sm:mr-0">
-                  {getName(key)}
+                  {name(key)}
                 </span>
               ))}
             </div>
@@ -77,8 +77,8 @@ export default function Information({ data }) {
             <div className="flex flex-col xl:flex-row items-start space-x-0 xl:space-x-2">
               <span className="max-w-min whitespace-nowrap font-semibold">Oper. Address:</span>
               <span className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 space-x-1">
-                <span className="lg:hidden">{ellipseAddress(data.operator_address, 16)}</span>
-                <span className="hidden lg:block">{ellipseAddress(data.operator_address, 32)}</span>
+                <span className="lg:hidden">{ellipse(data.operator_address, 16)}</span>
+                <span className="hidden lg:block">{ellipse(data.operator_address, 32)}</span>
                 <Copy size={18} value={data.operator_address} />
               </span>
             </div>
@@ -93,12 +93,12 @@ export default function Information({ data }) {
               <span className="flex items-center text-gray-600 dark:text-gray-400 space-x-1">
                 <Link href={`/account/${data.delegator_address}`}>
                   <a className="lg:hidden text-blue-600 dark:text-white">
-                    {ellipseAddress(data.delegator_address, 16)}
+                    {ellipse(data.delegator_address, 16)}
                   </a>
                 </Link>
                 <Link href={`/account/${data.delegator_address}`}>
                   <a className="hidden lg:block text-blue-600 dark:text-white">
-                    {ellipseAddress(data.delegator_address, 24)}
+                    {ellipse(data.delegator_address, 24)}
                   </a>
                 </Link>
                 <Copy size={18} value={data.delegator_address} />
@@ -113,8 +113,8 @@ export default function Information({ data }) {
             <div className="flex flex-col xl:flex-row items-start space-x-0 xl:space-x-2">
               <span className="max-w-min whitespace-nowrap font-semibold">Cons. Address:</span>
               <span className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 space-x-1">
-                <span className="lg:hidden">{ellipseAddress(data.consensus_address, 16)}</span>
-                <span className="hidden lg:block">{ellipseAddress(data.consensus_address, 32)}</span>
+                <span className="lg:hidden">{ellipse(data.consensus_address, 16)}</span>
+                <span className="hidden lg:block">{ellipse(data.consensus_address, 32)}</span>
                 <Copy size={18} value={data.consensus_address} />
               </span>
             </div>
@@ -129,12 +129,12 @@ export default function Information({ data }) {
               <span className="flex flex-wrap items-center text-gray-600 dark:text-gray-400 space-x-1">
                 <Link href={`/account/${data.broadcaster_address}`}>
                   <a className="lg:hidden text-blue-600 dark:text-white">
-                    {ellipseAddress(data.broadcaster_address, 16)}
+                    {ellipse(data.broadcaster_address, 16)}
                   </a>
                 </Link>
                 <Link href={`/account/${data.broadcaster_address}`}>
                   <a className="hidden lg:block text-blue-600 dark:text-white">
-                    {ellipseAddress(data.broadcaster_address, 24)}
+                    {ellipse(data.broadcaster_address, 24)}
                   </a>
                 </Link>
                 <Copy size={18} value={data.broadcaster_address} />
@@ -173,12 +173,12 @@ export default function Information({ data }) {
             <div className="flex flex-col xl:flex-row items-start space-x-0 xl:space-x-2">
               <span className="font-semibold">Commission:</span>
               <span className="flex items-center text-gray-600 dark:text-gray-400 space-x-1.5">
-                <span>{!isNaN(data.commission.commission_rates?.rate) ? numberFormat(data.commission.commission_rates.rate * 100, '0,0.00') : '-'}%</span>
+                <span>{!isNaN(data.commission.commission_rates?.rate) ? number_format(data.commission.commission_rates.rate * 100, '0,0.00') : '-'}%</span>
                 {!isNaN(data.commission.commission_rates?.max_rate) && (
-                  <span>(Max: {numberFormat(data.commission.commission_rates.max_rate * 100, '0,0.00')}%)</span>
+                  <span>(Max: {number_format(data.commission.commission_rates.max_rate * 100, '0,0.00')}%)</span>
                 )}
                 {!isNaN(data.commission.commission_rates?.max_change_rate) && (
-                  <span>(Max Change: {numberFormat(data.commission.commission_rates.max_change_rate * 100, '0,0.00')}%)</span>
+                  <span>(Max Change: {number_format(data.commission.commission_rates.max_change_rate * 100, '0,0.00')}%)</span>
                 )}
               </span>
             </div>
@@ -191,7 +191,7 @@ export default function Information({ data }) {
             <div className="flex flex-col xl:flex-row items-start space-x-0 xl:space-x-2">
               <span className="font-semibold">Min Self Delegation:</span>
               <span className="text-gray-600 dark:text-gray-400">
-                {numberFormat(Number(data.min_self_delegation), '0,0')}
+                {number_format(Number(data.min_self_delegation), '0,0')}
               </span>
             </div>
           )
@@ -203,7 +203,7 @@ export default function Information({ data }) {
             <div className="flex flex-col xl:flex-row items-start space-x-0 xl:space-x-2">
               <span className="font-semibold">Validator Since Block:</span>
               <span className="text-gray-600 dark:text-gray-400">
-                {numberFormat(data.start_height, '0,0')}
+                {number_format(data.start_height, '0,0')}
               </span>
             </div>
           )

@@ -16,7 +16,7 @@ import {
 } from 'recharts'
 import Loader from 'react-loader-spinner'
 
-import { numberFormat } from '../../../../lib/utils'
+import { number_format } from '../../../../lib/utils'
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active) {
@@ -46,13 +46,13 @@ const CustomTooltip = ({ active, payload, label }) => {
                   />
                   <span className="text-3xs font-medium">{e.to_chain?.short_name}</span>
                 </div>
-                <span className="font-mono font-semibold">{numberFormat(e.time?.tx, '0,0')}</span>
+                <span className="font-mono font-semibold">{number_format(e.time?.tx, '0,0')}</span>
               </div>
             ))
             :
             <div className="space-x-1.5">
               {data.tx > 0 && (
-                <span className="font-mono font-semibold">{numberFormat(data.tx, '0,0')}</span>
+                <span className="font-mono font-semibold">{number_format(data.tx, '0,0')}</span>
               )}
               <span className="font-medium">{!data.tx && 'No '}Transaction{data.tx !== 1 ? 's' : ''}</span>
             </div>

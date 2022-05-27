@@ -6,7 +6,7 @@ import Loader from 'react-loader-spinner'
 import G6 from '@antv/g6'
 
 import { chainTitle, getChain } from '../../lib/object/chain'
-import { numberFormat } from '../../lib/utils'
+import { number_format } from '../../lib/utils'
 
 export default function NetworkGraph({ data, mini }) {
   const { preferences, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, cosmos_chains: state.cosmos_chains }), shallowEqual)
@@ -41,9 +41,9 @@ export default function NetworkGraph({ data, mini }) {
                   <span class="font-medium">${e.item.getModel().transfer.to_chain?.short_name}</span>
                 </div>
               </li>
-              <li><span class="font-semibold">Transactions</span>: ${numberFormat(e.item.getModel().transfer.tx, '0,0')}</li>
-              <li><span class="uppercase font-semibold">Volume</span>: ${numberFormat(e.item.getModel().transfer.amount, e.item.getModel().transfer.amount >= 100000 ? '0,0.00a' : '0,0.000')} ${e.item.getModel().transfer.asset?.symbol}</li>
-              <li><span class="uppercase font-semibold">Avg. Size</span>: ${numberFormat(e.item.getModel().transfer.avg_amount, e.item.getModel().transfer.avg_amount >= 100000 ? '0,0.00a' : '0,0.000')} ${e.item.getModel().transfer.asset?.symbol}</li>
+              <li><span class="font-semibold">Transactions</span>: ${number_format(e.item.getModel().transfer.tx, '0,0')}</li>
+              <li><span class="uppercase font-semibold">Volume</span>: ${number_format(e.item.getModel().transfer.amount, e.item.getModel().transfer.amount >= 100000 ? '0,0.00a' : '0,0.000')} ${e.item.getModel().transfer.asset?.symbol}</li>
+              <li><span class="uppercase font-semibold">Avg. Size</span>: ${number_format(e.item.getModel().transfer.avg_amount, e.item.getModel().transfer.avg_amount >= 100000 ? '0,0.00a' : '0,0.000')} ${e.item.getModel().transfer.asset?.symbol}</li>
             </ul>`
           return outDiv
         },
@@ -139,7 +139,7 @@ export default function NetworkGraph({ data, mini }) {
           source: transfer.from_chain?.id,
           target: transfer.to_chain?.id,
           type: 'circle-running',
-          label: `${numberFormat(transfer.amount, transfer.amount >= 100000 ? '0,0.00a' : '0,0.000')} ${transfer.asset?.symbol}`.toUpperCase(),
+          label: `${number_format(transfer.amount, transfer.amount >= 100000 ? '0,0.00a' : '0,0.000')} ${transfer.asset?.symbol}`.toUpperCase(),
           labelCfg: {
             style: {
               ...labelCfg?.style,
@@ -163,7 +163,7 @@ export default function NetworkGraph({ data, mini }) {
             id: k,
             transfers: v.map(t => t.transfer),
             tx: _.sumBy(v, 'transfer.tx'),
-            label: `${numberFormat(_.sumBy(v, 'transfer.tx'), _.sumBy(v, 'transfer.tx') >= 100000 ? '0,0.00a' : '0,0')} txs`,
+            label: `${number_format(_.sumBy(v, 'transfer.tx'), _.sumBy(v, 'transfer.tx') >= 100000 ? '0,0.00a' : '0,0')} txs`,
           }
         })
       }

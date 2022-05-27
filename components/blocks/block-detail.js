@@ -6,7 +6,7 @@ import { Img } from 'react-image'
 import Widget from '../widget'
 import Copy from '../copy'
 
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function BlockDetail({ data, validator_data }) {
   if (data?.proposer_address && validator_data?.consensus_address === data.proposer_address) {
@@ -24,7 +24,7 @@ export default function BlockDetail({ data, validator_data }) {
         <div className="flex flex-col lg:flex-row items-start lg:items-center space-x-0 lg:space-x-2">
           <span className="font-semibold">Height:</span>
           {data ?
-            <span>{numberFormat(data.height, '0,0')}</span>
+            <span>{number_format(data.height, '0,0')}</span>
             :
             <div className="skeleton w-16 h-4" />
           }
@@ -33,7 +33,7 @@ export default function BlockDetail({ data, validator_data }) {
           <span className="font-semibold">Block Hash:</span>
           {data ?
             <span className="flex items-center space-x-1">
-              <span>{ellipseAddress(data.hash, 16)}</span>
+              <span>{ellipse(data.hash, 16)}</span>
               <Copy value={data.hash} />
             </span>
             :
@@ -55,7 +55,7 @@ export default function BlockDetail({ data, validator_data }) {
           <span className="font-semibold">No. of TXs:</span>
           {data ?
             data.txs > -1 ?
-              <span>{numberFormat(data.txs, '0,0')}</span>
+              <span>{number_format(data.txs, '0,0')}</span>
               :
               <span>-</span>
             :
@@ -91,7 +91,7 @@ export default function BlockDetail({ data, validator_data }) {
                   <span className="flex items-center space-x-1">
                     <Link href={`/validator/${data.operator_address}`}>
                       <a className="text-gray-500 font-light">
-                        {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                        {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                       </a>
                     </Link>
                     <Copy value={data.operator_address} />
@@ -102,7 +102,7 @@ export default function BlockDetail({ data, validator_data }) {
               data.proposer_address ?
                 <div className="flex items-center space-x-1">
                   <span className="text-gray-500">
-                    {process.env.NEXT_PUBLIC_PREFIX_CONSENSUS}{ellipseAddress(data.proposer_address?.replace(process.env.NEXT_PUBLIC_PREFIX_CONSENSUS, ''), 8)}
+                    {process.env.NEXT_PUBLIC_PREFIX_CONSENSUS}{ellipse(data.proposer_address?.replace(process.env.NEXT_PUBLIC_PREFIX_CONSENSUS, ''), 8)}
                   </span>
                   <Copy value={data.proposer_address} />
                 </div>

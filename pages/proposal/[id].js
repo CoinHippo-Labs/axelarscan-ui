@@ -1,12 +1,9 @@
-import { useRouter } from 'next/router'
+import Proposal from '../../components/proposal'
 
-import Proposal from '../../components/proposals/proposal'
-
-export default function ProposalId() {
-  const router = useRouter()
-  const { query } = { ...router }
-
+export default () => {
   return (
-    <Proposal id={query.id} />
+    <div className="max-w-6xl mx-auto">
+      <Proposal />
+    </div>
   )
 }

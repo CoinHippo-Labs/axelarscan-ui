@@ -17,7 +17,7 @@ import Popover from '../popover'
 
 import { evm_votes as getEvmVotes } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { paramsToObject, numberFormat, ellipseAddress, sleep } from '../../lib/utils'
+import { paramsToObject, number_format, ellipse, sleep } from '../../lib/utils'
 
 const PAGE_SIZE = 100
 const MAX_PAGE = 50
@@ -187,7 +187,7 @@ export default function EVMVotes({ className }) {
                   <Copy
                     value={props.value}
                     copyTitle={<span className="uppercase text-gray-400 dark:text-gray-600 text-2xs font-medium">
-                      {ellipseAddress(props.value, 8)}
+                      {ellipse(props.value, 8)}
                     </span>}
                   />
                   {chain?.explorer?.url && (
@@ -222,7 +222,7 @@ export default function EVMVotes({ className }) {
                 <Copy
                   value={props.value}
                   copyTitle={<span className="uppercase text-gray-400 dark:text-gray-600 text-2xs font-medium">
-                    {ellipseAddress(props.value, 16)}
+                    {ellipse(props.value, 16)}
                   </span>}
                 />
                 :
@@ -237,7 +237,7 @@ export default function EVMVotes({ className }) {
               !props.row.original.skeleton ?
                 <Link href={`/block/${props.value}`}>
                   <a className="text-blue-500 dark:text-gray-400 font-medium">
-                    {numberFormat(props.value, '0,0')}
+                    {number_format(props.value, '0,0')}
                   </a>
                 </Link>
                 :
@@ -289,14 +289,14 @@ export default function EVMVotes({ className }) {
                       {validator_data.description?.moniker && (
                         <Link href={`/validator/${validator_data.operator_address}`}>
                           <a className="text-blue-600 dark:text-white font-medium">
-                            {ellipseAddress(validator_data.description.moniker, 16) || validator_data.operator_address}
+                            {ellipse(validator_data.description.moniker, 16) || validator_data.operator_address}
                           </a>
                         </Link>
                       )}
                       <span className="flex items-center space-x-1">
                         <Link href={`/validator/${validator_data.operator_address}`}>
                           <a className="text-gray-400 dark:text-gray-600 font-light">
-                            {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                            {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(validator_data.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                           </a>
                         </Link>
                         <Copy value={validator_data.operator_address} />
@@ -307,7 +307,7 @@ export default function EVMVotes({ className }) {
                   <div className="flex items-center space-x-1">
                     <Link href={`/account/${props.value}`}>
                       <a className="text-blue-600 dark:text-white font-medium">
-                        {ellipseAddress(props.value)}
+                        {ellipse(props.value)}
                       </a>
                     </Link>
                     <Copy value={props.value} />
@@ -368,7 +368,7 @@ export default function EVMVotes({ className }) {
                 <div className="flex items-center space-x-1">
                   <Link href={`/tx/${props.value}`}>
                     <a className="uppercase text-blue-600 dark:text-white font-medium">
-                      {ellipseAddress(Array.isArray(props.value) ? _.last(props.value) : props.value)}
+                      {ellipse(Array.isArray(props.value) ? _.last(props.value) : props.value)}
                     </a>
                   </Link>
                   <Copy value={Array.isArray(props.value) ? _.last(props.value) : props.value} />

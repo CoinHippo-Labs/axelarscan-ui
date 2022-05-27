@@ -41,7 +41,7 @@ export default () => {
           />
         )}
         <span className="font-bold">
-          {c.title}
+          {c.name}
         </span>
       </div>
       <div className="space-y-2">
@@ -87,7 +87,7 @@ export default () => {
   ))
 
   return (
-    <div className="mx-auto py-2">
+    <div className="mx-auto pt-2 pb-6">
       <StackGrid
         columnWidth={267}
         gutterWidth={16}

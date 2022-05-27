@@ -3,7 +3,7 @@ import { FiBox } from 'react-icons/fi'
 
 import Widget from '../widget'
 
-import { numberFormat, getName } from '../../lib/utils'
+import { number_format, name } from '../../lib/utils'
 
 export default function HealthCheck({ data, health }) {
   const numBlocksBeforeProxyRegistered = health?.num_block_before_registered
@@ -11,7 +11,7 @@ export default function HealthCheck({ data, health }) {
   return (
     <Widget
       title={<span className="text-lg font-medium">Health Check</span>}
-      right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {numberFormat(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS, '0,0')} Blocks</span>}
+      right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {number_format(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
     >
       <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 text-base sm:text-sm lg:text-base gap-4 mt-3 mb-0.5">
@@ -25,7 +25,7 @@ export default function HealthCheck({ data, health }) {
                   :
                   <FaTimesCircle size={16} />
                 }
-                <span className="whitespace-nowrap capitalize">{getName(health.broadcaster_registration ? 'proxy_registered' : 'no_proxy_registered')}</span>
+                <span className="whitespace-nowrap capitalize">{name(health.broadcaster_registration ? 'proxy_registered' : 'no_proxy_registered')}</span>
               </span>
               :
               <span className="text-gray-500 dark:text-gray-400">-</span>
@@ -41,12 +41,12 @@ export default function HealthCheck({ data, health }) {
           </span>
           {numBlocksBeforeProxyRegistered || typeof numBlocksBeforeProxyRegistered === 'number' ?
             <span className="flex items-center text-gray-500 dark:text-gray-400 space-x-1.5">
-              <span>{typeof numBlocksBeforeProxyRegistered === 'number' ? numberFormat(numBlocksBeforeProxyRegistered, '0,0') : numBlocksBeforeProxyRegistered}</span>
+              <span>{typeof numBlocksBeforeProxyRegistered === 'number' ? number_format(numBlocksBeforeProxyRegistered, '0,0') : numBlocksBeforeProxyRegistered}</span>
               {typeof numBlocksBeforeProxyRegistered === 'number' && (
                 <span className="flex items-center text-sm space-x-1">
                   <span>(Registered at</span>
                   <FiBox size={14} className="stroke-current mb-0.5" />
-                  <span>{numberFormat(data.start_proxy_height, '0,0')})</span>
+                  <span>{number_format(data.start_proxy_height, '0,0')})</span>
                 </span>
               )}
             </span>
@@ -64,7 +64,7 @@ export default function HealthCheck({ data, health }) {
                   :
                   <FaTimesCircle size={16} />
                 }
-                <span>{numberFormat(health.broadcaster_funded.amount, '0,0.0000000')}</span>
+                <span>{number_format(health.broadcaster_funded.amount, '0,0.0000000')}</span>
                 <span className="uppercase">{health.broadcaster_funded.denom}</span>
               </span>
               :
@@ -78,11 +78,11 @@ export default function HealthCheck({ data, health }) {
           {health ?
             <div className="flex items-center space-x-1">
               <span className="text-gray-500 dark:text-gray-400">
-                {typeof health.heartbeats_uptime === 'number' ? `${numberFormat(health.heartbeats_uptime, '0,0.00')}%` : '-'}
+                {typeof health.heartbeats_uptime === 'number' ? `${number_format(health.heartbeats_uptime, '0,0.00')}%` : '-'}
               </span>
               {/*typeof health.missed_heartbeats === 'number' && (
                 <span className="text-gray-500 dark:text-gray-400">
-                  ({numberFormat(health.missed_heartbeats, '0,0')} Missed)
+                  ({number_format(health.missed_heartbeats, '0,0')} Missed)
                 </span>
               )*/}
             </div>
@@ -95,11 +95,11 @@ export default function HealthCheck({ data, health }) {
           {health ?
             <div className="flex items-center space-x-1">
               <span className="text-gray-500 dark:text-gray-400">
-                {numberFormat(health.missed_heartbeats, '0,0')}
+                {number_format(health.missed_heartbeats, '0,0')}
               </span>
               <span>/</span>
               <span className="text-gray-500 dark:text-gray-400">
-                {numberFormat(health.total_heartbeats, '0,0')}
+                {number_format(health.total_heartbeats, '0,0')}
               </span>
             </div>
             :

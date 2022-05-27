@@ -22,7 +22,7 @@ import { transfers } from '../../lib/api/index'
 import { chainTitle, getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { currency, currency_symbol } from '../../lib/object/currency'
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function Transfers() {
   const { chains, cosmos_chains, assets, denoms, tvl } = useSelector(state => ({ chains: state.chains, cosmos_chains: state.cosmos_chains, assets: state.assets, denoms: state.denoms, tvl: state.tvl }), shallowEqual)
@@ -583,7 +583,7 @@ export default function Transfers() {
                     </div>
                     <div className="flex items-center space-x-1">
                       <span className="font-mono uppercase text-gray-800 dark:text-gray-100 text-base font-semibold">
-                        {numberFormat(t.tx, t.tx >= 100000 ? '0,0.00a' : '0,0')}
+                        {number_format(t.tx, t.tx >= 100000 ? '0,0.00a' : '0,0')}
                       </span>
                     </div>
                   </div>
@@ -611,7 +611,7 @@ export default function Transfers() {
               <span>total</span>
               {crosschainSummaryData ?
                 <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono text-white font-semibold py-0.5 px-1.5">
-                  {numberFormat(_.sumBy(crosschainSummaryData.total_transfers, 'tx'), '0,0')}
+                  {number_format(_.sumBy(crosschainSummaryData.total_transfers, 'tx'), '0,0')}
                 </div>
                 :
                 <div className="skeleton w-12 h-6" />
@@ -654,12 +654,12 @@ export default function Transfers() {
                     </div>
                     <div className="flex flex-col items-end space-y-1.5">
                       <span className="text-2xs space-x-1">
-                        <span className="font-mono uppercase font-semibold">{numberFormat(t.amount, t.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                        <span className="font-mono uppercase font-semibold">{number_format(t.amount, t.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                         <span className="text-gray-400 dark:text-gray-600">{t.asset?.symbol}</span>
                       </span>
                       {t.value > 0 && (
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                          {currency_symbol}{numberFormat(t.value, t.value > 100000 ? '0,0.00a' : '0,0.00')}
+                          {currency_symbol}{number_format(t.value, t.value > 100000 ? '0,0.00a' : '0,0.00')}
                         </span>
                       )}
                     </div>
@@ -697,7 +697,7 @@ export default function Transfers() {
                 <span>total</span>
                 {crosschainSummaryData ?
                   <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono uppercase text-white font-semibold py-0.5 px-1.5">
-                    {currency_symbol}{numberFormat(_.sumBy(crosschainSummaryData.total_transfers || [], 'value'), _.sumBy(crosschainSummaryData.total_transfers || [], 'value') >= 100000 ? '0,0.00a' : '0,0.000')}
+                    {currency_symbol}{number_format(_.sumBy(crosschainSummaryData.total_transfers || [], 'value'), _.sumBy(crosschainSummaryData.total_transfers || [], 'value') >= 100000 ? '0,0.00a' : '0,0.000')}
                   </div>
                   :
                   <div className="skeleton w-12 h-6" />
@@ -765,7 +765,7 @@ export default function Transfers() {
                                     <Copy
                                       value={c.contract.contract_address}
                                       copyTitle={<span className="text-xs font-normal">
-                                        {ellipseAddress(c.contract.contract_address, 6)}
+                                        {ellipse(c.contract.contract_address, 6)}
                                       </span>}
                                     />
                                     {c.chain?.explorer?.url && (
@@ -794,12 +794,12 @@ export default function Transfers() {
                             </div>
                             <div className="flex flex-col items-end space-y-1.5">
                               <span className="text-2xs space-x-1">
-                                <span className="font-mono uppercase font-semibold">{numberFormat(c.amount, c.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                                <span className="font-mono uppercase font-semibold">{number_format(c.amount, c.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                                 <span className="text-gray-400 dark:text-gray-600">{c.denom?.symbol}</span>
                               </span>
                               {c.value > 0 && (
                                 <span className="font-mono uppercase text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                                  {currency_symbol}{numberFormat(c.value, c.value > 100000 ? '0,0.00a' : '0,0.00')}
+                                  {currency_symbol}{number_format(c.value, c.value > 100000 ? '0,0.00a' : '0,0.00')}
                                 </span>
                               )}
                             </div>
@@ -809,12 +809,12 @@ export default function Transfers() {
                     >
                       <div className="flex flex-col items-end space-y-1.5">
                         <span className="text-2xs space-x-1">
-                          <span className="font-mono uppercase font-semibold">{numberFormat(t.amount, t.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                          <span className="font-mono uppercase font-semibold">{number_format(t.amount, t.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                           <span className="normal-case text-gray-400 dark:text-gray-600 font-normal">{t.asset?.symbol}</span>
                         </span>
                         {t.value > 0 && (
                           <span className="font-mono text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                            {currency_symbol}{numberFormat(t.value, t.value > 100000 ? '0,0.00a' : '0,0.00')}
+                            {currency_symbol}{number_format(t.value, t.value > 100000 ? '0,0.00a' : '0,0.00')}
                           </span>
                         )}
                       </div>
@@ -848,7 +848,7 @@ export default function Transfers() {
                 <span>total</span>
                 {crosschainTVLData ?
                   <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono uppercase text-white font-semibold py-0.5 px-1.5">
-                    {currency_symbol}{numberFormat(_.sumBy(crosschainTVLData.data || [], 'value'), _.sumBy(crosschainTVLData.data || [], 'value') >= 100000 ? '0,0.00a' : '0,0.000')}
+                    {currency_symbol}{number_format(_.sumBy(crosschainTVLData.data || [], 'value'), _.sumBy(crosschainTVLData.data || [], 'value') >= 100000 ? '0,0.00a' : '0,0.000')}
                   </div>
                   :
                   <div className="skeleton w-12 h-6" />
@@ -891,12 +891,12 @@ export default function Transfers() {
                     </div>
                     <div className="flex flex-col items-end space-y-1.5">
                       <span className="text-2xs space-x-1">
-                        <span className="font-mono uppercase font-semibold">{numberFormat(t.avg_amount, t.avg_amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                        <span className="font-mono uppercase font-semibold">{number_format(t.avg_amount, t.avg_amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                         <span className="text-gray-400 dark:text-gray-600">{t.asset?.symbol}</span>
                       </span>
                       {t.avg_value > 0 && (
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                          {currency_symbol}{numberFormat(t.avg_value, t.avg_value > 100000 ? '0,0.00a' : '0,0.00')}
+                          {currency_symbol}{number_format(t.avg_value, t.avg_value > 100000 ? '0,0.00a' : '0,0.00')}
                         </span>
                       )}
                     </div>
@@ -925,7 +925,7 @@ export default function Transfers() {
               <span className="flex items-center text-gray-400 dark:text-gray-600 text-sm font-normal space-x-1">
                 <span>from</span>
                 {crosschainSummaryData ?
-                  <span className="leading-5 font-mono uppercase text-gray-700 dark:text-gray-300 text-2xs font-semibold">{numberFormat(_.sumBy(crosschainSummaryData.total_transfers, 'tx'), _.sumBy(crosschainSummaryData.total_transfers, 'tx') >= 100000 ? '0,0.00a' : '0,0')}</span>
+                  <span className="leading-5 font-mono uppercase text-gray-700 dark:text-gray-300 text-2xs font-semibold">{number_format(_.sumBy(crosschainSummaryData.total_transfers, 'tx'), _.sumBy(crosschainSummaryData.total_transfers, 'tx') >= 100000 ? '0,0.00a' : '0,0')}</span>
                   :
                   <div className="skeleton w-8 h-5" />
                 }
@@ -935,7 +935,7 @@ export default function Transfers() {
                 <span>Avg.</span>
                 {crosschainSummaryData ?
                   <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono uppercase text-white font-semibold py-0.5 px-1.5">
-                    {currency_symbol}{numberFormat(_.sumBy(crosschainSummaryData.total_transfers || [], 'value') / _.sumBy(crosschainSummaryData.total_transfers || [], 'tx'), _.sumBy(crosschainSummaryData.total_transfers || [], 'value') / _.sumBy(crosschainSummaryData.total_transfers || [], 'tx') >= 100000 ? '0,0.00a' : '0,0.000')}
+                    {currency_symbol}{number_format(_.sumBy(crosschainSummaryData.total_transfers || [], 'value') / _.sumBy(crosschainSummaryData.total_transfers || [], 'tx'), _.sumBy(crosschainSummaryData.total_transfers || [], 'value') / _.sumBy(crosschainSummaryData.total_transfers || [], 'tx') >= 100000 ? '0,0.00a' : '0,0.000')}
                   </div>
                   :
                   <div className="skeleton w-12 h-6" />
@@ -983,12 +983,12 @@ export default function Transfers() {
                     </div>
                     <div className="flex flex-col items-end space-y-1.5">
                       <span className="text-2xs space-x-1">
-                        <span className="font-mono uppercase font-semibold">{numberFormat(t.max_amount, t.max_amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
+                        <span className="font-mono uppercase font-semibold">{number_format(t.max_amount, t.max_amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
                         <span className="text-gray-400 dark:text-gray-600">{t.asset?.symbol}</span>
                       </span>
                       {t.max_value > 0 && (
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                          {currency_symbol}{numberFormat(t.max_value, t.max_value > 100000 ? '0,0.00a' : '0,0.00')}
+                          {currency_symbol}{number_format(t.max_value, t.max_value > 100000 ? '0,0.00a' : '0,0.00')}
                         </span>
                       )}
                     </div>
@@ -1017,7 +1017,7 @@ export default function Transfers() {
               <span>from</span>
               {crosschainSummaryData ?
                 <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono text-white font-semibold py-0.5 px-1.5">
-                  {numberFormat(_.sumBy(crosschainSummaryData.highest_transfer_24h, 'tx'), '0,0')}
+                  {number_format(_.sumBy(crosschainSummaryData.highest_transfer_24h, 'tx'), '0,0')}
                 </div>
                 :
                 <div className="skeleton w-12 h-6" />
@@ -1050,7 +1050,7 @@ export default function Transfers() {
               <div key={i} className="min-w-max text-right space-y-1">
                 <div className="flex items-center justify-end space-x-1.5">
                   <span className="font-mono text-base font-semibold">
-                    {typeof t.tx === 'number' ? numberFormat(t.tx, '0,0') : '- '}
+                    {typeof t.tx === 'number' ? number_format(t.tx, '0,0') : '- '}
                   </span>
                   <span className="text-gray-400 dark:text-gray-600 text-base">TXs</span>
                 </div>
@@ -1072,7 +1072,7 @@ export default function Transfers() {
               <div key={i} className="min-w-max text-right space-y-1">
                 <div className="flex items-center justify-end space-x-1.5">
                   <span className="font-mono text-base font-semibold">
-                    {typeof t.amount === 'number' ? numberFormat(t.amount, '0,0.00000000') : '- '}
+                    {typeof t.amount === 'number' ? number_format(t.amount, '0,0.00000000') : '- '}
                   </span>
                   <span className="text-gray-400 dark:text-gray-600 text-base">{chartData.data.find(_t => _t?.id === assetSelect)?.asset?.symbol}</span>
                 </div>
@@ -1094,7 +1094,7 @@ export default function Transfers() {
               <div key={i} className="min-w-max text-right space-y-0.5">
                 <div className="flex items-center justify-end space-x-1.5">
                   <span className="font-mono text-base font-semibold">
-                    {typeof _.sumBy(t.data, 'tx') === 'number' ? numberFormat(_.sumBy(t.data, 'tx'), '0,0') : '- '}
+                    {typeof _.sumBy(t.data, 'tx') === 'number' ? number_format(_.sumBy(t.data, 'tx'), '0,0') : '- '}
                   </span>
                   <span className="text-gray-400 dark:text-gray-600 text-base">TXs</span>
                 </div>
@@ -1114,7 +1114,7 @@ export default function Transfers() {
               <div className="min-w-max text-right space-y-1.5 -mt-0.5">
                 <div className="flex items-center justify-end space-x-1.5">
                   <span className="font-mono text-base font-semibold">
-                    {typeof _.sumBy(crosschainTVLData.data?.filter(d => d?.asset?.id === assetSelect), 'amount') === 'number' ? numberFormat(_.sumBy(crosschainTVLData.data?.filter(d => d?.asset?.id === assetSelect), 'amount'), '0,0.00000000') : '- '}
+                    {typeof _.sumBy(crosschainTVLData.data?.filter(d => d?.asset?.id === assetSelect), 'amount') === 'number' ? number_format(_.sumBy(crosschainTVLData.data?.filter(d => d?.asset?.id === assetSelect), 'amount'), '0,0.00000000') : '- '}
                   </span>
                   <span className="text-gray-400 dark:text-gray-600 text-base">{crosschainTVLData.data?.find(_t => _t?.asset?.id === assetSelect)?.asset?.symbol}</span>
                 </div>

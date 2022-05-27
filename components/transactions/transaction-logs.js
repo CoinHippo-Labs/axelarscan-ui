@@ -7,7 +7,7 @@ import { BsArrowRight } from 'react-icons/bs'
 import Copy from '../copy'
 
 import { type } from '../../lib/object/id'
-import { numberFormat, getName, ellipseAddress, to_json } from '../../lib/utils'
+import { number_format, name, ellipse, to_json } from '../../lib/utils'
 
 export default function TransactionLogs({ data }) {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
@@ -45,7 +45,7 @@ export default function TransactionLogs({ data }) {
                           <div className="flex items-center text-2xs lg:text-base space-x-1">
                             <Link href={`/${type(a.sender)}/${a.sender}`}>
                               <a className="uppercase text-blue-600 dark:text-white font-medium">
-                                {ellipseAddress(a.sender, 16)}
+                                {ellipse(a.sender, 16)}
                               </a>
                             </Link>
                             <Copy value={a.sender} />
@@ -67,7 +67,7 @@ export default function TransactionLogs({ data }) {
                           <div className="flex items-center text-2xs lg:text-base space-x-1">
                             <Link href={`/${type(a.depositor)}/${a.depositor}`}>
                               <a className="uppercase text-blue-600 dark:text-white font-medium">
-                                {ellipseAddress(a.depositor, 16)}
+                                {ellipse(a.depositor, 16)}
                               </a>
                             </Link>
                             <Copy value={a.depositor} />
@@ -103,7 +103,7 @@ export default function TransactionLogs({ data }) {
                         <>
                           {a.action ?
                             <span className="bg-gray-100 dark:bg-gray-800 rounded-lg capitalize text-gray-900 dark:text-gray-100 font-semibold px-2 py-1">
-                              {getName(a.action)}
+                              {name(a.action)}
                             </span>
                             :
                             <BsArrowRight size={24} />
@@ -111,7 +111,7 @@ export default function TransactionLogs({ data }) {
                           {a.market_id && a.market_price ?
                             <>
                               <span className="uppercase">{a.market_id}</span>
-                              <span>{numberFormat(a.market_price, '0,0.00000000')}</span>
+                              <span>{number_format(a.market_price, '0,0.00000000')}</span>
                             </>
                             :
                             a.value ?
@@ -119,8 +119,8 @@ export default function TransactionLogs({ data }) {
                               :
                               /*typeof a.amount === 'number'*/a.amount > 0 ?
                                 <span className="w-full max-w-sm break-all flex items-start justify-end space-x-1">
-                                  <span className="whitespace-nowrap">{numberFormat(a.amount, '0,0.00000000')}</span>
-                                  <span className="whitespace-nowrap font-medium">{ellipseAddress(a.symbol || a.denom, 12)}</span>
+                                  <span className="whitespace-nowrap">{number_format(a.amount, '0,0.00000000')}</span>
+                                  <span className="whitespace-nowrap font-medium">{ellipse(a.symbol || a.denom, 12)}</span>
                                 </span>
                                 :
                                 a.log ?
@@ -160,7 +160,7 @@ export default function TransactionLogs({ data }) {
                           {a.outPointInfo.out_point && (
                             <div className="flex items-center text-xs space-x-1">
                               <span className="font-semibold">Out Point:</span>
-                              <span className="text-gray-400 dark:text-gray-600">{ellipseAddress(a.outPointInfo.out_point)}</span>
+                              <span className="text-gray-400 dark:text-gray-600">{ellipse(a.outPointInfo.out_point)}</span>
                               <Copy value={a.outPointInfo.out_point} />
                             </div>
                           )}
@@ -173,7 +173,7 @@ export default function TransactionLogs({ data }) {
                           {a.outPointInfo.address && (
                             <div className="flex items-center text-xs space-x-1">
                               <span className="font-semibold">Address:</span>
-                              <span className="text-gray-400 dark:text-gray-600">{ellipseAddress(a.outPointInfo.address)}</span>
+                              <span className="text-gray-400 dark:text-gray-600">{ellipse(a.outPointInfo.address)}</span>
                               <Copy value={a.outPointInfo.address} />
                             </div>
                           )}
@@ -195,7 +195,7 @@ export default function TransactionLogs({ data }) {
                               <div key={i} className="flex items-center text-2xs lg:text-base space-x-1">
                                 <Link href={`/${type(recipient)}/${recipient}`}>
                                   <a className="uppercase text-blue-600 dark:text-white font-medium">
-                                    {ellipseAddress(recipient, 16)}
+                                    {ellipse(recipient, 16)}
                                   </a>
                                 </Link>
                                 <Copy value={recipient} />
@@ -205,7 +205,7 @@ export default function TransactionLogs({ data }) {
                             <div className="flex items-center text-2xs lg:text-base space-x-1">
                               <Link href={`/${type(a.recipient)}/${a.recipient}`}>
                                 <a className="uppercase text-blue-600 dark:text-white font-medium">
-                                  {ellipseAddress(a.recipient, 16)}
+                                  {ellipse(a.recipient, 16)}
                                 </a>
                               </Link>
                               <Copy value={a.recipient} />
@@ -228,7 +228,7 @@ export default function TransactionLogs({ data }) {
                           <div className="flex items-center text-2xs lg:text-base space-x-1">
                             <Link href={`/${type(a.validator)}/${a.validator}`}>
                               <a className="uppercase text-blue-600 dark:text-white font-medium">
-                                {ellipseAddress(a.validator, 16)}
+                                {ellipse(a.validator, 16)}
                               </a>
                             </Link>
                             <Copy value={a.validator} />

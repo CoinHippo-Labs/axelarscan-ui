@@ -4,7 +4,7 @@ import moment from 'moment'
 
 import Widget from '../widget'
 
-import { getName, numberFormat } from '../../lib/utils'
+import { name, number_format } from '../../lib/utils'
 
 export default function CosmosGeneric({ data, jailed }) {
   const { status } = useSelector(state => ({ status: state.status }), shallowEqual)
@@ -24,7 +24,7 @@ export default function CosmosGeneric({ data, jailed }) {
   return (
     <Widget
       title={<span className="text-lg font-medium">Cosmos Generic</span>}
-      right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {numberFormat(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS, '0,0')} Blocks</span>}
+      right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {number_format(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
     >
       <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 text-base sm:text-sm lg:text-base gap-4 mt-3 mb-0.5">
@@ -32,7 +32,7 @@ export default function CosmosGeneric({ data, jailed }) {
           <span className="font-semibold">Uptime</span>
           {typeof data?.uptime === 'number' ?
             <span className="text-gray-500 dark:text-gray-400">
-              {numberFormat(data.uptime, '0,0.00')}%
+              {number_format(data.uptime, '0,0.00')}%
             </span>
             :
             <div className="skeleton w-28 h-6" />
@@ -42,7 +42,7 @@ export default function CosmosGeneric({ data, jailed }) {
           <span className="font-semibold"># Missed Blocks</span>
           {typeof numMissedBlocks === 'number' ?
             <span className="text-gray-500 dark:text-gray-400">
-              {numberFormat(numMissedBlocks, '0,0')}
+              {number_format(numMissedBlocks, '0,0')}
             </span>
             :
             <div className="skeleton w-28 h-6" />
@@ -54,7 +54,7 @@ export default function CosmosGeneric({ data, jailed }) {
             <span className="text-gray-500 dark:text-gray-400">
               {typeof jailed.times_jailed === 'number' ?
                 jailed.times_jailed > 0 ?
-                  numberFormat(jailed.times_jailed, '0,0')
+                  number_format(jailed.times_jailed, '0,0')
                   :
                   jailed.times_jailed < 0 ?
                     'Long Time Jailed'

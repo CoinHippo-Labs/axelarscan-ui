@@ -12,7 +12,7 @@ import Copy from '../copy'
 
 import { chain_manager } from '../../lib/object/chain'
 import { denom_manager } from '../../lib/object/denom'
-import { numberFormat, getName, ellipseAddress } from '../../lib/utils'
+import { number_format, name, ellipse } from '../../lib/utils'
 
 export default function ValidatorsTable({ status }) {
   const { chains, denoms, validators, validators_chains } = useSelector(state => ({ chains: state.chains, denoms: state.denoms, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
@@ -54,7 +54,7 @@ export default function ValidatorsTable({ status }) {
             sortType: (rowA, rowB) => rowA.original.i > rowB.original.i ? 1 : -1,
             Cell: props => (
               !props.row.original.skeleton ?
-                numberFormat((props.flatRows?.indexOf(props.row) > -1 ? props.flatRows.indexOf(props.row) : props.value) + 1, '0,0')
+                number_format((props.flatRows?.indexOf(props.row) > -1 ? props.flatRows.indexOf(props.row) : props.value) + 1, '0,0')
                 :
                 <div className="skeleton w-4 h-4" />
             ),
@@ -83,14 +83,14 @@ export default function ValidatorsTable({ status }) {
                     {props.value && (
                       <Link href={`/validator/${props.row.original.operator_address}`}>
                         <a className="text-blue-600 dark:text-white font-medium">
-                          {ellipseAddress(props.value, 16) || props.row.original.operator_address}
+                          {ellipse(props.value, 16) || props.row.original.operator_address}
                         </a>
                       </Link>
                     )}
                     <span className="flex items-center space-x-1">
                       <Link href={`/validator/${props.row.original.operator_address}`}>
                         <a className="text-gray-400 dark:text-gray-600 font-light">
-                          {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipseAddress(props.row.original.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
+                          {process.env.NEXT_PUBLIC_PREFIX_VALIDATOR}{ellipse(props.row.original.operator_address?.replace(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR, ''), 8)}
                         </a>
                       </Link>
                       <Copy value={props.row.original.operator_address} />
@@ -116,8 +116,8 @@ export default function ValidatorsTable({ status }) {
                 <div className="flex flex-col justify-center text-left sm:text-right">
                   {props.value > 0 ?
                     <>
-                      <span className="font-medium">{numberFormat(Math.floor(denom_manager.amount(props.value, denoms_data?.[0]?.id, denoms_data)), '0,0.00')}</span>
-                      <span className="text-gray-400 dark:text-gray-600">{numberFormat(props.value * 100 / _.sumBy(validatorsData.filter(v => !v.jailed && ['BOND_STATUS_BONDED'].includes(v.status)), 'tokens'), '0,0.000')}%</span>
+                      <span className="font-medium">{number_format(Math.floor(denom_manager.amount(props.value, denoms_data?.[0]?.id, denoms_data)), '0,0.00')}</span>
+                      <span className="text-gray-400 dark:text-gray-600">{number_format(props.value * 100 / _.sumBy(validatorsData.filter(v => !v.jailed && ['BOND_STATUS_BONDED'].includes(v.status)), 'tokens'), '0,0.000')}%</span>
                     </>
                     :
                     <span className="text-gray-400 dark:text-gray-600">-</span>
@@ -139,7 +139,7 @@ export default function ValidatorsTable({ status }) {
               !props.row.original.skeleton && typeof props.value === 'number' ?
                 <div className="flex flex-col justify-center text-left sm:text-right">
                   {props.value > 0 ?
-                    <span className="text-gray-400 dark:text-gray-600">{numberFormat(props.value * 100 / props.row.original.delegator_shares, '0,0.000')}%</span>
+                    <span className="text-gray-400 dark:text-gray-600">{number_format(props.value * 100 / props.row.original.delegator_shares, '0,0.000')}%</span>
                     :
                     <span className="text-gray-400 dark:text-gray-600">-</span>
                   }
@@ -159,7 +159,7 @@ export default function ValidatorsTable({ status }) {
               !props.row.original.skeleton ?
                 <div className="text-right">
                   {!isNaN(props.value) ?
-                    <span>{numberFormat(props.value * 100, '0,0.00')}%</span>
+                    <span>{number_format(props.value * 100, '0,0.00')}%</span>
                     :
                     <span className="text-gray-400 dark:text-gray-600">-</span>
                   }
@@ -173,7 +173,7 @@ export default function ValidatorsTable({ status }) {
             Header: (
               <span className="flex items-center space-x-1">
                 <span>Uptime</span>
-                <span>{numberFormat(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS), '0,0')}</span>
+                <span>{number_format(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS), '0,0')}</span>
                 <FiBox size={16} className="stroke-current" />
               </span>
             ),
@@ -187,7 +187,7 @@ export default function ValidatorsTable({ status }) {
                       <ProgressBarWithText
                         width={props.value}
                         value={<div className="text-white mx-1" style={{ fontSize: '.55rem' }}>
-                          {numberFormat(props.value, '0,0.00')}%
+                          {number_format(props.value, '0,0.00')}%
                         </div>}
                         color="bg-green-500 dark:bg-green-700 rounded"
                         backgroundClassName="h-4 bg-gray-200 dark:bg-gray-800 rounded"
@@ -200,7 +200,7 @@ export default function ValidatorsTable({ status }) {
                   {typeof props.row.original.start_height === 'number' && (
                     <div className="text-3xs text-right space-x-1 mt-1.5">
                       <span className="text-gray-400 dark:text-gray-600 font-medium">Validator Since Block:</span>
-                      <span className="text-gray-600 dark:text-gray-100 font-semibold">{numberFormat(props.row.original.start_height, '0,0')}</span>
+                      <span className="text-gray-600 dark:text-gray-100 font-semibold">{number_format(props.row.original.start_height, '0,0')}</span>
                     </div>
                   )}
                 </>
@@ -216,7 +216,7 @@ export default function ValidatorsTable({ status }) {
             Header: (
               <span className="flex items-center space-x-1">
                 <span>Heartbeat</span>
-                <span>{numberFormat(Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS), '0,0')}</span>
+                <span>{number_format(Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS), '0,0')}</span>
                 <FiBox size={16} className="stroke-current" />
               </span>
             ),
@@ -230,7 +230,7 @@ export default function ValidatorsTable({ status }) {
                       <ProgressBarWithText
                         width={props.value}
                         value={<div className="text-white mx-1" style={{ fontSize: '.55rem' }}>
-                          {numberFormat(props.value, '0,0.00')}%
+                          {number_format(props.value, '0,0.00')}%
                         </div>}
                         color="bg-green-500 dark:bg-green-700 rounded"
                         backgroundClassName="h-4 bg-gray-200 dark:bg-gray-800 rounded"
@@ -243,7 +243,7 @@ export default function ValidatorsTable({ status }) {
                   {typeof props.row.original.start_proxy_height === 'number' && (
                     <div className="text-3xs text-right space-x-1 mt-1.5">
                       <span className="text-gray-400 dark:text-gray-600 font-medium">Proxy Registered Block:</span>
-                      <span className="text-gray-600 dark:text-gray-100 font-semibold">{numberFormat(props.row.original.start_proxy_height, '0,0')}</span>
+                      <span className="text-gray-600 dark:text-gray-100 font-semibold">{number_format(props.row.original.start_proxy_height, '0,0')}</span>
                     </div>
                   )}
                 </>
@@ -259,7 +259,7 @@ export default function ValidatorsTable({ status }) {
             Header: (
               <span className="flex items-center space-x-1">
                 <span className="whitespace-nowrap">EVM Votes</span>
-                <span>{numberFormat(Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS), '0,0')}</span>
+                <span>{number_format(Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS), '0,0')}</span>
                 <FiBox size={16} className="stroke-current" />
               </span>
             ),
@@ -280,14 +280,14 @@ export default function ValidatorsTable({ status }) {
                           <div className="flex items-center uppercase text-3xs space-x-1">
                             <div className="text-green-500 font-semibold space-x-0.5">
                               <span className="font-mono">
-                                {numberFormat(value?.confirms?.true || 0, '0,0')}
+                                {number_format(value?.confirms?.true || 0, '0,0')}
                               </span>
                               <span>Yes</span>
                             </div>
                             <span className="text-gray-400 dark:text-gray-600 font-semibold">:</span>
                             <div className={`${value?.confirms?.false > 0 ? 'text-red-500 font-bold' : 'text-gray-400 dark:text-gray-600 font-semibold'} font-semibold space-x-0.5`}>
                               <span className="font-mono">
-                                {numberFormat(value?.confirms?.false || 0, '0,0')}
+                                {number_format(value?.confirms?.false || 0, '0,0')}
                               </span>
                               <span>No</span>
                             </div>
@@ -295,7 +295,7 @@ export default function ValidatorsTable({ status }) {
                           <div className={`flex items-center ${(props.row.original.total_polls?.[key] || 0) > (value?.confirms?.true || 0) ? 'text-yellow-500 dark:text-yellow-400 font-bold' : 'text-gray-500 dark:text-gray-300 font-semibold'} text-3xs space-x-1`}>
                             <span className="capitalize">Total:</span>
                             <span className="font-mono">
-                              {numberFormat(props.row.original.total_polls?.[key] || 0, '0,0')}
+                              {number_format(props.row.original.total_polls?.[key] || 0, '0,0')}
                             </span>
                           </div>
                         </div>
@@ -374,7 +374,7 @@ export default function ValidatorsTable({ status }) {
                         <div className="flex flex-col items-end space-y-1.5 mt-2">
                           {Object.entries(props.row.original.tss_illegibility_info).filter(([key, value]) => value).map(([key, value]) => (
                             <span key={key} className="max-w-min bg-gray-100 dark:bg-gray-900 rounded-xl capitalize text-gray-900 dark:text-gray-200 text-xs font-semibold px-1.5 py-0.5">
-                              {getName(key)}
+                              {name(key)}
                             </span>
                           ))}
                         </div>

@@ -5,7 +5,7 @@ import Widget from '../widget'
 import Copy from '../copy'
 
 import { chain_manager } from '../../lib/object/chain'
-import { numberFormat } from '../../lib/utils'
+import { number_format } from '../../lib/utils'
 
 export default function EVMSpecific({ supportedChains, evmVotes, validator_data }) {
   const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
@@ -54,7 +54,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                   <Link href={`/evm-votes?vote=yes${validator_data?.broadcaster_address ? `&voter=${validator_data.broadcaster_address}` : ''}`}>
                     <a className="text-green-500 font-semibold space-x-1">
                       <span className="font-mono">
-                        {numberFormat(_.sum(Object.values(evmVotes.data.chains).map(v => v?.confirms?.true)) || 0, '0,0')}
+                        {number_format(_.sum(Object.values(evmVotes.data.chains).map(v => v?.confirms?.true)) || 0, '0,0')}
                       </span>
                       <span>Yes</span>
                     </a>
@@ -63,7 +63,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                   <Link href={`/evm-votes?vote=no${validator_data?.broadcaster_address ? `&voter=${validator_data.broadcaster_address}` : ''}`}>
                     <a className="text-red-500 font-semibold space-x-1">
                       <span className="font-mono">
-                        {numberFormat(_.sum(Object.values(evmVotes.data.chains).map(v => v?.confirms?.false)) || 0, '0,0')}
+                        {number_format(_.sum(Object.values(evmVotes.data.chains).map(v => v?.confirms?.false)) || 0, '0,0')}
                       </span>
                       <span>No</span>
                     </a>
@@ -71,7 +71,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                   <span className="hidden sm:block text-gray-400 dark:text-gray-600 font-semibold">:</span>
                   <span className="text-gray-400 dark:text-gray-600 font-semibold space-x-1">
                     <span className="font-mono">
-                      {numberFormat((_.sum(Object.values(evmVotes.all_data || {})) || 0) - _.sum(Object.values(evmVotes.data.chains).map(v => (v?.confirms?.false || 0) + (v?.confirms?.true || 0))), '0,0')}
+                      {number_format((_.sum(Object.values(evmVotes.all_data || {})) || 0) - _.sum(Object.values(evmVotes.data.chains).map(v => (v?.confirms?.false || 0) + (v?.confirms?.true || 0))), '0,0')}
                     </span>
                     <span>Unsubmitted</span>
                   </span>
@@ -99,7 +99,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                           <Link href={`/evm-votes?chain=${key}&vote=yes${validator_data?.broadcaster_address ? `&voter=${validator_data.broadcaster_address}` : ''}`}>
                             <a className="text-green-500 font-semibold space-x-0.5">
                               <span className="font-mono">
-                                {numberFormat(value?.confirms?.true || 0, '0,0')}
+                                {number_format(value?.confirms?.true || 0, '0,0')}
                               </span>
                               <span>Y</span>
                             </a>
@@ -108,7 +108,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                           <Link href={`/evm-votes?chain=${key}&vote=no${validator_data?.broadcaster_address ? `&voter=${validator_data.broadcaster_address}` : ''}`}>
                             <a className={`${value?.confirms?.false > 0 ? 'text-red-500' : 'text-gray-400 dark:text-gray-600'} font-semibold space-x-0.5`}>
                               <span className="font-mono">
-                                {numberFormat(value?.confirms?.false || 0, '0,0')}
+                                {number_format(value?.confirms?.false || 0, '0,0')}
                               </span>
                               <span>N</span>
                             </a>
@@ -119,7 +119,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                             <a className="flex items-center text-gray-500 dark:text-gray-300 text-3xs font-semibold space-x-1">
                               <span className="capitalize">Total:</span>
                               <span className="font-mono">
-                                {numberFormat(evmVotes.all_data?.[key] || 0, '0,0')}
+                                {number_format(evmVotes.all_data?.[key] || 0, '0,0')}
                               </span>
                             </a>
                           </Link>

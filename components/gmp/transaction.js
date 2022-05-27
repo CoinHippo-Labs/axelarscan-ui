@@ -24,7 +24,7 @@ import Wallet from '../wallet'
 
 import { search } from '../../lib/api/gmp'
 import { chainTitle } from '../../lib/object/chain'
-import { numberFormat, ellipseAddress, sleep } from '../../lib/utils'
+import { number_format, ellipse, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 import { WALLET_DATA } from '../../reducers/types'
 
@@ -401,7 +401,7 @@ export default function Transaction() {
                       <Copy
                         value={call.returnValues.sender}
                         copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                          {ellipseAddress(call.returnValues.sender, 8)}
+                          {ellipse(call.returnValues.sender, 8)}
                         </span>}
                       />
                       {fromChain?.explorer?.url && (
@@ -518,7 +518,7 @@ export default function Transaction() {
                                 <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
                                   <span className="font-mono mr-1.5">
                                     {call.returnValues?.amount ?
-                                      numberFormat(BigNumber(EthersBigNumber.from(call.returnValues.amount).toString())
+                                      number_format(BigNumber(EthersBigNumber.from(call.returnValues.amount).toString())
                                         .shiftedBy(-(fromContract?.decimals || toContract?.decimals || 6)).toNumber()
                                       , '0,0.00000000', true)
                                       :
@@ -526,7 +526,7 @@ export default function Transaction() {
                                     }
                                   </span>
                                   <span className="normal-case">
-                                    {ellipseAddress(asset?.symbol || call.returnValues?.symbol, 12)}
+                                    {ellipse(asset?.symbol || call.returnValues?.symbol, 12)}
                                   </span>
                                 </span>
                               </div>
@@ -547,7 +547,7 @@ export default function Transaction() {
                           <Copy
                             value={call.contract_address}
                             copyTitle={<span className="normal-case text-gray-600 dark:text-gray-400 text-xs font-medium">
-                              {ellipseAddress(call.contract_address, 8)}
+                              {ellipse(call.contract_address, 8)}
                             </span>}
                           />
                           {fromChain?.explorer?.url && (
@@ -637,7 +637,7 @@ export default function Transaction() {
                         <Copy
                           value={call.returnValues.destinationContractAddress}
                           copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                            {ellipseAddress(call.returnValues.destinationContractAddress, 8)}
+                            {ellipse(call.returnValues.destinationContractAddress, 8)}
                           </span>}
                         />
                         {toChain?.explorer?.url && (
@@ -713,10 +713,10 @@ export default function Transaction() {
                                 rel="noopener noreferrer"
                                 className="text-blue-600 dark:text-white text-xs lg:text-base font-medium mr-1.5"
                               >
-                                {ellipseAddress(t.transactionHash, 16)}
+                                {ellipse(t.transactionHash, 16)}
                               </a>
                               :
-                              <span className="text-xs lg:text-base mr-1.5">{ellipseAddress(t.transactionHash, 16)}</span>
+                              <span className="text-xs lg:text-base mr-1.5">{ellipse(t.transactionHash, 16)}</span>
                             }
                             <Copy size={18} value={t.transactionHash} />
                             {i === 3 && !t.block_timestamp && (
@@ -804,10 +804,10 @@ export default function Transaction() {
                             rel="noopener noreferrer"
                             className="text-xs lg:text-base"
                           >
-                            {numberFormat(t.blockNumber, '0,0')}
+                            {number_format(t.blockNumber, '0,0')}
                           </a>
                           :
-                          <span className="text-xs lg:text-base">{numberFormat(t.blockNumber, '0,0')}</span>
+                          <span className="text-xs lg:text-base">{number_format(t.blockNumber, '0,0')}</span>
                         :
                         <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
                       :
@@ -864,7 +864,7 @@ export default function Transaction() {
                             <Copy
                               value={t?.transaction?.from || t?.receipt?.from}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
-                                {ellipseAddress(t?.transaction?.from || t?.receipt?.from, 8)}
+                                {ellipse(t?.transaction?.from || t?.receipt?.from, 8)}
                               </span>}
                             />
                             {fromChain?.explorer?.url && (
@@ -901,7 +901,7 @@ export default function Transaction() {
                           <Copy
                             value={(i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from))}
                             copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
-                              {ellipseAddress((i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from)), 8)}
+                              {ellipse((i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from)), 8)}
                             </span>}
                           />
                           {(i < 2 ? fromChain : toChain)?.explorer?.url && (
@@ -937,7 +937,7 @@ export default function Transaction() {
                           <Copy
                             value={i < 3 ? t.contract_address : call.returnValues.destinationContractAddress}
                             copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
-                              {ellipseAddress(i < 3 ? t.contract_address : call.returnValues.destinationContractAddress, 8)}
+                              {ellipse(i < 3 ? t.contract_address : call.returnValues.destinationContractAddress, 8)}
                             </span>}
                           />
                           {(i < 2 ? fromChain : toChain)?.explorer?.url && (
@@ -974,7 +974,7 @@ export default function Transaction() {
                             <Copy
                               value={call.transaction.from}
                               copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
-                                {ellipseAddress(call.transaction.from, 8)}
+                                {ellipse(call.transaction.from, 8)}
                               </span>}
                             />
                             {toChain?.explorer?.url && (

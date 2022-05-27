@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
-import { FiBox, FiClock, FiGift } from 'react-icons/fi'
+import { FiBox } from 'react-icons/fi'
 import { BiServer } from 'react-icons/bi'
 import { HiOutlineExternalLink } from 'react-icons/hi'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
@@ -191,7 +191,7 @@ export default () => {
       title = 'Proposals'
       break
     case '/proposal/[id]':
-      title `Proposal: ${number_format(id, '0,0')}`
+      title = `Proposal: ${number_format(id, '0,0')}`
       break
     default:
       break
@@ -238,7 +238,7 @@ export default () => {
       {status_data?.latest_block_height && (
         <Link href={`/block/${status_data.latest_block_height}`}>
           <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
-            <FiBox size={14} className="mb-0.5" />
+            <FiBox size={16} />
             <span className="font-mono font-bold">
               {number_format(status_data.latest_block_height, '0,0')}
             </span>
@@ -249,28 +249,25 @@ export default () => {
         <>
           {chain_data?.staking_params && (
             <>
-              <div className="flex items-center space-x-1.5 ml-4">
-                <div className="flex items-center space-x-1">
-                  <span className="font-semibold">
-                    Max
-                  </span>
-                  <BiServer size={16} className="mb-0.5" />
-                </div>
-                {chain_data.staking_params.max_validators ?
-                  <Link href="/validators">
-                    <a className="font-mono text-blue-600 dark:text-white font-bold">
+              {chain_data.staking_params.max_validators && (
+                <Link href="/validators">
+                  <a className="flex items-center font-mono text-blue-600 dark:text-white space-x-1.5 ml-4">
+                    <div className="flex items-center space-x-1">
+                      <span className="font-semibold">
+                        Max
+                      </span>
+                      <BiServer size={14} />
+                      :
+                    </div>
+                    <span className="font-mono font-bold">
                       {number_format(chain_data.staking_params.max_validators, '0,0')}
-                    </a>
-                  </Link>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
-              </div>
+                    </span>
+                  </a>
+                </Link>
+              )}
               <div className="flex items-center space-x-1.5 ml-4">
-                <span className="font-semibold">
-                  Unbonding
+                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                  Unbonding:
                 </span>
                 {chain_data.staking_params.unbonding_time ?
                   <span className="font-mono font-bold">
@@ -287,8 +284,8 @@ export default () => {
           {chain_data?.slashing_params && (
             <>
               <div className="flex items-center space-x-1.5 ml-4">
-                <span className="font-semibold">
-                  Max Missed
+                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                  Max Missed:
                 </span>
                 {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
                   <span className="font-mono font-bold">
@@ -301,12 +298,9 @@ export default () => {
                 }
               </div>
               <div className="flex items-center space-x-1.5 ml-4">
-                <div className="flex items-center space-x-1">
-                  <span className="font-semibold">
-                    Jail
-                  </span>
-                  <FiClock size={16} className="mb-0.5" />
-                </div>
+                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                  Jail:
+                </span>
                 {chain_data.slashing_params.downtime_jail_duration ?
                   <span className="font-mono font-bold">
                     {chain_data.slashing_params.downtime_jail_duration}
@@ -318,8 +312,8 @@ export default () => {
                 }
               </div>
               <div className="flex items-center space-x-1.5 ml-4">
-                <span className="font-semibold">
-                  x2 Sign
+                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                  x2 Sign:
                 </span>
                 {chain_data.slashing_params.slash_fraction_double_sign ?
                   <span className="font-mono font-bold">
@@ -336,12 +330,9 @@ export default () => {
           {chain_data?.distribution_params && (
             <>
               <div className="flex items-center space-x-1.5 ml-4">
-                <div className="flex items-center space-x-1">
-                  <span className="font-semibold">
-                    Proposer
-                  </span>
-                  <FiGift size={16} className="mb-0.5" />
-                </div>
+                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                  Proposer Reward:
+                </span>
                 {chain_data.distribution_params.base_proposer_reward ?
                   <div className="whitespace-nowrap space-x-1">
                     <span className="font-mono font-bold">
@@ -360,8 +351,8 @@ export default () => {
                 }
               </div>
               <div className="flex items-center space-x-1.5 ml-4">
-                <span className="whitespace-nowrap font-semibold">
-                  Community Tax
+                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
+                  Community Tax:
                 </span>
                 {chain_data.distribution_params.community_tax ?
                   <span className="font-mono font-bold">
@@ -376,8 +367,8 @@ export default () => {
             </>
           )}
           <div className="flex items-center space-x-1.5 ml-4">
-            <span className="font-semibold">
-              Proposals
+            <span className="text-slate-400 dark:text-slate-600 font-semibold">
+              Proposals:
             </span>
             <Link href="/proposals">
               <a className="text-blue-600 dark:text-white">

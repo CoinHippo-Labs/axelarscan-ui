@@ -5,7 +5,7 @@ import moment from 'moment'
 import Widget from '../widget'
 import Copy from '../copy'
 
-import { numberFormat, ellipseAddress } from '../../lib/utils'
+import { number_format, ellipse } from '../../lib/utils'
 
 export default function Summary({ data }) {
   return (
@@ -17,12 +17,12 @@ export default function Summary({ data }) {
               <span>{data?.latest_block?.pre_votes > 0 ? 'Pre Votes' : 'Consensus State'}</span>
               {data?.latest_block?.pre_votes > 0 && (
                 <div className={`bg-${data.latest_block.pre_votes > 2 / 3 ? 'green' : 'red'}-500 rounded-xl text-white text-xs py-0.5 px-2`}>
-                  <span className="font-mono">{numberFormat(data.latest_block.pre_votes * 100, '0,0.00')}</span>%
+                  <span className="font-mono">{number_format(data.latest_block.pre_votes * 100, '0,0.00')}</span>%
                 </div>
               )}
             </span>
             {data?.latest_block?.height && (
-              <span className="font-mono text-gray-600 dark:text-gray-400 text-2xs">{numberFormat(data.latest_block.height, '0,0')}</span>
+              <span className="font-mono text-gray-600 dark:text-gray-400 text-2xs">{number_format(data.latest_block.height, '0,0')}</span>
             )}
           </div>}
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 cursor-pointer px-4 sm:py-4"
@@ -50,14 +50,14 @@ export default function Summary({ data }) {
                       {data.latest_block.proposer_name && (
                         <Link href={`/validator/${data.latest_block.operator_address}`}>
                           <a className="leading-4 text-base text-blue-600 dark:text-white font-semibold">
-                            {ellipseAddress(data.latest_block.proposer_name, 16) || ellipseAddress(data.latest_block.operator_address, 8)}
+                            {ellipse(data.latest_block.proposer_name, 16) || ellipse(data.latest_block.operator_address, 8)}
                           </a>
                         </Link>
                       )}
                       {/*<span className="flex items-center space-x-1">
                         <Link href={`/validator/${data.latest_block.operator_address}`}>
                           <a className="text-3xs text-gray-600 dark:text-gray-200 font-normal">
-                            {ellipseAddress(data.latest_block.operator_address, 16)}
+                            {ellipse(data.latest_block.operator_address, 16)}
                           </a>
                         </Link>
                         <Copy size={14} value={data.latest_block.operator_address} />
@@ -87,7 +87,7 @@ export default function Summary({ data }) {
                 {data?.latest_block?.voting_power ?
                   <Link href={`/validator/${data.latest_block.operator_address}`}>
                     <span className="cursor-pointer font-mono text-black dark:text-white font-semibold">
-                      {numberFormat(data.latest_block.voting_power, '0,0')}
+                      {number_format(data.latest_block.voting_power, '0,0')}
                     </span>
                   </Link>
                   :
@@ -106,7 +106,7 @@ export default function Summary({ data }) {
           <div className="flex flex-col space-y-1 mt-1">
             {data ?
               <span className="h-8 font-mono text-3xl font-semibold">
-                {typeof data.block_height === 'number' && numberFormat(data.block_height, '0,0')}
+                {typeof data.block_height === 'number' && number_format(data.block_height, '0,0')}
               </span>
               :
               <div className="skeleton w-24 h-7 mt-1" />
@@ -129,7 +129,7 @@ export default function Summary({ data }) {
           <div className="flex flex-col item space-y-1 mt-1">
             {data ?
               <span className="h-8 font-mono text-3xl font-semibold">
-                {typeof data.avg_block_time === 'number' && numberFormat(data.avg_block_time, '0.00')}
+                {typeof data.avg_block_time === 'number' && number_format(data.avg_block_time, '0.00')}
               </span>
               :
               <div className="skeleton w-24 h-7 mt-1" />
@@ -146,7 +146,7 @@ export default function Summary({ data }) {
           <div className="flex flex-col space-y-1 mt-1">
             {typeof data?.active_validators === 'number' ?
               <span className="h-8 font-mono text-3xl font-semibold">
-                {numberFormat(data.active_validators, '0,0')}
+                {number_format(data.active_validators, '0,0')}
               </span>
               :
               <div className="skeleton w-24 h-7 mt-1" />
@@ -155,7 +155,7 @@ export default function Summary({ data }) {
               <span>out of</span>
               {typeof data?.total_validators === 'number' ?
                 <span className="text-gray-600 dark:text-gray-200 font-medium">
-                  {numberFormat(data.total_validators, '0,0')}
+                  {number_format(data.total_validators, '0,0')}
                 </span>
                 :
                 <div className="skeleton w-6 h-3.5" />
@@ -181,7 +181,7 @@ export default function Summary({ data }) {
             <span className="flex items-center text-gray-400 dark:text-gray-600 text-sm font-normal space-x-1">
               {typeof data?.online_voting_power_now_percentage === 'number' ?
                 <span className="text-gray-600 dark:text-gray-200 font-medium">
-                  {numberFormat(data.online_voting_power_now_percentage, '0,0.000000')}%
+                  {number_format(data.online_voting_power_now_percentage, '0,0.000000')}%
                 </span>
                 :
                 <div className="skeleton w-6 h-3.5" />
@@ -195,7 +195,7 @@ export default function Summary({ data }) {
                 <div className="skeleton w-8 h-3.5" />
               }
               <span className="text-gray-600 dark:text-gray-400 font-medium">
-                {data && ellipseAddress(data.denom)}
+                {data && ellipse(data.denom)}
               </span>
             </span>
           </div>
