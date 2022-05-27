@@ -49,7 +49,7 @@ export default function Block({ height }) {
 
         while (pageKey) {
           if (!controller.signal.aborted) {
-            response = await getTransactions({ events: `tx.height=${height}`, 'pagination.key': pageKey && typeof pageKey === 'string' ? pageKey : undefined }, null, denoms_data)
+            response = await getTransactions({ events: `tx.height=${height}`, 'pagination.key': pageKey && typeof pageKey === 'string' ? pageKey : undefined }, denoms_data)
             data = _.orderBy(_.uniqBy(_.concat(data, response?.data || []), 'txhash'), ['timestamp'], ['desc'])
             pageKey = response?.pagination?.next_key
           }

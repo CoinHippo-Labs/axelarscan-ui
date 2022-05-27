@@ -1,12 +1,9 @@
-import { useRouter } from 'next/router'
+import Transaction from '../../components/transaction'
 
-import Transaction from '../../components/transactions/transaction'
-
-export default function Tx() {
-  const router = useRouter()
-  const { query } = { ...router }
-
+export default () => {
   return (
-    <Transaction tx={query.tx} />
+    <div className="max-w-6xl mx-auto">
+      <Transaction />
+    </div>
   )
 }

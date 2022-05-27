@@ -205,7 +205,7 @@ export default function Account({ address }) {
 
         if (address.length >= 65) {
           if (!controller.signal.aborted) {
-            const response = await transactions_by_events(`transfer.sender='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`transfer.sender='${address}'`, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[0] = response
@@ -213,7 +213,7 @@ export default function Account({ address }) {
             }
           }
           if (!controller.signal.aborted) {
-            const response = await transactions_by_events(`transfer.recipient='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`transfer.recipient='${address}'`, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[1] = response
@@ -221,7 +221,7 @@ export default function Account({ address }) {
             }
           }
           if (!controller.signal.aborted) {
-            const response = await transactions_by_events(`message.sender='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`message.sender='${address}'`, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[2] = response
@@ -229,7 +229,7 @@ export default function Account({ address }) {
             }
           }
           if (!controller.signal.aborted && address.length >= 65) {
-            const response = await transactions_by_events(`link.depositAddress='${address}'`, null, null, null, denoms_data)
+            const response = await transactions_by_events(`link.depositAddress='${address}'`, null, null, denoms_data)
 
             if (response?.data?.length > 0) {
               data[3] = response
