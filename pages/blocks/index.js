@@ -1,9 +1,9 @@
-import BlocksTable from '../../components/blocks/blocks-table'
+import Blocks from '../../components/blocks'
 
-export default function Blocks() {
+export default () => {
   return (
-    <div className="max-w-4xl my-2 xl:my-4 mx-auto">
-      <BlocksTable className="no-border" />
+    <div className="max-w-4xl mt-2 mb-6 mx-auto">
+      <Blocks />
     </div>
   )
 }

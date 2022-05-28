@@ -10,6 +10,7 @@ import status from './status'
 import tvl from './tvl'
 import validators from './validators'
 import validators_chains from './validators-chains'
+import validators_profile from './validators-profile'
 import rpc_providers from './rpc-providers'
 import wallet from './wallet'
 import chain_id from './chain-id'
@@ -25,6 +26,7 @@ export default combineReducers({
   tvl,
   validators,
   validators_chains,
+  validators_profile,
   rpc_providers,
   wallet,
   chain_id,

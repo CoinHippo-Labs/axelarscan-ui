@@ -198,6 +198,7 @@ export default () => {
   }
 
   const is_validator_path = ['/validator', '/participations', '/proposals'].findIndex(p => pathname?.includes(p)) > -1
+  const is_block_path = ['/block'].findIndex(p => pathname?.includes(p)) > -1
 
   return (
     <div className="w-full overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
@@ -327,6 +328,10 @@ export default () => {
               </div>
             </>
           )}
+        </>
+      )}
+      {(is_validator_path || is_block_path) && (
+        <>
           {chain_data?.distribution_params && (
             <>
               <div className="flex items-center space-x-1.5 ml-4">

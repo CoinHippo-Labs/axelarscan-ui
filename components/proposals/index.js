@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { Puff } from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
 import { all_proposals } from '../../lib/api/cosmos'
@@ -191,7 +191,7 @@ export default () => {
           className="no-border"
         />
         :
-        <Puff color={loader_color(theme)} width="32" height="32" />
+        <TailSpin color={loader_color(theme)} width="32" height="32" />
       }
     </div>
   )

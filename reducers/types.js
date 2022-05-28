@@ -19,6 +19,7 @@ export const TVL_DATA = 'tvl_data'
 // validators
 export const VALIDATORS_DATA = 'validators_data'
 export const VALIDATORS_CHAINS_DATA = 'validators_chains_data'
+export const VALIDATORS_PROFILE_DATA = 'validators_profile_data'
 
 // rpc
 export const RPCS = 'rpcs'

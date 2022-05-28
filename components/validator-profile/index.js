@@ -1,40 +1,58 @@
 import { useState, useEffect } from 'react'
-import { useSelector, shallowEqual } from 'react-redux'
+import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { Puff } from 'react-loader-spinner'
 
 import Image from '../image'
 import { validator_profile } from '../../lib/api/cosmos'
 import { loader_color, rand_image } from '../../lib/utils'
+import { VALIDATORS_PROFILE_DATA } from '../../reducers/types'
 
 export default ({ validator_description }) => {
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
+  const dispatch = useDispatch()
+  const { preferences, validators_profile } = useSelector(state => ({ preferences: state.preferences, validators_profile: state.validators_profile }), shallowEqual)
   const { theme } = { ...preferences }
+  const { validators_profile_data } = { ...validators_profile }
 
   const [image, setImage] = useState(null)
 
   useEffect(() => {
     const getData = async () => {
-      let _image
-      if (validator_description?.identity) {
-        const response = await validator_profile({ key_suffix: validator_description.identity })
-        _image = response?.them?.[0]?.pictures?.primary?.url
-      }
-      if (!_image) {
-        if (validator_description?.moniker?.toLowerCase().startsWith('axelar-core-')) {
-          _image = '/logos/chains/axelar.png'
+      if (validator_description) {
+        const { moniker, identity } = { ...validator_description }
+        let _image
+        if (validators_profile_data?.[identity]) {
+          _image = validators_profile_data[identity]
         }
-        else {
-          _image = rand_image()
+        else if (identity) {
+          const response = await validator_profile({ key_suffix: identity })
+          _image = response?.them?.[0]?.pictures?.primary?.url
         }
+        if (!_image) {
+          if (moniker?.toLowerCase().startsWith('axelar-core-')) {
+            _image = '/logos/chains/axelar.png'
+          }
+          else {
+            _image = rand_image()
+          }
+        }
+        setImage(_image)
+        dispatch({
+          type: VALIDATORS_PROFILE_DATA,
+          value: {
+            [`${identity}`]: _image,
+          },
+        })
       }
-      setImage(_image)
     }
     getData()
   }, [validator_description])
 
-  return image ?
+  const { identity } = { ...validator_description }
+  const _image = validators_profile_data?.[identity] || image
+
+  return _image ?
     <Image
-      src={image}
+      src={_image}
       alt=""
       className="w-6 h-6 rounded-full"
     />
