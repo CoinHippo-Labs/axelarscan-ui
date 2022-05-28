@@ -12,7 +12,7 @@ import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { transactions_by_events } from '../../lib/api/cosmos'
+import { transactions_by_events, transactions_by_events_paging } from '../../lib/api/cosmos'
 import { transactions as getTransactions } from '../../lib/api/index'
 import { number_format, name, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -78,9 +78,18 @@ export default ({ n }) => {
           if (height) {
             response = await transactions_by_events(`tx.height=${height}`, _data, true, assets_data)
           }
+          else if (address?.length >= 65) {
+            response = await transactions_by_events_paging(`transfer.sender='${address}'`, response, from, assets_data)
+            response = await transactions_by_events_paging(`transfer.recipient='${address}'`, response, from, assets_data)
+            response = await transactions_by_events_paging(`message.sender='${address}'`, response, from, assets_data)
+            response = await transactions_by_events_paging(`link.depositAddress='${address}'`, response, from, assets_data)
+          }
           else {
             const must = [], must_not = []
-            if (filters) {
+            if (address) {
+              must.push({ match: { addresses: address } })
+            }
+            else if (filters) {
               const { txHash, status, type, time } = { ...filters }
               if (txHash) {
                 must.push({ match: { txhash: txHash } })
@@ -372,7 +381,7 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : height || address ? 25 : 100}
           className="min-h-full no-border"
         />
-        {data.length > 0 && !n && !height && (
+        {data.length > 0 && !n && !height && !(address?.length >= 65) && (
           !fetching ?
             <button
               onClick={() => {

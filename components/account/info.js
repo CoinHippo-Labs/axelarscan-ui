@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 
@@ -12,9 +13,13 @@ import { chainTitle } from '../../lib/object/chain'
 import { currency, currency_symbol } from '../../lib/object/currency'
 import { number_format, ellipse } from '../../lib/utils'
 
-export default function AccountDetail({ address, data }) {
+export default ({ data }) => {
   const { env } = useSelector(state => ({ env: state.env }), shallowEqual)
   const { env_data } = { ...env }
+
+  const router = useRouter()
+  const { query } = { ...router }
+  const { address } = { ...query }
 
   const isDepositAddress = address?.length >= 65
 

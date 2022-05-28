@@ -1,12 +1,9 @@
-import { useRouter } from 'next/router'
-
 import Account from '../../components/account'
 
-export default function AccountIndex() {
-  const router = useRouter()
-  const { query } = { ...router }
-
+export default () => {
   return (
-    <Account address={query.address} />
+    <div className="max-w-8xl mx-auto">
+      <Account />
+    </div>
   )
 }
