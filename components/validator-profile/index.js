@@ -32,7 +32,7 @@ export default ({ validator_description }) => {
           if (moniker?.toLowerCase().startsWith('axelar-core-')) {
             _image = '/logos/chains/axelar.png'
           }
-          else {
+          else if (!identity) {
             _image = rand_image()
           }
         }

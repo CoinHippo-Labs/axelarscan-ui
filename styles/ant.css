@@ -1,0 +1,18 @@
+.ant-picker-input input,
+.ant-picker-range-separator span,
+.ant-picker-suffix span {
+  @apply text-black dark:text-white !important;
+}
+
+.ant-picker-clear {
+  @apply bg-white rounded-full;
+  span {
+    @apply text-slate-400 dark:text-slate-600 !important;
+  }
+}
+
+.ant-btn-primary {
+  &:not(:disabled) {
+    @apply bg-blue-600 hover:bg-blue-500 border-0 text-white !important;
+  }
+}

@@ -31,12 +31,12 @@ export default ({ n }) => {
   const [offset, setOffet] = useState(0)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
+  const [filters, setFilters] = useState(null)
   const [types, setTypes] = useState(null)
   const [filterTypes, setFilterTypes] = useState(null)
-  const [filters, setFilters] = useState(null)
 
   useEffect(() => {
-    if (asPath && !filters) {
+    if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const { txHash, status, type, fromTime, toTime } = { ...params }
       setFilters({
@@ -54,7 +54,7 @@ export default ({ n }) => {
       setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
     }
     triggering()
-    const interval = setInterval(() => triggering(true), ((height || address || pathname?.includes('/search')) ? 3 : 0.1) * 60 * 1000)
+    const interval = setInterval(() => triggering(true), (height || address || ['/transactions/search'].includes(pathname) ? 3 : 0.1) * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
@@ -361,7 +361,7 @@ export default ({ n }) => {
             !['transfer'].includes(c.accessor)
           )}
           data={data_filtered}
-          noPagination={data_filtered.length <= 10 || !n}
+          noPagination={data_filtered.length <= 10 || (!n && !(height || address || ['/transactions/search'].includes(pathname)))}
           defaultPageSize={n ? 10 : 100}
           className="min-h-full no-border"
         />

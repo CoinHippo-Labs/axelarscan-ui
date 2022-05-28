@@ -6,6 +6,9 @@ import { BiServer } from 'react-icons/bi'
 import { HiOutlineExternalLink } from 'react-icons/hi'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
+import TransactionFilters from '../../transactions/filters'
+// import GMPFilters from '../../gmp/filters'
+// import TransferFilters from '../../transfers/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
 import { currency, currency_symbol } from '../../../lib/object/currency'
@@ -21,7 +24,7 @@ export default () => {
   const { status, height, address, tx, id } = { ...query }
 
   const { token_data } = { ...chain_data }
-  let title, subtitle
+  let title, subtitle, right
   switch (pathname) {
     case '/':
       title = 'Overview'
@@ -110,6 +113,9 @@ export default () => {
             </div>
           ))}
         </div>
+      )
+      right = pathname.endsWith('/search') && (
+        <TransactionFilters />
       )
       break
     case '/tx/[tx]':
@@ -236,151 +242,155 @@ export default () => {
         </div>
       )}
       <span className="sm:ml-auto" />
-      {status_data?.latest_block_height && (
-        <Link href={`/block/${status_data.latest_block_height}`}>
-          <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
-            <FiBox size={16} />
-            <span className="font-mono font-bold">
-              {number_format(status_data.latest_block_height, '0,0')}
-            </span>
-          </a>
-        </Link>
-      )}
-      {is_validator_path && (
+      {right || (
         <>
-          {chain_data?.staking_params && (
+          {status_data?.latest_block_height && (
+            <Link href={`/block/${status_data.latest_block_height}`}>
+              <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
+                <FiBox size={16} />
+                <span className="font-mono font-bold">
+                  {number_format(status_data.latest_block_height, '0,0')}
+                </span>
+              </a>
+            </Link>
+          )}
+          {is_validator_path && (
             <>
-              {chain_data.staking_params.max_validators && (
-                <Link href="/validators">
-                  <a className="flex items-center font-mono text-blue-600 dark:text-white space-x-1.5 ml-4">
-                    <div className="flex items-center space-x-1">
-                      <span className="font-semibold">
-                        Max
-                      </span>
-                      <BiServer size={14} />
-                      :
-                    </div>
-                    <span className="font-mono font-bold">
-                      {number_format(chain_data.staking_params.max_validators, '0,0')}
+              {chain_data?.staking_params && (
+                <>
+                  {chain_data.staking_params.max_validators && (
+                    <Link href="/validators">
+                      <a className="flex items-center font-mono text-blue-600 dark:text-white space-x-1.5 ml-4">
+                        <div className="flex items-center space-x-1">
+                          <span className="font-semibold">
+                            Max
+                          </span>
+                          <BiServer size={14} />
+                          :
+                        </div>
+                        <span className="font-mono font-bold">
+                          {number_format(chain_data.staking_params.max_validators, '0,0')}
+                        </span>
+                      </a>
+                    </Link>
+                  )}
+                  <div className="flex items-center space-x-1.5 ml-4">
+                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                      Unbonding:
                     </span>
-                  </a>
-                </Link>
+                    {chain_data.staking_params.unbonding_time ?
+                      <span className="font-mono font-bold">
+                        {chain_data.staking_params.unbonding_time}
+                      </span>
+                      :
+                      <span>
+                        -
+                      </span>
+                    }
+                  </div>
+                </>
+              )}
+              {chain_data?.slashing_params && (
+                <>
+                  <div className="flex items-center space-x-1.5 ml-4">
+                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                      Max Missed:
+                    </span>
+                    {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
+                      <span className="font-mono font-bold">
+                        {number_format(Number(chain_data.slashing_params.signed_blocks_window) - (Number(chain_data.slashing_params.min_signed_per_window) * Number(chain_data.slashing_params.signed_blocks_window)), '0,0')}
+                      </span>
+                      :
+                      <span>
+                        -
+                      </span>
+                    }
+                  </div>
+                  <div className="flex items-center space-x-1.5 ml-4">
+                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                      Jail:
+                    </span>
+                    {chain_data.slashing_params.downtime_jail_duration ?
+                      <span className="font-mono font-bold">
+                        {chain_data.slashing_params.downtime_jail_duration}
+                      </span>
+                      :
+                      <span>
+                        -
+                      </span>
+                    }
+                  </div>
+                  <div className="flex items-center space-x-1.5 ml-4">
+                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                      x2 Sign:
+                    </span>
+                    {chain_data.slashing_params.slash_fraction_double_sign ?
+                      <span className="font-mono font-bold">
+                        {number_format(chain_data.slashing_params.slash_fraction_double_sign, '0,0.00000000')}
+                      </span>
+                      :
+                      <span>
+                        -
+                      </span>
+                    }
+                  </div>
+                </>
+              )}
+            </>
+          )}
+          {(is_validator_path || is_block_path) && (
+            <>
+              {chain_data?.distribution_params && (
+                <>
+                  <div className="flex items-center space-x-1.5 ml-4">
+                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                      Proposer Reward:
+                    </span>
+                    {chain_data.distribution_params.base_proposer_reward ?
+                      <div className="whitespace-nowrap space-x-1">
+                        <span className="font-mono font-bold">
+                          {number_format(Number(chain_data.distribution_params.base_proposer_reward) * 100, '0,0.00')}%
+                        </span>
+                        {!isNaN(chain_data.distribution_params.bonus_proposer_reward) && (
+                          <span className="font-mono font-medium">
+                            (+{number_format(Number(chain_data.distribution_params.bonus_proposer_reward) * 100, '0,0.00')}%)
+                          </span>
+                        )}
+                      </div>
+                      :
+                      <span>
+                        -
+                      </span>
+                    }
+                  </div>
+                  <div className="flex items-center space-x-1.5 ml-4">
+                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
+                      Community Tax:
+                    </span>
+                    {chain_data.distribution_params.community_tax ?
+                      <span className="font-mono font-bold">
+                        {number_format(Number(chain_data.distribution_params.community_tax) * 100, '0,0.00')}%
+                      </span>
+                      :
+                      <span>
+                        -
+                      </span>
+                    }
+                  </div>
+                </>
               )}
               <div className="flex items-center space-x-1.5 ml-4">
                 <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                  Unbonding:
+                  Proposals:
                 </span>
-                {chain_data.staking_params.unbonding_time ?
-                  <span className="font-mono font-bold">
-                    {chain_data.staking_params.unbonding_time}
-                  </span>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
+                <Link href="/proposals">
+                  <a className="text-blue-600 dark:text-white">
+                    <HiOutlineExternalLink size={16} />
+                  </a>
+                </Link>
               </div>
             </>
           )}
-          {chain_data?.slashing_params && (
-            <>
-              <div className="flex items-center space-x-1.5 ml-4">
-                <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                  Max Missed:
-                </span>
-                {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
-                  <span className="font-mono font-bold">
-                    {number_format(Number(chain_data.slashing_params.signed_blocks_window) - (Number(chain_data.slashing_params.min_signed_per_window) * Number(chain_data.slashing_params.signed_blocks_window)), '0,0')}
-                  </span>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
-              </div>
-              <div className="flex items-center space-x-1.5 ml-4">
-                <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                  Jail:
-                </span>
-                {chain_data.slashing_params.downtime_jail_duration ?
-                  <span className="font-mono font-bold">
-                    {chain_data.slashing_params.downtime_jail_duration}
-                  </span>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
-              </div>
-              <div className="flex items-center space-x-1.5 ml-4">
-                <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                  x2 Sign:
-                </span>
-                {chain_data.slashing_params.slash_fraction_double_sign ?
-                  <span className="font-mono font-bold">
-                    {number_format(chain_data.slashing_params.slash_fraction_double_sign, '0,0.00000000')}
-                  </span>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
-              </div>
-            </>
-          )}
-        </>
-      )}
-      {(is_validator_path || is_block_path) && (
-        <>
-          {chain_data?.distribution_params && (
-            <>
-              <div className="flex items-center space-x-1.5 ml-4">
-                <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                  Proposer Reward:
-                </span>
-                {chain_data.distribution_params.base_proposer_reward ?
-                  <div className="whitespace-nowrap space-x-1">
-                    <span className="font-mono font-bold">
-                      {number_format(Number(chain_data.distribution_params.base_proposer_reward) * 100, '0,0.00')}%
-                    </span>
-                    {!isNaN(chain_data.distribution_params.bonus_proposer_reward) && (
-                      <span className="font-mono font-medium">
-                        (+{number_format(Number(chain_data.distribution_params.bonus_proposer_reward) * 100, '0,0.00')}%)
-                      </span>
-                    )}
-                  </div>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
-              </div>
-              <div className="flex items-center space-x-1.5 ml-4">
-                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                  Community Tax:
-                </span>
-                {chain_data.distribution_params.community_tax ?
-                  <span className="font-mono font-bold">
-                    {number_format(Number(chain_data.distribution_params.community_tax) * 100, '0,0.00')}%
-                  </span>
-                  :
-                  <span>
-                    -
-                  </span>
-                }
-              </div>
-            </>
-          )}
-          <div className="flex items-center space-x-1.5 ml-4">
-            <span className="text-slate-400 dark:text-slate-600 font-semibold">
-              Proposals:
-            </span>
-            <Link href="/proposals">
-              <a className="text-blue-600 dark:text-white">
-                <HiOutlineExternalLink size={16} />
-              </a>
-            </Link>
-          </div>
         </>
       )}
     </div>
