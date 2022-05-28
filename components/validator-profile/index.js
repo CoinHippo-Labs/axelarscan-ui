@@ -19,9 +19,10 @@ export default ({ validator_description }) => {
     const getData = async () => {
       if (validator_description) {
         const { moniker, identity } = { ...validator_description }
+        const key = identity || moniker?.split(' ').join('_')
         let _image
-        if (validators_profile_data?.[identity]) {
-          _image = validators_profile_data[identity]
+        if (validators_profile_data?.[key]) {
+          _image = validators_profile_data[key]
         }
         else if (identity) {
           const response = await validator_profile({ key_suffix: identity })
@@ -39,7 +40,7 @@ export default ({ validator_description }) => {
         dispatch({
           type: VALIDATORS_PROFILE_DATA,
           value: {
-            [`${identity}`]: _image,
+            [`${key}`]: _image,
           },
         })
       }
@@ -47,8 +48,9 @@ export default ({ validator_description }) => {
     getData()
   }, [validator_description])
 
-  const { identity } = { ...validator_description }
-  const _image = validators_profile_data?.[identity] || image
+  const { moniker, identity } = { ...validator_description }
+  const key = identity || moniker?.split(' ').join('_')
+  const _image = validators_profile_data?.[key] || image
 
   return _image ?
     <Image

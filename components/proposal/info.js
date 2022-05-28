@@ -197,7 +197,10 @@ export default ({ data }) => {
           <div className="flex flex-col space-y-1.5">
             {data.total_deposit ?
               data.total_deposit.map((d, i) => (
-                <span key={i} className="text-xs lg:text-base font-semibold">
+                <span
+                  key={i}
+                  className="text-xs lg:text-base font-semibold"
+                >
                   {number_format(d.amount, '0,0.00')} {d.symbol || d.denom}
                 </span>
               ))

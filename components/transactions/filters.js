@@ -6,9 +6,31 @@ import { DatePicker } from 'antd'
 import { VscFilterFilled, VscFilter } from 'react-icons/vsc'
 
 import Modal from '../modals'
+import { transactions as getTransactions } from '../../lib/api/index'
 
-export default function TransactionsFilter({ applied = false, disabled = false, initialFilter, updateFilter, types }) {
+export default function TransactionsFilter({ applied = false, disabled = false, initialFilter, updateFilter }) {
   const [filter, setFilter] = useState(initialFilter)
+  const [types, setTypes] = useState(null)
+
+  useEffect(async () => {
+    const response = await getTransactions({
+      size: 0,
+      aggs: {
+        types: {
+          terms: { field: 'types.keyword', size: 100 },
+        },
+      },
+    })
+    setTypes(_.orderBy(response?.data || []))
+  }, [])
+
+  useEffect(() => {
+    setFilter(initialFilter)
+  }, [initialFilter])
+
+// if (searchParams) {
+//   router.push(`${pathname}?${Object.entries(searchParams).map(([k, v]) => `${k}=${v}`).join('&')}`)
+// }
 
   const items = [
     {
@@ -42,10 +64,6 @@ export default function TransactionsFilter({ applied = false, disabled = false, 
       options: _.concat({ value: '', title: 'Any' }, types?.map(t => { return { value: t, title: t } }) || []),
     },
   ]
-
-  useEffect(() => {
-    setFilter(initialFilter)
-  }, [initialFilter])
 
   return (
     <Modal

@@ -38,7 +38,7 @@ export default ({ data }) => {
             Cell: props => (
               <div className="flex items-center space-x-1">
                 <Link href={`/account/${props.value}`}>
-                  <a className="text-blue-600 dark:text-white">
+                  <a className="text-blue-600 dark:text-white font-medium">
                     {ellipse(props.value, 12, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
                   </a>
                 </Link>

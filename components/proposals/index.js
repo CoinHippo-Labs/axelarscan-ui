@@ -134,10 +134,13 @@ export default () => {
               sortType: (a, b) => _.sumBy(a.original.total_deposit?.filter(d => d?.denom === 'uaxl') || [], 'amount') > _.sumBy(b.original.total_deposit?.filter(d => d?.denom === 'uaxl') || [], 'amount') ? 1 : -1,
               Cell: props => (
                 <div className="flex flex-col text-left sm:text-right">
-                  <div className="flex flex-col items-end space-y-1.5">
+                  <div className="flex flex-col items-start sm:items-end space-y-1.5">
                     {props.value ?
                       props.value.map((d, i) => (
-                        <span key={i} className="font-semibold">
+                        <span
+                          key={i}
+                          className="font-semibold"
+                        >
                           {number_format(d.amount, '0,0.00')} {d.symbol || d.denom}
                         </span>
                       ))

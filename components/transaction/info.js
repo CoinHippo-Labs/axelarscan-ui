@@ -37,6 +37,36 @@ export default ({ data }) => {
       </div>
       <div className={rowClassName}>
         <span className={titleClassName}>
+          Block:
+        </span>
+        {data ?
+          data.height && (
+            <Link href={`/block/${data.height}`}>
+              <a className="text-blue-600 dark:text-white text-xs lg:text-base font-bold">
+                {number_format(data.height, '0,0')}
+              </a>
+            </Link>
+          )
+          :
+          <div className="skeleton w-40 h-6 mt-1" />
+        }
+      </div>
+      {(!data || data.type) && (
+        <div className={rowClassName}>
+          <span className={titleClassName}>
+            Type:
+          </span>
+          {data ?
+            <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-base font-semibold py-0.5 px-2">
+              {name(data.type)}
+            </div>
+            :
+            <div className="skeleton w-40 h-6 mt-1" />
+          }
+        </div>
+      )}
+      <div className={rowClassName}>
+        <span className={titleClassName}>
           Status:
         </span>
         {data ?
@@ -58,22 +88,6 @@ export default ({ data }) => {
       </div>
       <div className={rowClassName}>
         <span className={titleClassName}>
-          Block:
-        </span>
-        {data ?
-          data.height && (
-            <Link href={`/block/${data.height}`}>
-              <a className="text-blue-600 dark:text-white text-xs lg:text-base font-bold">
-                {number_format(data.height, '0,0')}
-              </a>
-            </Link>
-          )
-          :
-          <div className="skeleton w-40 h-6 mt-1" />
-        }
-      </div>
-      <div className={rowClassName}>
-        <span className={titleClassName}>
           Time:
         </span>
         {data ?
@@ -86,20 +100,6 @@ export default ({ data }) => {
           <div className="skeleton w-40 h-6 mt-1" />
         }
       </div>
-      {(!data || data.type) && (
-        <div className={rowClassName}>
-          <span className={titleClassName}>
-            Type:
-          </span>
-          {data ?
-            <span className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-base font-semibold py-0.5 px-2">
-              {name(data.type)}
-            </span>
-            :
-            <div className="skeleton w-40 h-6 mt-1" />
-          }
-        </div>
-      )}
       <div className={rowClassName}>
         <span className={titleClassName}>
           Sender:

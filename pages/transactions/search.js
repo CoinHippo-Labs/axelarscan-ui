@@ -1,9 +1,9 @@
-import TransactionsTable from '../../components/transactions/transactions-table'
+import Transactions from '../../components/transactions'
 
-export default function TransactionsSearch() {
+export default () => {
   return (
-    <div className="max-w-7xl my-2 xl:my-4 mx-auto">
-      <TransactionsTable location="search" className="no-border" />
+    <div className="max-w-8xl mt-2 mb-6 mx-auto">
+      <Transactions />
     </div>
   )
 }
