@@ -12,6 +12,7 @@ import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
+import { transactions_by_events } from '../../lib/api/cosmos'
 import { transactions as getTransactions } from '../../lib/api/index'
 import { number_format, name, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -73,44 +74,50 @@ export default ({ n }) => {
           const _data = !fetchTrigger ? [] : (data || []),
             size = n || LIMIT
           const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
-          const must = [], must_not = []
-          if (filters) {
-            const { txHash, status, type, time } = { ...filters }
-            if (txHash) {
-              must.push({ match: { txhash: txHash } })
-            }
-            if (status) {
-              switch (status) {
-                case 'success':
-                  must.push({ match: { code: 0 } })
-                  break
-                default:
-                  must_not.push({ match: { code: 0 } })
-                  break
+          let response
+          if (height) {
+            response = await transactions_by_events(`tx.height=${height}`, _data, true, assets_data)
+          }
+          else {
+            const must = [], must_not = []
+            if (filters) {
+              const { txHash, status, type, time } = { ...filters }
+              if (txHash) {
+                must.push({ match: { txhash: txHash } })
+              }
+              if (status) {
+                switch (status) {
+                  case 'success':
+                    must.push({ match: { code: 0 } })
+                    break
+                  default:
+                    must_not.push({ match: { code: 0 } })
+                    break
+                }
+              }
+              if (type) {
+                must.push({ match: { types: type } })
+              }
+              if (time?.length > 1) {
+                must.push({ range: { timestamp: { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
               }
             }
-            if (type) {
-              must.push({ match: { types: type } })
-            }
-            if (time?.length > 1) {
-              must.push({ range: { timestamp: { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
-            }
-          }
-          let response = await getTransactions({
-            query: {
-              bool: {
-                must,
-                must_not,
+            response = await getTransactions({
+              query: {
+                bool: {
+                  must,
+                  must_not,
+                },
               },
-            },
-            size,
-            from,
-            sort: [{ timestamp: 'desc' }],
-            fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
-            _source: {
-              includes: 'logs'
-            },
-          }, assets_data)
+              size,
+              from,
+              sort: [{ timestamp: 'desc' }],
+              fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
+              _source: {
+                includes: 'logs'
+              },
+            }, assets_data)
+          }
           if (response) {
             response = _.orderBy(_.uniqBy(_.concat(_data, response?.data?.map(d => {
               const { txhash, timestamp } = { ...d }
@@ -354,7 +361,7 @@ export default ({ n }) => {
               ),
               headerClassName: 'justify-end text-right',
             },
-          ].filter(c => ['/block'].includes(pathname) ? !['height', 'transfer'].includes(c.accessor) :
+          ].filter(c => ['/block/[height]'].includes(pathname) ? !['height', 'transfer'].includes(c.accessor) :
             ['/'].includes(pathname) ? !['height', 'sender', 'value', 'transfer', 'fee'].includes(c.accessor) :
             ['/validator/[address]'].includes(pathname) ? !['sender', 'value', 'transfer', 'fee'].includes(c.accessor) :
             ['/account/[address]'].includes(pathname) ? true :
@@ -362,10 +369,10 @@ export default ({ n }) => {
           )}
           data={data_filtered}
           noPagination={data_filtered.length <= 10 || (!n && !(height || address || ['/transactions/search'].includes(pathname)))}
-          defaultPageSize={n ? 10 : 100}
+          defaultPageSize={n ? 10 : height || address ? 25 : 100}
           className="min-h-full no-border"
         />
-        {data.length > 0 && !n && (
+        {data.length > 0 && !n && !height && (
           !fetching ?
             <button
               onClick={() => {

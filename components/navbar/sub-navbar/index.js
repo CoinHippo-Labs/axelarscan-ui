@@ -77,7 +77,7 @@ export default () => {
       title = 'Latest Blocks'
       break
     case '/block/[height]':
-      title `Block: ${number_format(height, '0,0')}`
+      title = `Block: ${number_format(height, '0,0')}`
       subtitle = (
         <div className="flex items-center space-x-2">
           <Link href={`/block/${Number(height) - 1}`}>

@@ -129,9 +129,13 @@ export default ({ n }) => {
                     </div>
                   </div>
                   :
-                  <span className="font-semibold">
-                    {ellipse(props.value, 8, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS)}
-                  </span>
+                  <Copy
+                    value={props.value}
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                      {ellipse(props.value, 8, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS)}
+                    </span>}
+                    size={18}
+                  />
               ),
             },
             {

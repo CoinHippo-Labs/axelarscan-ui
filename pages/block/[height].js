@@ -1,12 +1,9 @@
-import { useRouter } from 'next/router'
+import Block from '../../components/block'
 
-import Block from '../../components/blocks/block'
-
-export default function BlockHeight() {
-  const router = useRouter()
-  const { query } = { ...router }
-
+export default () => {
   return (
-    <Block height={query?.height} />
+    <div className="max-w-7xl mx-auto">
+      <Block />
+    </div>
   )
 }

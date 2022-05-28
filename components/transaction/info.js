@@ -11,9 +11,9 @@ export default ({ data }) => {
   const { validators } = useSelector(state => ({ validators: state.validators }), shallowEqual)
   const { validators_data } = { ...validators }
 
+  const validator_data = data?.sender && validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, data.sender))
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 text-xs lg:text-base font-bold'
-  const validator_data = data?.sender && validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, data.sender))
 
   return (
     <div className="w-full flex flex-col space-y-4">
