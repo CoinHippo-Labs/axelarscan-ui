@@ -5,14 +5,13 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { TailSpin, ThreeDots } from 'react-loader-spinner'
-import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
-import { BiLeftArrowCircle, BiRightArrowCircle } from 'react-icons/bs'
+import { BiCheckCircle, BiXCircle, BiLeftArrowCircle, BiRightArrowCircle } from 'react-icons/bi'
 
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { transactions_by_events, transactions_by_events_paging } from '../../lib/api/cosmos'
+import { transactions_by_events } from '../../lib/api/cosmos'
 import { transactions as getTransactions } from '../../lib/api/index'
 import { number_format, name, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -79,10 +78,10 @@ export default ({ n }) => {
             response = await transactions_by_events(`tx.height=${height}`, _data, true, assets_data)
           }
           else if (address?.length >= 65) {
-            response = await transactions_by_events_paging(`transfer.sender='${address}'`, response, from, assets_data)
-            response = await transactions_by_events_paging(`transfer.recipient='${address}'`, response, from, assets_data)
-            response = await transactions_by_events_paging(`message.sender='${address}'`, response, from, assets_data)
-            response = await transactions_by_events_paging(`link.depositAddress='${address}'`, response, from, assets_data)
+            response = await transactions_by_events(`transfer.sender='${address}'`, response?.data, true, assets_data)
+            response = await transactions_by_events(`transfer.recipient='${address}'`, response?.data, true, assets_data)
+            response = await transactions_by_events(`message.sender='${address}'`, response?.data, true, assets_data)
+            response = await transactions_by_events(`link.depositAddress='${address}'`, response?.data, true, assets_data)
           }
           else {
             const must = [], must_not = []
@@ -121,7 +120,7 @@ export default ({ n }) => {
               size,
               from,
               sort: [{ timestamp: 'desc' }],
-              fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
+              fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'tx.body.messages.signer', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
               _source: {
                 includes: 'logs'
               },
@@ -129,11 +128,13 @@ export default ({ n }) => {
           }
           if (response) {
             response = _.orderBy(_.uniqBy(_.concat(_data, response?.data?.map(d => {
-              const { txhash, timestamp } = { ...d }
+              const { txhash, timestamp, activities } = { ...d }
               return {
                 ...d,
                 txhash: Array.isArray(txhash) ? _.last(txhash) : txhash,
                 timestamp: Array.isArray(timestamp) ? _.last(timestamp) : timestamp,
+                transfer: activities?.findIndex(a => equals_ignore_case(a?.sender, address)) > -1 ? 'out' :
+                  activities?.findIndex(a => equals_ignore_case(a?.receiver, address)) > -1 ? 'in' : null
               }
             }) || []), 'txhash'), ['timestamp'], ['desc'])
             setData(response)
@@ -296,7 +297,7 @@ export default ({ n }) => {
             },
             {
               Header: 'Amount',
-              accessor: 'value',
+              accessor: 'amount',
               disableSortBy: true,
               Cell: props => (
                 <div className="flex flex-col text-left sm:text-right">
@@ -306,8 +307,8 @@ export default ({ n }) => {
                         {number_format(props.value, '0,0.00000000')} {props.row.original.symbol}
                       </span>
                       :
-                      props.row.original.activities?.findIndex(a => a?.amount) > -1 ?
-                        props.row.original.activities.filter(a => a?.amount).map((a, i) => (
+                      props.row.original.activities?.findIndex(a => a?.amount && a.amount !== props.row.original.fee) > -1 ?
+                        props.row.original.activities.filter(a => a?.amount && a.amount !== props.row.original.fee).map((a, i) => (
                           <span
                             key={i}
                             className="uppercase text-xs lg:text-sm font-semibold"
@@ -330,13 +331,13 @@ export default ({ n }) => {
               accessor: 'transfer',
               disableSortBy: true,
               Cell: props => (
-                <div className="flex items-center space-x-1.5">
+                <div className="flex items-center space-x-1">
                   {props.value === 'in' ?
                     <BiLeftArrowCircle size={18} className="text-green-500 dark:text-green-600" /> :
                     props.value === 'out' ?
                       <BiRightArrowCircle size={18} className="text-red-500 dark:text-red-600" /> : null
                   }
-                  <span className="uppercase font-semibold">
+                  <span className={`uppercase ${props.value === 'in' ? 'text-green-500 dark:text-green-600' : props.value === 'out' ? 'text-red-500 dark:text-red-600' : ''} font-semibold`}>
                     {props.value}
                   </span>
                 </div>

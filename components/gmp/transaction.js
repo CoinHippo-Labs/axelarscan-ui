@@ -699,7 +699,7 @@ export default function Transaction() {
               >
                 <div className="w-full flex flex-col space-y-4">
                   <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 whitespace-nowrap text-xs lg:text-base font-semibold">
+                    <span className="md:w-20 xl:w-40 whitespace-nowrap text-sm lg:text-base font-semibold">
                       TX Hash:
                     </span>
                     {transaction ?
@@ -711,12 +711,12 @@ export default function Transaction() {
                                 href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.transaction_path?.replace('{tx}', t.transactionHash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white text-xs lg:text-base font-medium mr-1.5"
+                                className="text-blue-600 dark:text-white text-sm lg:text-base font-medium mr-1.5"
                               >
                                 {ellipse(t.transactionHash, 16)}
                               </a>
                               :
-                              <span className="text-xs lg:text-base mr-1.5">{ellipse(t.transactionHash, 16)}</span>
+                              <span className="text-sm lg:text-base mr-1.5">{ellipse(t.transactionHash, 16)}</span>
                             }
                             <Copy size={18} value={t.transactionHash} />
                             {i === 3 && !t.block_timestamp && (
@@ -748,7 +748,7 @@ export default function Transaction() {
                             />
                             :
                             !t?.transactionHash && (
-                              <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                              <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                             )
                           }
                           {i === 3 && approved && address && (
@@ -794,7 +794,7 @@ export default function Transaction() {
                     }
                   </div>
                   <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Block:</span>
+                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Block:</span>
                     {transaction ?
                       t?.blockNumber ?
                         (i < 2 ? fromChain : toChain)?.explorer?.url ?
@@ -802,20 +802,20 @@ export default function Transaction() {
                             href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.block_path?.replace('{block}', t.blockNumber)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs lg:text-base"
+                            className="text-sm lg:text-base"
                           >
                             {number_format(t.blockNumber, '0,0')}
                           </a>
                           :
-                          <span className="text-xs lg:text-base">{number_format(t.blockNumber, '0,0')}</span>
+                          <span className="text-sm lg:text-base">{number_format(t.blockNumber, '0,0')}</span>
                         :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                       :
                       <div className="skeleton w-24 h-4 lg:h-6 mt-1" />
                     }
                   </div>
                   <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Status:</span>
+                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Status:</span>
                     {transaction ?
                       <div className={`max-w-min h-6 bg-gray-100 dark:bg-${t ? t?.receipt?.status ? 'green-600' : 'red-700' : 'blue-700'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}>
                         {t || data?.is_executed ?
@@ -842,28 +842,28 @@ export default function Transaction() {
                     }
                   </div>
                   <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Time:</span>
+                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Time:</span>
                     {transaction ?
                       t?.block_timestamp ?
-                        <span className="text-xs lg:text-base">
+                        <span className="text-sm lg:text-base">
                           <span className="text-gray-400 dark:text-gray-600 mr-1">{moment(t.block_timestamp * 1000).fromNow()}</span>
                           <span>({moment(t.block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})</span>
                         </span>
                         :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                       :
                       <div className="skeleton w-60 h-4 lg:h-6 mt-1" />
                     }
                   </div>
                   {i < 2 && (
                     <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                      <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Sender Address:</span>
+                      <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Sender Address:</span>
                       {transaction ?
                         t?.transaction?.from || t?.receipt?.from ?
                           <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                             <Copy
                               value={t?.transaction?.from || t?.receipt?.from}
-                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
+                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
                                 {ellipse(t?.transaction?.from || t?.receipt?.from, 8)}
                               </span>}
                             />
@@ -887,20 +887,20 @@ export default function Transaction() {
                             )}
                           </div>
                           :
-                          <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                          <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                         :
                         <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
                       }
                     </div>
                   )}
                   <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">{i < 2 ? 'Source' : 'Relayer'} Address:</span>
+                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">{i < 2 ? 'Source' : 'Relayer'} Address:</span>
                     {transaction ?
                       (i < 2 ? call?.returnValues?.sender : (t?.transaction?.from || t?.from)) ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                           <Copy
                             value={(i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from))}
-                            copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
+                            copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
                               {ellipse((i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from)), 8)}
                             </span>}
                           />
@@ -924,19 +924,19 @@ export default function Transaction() {
                           )}
                         </div>
                         :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                       :
                       <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
                     }
                   </div>
                   <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 min-w-max text-xs lg:text-base font-semibold">{i < 1 ? 'Gateway' : i < 2 ? 'Gas Receiver' : i < 3 ? 'Gateway' : 'Destination'} Contract:</span>
+                    <span className="md:w-20 xl:w-40 min-w-max text-sm lg:text-base font-semibold">{i < 1 ? 'Gateway' : i < 2 ? 'Gas Receiver' : i < 3 ? 'Gateway' : 'Destination'} Contract:</span>
                     {transaction ?
                       (i < 3 ? t?.contract_address : call?.returnValues?.destinationContractAddress) ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                           <Copy
                             value={i < 3 ? t.contract_address : call.returnValues.destinationContractAddress}
-                            copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
+                            copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
                               {ellipse(i < 3 ? t.contract_address : call.returnValues.destinationContractAddress, 8)}
                             </span>}
                           />
@@ -960,20 +960,20 @@ export default function Transaction() {
                           )}
                         </div>
                         :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                       :
                       <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
                     }
                   </div>
                   {i === 3 && (
                     <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                      <span className="md:w-20 xl:w-40 min-w-max text-xs lg:text-base font-semibold">Receiver Address:</span>
+                      <span className="md:w-20 xl:w-40 min-w-max text-sm lg:text-base font-semibold">Receiver Address:</span>
                       {transaction ?
                         call?.transaction?.from ?
                           <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                             <Copy
                               value={call.transaction.from}
-                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs lg:text-base font-medium">
+                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
                                 {ellipse(call.transaction.from, 8)}
                               </span>}
                             />
@@ -997,7 +997,7 @@ export default function Transaction() {
                             )}
                           </div>
                           :
-                          <span className="font-mono text-gray-400 dark:text-gray-600 text-xs lg:text-base">n/a</span>
+                          <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
                         :
                         <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
                       }
@@ -1005,7 +1005,7 @@ export default function Transaction() {
                   )}
                   {i === 3 && !executed && error && (
                     <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                      <span className="md:w-20 xl:w-40 text-xs lg:text-base font-semibold">Error:</span>
+                      <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Error:</span>
                       {transaction ?
                         <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
                           {error.error?.code && (
@@ -1037,7 +1037,7 @@ export default function Transaction() {
                       <Copy size={20} value={call.returnValues.payloadHash} className="mt-4" />
                     </div>
                     :
-                    <span className="text-xs lg:text-base">-</span>
+                    <span className="text-sm lg:text-base">-</span>
                   :
                   <div className="flex flex-col space-y-3">
                     {[...Array(1).keys()].map(i => (
@@ -1057,7 +1057,7 @@ export default function Transaction() {
                       <Copy size={20} value={call.returnValues.payload} className="mt-4" />
                     </div>
                     :
-                    <span className="text-xs lg:text-base">-</span>
+                    <span className="text-sm lg:text-base">-</span>
                   :
                   <div className="flex flex-col space-y-3">
                     {[...Array(8).keys()].map(i => (

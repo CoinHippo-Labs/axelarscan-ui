@@ -13,7 +13,7 @@ export default ({ data }) => {
 
   const validator_data = data?.sender && validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, data.sender))
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
-  const titleClassName = 'w-40 lg:w-64 text-xs lg:text-base font-bold'
+  const titleClassName = 'w-40 lg:w-64 text-sm lg:text-base font-bold'
 
   return (
     <div className="w-full flex flex-col space-y-4">
@@ -25,7 +25,7 @@ export default ({ data }) => {
           data.txhash && (
             <Copy
               value={data.txhash}
-              title={<span className="cursor-pointer break-all text-black dark:text-white text-xs lg:text-base font-semibold">
+              title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-semibold">
                 {data.txhash}
               </span>}
               size={20}
@@ -42,7 +42,7 @@ export default ({ data }) => {
         {data ?
           data.height && (
             <Link href={`/block/${data.height}`}>
-              <a className="text-blue-600 dark:text-white text-xs lg:text-base font-bold">
+              <a className="text-blue-600 dark:text-white text-sm lg:text-base font-bold">
                 {number_format(data.height, '0,0')}
               </a>
             </Link>
@@ -57,7 +57,7 @@ export default ({ data }) => {
             Type:
           </span>
           {data ?
-            <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-base font-semibold py-0.5 px-2">
+            <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
               {name(data.type)}
             </div>
             :
@@ -71,7 +71,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.status && (
-            <div className={`max-w-min ${data.status === 'success' ? 'bg-green-400 dark:bg-green-500 text-white' : 'bg-red-400 dark:bg-red-500 text-white'} rounded-lg uppercase flex items-center text-xs lg:text-base font-semibold space-x-1 py-0.5 px-2`}>
+            <div className={`max-w-min ${data.status === 'success' ? 'bg-green-400 dark:bg-green-500 text-white' : 'bg-red-400 dark:bg-red-500 text-white'} rounded-lg uppercase flex items-center text-sm lg:text-base font-semibold space-x-1 py-0.5 px-2`}>
               {data.status === 'success' ?
                 <BiCheckCircle size={20} />
                 :
@@ -92,7 +92,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.timestamp && (
-            <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-base font-medium">
+            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
               {moment(data.timestamp).fromNow()} ({moment(data.timestamp).format('MMM D, YYYY h:mm:ss A')})
             </span>
           )
@@ -134,7 +134,7 @@ export default ({ data }) => {
             data.sender ?
               <div className="flex items-center space-x-1">
                 <Link href={`/account/${data.sender}`}>
-                  <a className="text-blue-600 dark:text-white text-xs lg:text-base font-semibold">
+                  <a className="text-blue-600 dark:text-white text-sm lg:text-base font-semibold">
                     {ellipse(data.sender, 12, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
                   </a>
                 </Link>
@@ -156,7 +156,7 @@ export default ({ data }) => {
           Transaction Fee:
         </span>
         {data ?
-          <span className="text-xs lg:text-base font-semibold">
+          <span className="text-sm lg:text-base font-semibold">
             {data.fee > 0 ?
               `${number_format(data.fee, '0,0.00000000')} ${data.symbol?.toUpperCase() || ''}` :
               'No Fee'
@@ -171,7 +171,7 @@ export default ({ data }) => {
           Gas Used:
         </span>
         {data ?
-          <span className="text-xs lg:text-base font-semibold">
+          <span className="text-sm lg:text-base font-semibold">
             {number_format(data.gas_used, '0,0') || '-'}
           </span>
           :
@@ -183,7 +183,7 @@ export default ({ data }) => {
           Gas Limit:
         </span>
         {data ?
-          <span className="text-xs lg:text-base font-semibold">
+          <span className="text-sm lg:text-base font-semibold">
             {number_format(data.gas_limit, '0,0') || '-'}
           </span>
           :
@@ -196,7 +196,7 @@ export default ({ data }) => {
             Memo:
           </span>
           {data ?
-            <span className="break-all text-slate-400 dark:text-slate-600 text-xs lg:text-base">
+            <span className="break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base">
               {data.memo}
             </span>
             :

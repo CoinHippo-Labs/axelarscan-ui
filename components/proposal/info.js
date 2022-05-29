@@ -10,7 +10,7 @@ export default ({ data }) => {
 
   const ReactJson = typeof window !== 'undefined' && dynamic(import('react-json-view'))
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
-  const titleClassName = 'w-40 lg:w-64 text-xs lg:text-base font-bold'
+  const titleClassName = 'w-40 lg:w-64 text-sm lg:text-base font-bold'
 
   return (
     <div className="w-full flex flex-col space-y-4">
@@ -19,7 +19,7 @@ export default ({ data }) => {
           Title:
         </span>
         {data ?
-          <span className="text-xs lg:text-base font-semibold">
+          <span className="text-sm lg:text-base font-semibold">
             {data.content?.title}
           </span>
           :
@@ -31,7 +31,7 @@ export default ({ data }) => {
           Description:
         </span>
         {data ?
-          <span className="break-all text-slate-400 dark:text-slate-600 text-xs lg:text-base">
+          <span className="break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base">
             {data.content?.description}
           </span>
           :
@@ -44,7 +44,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.status && (
-            <span className={`${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-slate-100 dark:bg-slate-900' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-yellow-400 dark:bg-yellow-500 text-white' : ['REJECTED', 'FAILED'].includes(data.status) ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-green-400 dark:bg-green-500 text-white'} rounded-lg uppercase text-xs lg:text-base font-semibold py-0.5 px-2`}>
+            <span className={`${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-slate-100 dark:bg-slate-900' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-yellow-400 dark:bg-yellow-500 text-white' : ['REJECTED', 'FAILED'].includes(data.status) ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-green-400 dark:bg-green-500 text-white'} rounded-lg uppercase text-sm lg:text-base font-semibold py-0.5 px-2`}>
               {data.status?.replace('_', ' ')}
             </span>
           )
@@ -58,7 +58,7 @@ export default ({ data }) => {
             Type:
           </span>
           {data ?
-            <span className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-base font-semibold py-0.5 px-2">
+            <span className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
               {name(data.type)}
             </span>
             :
@@ -72,7 +72,7 @@ export default ({ data }) => {
             <span className={titleClassName}>
               Plan:
             </span>
-            <span className="text-xs lg:text-base font-semibold">
+            <span className="text-sm lg:text-base font-semibold">
               {data.content.plan.name}
             </span>
           </div>
@@ -80,7 +80,7 @@ export default ({ data }) => {
             <span className={titleClassName}>
               Block:
             </span>
-            <span className="text-xs lg:text-base font-semibold">
+            <span className="text-sm lg:text-base font-semibold">
               {number_format(data.content.plan.height, '0,0')}
             </span>
           </div>
@@ -89,7 +89,7 @@ export default ({ data }) => {
               <span className={titleClassName}>
                 {name(data.type)}:
               </span>
-              <div className="text-xs lg:text-base font-semibold">
+              <div className="text-sm lg:text-base font-semibold">
                 {typeof to_json(data.content.plan.info) === 'object' ?
                   <div className="max-w-lg max-h-96 overflow-y-auto">
                     <ReactJson
@@ -112,7 +112,7 @@ export default ({ data }) => {
           <span className={titleClassName}>
             {c.key}:
           </span>
-          <div className="text-xs lg:text-base font-semibold">
+          <div className="text-sm lg:text-base font-semibold">
             {typeof to_json(c.value) === 'object' ?
               <div className="space-y-2">
                 <span className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize py-0.5 px-2">
@@ -139,7 +139,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.submit_time && (
-            <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-base font-medium">
+            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
               {moment(data.submit_time).fromNow()} ({moment(data.submit_time).format('MMM D, YYYY h:mm:ss A')})
             </span>
           )
@@ -153,7 +153,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.deposit_end_time && (
-            <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-base font-medium">
+            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
               {moment(data.deposit_end_time).fromNow()} ({moment(data.deposit_end_time).format('MMM D, YYYY h:mm:ss A')})
             </span>
           )
@@ -167,7 +167,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.voting_start_time && (
-            <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-base font-medium">
+            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
               {moment(data.voting_start_time).fromNow()} ({moment(data.voting_start_time).format('MMM D, YYYY h:mm:ss A')})
             </span>
           )
@@ -181,7 +181,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.voting_end_time && (
-            <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-base font-medium">
+            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
               {moment(data.voting_end_time).fromNow()} ({moment(data.voting_end_time).format('MMM D, YYYY h:mm:ss A')})
             </span>
           )
@@ -199,7 +199,7 @@ export default ({ data }) => {
               data.total_deposit.map((d, i) => (
                 <span
                   key={i}
-                  className="text-xs lg:text-base font-semibold"
+                  className="text-sm lg:text-base font-semibold"
                 >
                   {number_format(d.amount, '0,0.00')} {d.symbol || d.denom}
                 </span>

@@ -13,7 +13,7 @@ export default ({ data }) => {
   const { height, hash, time, num_txs, proposer_address } = { ...data }
   const validator_data = validators_data?.find(v => equals_ignore_case(v?.consensus_address, proposer_address))
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
-  const titleClassName = 'w-40 lg:w-64 text-xs lg:text-base font-bold'
+  const titleClassName = 'w-40 lg:w-64 text-sm lg:text-base font-bold'
 
   return (
     <div className="w-full flex flex-col space-y-4">
@@ -23,7 +23,7 @@ export default ({ data }) => {
         </span>
         {data ?
           height && (
-            <span className="text-xs lg:text-base font-semibold">
+            <span className="text-sm lg:text-base font-semibold">
               {number_format(height, '0,0')}
             </span>
           )
@@ -39,7 +39,7 @@ export default ({ data }) => {
           hash && (
             <Copy
               value={hash}
-              title={<span className="cursor-pointer break-all text-black dark:text-white text-xs lg:text-base font-semibold">
+              title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-semibold">
                 {hash}
               </span>}
               size={20}
@@ -55,7 +55,7 @@ export default ({ data }) => {
         </span>
         {data ?
           time && (
-            <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-base font-medium">
+            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
               {moment(time).fromNow()} ({moment(time).format('MMM D, YYYY h:mm:ss A')})
             </span>
           )
@@ -97,7 +97,7 @@ export default ({ data }) => {
             proposer_address ?
               <Copy
                 value={proposer_address}
-                title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 text-xs lg:text-base font-semibold">
+                title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 text-sm lg:text-base font-semibold">
                   {ellipse(proposer_address, 8, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS)}
                 </span>}
                 size={18}
@@ -115,7 +115,7 @@ export default ({ data }) => {
           Transactions:
         </span>
         {data ?
-          <span className="font-mono text-xs lg:text-base font-semibold">
+          <span className="font-mono text-sm lg:text-base font-semibold">
             {num_txs > -1 ?
               `${number_format(num_txs, '0,0')}` : '-'
             }

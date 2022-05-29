@@ -7,13 +7,14 @@ import { BiX } from 'react-icons/bi'
 
 import Modal from '../modals'
 import { transactions as getTransactions } from '../../lib/api/index'
+import { params_to_obj } from '../../lib/utils'
 
 export default () => {
   const router = useRouter()
-  const { pathname, query } = { ...router }
+  const { pathname, query, asPath } = { ...router }
 
   const [filters, setFilters] = useState(null)
-  const [filter, setFilter] = useState(null)
+  const [filter, setFilter] = useState(undefined)
   const [types, setTypes] = useState(null)
   const [hidden, setHidden] = useState(true)
 
@@ -33,27 +34,42 @@ export default () => {
   }, [])
 
   useEffect(() => {
-    const qs = new URLSearchParams()
-    Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
-      let key, value
-      switch (k) {
-        case 'time':
-          key = 'fromTime'
-          value = moment(v[0]).valueOf()
-          qs.append(key, value)
-          key = 'toTime'
-          value = moment(v[1]).valueOf()
-          break
-        default:
-          key = k
-          value = v
-          break
-      }
-      qs.append(key, value)
-    })
-    const qs_string = qs.toString()
-    router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
-    setHidden(true)
+    if (asPath) {
+      const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const { txHash, status, type, fromTime, toTime } = { ...params }
+      setFilters({
+        txHash,
+        status: ['success', 'failed'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        type,
+        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+      })
+    }
+  }, [asPath])
+
+  useEffect(() => {
+    if (filter !== undefined) {
+      const qs = new URLSearchParams()
+      Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
+        let key, value
+        switch (k) {
+          case 'time':
+            key = 'fromTime'
+            value = moment(v[0]).valueOf()
+            qs.append(key, value)
+            key = 'toTime'
+            value = moment(v[1]).valueOf()
+            break
+          default:
+            key = k
+            value = v
+            break
+        }
+        qs.append(key, value)
+      })
+      const qs_string = qs.toString()
+      router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
+      setHidden(true)
+    }
   }, [filter])
 
   const fields = [

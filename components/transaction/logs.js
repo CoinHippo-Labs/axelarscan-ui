@@ -14,7 +14,7 @@ export default ({ data }) => {
         Logs
       </div>
       {data?.raw_log && (
-        <div className="text-xs lg:text-base font-semibold">
+        <div className="text-sm lg:text-base font-semibold">
           {to_json(data.raw_log) ?
             <ReactJson
               src={to_json(data.raw_log)}

@@ -7,7 +7,7 @@ import Info from './info'
 import Transactions from '../transactions'
 import { all_bank_balances, all_staking_delegations, all_staking_redelegations, all_staking_unbonding, distribution_rewards, distribution_commissions } from '../../lib/api/cosmos'
 import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
-import { denom_manager } from '../../lib/object/denom'
+import { getDenom, denom_manager } from '../../lib/object/denom'
 import { equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -25,7 +25,7 @@ export default () => {
   const [balances, setBalances] = useState(null)
   const [delegations, setDelegations] = useState(null)
   const [redelegations, setRedelegations] = useState(null)
-  const [unbonds, setUnbonds] = useState(null)
+  const [unbondings, setunbondings] = useState(null)
   const [rewards, setRewards] = useState(null)
   const [commissions, setCommissions] = useState(null)
   const [depositAddresses, setDepositAddresses] = useState(null)
@@ -42,8 +42,15 @@ export default () => {
               ...b,
               denom: denom_manager.symbol(denom, assets_data),
               amount: denom_manager.amount(amount, denom, assets_data),
+              asset_data: getDenom(denom, assets_data),
             }
-          })?.filter(b => b?.amount > -1) || [])
+          }).filter(b => b?.amount > -1).map(b => {
+            const { amount, asset_data } = { ...b }
+            return {
+              ...b,
+              value: amount * (asset_data?.price || 0),
+            }
+          }) || [])
         }
       }
     }
@@ -70,8 +77,15 @@ export default () => {
               ...balance,
               denom: denom_manager.symbol(denom, assets_data),
               amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
+              asset_data: getDenom(denom, assets_data),
             }
-          }).filter(d => d?.amount > -1) || [])
+          }).filter(d => d?.amount > -1).map(d => {
+            const { amount, asset_data } = { ...d }
+            return {
+              ...d,
+              value: amount * (asset_data?.price || 0),
+            }
+          }) || [])
         }
       }
     }
@@ -86,6 +100,7 @@ export default () => {
     const getData = async () => {
       if (address && address.length < 65 && assets_data && validators_data) {
         if (!controller.signal.aborted) {
+          const { staking_params } = { ...chain_data }
           const response = await all_staking_redelegations(address)
           setRedelegations(response?.data?.flatMap(r => !r?.redelegation?.entries ? [] : r.redelegation.entries.map(e => {
             const { validator_src_address, validator_dst_address } = { ...r.redelegation }
@@ -101,14 +116,22 @@ export default () => {
               shares_dst: denom_manager.amount(Number(shares_dst), assets_data[0]?.id, assets_data),
             }
           })).map(r => {
-            const { denom, shares_dst } = { ...r }
-            const { staking_params } = { ...chain_data }
+            const { initial_balance, shares_dst } = { ...r }
+            let { denom } = { ...r }
+            denom = denom || staking_params?.bond_denom
             return {
               ...r,
-              denom: denom || staking_params?.bond_denom,
-              amount: shares_dst,
+              denom: denom_manager.symbol(denom, assets_data),
+              amount: shares_dst - initial_balance,
+              asset_data: getDenom(denom, assets_data),
             }
-          }).filter(r => r?.amount > -1) || [])
+          }).filter(r => r?.amount > -1).map(r => {
+            const { amount, asset_data } = { ...r }
+            return {
+              ...r,
+              value: amount * (asset_data?.price || 0),
+            }
+          }) || [])
         }
       }
     }
@@ -123,8 +146,9 @@ export default () => {
     const getData = async () => {
       if (address && address.length < 65 && assets_data && validators_data) {
         if (!controller.signal.aborted) {
+          const { staking_params } = { ...chain_data }
           const response = await all_staking_unbonding(address)
-          setUnbonds(response?.data?.flatMap(u => !u?.entries ? [] : u.entries.map(e => {
+          setunbondings(response?.data?.flatMap(u => !u?.entries ? [] : u.entries.map(e => {
             const { validator_address } = { ...u }
             const { creation_height, initial_balance, balance } = { ...e }
             return {
@@ -137,14 +161,22 @@ export default () => {
               balance: denom_manager.amount(Number(balance), assets_data[0]?.id, assets_data),
             }
           })).map(u => {
-            const { denom, balance } = { ...u }
-            const { staking_params } = { ...chain_data }
+            const { initial_balance, balance } = { ...u }
+            let { denom } = { ...u }
+            denom = denom || staking_params?.bond_denom
             return {
               ...u,
-              denom: denom || staking_params?.bond_denom,
-              amount: balance,
+              denom: denom_manager.symbol(denom, assets_data),
+              amount: initial_balance - balance,
+              asset_data: getDenom(denom, assets_data),
             }
-          }).filter(u => u?.amount > -1) || [])
+          }).filter(u => u?.amount > -1).map(u => {
+            const { amount, asset_data } = { ...u }
+            return {
+              ...u,
+              value: amount * (asset_data?.price || 0),
+            }
+          }) || [])
         }
       }
     }
@@ -171,13 +203,13 @@ export default () => {
                   denom: denom_manager.symbol(denom, assets_data),
                   amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
                 }
-              }) || [], 'denom')
+              }).filter(r => r?.amount > -1) || [], 'denom')
             ).map(([k, v]) => {
               return {
                 denom: k,
                 amount: _.sumBy(v, 'amount'),
               }
-            }).filter(r => r?.amount > -1) || [],
+            }) || [],
             total: Object.entries(
               _.groupBy(total?.map(t => {
                 const { denom, amount } = { ...t }
@@ -244,11 +276,12 @@ export default () => {
             sort: [{ height: 'desc' }],
           })
           setDepositAddresses(response?.data?.map(d => {
-            const { asset, sender_chain, recipient_chain } = { ...d }
+            const { denom, sender_chain, recipient_chain } = { ...d }
+            console.log(d)
             return {
               ...d,
-              denom: denom_manager.symbol(asset, assets_data),
-              asset_data: assets_data.find(a => equals_ignore_case(a?.id, asset)),
+              denom: denom_manager.symbol(denom, assets_data),
+              asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
               source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
                 cosmos_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)),
               destination_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, recipient_chain)) ||
@@ -265,7 +298,7 @@ export default () => {
   }, [address, evm_chains_data, cosmos_chains_data, assets_data])
 
   return (
-    <div className="space-y-4 mt-2 mb-6 mx-auto">
+    <div className="space-y-6 mt-2 mb-6 mx-auto">
       <Info
         data={address?.length >= 65 ?
           { depositAddresses } :
@@ -273,7 +306,7 @@ export default () => {
             balances,
             delegations,
             redelegations,
-            unbonds,
+            unbondings,
             rewards,
             commissions,
           }
