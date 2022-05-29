@@ -277,7 +277,6 @@ export default () => {
           })
           setDepositAddresses(response?.data?.map(d => {
             const { denom, sender_chain, recipient_chain } = { ...d }
-            console.log(d)
             return {
               ...d,
               denom: denom_manager.symbol(denom, assets_data),

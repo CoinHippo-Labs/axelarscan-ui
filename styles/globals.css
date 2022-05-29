@@ -202,3 +202,7 @@ input[type=number] {
 .min-h-screen {
   min-height: calc(100vh - 168px) !important;
 }
+
+.linkify a {
+  @apply text-blue-600 dark:text-white font-semibold;
+}

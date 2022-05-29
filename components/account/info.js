@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import { TailSpin } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
@@ -8,7 +9,6 @@ import Image from '../image'
 import ValidatorProfile from '../validator-profile'
 import EnsProfile from '../ens-profile'
 import Copy from '../copy'
-import { chainName } from '../../lib/object/chain'
 import { denom_manager } from '../../lib/object/denom'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -27,6 +27,8 @@ export default ({ data }) => {
   const validator_data = !is_deposit_address && validators_data?.find(v => equals_ignore_case(v?.delegator_address, address) || equals_ignore_case(v?.broadcaster_address, address))
   const reward = !is_deposit_address && rewards?.rewards?.find(r => equals_ignore_case(r?.denom, 'axl'))
   const commission = !is_deposit_address && commissions?.find(c => equals_ignore_case(c?.denom, 'axl'))
+  const deposit_address = _.head(depositAddresses)
+  const { sender_chain, recipient_chain, source_chain_data, destination_chain_data, sender_address, recipient_address, denom, asset_data } = { ...deposit_address }
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = `w-40 lg:w-${is_deposit_address ? 64 : 56} text-sm lg:text-base font-bold`
 
@@ -47,48 +49,137 @@ export default ({ data }) => {
             />
           )}
         </div>
-        {validator_data && (
-          <div className={rowClassName}>
-            <span className={titleClassName}>
-              Validator:
-            </span>
-            <div className="min-w-max flex items-start space-x-2">
-              <Link href={`/validator/${validator_data.operator_address}`}>
-                <a>
-                  <ValidatorProfile validator_description={validator_data.description} />
-                </a>
-              </Link>
-              <div className="flex flex-col">
-                {validator_data.description?.moniker && (
-                  <Link href={`/validator/${validator_data.operator_address}`}>
-                    <a className="text-blue-600 dark:text-white font-bold">
-                      {ellipse(validator_data.description.moniker, 16)}
-                    </a>
-                  </Link>
-                )}
-                <div className="flex items-center space-x-1">
-                  <Link href={`/validator/${validator_data.operator_address}`}>
-                    <a className="text-slate-400 dark:text-slate-600 font-medium">
-                      {ellipse(validator_data.operator_address, 12, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
-                    </a>
-                  </Link>
-                  <Copy value={validator_data.operator_address} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
         <div className={rowClassName}>
           <span className={titleClassName}>
-            Rewards:
+            Source:
           </span>
-          {rewards ?
-            <span className="text-sm lg:text-base font-semibold">
-              {reward?.amount > -1 ?
-                `${number_format(reward.amount, '0,0.00000000')} ${reward.denom || ''}` :
-                'No Rewards'
-              }
-            </span>
+          {depositAddresses ?
+            source_chain_data ?
+              <div className="min-w-max flex items-start space-x-2">
+                {source_chain_data.image && (
+                  <Image
+                    src={source_chain_data.image}
+                    alt=""
+                    className="w-6 h-6 rounded-full"
+                  />
+                )}
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold">
+                    {source_chain_data.name || sender_chain}
+                  </span>
+                  {sender_address && (
+                    <Copy
+                      value={sender_address}
+                      title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                        {ellipse(sender_address, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+                      </span>}
+                      size={18}
+                    />
+                  )}
+                </div>
+              </div>
+              :
+              sender_address ?
+                <div className="flex items-center space-x-1">
+                  <Copy
+                    value={sender_address}
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                      {ellipse(sender_address, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+                    </span>}
+                    size={18}
+                  />
+                </div>
+                :
+                <span>
+                  -
+                </span>
+            :
+            <div className="skeleton w-40 h-6 mt-1" />
+          }
+        </div>
+        <div className={rowClassName}>
+          <span className={titleClassName}>
+            Destination:
+          </span>
+          {depositAddresses ?
+            destination_chain_data ?
+              <div className="min-w-max flex items-start space-x-2">
+                {destination_chain_data.image && (
+                  <Image
+                    src={destination_chain_data.image}
+                    alt=""
+                    className="w-6 h-6 rounded-full"
+                  />
+                )}
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold">
+                    {destination_chain_data.name || recipient_chain}
+                  </span>
+                  {recipient_address && (
+                    <Copy
+                      value={recipient_address}
+                      title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                        {ellipse(recipient_address, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+                      </span>}
+                      size={18}
+                    />
+                  )}
+                </div>
+              </div>
+              :
+              recipient_address ?
+                <div className="flex items-center space-x-1">
+                  <Copy
+                    value={recipient_address}
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                      {ellipse(recipient_address, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+                    </span>}
+                    size={18}
+                  />
+                </div>
+                :
+                <span>
+                  -
+                </span>
+            :
+            <div className="skeleton w-40 h-6 mt-1" />
+          }
+        </div>
+        <div className={rowClassName}>
+          <span className={titleClassName}>
+            Asset:
+          </span>
+          {depositAddresses ?
+            asset_data ?
+              <div className="min-w-max flex items-center space-x-2">
+                {asset_data.image && (
+                  <Image
+                    src={asset_data.image}
+                    alt=""
+                    className="w-6 h-6 rounded-full"
+                  />
+                )}
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold">
+                    {asset_data.name || denom}
+                  </span>
+                </div>
+              </div>
+              :
+              denom ?
+                <div className="flex items-center space-x-1">
+                  <Copy
+                    value={denom}
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                      {ellipse(denom, 8)}
+                    </span>}
+                    size={18}
+                  />
+                </div>
+                :
+                <span>
+                  -
+                </span>
             :
             <div className="skeleton w-40 h-6 mt-1" />
           }
@@ -628,185 +719,3 @@ export default ({ data }) => {
       </div>
   )
 }
-
-{/*<>
-            <Datatable
-              columns={[
-                {
-                  Header: 'Tx Hash',
-                  accessor: 'txhash',
-                  disableSortBy: true,
-                  Cell: props => (
-                    !props.row.original.skeleton ?
-                      <div className="flex items-center space-x-1">
-                        <Link href={`/tx/${props.value}`}>
-                          <a className="uppercase text-xs text-blue-600 dark:text-white font-medium">
-                            {ellipse(props.value, 8)}
-                          </a>
-                        </Link>
-                        <Copy value={props.value} />
-                      </div>
-                      :
-                      <div className="skeleton w-32 h-4" />
-                  ),
-                },
-                {
-                  Header: 'Height',
-                  accessor: 'height',
-                  disableSortBy: true,
-                  Cell: props => (
-                    !props.row.original.skeleton ?
-                      <Link href={`/block/${props.value}`}>
-                        <a className="text-xs text-blue-500 dark:text-gray-400 font-medium">
-                          {number_format(props.value, '0,0')}
-                        </a>
-                      </Link>
-                      :
-                      <div className="skeleton w-12 h-4" />
-                  ),
-                },
-                {
-                  Header: 'Sender',
-                  accessor: 'sender_address',
-                  disableSortBy: true,
-                  Cell: props => {
-                    const chain = props.row.original.from_chain
-
-                    return !props.row.original.skeleton ?
-                      props.value ?
-                        <div className="min-w-max">
-                          <div className="flex items-center space-x-1">
-                            <Copy
-                              value={props.value}
-                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                                {ellipse(props.value, 8)}
-                              </span>}
-                            />
-                            {chain?.explorer?.url && (
-                              <a
-                                href={`${chain.explorer.url}${chain.explorer.address_path?.replace('{address}', props.value)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white"
-                              >
-                                {chain.explorer.icon ?
-                                  <Img
-                                    src={chain.explorer.icon}
-                                    alt=""
-                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                  />
-                                  :
-                                  <TiArrowRight size={16} className="transform -rotate-45" />
-                                }
-                              </a>
-                            )}
-                          </div>
-                          {chain && (
-                            <div className="flex items-center space-x-2 mt-0.5">
-                              <Img
-                                src={chain.image}
-                                alt=""
-                                className="w-6 h-6 rounded-full"
-                              />
-                              <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(chain)}</span>
-                            </div>
-                          )}
-                        </div>
-                        :
-                        <span className="text-gray-400 dark:text-gray-600 font-light">Unknown</span>
-                      :
-                      <div className="space-y-1.5">
-                        <div className="skeleton w-32 h-4" />
-                        <div className="skeleton w-24 h-3.5" />
-                      </div>
-                  },
-                },
-                {
-                  Header: 'Recipient',
-                  accessor: 'recipient_address',
-                  disableSortBy: true,
-                  Cell: props => {
-                    const chain = props.row.original.to_chain
-
-                    return !props.row.original.skeleton ?
-                      props.value ?
-                        <div className="min-w-max">
-                          <div className="flex items-center space-x-1">
-                            <Copy
-                              value={props.value}
-                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                                {ellipse(props.value, 8)}
-                              </span>}
-                            />
-                            {chain?.explorer?.url && (
-                              <a
-                                href={`${chain.explorer.url}${chain.explorer.address_path?.replace('{address}', props.value)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white"
-                              >
-                                {chain.explorer.icon ?
-                                  <Img
-                                    src={chain.explorer.icon}
-                                    alt=""
-                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                  />
-                                  :
-                                  <TiArrowRight size={16} className="transform -rotate-45" />
-                                }
-                              </a>
-                            )}
-                          </div>
-                          {chain && (
-                            <div className="flex items-center space-x-2 mt-0.5">
-                              <Img
-                                src={chain.image}
-                                alt=""
-                                className="w-6 h-6 rounded-full"
-                              />
-                              <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(chain)}</span>
-                            </div>
-                          )}
-                        </div>
-                        :
-                        <span className="text-gray-400 dark:text-gray-600 font-light">Unknown</span>
-                      :
-                      <div className="space-y-1.5">
-                        <div className="skeleton w-32 h-4" />
-                        <div className="skeleton w-24 h-3.5" />
-                      </div>
-                  },
-                },
-                {
-                  Header: 'Asset',
-                  accessor: 'denom',
-                  disableSortBy: true,
-                  Cell: props => {
-                    return !props.row.original.skeleton ?
-                      <div className="min-w-max max-w-min bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center space-x-1 ml-auto -mr-2 py-1 px-2.5">
-                        <Img
-                          src={props.row.original.asset?.image}
-                          alt=""
-                          className="w-5 h-5 rounded-full"
-                        />
-                        <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
-                          <span className="normal-case">{props.row.original.asset?.symbol || ellipse(props.value, 8)}</span>
-                        </span>
-                      </div>
-                      :
-                      <div className="skeleton w-14 h-5 ml-auto" />
-                  },
-                  headerClassName: 'justify-end text-right',
-                },
-              ]}
-              data={data ?
-                (data.linked_addresses?.map((linked, i) => { return { ...linked, i } })) || []
-                :
-                [...Array(3).keys()].map(i => { return { i, skeleton: true } })
-              }
-              noPagination={data?.linked_addresses?.length > 10 ? false : true}
-              defaultPageSize={10}
-              className="no-border mt-4"
-            />
-        }
-    </>*/}

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
+import Linkify from 'react-linkify'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
 import Copy from '../copy'
@@ -195,13 +196,11 @@ export default ({ data }) => {
           <span className={titleClassName}>
             Memo:
           </span>
-          {data ?
-            <span className="break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base">
+          <span className="linkify break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
+            <Linkify>
               {data.memo}
-            </span>
-            :
-            <div className="skeleton w-40 h-6 mt-1" />
-          }
+            </Linkify>
+          </span>
         </div>
       )}
     </div>
