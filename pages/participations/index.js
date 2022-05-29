@@ -1,6 +1,6 @@
 import Participations from '../../components/participations'
 
-export default function ParticipationsIndex() {
+export default () => {
   return (
     <div className="max-w-8xl mx-auto">
       <Participations />

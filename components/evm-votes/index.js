@@ -230,7 +230,7 @@ export default function EVMVotes({ className }) {
             ),
           },
           {
-            Header: 'Height',
+            Header: 'Block',
             accessor: 'height',
             disableSortBy: true,
             Cell: props => (

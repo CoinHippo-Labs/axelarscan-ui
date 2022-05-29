@@ -206,7 +206,7 @@ export default ({ n }) => {
               ),
             },
             {
-              Header: 'Height',
+              Header: 'Block',
               accessor: 'height',
               disableSortBy: true,
               Cell: props => (
