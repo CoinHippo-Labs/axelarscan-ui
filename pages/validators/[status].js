@@ -1,12 +1,9 @@
-import { useRouter } from 'next/router'
+import Validators from '../../components/validators'
 
-import ValidatorsTable from '../../components/validators/validators-table'
-
-export default function ValidatorsStatus() {
-  const router = useRouter()
-  const { query } = { ...router }
-
+export default () => {
   return (
-    <ValidatorsTable status={query.status} />
+    <div className="max-w-8xl mx-auto">
+      <Validators />
+    </div>
   )
 }

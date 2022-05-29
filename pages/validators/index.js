@@ -1,7 +1,9 @@
-import ValidatorsTable from '../../components/validators/validators-table'
+import Validators from '../../components/validators'
 
-export default function Validators() {
+export default () => {
   return (
-    <ValidatorsTable status="active" />
+    <div className="max-w-8xl mx-auto">
+      <Validators />
+    </div>
   )
 }
