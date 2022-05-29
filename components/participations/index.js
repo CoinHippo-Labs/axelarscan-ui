@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
+import {BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
-// import Info from './info'
+import Info from './info'
 import Participations from './participations'
 import { genesis } from '../../lib/api/rpc'
 import { keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
-import { equals_ignore_case } from '../../lib/utils'
+import { number_format, equals_ignore_case } from '../../lib/utils'
 
 const TABLES = ['keygens_success', 'keygens_failed', 'signs_success', 'signs_failed']
 
@@ -14,7 +16,7 @@ export default () => {
   const { validators_data } = { ...validators }
 
   const [info, setInfo] = useState(null)
-  const [table, setTable] = useState(TABLES?.[0])
+  const [table, setTable] = useState(_.head(TABLES))
   const [keygensSuccess, setKeygensSuccess] = useState(null)
   const [keygensFailed, setKeygensFailed] = useState(null)
   const [signsSuccess, setSignsSuccess] = useState(null)
@@ -233,8 +235,8 @@ export default () => {
   }, [validators_data])
 
   return (
-    <div className="space-y-4 mt-2 mb-6 mx-auto">
-      {/*<Info
+    <div className="space-y-6 mt-2 mb-6 mx-auto">
+      <Info
         data={{
           info,
           keygensSuccess,
@@ -242,17 +244,39 @@ export default () => {
           signsSuccess,
           signsFailed,
         }}
-      />*/}
+      />
       <div className="flex items-center overflow-x-auto space-x-2">
-        {TABLES.map((t, i) => (
-          <button
-            key={i}
-            onClick={() => setTable(t)}
-            className={`${t === table ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded-lg uppercase py-1 px-2`}
-          >
-            {t.split('_').join(' - ')}
-          </button>
-        ))}
+        {TABLES.map((t, i) => {
+          const { total } = {
+            ...(t === 'keygens_failed' ?
+              keygensFailed :
+              t === 'signs_success' ?
+                signsSuccess :
+                t === 'signs_failed' ?
+                  signsFailed : keygensSuccess
+            )
+          }
+          return (
+            <button
+              key={i}
+              onClick={() => setTable(t)}
+              className={`${t === table ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded-lg flex items-center uppercase space-x-1 py-1 px-2`}
+            >
+              {t?.endsWith('_failed') ?
+                <BiXCircle size={16} className={`${t === table ? 'text-white' : 'text-red-500 dark:text-red-600'}`} /> :
+                <BiCheckCircle size={16} className={`${t === table ? 'text-white' : 'text-green-500 dark:text-green-600'}`} />
+              }
+              <span className="whitespace-nowrap">
+                {_.head(t.split('_'))}
+              </span>
+              {typeof total === 'number' && (
+                <span className="font-mono font-bold">
+                  ({number_format(total, '0,0')})
+                </span>
+              )}
+            </button>
+          )
+        })}
       </div>
       <Participations
         table={table}

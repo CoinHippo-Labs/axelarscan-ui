@@ -157,6 +157,27 @@ export default () => {
     case 'gmp':
     case 'gmp/search':
       title = 'General Message Passing'
+      subtitle = (
+        <div className="flex items-center space-x-1">
+          {[
+            { title: 'Overview', path: '/gmp' },
+            { title: 'Search', path: '/gmp/search' },
+          ].map((r, i) => (
+            <div
+              key={i}
+              onClick={() => router.push(r.path)}
+              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+            >
+              <span className="font-semibold">
+                {r.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )
+      // right = pathname.endsWith('/search') && (
+      //   <GMPFilters />
+      // )
       break
     case 'gmp/[tx]':
       title = 'General Message Passing'
@@ -175,6 +196,27 @@ export default () => {
     case 'transfers':
     case 'transfers/search':
       title = 'Cross-chain Transfers'
+      subtitle = (
+        <div className="flex items-center space-x-1">
+          {[
+            { title: 'Overview', path: '/transfers' },
+            { title: 'Search', path: '/transfers/search' },
+          ].map((r, i) => (
+            <div
+              key={i}
+              onClick={() => router.push(r.path)}
+              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+            >
+              <span className="font-semibold">
+                {r.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )
+      // right = pathname.endsWith('/search') && (
+      //   <TransferFilters />
+      // )
       break
     case 'transfers/[tx]':
       title = 'Cross-chain Transfers'
@@ -275,7 +317,7 @@ export default () => {
                     </Link>
                   )}
                   <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
                       Unbonding:
                     </span>
                     {chain_data.staking_params.unbonding_time ?
@@ -293,7 +335,7 @@ export default () => {
               {chain_data?.slashing_params && (
                 <>
                   <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
                       Max Missed:
                     </span>
                     {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
@@ -307,7 +349,7 @@ export default () => {
                     }
                   </div>
                   <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
                       Jail:
                     </span>
                     {chain_data.slashing_params.downtime_jail_duration ?
@@ -321,7 +363,7 @@ export default () => {
                     }
                   </div>
                   <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
                       x2 Sign:
                     </span>
                     {chain_data.slashing_params.slash_fraction_double_sign ?
@@ -343,7 +385,7 @@ export default () => {
               {chain_data?.distribution_params && (
                 <>
                   <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
                       Proposer Reward:
                     </span>
                     {chain_data.distribution_params.base_proposer_reward ?
@@ -380,7 +422,7 @@ export default () => {
                 </>
               )}
               <div className="flex items-center space-x-1.5 ml-4">
-                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
                   Proposals:
                 </span>
                 <Link href="/proposals">
