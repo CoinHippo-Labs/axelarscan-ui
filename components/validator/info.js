@@ -132,7 +132,7 @@ export default ({
           delegator_address && (
             <div className="flex items-center space-x-1">
               <Link href={`/account/${delegator_address}`}>
-                <a className="break-all text-blue-600 dark:text-white text-sm lg:text-base font-semibold">
+                <a className="break-all text-blue-600 dark:text-blue-400 text-sm lg:text-base font-semibold">
                   {ellipse(delegator_address, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
                 </a>
               </Link>
@@ -153,7 +153,7 @@ export default ({
           </span>
           <div className="flex items-center space-x-1">
             <Link href={`/account/${broadcaster_address}`}>
-              <a className="break-all text-blue-600 dark:text-white text-sm lg:text-base font-semibold">
+              <a className="break-all text-blue-600 dark:text-blue-400 text-sm lg:text-base font-semibold">
                 {ellipse(broadcaster_address, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
               </a>
             </Link>
@@ -174,7 +174,7 @@ export default ({
           </span>
           {data ?
             details && (
-              <div className="linkify text-slate-400 dark:text-slate-200 text-sm lg:text-base font-medium">
+              <div className="linkify text-slate-400 dark:text-slate-200 text-sm lg:text-base">
                 <Linkify>
                   {details}
                 </Linkify>
@@ -196,7 +196,7 @@ export default ({
                 href={website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 dark:text-white text-sm lg:text-base font-semibold"
+                className="text-blue-600 dark:text-blue-400 text-sm lg:text-base font-semibold"
               >
                 {website}
               </a>

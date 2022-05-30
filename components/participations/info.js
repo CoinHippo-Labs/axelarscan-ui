@@ -189,14 +189,14 @@ export default ({ data }) => {
             EVM Votes Threshold
           </span>
           <div
-            className="flex flex-wrap items-center"
+            className="flex sm:flex-wrap items-center overflow-x-auto"
             style={{ marginTop: '-0.25rem' }}
           >
             {evm_votes_thresholds ?
               evm_votes_thresholds.map((c, i) => (
                 <div
                   key={i}
-                  className="flex flex-col space-y-3 mt-3 mr-6"
+                  className="min-w-max flex flex-col space-y-3 mt-3 mb-1 mr-6"
                 >
                   <div className="flex items-center space-x-2">
                     {chain_manager.image(c?.params?.chain, evm_chains_data) && (

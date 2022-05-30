@@ -72,7 +72,7 @@ export default ({ data }) => {
         noPagination={data.length <= 10}
         defaultPageSize={10}
         className="no-border"
-        style={{ minHeight: 'calc(100% - 32px)' }}
+        style={{ minHeight: 'calc(100% - 48px)' }}
       />
       :
       <TailSpin color={loader_color(theme)} width="32" height="32" />

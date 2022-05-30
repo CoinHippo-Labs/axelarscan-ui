@@ -284,7 +284,7 @@ export default () => {
           }
           for (let height = latest_block; height >= first; height--) {
             if (height % num_blocks_per_heartbeat === 1 && heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat) {
-              const h = data.find(d => d?.period_height === height)
+              const h = data?.find(d => d?.period_height === height)
               const { sender } = { ...h }
               heartbeats.push({
                 ...h,
@@ -504,6 +504,8 @@ export default () => {
     }
   }, [address, validators_chains_data])
 
+  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-400 shadow dark:shadow-slate-200 rounded-lg p-4'
+
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto">
       <div className="sm:grid sm:grid-cols-2 space-y-6 sm:space-y-0 gap-6">
@@ -518,32 +520,41 @@ export default () => {
           <Delegations data={delegations?.address === address && delegations?.data} />
         </div>
       </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 gap-4">
+        <div className={`${metricClassName}`}>
+        </div>
+        <div className={`${metricClassName}`}>
+        </div>
+        <div className={`${metricClassName}`}>
+        </div>
+        <div className={`${metricClassName} sm:col-span-2`}>
+        </div>
+        <div className={`${metricClassName} xl:col-span-2`}>
+        </div>
+      </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div className="space-y-4">
-          <CosmosGeneric
-            data={validator?.address === address && validator?.data}
-          />
+        <div className="space-y-2">
+          <span className="text-sm sm:text-lg font-bold">
+            Uptimes
+          </span>
           <Uptimes
             data={uptimes?.address === address && uptimes?.data}
             validator_data={validator?.address === address && validator?.data}
           />
         </div>
-        <div className="space-y-4">
-          <HealthCheck
-            data={validator?.address === address && validator?.data}
-            health={health?.address === address && health?.data}
-          />
+        <div className="space-y-2">
+          <span className="text-sm sm:text-lg font-bold">
+            Heartbeats
+          </span>
           <Heartbeats
             data={heartbeats?.address === address && heartbeats?.data}
             validator_data={validator?.address === address && validator?.data}
           />
         </div>
-        <div className="xl:col-span-1 space-y-4">
-          <EVMSupport
-            supportedChains={supportedChains?.address === address && supportedChains?.data}
-            evmVotes={evmVotes?.address === address && evmVotes}
-            validator_data={validator?.address === address && validator?.data}
-          />
+        <div className="md:col-span-2 xl:col-span-1 space-y-2">
+          <span className="text-sm sm:text-lg font-bold">
+            EVM votes
+          </span>
           <Polls
             data={evmPolls?.address === address && evmPolls}
             validator_data={validator?.address === address && validator?.data}
