@@ -58,11 +58,11 @@ export default () => {
               href={`/validators${s !== 'active' ? `/${s}` : ''}`}
             >
               <a className={`${selected ? 'bg-blue-500 dark:bg-blue-600 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-medium hover:font-semibold'} rounded-lg flex items-center uppercase space-x-1 py-1 px-2`}>
-                <span className={`whitespace-nowrap ${selected ? 'text-white' : 'text-black'}`}>
+                <span className={`whitespace-nowrap ${selected ? 'text-white' : 'text-black dark:text-white'}`}>
                   {s}
                 </span>
                 {typeof total === 'number' && (
-                  <span className={`whitespace-nowrap font-mono ${selected ? 'text-white' : 'text-black'} font-bold`}>
+                  <span className={`whitespace-nowrap font-mono ${selected ? 'text-white' : 'text-black dark:text-white'} font-bold`}>
                     ({number_format(total, '0,0')})
                   </span>
                 )}
