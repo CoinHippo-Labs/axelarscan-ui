@@ -547,7 +547,7 @@ export default function Transfers() {
 
   return (
     <div className="max-w-full space-y-8 sm:space-y-12 mx-auto">
-      <div className="w-full grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4">
         <div
           title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of cross-chain transactions</span>}
@@ -1041,7 +1041,7 @@ export default function Transfers() {
             <div className="skeleton w-28 h-7 mb-3 ml-auto" />
           }
         </div>
-        <div className="w-full grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+        <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
           <div
             title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of transactions by day</span>}

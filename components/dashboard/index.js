@@ -258,7 +258,7 @@ export default function Dashboard() {
         title={<span className="text-black dark:text-white text-lg font-semibold ml-1">Cross-Chain Asset Transfers</span>}
         className="bg-transparent border-0 mt-6 mb-0 py-0 px-3 sm:px-0"
       >
-        <div className="w-full grid grid-flow-row grid-cols-1 md:grid-cols-4 mt-2 gap-5">
+        <div className="w-full grid grid-cols-1 md:grid-cols-4 mt-2 gap-5">
           <div
             title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of cross-chain transactions</span>}
@@ -419,7 +419,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-      <div className="w-full grid grid-flow-row grid-cols-1 lg:grid-cols-2 gap-5 my-0 md:my-4">
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-5 my-0 md:my-4">
         <div className="mt-8 md:mt-4">
           <Link href="/blocks">
             <a className="text-gray-900 dark:text-gray-100 text-base font-semibold mx-3">Latest Blocks</a>

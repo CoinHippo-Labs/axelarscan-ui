@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload, label }) => {
             {moment(data?.time).utc().format('MMM D, YYYY [(UTC)]')}
           </span>
         </div>
-        <div className="grid grid-flow-row grid-cols-1 gap-y-2 text-xs mt-1">
+        <div className="grid grid-cols-1 gap-y-2 text-xs mt-1">
           {data.elements?.length > 0 ?
             _.orderBy(data.elements.map(e => { return { ...e, time: e?.times?.find(t => t.time === data.time) } }), ['time.value', 'time.amount'], ['desc', 'desc']).map((e, i) => (
               <div key={i} className="flex items-center justify-between space-x-6">

@@ -8,7 +8,7 @@ import { number_format, ellipse } from '../../lib/utils'
 
 export default function Summary({ data }) {
   return (
-    <div className="w-full grid grid-flow-row grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-2 sm:mt-4">
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-2 sm:mt-4">
       <Link href="/blocks">
         <div
           title={<div className="flex items-center justify-between space-x-1.5">

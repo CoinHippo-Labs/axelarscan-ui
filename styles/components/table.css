@@ -1,5 +1,5 @@
 .table {
-  @apply w-full table-auto block md:inline-table overflow-x-scroll;
+  @apply w-full table-auto block lg:inline-table overflow-x-scroll;
   &.inline-table {
     display: inline-table;
   }

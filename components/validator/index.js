@@ -5,20 +5,19 @@ import _ from 'lodash'
 import moment from 'moment'
 
 import Info from './info'
+import Delegations from './delegations'
 import CosmosGeneric from './cosmos-generic'
 import HealthCheck from './health-check'
 import AxelarSpecific from './axelar-specific'
-import EVMSupport from './evm-support'
-import VotingPower from './voting-power'
 import Uptimes from './uptimes'
 import Heartbeats from './heartbeats'
-import Polls from './polls'
 import Participations from '../participations/participations'
-import DelegationsTable from './delegations-table'
+import EVMSupport from './evm-support'
+import Polls from './polls'
 import { uptimeForJailedInfoSync, jailedInfo } from '../../lib/api/query'
-import { all_bank_balances, validator_sets, all_delegations, distributionRewards, distributionCommissions } from '../../lib/api/cosmos'
+import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
 import { keygens_by_validator } from '../../lib/api/executor'
-import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
+import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { base64ToBech32 } from '../../lib/object/key'
@@ -46,7 +45,7 @@ export default () => {
   const [uptimes, setUptimes] = useState(null)
   const [heartbeats, setHeartbeats] = useState(null)
   const [evmVotes, setEvmVotes] = useState(null)
-  const [evmVotePolls, setEvmVotePolls] = useState(null)
+  const [evmPolls, setEvmPolls] = useState(null)
   const [table, setTable] = useState('keyshares')
   const [keyshares, setKeyshares] = useState(null)
   const [keygens, setKeygens] = useState(null)
@@ -214,115 +213,115 @@ export default () => {
     }
   }, [address, validator, assets_data])
 
-  // useEffect(() => {
-  //   const controller = new AbortController()
+  /*useEffect(() => {
+    const controller = new AbortController()
 
-  //   const getDataSync = async (beginBlock, address, from, i) => {
-  //     const data = await uptimeForJailedInfoSync(beginBlock, address, from)
-  //     dispatch({
-  //       type: JAILED_SYNC_DATA,
-  //       value: data,
-  //       i,
-  //     })
-  //   }
+    const getDataSync = async (beginBlock, address, from, i) => {
+      const data = await uptimeForJailedInfoSync(beginBlock, address, from)
+      dispatch({
+        type: JAILED_SYNC_DATA,
+        value: data,
+        i,
+      })
+    }
 
-  //   const getData = async () => {
-  //     if (address && validator?.address === address && (!jailed || !validator.broadcaster_loaded)) {
-  //       if (!controller.signal.aborted) {
-  //         const validator_data = validator?.data
-  //         let response, jailed_data
-  //         if (validator_data?.jailed_until > 0) {
-  //           const _maxMissed = env_data?.slashing_params ? Number(env_data.slashing_params.signed_blocks_window) - (Number(env_data.slashing_params.min_signed_per_window) * Number(env_data.slashing_params.signed_blocks_window)) : Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED)
-  //           setMaxMissed(_maxMissed)
+    const getData = async () => {
+      if (address && validator?.address === address && (!jailed || !validator.broadcaster_loaded)) {
+        if (!controller.signal.aborted) {
+          const validator_data = validator?.data
+          let response, jailed_data
+          if (validator_data?.jailed_until > 0) {
+            const _maxMissed = env_data?.slashing_params ? Number(env_data.slashing_params.signed_blocks_window) - (Number(env_data.slashing_params.min_signed_per_window) * Number(env_data.slashing_params.signed_blocks_window)) : Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED)
+            setMaxMissed(_maxMissed)
 
-  //           const beginBlock = Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) > validator_data.start_height ? Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) : validator_data.start_height
-  //           const numBlock = Number(status_data.latest_block_height) - beginBlock
-  //           if (!validator_data.uptime) {
-  //             jailed_data = {
-  //               times_jailed: -1,
-  //               avg_jail_response_time: -1,
-  //             }
-  //           }
-  //           else if (numBlock * (1 - (validator_data?.uptime / 100)) > _maxMissed) {
-  //             const chunkSize = _.head([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()].map(i => i + 1).filter(i => Math.ceil(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) / i) <= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK))) || Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
-  //             _.chunk([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()], chunkSize).forEach((chunk, i) => getDataSync(beginBlock, validator_data.consensus_address, i * chunkSize, i))
-  //           }
-  //           else {
-  //             jailed_data = {
-  //               times_jailed: 0,
-  //               avg_jail_response_time: 0,
-  //             }
-  //           }
-  //         }
-  //         else {
-  //           jailed_data = {
-  //             times_jailed: 0,
-  //             avg_jail_response_time: 0,
-  //           }
-  //         }
+            const beginBlock = Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) > validator_data.start_height ? Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) : validator_data.start_height
+            const numBlock = Number(status_data.latest_block_height) - beginBlock
+            if (!validator_data.uptime) {
+              jailed_data = {
+                times_jailed: -1,
+                avg_jail_response_time: -1,
+              }
+            }
+            else if (numBlock * (1 - (validator_data?.uptime / 100)) > _maxMissed) {
+              const chunkSize = _.head([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()].map(i => i + 1).filter(i => Math.ceil(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) / i) <= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK))) || Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
+              _.chunk([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()], chunkSize).forEach((chunk, i) => getDataSync(beginBlock, validator_data.consensus_address, i * chunkSize, i))
+            }
+            else {
+              jailed_data = {
+                times_jailed: 0,
+                avg_jail_response_time: 0,
+              }
+            }
+          }
+          else {
+            jailed_data = {
+              times_jailed: 0,
+              avg_jail_response_time: 0,
+            }
+          }
 
-  //         if (jailed_data) {
-  //           setJailed({ data: jailed_data, address })
-  //         }
-  //       }
-  //     }
-  //   }
+          if (jailed_data) {
+            setJailed({ data: jailed_data, address })
+          }
+        }
+      }
+    }
 
-  //   getData()
+    getData()
 
-  //   return () => {
-  //     controller?.abort()
-  //     dispatch({
-  //       type: JAILED_SYNC_DATA,
-  //       value: null,
-  //     })
-  //   }
-  // }, [address, validator])
+    return () => {
+      controller?.abort()
+      dispatch({
+        type: JAILED_SYNC_DATA,
+        value: null,
+      })
+    }
+  }, [address, validator])
 
-  // useEffect(() => {
-  //   if (Object.keys(jailed_sync_data || {}).length >= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK)) {
-  //     const uptime_data = jailedInfo(Object.values(jailed_sync_data).flatMap(u => u), status_data && (moment(status_data.latest_block_time).diff(moment(status_data.earliest_block_time), 'milliseconds') / Number(status_data.latest_block_height)))?.data
-  //     let jailed_data
+  useEffect(() => {
+    if (Object.keys(jailed_sync_data || {}).length >= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK)) {
+      const uptime_data = jailedInfo(Object.values(jailed_sync_data).flatMap(u => u), status_data && (moment(status_data.latest_block_time).diff(moment(status_data.earliest_block_time), 'milliseconds') / Number(status_data.latest_block_height)))?.data
+      let jailed_data
 
-  //     if (uptime_data) {
-  //       const _jailed_data = []
-  //       let numMissed = 0, _jailed = false
+      if (uptime_data) {
+        const _jailed_data = []
+        let numMissed = 0, _jailed = false
 
-  //       for (let i = 0; i < uptime_data.length; i++) {
-  //         const block = uptime_data[i]
-  //         if (block?.up) {
-  //           if (_jailed) {
-  //             if (_jailed_data.length - 1 >= 0) {
-  //               _jailed_data[_jailed_data.length - 1].unjail_time = block.time
-  //             }
-  //           }
-  //           numMissed = 0
-  //           _jailed = false
-  //         }
-  //         else {
-  //           numMissed++
-  //         }
+        for (let i = 0; i < uptime_data.length; i++) {
+          const block = uptime_data[i]
+          if (block?.up) {
+            if (_jailed) {
+              if (_jailed_data.length - 1 >= 0) {
+                _jailed_data[_jailed_data.length - 1].unjail_time = block.time
+              }
+            }
+            numMissed = 0
+            _jailed = false
+          }
+          else {
+            numMissed++
+          }
 
-  //         if (numMissed > maxMissed && !_jailed) {
-  //           _jailed_data.push(block)
-  //           _jailed = true
-  //         }
-  //       }
+          if (numMissed > maxMissed && !_jailed) {
+            _jailed_data.push(block)
+            _jailed = true
+          }
+        }
 
-  //       jailedData = {
-  //         times_jailed: _jailed_data.length,
-  //         avg_jail_response_time: _jailed_data.filter(b => b.unjail_time).length > 0 ? _.meanBy(_jailed_data.filter(b => b.unjail_time).map(b => { return { ...b, response_time: b.unjail_time - b.time }}), 'response_time') : -1,
-  //       }
-  //     }
+        jailedData = {
+          times_jailed: _jailed_data.length,
+          avg_jail_response_time: _jailed_data.filter(b => b.unjail_time).length > 0 ? _.meanBy(_jailed_data.filter(b => b.unjail_time).map(b => { return { ...b, response_time: b.unjail_time - b.time }}), 'response_time') : -1,
+        }
+      }
 
-  //     dispatch({
-  //       type: JAILED_SYNC_DATA,
-  //       value: null,
-  //     })
+      dispatch({
+        type: JAILED_SYNC_DATA,
+        value: null,
+      })
 
-  //     setJailed({ data: jailed_data || {}, address })
-  //   }
-  // }, [jailed_sync_data])
+      setJailed({ data: jailed_data || {}, address })
+    }
+  }, [jailed_sync_data])*/
 
   // uptimes
   useEffect(() => {
@@ -418,141 +417,105 @@ export default () => {
     }
   }, [address, validator])
 
+  // evm votes
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
-      if (address && validator?.address === address && validator.broadcaster_loaded) {
+      if (address && equals_ignore_case(validator?.address, address) && validator.broadcaster_loaded) {
         if (!controller.signal.aborted) {
-          const v = validator.data
-          let data, all_data
-          if (v?.broadcaster_address) {
-            const response = await getEvmVotes({
-              aggs: {
-                votes: {
-                  terms: { field: 'sender.keyword', size: 10000 },
-                  aggs: {
-                    chains: {
-                      terms: { field: 'sender_chain.keyword', size: 1000 },
-                      aggs: {
-                        confirms: {
-                          terms: { field: 'confirmed' },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              query: { match: { sender: v.broadcaster_address } },
-            })
-            data = response?.data?.[v?.broadcaster_address] || {}
-          }
-          else {
-            data = {}
-          }
-          if (v?.broadcaster_address) {
-            const response = await getEvmVotes({
-              aggs: {
-                all_votes: {
-                  terms: { field: 'sender_chain.keyword', size: 10000 },
-                  aggs: {
-                    polls: {
-                      cardinality: { field: 'poll_id.keyword' },
-                    },
-                  },
-                },
-              },
+          const { broadcaster_address, start_height } = { ...validator.data }
+          let votes = {}, polls = {}
+          if (broadcaster_address) {
+            let response = await getEvmVotes({
               query: {
-                bool: {
-                  must: [
-                    { match: { poll_initial: true } },
-                    { range: { height: { gte: v?.start_height || 1 } } },
-                  ],
+                match: { voter: broadcaster_address },
+              },
+              aggs: {
+                chains: {
+                  terms: { field: 'sender_chain.keyword', size: 1000 },
+                  aggs: {
+                    votes: {
+                      terms: { field: 'vote' },
+                    },
+                  },
                 },
               },
             })
-            all_data = response?.all_data || {}
+            votes = { ...response?.data }
+            response = await getEvmPolls({
+              query: {
+                range: { height: {
+                  gte: start_height || 1,
+                } },
+              },
+              aggs: {
+                chains: {
+                  terms: { field: 'sender_chain.keyword', size: 1000 },
+                },
+              },
+            })
+            polls = { ...response?.data }
           }
-          else {
-            all_data = {}
-          }
-          setEvmVotes({ data, all_data, address })
+          setEvmVotes({
+            votes,
+            polls,
+            address,
+          })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
   }, [address, validator])
 
+  // evm polls
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
-      if (address && validator?.address === address && validator.broadcaster_loaded && status_data) {
+      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded) {
         if (!controller.signal.aborted) {
-          const v = validator.data
-          let data, all_data
-          if (v?.broadcaster_address) {
-            const response = await getEvmVotes({
+          const { broadcaster_address } = { ...validator.data }
+          let votes = [], polls = []
+          if (broadcaster_address) {
+            const latest_block = Number(status_data.latest_block_height)
+            const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
+            const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
+            let response = await getEvmVotes({
               query: {
                 bool: {
                   must: [
-                    { match: { sender: v.broadcaster_address } },
-                    { range: { height: { gte: Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS) } } },
+                    { match: { voter: broadcaster_address } },
+                    { range: { height: {
+                      gte: latest_block - num_evm_votes_blocks,
+                    } } },
                   ],
                 },
               },
+              size: num_evm_votes_polls,
               sort: [{ 'created_at.ms': 'desc' }],
-              size: Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS),
             })
-            data = response?.data || []
-          }
-          else {
-            data = []
-          }
-          if (v?.broadcaster_address) {
-            const response = await getEvmVotes({
-              aggs: {
-                all_polls: {
-                  terms: { field: 'poll_id.keyword', size: 10000 },
-                  aggs: {
-                    sender_chain: {
-                      terms: { field: 'sender_chain.keyword' },
-                    },
-                    height: {
-                      min: { field: 'height' },
-                    },
-                    created_at: {
-                      min: { field: 'created_at.ms' },
-                    },
-                  },
-                },
-              },
+            votes = response?.data || []
+            response = await getEvmPolls({
               query: {
-                bool: {
-                  must: [
-                    { match: { poll_initial: true } },
-                    { range: { height: { gte: Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS) } } },
-                  ],
-                },
+                range: { height: {
+                  gte: latest_block - num_evm_votes_blocks,
+                } },
               },
+              size: num_evm_votes_polls,
             })
-            all_data = response?.all_polls || []
+            polls = response?.data || []
           }
-          else {
-            all_data = []
-          }
-          setEvmVotePolls({ data, all_data, address })
+          setEvmPolls({
+            votes,
+            polls,
+            address,
+          })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
@@ -597,11 +560,12 @@ export default () => {
           setKeygens({
             data,
             total,
+            total_participations: data?.filter(d => d.participated).length || 0,
             address,
           })
         }
         if (!controller.signal.aborted) {
-          let data, total = 0
+          let data, total = 0, total_participations = 0
           const results = [true, false]
           for (let i = 0; i < results.length; i++) {
             const result = results[i]
@@ -612,12 +576,14 @@ export default () => {
               track_total_hits: true,
             })
             total += (response?.total || 0)
+            if (result) {
+              total_participations += (response?.total || 0)
+            }
             data = _.orderBy(_.uniqBy(_.concat(data || [], response?.data?.map(d => {
               const { key_id, key_role, participants, non_participants } = { ...d }
               return {
                 ...d,
                 key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
-                result,
                 participated: participants?.findIndex(a => equals_ignore_case(a, address)) > -1 &&
                   non_participants?.findIndex(a => equals_ignore_case(a, address)) < 0,
               }
@@ -626,6 +592,7 @@ export default () => {
           setSigns({
             data,
             total,
+            total_participations,
             address,
           })
         }
@@ -648,21 +615,21 @@ export default () => {
   }, [address, validators_chains_data])
 
   return (
-    <div className="space-y-4 mt-2 mb-6 mx-auto">
-      <Info data={validator?.address === address && validator?.data} />
-      {/*<div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 my-4">
-        <VotingPower data={votingPower?.address === address && votingPower?.data} />
-        <div
-          title={<span className="text-lg font-medium">Delegations</span>}
-          className="dark:border-gray-900"
-        >
-          <div className="mt-2">
-            <DelegationsTable data={delegations?.address === address && delegations?.data} />
+    <div className="space-y-6 mt-2 mb-6 mx-auto">
+      <div className="sm:grid sm:grid-cols-2 space-y-6 sm:space-y-0 gap-6">
+        <Info
+          data={validator?.address === address && validator?.data}
+          votingPower={votingPower}
+        />
+        <div className="space-y-4">
+          <div className={`text-lg font-bold ${validator ? 'lg:mt-1' : '-mt-0.5 -mb-1'}`}>
+            Delegations
           </div>
+          <Delegations data={delegations?.address === address && delegations?.data} />
         </div>
       </div>
-      <div className="grid grid-flow-row grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-4">
-        <div className="md:col-span-2 grid grid-flow-row grid-col-1 md:grid-cols-2 gap-4" style={{ height: 'fit-content' }}>
+      {/*<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-4">
+        <div className="md:col-span-2 grid grid-col-1 md:grid-cols-2 gap-4" style={{ height: 'fit-content' }}>
           <div className="space-y-4">
             <CosmosGeneric
               data={validator?.address === address && validator?.data}
@@ -690,7 +657,7 @@ export default () => {
               validator_data={validator?.address === address && validator?.data}
             />
             <Polls
-              data={evmVotePolls?.address === address && evmVotePolls}
+              data={evmPolls?.address === address && evmPolls}
               validator_data={validator?.address === address && validator?.data}
             />
           </div>
@@ -703,7 +670,7 @@ export default () => {
             rewards={rewards?.address === address && rewards?.data}
           />
           <div
-            title={<div className="grid grid-flow-row grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
+            title={<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
               {['keyshares', 'keygens', 'signs'].map((t, i) => (
                 <div
                   key={i}
@@ -728,7 +695,7 @@ export default () => {
             </div>
           </div>
         </div>
-      </div>*/}
+      </div>}*/}
     </div>
   )
 }

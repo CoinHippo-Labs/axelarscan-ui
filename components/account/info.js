@@ -186,7 +186,7 @@ export default ({ data }) => {
         </div>
       </div>
       :
-      <div className="grid grid-flow-row sm:grid-cols-6 gap-6">
+      <div className="grid sm:grid-cols-6 gap-6">
         <div className="sm:col-span-3 w-full flex flex-col space-y-4">
           <div className={rowClassName}>
             <span className={titleClassName}>

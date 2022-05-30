@@ -7,7 +7,10 @@ import { validator_profile } from '../../lib/api/cosmos'
 import { loader_color, rand_image } from '../../lib/utils'
 import { VALIDATORS_PROFILE_DATA } from '../../reducers/types'
 
-export default ({ validator_description }) => {
+export default ({
+  validator_description,
+  className = '',
+}) => {
   const dispatch = useDispatch()
   const { preferences, validators_profile } = useSelector(state => ({ preferences: state.preferences, validators_profile: state.validators_profile }), shallowEqual)
   const { theme } = { ...preferences }
@@ -56,7 +59,7 @@ export default ({ validator_description }) => {
     <Image
       src={_image}
       alt=""
-      className="w-6 h-6 rounded-full"
+      className={`w-6 h-6 rounded-full ${className}`}
     />
     :
     <Puff color={loader_color(theme)} width="24" height="24" />

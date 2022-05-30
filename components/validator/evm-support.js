@@ -15,7 +15,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
       title={<span className="text-lg font-medium">EVMs Support</span>}
       className="dark:border-gray-900"
     >
-      <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 text-base sm:text-sm lg:text-base gap-4 mt-3 mb-0.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 text-base sm:text-sm lg:text-base gap-4 mt-3 mb-0.5">
         <div className="sm:col-span-2 flex flex-col space-y-1">
           <span className="font-semibold space-x-2">
             <span>Chains Supported</span>
@@ -81,7 +81,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
           {evmVotes?.data?.chains ?
             <span className="flex flex-wrap items-center text-gray-500 dark:text-gray-400">
               {Object.keys(evmVotes.data.chains).length > 0 ?
-                <div className="w-full grid grid-flow-row grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-3 gap-x-5">
+                <div className="w-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-3 gap-x-5">
                   {Object.entries(evmVotes.data.chains).map(([key, value]) => (
                     <div key={key} className="flex items-start justify-between space-x-2">
                       <Link href={`/evm-votes?chain=${key}${validator_data?.broadcaster_address ? `&voter=${validator_data.broadcaster_address}` : ''}`}>

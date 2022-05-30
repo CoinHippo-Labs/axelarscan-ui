@@ -675,7 +675,7 @@ export default function Transaction() {
               </div>
             </div>
           </div>
-          <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6 mt-4 xl:mt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6 mt-4 xl:mt-6">
             {[call, gas_paid, approved, executed || error].map((t, i) => (
               <div
                 key={i}

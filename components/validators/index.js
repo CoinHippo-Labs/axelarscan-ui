@@ -109,7 +109,7 @@ export default () => {
                       <div className="flex items-center space-x-1">
                         <Link href={`/validator/${props.value}`}>
                           <a className="text-slate-400 dark:text-slate-600 font-medium">
-                            {ellipse(props.value, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                            {ellipse(props.value, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                           </a>
                         </Link>
                         <Copy value={props.value} />
@@ -204,7 +204,7 @@ export default () => {
                         </div>}
                         color="bg-green-500 dark:bg-green-600 rounded-lg"
                         backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg"
-                        className={`h-4 flex items-center justify-${props.value < 20 ? 'start' : 'end'}`}
+                        className={`h-4 flex items-center justify-${props.value < 33 ? 'start' : 'end'}`}
                       />
                     </div>
                     :
@@ -252,7 +252,7 @@ export default () => {
                           </div>}
                           color="bg-green-500 dark:bg-green-600 rounded-lg"
                           backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg"
-                          className={`h-4 flex items-center justify-${props.value < 20 ? 'start' : 'end'}`}
+                          className={`h-4 flex items-center justify-${props.value < 33 ? 'start' : 'end'}`}
                         />
                       </div>
                       :

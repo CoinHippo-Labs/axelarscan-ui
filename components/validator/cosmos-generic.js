@@ -25,7 +25,7 @@ export default function CosmosGeneric({ data, jailed }) {
       right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {number_format(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
     >
-      <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 text-base sm:text-sm lg:text-base gap-4 mt-3 mb-0.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 text-base sm:text-sm lg:text-base gap-4 mt-3 mb-0.5">
         <div className="flex flex-col space-y-1">
           <span className="font-semibold">Uptime</span>
           {typeof data?.uptime === 'number' ?
