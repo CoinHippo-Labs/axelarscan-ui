@@ -62,5 +62,7 @@ export default ({
       className={`w-6 h-6 rounded-full ${className}`}
     />
     :
-    <Puff color={loader_color(theme)} width="24" height="24" />
+    <div className={`flex items-center justify-center ${className}`}>
+      <Puff color={loader_color(theme)} width="24" height="24" />
+    </div>
 }

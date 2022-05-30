@@ -16,7 +16,7 @@ import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { coin } from '../../lib/api/coingecko'
 import { status as getStatus } from '../../lib/api/rpc'
-import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
+import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, mint_inflation, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
 import { ens as getEns } from '../../lib/api/ens'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
@@ -132,14 +132,6 @@ export default () => {
           type: CHAIN_DATA,
           value: { ...chain_data },
         })
-        if (chain_data?.coingecko_id) {
-          const response = await coin(chain_data.coingecko_id)
-          chain_data.token_data = !response?.error && response
-          dispatch({
-            type: CHAIN_DATA,
-            value: { ...chain_data },
-          })
-        }
         let response = await staking_params()
         if (response) {
           dispatch({
@@ -185,6 +177,21 @@ export default () => {
           dispatch({
             type: CHAIN_DATA,
             value: { distribution_params: { ...response?.params } },
+          })
+        }
+        response = await mint_inflation()
+        if (response) {
+          dispatch({
+            type: CHAIN_DATA,
+            value: { inflation: Number(response?.inflation || 0) },
+          })
+        }
+        if (chain_data?.coingecko_id) {
+          const response = await coin(chain_data.coingecko_id)
+          chain_data.token_data = !response?.error && response
+          dispatch({
+            type: CHAIN_DATA,
+            value: { ...chain_data },
           })
         }
         const res = await fetch(process.env.NEXT_PUBLIC_RELEASES_URL)

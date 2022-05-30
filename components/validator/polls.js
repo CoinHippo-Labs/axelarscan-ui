@@ -59,7 +59,7 @@ export default function Polls({ data, validator_data }) {
                         className="w-4 h-4 rounded-full"
                       />
                     )}
-                    <span className="whitespace-nowrap">{chain_manager.title(poll.sender_chain, chains_data)}</span>
+                    <span className="whitespace-nowrap">{chain_manager.name(poll.sender_chain, chains_data)}</span>
                   </span>
                   <span className="ml-auto" />
                   {chain?.explorer?.url && evm_tx && (
@@ -138,7 +138,7 @@ export default function Polls({ data, validator_data }) {
             >
               <div
                 title={number_format(poll.height, '0,0')}
-                className={`w-6 md:w-6 h-6 md:h-6 ${vote?.confirmed ? 'bg-green-600 dark:bg-green-700' : vote && !vote.confirmed ? 'bg-red-600 dark:bg-red-700' : 'bg-gray-400 dark:bg-gray-700'} rounded m-1`}
+                className={`w-6 md:w-6 h-6 md:h-6 ${vote?.confirmed ? 'bg-green-500 dark:bg-green-600' : vote && !vote.confirmed ? 'bg-red-600 dark:bg-red-700' : 'bg-gray-400 dark:bg-gray-700'} rounded m-1`}
               />
             </Popover>
             :

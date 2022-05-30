@@ -14,7 +14,6 @@ import Heartbeats from './heartbeats'
 import Participations from '../participations/participations'
 import EVMSupport from './evm-support'
 import Polls from './polls'
-import { uptimeForJailedInfoSync, jailedInfo } from '../../lib/api/query'
 import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
 import { keygens_by_validator } from '../../lib/api/executor'
 import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
@@ -40,8 +39,6 @@ export default () => {
   const [health, setHealth] = useState(null)
   const [votingPower, setVotingPower] = useState(null)
   const [delegations, setDelegations] = useState(null)
-  const [maxMissed, setMaxMissed] = useState(Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED))
-  const [jailed, setJailed] = useState(null)
   const [uptimes, setUptimes] = useState(null)
   const [heartbeats, setHeartbeats] = useState(null)
   const [evmVotes, setEvmVotes] = useState(null)
@@ -213,116 +210,6 @@ export default () => {
     }
   }, [address, validator, assets_data])
 
-  /*useEffect(() => {
-    const controller = new AbortController()
-
-    const getDataSync = async (beginBlock, address, from, i) => {
-      const data = await uptimeForJailedInfoSync(beginBlock, address, from)
-      dispatch({
-        type: JAILED_SYNC_DATA,
-        value: data,
-        i,
-      })
-    }
-
-    const getData = async () => {
-      if (address && validator?.address === address && (!jailed || !validator.broadcaster_loaded)) {
-        if (!controller.signal.aborted) {
-          const validator_data = validator?.data
-          let response, jailed_data
-          if (validator_data?.jailed_until > 0) {
-            const _maxMissed = env_data?.slashing_params ? Number(env_data.slashing_params.signed_blocks_window) - (Number(env_data.slashing_params.min_signed_per_window) * Number(env_data.slashing_params.signed_blocks_window)) : Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED)
-            setMaxMissed(_maxMissed)
-
-            const beginBlock = Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) > validator_data.start_height ? Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) : validator_data.start_height
-            const numBlock = Number(status_data.latest_block_height) - beginBlock
-            if (!validator_data.uptime) {
-              jailed_data = {
-                times_jailed: -1,
-                avg_jail_response_time: -1,
-              }
-            }
-            else if (numBlock * (1 - (validator_data?.uptime / 100)) > _maxMissed) {
-              const chunkSize = _.head([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()].map(i => i + 1).filter(i => Math.ceil(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) / i) <= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK))) || Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
-              _.chunk([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()], chunkSize).forEach((chunk, i) => getDataSync(beginBlock, validator_data.consensus_address, i * chunkSize, i))
-            }
-            else {
-              jailed_data = {
-                times_jailed: 0,
-                avg_jail_response_time: 0,
-              }
-            }
-          }
-          else {
-            jailed_data = {
-              times_jailed: 0,
-              avg_jail_response_time: 0,
-            }
-          }
-
-          if (jailed_data) {
-            setJailed({ data: jailed_data, address })
-          }
-        }
-      }
-    }
-
-    getData()
-
-    return () => {
-      controller?.abort()
-      dispatch({
-        type: JAILED_SYNC_DATA,
-        value: null,
-      })
-    }
-  }, [address, validator])
-
-  useEffect(() => {
-    if (Object.keys(jailed_sync_data || {}).length >= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK)) {
-      const uptime_data = jailedInfo(Object.values(jailed_sync_data).flatMap(u => u), status_data && (moment(status_data.latest_block_time).diff(moment(status_data.earliest_block_time), 'milliseconds') / Number(status_data.latest_block_height)))?.data
-      let jailed_data
-
-      if (uptime_data) {
-        const _jailed_data = []
-        let numMissed = 0, _jailed = false
-
-        for (let i = 0; i < uptime_data.length; i++) {
-          const block = uptime_data[i]
-          if (block?.up) {
-            if (_jailed) {
-              if (_jailed_data.length - 1 >= 0) {
-                _jailed_data[_jailed_data.length - 1].unjail_time = block.time
-              }
-            }
-            numMissed = 0
-            _jailed = false
-          }
-          else {
-            numMissed++
-          }
-
-          if (numMissed > maxMissed && !_jailed) {
-            _jailed_data.push(block)
-            _jailed = true
-          }
-        }
-
-        jailedData = {
-          times_jailed: _jailed_data.length,
-          avg_jail_response_time: _jailed_data.filter(b => b.unjail_time).length > 0 ? _.meanBy(_jailed_data.filter(b => b.unjail_time).map(b => { return { ...b, response_time: b.unjail_time - b.time }}), 'response_time') : -1,
-        }
-      }
-
-      dispatch({
-        type: JAILED_SYNC_DATA,
-        value: null,
-      })
-
-      setJailed({ data: jailed_data || {}, address })
-    }
-  }, [jailed_sync_data])*/
-
   // uptimes
   useEffect(() => {
     const controller = new AbortController()
@@ -337,6 +224,7 @@ export default () => {
               gt: latest_block - num_uptime_display_blocks,
             } } },
             size: num_uptime_display_blocks,
+            sort: [{ height: 'desc' }],
           })
           const data = response?.data || []
           setUptimes({
@@ -390,6 +278,7 @@ export default () => {
                 },
               },
               size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
+              sort: [{ period_height: 'desc' }],
             })
             data = response?.data || []
           }
@@ -504,6 +393,7 @@ export default () => {
                 } },
               },
               size: num_evm_votes_polls,
+              sort: [{ 'created_at.ms': 'desc' }],
             })
             polls = response?.data || []
           }
@@ -622,80 +512,77 @@ export default () => {
           votingPower={votingPower}
         />
         <div className="space-y-4">
-          <div className={`text-lg font-bold ${validator ? 'lg:mt-1' : '-mt-0.5 -mb-1'}`}>
+          <div className="text-lg font-bold lg:mt-1">
             Delegations
           </div>
           <Delegations data={delegations?.address === address && delegations?.data} />
         </div>
       </div>
-      {/*<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-4">
-        <div className="md:col-span-2 grid grid-col-1 md:grid-cols-2 gap-4" style={{ height: 'fit-content' }}>
-          <div className="space-y-4">
-            <CosmosGeneric
-              data={validator?.address === address && validator?.data}
-              jailed={jailed?.address === address && jailed?.data}
-            />
-            <Uptimes
-              data={uptimes?.address === address && uptimes?.data}
-              validator_data={validator?.address === address && validator?.data}
-            />
-          </div>
-          <div className="space-y-4">
-            <HealthCheck
-              data={validator?.address === address && validator?.data}
-              health={health?.address === address && health?.data}
-            />
-            <Heartbeats
-              data={heartbeats?.address === address && heartbeats?.data}
-              validator_data={validator?.address === address && validator?.data}
-            />
-          </div>
-          <div className="md:col-span-2 space-y-4">
-            <EVMSupport
-              supportedChains={supportedChains?.address === address && supportedChains?.data}
-              evmVotes={evmVotes?.address === address && evmVotes}
-              validator_data={validator?.address === address && validator?.data}
-            />
-            <Polls
-              data={evmPolls?.address === address && evmPolls}
-              validator_data={validator?.address === address && validator?.data}
-            />
-          </div>
+      <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="space-y-4">
+          <CosmosGeneric
+            data={validator?.address === address && validator?.data}
+          />
+          <Uptimes
+            data={uptimes?.address === address && uptimes?.data}
+            validator_data={validator?.address === address && validator?.data}
+          />
         </div>
         <div className="space-y-4">
-          <AxelarSpecific
+          <HealthCheck
             data={validator?.address === address && validator?.data}
-            keygens={keygens?.address === address && keygens?.data}
-            signs={signs?.address === address && signs}
-            rewards={rewards?.address === address && rewards?.data}
+            health={health?.address === address && health?.data}
           />
-          <div
-            title={<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
-              {['keyshares', 'keygens', 'signs'].map((t, i) => (
-                <div
-                  key={i}
-                  onClick={() => setTable(t)}
-                  className={`max-w-min sm:max-w-max md:max-w-min lg:max-w-max btn btn-default btn-rounded cursor-pointer whitespace-nowrap bg-trasparent ${t === tab ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 text-white dark:hover:text-gray-100'}`}
-                >
-                  {name(t)}
-                </div>
-              ))}
-            </div>}
-            className="dark:border-gray-900 px-2 md:px-4"
-          >
-            <div className="mt-1">
-              <Participations
-                table={table}
-                _data={table === 'keygens' ?
-                  keygens :
-                  table === 'signs' ?
-                    signs : keyshares
-                }
-              />
-            </div>
+          <Heartbeats
+            data={heartbeats?.address === address && heartbeats?.data}
+            validator_data={validator?.address === address && validator?.data}
+          />
+        </div>
+        <div className="xl:col-span-1 space-y-4">
+          <EVMSupport
+            supportedChains={supportedChains?.address === address && supportedChains?.data}
+            evmVotes={evmVotes?.address === address && evmVotes}
+            validator_data={validator?.address === address && validator?.data}
+          />
+          <Polls
+            data={evmPolls?.address === address && evmPolls}
+            validator_data={validator?.address === address && validator?.data}
+          />
+        </div>
+      </div>
+    {/*<div className="space-y-4">
+        <AxelarSpecific
+          data={validator?.address === address && validator?.data}
+          keygens={keygens?.address === address && keygens?.data}
+          signs={signs?.address === address && signs}
+          rewards={rewards?.address === address && rewards?.data}
+        />
+        <div
+          title={<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
+            {['keyshares', 'keygens', 'signs'].map((t, i) => (
+              <div
+                key={i}
+                onClick={() => setTable(t)}
+                className={`max-w-min sm:max-w-max md:max-w-min lg:max-w-max btn btn-default btn-rounded cursor-pointer whitespace-nowrap bg-trasparent ${t === tab ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 text-white dark:hover:text-gray-100'}`}
+              >
+                {name(t)}
+              </div>
+            ))}
+          </div>}
+          className="dark:border-gray-900 px-2 md:px-4"
+        >
+          <div className="mt-1">
+            <Participations
+              table={table}
+              _data={table === 'keygens' ?
+                keygens :
+                table === 'signs' ?
+                  signs : keyshares
+              }
+            />
           </div>
         </div>
-      </div>}*/}
+      </div>*/}
     </div>
   )
 }

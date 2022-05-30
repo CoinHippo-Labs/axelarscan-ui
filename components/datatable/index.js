@@ -31,6 +31,7 @@ export default ({
   noPagination = false,
   noRecordPerPage = false,
   className = '',
+  style,
 }) => {
   const tableRef = useRef()
   const {
@@ -86,7 +87,7 @@ export default ({
 
   return (
     <>
-      <table ref={tableRef} { ...getTableProps() } className={`table rounded-lg ${className}`}>
+      <table ref={tableRef} { ...getTableProps() } className={`table rounded-lg ${className}`} style={{ ...style }}>
         <thead>
           {headerGroups.map(hg => (
             <tr { ...hg.getHeaderGroupProps() }>

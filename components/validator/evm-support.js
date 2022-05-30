@@ -32,7 +32,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                         className="w-4 h-4 rounded-full"
                       />
                     )}
-                    <span className="whitespace-nowrap">{chain_manager.title(id, chains_data)}</span>
+                    <span className="whitespace-nowrap">{chain_manager.name(id, chains_data)}</span>
                   </span>
                 ))
                 :
@@ -88,7 +88,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
                         <a>
                           <img
                             src={chain_manager.image(key, chains_data)}
-                            alt={chain_manager.title(key, chains_data)}
+                            alt={chain_manager.name(key, chains_data)}
                             className="w-6 h-6 rounded-full"
                           />
                         </a>

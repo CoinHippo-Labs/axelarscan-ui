@@ -202,8 +202,8 @@ export default () => {
                         text={<div className="text-white text-2xs font-bold mx-1">
                           {number_format(props.value, '0,0.00')}%
                         </div>}
-                        color="bg-green-500 dark:bg-green-600 rounded-lg"
-                        backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg"
+                        color="bg-green-500 dark:bg-green-600 rounded"
+                        backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded"
                         className={`h-4 flex items-center justify-${props.value < 33 ? 'start' : 'end'}`}
                       />
                     </div>
@@ -250,8 +250,8 @@ export default () => {
                           text={<div className="text-white text-2xs font-bold mx-1">
                             {number_format(props.value, '0,0.00')}%
                           </div>}
-                          color="bg-green-500 dark:bg-green-600 rounded-lg"
-                          backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg"
+                          color="bg-green-500 dark:bg-green-600 rounded"
+                          backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded"
                           className={`h-4 flex items-center justify-${props.value < 33 ? 'start' : 'end'}`}
                         />
                       </div>

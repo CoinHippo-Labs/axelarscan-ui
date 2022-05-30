@@ -43,7 +43,7 @@ export default ({
 
   return (
     <div className="w-full flex flex-col space-y-4">
-      <div className="flex items-center justify-between space-x-2">
+      <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-3">
           <ValidatorProfile
             validator_description={description}
@@ -164,44 +164,48 @@ export default ({
           </div>
         </div>
       )}
-      <div className={rowClassName}>
-        <span
-          className={titleClassName}
-          style={{ minWidth: '16rem' }}
-        >
-          Validator Details:
-        </span>
-        {data ?
-          details && (
-            <div className="linkify text-slate-400 dark:text-slate-200 text-sm lg:text-base font-medium">
-              <Linkify>
-                {details}
-              </Linkify>
-            </div>
-          )
-          :
-          <div className="skeleton w-40 h-6 mt-1" />
-        }
-      </div>
-      <div className={rowClassName}>
-        <span className={titleClassName}>
-          Website:
-        </span>
-        {data ?
-          website && (
-            <a
-              href={website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 dark:text-white text-sm lg:text-base font-semibold"
-            >
-              {website}
-            </a>
-          )
-          :
-          <div className="skeleton w-40 h-6 mt-1" />
-        }
-      </div>
+      {(!data || details) && (
+        <div className={rowClassName}>
+          <span
+            className={titleClassName}
+            style={{ minWidth: '16rem' }}
+          >
+            Validator Details:
+          </span>
+          {data ?
+            details && (
+              <div className="linkify text-slate-400 dark:text-slate-200 text-sm lg:text-base font-medium">
+                <Linkify>
+                  {details}
+                </Linkify>
+              </div>
+            )
+            :
+            <div className="skeleton w-40 h-6 mt-1" />
+          }
+        </div>
+      )}
+      {(!data || website) && (
+        <div className={rowClassName}>
+          <span className={titleClassName}>
+            Website:
+          </span>
+          {data ?
+            website && (
+              <a
+                href={website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 dark:text-white text-sm lg:text-base font-semibold"
+              >
+                {website}
+              </a>
+            )
+            :
+            <div className="skeleton w-40 h-6 mt-1" />
+          }
+        </div>
+      )}
       <div className={rowClassName}>
         <span className={titleClassName}>
           Voting Power:
