@@ -430,15 +430,33 @@ export default () => {
                             gte: latest_block - num_evm_votes_blocks,
                           } },
                         },
+                        aggs: {
+                          chains: {
+                            terms: { field: 'sender_chain.keyword', size: 1000 },
+                          },
+                        },
                         track_total_hits: true,
                       })
-                      const total_polls = response?.total || _.maxBy(vs, 'total_votes')?.total_votes || 0
+                      const { data, total } = { ...response }
+                      const total_polls = total || _.maxBy(vs, 'total_votes')?.total_votes || 0
                       vs = vs.map(v => {
+                        const { votes, total_votes, total_yes_votes, total_no_votes } = { ...v }
+                        const { chains } = { ...votes }
+                        Object.entries({ ...chains }).forEach(([k, _v]) => {
+                          chains[k] = {
+                            ..._v,
+                            total_polls: data?.[k] || _v?.total,
+                          }
+                        })
                         return {
                           ...v,
-                          total_votes: v?.total_votes > total_polls ? total_polls : v?.total_votes,
-                          total_yes_votes: v?.total_yes_votes > total_polls ? total_polls : v?.total_yes_votes,
-                          total_no_votes: v?.total_no_votes > total_polls ? total_polls : v?.total_no_votes,
+                          votes: {
+                            ...votes,
+                            chains,
+                          },
+                          total_votes: total_votes > total_polls ? total_polls : total_votes,
+                          total_yes_votes: total_yes_votes > total_polls ? total_polls : total_yes_votes,
+                          total_no_votes: total_no_votes > total_polls ? total_polls : total_no_votes,
                           total_polls,
                         }
                       })
