@@ -5,8 +5,6 @@ import { FiBox } from 'react-icons/fi'
 import { number_format, name } from '../../lib/utils'
 
 export default function HealthCheck({ data, health }) {
-  const numBlocksBeforeProxyRegistered = health?.num_block_before_registered
-
   return (
     <div
       title={<span className="text-lg font-medium">Health Check</span>}
@@ -32,27 +30,6 @@ export default function HealthCheck({ data, health }) {
             <div className="skeleton w-28 h-6" />
           }
         </div>
-        {/*<div className="flex flex-col space-y-1">
-          <span className="flex items-center font-semibold">
-            <span className="mr-1">#</span>
-            <FiBox size={18} className="stroke-current mb-0.5 mr-1.5" />
-            <span>Before Registered</span>
-          </span>
-          {numBlocksBeforeProxyRegistered || typeof numBlocksBeforeProxyRegistered === 'number' ?
-            <span className="flex items-center text-gray-500 dark:text-gray-400 space-x-1.5">
-              <span>{typeof numBlocksBeforeProxyRegistered === 'number' ? number_format(numBlocksBeforeProxyRegistered, '0,0') : numBlocksBeforeProxyRegistered}</span>
-              {typeof numBlocksBeforeProxyRegistered === 'number' && (
-                <span className="flex items-center text-sm space-x-1">
-                  <span>(Registered at</span>
-                  <FiBox size={14} className="stroke-current mb-0.5" />
-                  <span>{number_format(data.start_proxy_height, '0,0')})</span>
-                </span>
-              )}
-            </span>
-            :
-            <div className="skeleton w-28 h-6" />
-          }
-        </div>*/}
         <div className="flex flex-col space-y-1">
           <span className="font-semibold">Broadcaster Funded</span>
           {health ?

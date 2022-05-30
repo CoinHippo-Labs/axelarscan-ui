@@ -162,7 +162,7 @@ export default () => {
                 <div className="flex flex-col items-end space-y-1.5">
                   {props.value ?
                     <>
-                      <div className={`max-w-min ${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(props.value) ? 'bg-slate-100 dark:bg-slate-900' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(props.value) ? 'bg-yellow-400 dark:bg-yellow-500 text-white' : ['REJECTED', 'FAILED'].includes(props.value) ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-green-400 dark:bg-green-500 text-white'} rounded-lg capitalize font-bold -mt-0.5 py-0.5 px-1.5`}>
+                      <div className={`max-w-min ${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(props.value) ? 'bg-slate-100 dark:bg-slate-900' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(props.value) ? 'bg-yellow-400 dark:bg-yellow-500 text-white' : ['REJECTED', 'FAILED'].includes(props.value) ? 'bg-red-500 dark:bg-red-600 text-white' : 'bg-green-500 dark:bg-green-600 text-white'} rounded-lg capitalize font-bold -mt-0.5 py-0.5 px-1.5`}>
                         {props.value?.replace('_', ' ')}
                       </div>
                       {['PASSED', 'REJECTED'].includes(props.value) && props.row.original.final_tally_result && (

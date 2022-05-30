@@ -47,11 +47,10 @@ export default () => {
         }, is_success)
         const _data = {
           data: response?.data?.map(d => {
-            const { key_id, height, key_chain, key_role, snapshot_validators, snapshot_non_participant_validators } = { ...d }
+            const { key_id, height, key_role, snapshot_validators, snapshot_non_participant_validators } = { ...d }
             return {
               ...d,
               id: `${key_id}_${height}`,
-              key_chain,
               key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
               validators: snapshot_validators?.validators?.map(v => {
                 const { validator, share_count } = { ...v }
@@ -109,11 +108,10 @@ export default () => {
         })
         const _data = {
           data: response?.data?.map(d => {
-            const { sig_id, key_id, key_chain, key_role, participants, participant_shares, non_participants, non_participant_shares } = { ...d }
+            const { sig_id, key_id, key_role, participants, participant_shares, non_participants, non_participant_shares } = { ...d }
             return {
               ...d,
               id: sig_id,
-              key_chain,
               key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
               validators: participants?.map((a, i) => {
                 return {

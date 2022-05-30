@@ -45,7 +45,7 @@ export default ({
                 <div className="flex flex-col items-start space-y-1">
                   <div className="flex items-center space-x-1.5">
                     {['keygens_failed'].includes(table) && (
-                      <BiErrorCircle size={16} className="text-red-400 dark:text-red-500" />
+                      <BiErrorCircle size={16} className="text-red-500 dark:text-red-600" />
                     )}
                     {props.value && (
                       <Copy

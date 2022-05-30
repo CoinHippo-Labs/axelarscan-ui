@@ -44,7 +44,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.status && (
-            <span className={`${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-slate-100 dark:bg-slate-900' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-yellow-400 dark:bg-yellow-500 text-white' : ['REJECTED', 'FAILED'].includes(data.status) ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-green-400 dark:bg-green-500 text-white'} rounded-lg uppercase text-sm lg:text-base font-semibold py-0.5 px-2`}>
+            <span className={`${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-slate-100 dark:bg-slate-900' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(data.status) ? 'bg-yellow-400 dark:bg-yellow-500 text-white' : ['REJECTED', 'FAILED'].includes(data.status) ? 'bg-red-500 dark:bg-red-600 text-white' : 'bg-green-500 dark:bg-green-600 text-white'} rounded-lg uppercase text-sm lg:text-base font-semibold py-0.5 px-2`}>
               {data.status?.replace('_', ' ')}
             </span>
           )

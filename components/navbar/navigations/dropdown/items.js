@@ -38,7 +38,7 @@ export default ({ onClick }) => {
             <FaHandPointLeft size={20} />
           </HeadShake> : m.external ?
           <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `dropdown-item w-full bg-transparent hover:bg-blue-50 dark:hover:bg-slate-800 ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-blue-600 dark:text-white ${!m.external && pathname === m.path ? 'font-bold' : 'font-medium hover:font-bold'} space-x-1.5 p-3`
+        const className = `dropdown-item w-full bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-black dark:text-white ${!m.external && pathname === m.path ? 'font-extrabold' : 'font-medium hover:font-bold'} space-x-1.5 p-3`
         return m.external ?
           <a
             key={i}

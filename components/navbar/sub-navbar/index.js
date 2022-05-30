@@ -382,7 +382,7 @@ export default () => {
           )}
           {(is_validator_path || is_block_path) && (
             <>
-              {chain_data?.distribution_params && (
+              {!['/validator/[address]'].includes(pathname) && chain_data?.distribution_params && (
                 <>
                   <div className="flex items-center space-x-1.5 ml-4">
                     <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">

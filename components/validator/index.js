@@ -1,419 +1,418 @@
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-
+import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import moment from 'moment'
 
-import Information from './information'
+import Info from './info'
 import CosmosGeneric from './cosmos-generic'
 import HealthCheck from './health-check'
 import AxelarSpecific from './axelar-specific'
 import EVMSupport from './evm-support'
 import VotingPower from './voting-power'
-import Uptime from './uptime'
-import Heartbeat from './heartbeat'
+import Uptimes from './uptimes'
+import Heartbeats from './heartbeats'
 import Polls from './polls'
 import Participations from '../participations/participations'
 import DelegationsTable from './delegations-table'
-
-import { getUptime, uptimeForJailedInfoSync, jailedInfo, getHeartbeat } from '../../lib/api/query'
-import { validatorSets, allBankBalances, allDelegations, distributionRewards, distributionCommissions } from '../../lib/api/cosmos'
+import { uptimeForJailedInfoSync, jailedInfo } from '../../lib/api/query'
+import { all_bank_balances, validator_sets, all_delegations, distributionRewards, distributionCommissions } from '../../lib/api/cosmos'
 import { keygens_by_validator } from '../../lib/api/executor'
-import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
+import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { denom_manager } from '../../lib/object/denom'
-import { blocksPerHeartbeat, blockFraction, lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
-import { name } from '../../lib/utils'
+import { getDenom, denom_manager } from '../../lib/object/denom'
+import { base64ToBech32 } from '../../lib/object/key'
+import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
+import { name, equals_ignore_case } from '../../lib/utils'
 
-import { JAILED_SYNC_DATA } from '../../reducers/types'
-
-export default function Validator({ address }) {
-  const dispatch = useDispatch()
-  const { chains, denoms, status, env, validators, validators_chains, jailed_sync } = useSelector(state => ({ chains: state.chains, denoms: state.denoms, status: state.status, env: state.env, validators: state.validators, validators_chains: state.validators_chains, jailed_sync: state.jailed_sync }), shallowEqual)
-  const { chains_data } = { ...chains }
-  const { denoms_data } = { ...denoms }
+export default () => {
+  const { assets, status, chain, validators, validators_chains } = useSelector(state => ({ assets: state.assets, status: state.status, chain: state.chain, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
+  const { assets_data } = { ...assets }
   const { status_data } = { ...status }
-  const { env_data } = { ...env }
+  const { chain_data } = { ...chain }
   const { validators_data } = { ...validators }
   const { validators_chains_data } = { ...validators_chains }
-  const { jailed_sync_data } = { ...jailed_sync }
+
+  const router = useRouter()
+  const { query } = { ...router }
+  const { address } = { ...query }
 
   const [validator, setValidator] = useState(null)
+  const [health, setHealth] = useState(null)
   const [votingPower, setVotingPower] = useState(null)
   const [delegations, setDelegations] = useState(null)
-  const [uptime, setUptime] = useState(null)
   const [maxMissed, setMaxMissed] = useState(Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED))
   const [jailed, setJailed] = useState(null)
-  const [heartbeat, setHeartbeat] = useState(null)
-  const [health, setHealth] = useState(null)
+  const [uptimes, setUptimes] = useState(null)
+  const [heartbeats, setHeartbeats] = useState(null)
   const [evmVotes, setEvmVotes] = useState(null)
   const [evmVotePolls, setEvmVotePolls] = useState(null)
-
-  const [tab, setTab] = useState('key_share')
-  const [keyShares, setKeyShares] = useState(null)
+  const [table, setTable] = useState('keyshares')
+  const [keyshares, setKeyshares] = useState(null)
   const [keygens, setKeygens] = useState(null)
   const [signs, setSigns] = useState(null)
   const [supportedChains, setSupportedChains] = useState(null)
-  const [rewards, setRewards] = useState(null)
 
+  // validator & health
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
-      if (address && denoms_data && status_data && validators_data) {
-        let response, data
-        const validator_data = validators_data?.find(v => v.operator_address === address)
+      if (address && assets_data && status_data && validators_data) {
+        const validator_data = validators_data.find(v => equals_ignore_case(v?.operator_address, address))
         if (validator_data?.start_proxy_height || validator_data?.start_height || validator_data?.deregistering) {
-          data = { ...data, ...validator_data }
-          setValidator({ data, address, broadcaster_loaded: data.broadcaster_loaded })
-
-          if (data.broadcaster_loaded && 'tss_illegibility_info' in data) {
+          const {
+            start_height,
+            start_proxy_height,
+            broadcaster_loaded,
+            broadcaster_address,
+            tss_illegibility_info,
+          } = { ...validator_data }
+          setValidator({
+            data: validator_data,
+            address,
+            broadcaster_loaded,
+          })
+          if (broadcaster_loaded && 'tss_illegibility_info' in validator_data) {
             const _health = {
-              broadcaster_registration: !data.tss_illegibility_info?.no_proxy_registered && data.broadcaster_address ? true : false,
+              broadcaster_registration: !tss_illegibility_info?.no_proxy_registered && broadcaster_address ? true : false,
             }
-            _health.num_block_before_registered = _health ? _health.broadcaster_registration ? typeof data?.start_proxy_height === 'number' && typeof data?.start_height === 'number' ? data.start_proxy_height >= data.start_height ? data.start_proxy_height - data.start_height : 0 : '-' : 'No Proxy' : null
-
-            if (data.broadcaster_address) {
-              response = await allBankBalances(data.broadcaster_address)
+            if (broadcaster_address) {
+              const response = await all_bank_balances(broadcaster_address)
               if (response?.data) {
-                _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => { return { amount: denom_manager.amount(b.amount, b.denom, denoms_data), denom: denom_manager.symbol(b.denom, denoms_data) } }))
+                _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => {
+                  const { denom, amount } = { ...b }
+                  return {
+                    denom: denom_manager.symbol(denom, assets_data),
+                    amount: denom_manager.amount(amount, denom, assets_data),
+                  }
+                }))
               }
             }
             else {
               _health.broadcaster_funded = 'No Proxy'
             }
-
-            response = await getHeartbeats({
-              _source: false,
+            const latest_block = Number(status_data.latest_block_height)
+            const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
+            const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
+            const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
+            const last = lastHeartbeatBlock(latest_block)
+            const response = await getHeartbeats({
+              query: {
+                bool: {
+                  must: [
+                    { match: { sender: broadcaster_address } },
+                    { range: { height: {
+                      gte: first,
+                      lte: latest_block,
+                    } } },
+                  ],
+                },
+              },
               aggs: {
                 heartbeats: {
                   terms: { field: 'sender.keyword' },
                   aggs: {
                     period_height: {
-                      terms: { field: 'period_height', size: 100000 },
+                      terms: { field: 'period_height', size: 1000 },
                     },
                   },
                 },
               },
-              query: {
-                bool: {
-                  must: [
-                    { match: { sender: data.broadcaster_address } },
-                    { range: { height: { gt: firstHeartbeatBlock(Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)), lte: Number(status_data.latest_block_height) } } },
-                  ],
-                },
-              },
+              _source: false,
             })
-
-            const _last = lastHeartbeatBlock(Number(status_data.latest_block_height))
-            const _first = firstHeartbeatBlock(Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)) + 1
-
-            const totalHeartbeats = Math.floor((_last - _first) / Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)) + 1
-            _health.total_heartbeats = totalHeartbeats
-            _health.up_heartbeats = response?.data?.[data?.broadcaster_address] || 0
-
-            _health.missed_heartbeats = _health.total_heartbeats - _health.up_heartbeats
-            _health.missed_heartbeats = _health.missed_heartbeats < 0 ? 0 : _health.missed_heartbeats
-
-            _health.heartbeats_uptime = _health.total_heartbeats > 0 ? _health.up_heartbeats * 100 / _health.total_heartbeats : 0
-            _health.heartbeats_uptime = _health.heartbeats_uptime > 100 ? 100 : _health.heartbeats_uptime
-            setHealth({ data: _health, address })
+            const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
+            const up = response?.data?.[broadcaster_address] || 0
+            let missed = total - up
+            missed = missed < 0 ? 0 :missed
+            let uptime = total > 0 ? up * 100 / total : 0
+            uptime = uptime > 100 ? 100 : uptime
+            setHealth({
+              data: {
+                ..._health,
+                total,
+                up,
+                missed,
+                heartbeats_uptime: uptime,
+              },
+              address,
+            })
           }
         }
         else {
-          setValidator({ data, address, broadcaster_loaded: true })
+          setValidator({
+            data: null,
+            address,
+            broadcaster_loaded: true,
+          })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
   }, [address, validators_data])
 
+  // voting power
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
-      if (address && validator?.address === address && (!votingPower || !validator.broadcaster_loaded)) {
+      if (address && equals_ignore_case(validator?.address, address) && (!votingPower || !validator.broadcaster_loaded)) {
         if (!controller.signal.aborted) {
-          let response, data = { ...validator.data }
-
-          if (!controller.signal.aborted) {
-            response = await validatorSets()
-            if (response?.result?.validators?.findIndex(v => v.address === data.consensus_address) > -1) {
-              const v = response.result.validators?.find(v => v.address === data.consensus_address)
-              data = {
-                ...data,
-                proposer_priority: v?.proposer_priority,
-                voting_power: Number(v?.voting_power),
-              }
-            }
-            setVotingPower({ data, address })
-          }
+          const { data } = { ...validator }
+          const { consensus_address } = { ...data }
+          const response = await validator_sets()
+          const v = response?.result?.validators?.find(_v => equals_ignore_case(_v?.address, consensus_address))
+          const { proposer_priority, voting_power } = { ...v }
+          setVotingPower({
+            data: {
+              ...data,
+              proposer_priority,
+              voting_power: Number(voting_power),
+            },
+            address,
+          })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
   }, [address, validator])
 
+  // delegations
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
-      if (address && validator?.address === address && (!delegations || !validator.broadcaster_loaded) && denoms_data) {
+      if (address && equals_ignore_case(validator?.address, address) && assets_data && (!delegations || !validator.broadcaster_loaded)) {
         if (!controller.signal.aborted) {
-          let response, _delegations
-          if (!controller.signal.aborted) {
-            response = await allDelegations(address)
-            _delegations = _.orderBy(response.data?.map(d => {
+          const response = await all_delegations(address)
+          setDelegations({
+            data: _.orderBy(response?.data?.map(d => {
+              const { delegation, balance } = { ...d }
+              const { delegator_address, shares } = { ...delegation }
+              const { denom, amount } = { ...balance }
               return {
-                ...d.delegation,
-                self: d.delegation.delegator_address === validator.data?.delegator_address,
-                shares: d.delegation && denom_manager.amount(d.delegation.shares, d.balance?.denom, denoms_data),
-                ...d.balance,
-                denom: denom_manager.symbol(d.balance?.denom, denoms_data),
-                amount: d.balance && denom_manager.amount(d.balance.amount, d.balance.denom, denoms_data),
+                ...delegation,
+                self: equals_ignore_case(delegator_address, validator.data?.delegator_address),
+                shares: isNaN(shares) ? -1 : denom_manager.amount(shares, denom, assets_data),
+                ...balance,
+                denom: denom_manager.symbol(denom, assets_data),
+                amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
+                asset_data: getDenom(denom, assets_data),
               }
-            }) || [], ['self', 'shares'], ['desc', 'desc'])
-            setDelegations({ data: _delegations, address })
-          }
-
-          /*if (!controller.signal.aborted) {
-            let _rewards = []
-            response = await distributionRewards(validator.data?.delegator_address)
-            if (response && !response.error) {
-              _rewards.push({
-                ...response,
-                name: 'Distribution Rewards',
-                rewards: response.rewards && Object.entries(_.groupBy(response.rewards.flatMap(r => r.reward).map(r => { return { ...r, denom: denom_manager.symbol(r.denom, denoms_data), amount: r.amount && (isNaN(r.amount) ? -1 : denom_manager.amount(r.amount, r.denom, denoms_data)) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
-                total: response.total && Object.entries(_.groupBy(response.total.map(t => { return { ...t, denom: denom_manager.symbol(t.denom, denoms_data), amount: t.amount && denom_manager.amount(t.amount, t.denom, denoms_data) } }), 'denom')).map(([key, value]) => { return { denom: key, amount: _.sumBy(value, 'amount') } }),
-              })
-            }
-
-            response = await distributionCommissions(validator.data?.operator_address)
-            if (response && !response.error) {
-              _rewards.push({
-                ...response,
-                name: 'Distribution Commissions',
-                total: response?.commission?.commission?.map(c => {
-                  return {
-                    ...c,
-                    denom: denom_manager.symbol(c.denom, denoms_data),
-                    amount: c.amount && (isNaN(c.amount) ? -1 : denom_manager.amount(c.amount, c.denom, denoms_data)),
-                  }
-                }),
-              })
-            }
-
-            _rewards = _rewards.map(r => {
-              return {
-                ...r,
-                rewards_per_stake: r.total?.map(_denom => {
-                  const stake = _.sumBy(_delegations?.filter(d => d.denom === _denom.denom) || [], 'amount')
-                  return {
-                    ..._denom,
-                    stake,
-                    amount_per_stake: _denom.amount / (stake > 0 ? stake : 1),
-                  }
-                }),
-              }
-            })
-
-            setRewards({ data: _rewards, address })
-          }*/
+            }) || [], ['self', 'shares'], ['desc', 'desc']),
+            address,
+          })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
-  }, [address, validator, denoms_data])
+  }, [address, validator, assets_data])
 
+  // useEffect(() => {
+  //   const controller = new AbortController()
+
+  //   const getDataSync = async (beginBlock, address, from, i) => {
+  //     const data = await uptimeForJailedInfoSync(beginBlock, address, from)
+  //     dispatch({
+  //       type: JAILED_SYNC_DATA,
+  //       value: data,
+  //       i,
+  //     })
+  //   }
+
+  //   const getData = async () => {
+  //     if (address && validator?.address === address && (!jailed || !validator.broadcaster_loaded)) {
+  //       if (!controller.signal.aborted) {
+  //         const validator_data = validator?.data
+  //         let response, jailed_data
+  //         if (validator_data?.jailed_until > 0) {
+  //           const _maxMissed = env_data?.slashing_params ? Number(env_data.slashing_params.signed_blocks_window) - (Number(env_data.slashing_params.min_signed_per_window) * Number(env_data.slashing_params.signed_blocks_window)) : Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED)
+  //           setMaxMissed(_maxMissed)
+
+  //           const beginBlock = Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) > validator_data.start_height ? Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) : validator_data.start_height
+  //           const numBlock = Number(status_data.latest_block_height) - beginBlock
+  //           if (!validator_data.uptime) {
+  //             jailed_data = {
+  //               times_jailed: -1,
+  //               avg_jail_response_time: -1,
+  //             }
+  //           }
+  //           else if (numBlock * (1 - (validator_data?.uptime / 100)) > _maxMissed) {
+  //             const chunkSize = _.head([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()].map(i => i + 1).filter(i => Math.ceil(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) / i) <= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK))) || Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
+  //             _.chunk([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()], chunkSize).forEach((chunk, i) => getDataSync(beginBlock, validator_data.consensus_address, i * chunkSize, i))
+  //           }
+  //           else {
+  //             jailed_data = {
+  //               times_jailed: 0,
+  //               avg_jail_response_time: 0,
+  //             }
+  //           }
+  //         }
+  //         else {
+  //           jailed_data = {
+  //             times_jailed: 0,
+  //             avg_jail_response_time: 0,
+  //           }
+  //         }
+
+  //         if (jailed_data) {
+  //           setJailed({ data: jailed_data, address })
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   getData()
+
+  //   return () => {
+  //     controller?.abort()
+  //     dispatch({
+  //       type: JAILED_SYNC_DATA,
+  //       value: null,
+  //     })
+  //   }
+  // }, [address, validator])
+
+  // useEffect(() => {
+  //   if (Object.keys(jailed_sync_data || {}).length >= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK)) {
+  //     const uptime_data = jailedInfo(Object.values(jailed_sync_data).flatMap(u => u), status_data && (moment(status_data.latest_block_time).diff(moment(status_data.earliest_block_time), 'milliseconds') / Number(status_data.latest_block_height)))?.data
+  //     let jailed_data
+
+  //     if (uptime_data) {
+  //       const _jailed_data = []
+  //       let numMissed = 0, _jailed = false
+
+  //       for (let i = 0; i < uptime_data.length; i++) {
+  //         const block = uptime_data[i]
+  //         if (block?.up) {
+  //           if (_jailed) {
+  //             if (_jailed_data.length - 1 >= 0) {
+  //               _jailed_data[_jailed_data.length - 1].unjail_time = block.time
+  //             }
+  //           }
+  //           numMissed = 0
+  //           _jailed = false
+  //         }
+  //         else {
+  //           numMissed++
+  //         }
+
+  //         if (numMissed > maxMissed && !_jailed) {
+  //           _jailed_data.push(block)
+  //           _jailed = true
+  //         }
+  //       }
+
+  //       jailedData = {
+  //         times_jailed: _jailed_data.length,
+  //         avg_jail_response_time: _jailed_data.filter(b => b.unjail_time).length > 0 ? _.meanBy(_jailed_data.filter(b => b.unjail_time).map(b => { return { ...b, response_time: b.unjail_time - b.time }}), 'response_time') : -1,
+  //       }
+  //     }
+
+  //     dispatch({
+  //       type: JAILED_SYNC_DATA,
+  //       value: null,
+  //     })
+
+  //     setJailed({ data: jailed_data || {}, address })
+  //   }
+  // }, [jailed_sync_data])
+
+  // uptimes
   useEffect(() => {
     const controller = new AbortController()
-
-    const getDataSync = async (beginBlock, address, from, i) => {
-      const data = await uptimeForJailedInfoSync(beginBlock, address, from)
-      dispatch({
-        type: JAILED_SYNC_DATA,
-        value: data,
-        i,
-      })
-    }
-
     const getData = async () => {
-      if (address && validator?.address === address && (!jailed || !validator.broadcaster_loaded)) {
+      if (address && equals_ignore_case(validator?.address, address) && status_data && (!uptimes || !validator.broadcaster_loaded)) {
         if (!controller.signal.aborted) {
-          const validator_data = validator?.data
-          let response, jailed_data
-          if (validator_data?.jailed_until > 0) {
-            const _maxMissed = env_data?.slashing_params ? Number(env_data.slashing_params.signed_blocks_window) - (Number(env_data.slashing_params.min_signed_per_window) * Number(env_data.slashing_params.signed_blocks_window)) : Number(process.env.NEXT_PUBLIC_DEFAULT_MAX_MISSED)
-            setMaxMissed(_maxMissed)
-
-            const beginBlock = Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) > validator_data.start_height ? Number(status_data.latest_block_height) - Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) : validator_data.start_height
-            const numBlock = Number(status_data.latest_block_height) - beginBlock
-            if (!validator_data.uptime) {
-              jailed_data = {
-                times_jailed: -1,
-                avg_jail_response_time: -1,
+          const { consensus_address } = { ...validator.data }
+          const latest_block = Number(status_data.latest_block_height)
+          const num_uptime_display_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_DISPLAY_BLOCKS)
+          const response = await getUptimes({
+            query: { range: { height: {
+              gt: latest_block - num_uptime_display_blocks,
+            } } },
+            size: num_uptime_display_blocks,
+          })
+          const data = response?.data || []
+          setUptimes({
+            data: [...Array(num_uptime_display_blocks).keys()].map(i => {
+              const height = latest_block - i
+              const u = data.find(d => d?.height === height)
+              const { validators } = { ...u }
+              return {
+                ...u,
+                height,
+                up: !!validators?.map(v => base64ToBech32(v, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS)).includes(consensus_address),
               }
-            }
-            else if (numBlock * (1 - (validator_data?.uptime / 100)) > _maxMissed) {
-              const chunkSize = _.head([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()].map(i => i + 1).filter(i => Math.ceil(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS) / i) <= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK))) || Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
-              _.chunk([...Array(Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)).keys()], chunkSize).forEach((chunk, i) => getDataSync(beginBlock, validator_data.consensus_address, i * chunkSize, i))
-            }
-            else {
-              jailed_data = {
-                times_jailed: 0,
-                avg_jail_response_time: 0,
-              }
-            }
-          }
-          else {
-            jailed_data = {
-              times_jailed: 0,
-              avg_jail_response_time: 0,
-            }
-          }
-
-          if (jailed_data) {
-            setJailed({ data: jailed_data, address })
-          }
+            }),
+            address,
+          })
         }
       }
     }
-
     getData()
-
-    return () => {
-      controller?.abort()
-      dispatch({
-        type: JAILED_SYNC_DATA,
-        value: null,
-      })
-    }
-  }, [address, validator])
-
-  useEffect(() => {
-    if (Object.keys(jailed_sync_data || {}).length >= Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS_CHUNK)) {
-      const uptime_data = jailedInfo(Object.values(jailed_sync_data).flatMap(u => u), status_data && (moment(status_data.latest_block_time).diff(moment(status_data.earliest_block_time), 'milliseconds') / Number(status_data.latest_block_height)))?.data
-      let jailed_data
-
-      if (uptime_data) {
-        const _jailed_data = []
-        let numMissed = 0, _jailed = false
-
-        for (let i = 0; i < uptime_data.length; i++) {
-          const block = uptime_data[i]
-          if (block?.up) {
-            if (_jailed) {
-              if (_jailed_data.length - 1 >= 0) {
-                _jailed_data[_jailed_data.length - 1].unjail_time = block.time
-              }
-            }
-            numMissed = 0
-            _jailed = false
-          }
-          else {
-            numMissed++
-          }
-
-          if (numMissed > maxMissed && !_jailed) {
-            _jailed_data.push(block)
-            _jailed = true
-          }
-        }
-
-        jailedData = {
-          times_jailed: _jailed_data.length,
-          avg_jail_response_time: _jailed_data.filter(b => b.unjail_time).length > 0 ? _.meanBy(_jailed_data.filter(b => b.unjail_time).map(b => { return { ...b, response_time: b.unjail_time - b.time }}), 'response_time') : -1,
-        }
-      }
-
-      dispatch({
-        type: JAILED_SYNC_DATA,
-        value: null,
-      })
-
-      setJailed({ data: jailed_data || {}, address })
-    }
-  }, [jailed_sync_data])
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    const getData = async () => {
-      if (address && validator?.address === address && status_data && (!uptime || !validator.broadcaster_loaded)) {
-        if (!controller.signal.aborted) {
-          const data = validator?.data
-          const response = await getUptime(Number(status_data.latest_block_height), data?.consensus_address)
-          setUptime({ data: response?.data || [], address })
-        }
-      }
-    }
-
-    getData()
-
     return () => {
       controller?.abort()
     }
   }, [address, validator])
 
+  // heartbeats
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
-      if (address && validator?.address === address && validator.broadcaster_loaded && status_data && (!heartbeat || (validator.data && 'tss_illegibility_info' in validator.data))) {
+      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded && (!heartbeats || 'tss_illegibility_info' in { ...validator.data })) {
         if (!controller.signal.aborted) {
-          const data = validator.data
-          const latestBlock = Number(status_data.latest_block_height)
-          let beginBlock = latestBlock - Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
-          beginBlock = beginBlock > (data?.start_proxy_height || 0) ? beginBlock : (data?.start_proxy_height || 0)
-          beginBlock = firstHeartbeatBlock(beginBlock)
-
-          let heartbeats = []
-          for (let height = latestBlock; height >= beginBlock; height--) {
-            if (height % Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT) === 1 && heartbeats.length < Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS) / Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)) {
-              heartbeats.push({ height })
-            }
-          }
-
-          if (data?.broadcaster_address) {
-            let response = await getHeartbeat(beginBlock, latestBlock, data.broadcaster_address)
-            if (response?.data) {
-              heartbeats = heartbeats.map(h => response.data.find(_h => (_h?.height - (_h?.height % blocksPerHeartbeat) + blockFraction) === (h?.height - (h?.height % blocksPerHeartbeat) + blockFraction)) || h)
-            }
-
-            heartbeats = heartbeats.map(h => {
-              const _ineligibilities = null
-              return {
-                ...h,
-                up: (h?.sender && h.sender === data.broadcaster_address) || _ineligibilities,
-                height: _ineligibilities?.height ? Number(_ineligibilities?.height) : h.height,
-                key_ids: _ineligibilities?.key_IDs?.split(',') || h.key_ids,
-                ineligibilities: {
-                  ..._ineligibilities?.ineligibilities,
+          const { broadcaster_address } = { ...validator.data }
+          let { start_proxy_height } = { ...validator.data }
+          start_proxy_height = start_proxy_height || 0
+          const latest_block = Number(status_data.latest_block_height)
+          const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
+          const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
+          const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks > start_proxy_height ? latest_block - num_heartbeat_blocks : start_proxy_height)
+          const heartbeats = []
+          let data
+          if (broadcaster_address) {
+            const response = await getHeartbeats({
+              query: {
+                bool: {
+                  must: [
+                    { match: { sender: broadcaster_address } },
+                    { range: { height: {
+                      gte: first,
+                      lte: latest_block,
+                    } } },
+                  ],
                 },
-              }
+              },
+              size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
             })
+            data = response?.data || []
           }
-          setHeartbeat({ data: heartbeats, address })
+          for (let height = latest_block; height >= first; height--) {
+            if (height % num_blocks_per_heartbeat === 1 && heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat) {
+              const h = data.find(d => d?.period_height === height)
+              const { sender } = { ...h }
+              heartbeats.push({
+                ...h,
+                height,
+                up: equals_ignore_case(sender, broadcaster_address),
+              })
+            }
+          }
+          setHeartbeats({
+            data: heartbeats,
+            address,
+          })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
@@ -559,129 +558,99 @@ export default function Validator({ address }) {
     }
   }, [address, validator])
 
+  // keyshares & keygens & signs
   useEffect(() => {
     const controller = new AbortController()
-
     const getData = async () => {
       if (address) {
-        let response, keygens_data, signs_data, total_participated_signs, total_not_participated_signs
         if (!controller.signal.aborted) {
-          response = await keygens_by_validator(address)
+          const response = await keygens_by_validator(address)
           if (response) {
-            setKeyShares({ data: response, address })
+            setKeyshares({
+              data: _.orderBy(response, ['snapshot_block_number'], ['desc']),
+              address,
+            })
           }
         }
-
         if (!controller.signal.aborted) {
-          response = await getKeygens({
-            size: 1000,
-            sort: [{ height: 'desc' }],
-          }, true)
-          let data = Array.isArray(response?.data) ? response.data : []
-          for (let i = 0; i < data.length; i++) {
-            const keygen = data[i]
-            data[i] = {
-              ...keygen,
-              key_chain: keygen.key_chain || (keygen?.key_id?.split('-').length > 1 && name(keygen.key_id.split('-')[0])),
-              key_role: keygen.key_role || (keygen?.key_id?.split('-').length > 2 && `${keygen.key_id.split('-')[1].toUpperCase()}_KEY`),
-              participated: keygen.snapshot_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              not_participated: keygen.snapshot_non_participant_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              success: true,
-            }
+          let data, total = 0
+          const results = [true, false]
+          for (let i = 0; i < results.length; i++) {
+            const result = results[i]
+            const response = await getKeygens({
+              size: 1000,
+              sort: [{ height: 'desc' }],
+              track_total_hits: true,
+            }, result)
+            total += (response?.total || 0)
+            data = _.orderBy(_.uniqBy(_.concat(data || [], response?.data?.map(d => {
+              const { key_id, key_role, snapshot_validators, snapshot_non_participant_validators } = { ...d }
+              return {
+                ...d,
+                key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
+                result,
+                participated: snapshot_validators?.validators?.findIndex(v => equals_ignore_case(v?.validator, address)) > -1 &&
+                  snapshot_non_participant_validators?.validators?.findIndex(v => equals_ignore_case(v?.validator, address)) < 0,
+              }
+            }) || []), 'key_id'), ['height'], ['desc'])
           }
-          keygens_data = _.orderBy(_.concat(keygens_data || [], data.filter(k => k.participated || k.not_participated)), ['height'], ['desc'])
-
-          response = await getKeygens({
-            size: 1000,
-            sort: [{ height: 'desc' }],
-          }, false)
-          data = Array.isArray(response?.data) ? response.data : []
-          for (let i = 0; i < data.length; i++) {
-            const keygen = data[i]
-            data[i] = {
-              ...keygen,
-              key_chain: keygen.key_chain || (keygen?.key_id?.split('-').length > 1 && name(keygen.key_id.split('-')[0])),
-              key_role: keygen.key_role || (keygen?.key_id?.split('-').length > 2 && `${keygen.key_id.split('-')[1].toUpperCase()}_KEY`),
-              participated: keygen.snapshot_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              not_participated: keygen.snapshot_non_participant_validators?.validators?.findIndex(v => v?.validator?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              success: false,
-            }
-          }
-          keygens_data = _.orderBy(_.concat(keygens_data || [], data.filter(k => k.participated || k.not_participated)), ['height'], ['desc'])
-          setKeygens({ data: keygens_data, total: keygens_data.length, address })
+          setKeygens({
+            data,
+            total,
+            address,
+          })
         }
-
         if (!controller.signal.aborted) {
-          response = await getSignAttempts({
-            size: 1000,
-            query: { match: { participants: address } },
-            sort: [{ height: 'desc' }],
-            aggs: { total: { terms: { field: 'result' } } },
-          })
-          let data = Array.isArray(response?.data) ? response.data : []
-          total_participated_signs = response?.total
-
-          for (let i = 0; i < data.length; i++) {
-            const sign = data[i]
-            data[i] = {
-              ...sign,
-              key_chain: sign.key_chain || (sign?.key_id?.split('-').length > 1 && name(sign.key_id.split('-')[0])),
-              key_role: sign.key_role || (sign?.key_id?.split('-').length > 2 && `${sign.key_id.split('-')[1].toUpperCase()}_KEY`),
-              participated: sign.participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              not_participated: sign.non_participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              success: true,
-            }
+          let data, total = 0
+          const results = [true, false]
+          for (let i = 0; i < results.length; i++) {
+            const result = results[i]
+            const response = await getSignAttempts({
+              query: { match: { [`${!result ? 'non_' : ''}participants`]: address } },
+              size: 1000,
+              sort: [{ height: 'desc' }],
+              track_total_hits: true,
+            })
+            total += (response?.total || 0)
+            data = _.orderBy(_.uniqBy(_.concat(data || [], response?.data?.map(d => {
+              const { key_id, key_role, participants, non_participants } = { ...d }
+              return {
+                ...d,
+                key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
+                result,
+                participated: participants?.findIndex(a => equals_ignore_case(a, address)) > -1 &&
+                  non_participants?.findIndex(a => equals_ignore_case(a, address)) < 0,
+              }
+            }) || []), 'sig_id'), ['height'], ['desc'])
           }
-          signs_data = _.orderBy(_.concat(signs_data || [], data.filter(s => s.participated || s.not_participated)), ['height'], ['desc'])
-
-          response = await getSignAttempts({
-            size: 1000,
-            query: { match: { non_participants: address } },
-            sort: [{ height: 'desc' }],
-            aggs: { total: { terms: { field: 'result' } } },
+          setSigns({
+            data,
+            total,
+            address,
           })
-          data = Array.isArray(response?.data) ? response.data : []
-          total_not_participated_signs = response?.total
-
-          for (let i = 0; i < data.length; i++) {
-            const sign = data[i]
-            data[i] = {
-              ...sign,
-              key_chain: sign.key_chain || (sign?.key_id?.split('-').length > 1 && name(sign.key_id.split('-')[0])),
-              key_role: sign.key_role || (sign?.key_id?.split('-').length > 2 && `${sign.key_id.split('-')[1].toUpperCase()}_KEY`),
-              participated: sign.participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              not_participated: sign.non_participants?.findIndex(a => a?.toLowerCase() === address?.toLowerCase()) > -1 ? true : false,
-              success: false,
-            }
-          }
-          signs_data = _.orderBy(_.concat(signs_data || [], data.filter(s => s.participated || s.not_participated)), ['height'], ['desc'])
-          setSigns({ data: signs_data, total: total_participated_signs + total_not_participated_signs, total_participated_signs, total_not_participated_signs, address })
         }
       }
     }
-
     getData()
-
     return () => {
       controller?.abort()
     }
   }, [address])
 
+  // supported chains
   useEffect(() => {
     if (address && validators_chains_data) {
       setSupportedChains({
-        data: Object.entries(validators_chains_data || {}).filter(([key, value]) => value?.includes(address.toLowerCase())).map(([key, value]) => key),
+        data: Object.entries(validators_chains_data).filter(([k, v]) => v?.findIndex(_v => equals_ignore_case(_v, address)) > -1).map(([k, v]) => k),
         address,
       })
     }
   }, [address, validators_chains_data])
 
   return (
-    <>
-      <div className="my-4">
-        <Information data={validator?.address === address && validator?.data} />
-      </div>
-      <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 my-4">
+    <div className="space-y-4 mt-2 mb-6 mx-auto">
+      <Info data={validator?.address === address && validator?.data} />
+      {/*<div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 my-4">
         <VotingPower data={votingPower?.address === address && votingPower?.data} />
         <div
           title={<span className="text-lg font-medium">Delegations</span>}
@@ -699,8 +668,8 @@ export default function Validator({ address }) {
               data={validator?.address === address && validator?.data}
               jailed={jailed?.address === address && jailed?.data}
             />
-            <Uptime
-              data={uptime?.address === address && uptime?.data}
+            <Uptimes
+              data={uptimes?.address === address && uptimes?.data}
               validator_data={validator?.address === address && validator?.data}
             />
           </div>
@@ -709,8 +678,8 @@ export default function Validator({ address }) {
               data={validator?.address === address && validator?.data}
               health={health?.address === address && health?.data}
             />
-            <Heartbeat
-              data={heartbeat?.address === address && heartbeat?.data}
+            <Heartbeats
+              data={heartbeats?.address === address && heartbeats?.data}
               validator_data={validator?.address === address && validator?.data}
             />
           </div>
@@ -735,10 +704,10 @@ export default function Validator({ address }) {
           />
           <div
             title={<div className="grid grid-flow-row grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
-              {['key_share', 'keygen', 'sign'].map((t, i) => (
+              {['keyshares', 'keygens', 'signs'].map((t, i) => (
                 <div
                   key={i}
-                  onClick={() => setTab(t)}
+                  onClick={() => setTable(t)}
                   className={`max-w-min sm:max-w-max md:max-w-min lg:max-w-max btn btn-default btn-rounded cursor-pointer whitespace-nowrap bg-trasparent ${t === tab ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 text-white dark:hover:text-gray-100'}`}
                 >
                   {name(t)}
@@ -748,30 +717,18 @@ export default function Validator({ address }) {
             className="dark:border-gray-900 px-2 md:px-4"
           >
             <div className="mt-1">
-              {tab === 'keygen' ?
-                <Participations
-                  data={keygens}
-                  page="validator-keygen"
-                  className="no-border"
-                />
-                :
-                tab === 'sign' ?
-                  <Participations
-                    data={signs}
-                    page="validator-sign"
-                    className="no-border"
-                  />
-                  :
-                  <Participations
-                    data={keyShares}
-                    page="validator"
-                    className="no-border"
-                  />
-              }
+              <Participations
+                table={table}
+                _data={table === 'keygens' ?
+                  keygens :
+                  table === 'signs' ?
+                    signs : keyshares
+                }
+              />
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </div>*/}
+    </div>
   )
 }

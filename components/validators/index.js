@@ -141,7 +141,7 @@ export default () => {
                   <div className="flex flex-col items-start sm:items-end">
                     {props.value > 0 ?
                       <>
-                        <span className="text-xs lg:text-base font-bold lg:-mt-0.5">
+                        <span className="text-xs lg:text-sm font-bold">
                           {number_format(Math.floor(denom_manager.amount(props.value, assets_data[0]?.id, assets_data)), '0,0.00000000')}
                         </span>
                         <span className="text-slate-400 dark:text-slate-200 text-2xs lg:text-sm">
@@ -202,7 +202,7 @@ export default () => {
                         text={<div className="text-white text-2xs font-bold mx-1">
                           {number_format(props.value, '0,0.00')}%
                         </div>}
-                        color="bg-green-400 dark:bg-green-500 rounded-lg"
+                        color="bg-green-500 dark:bg-green-600 rounded-lg"
                         backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg"
                         className={`h-4 flex items-center justify-${props.value < 20 ? 'start' : 'end'}`}
                       />
@@ -250,7 +250,7 @@ export default () => {
                           text={<div className="text-white text-2xs font-bold mx-1">
                             {number_format(props.value, '0,0.00')}%
                           </div>}
-                          color="bg-green-400 dark:bg-green-500 rounded-lg"
+                          color="bg-green-500 dark:bg-green-600 rounded-lg"
                           backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded-lg"
                           className={`h-4 flex items-center justify-${props.value < 20 ? 'start' : 'end'}`}
                         />
@@ -299,7 +299,7 @@ export default () => {
                       Object.entries(props.value.chains).map(([k, v]) => (
                         <div
                           key={k}
-                          className="flex items-center justify-between space-x-2"
+                          className="min-w-max flex items-center justify-between space-x-2"
                         >
                           <div className="flex items-center space-x-2">
                             {chain_manager.image(k, evm_chains_data) && (
@@ -309,10 +309,10 @@ export default () => {
                                 className="w-4 h-4 rounded-full"
                               />
                             )}
-                            <span className={`${v?.votes?.true ? 'text-green-400 dark:text-green-500 font-bold' : 'text-slate-300 dark:text-slate-500 font-medium'} -mt-0.5`}>
+                            <span className={`${v?.votes?.true ? 'text-green-500 dark:text-green-600 font-bold' : 'text-slate-300 dark:text-slate-500 font-medium'} -mt-0.5`}>
                               {number_format(v?.votes?.true || 0, '0,0')} Y
                             </span>
-                            <span className={`${v?.votes?.false ? 'text-red-400 dark:text-red-500 font-bold' : 'text-slate-300 dark:text-slate-500 font-medium'} -mt-0.5`}>
+                            <span className={`${v?.votes?.false ? 'text-red-500 dark:text-red-600 font-bold' : 'text-slate-300 dark:text-slate-500 font-medium'} -mt-0.5`}>
                               {number_format(v?.votes?.false || 0, '0,0')} N
                             </span>
                             {v?.total_polls - v?.total > 0 && (
@@ -387,11 +387,11 @@ export default () => {
                           </div>
                         )}
                         {props.row.original.jailed && (
-                          <div className="bg-red-400 dark:bg-red-500 rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5">
+                          <div className="bg-red-500 dark:bg-red-600 rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5">
                             Jailed
                           </div>
                         )}
-                        <div className={`${props.value.includes('UN') ? props.value.endsWith('ED') ? 'bg-red-400 dark:bg-red-500' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-400 dark:bg-green-500'} rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5`}>
+                        <div className={`${props.value.includes('UN') ? props.value.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5`}>
                           {props.value.replace('BOND_STATUS_', '').toLowerCase()}
                         </div>
                         {Object.entries({ ...props.row.original.tss_illegibility_info }).filter(([k, v]) => v).map(([k, v]) => (

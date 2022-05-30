@@ -104,7 +104,7 @@ export default ({ data }) => {
             Cell: props => (
               <div className="flex flex-col items-end text-right">
                 {props.value ?
-                  <div className={`max-w-min ${['YES'].includes(props.value) ? 'bg-green-400 dark:bg-green-500 text-white' : ['NO'].includes(props.value) ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg font-semibold -mt-0.5 py-1 px-2`}>
+                  <div className={`max-w-min ${['YES'].includes(props.value) ? 'bg-green-500 dark:bg-green-600 text-white' : ['NO'].includes(props.value) ? 'bg-red-500 dark:bg-red-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg font-semibold -mt-0.5 py-1 px-2`}>
                     {props.value?.replace('_', ' ')}
                   </div>
                   :

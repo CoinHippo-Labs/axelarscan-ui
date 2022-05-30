@@ -355,7 +355,6 @@ export default () => {
                       const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
                       const last = lastHeartbeatBlock(latest_block)
                       response = await getHeartbeats({
-                        _source: false,
                         query: {
                           bool: {
                             must: [
@@ -376,6 +375,7 @@ export default () => {
                             },
                           },
                         },
+                        _source: false,
                       })
                       for (let i = 0; i < vs.length; i++) {
                         const v = vs[i]

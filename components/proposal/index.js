@@ -78,7 +78,7 @@ export default () => {
               votes.map((v, i) => (
                 <div
                   key={i}
-                  className={`${['YES'].includes(v?.option) ? 'bg-green-400 dark:bg-green-500 text-white' : ['NO'].includes(v?.option) ? 'bg-red-400 dark:bg-red-500 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase whitespace-nowrap font-semibold py-1 px-2`}
+                  className={`${['YES'].includes(v?.option) ? 'bg-green-500 dark:bg-green-600 text-white' : ['NO'].includes(v?.option) ? 'bg-red-500 dark:bg-red-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase whitespace-nowrap font-semibold py-1 px-2`}
                 >
                   {number_format(v.value, '0,0')} {v?.option?.replace('_', ' ')}
                 </div>
