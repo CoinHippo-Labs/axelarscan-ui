@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 
-import Widget from '../widget'
 import Copy from '../copy'
 
 import { chain_manager } from '../../lib/object/chain'
@@ -12,7 +11,7 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
   const { chains_data } = { ...chains }
 
   return (
-    <Widget
+    <div
       title={<span className="text-lg font-medium">EVMs Support</span>}
       className="dark:border-gray-900"
     >
@@ -140,6 +139,6 @@ export default function EVMSpecific({ supportedChains, evmVotes, validator_data 
           }
         </div>
       </div>
-    </Widget>
+    </div>
   )
 }

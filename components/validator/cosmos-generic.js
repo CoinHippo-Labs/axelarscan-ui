@@ -2,8 +2,6 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import moment from 'moment'
 
-import Widget from '../widget'
-
 import { name, number_format } from '../../lib/utils'
 
 export default function CosmosGeneric({ data, jailed }) {
@@ -22,7 +20,7 @@ export default function CosmosGeneric({ data, jailed }) {
   numMissedBlocks = numMissedBlocks < 0 ? 0 : numMissedBlocks
 
   return (
-    <Widget
+    <div
       title={<span className="text-lg font-medium">Cosmos Generic</span>}
       right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {number_format(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
@@ -98,6 +96,6 @@ export default function CosmosGeneric({ data, jailed }) {
           }
         </div>
       </div>
-    </Widget>
+    </div>
   )
 }

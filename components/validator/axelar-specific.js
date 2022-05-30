@@ -1,4 +1,3 @@
-import Widget from '../widget'
 import Copy from '../copy'
 
 import { number_format, ellipse } from '../../lib/utils'
@@ -13,7 +12,7 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
   const totalSign = signParticipated + signNotParticipated
 
   return (
-    <Widget
+    <div
       title={<span className="text-lg font-medium">Axelar Specific</span>}
       className="dark:border-gray-900"
     >
@@ -95,6 +94,6 @@ export default function AxelarSpecific({ data, keygens, signs, rewards }) {
           }
         </div>*/}
       </div>
-    </Widget>
+    </div>
   )
 }

@@ -5,7 +5,7 @@ import _ from 'lodash'
 import Loader from 'react-loader-spinner'
 import G6 from '@antv/g6'
 
-import { chainTitle, getChain } from '../../lib/object/chain'
+import { chainName, getChain } from '../../lib/object/chain'
 import { number_format } from '../../lib/utils'
 
 export default function NetworkGraph({ data, mini }) {
@@ -112,7 +112,7 @@ export default function NetworkGraph({ data, mini }) {
             size: transfer.from_chain?.id === axelarChain?.id ? mini ? 48 : 72 : mini ? 36 : 48,
             type: 'image',
             img: transfer.from_chain?.image,
-            label: chainTitle(transfer.from_chain),
+            label: chainName(transfer.from_chain),
             labelCfg,
             style,
           })
@@ -124,7 +124,7 @@ export default function NetworkGraph({ data, mini }) {
             size: transfer.to_chain?.id === axelarChain?.id ? mini ? 48 : 72 : mini ? 36 : 48,
             type: 'image',
             img: transfer.to_chain?.image,
-            label: chainTitle(transfer.to_chain),
+            label: chainName(transfer.to_chain),
             labelCfg,
             style,
           })

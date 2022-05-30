@@ -6,14 +6,13 @@ import { IoArrowUpCircle } from 'react-icons/io5'
 import { MdCancel } from 'react-icons/md'
 import { FiKey } from 'react-icons/fi'
 
-import Widget from '../widget'
 import Popover from '../popover'
 
 import { number_format, name } from '../../lib/utils'
 
 export default function Heartbeat({ data, validator_data }) {
   return (
-    <Widget
+    <div
       title={<div className="flex items-center space-x-1">
         <span className="text-lg font-medium">Heartbeat</span>
         {data && (
@@ -100,6 +99,6 @@ export default function Heartbeat({ data, validator_data }) {
             </div>
         })}
       </div>
-    </Widget>
+    </div>
   )
 }

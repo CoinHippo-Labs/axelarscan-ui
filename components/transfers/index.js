@@ -14,12 +14,11 @@ import TransactionsByChain from './charts/transactions-by-chain'
 import TVLByChain from './charts/tvl-by-chain'
 import NetworkGraph from './network-graph'
 import TransfersTable from './transfers-table'
-import Widget from '../widget'
 import Copy from '../copy'
 import Popover from '../popover'
 
 import { transfers } from '../../lib/api/index'
-import { chainTitle, getChain, chain_manager } from '../../lib/object/chain'
+import { chainName, getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { currency, currency_symbol } from '../../lib/object/currency'
 import { number_format, ellipse } from '../../lib/utils'
@@ -549,7 +548,7 @@ export default function Transfers() {
   return (
     <div className="max-w-full space-y-8 sm:space-y-12 mx-auto">
       <div className="w-full grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mt-4">
-        <Widget
+        <div
           title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of cross-chain transactions</span>}
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
@@ -619,8 +618,8 @@ export default function Transfers() {
               <span>transactions</span>
             </span>
           </div>
-        </Widget>
-        <Widget
+        </div>
+        <div
           title={<span className="text-black dark:text-white text-base font-semibold">Volume</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Transfer volume across chain</span>}
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
@@ -705,8 +704,8 @@ export default function Transfers() {
               </span>
             </div>
           </div>
-        </Widget>
-        <Widget
+        </div>
+        <div
           title={<span className="text-black dark:text-white text-base font-semibold">TVL on EVMs</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Total Value Locked on Axelar Network</span>}
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
@@ -758,7 +757,7 @@ export default function Transfers() {
                         {_.orderBy(t.contracts || [], ['amount'], ['desc']).map((c, j) => (
                           <div key={j} className="flex items-center justify-between space-x-2">
                             <div className="flex flex-col">
-                              <span className="font-semibold">{chainTitle(c.chain)}</span>
+                              <span className="font-semibold">{chainName(c.chain)}</span>
                               <div className="flex items-center space-x-1">
                                 {c.contract?.contract_address ?
                                   <>
@@ -856,8 +855,8 @@ export default function Transfers() {
               </span>
             </div>
           </div>
-        </Widget>
-        <Widget
+        </div>
+        <div
           title={<span className="text-black dark:text-white text-base font-semibold">Size</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Average size of cross-chain transfers</span>}
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
@@ -943,8 +942,8 @@ export default function Transfers() {
               </span>
             </div>
           </div>
-        </Widget>
-        <Widget
+        </div>
+        <div
           title={<span className="text-black dark:text-white text-base font-semibold">Highest Transfer</span>}
           description={<span className="flex items-center text-gray-400 dark:text-gray-500 text-xs font-normal space-x-1">
             <span>The highest transfer size in last</span>
@@ -1025,7 +1024,7 @@ export default function Transfers() {
               <span>transactions</span>
             </span>
           </div>
-        </Widget>
+        </div>
       </div>
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
@@ -1043,7 +1042,7 @@ export default function Transfers() {
           }
         </div>
         <div className="w-full grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-          <Widget
+          <div
             title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of transactions by day</span>}
             right={[assetSelect && chartData?.data?.find(t => t?.id === assetSelect)?.times?.find(t => t.time === timeFocus)].filter(t => t).map((t, i) => (
@@ -1064,8 +1063,8 @@ export default function Transfers() {
               txsData={chartData?.data?.find(t => t?.id === assetSelect)}
               setTimeFocus={t => setTimeFocus(t)}
             />
-          </Widget>
-          <Widget
+          </div>
+          <div
             title={<span className="text-black dark:text-white text-base font-semibold">Volume</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Transfer volume by day</span>}
             right={[assetSelect && chartData?.data?.find(t => t?.id === assetSelect)?.times?.find(t => t.time === timeFocus)].filter(t => t).map((t, i) => (
@@ -1086,8 +1085,8 @@ export default function Transfers() {
               volumeData={chartData?.data?.find(t => t?.id === assetSelect)}
               setTimeFocus={t => setTimeFocus(t)}
             />
-          </Widget>
-          <Widget
+          </div>
+          <div
             title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of transactions by destination chain</span>}
             right={[assetSelect && chartData?.data?.find(t => t?.id === assetSelect)].filter(t => t).map((t, i) => (
@@ -1106,8 +1105,8 @@ export default function Transfers() {
             <TransactionsByChain
               txsData={chartData?.data?.find(t => t?.id === assetSelect)}
             />
-          </Widget>
-          <Widget
+          </div>
+          <div
             title={<span className="text-black dark:text-white text-base font-semibold">TVL on EVMs</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Total Value Locked on Axelar Network</span>}
             right={assetSelect && crosschainTVLData?.updated_at && (
@@ -1126,17 +1125,17 @@ export default function Transfers() {
             <TVLByChain
               tvlData={crosschainTVLData?.data?.filter(d => d?.asset?.id === assetSelect)}
             />
-          </Widget>
+          </div>
         </div>
       </div>
       <div className="max-w-7xl mx-auto">
-        <Widget
+        <div
           title={<span className="text-black dark:text-white text-base font-semibold">Traffics</span>}
           description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Cross-Chain on Axelar Network</span>}
           className="shadow border-0 my-6 px-4 sm:py-4"
         >
           <NetworkGraph data={transfersData?.ng_data} />
-        </Widget>
+        </div>
         <TransfersTable data={transfersData} />
       </div>
     </div>

@@ -2,7 +2,6 @@ import Link from 'next/link'
 
 import moment from 'moment'
 
-import Widget from '../widget'
 import Copy from '../copy'
 
 import { number_format, ellipse } from '../../lib/utils'
@@ -11,7 +10,7 @@ export default function Summary({ data }) {
   return (
     <div className="w-full grid grid-flow-row grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-2 sm:mt-4">
       <Link href="/blocks">
-        <Widget
+        <div
           title={<div className="flex items-center justify-between space-x-1.5">
             <span className="flex items-center space-x-1.5">
               <span>{data?.latest_block?.pre_votes > 0 ? 'Pre Votes' : 'Consensus State'}</span>
@@ -96,10 +95,10 @@ export default function Summary({ data }) {
               </div>
             </span>
           </div>
-        </Widget>
+        </div>
       </Link>
       <Link href={`/block${typeof data?.block_height === 'number' ? `/${data.block_height}` : 's'}`}>
-        <Widget
+        <div
           title="Latest Block Height"
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 cursor-pointer px-4 sm:py-4"
         >
@@ -119,10 +118,10 @@ export default function Summary({ data }) {
               }
             </span>
           </div>
-        </Widget>
+        </div>
       </Link>
       <Link href="/blocks">
-        <Widget
+        <div
           title="Average Block Time"
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 cursor-pointer px-4 sm:py-4"
         >
@@ -136,10 +135,10 @@ export default function Summary({ data }) {
             }
             <span className="text-gray-400 dark:text-gray-600 text-sm font-normal">seconds</span>
           </div>
-        </Widget>
+        </div>
       </Link>
       <Link href="/validators">
-        <Widget
+        <div
           title="Active Validators"
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 cursor-pointer px-4 sm:py-4"
         >
@@ -163,10 +162,10 @@ export default function Summary({ data }) {
               <span>validators</span>
             </span>
           </div>
-        </Widget>
+        </div>
       </Link>
       <Link href="/validators">
-        <Widget
+        <div
           title="Online Voting Power"
           className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 cursor-pointer px-4 sm:py-4"
         >
@@ -199,7 +198,7 @@ export default function Summary({ data }) {
               </span>
             </span>
           </div>
-        </Widget>
+        </div>
       </Link>
     </div>
   )

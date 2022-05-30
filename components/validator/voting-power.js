@@ -2,7 +2,6 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 
-import Widget from '../widget'
 import Copy from '../copy'
 
 import { denom_manager } from '../../lib/object/denom'
@@ -14,7 +13,7 @@ export default function VotingPower({ data }) {
   const { env_data } = { ...env }
 
   return (
-    <Widget
+    <div
       title={<span className="text-lg font-medium">Voting Power</span>}
       className="dark:border-gray-900"
     >
@@ -81,6 +80,6 @@ export default function VotingPower({ data }) {
           }
         </div>
       </div>
-    </Widget>
+    </div>
   )
 }

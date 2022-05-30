@@ -4,14 +4,13 @@ import { BsArrowRightShort } from 'react-icons/bs'
 import { IoArrowUpCircle } from 'react-icons/io5'
 import { MdCancel } from 'react-icons/md'
 
-import Widget from '../widget'
 import Popover from '../popover'
 
 import { number_format } from '../../lib/utils'
 
 export default function Uptime({ data, validator_data }) {
   return (
-    <Widget
+    <div
       title={<span className="text-lg font-medium">Uptime</span>}
       right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600 sm:mr-1 xl:mr-1.5">Latest {number_format(process.env.NEXT_PUBLIC_NUM_UPTIME_DISPLAY_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
@@ -58,6 +57,6 @@ export default function Uptime({ data, validator_data }) {
             </div>
         ))}
       </div>
-    </Widget>
+    </div>
   )
 }

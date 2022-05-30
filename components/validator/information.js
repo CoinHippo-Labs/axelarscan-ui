@@ -4,14 +4,13 @@ import moment from 'moment'
 import _ from 'lodash'
 import Linkify from 'react-linkify'
 
-import Widget from '../widget'
 import Copy from '../copy'
 
 import { number_format, name, ellipse } from '../../lib/utils'
 
 export default function Information({ data }) {
   return (
-    <Widget
+    <div
       title={data ?
         <div className="flex items-center space-x-3 mr-2">
           {data.description?.image ?
@@ -230,6 +229,6 @@ export default function Information({ data }) {
           <div className="skeleton w-60 h-6" />
         }
       </div>
-    </Widget>
+    </div>
   )
 }

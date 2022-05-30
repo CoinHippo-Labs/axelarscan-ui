@@ -5,8 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber as EthersBigNumber, constants } from 'ethers'
-import BigNumber from 'bignumber.js'
+import { BigNumber, constants } from 'ethers'
 import {Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
@@ -18,13 +17,11 @@ import Copy from '../copy'
 import Popover from '../popover'
 
 import { search } from '../../lib/api/gmp'
-import { chain_manager, chainTitle } from '../../lib/object/chain'
-import { paramsToObject, number_format, ellipse, sleep } from '../../lib/utils'
+import { chain_manager, chainName } from '../../lib/object/chain'
+import { params_to_obj, number_format, ellipse, sleep } from '../../lib/utils'
 
 const PAGE_SIZE = 50
 const MAX_PAGE = 50
-
-BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
 export default function GMP({ addTokenToMetaMask, className }) {
   const { preferences, chains, assets } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets }), shallowEqual)
@@ -43,7 +40,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
 
   useEffect(() => {
     if (asPath && !gmpsFilter) {
-      const query = paramsToObject(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
+      const query = params_to_obj(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
       if (query) {
         const filter = { ...query }
         if (filter.fromTime && filter.toTime) {
@@ -224,7 +221,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                           alt=""
                           className="w-6 h-6 rounded-full"
                         />
-                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(chain_data)}</span>
+                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainName(chain_data)}</span>
                       </div>
                     )}
                   </div>
@@ -287,9 +284,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                           <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
                             <span className="font-mono mr-1.5">
                               {props.row.original.call?.returnValues?.amount ?
-                                number_format(BigNumber(EthersBigNumber.from(props.row.original.call.returnValues.amount).toString())
-                                  .shiftedBy(-(from_contract?.decimals || to_contract?.decimals || 6)).toNumber()
-                                , '0,0.00000000', true)
+                                number_format(utils.formatUnits(BigNumber.from(props.row.original.call.returnValues.amount).toString(), from_contract?.decimals || to_contract?.decimals || 6), '0,0.00000000', true)
                                 :
                                 '-'
                               }
@@ -392,7 +387,7 @@ export default function GMP({ addTokenToMetaMask, className }) {
                           alt=""
                           className="w-6 h-6 rounded-full"
                         />
-                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(chain_data)}</span>
+                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainName(chain_data)}</span>
                       </div>
                     )}
                   </div>

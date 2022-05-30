@@ -8,7 +8,6 @@ import { BsArrowRightShort } from 'react-icons/bs'
 import { TiArrowRight } from 'react-icons/ti'
 import { FaCheckCircle, FaTimesCircle, FaMinusCircle } from 'react-icons/fa'
 
-import Widget from '../widget'
 import Popover from '../popover'
 import Copy from '../copy'
 
@@ -20,7 +19,7 @@ export default function Polls({ data, validator_data }) {
   const { chains_data } = { ...chains }
 
   return (
-    <Widget
+    <div
       title={<span className="text-sm sm:text-lg font-medium">Polls in the latest {number_format(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_BLOCKS, '0,0')} Blocks</span>}
       right={<span className="whitespace-nowrap text-xs sm:text-base text-gray-400 dark:text-gray-600 sm:mr-1 xl:mr-1.5">
         <span className="hidden sm:inline-flex mr-1">Maximum</span>
@@ -148,6 +147,6 @@ export default function Polls({ data, validator_data }) {
             </div>
         })}
       </div>
-    </Widget>
+    </div>
   )
 }

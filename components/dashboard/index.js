@@ -14,7 +14,6 @@ import Summary from './summary'
 import NetworkGraph from '../transfers/network-graph'
 import BlocksTable from '../blocks/blocks-table'
 import TransactionsTable from '../transactions/transactions-table'
-import Widget from '../widget'
 
 import { consensus_state } from '../../lib/api/rpc'
 import { transfers } from '../../lib/api/index'
@@ -255,12 +254,12 @@ export default function Dashboard() {
   return (
     <div className="sm:mb-4 mx-auto pb-2">
       <Summary data={summaryData} />
-      <Widget
+      <div
         title={<span className="text-black dark:text-white text-lg font-semibold ml-1">Cross-Chain Asset Transfers</span>}
         className="bg-transparent border-0 mt-6 mb-0 py-0 px-3 sm:px-0"
       >
         <div className="w-full grid grid-flow-row grid-cols-1 md:grid-cols-4 mt-2 gap-5">
-          <Widget
+          <div
             title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of cross-chain transactions</span>}
             className="md:col-span-2 lg:col-span-1 bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
@@ -329,11 +328,11 @@ export default function Dashboard() {
                 <span>transactions</span>
               </span>
             </div>
-          </Widget>
+          </div>
           <div className="md:col-span-2 hidden sm:block bg-transaparent sm:bg-white dark:bg-black rounded-2xl shadow border-0 sm:px-6 sm:py-4">
             <NetworkGraph data={transfersData?.ng_data} mini={true} />
           </div>
-          <Widget
+          <div
             title={<span className="text-black dark:text-white text-base font-semibold">Supported Chains</span>}
             description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">List of chains supported on Axelar Network</span>}
             className="md:col-span-2 lg:col-span-1 bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
@@ -417,33 +416,33 @@ export default function Dashboard() {
                 <span>chains</span>
               </span>
             </div>
-          </Widget>
+          </div>
         </div>
-      </Widget>
+      </div>
       <div className="w-full grid grid-flow-row grid-cols-1 lg:grid-cols-2 gap-5 my-0 md:my-4">
         <div className="mt-8 md:mt-4">
           <Link href="/blocks">
             <a className="text-gray-900 dark:text-gray-100 text-base font-semibold mx-3">Latest Blocks</a>
           </Link>
           <div className="h-1" />
-          <Widget className="min-h-full contents p-0">
+          <div className="min-h-full contents p-0">
             <BlocksTable
               n={10}
               className="bg-white dark:bg-black no-border"
             />
-          </Widget>
+          </div>
         </div>
         <div className="mt-8 md:mt-4">
           <Link href="/transactions">
             <a className="text-gray-900 dark:text-gray-100 text-base font-semibold mx-3">Latest Transactions</a>
           </Link>
           <div className="h-1" />
-          <Widget className="min-h-full contents p-0">
+          <div className="min-h-full contents p-0">
             <TransactionsTable
               location="index"
               className="bg-white dark:bg-black no-border"
             />
-          </Widget>
+          </div>
         </div>
       </div>
     </div>

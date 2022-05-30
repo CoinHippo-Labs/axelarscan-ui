@@ -1,8 +1,8 @@
-import Transfers from '../../components/transfers'
+import Transfers from '../../components/validator'
 
-export default function TransfersIndex() {
+export default () => {
   return (
-    <div className="max-w-8xl my-2 xl:mt-2 xl:mb-4 mx-auto">
+    <div className="max-w-8xl mx-auto">
       <Transfers />
     </div>
   )

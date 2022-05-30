@@ -15,7 +15,7 @@ import {
 } from 'recharts'
 import Loader from 'react-loader-spinner'
 
-import { chainTitle } from '../../../../lib/object/chain'
+import { chainName } from '../../../../lib/object/chain'
 import { currency_symbol } from '../../../../lib/object/currency'
 import { number_format } from '../../../../lib/utils'
 
@@ -45,7 +45,7 @@ const CustomTooltip = ({ active, payload, label }) => {
                     alt=""
                     className="w-5 h-5 rounded-full"
                   />
-                  <span className="text-3xs font-medium">{chainTitle(e.to_chain)}</span>
+                  <span className="text-3xs font-medium">{chainName(e.to_chain)}</span>
                 </div>
                 {e.time && (
                   <div className="flex flex-col items-end space-y-1">

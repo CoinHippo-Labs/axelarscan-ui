@@ -12,10 +12,8 @@ import VotingPower from './voting-power'
 import Uptime from './uptime'
 import Heartbeat from './heartbeat'
 import Polls from './polls'
-import KeysTable from '../participations/keys-table'
-import TransactionsTable from '../transactions/transactions-table'
+import Participations from '../participations/participations'
 import DelegationsTable from './delegations-table'
-import Widget from '../widget'
 
 import { getUptime, uptimeForJailedInfoSync, jailedInfo, getHeartbeat } from '../../lib/api/query'
 import { validatorSets, allBankBalances, allDelegations, distributionRewards, distributionCommissions } from '../../lib/api/cosmos'
@@ -685,14 +683,14 @@ export default function Validator({ address }) {
       </div>
       <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 my-4">
         <VotingPower data={votingPower?.address === address && votingPower?.data} />
-        <Widget
+        <div
           title={<span className="text-lg font-medium">Delegations</span>}
           className="dark:border-gray-900"
         >
           <div className="mt-2">
             <DelegationsTable data={delegations?.address === address && delegations?.data} />
           </div>
-        </Widget>
+        </div>
       </div>
       <div className="grid grid-flow-row grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 my-4">
         <div className="md:col-span-2 grid grid-flow-row grid-col-1 md:grid-cols-2 gap-4" style={{ height: 'fit-content' }}>
@@ -735,7 +733,7 @@ export default function Validator({ address }) {
             signs={signs?.address === address && signs}
             rewards={rewards?.address === address && rewards?.data}
           />
-          <Widget
+          <div
             title={<div className="grid grid-flow-row grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
               {['key_share', 'keygen', 'sign'].map((t, i) => (
                 <div
@@ -751,27 +749,27 @@ export default function Validator({ address }) {
           >
             <div className="mt-1">
               {tab === 'keygen' ?
-                <KeysTable
+                <Participations
                   data={keygens}
                   page="validator-keygen"
                   className="no-border"
                 />
                 :
                 tab === 'sign' ?
-                  <KeysTable
+                  <Participations
                     data={signs}
                     page="validator-sign"
                     className="no-border"
                   />
                   :
-                  <KeysTable
+                  <Participations
                     data={keyShares}
                     page="validator"
                     className="no-border"
                   />
               }
             </div>
-          </Widget>
+          </div>
         </div>
       </div>
     </>

@@ -5,8 +5,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import Web3 from 'web3'
-import { BigNumber as EthersBigNumber, constants, providers, utils } from 'ethers'
-import BigNumber from 'bignumber.js'
+import { BigNumber, constants, providers, utils } from 'ethers'
 import { Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
@@ -17,18 +16,15 @@ import { RiCloseCircleFill } from 'react-icons/ri'
 import { MdRefresh } from 'react-icons/md'
 
 import Copy from '../copy'
-import Widget from '../widget'
 import Popover from '../popover'
 import Notification from '../notifications'
 import Wallet from '../wallet'
 
 import { search } from '../../lib/api/gmp'
-import { chainTitle } from '../../lib/object/chain'
+import { chainName } from '../../lib/object/chain'
 import { number_format, ellipse, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 import { WALLET_DATA } from '../../reducers/types'
-
-BigNumber.config({ DECIMAL_PLACES: Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT), EXPONENTIAL_AT: [-7, Number(process.env.NEXT_PUBLIC_MAX_BIGNUMBER_EXPONENTIAL_AT)] })
 
 export default function Transaction() {
   const dispatch = useDispatch()
@@ -258,7 +254,7 @@ export default function Transaction() {
             data.approved?.returnValues?.sourceAddress,
             data.call?.returnValues?.payload,
             data.approved?.returnValues?.symbol,
-            EthersBigNumber.from(data.approved?.returnValues?.amount).toString(),
+            BigNumber.from(data.approved?.returnValues?.amount).toString(),
           ).send({ from: address })
           .on('transactionHash', hash => {
             setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
@@ -388,7 +384,7 @@ export default function Transaction() {
       {!transaction || data ?
         <>
           <div className="mt-2 xl:mt-4">
-            <Widget
+            <div
               title={<div className="leading-4 uppercase text-gray-400 dark:text-gray-600 text-sm sm:text-base font-semibold mb-2">General Message Passing</div>}
               right={executeButton || time_spent_component}
               className="overflow-x-auto border-0 shadow-md rounded-2xl ml-auto px-5 lg:px-3 xl:px-5"
@@ -430,7 +426,7 @@ export default function Transaction() {
                           alt=""
                           className="w-6 h-6 rounded-full"
                         />
-                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(fromChain)}</span>
+                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainName(fromChain)}</span>
                       </div>
                     )}
                     </div>
@@ -518,9 +514,7 @@ export default function Transaction() {
                                 <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
                                   <span className="font-mono mr-1.5">
                                     {call.returnValues?.amount ?
-                                      number_format(BigNumber(EthersBigNumber.from(call.returnValues.amount).toString())
-                                        .shiftedBy(-(fromContract?.decimals || toContract?.decimals || 6)).toNumber()
-                                      , '0,0.00000000', true)
+                                      number_format(utils.formatUnits(BigNumber.from(call.returnValues.amount).toString(), fromContract?.decimals || toContract?.decimals || 6), '0,0.00000000', true)
                                       :
                                       '-'
                                     }
@@ -666,7 +660,7 @@ export default function Transaction() {
                             alt=""
                             className="w-6 h-6 rounded-full"
                           />
-                          <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainTitle(toChain)}</span>
+                          <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainName(toChain)}</span>
                         </div>
                       )}
                     </div>
@@ -679,11 +673,11 @@ export default function Transaction() {
                   </div>
                 }
               </div>
-            </Widget>
+            </div>
           </div>
           <div className="grid grid-flow-row grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6 mt-4 xl:mt-6">
             {[call, gas_paid, approved, executed || error].map((t, i) => (
-              <Widget
+              <div
                 key={i}
                 title={<div className="flex items-center space-x-3 mb-4">
                   <Img
@@ -1021,7 +1015,7 @@ export default function Transaction() {
                     </div>
                   )}
                 </div>
-              </Widget>
+              </div>
             ))}
           </div>
           <div className="mt-4 mb-6">

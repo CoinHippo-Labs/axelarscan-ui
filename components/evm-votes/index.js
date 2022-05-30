@@ -17,7 +17,7 @@ import Popover from '../popover'
 
 import { evm_votes as getEvmVotes } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { paramsToObject, number_format, ellipse, sleep } from '../../lib/utils'
+import { params_to_obj, number_format, ellipse, sleep } from '../../lib/utils'
 
 const PAGE_SIZE = 100
 const MAX_PAGE = 50
@@ -39,7 +39,7 @@ export default function EVMVotes({ className }) {
 
   useEffect(() => {
     if (asPath && !votesFilter) {
-      const query = paramsToObject(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
+      const query = params_to_obj(asPath?.indexOf('?') > -1 && asPath?.substring(asPath.indexOf('?') + 1))
       if (query) {
         let filter
         if (query.transaction_id) {

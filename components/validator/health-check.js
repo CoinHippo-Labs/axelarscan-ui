@@ -1,7 +1,6 @@
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
 import { FiBox } from 'react-icons/fi'
 
-import Widget from '../widget'
 
 import { number_format, name } from '../../lib/utils'
 
@@ -9,7 +8,7 @@ export default function HealthCheck({ data, health }) {
   const numBlocksBeforeProxyRegistered = health?.num_block_before_registered
 
   return (
-    <Widget
+    <div
       title={<span className="text-lg font-medium">Health Check</span>}
       right={<span className="whitespace-nowrap text-gray-400 dark:text-gray-600">Latest {number_format(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS, '0,0')} Blocks</span>}
       className="dark:border-gray-900"
@@ -107,6 +106,6 @@ export default function HealthCheck({ data, health }) {
           }
         </div>
       </div>
-    </Widget>
+    </div>
   )
 }
