@@ -10,10 +10,10 @@ import { BiRightArrowCircle, BiCheckCircle } from 'react-icons/bi'
 import { HiOutlineClock } from 'react-icons/hi'
 import { TiArrowRight } from 'react-icons/ti'
 
-// import PendingCommands from './pending-commands'
+import PendingCommands from './pending-commands'
 import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
-import Image from '../Image'
+import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { axelard } from '../../lib/api/executor'
@@ -206,7 +206,7 @@ export default () => {
                 key={i}
                 className="my-1 mr-1.5"
               >
-                {/*<PendingCommands chain={c} />*/}
+                <PendingCommands chain_data={c} />
               </div>
             ))}
           </div>
