@@ -4,7 +4,6 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
-import Web3 from 'web3'
 import { Img } from 'react-image'
 import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from 'react-icons/md'
 import { HiOutlineSearchCircle } from 'react-icons/hi'
@@ -33,19 +32,12 @@ export default () => {
   const { env_data } = { ...env }
   const { validators_data } = { ...validators }
 
-  const [web3, setWeb3] = useState(null)
   const [consensusStateData, setConsensusStateData] = useState(null)
   const [summaryData, setSummaryData] = useState(null)
   const [transfersData, setTransfersData] = useState(null)
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
   const axelarChain = getChain('axelarnet', cosmos_chains_data)
-
-  useEffect(() => {
-    if (!web3) {
-      setWeb3(new Web3(Web3.givenProvider))
-    }
-  }, [web3])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -331,91 +323,6 @@ export default () => {
           </div>
           <div className="md:col-span-2 hidden sm:block bg-transaparent sm:bg-white dark:bg-black rounded-2xl shadow border-0 sm:px-6 sm:py-4">
             <NetworkGraph data={transfersData?.ng_data} mini={true} />
-          </div>
-          <div
-            title={<span className="text-black dark:text-white text-base font-semibold">Supported Chains</span>}
-            description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">List of chains supported on Axelar Network</span>}
-            className="md:col-span-2 lg:col-span-1 bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
-          >
-            <div className="flex flex-col space-y-2 mt-1">
-              {supportedChains ?
-                <div className="h-52 md:h-88 flex flex-col overflow-y-auto space-y-3">
-                  {supportedChains.map((c, i) => (
-                    <div key={i} className="flex items-center justify-between my-1">
-                      <div className="flex items-center space-x-3">
-                        <img
-                          src={c.image}
-                          alt=""
-                          className="w-7 md:w-8 h-7 md:h-8 rounded-full"
-                        />
-                        <div className="text-base font-semibold">{c.title}</div>
-                      </div>
-                      <div className="flex items-center space-x-0.5 md:space-x-1.5">
-                        {c.provider_params && (
-                          <button
-                            onClick={() => addNetwork(c.chain_id)}
-                            className="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded-lg flex items-center justify-center py-1.5 px-2"
-                          >
-                            <Img
-                              src="/logos/wallets/metamask.png"
-                              alt=""
-                              className="w-4 h-4"
-                            />
-                          </button>
-                        )}
-                        {c.explorer?.url && (
-                          <a
-                            href={c.explorer.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <HiOutlineSearchCircle size={20} />
-                          </a>
-                        )}
-                        {c.website && (
-                          <a
-                            href={c.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <BsWindow size={20} />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                :
-                <div className="flex flex-col space-y-3">
-                  {[...Array(8).keys()].map(i => (
-                    <div key={i} className="flex items-center justify-between my-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="skeleton w-7 md:w-8 h-7 md:h-8 rounded-full" />
-                        <div className="skeleton w-16 sm:w-24 h-5" />
-                      </div>
-                      <div className="flex items-center justify-end space-x-0.5 md:space-x-1.5">
-                        {[...Array(3).keys()].map(j => (
-                          <div key={j} className="skeleton w-4 md:w-6 h-4 md:h-6 rounded-full" />
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              }
-              <span className="flex items-center text-gray-400 dark:text-gray-600 text-sm font-normal space-x-2 ml-auto">
-                <span>total</span>
-                {supportedChains ?
-                  <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono text-white font-semibold py-0.5 px-1.5">
-                    {number_format(supportedChains.length, '0,0')}
-                  </div>
-                  :
-                  <div className="skeleton w-12 h-6" />
-                }
-                <span>chains</span>
-              </span>
-            </div>
           </div>
         </div>
       </div>*/}

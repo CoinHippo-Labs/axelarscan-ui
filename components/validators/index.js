@@ -195,22 +195,27 @@ export default () => {
               sortType: (a, b) => a.original.uptime > b.original.uptime ? 1 : -1,
               Cell: props => (
                 <div className="w-40 flex flex-col items-start sm:items-end text-left sm:text-right space-y-0.5 sm:ml-auto">
-                  {props.value > 0 ?
-                    <div className="w-full mt-1">
-                      <ProgressBarWithText
-                        width={props.value}
-                        text={<div className="text-white text-2xs font-bold mx-1">
-                          {number_format(props.value, '0,0.00')}%
-                        </div>}
-                        color="bg-green-500 dark:bg-green-600 rounded"
-                        backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded"
-                        className={`h-4 flex items-center justify-${props.value < 33 ? 'start' : 'end'}`}
-                      />
-                    </div>
+                  {typeof props.value === 'number' ?
+                    props.value > 0 ?
+                      <div className="w-full mt-1">
+                        <ProgressBarWithText
+                          width={props.value}
+                          text={<div className="text-white text-2xs font-bold mx-1">
+                            {number_format(props.value, '0,0.00')}%
+                          </div>}
+                          color="bg-green-500 dark:bg-green-600 rounded"
+                          backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 rounded"
+                          className={`h-4 flex items-center justify-${props.value < 33 ? 'start' : 'end'}`}
+                        />
+                      </div>
+                      :
+                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                        No Uptimes
+                      </span>
                     :
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                      No Uptimes
-                    </span>
+                    <div className="mt-1">
+                      <ThreeDots color={loader_color(theme)} width="32" height="16" />
+                    </div>
                   }
                   {typeof props.row.original.start_height === 'number' && (
                     <div className="text-2xs space-x-1">
