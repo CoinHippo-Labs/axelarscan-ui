@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import {BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
 import Info from './info'
 import Participations from './participations'

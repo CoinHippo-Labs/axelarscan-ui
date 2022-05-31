@@ -2,18 +2,17 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import moment from 'moment'
+import { FallingLines } from 'react-loader-spinner'
+import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
 import Info from './info'
 import Delegations from './delegations'
-import CosmosGeneric from './cosmos-generic'
-import HealthCheck from './health-check'
-import AxelarSpecific from './axelar-specific'
 import Uptimes from './uptimes'
 import Heartbeats from './heartbeats'
-import Participations from '../participations/participations'
 import EVMSupport from './evm-support'
 import Polls from './polls'
+import Participations from '../participations/participations'
+import Image from '../image'
 import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
 import { keygens_by_validator } from '../../lib/api/executor'
 import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
@@ -21,10 +20,17 @@ import { chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { base64ToBech32 } from '../../lib/object/key'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
-import { name, equals_ignore_case } from '../../lib/utils'
+import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
+
+const num_uptime_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
+const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
+const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
+const min_broadcaster_fund = Number(process.env.NEXT_PUBLIC_MIN_BROADCAST_FUND)
 
 export default () => {
-  const { assets, status, chain, validators, validators_chains } = useSelector(state => ({ assets: state.assets, status: state.status, chain: state.chain, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
+  const { preferences, evm_chains, assets, status, chain, validators, validators_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets, status: state.status, chain: state.chain, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
+  const { theme } = { ...preferences }
+  const { evm_chains_data } = { ...evm_chains }
   const { assets_data } = { ...assets }
   const { status_data } = { ...status }
   const { chain_data } = { ...chain }
@@ -43,7 +49,6 @@ export default () => {
   const [heartbeats, setHeartbeats] = useState(null)
   const [evmVotes, setEvmVotes] = useState(null)
   const [evmPolls, setEvmPolls] = useState(null)
-  const [table, setTable] = useState('keyshares')
   const [keyshares, setKeyshares] = useState(null)
   const [keygens, setKeygens] = useState(null)
   const [signs, setSigns] = useState(null)
@@ -88,8 +93,6 @@ export default () => {
               _health.broadcaster_funded = 'No Proxy'
             }
             const latest_block = Number(status_data.latest_block_height)
-            const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
-            const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
             const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
             const last = lastHeartbeatBlock(latest_block)
             const response = await getHeartbeats({
@@ -259,8 +262,6 @@ export default () => {
           let { start_proxy_height } = { ...validator.data }
           start_proxy_height = start_proxy_height || 0
           const latest_block = Number(status_data.latest_block_height)
-          const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
-          const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
           const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks > start_proxy_height ? latest_block - num_heartbeat_blocks : start_proxy_height)
           const heartbeats = []
           let data
@@ -504,10 +505,13 @@ export default () => {
     }
   }, [address, validators_chains_data])
 
+  const { uptime, heartbeats_uptime } = { ...validator?.data }
+  const { broadcaster_funded } = { ...health?.data }
+  const supported_chains = supportedChains?.data
   const metricClassName = 'bg-white dark:bg-black border dark:border-slate-400 shadow dark:shadow-slate-200 rounded-lg p-4'
 
   return (
-    <div className="space-y-6 mt-2 mb-6 mx-auto">
+    <div className="space-y-6 mt-2 mb-6 mx-auto pb-16">
       <div className="sm:grid sm:grid-cols-2 space-y-6 sm:space-y-0 gap-6">
         <Info
           data={validator?.address === address && validator?.data}
@@ -520,32 +524,144 @@ export default () => {
           <Delegations data={delegations?.address === address && delegations?.data} />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 xl:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         <div className={`${metricClassName}`}>
+          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+            Uptimes
+          </span>
+          <div className="text-3xl font-bold">
+            {typeof uptime === 'number' ?
+              `${number_format(uptime, '0,0.00')}%`
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+            Last {number_format(num_uptime_blocks, '0,0')} Blocks
+          </span>
         </div>
         <div className={`${metricClassName}`}>
+          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+            Heartbeats
+          </span>
+          <div className="text-3xl font-bold">
+            {typeof heartbeats_uptime === 'number' ?
+              `${number_format(heartbeats_uptime, '0,0.00')}%`
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+            Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
+          </span>
         </div>
         <div className={`${metricClassName}`}>
+          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+            Broadcaster
+          </span>
+          <div className={`h-9 flex items-center ${broadcaster_funded ? broadcaster_funded.amount >= min_broadcaster_fund ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600' : ''} text-3xl font-bold space-x-1.5`}>
+            {broadcaster_funded ?
+              <>
+                <span className={`${number_format(broadcaster_funded.amount, '0,0.00').length > 6 ? 'lg:text-xl' : ''}`}>
+                  {number_format(broadcaster_funded.amount, '0,0.00')}
+                </span>
+                {broadcaster_funded.amount >= min_broadcaster_fund ?
+                  <BiCheckCircle size={28} /> :
+                  <BiXCircle size={28} />
+                }
+              </>
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+            Balance {broadcaster_funded?.denom && (
+              <>
+                ({broadcaster_funded.denom})
+              </>
+            )}
+          </span>
         </div>
-        <div className={`${metricClassName} sm:col-span-2`}>
+        <div className={`${metricClassName}`}>
+          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+            Supported
+          </span>
+          <div className="h-9 flex items-center overflow-x-auto text-3xl font-bold space-x-1.5">
+            {supportedChains ?
+              supported_chains?.length > 0 ?
+                supported_chains.filter(c => chain_manager.image(c, evm_chains_data)).map((c, i) => (
+                  <Image
+                    key={i}
+                    src={chain_manager.image(c, evm_chains_data)}
+                    title={chain_manager.name(c, evm_chains_data)}
+                    className="w-6 h-6 rounded-full"
+                  />
+                ))
+                :
+                <span className="lg:text-xl font-semibold">
+                  No EVM Supported
+                </span>
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+            EVM Chains
+          </span>
         </div>
         <div className={`${metricClassName} xl:col-span-2`}>
+          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+            Votes
+          </span>
+          <div className="h-9 flex items-center overflow-x-auto text-3xl font-bold space-x-1.5">
+            {supportedChains ?
+              supported_chains?.length > 0 ?
+                supported_chains.filter(c => chain_manager.image(c, evm_chains_data)).map((c, i) => (
+                  <Image
+                    key={i}
+                    src={chain_manager.image(c, evm_chains_data)}
+                    title={chain_manager.name(c, evm_chains_data)}
+                    className="w-6 h-6 rounded-full"
+                  />
+                ))
+                :
+                <span className="lg:text-xl font-semibold">
+                  No EVM Supported
+                </span>
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+            EVM Chains
+          </span>
         </div>
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="space-y-2">
-          <span className="text-sm sm:text-lg font-bold">
-            Uptimes
-          </span>
-          <Uptimes
-            data={uptimes?.address === address && uptimes?.data}
-            validator_data={validator?.address === address && validator?.data}
-          />
+          <div className="flex items-center justify-between mr-3 xl:mr-1.5">
+            <span className="text-sm sm:text-lg font-bold">
+              Uptimes
+            </span>
+            {typeof uptime === 'number' && (
+              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                {number_format(uptime * num_uptime_blocks / 100, '0,0')} / {number_format(num_uptime_blocks, '0,0')}
+              </span>
+            )}
+          </div>
+          <Uptimes data={uptimes?.address === address && uptimes?.data} />
         </div>
         <div className="space-y-2">
-          <span className="text-sm sm:text-lg font-bold">
-            Heartbeats
-          </span>
+          <div className="flex items-center justify-between mr-3 xl:mr-1.5">
+            <span className="text-sm sm:text-lg font-bold">
+              Heartbeats
+            </span>
+            {heartbeats?.data && (
+              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                {number_format(heartbeats.data.filter(h => h?.up).length, '0,0')} / {number_format(num_heartbeat_blocks / num_blocks_per_heartbeat, '0,0')}
+              </span>
+            )}
+          </div>
           <Heartbeats
             data={heartbeats?.address === address && heartbeats?.data}
             validator_data={validator?.address === address && validator?.data}
@@ -561,39 +677,54 @@ export default () => {
           />
         </div>
       </div>
-    {/*<div className="space-y-4">
-        <AxelarSpecific
-          data={validator?.address === address && validator?.data}
-          keygens={keygens?.address === address && keygens?.data}
-          signs={signs?.address === address && signs}
-          rewards={rewards?.address === address && rewards?.data}
-        />
-        <div
-          title={<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-3 xl:flex flex-row items-center space-x-1">
-            {['keyshares', 'keygens', 'signs'].map((t, i) => (
-              <div
-                key={i}
-                onClick={() => setTable(t)}
-                className={`max-w-min sm:max-w-max md:max-w-min lg:max-w-max btn btn-default btn-rounded cursor-pointer whitespace-nowrap bg-trasparent ${t === tab ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold' : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 text-white dark:hover:text-gray-100'}`}
-              >
-                {name(t)}
-              </div>
-            ))}
-          </div>}
-          className="dark:border-gray-900 px-2 md:px-4"
-        >
-          <div className="mt-1">
-            <Participations
-              table={table}
-              _data={table === 'keygens' ?
-                keygens :
-                table === 'signs' ?
-                  signs : keyshares
-              }
-            />
+      <div className="lg:grid lg:grid-cols-2 xl:grid-cols-3 space-y-6 lg:space-y-0 gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm sm:text-lg font-bold">
+              Key Shares
+            </span>
           </div>
+          <Participations
+            table="keyshares"
+            _data={keyshares?.address === address && keyshares}
+            className="min-h-full"
+          />
         </div>
-      </div>*/}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm sm:text-lg font-bold">
+              Keygens
+            </span>
+            {typeof keygens?.total_participations === 'number' && (
+              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                {number_format(keygens.total_participations, '0,0')} / {number_format(keygens.total, '0,0')}
+              </span>
+            )}
+          </div>
+          <Participations
+            table="keygens"
+            _data={keygens?.address === address && keygens}
+            className="min-h-full"
+          />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm sm:text-lg font-bold">
+              Signs
+            </span>
+            {typeof signs?.total_participations === 'number' && (
+              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                {number_format(signs.total_participations, '0,0')} / {number_format(signs.total, '0,0')}
+              </span>
+            )}
+          </div>
+          <Participations
+            table="signs"
+            _data={signs?.address === address && signs}
+            className="min-h-full"
+          />
+        </div>
+      </div>
     </div>
   )
 }
