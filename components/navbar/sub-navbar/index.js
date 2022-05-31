@@ -288,7 +288,12 @@ export default () => {
         </div>
       )}
       <span className="sm:ml-auto" />
-      {right || (
+      {right ?
+        <>
+          <span className="ml-auto" />
+          {right}
+        </>
+        :
         <>
           {status_data?.latest_block_height && (
             <Link href={`/block/${status_data.latest_block_height}`}>
@@ -438,7 +443,7 @@ export default () => {
             </>
           )}
         </>
-      )}
+      }
     </div>
   )
 }
