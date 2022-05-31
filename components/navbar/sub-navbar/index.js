@@ -346,7 +346,7 @@ export default () => {
             <Link href={`/block/${status_data.latest_block_height}`}>
               <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
                 <FiBox size={16} />
-                <span className="font-mono font-bold">
+                <span className="font-bold">
                   {number_format(status_data.latest_block_height, '0,0')}
                 </span>
               </a>
@@ -358,7 +358,7 @@ export default () => {
                 <>
                   {chain_data.staking_params.max_validators && (
                     <Link href="/validators">
-                      <a className="flex items-center font-mono text-blue-600 dark:text-white space-x-1.5 ml-4">
+                      <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
                         <div className="flex items-center space-x-1">
                           <span className="font-semibold">
                             Max
@@ -366,7 +366,7 @@ export default () => {
                           <BiServer size={14} />
                           :
                         </div>
-                        <span className="font-mono font-bold">
+                        <span className="font-bold">
                           {number_format(chain_data.staking_params.max_validators, '0,0')}
                         </span>
                       </a>
@@ -377,7 +377,7 @@ export default () => {
                       Unbonding:
                     </span>
                     {chain_data.staking_params.unbonding_time ?
-                      <span className="font-mono font-bold">
+                      <span className="font-bold">
                         {chain_data.staking_params.unbonding_time}
                       </span>
                       :
@@ -395,7 +395,7 @@ export default () => {
                       Max Missed:
                     </span>
                     {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
-                      <span className="font-mono font-bold">
+                      <span className="font-bold">
                         {number_format(Number(chain_data.slashing_params.signed_blocks_window) - (Number(chain_data.slashing_params.min_signed_per_window) * Number(chain_data.slashing_params.signed_blocks_window)), '0,0')}
                       </span>
                       :
@@ -409,7 +409,7 @@ export default () => {
                       Jail:
                     </span>
                     {chain_data.slashing_params.downtime_jail_duration ?
-                      <span className="font-mono font-bold">
+                      <span className="font-bold">
                         {chain_data.slashing_params.downtime_jail_duration}
                       </span>
                       :
@@ -423,7 +423,7 @@ export default () => {
                       x2 Sign:
                     </span>
                     {chain_data.slashing_params.slash_fraction_double_sign ?
-                      <span className="font-mono font-bold">
+                      <span className="font-bold">
                         {number_format(chain_data.slashing_params.slash_fraction_double_sign, '0,0.00000000')}
                       </span>
                       :
@@ -446,11 +446,11 @@ export default () => {
                     </span>
                     {chain_data.distribution_params.base_proposer_reward ?
                       <div className="whitespace-nowrap space-x-1">
-                        <span className="font-mono font-bold">
+                        <span className="font-bold">
                           {number_format(Number(chain_data.distribution_params.base_proposer_reward) * 100, '0,0.00')}%
                         </span>
                         {!isNaN(chain_data.distribution_params.bonus_proposer_reward) && (
-                          <span className="font-mono font-medium">
+                          <span className="font-medium">
                             (+{number_format(Number(chain_data.distribution_params.bonus_proposer_reward) * 100, '0,0.00')}%)
                           </span>
                         )}
@@ -466,7 +466,7 @@ export default () => {
                       Community Tax:
                     </span>
                     {chain_data.distribution_params.community_tax ?
-                      <span className="font-mono font-bold">
+                      <span className="font-bold">
                         {number_format(Number(chain_data.distribution_params.community_tax) * 100, '0,0.00')}%
                       </span>
                       :

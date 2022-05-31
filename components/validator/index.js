@@ -525,7 +525,7 @@ export default () => {
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
         <div className={`${metricClassName}`}>
-          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Uptimes
           </span>
           <div className="text-3xl font-bold">
@@ -535,12 +535,12 @@ export default () => {
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
-          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             Last {number_format(num_uptime_blocks, '0,0')} Blocks
           </span>
         </div>
         <div className={`${metricClassName}`}>
-          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Heartbeats
           </span>
           <div className="text-3xl font-bold">
@@ -550,12 +550,12 @@ export default () => {
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
-          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
           </span>
         </div>
         <div className={`${metricClassName}`}>
-          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Broadcaster
           </span>
           <div className={`h-9 flex items-center ${broadcaster_funded ? broadcaster_funded.amount >= min_broadcaster_fund ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600' : ''} text-3xl font-bold space-x-1.5`}>
@@ -573,7 +573,7 @@ export default () => {
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
-          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             Balance {broadcaster_funded?.denom && (
               <>
                 ({broadcaster_funded.denom})
@@ -582,7 +582,7 @@ export default () => {
           </span>
         </div>
         <div className={`${metricClassName}`}>
-          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Supported
           </span>
           <div className="h-9 flex items-center overflow-x-auto text-3xl font-bold space-x-1.5">
@@ -604,12 +604,12 @@ export default () => {
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
-          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             EVM Chains
           </span>
         </div>
         <div className={`${metricClassName} col-span-2 lg:col-span-1 xl:col-span-2`}>
-          <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             EVM votes
           </span>
           <div className="flex flex-wrap items-center">

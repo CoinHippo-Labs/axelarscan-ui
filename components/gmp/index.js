@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, constants } from 'ethers'
+import { BigNumber, constants, utils } from 'ethers'
 import {Img } from 'react-image'
 import Loader from 'react-loader-spinner'
 import { TiArrowRight } from 'react-icons/ti'
