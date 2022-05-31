@@ -71,7 +71,7 @@ export default ({ n }) => {
 
   return (
     data ?
-      <div className="grid gap-2">
+      <div className="min-h-full grid gap-2">
         <Datatable
           columns={[
             {
@@ -121,7 +121,7 @@ export default ({ n }) => {
                       <div className="flex items-center space-x-1">
                         <Link href={`/validator/${props.row.original.operator_address}`}>
                           <a className="text-slate-400 dark:text-slate-600 font-medium">
-                            {ellipse(props.row.original.operator_address, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                            {ellipse(props.row.original.operator_address, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                           </a>
                         </Link>
                         <Copy value={props.row.original.operator_address} />

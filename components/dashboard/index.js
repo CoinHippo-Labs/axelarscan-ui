@@ -11,9 +11,9 @@ import { HiOutlineSearchCircle } from 'react-icons/hi'
 import { BsWindow } from 'react-icons/bs'
 
 import Summary from './summary'
-import NetworkGraph from '../transfers/network-graph'
-import BlocksTable from '../blocks/blocks-table'
-import TransactionsTable from '../transactions/transactions-table'
+// import NetworkGraph from '../transfers/network-graph'
+import Blocks from '../blocks'
+import Transactions from '../transactions'
 
 import { consensus_state } from '../../lib/api/rpc'
 import { transfers } from '../../lib/api/index'
@@ -23,7 +23,7 @@ import { hexToBech32 } from '../../lib/object/key'
 import { currency } from '../../lib/object/currency'
 import { number_format } from '../../lib/utils'
 
-export default function Dashboard() {
+export default () => {
   const { chains, cosmos_chains, assets, denoms, status, env, validators } = useSelector(state => ({ chains: state.chains, cosmos_chains: state.cosmos_chains, assets: state.assets, denoms: state.denoms, status: state.status, env: state.env, validators: state.validators }), shallowEqual)
   const { chains_data } = { ...chains }
   const { cosmos_chains_data } = { ...cosmos_chains }
@@ -252,9 +252,9 @@ export default function Dashboard() {
   const supportedChains = (chains_data || cosmos_chains_data) && _.uniq(_.concat(axelarChain, _.orderBy(_.concat(chains_data, cosmos_chains_data), 'title')), 'id').filter(c => c)
 
   return (
-    <div className="sm:mb-4 mx-auto pb-2">
+    <div className="space-y-6 mt-2 mb-6 mx-auto pb-10">
       <Summary data={summaryData} />
-      <div
+      {/*<div
         title={<span className="text-black dark:text-white text-lg font-semibold ml-1">Cross-Chain Asset Transfers</span>}
         className="bg-transparent border-0 mt-6 mb-0 py-0 px-3 sm:px-0"
       >
@@ -418,31 +418,23 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-5 my-0 md:my-4">
-        <div className="mt-8 md:mt-4">
+      </div>*/}
+      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
           <Link href="/blocks">
-            <a className="text-gray-900 dark:text-gray-100 text-base font-semibold mx-3">Latest Blocks</a>
+            <a className="text-lg font-bold mx-3">
+              Latest Blocks
+            </a>
           </Link>
-          <div className="h-1" />
-          <div className="min-h-full contents p-0">
-            <BlocksTable
-              n={10}
-              className="bg-white dark:bg-black no-border"
-            />
-          </div>
+          <Blocks n={10} />
         </div>
-        <div className="mt-8 md:mt-4">
+        <div className="space-y-2">
           <Link href="/transactions">
-            <a className="text-gray-900 dark:text-gray-100 text-base font-semibold mx-3">Latest Transactions</a>
+            <a className="text-lg font-bold mx-3">
+              Latest Transactions
+            </a>
           </Link>
-          <div className="h-1" />
-          <div className="min-h-full contents p-0">
-            <TransactionsTable
-              location="index"
-              className="bg-white dark:bg-black no-border"
-            />
-          </div>
+          <Transactions n={10} />
         </div>
       </div>
     </div>

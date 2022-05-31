@@ -158,11 +158,11 @@ export default ({ n }) => {
     }
   }, [data])
 
-  const data_filtered = data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type) || (filterTypes.includes('undefined') && !d?.type))
+  const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type) || (filterTypes.includes('undefined') && !d?.type)), 0, n || undefined)
 
   return (
     data ?
-      <div className="grid gap-2">
+      <div className="min-h-full grid gap-2">
         {!n && (
           <div className="block sm:flex sm:flex-wrap items-center justify-end overflow-x-auto space-x-1 mb-2">
             {Object.entries({ ...types }).map(([k, v]) => (
@@ -222,7 +222,7 @@ export default ({ n }) => {
               accessor: 'type',
               disableSortBy: true,
               Cell: props => (
-                <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
+                <div className={`max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5`}>
                   {name(props.value) || '-'}
                 </div>
               ),
@@ -372,8 +372,8 @@ export default ({ n }) => {
               headerClassName: 'justify-end text-right',
             },
           ].filter(c => ['/block/[height]'].includes(pathname) ? !['height', 'transfer'].includes(c.accessor) :
-            ['/'].includes(pathname) ? !['height', 'sender', 'value', 'transfer', 'fee'].includes(c.accessor) :
-            ['/validator/[address]'].includes(pathname) ? !['sender', 'value', 'transfer', 'fee'].includes(c.accessor) :
+            ['/'].includes(pathname) ? !['height', 'sender', 'amount', 'transfer', 'fee'].includes(c.accessor) :
+            ['/validator/[address]'].includes(pathname) ? !['sender', 'amount', 'transfer', 'fee'].includes(c.accessor) :
             ['/account/[address]'].includes(pathname) ? true :
             !['transfer'].includes(c.accessor)
           )}

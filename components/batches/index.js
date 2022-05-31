@@ -198,7 +198,7 @@ export default () => {
 
   return (
     data ?
-      <div className="grid gap-2">
+      <div className="min-h-full grid gap-2">
         <div className="flex flex-col sm:flex-row items-center justify-between space-x-2 mb-2">
           <div className="flex flex-wrap items-center">
             {evm_chains_data?.map((c, i) => (

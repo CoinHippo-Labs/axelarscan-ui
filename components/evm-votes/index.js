@@ -143,7 +143,7 @@ export default () => {
 
   return (
     data ?
-      <div className="grid gap-2">
+      <div className="min-h-full grid gap-2">
         <div className="flex items-center space-x-2 -mt-4">
           <span className="text-lg font-bold">
             {number_format(total, '0,0')}
