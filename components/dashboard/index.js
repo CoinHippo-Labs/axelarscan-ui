@@ -232,17 +232,6 @@ export default () => {
     }
   }, [chains_data, cosmos_chains_data, denoms_data])
 
-  const addNetwork = async chain_id => {
-    try {
-      await web3.currentProvider.request({
-        method: 'wallet_addEthereumChain',
-        params: chains_data?.find(c => c.chain_id === chain_id)?.provider_params,
-      })
-    } catch (error) {}
-  }
-
-  const supportedChains = (chains_data || cosmos_chains_data) && _.uniq(_.concat(axelarChain, _.orderBy(_.concat(chains_data, cosmos_chains_data), 'title')), 'id').filter(c => c)
-
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto pb-10">
       <Summary data={summaryData} />

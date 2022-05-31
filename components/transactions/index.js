@@ -233,7 +233,7 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => (
                 props.value && (
-                  <div className={`max-w-min ${props.value === 'success' ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-red-500 dark:bg-red-600 text-white'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 -mt-0.5 py-0.5 px-1.5`}>
+                  <div className={`${props.value === 'success' ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm font-bold space-x-1`}>
                     {props.value === 'success' ?
                       <BiCheckCircle size={20} />
                       :

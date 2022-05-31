@@ -298,7 +298,7 @@ export default () => {
               accessor: 'votes',
               sortType: (a, b) => a.original.total_yes_votes > b.original.total_yes_votes ? 1 : a.original.total_yes_votes < b.original.total_yes_votes ? -1 : a.original.total_no_votes <= b.original.total_no_votes ? 1 : -1,
               Cell: props => (
-                <div className="flex flex-col justify-center space-y-0.5 mt-0.5">
+                <div className="flex flex-col justify-center space-y-0.5 mt-0.5 mx-3">
                   {props.value ?
                     Object.keys({ ...props.value.chains }).length > 0 ?
                       Object.entries(props.value.chains).map(([k, v]) => (
@@ -340,7 +340,7 @@ export default () => {
                   }
                 </div>
               ),
-              headerClassName: 'whitespace-nowrap',
+              headerClassName: 'whitespace-nowrap mx-3',
             },
             {
               Header: 'EVM Supported',

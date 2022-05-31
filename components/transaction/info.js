@@ -72,7 +72,7 @@ export default ({ data }) => {
         </span>
         {data ?
           data.status && (
-            <div className={`max-w-min ${data.status === 'success' ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-red-500 dark:bg-red-600 text-white'} rounded-lg uppercase flex items-center text-sm lg:text-base font-semibold space-x-1 py-0.5 px-2`}>
+            <div className={`${data.status === 'success' ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
               {data.status === 'success' ?
                 <BiCheckCircle size={20} />
                 :
