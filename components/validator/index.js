@@ -9,8 +9,7 @@ import Info from './info'
 import Delegations from './delegations'
 import Uptimes from './uptimes'
 import Heartbeats from './heartbeats'
-import EVMSupport from './evm-support'
-import Polls from './polls'
+import EVMVotes from './evm-votes'
 import Participations from '../participations/participations'
 import Image from '../image'
 import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
@@ -25,7 +24,9 @@ import { number_format, name, equals_ignore_case, loader_color } from '../../lib
 const num_uptime_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
 const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
 const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
-const min_broadcaster_fund = Number(process.env.NEXT_PUBLIC_MIN_BROADCAST_FUND)
+const min_broadcaster_fund = Number(process.env.NEXT_PUBLIC_MIN_BROADCASTER_FUND)
+const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
+const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
 
 export default () => {
   const { preferences, evm_chains, assets, status, chain, validators, validators_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets, status: state.status, chain: state.chain, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
@@ -370,8 +371,6 @@ export default () => {
           let votes = [], polls = []
           if (broadcaster_address) {
             const latest_block = Number(status_data.latest_block_height)
-            const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
-            const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
             let response = await getEvmVotes({
               query: {
                 bool: {
@@ -609,32 +608,53 @@ export default () => {
             EVM Chains
           </span>
         </div>
-        <div className={`${metricClassName} xl:col-span-2`}>
+        <div className={`${metricClassName} col-span-2 lg:col-span-1 xl:col-span-2`}>
           <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-            Votes
+            EVM votes
           </span>
-          <div className="h-9 flex items-center overflow-x-auto text-3xl font-bold space-x-1.5">
-            {supportedChains ?
-              supported_chains?.length > 0 ?
-                supported_chains.filter(c => chain_manager.image(c, evm_chains_data)).map((c, i) => (
-                  <Image
-                    key={i}
-                    src={chain_manager.image(c, evm_chains_data)}
-                    title={chain_manager.name(c, evm_chains_data)}
-                    className="w-6 h-6 rounded-full"
-                  />
+          <div className="flex flex-wrap items-center">
+            {evmVotes ?
+              Object.keys({ ...evmVotes?.votes }).length > 0 ?
+                Object.entries(evmVotes.votes).map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="min-w-max flex items-center justify-between text-xs space-x-1 my-1 mr-2"
+                  >
+                    <div className="flex items-center space-x-0.5">
+                      {chain_manager.image(k, evm_chains_data) && (
+                        <Image
+                          src={chain_manager.image(k, evm_chains_data)}
+                          title={chain_manager.name(k, evm_chains_data)}
+                          className="w-4 h-4 rounded-full"
+                        />
+                      )}
+                      <span className={`${v?.votes?.true ? 'text-green-500 dark:text-green-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>
+                        {number_format(v?.votes?.true || 0, '0,0')} Y
+                      </span>
+                      <span className={`${v?.votes?.false ? 'text-red-500 dark:text-red-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>
+                        {number_format(v?.votes?.false || 0, '0,0')} N
+                      </span>
+                      {evmVotes?.polls?.[k] - v?.total > 0 && (
+                        <span className="text-yellow-400 dark:text-yellow-500 font-bold">
+                          {number_format(evmVotes.polls[k] - v.total, '0,0')} UN
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-blue-400 dark:text-blue-200 font-semibold">
+                      [{number_format(evmVotes?.polls?.[k] || 0, '0,0')}]
+                    </span>
+                  </div>
                 ))
                 :
-                <span className="lg:text-xl font-semibold">
-                  No EVM Supported
+                <span className="text-3xl font-semibold">
+                  No Votes
                 </span>
               :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              <div className="h-9">
+                <FallingLines color={loader_color(theme)} width="36" height="36" />
+              </div>
             }
           </div>
-          <span className="text-slate-300 dark:text-slate-600 text-xs font-medium">
-            EVM Chains
-          </span>
         </div>
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -662,22 +682,31 @@ export default () => {
               </span>
             )}
           </div>
-          <Heartbeats
-            data={heartbeats?.address === address && heartbeats?.data}
-            validator_data={validator?.address === address && validator?.data}
-          />
+          <Heartbeats data={heartbeats?.address === address && heartbeats?.data} />
         </div>
         <div className="md:col-span-2 xl:col-span-1 space-y-2">
-          <span className="text-sm sm:text-lg font-bold">
-            EVM votes
-          </span>
-          <Polls
-            data={evmPolls?.address === address && evmPolls}
-            validator_data={validator?.address === address && validator?.data}
-          />
+          <div className="flex items-center justify-between mr-3 xl:mr-1.5">
+            <span className="text-sm sm:text-lg font-bold">
+              Votes
+            </span>
+            <div className="flex items-center space-x-1.5">
+              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                Last {number_format(num_evm_votes_blocks, '0,0')} Blocks
+              </span>
+              {evmPolls?.votes && evmPolls.polls && (
+                <>
+                  :
+                  <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                    {number_format(evmPolls.votes.length, '0,0')} / {number_format(evmPolls.polls.length, '0,0')}
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+          <EVMVotes data={evmPolls?.address === address && evmPolls} />
         </div>
       </div>
-      <div className="lg:grid lg:grid-cols-2 xl:grid-cols-3 space-y-6 lg:space-y-0 gap-6">
+      <div className="sm:grid sm:grid-cols-2 xl:grid-cols-3 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm sm:text-lg font-bold">
