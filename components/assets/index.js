@@ -59,7 +59,7 @@ export default () => {
                   <Image
                     src={image}
                     alt=""
-                    className="w-5 h-5 bg-white rounded-full"
+                    className="w-5 h-5 rounded-full"
                   />
                 )}
                 <div className="flex flex-col">

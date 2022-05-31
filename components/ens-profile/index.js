@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
+import { Img as Image } from 'react-image'
 
-import Image from '../image'
 import Copy from '../copy'
 import { ens as getEns } from '../../lib/api/ens'
 import { ellipse } from '../../lib/utils'

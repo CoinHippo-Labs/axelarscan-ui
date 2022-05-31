@@ -8,7 +8,7 @@ export default ({
   titleClassName = 'h-8 text-xs font-bold',
   className = '',
 }) => {
-  const _time = time && moment(time)
+  const _time = time && moment(!isNaN(time) ? Number(time) : time)
   return _time && (
     <Popover
       placement={placement}

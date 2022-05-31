@@ -10,6 +10,7 @@ import EVMVoteFilters from '../../evm-votes/filters'
 import TransactionFilters from '../../transactions/filters'
 // import GMPFilters from '../../gmp/filters'
 // import TransferFilters from '../../transfers/filters'
+import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
 import { currency, currency_symbol } from '../../../lib/object/currency'
@@ -132,7 +133,10 @@ export default () => {
           <span className="hidden xl:block">
             {ellipse(tx, 24)}
           </span>
-          <Copy value={tx} size={18} />
+          <Copy
+            value={tx}
+            size={18}
+          />
         </div>
       )
       break
@@ -193,7 +197,10 @@ export default () => {
           <span className="hidden xl:block">
             {ellipse(tx, 24)}
           </span>
-          <Copy value={tx} size={18} />
+          <Copy
+            value={tx}
+            size={18}
+          />
         </div>
       )
       break
@@ -232,7 +239,33 @@ export default () => {
           <span className="hidden xl:block">
             {ellipse(tx, 24)}
           </span>
-          <Copy value={tx} size={18} />
+          <Copy
+            value={tx}
+            size={18}
+          />
+        </div>
+      )
+      break
+    case '/batches':
+      title = 'Batches'
+      right = (
+        <BatchFilters />
+      )
+      break
+    case '/batch/[chain]/[id]':
+      title = 'Batch'
+      subtitle = (
+        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+          <span className="xl:hidden">
+            {ellipse(id, 16)}
+          </span>
+          <span className="hidden xl:block">
+            {ellipse(id, 24)}
+          </span>
+          <Copy
+            value={tx}
+            size={18}
+          />
         </div>
       )
       break
