@@ -89,7 +89,7 @@ export default () => {
             </div>
           )}
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0">
           {equals_ignore_case(data?.id, id) ?
             <div className="flex items-center text-slate-700 dark:text-slate-300 space-x-2">
               <RiKeyFill size={20} />
@@ -102,7 +102,7 @@ export default () => {
           }
           {equals_ignore_case(data?.id, id) ?
             created_at && (
-              <div className="text-xs text-slate-400 dark:text-slate-600">
+              <div className="text-slate-400 dark:text-slate-600">
                 {moment(created_at.ms).format('MMM D, YYYY h:mm:ss A')}
               </div>
             )
