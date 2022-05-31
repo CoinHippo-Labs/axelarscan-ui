@@ -1,46 +1,36 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
+import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { DatePicker } from 'antd'
 import { BiX } from 'react-icons/bi'
 
 import Modal from '../modals'
-import { transactions as getTransactions } from '../../lib/api/index'
 import { params_to_obj } from '../../lib/utils'
 
 export default () => {
+  const { evm_chains } = useSelector(state => ({ evm_chains: state.evm_chains }), shallowEqual)
+  const { evm_chains_data } = { ...evm_chains }
+
   const router = useRouter()
   const { pathname, query, asPath } = { ...router }
 
   const [filters, setFilters] = useState(null)
   const [filter, setFilter] = useState(undefined)
-  const [types, setTypes] = useState(null)
   const [hidden, setHidden] = useState(true)
-
-  useEffect(() => {
-    const getData = async () => {
-      const response = await getTransactions({
-        size: 0,
-        aggs: {
-          types: {
-            terms: { field: 'types.keyword', size: 100 },
-          },
-        },
-      })
-      setTypes(_.orderBy(response?.data || []))
-    }
-    getData()
-  }, [])
 
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { txHash, status, type, fromTime, toTime } = { ...params }
+      const { chain, txHash, pollId, transactionId, voter, vote, fromTime, toTime } = { ...params }
       setFilters({
+        chain,
         txHash,
-        status: ['success', 'failed'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
-        type,
+        pollId,
+        transactionId,
+        voter,
+        vote: ['yes', 'no'].includes(vote?.toLowerCase()) ? vote.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
     }
@@ -74,36 +64,54 @@ export default () => {
 
   const fields = [
     {
+      label: 'Chain',
+      name: 'chain',
+      type: 'select',
+      placeholder: 'Select chain',
+      options: _.concat(
+        { value: '', title: 'Any' },
+        evm_chains_data?.map(c => {
+          return {
+            value: c.id,
+            title: c.name,
+          }
+        }) || [],
+      ),
+    },
+    {
       label: 'Tx Hash',
       name: 'txHash',
       type: 'text',
       placeholder: 'Transaction Hash',
     },
     {
-      label: 'Status',
-      name: 'status',
-      type: 'select',
-      placeholder: 'Select transaction status',
-      options: [
-        { value: '', title: 'Any' },
-        { value: 'success', title: 'Success' },
-        { value: 'failed', title: 'Failed' },
-      ],
+      label: 'Poll ID',
+      name: 'pollId',
+      type: 'text',
+      placeholder: 'Poll ID',
     },
     {
-      label: 'Type',
-      name: 'type',
+      label: 'EVM Transaction ID',
+      name: 'transactionId',
+      type: 'text',
+      placeholder: 'Transaction ID',
+    },
+    {
+      label: 'Voter (Broadcaster Address)',
+      name: 'voter',
+      type: 'text',
+      placeholder: 'Voter',
+    },
+    {
+      label: 'Vote',
+      name: 'vote',
       type: 'select',
-      placeholder: 'Select transaction type',
-      options: _.concat(
+      placeholder: 'Select vote',
+      options: [
         { value: '', title: 'Any' },
-        types?.map(t => {
-          return {
-            value: t,
-            title: t,
-          }
-        }) || [],
-      ),
+        { value: 'yes', title: 'Yes' },
+        { value: 'no', title: 'No' },
+      ],
     },
     {
       label: 'Time',
@@ -118,13 +126,13 @@ export default () => {
   return (
     <Modal
       hidden={hidden}
-      disabled={!types}
+      disabled={!evm_chains_data}
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
       buttonClassName={`${filtered ? 'border-2 border-blue-600 dark:border-white text-blue-600 dark:text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-semibold'} rounded-lg text-sm sm:text-base py-1 px-2.5`}
       title={<div className="flex items-center justify-between">
         <span>
-          Filter Transactions
+          Filter Votes
         </span>
         <div
           onClick={() => setHidden(true)}

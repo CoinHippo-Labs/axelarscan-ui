@@ -127,7 +127,7 @@ export default ({ n }) => {
             }, assets_data)
           }
           if (response) {
-            response = _.orderBy(_.uniqBy(_.concat(_data, response?.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
               const { txhash, timestamp, activities } = { ...d }
               return {
                 ...d,

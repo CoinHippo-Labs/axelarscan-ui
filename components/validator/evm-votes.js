@@ -57,7 +57,7 @@ export default ({ data }) => {
                     Poll ID:
                   </span>
                   <div className="flex items-center space-x-1">
-                    <Link href={`/evm-votes?poll_id=${id}`}>
+                    <Link href={`/evm-votes?pollId=${id}`}>
                       <a className="text-blue-600 dark:text-white font-semibold">
                         {ellipse(id, 8)}
                       </a>

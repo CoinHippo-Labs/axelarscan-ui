@@ -6,6 +6,7 @@ import { BiServer } from 'react-icons/bi'
 import { HiOutlineExternalLink } from 'react-icons/hi'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
+import EVMVoteFilters from '../../evm-votes/filters'
 import TransactionFilters from '../../transactions/filters'
 // import GMPFilters from '../../gmp/filters'
 // import TransferFilters from '../../transfers/filters'
@@ -69,6 +70,9 @@ export default () => {
       break
     case '/evm-votes':
       title = 'EVM votes'
+      right = (
+        <EVMVoteFilters />
+      )
       break
     case '/participations':
       title = 'Participations'

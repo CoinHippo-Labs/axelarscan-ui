@@ -11,6 +11,23 @@ export default ({ data }) => {
   return (
     <div className="space-y-2">
       <div className="text-lg font-bold">
+        Body
+      </div>
+      {data?.tx && (
+        <div className="text-sm lg:text-base font-semibold">
+          {to_json(data.tx.body?.messages || data.tx) ?
+            <ReactJson
+              src={to_json(data.tx.body?.messages || data.tx)}
+              theme={theme === 'dark' ? 'harmonic' : 'rjv-default'}
+            />
+            :
+            <span>
+              {data.tx.body?.messages || data.tx}
+            </span>
+          }
+        </div>
+      )}
+      <div className="text-lg font-bold">
         Logs
       </div>
       {data?.raw_log && (
