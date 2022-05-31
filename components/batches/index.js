@@ -455,7 +455,7 @@ export default () => {
                       <HiOutlineClock size={20} />
                     }
                     <span className="capitalize">
-                      {props.value?.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()}
+                      {props.value.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()}
                     </span>
                   </div>
                 )

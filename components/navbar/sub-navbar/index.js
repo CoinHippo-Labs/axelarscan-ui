@@ -41,12 +41,14 @@ export default () => {
         <Copy
           value={address}
           title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
-            <span className="xl:hidden">
-              {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
-            </span>
-            <span className="hidden xl:block">
-              {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
-            </span>
+            <div>
+              <span className="xl:hidden">
+                {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+              </span>
+              <span className="hidden xl:block">
+                {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+              </span>
+            </div>
           </span>}
           size={18}
         />
@@ -58,12 +60,14 @@ export default () => {
         <Copy
           value={address}
           title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
-            <span className="xl:hidden">
-              {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
-            </span>
-            <span className="hidden xl:block">
-              {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
-            </span>
+            <div>
+              <span className="xl:hidden">
+                {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+              </span>
+              <span className="hidden xl:block">
+                {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+              </span>
+            </div>
           </span>}
           size={18}
         />
@@ -127,12 +131,14 @@ export default () => {
       title = 'Transaction'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
-          <span className="xl:hidden">
-            {ellipse(tx, 16)}
-          </span>
-          <span className="hidden xl:block">
-            {ellipse(tx, 24)}
-          </span>
+          <div>
+            <span className="xl:hidden">
+              {ellipse(tx, 16)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(tx, 24)}
+            </span>
+          </div>
           <Copy
             value={tx}
             size={18}
@@ -151,12 +157,14 @@ export default () => {
         <Copy
           value={address}
           title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
-            <span className="xl:hidden">
-              {ellipse(address, 12)}
-            </span>
-            <span className="hidden xl:block">
-              {ellipse(address, 16)}
-            </span>
+            <div>
+              <span className="xl:hidden">
+                {ellipse(address, 12)}
+              </span>
+              <span className="hidden xl:block">
+                {ellipse(address, 16)}
+              </span>
+            </div>
           </span>}
           size={18}
         />
@@ -191,12 +199,14 @@ export default () => {
       title = 'General Message Passing'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
-          <span className="xl:hidden">
-            {ellipse(tx, 16)}
-          </span>
-          <span className="hidden xl:block">
-            {ellipse(tx, 24)}
-          </span>
+          <div>
+            <span className="xl:hidden">
+              {ellipse(tx, 16)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(tx, 24)}
+            </span>
+          </div>
           <Copy
             value={tx}
             size={18}
@@ -233,12 +243,14 @@ export default () => {
       title = 'Cross-chain Transfers'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
-          <span className="xl:hidden">
-            {ellipse(tx, 16)}
-          </span>
-          <span className="hidden xl:block">
-            {ellipse(tx, 24)}
-          </span>
+          <div>
+            <span className="xl:hidden">
+              {ellipse(tx, 16)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(tx, 24)}
+            </span>
+          </div>
           <Copy
             value={tx}
             size={18}
@@ -256,12 +268,14 @@ export default () => {
       title = 'Batch'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
-          <span className="xl:hidden">
-            {ellipse(id, 16)}
-          </span>
-          <span className="hidden xl:block">
-            {ellipse(id, 24)}
-          </span>
+          <div>
+            <span className="xl:hidden">
+              {ellipse(id, 16)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(id, 24)}
+            </span>
+          </div>
           <Copy
             value={tx}
             size={18}

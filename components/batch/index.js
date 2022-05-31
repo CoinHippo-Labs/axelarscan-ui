@@ -1,101 +1,117 @@
+import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
-import { TailSpin, ThreeDots, Oval } from 'react-loader-spinner'
-import { MdRefresh } from 'react-icons/md'
+import { TailSpin } from 'react-loader-spinner'
+import { BiCheckCircle } from 'react-icons/bi'
+import { HiOutlineClock } from 'react-icons/hi'
+import { RiKeyFill } from 'react-icons/ri'
 import { TiArrowRight } from 'react-icons/ti'
+import { BsFillArrowLeftCircleFill } from 'react-icons/bs'
 
-import Modal from '../modals'
 import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import { axelard } from '../../lib/api/executor'
-import { number_format, ellipse, to_json, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, to_json, loader_color } from '../../lib/utils'
 
-export default ({ chain_data }) => {
-  const { preferences, assets } = useSelector(state => ({ preferences: state.preferences, assets: state.assets }), shallowEqual)
+export default () => {
+  const { preferences, evm_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets }), shallowEqual)
   const { theme } = { ...preferences }
+  const { evm_chains_data } = { ...evm_chains }
   const { assets_data } = { ...assets }
 
+  const router = useRouter()
+  const { pathname, query } = { ...router }
+  const { chain, id } = { ...query }
+
   const [data, setData] = useState(null)
-  const [fetching, setFetching] = useState(null)
-  const [fetchTrigger, setFetchTrigger] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async is_interval => {
-      if (chain_data) {
+      if (chain && id) {
         if (!controller.signal.aborted) {
-          setFetching(true)
-          if (!is_interval) {
-            setData(null)
-          }
           const response = await axelard({
-            cmd: `axelard q evm pending-commands ${chain_data.id} -oj`,
+            cmd: `axelard q evm batched-commands ${chain} ${id} -oj`,
+            cache: true,
+            cache_timeout: 1,
           })
-          setData(to_json(response?.stdout)?.commands || [])
-          setFetching(false)
+          setData({
+            data: { ...to_json(response?.stdout) },
+            chain,
+            id,
+          })
         }
       }
     }
     getData()
-    const interval = setInterval(() => getData(true), 0.25 * 60 * 1000)
+    const interval = setInterval(() => getData(true), 3 * 60 * 1000)
     return () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [chain_data, fetchTrigger])
+  }, [chain, id])
 
-  const key_id = data?.find(d => d?.key_id)?.key_id
-  const refreshButton = (
-    <button
-      disabled={!data}
-      onClick={() => setFetchTrigger(moment().valueOf())}
-      className={`${!data ? 'cursor-not-allowed text-slate-400 dark:text-slate-600' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'} rounded-full ml-auto p-1.5`}
-    >
-      {data ?
-        <MdRefresh size={16} /> :
-        <Oval color={loader_color(theme)} width="16" height="16" />
-      }
-    </button>
-  )
+  const chain_data = evm_chains_data?.find(c => equals_ignore_case(c?.id, chain))
+  const { key_id, status, created_at, commands, signature, prev_batched_commands_id } = { ...data?.data }
 
   return (
-    <Modal
-      buttonTitle={<div className="flex items-center space-x-2">
-        {chain_data?.image && (
-          <Image
-            src={chain_data.image}
-            className="w-5 h-5 rounded-full"
-          />
-        )}
-        {data && (
-          <span className="font-mono font-bold">
-            ({number_format(data.length || 0, '0,0')})
-          </span>
-        )}
-        {fetching && (
-          <ThreeDots color={loader_color(theme)} width="20" height="20" />
-        )}
-      </div>}
-      buttonClassName="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg text-base space-x-1.5 py-1 px-2.5"
-      title={<div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {chain_data?.image && (
-            <Image
-              src={chain_data.image}
-              className="w-7 h-7 rounded-full"
-            />
+    <div className="space-y-6 mb-6">
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {chain_data?.image && (
+              <Image
+                src={chain_data.image}
+                alt=""
+                className="w-6 h-6 rounded-full"
+              />
+            )}
+            <span className="text-base font-bold">
+              {chain_data?.name}
+            </span>
+          </div>
+          {status && (
+            <div className={`max-w-min ${equals_ignore_case(status, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 py-0.5 px-1.5`}>
+              {equals_ignore_case(status, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
+                <BiCheckCircle size={20} />
+                :
+                <HiOutlineClock size={20} />
+              }
+              <span className="capitalize">
+                {status.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()}
+              </span>
+            </div>
           )}
-          <span className="font-bold">
-            {key_id || chain_data?.name}
-          </span>
         </div>
-        {refreshButton}
-      </div>}
-      body={data ?
+        <div className="flex items-center justify-between">
+          {equals_ignore_case(data?.id, id) ?
+            <div className="flex items-center text-slate-700 dark:text-slate-300 space-x-2">
+              <RiKeyFill size={20} />
+              <span className="text-base font-medium">
+                {key_id || 'Unknown'}
+              </span>
+            </div>
+            :
+            <div className="skeleton w-48 h-6" />
+          }
+          {equals_ignore_case(data?.id, id) ?
+            created_at && (
+              <div className="text-xs text-slate-400 dark:text-slate-600">
+                {moment(created_at.ms).format('MMM D, YYYY h:mm:ss A')}
+              </div>
+            )
+            :
+            <div className="skeleton w-32 h-6" />
+          }
+        </div>
+      </div>
+      {commands ?
         <Datatable
           columns={[
             {
@@ -309,16 +325,120 @@ export default ({ chain_data }) => {
               headerClassName: 'whitespace-nowrap justify-end text-right',
             },
           ]}
-          data={data}
-          noPagination={data <= 10}
+          data={commands}
+          noPagination={commands.length <= 10}
           defaultPageSize={10}
           className="min-h-full small no-border"
         />
         :
         <TailSpin color={loader_color(theme)} width="32" height="32" />
       }
-      confirmButtonTitle="Ok"
-      className="max-w-full"
-    />
+      <div className="space-y-2">
+        <span className="text-base font-semibold">
+          Data
+        </span>
+        {equals_ignore_case(data?.id, id) ?
+          data?.data?.data ?
+            <div className="flex items-start">
+              <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                {data.data.data}
+              </div>
+              <div className="mt-4">
+                <Copy
+                  value={data.data.data}
+                  size={20}
+                />
+              </div>
+            </div>
+            :
+            <span className="text-xs lg:text-base">
+              -
+            </span>
+          :
+          <TailSpin color={loader_color(theme)} width="32" height="32" />
+        }
+      </div>
+      <div className="space-y-2">
+        <span className="text-base font-semibold">
+          Execute Data
+        </span>
+        {equals_ignore_case(data?.id, id) ?
+          data?.data?.execute_data ?
+            <div className="flex items-start">
+              <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                {data.data.execute_data}
+              </div>
+              <div className="mt-4">
+                <Copy
+                  value={data.data.execute_data}
+                  size={20}
+                />
+              </div>
+            </div>
+            :
+            <span className="text-xs lg:text-base">
+              -
+            </span>
+          :
+          <TailSpin color={loader_color(theme)} width="32" height="32" />
+        }
+      </div>
+      <div className="space-y-2">
+        <span className="text-base font-semibold">
+          Signature
+        </span>
+        {equals_ignore_case(data?.id, id) ?
+          signature ?
+            <div className="flex flex-col space-y-1.5">
+              {signature.map((s, i) => (
+                <div
+                  key={i}
+                  className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg py-1 px-2"
+                >
+                  <Copy
+                    value={s}
+                    title={<span className="cursor-pointer text-slate-600 dark:text-slate-400 text-xs font-semibold">
+                      <span className="lg:hidden">
+                        {ellipse(s, 20)}
+                      </span>
+                      <span className="hidden lg:block">
+                        {s}
+                      </span>
+                    </span>}
+                    size={18}
+                  />
+                </div>
+              ))}
+            </div>
+            :
+            <span className="text-xs lg:text-base">
+              -
+            </span>
+          :
+          <TailSpin color={loader_color(theme)} width="32" height="32" />
+        }
+      </div>
+      {equals_ignore_case(data?.id, id) && prev_batched_commands_id && (
+        <div>
+          <Link href={`${pathname?.replace('[chain]', chain).replace('[id]', prev_batched_commands_id)}`}>
+            <a className="flex items-center text-blue-600 dark:text-white space-x-2">
+              <BsFillArrowLeftCircleFill size={20} />
+              <span className="font-semibold">
+                Previous Batch
+              </span>
+            </a>
+          </Link>
+          <div className="ml-7">
+            <Copy
+              value={prev_batched_commands_id}
+              title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                {ellipse(prev_batched_commands_id, 8)}
+              </span>}
+              size={18}
+            />
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
