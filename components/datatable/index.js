@@ -28,6 +28,7 @@ export default ({
   data,
   rowSelectEnable = false,
   defaultPageSize = 10,
+  pageSizes = [10, 25, 50, 100],
   noPagination = false,
   noRecordPerPage = false,
   className = '',
@@ -135,7 +136,7 @@ export default ({
               onChange={event => setPageSize(Number(event.target.value))}
               className="form-select dark:bg-slate-900 outline-none border-slate-200 dark:border-slate-900 appearance-none shadow-none focus:shadow-none rounded-lg text-xs p-2 pl-3.5"
             >
-              {[10, 25, 50, 100].map((s, i) => (
+              {pageSizes.map((s, i) => (
                 <option key={i} value={s}>
                   Show {s}
                 </option>

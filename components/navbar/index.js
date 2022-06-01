@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { Bignumber, Contract, constants, providers, utils } from 'ethers'
+import { BigNumber, Contract, constants, providers, utils } from 'ethers'
 
 import Logo from './logo'
 import DropdownNavigations from './navigations/dropdown'
@@ -262,18 +262,20 @@ export default () => {
     const controller = new AbortController()
     const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
     const getContractSupply = async (contract_data, rpc) => {
-      let supply
+      let supply, decimals = 18
       if (contract_data && rpc) {
-        const { contract_address, decimals } = { ...contract_data }
+        const { contract_address } = { ...contract_data }
+        decimals = contract_data.decimals
         const contract = new Contract(contract_address, ['function totalSupply() view returns (uint256)'], rpc)
         supply = await contract.totalSupply()
       }
       return Number(utils.formatUnits(BigNumber.from((supply || 0).toString()), decimals))
     }
     const getBalance = async (address, contract_data, rpc) => {
-      let balance
+      let balance, decimals = 18
       if (address && contract_data && rpc) {
-        const { contract_address, decimals } = { ...contract_data }
+        const { contract_address } = { ...contract_data }
+        decimals = contract_data.decimals
         if (contract_address === constants.AddressZero) {
           balance = await rpc.getBalance(address)
         }
@@ -287,6 +289,7 @@ export default () => {
     const getChainData = async (chain_id, rpc) => {
       if (!controller.signal.aborted) {
         if (chain_id && rpc && assets_data) {
+          chain_id = Number(chain_id)
           const chain_data = evm_chains_data?.find(c => c?.chain_id === chain_id)
           if (chain_data) {
             for (let i = 0; i < assets_data.length; i++) {
@@ -298,7 +301,13 @@ export default () => {
                   const balance = await getBalance(chain_data.gateway_address, contract_data, rpc)
                   dispatch({
                     type: TVL_DATA,
-                    value: { [`${chain_data.id}_${asset_data.id}`]: supply + balance },
+                    value: {
+                      [`${chain_data.id}_${asset_data.id}`]: {
+                        supply,
+                        gateway_balance: balance,
+                        total: supply + balance,
+                      },
+                    },
                   })
                 }
               }
@@ -309,7 +318,7 @@ export default () => {
     }
     const getData = is_interval => {
       if (assets_data && rpcs) {
-        if (['/[address]', '/[tx]'].findIndex(p => pathname?.includes(p)) < 0 && (!tvl_data || is_interval)) {
+        if (['/[height]', '/[address]', '/[tx]', '/[id]'].findIndex(p => pathname?.includes(p)) < 0 && (!tvl_data || is_interval)) {
           Object.entries(rpcs).forEach(([k, v]) => getChainData(k, v))
         }
       }

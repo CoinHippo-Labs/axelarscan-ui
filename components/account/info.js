@@ -356,7 +356,7 @@ export default ({ data }) => {
                     <div className="flex flex-col text-left sm:text-right">
                       <div className="flex flex-col items-start sm:items-end space-y-1.5">
                         {typeof props.value === 'number' ?
-                          <span className="font-mono text-xs lg:text-sm font-bold">
+                          <span className="font-mono uppercase text-xs lg:text-sm font-bold">
                             {currency_symbol}
                             {number_format(props.value, props.value > 100000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.00000000')}
                           </span>
