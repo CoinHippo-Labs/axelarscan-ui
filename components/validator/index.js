@@ -22,6 +22,7 @@ import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
 import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
 
 const num_uptime_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
+const num_uptime_display_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_DISPLAY_BLOCKS)
 const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
 const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
 const min_broadcaster_fund = Number(process.env.NEXT_PUBLIC_MIN_BROADCASTER_FUND)
@@ -221,8 +222,7 @@ export default () => {
       if (address && equals_ignore_case(validator?.address, address) && status_data && (!uptimes || !validator.broadcaster_loaded)) {
         if (!controller.signal.aborted) {
           const { consensus_address } = { ...validator.data }
-          const latest_block = Number(status_data.latest_block_height)
-          const num_uptime_display_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_DISPLAY_BLOCKS)
+          const latest_block = Number(status_data.latest_block_height) - 1
           const response = await getUptimes({
             query: { range: { height: {
               gt: latest_block - num_uptime_display_blocks,
