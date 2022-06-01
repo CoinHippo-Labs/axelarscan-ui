@@ -13,6 +13,7 @@ import Blocks from '../blocks'
 import Transactions from '../transactions'
 import { consensus_state } from '../../lib/api/rpc'
 import { transfers as getTransfers } from '../../lib/api/index'
+import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { hexToBech32 } from '../../lib/object/key'
@@ -30,6 +31,7 @@ export default () => {
   const [consensusState, setConsensusState] = useState(null)
   const [cosmosMetrics, setCosmosMetrics] = useState(null)
   const [transfers, setTransfers] = useState(null)
+  const [gmps, setGmps] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -181,6 +183,86 @@ export default () => {
     }
   }, [evm_chains_data, cosmos_chains_data/*, assets_data*/])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    const getData = async () => {
+      if (evm_chains_data && cosmos_chains_data) {
+        if (!controller.signal.aborted) {
+          const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+          const axelar_chain_data = getChain('axelarnet', chains_data)
+          const response = await searchGMP({
+            aggs: {
+              source_chains: {
+                terms: { field: 'call.chain.keyword', size: 1000 },
+                aggs: {
+                  destination_chains: {
+                    terms: { field: 'call.returnValues.destinationChain.keyword', size: 1000 },
+                  },
+                },
+              },
+            },
+            size: 0,
+          })
+          const data = _.orderBy(response?.data?.map(t => {
+            const { source_chain, destination_chain } = { ...t }
+            return {
+              ...t,
+              source_chain_data: getChain(source_chain, chains_data),
+              destination_chain_data: getChain(destination_chain, chains_data),
+            }
+          }) || [], ['num_txs'], ['desc'])
+          const network_graph_data = []
+          data.forEach(t => {
+            const { source_chain, destination_chain/*, asset*/ } = { ...t }
+            if (!equals_ignore_case(source_chain, axelar_chain_data?.id) && !equals_ignore_case(destination_chain, axelar_chain_data?.id)) {
+              const x = ['source', 'destination']
+              x.forEach(_x => {
+                const _t = _.cloneDeep(t)
+                const id_field = `${_x}_chain`, data_field = `${_x}_chain_data`
+                _t[id_field] = axelar_chain_data?.id
+                _t[data_field] = axelar_chain_data
+                _t.id = `${_t.source_chain_data?.id}_${_t.destination_chain_data?.id}`
+                network_graph_data.push(_t)
+              })
+            }
+            else {
+              t.id = `${t.source_chain_data?.id}_${t.destination_chain_data?.id}`
+              network_graph_data.push(t)
+            }
+          })
+          setGmps({
+            data: _.orderBy(Object.entries(_.groupBy(data, 'id')).map(([k, v]) => {
+              const d = {
+                ..._.head(v),
+                id: k,
+                num_txs: _.sumBy(v, 'num_txs'),
+              }
+              return {
+                ...d,
+              }
+            }), ['num_txs'], ['desc']),
+            network_graph_data: _.orderBy(Object.entries(_.groupBy(network_graph_data, 'id')).map(([k, v]) => {
+              const n = {
+                ..._.head(v),
+                id: k,
+                num_txs: _.sumBy(v, 'num_txs'),
+              }
+              return {
+                ...n,
+              }
+            }), ['num_txs'], ['desc']),
+          })
+        }
+      }
+    }
+    getData()
+    const interval = setInterval(() => getData(), 1 * 60 * 1000)
+    return () => {
+      controller?.abort()
+      clearInterval(interval)
+    }
+  }, [evm_chains_data, cosmos_chains_data])
+
   return (
     <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">
       <CosmosMetrics data={cosmosMetrics} />
@@ -211,7 +293,10 @@ export default () => {
               id="transfers"
               data={transfers?.network_graph_data}
             />
-            <CrossChainQuantity data={transfers?.data} />
+            <CrossChainQuantity
+              data={transfers?.data}
+              pathname="/transfers/search"
+            />
           </div>
         </div>
         <div className="space-y-2">
@@ -224,13 +309,13 @@ export default () => {
                 </span>
               </a>
             </Link>
-            {transfers?.data && (
+            {gmps?.data && (
               <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
                 <span className="text-base font-semibold">
                   Total:
                 </span>
                 <span className="text-base font-bold">
-                  {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
+                  {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
                 </span>
               </div>
             )}
@@ -238,9 +323,12 @@ export default () => {
           <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
             <NetworkGraph
               id="gmp"
-              data={transfers?.network_graph_data}
+              data={gmps?.network_graph_data}
             />
-            <CrossChainQuantity data={transfers?.data} />
+            <CrossChainQuantity
+              data={gmps?.data}
+              pathname="/gmp/search"
+            />
           </div>
         </div>
       </div>

@@ -152,7 +152,7 @@ export default ({
         className={`${data?.length > 0 ? 'flex' : 'hidden'} items-center justify-start`}
       />
       {!data && (
-        <div className="w-3/4 h-80 flex items-center justify-center">
+        <div className="w-3/4 h-100 flex items-center justify-center">
           <BallTriangle color={loader_color(theme)} width="36" height="36" />
         </div>
       )}
