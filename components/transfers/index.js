@@ -11,9 +11,6 @@ import AssetSelect from './asset-select'
 import TimelyTransactions from './charts/timely-transactions'
 import TimelyVolume from './charts/timely-volume'
 import TransactionsByChain from './charts/transactions-by-chain'
-import TVLByChain from './charts/tvl-by-chain'
-import NetworkGraph from './network-graph'
-import TransfersTable from './transfers-table'
 import Copy from '../copy'
 import Popover from '../popover'
 
@@ -23,20 +20,17 @@ import { getDenom, denom_manager } from '../../lib/object/denom'
 import { currency, currency_symbol } from '../../lib/object/currency'
 import { number_format, ellipse } from '../../lib/utils'
 
-export default function Transfers() {
-  const { chains, cosmos_chains, assets, denoms, tvl } = useSelector(state => ({ chains: state.chains, cosmos_chains: state.cosmos_chains, assets: state.assets, denoms: state.denoms, tvl: state.tvl }), shallowEqual)
-  const { chains_data } = { ...chains }
+export default () => {
+  const { chains, cosmos_chains, assets } = useSelector(state => ({ chains: state.chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)
+  const { evm_chains_data } = { ...chains }
   const { cosmos_chains_data } = { ...cosmos_chains }
   const { assets_data } = { ...assets }
-  const { denoms_data } = { ...denoms }
-  const { tvl_data } = { ...tvl }
 
   const [assetSelect, setAssetSelect] = useState(null)
   const [chartData, setChartData] = useState(null)
   const [timeFocus, setTimeFocus] = useState(moment().utc().startOf('day').valueOf())
   const [transfersData, setTransfersData] = useState(null)
   const [crosschainSummaryData, setCrosschainSummaryData] = useState(null)
-  const [crosschainTVLData, setCrosschainTVLData] = useState(null)
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
   const axelarChain = getChain('axelarnet', cosmos_chains_data)
@@ -45,7 +39,7 @@ export default function Transfers() {
     const controller = new AbortController()
 
     const getData = async () => {
-      if (chains_data && cosmos_chains_data && denoms_data) {
+      if (evm_chains_data && cosmos_chains_data && assets_data) {
         let response, data
 
         if (!controller.signal.aborted) {
@@ -91,15 +85,15 @@ export default function Transfers() {
         }
 
         data = _.orderBy(response?.data?.map(t => {
-          const asset = getDenom(t?.asset, denoms_data)
+          const asset = getDenom(t?.asset, assets_data)
           return {
             ...t,
-            from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
-            to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
+            from_chain: getChain(t?.from_chain, evm_chains_data) || getChain(t?.from_chain, cosmos_chains_data),
+            to_chain: getChain(t?.to_chain, evm_chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0
@@ -178,13 +172,13 @@ export default function Transfers() {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [chains_data, cosmos_chains_data, denoms_data])
+  }, [evm_chains_data, cosmos_chains_data, assets_data])
 
   useEffect(() => {
     const controller = new AbortController()
 
     const getData = async () => {
-      if (chains_data && cosmos_chains_data && denoms_data) {
+      if (evm_chains_data && cosmos_chains_data && assets_data) {
         const today = moment().utc().startOf('day')
         const daily_time_range = 30
         const day_ms = 24 * 60 * 60 * 1000
@@ -235,20 +229,20 @@ export default function Transfers() {
         }
 
         data = _.orderBy(response?.data?.map(t => {
-          const asset = getDenom(t?.asset, denoms_data)
+          const asset = getDenom(t?.asset, assets_data)
           return {
             ...t,
-            to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
+            to_chain: getChain(t?.to_chain, evm_chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denom_manager.amount(t?.amount, asset?.id, denoms_data),
-            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, denoms_data),
-            max_amount: denom_manager.amount(t?.max_amount, asset?.id, denoms_data),
+            amount: denom_manager.amount(t?.amount, asset?.id, assets_data),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data),
             times: t?.times?.map(time => {
               return {
                 ...time,
-                amount: denom_manager.amount(time?.amount, asset?.id, denoms_data),
-                avg_amount: denom_manager.amount(time?.avg_amount, asset?.id, denoms_data),
-                max_amount: denom_manager.amount(time?.max_amount, asset?.id, denoms_data),
+                amount: denom_manager.amount(time?.amount, asset?.id, assets_data),
+                avg_amount: denom_manager.amount(time?.avg_amount, asset?.id, assets_data),
+                max_amount: denom_manager.amount(time?.max_amount, asset?.id, assets_data),
               }
             }),
           }
@@ -346,13 +340,13 @@ export default function Transfers() {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [chains_data, cosmos_chains_data, denoms_data])
+  }, [evm_chains_data, cosmos_chains_data, assets_data])
 
   useEffect(() => {
     const controller = new AbortController()
 
     const getData = async () => {
-      if (chains_data && cosmos_chains_data && denoms_data) {
+      if (evm_chains_data && cosmos_chains_data && assets_data) {
         let response
 
         if (!controller.signal.aborted) {
@@ -393,14 +387,14 @@ export default function Transfers() {
         }
 
         let total_transfers = _.orderBy(response?.data?.map(t => {
-          const asset = getDenom(t?.asset, denoms_data)
+          const asset = getDenom(t?.asset, assets_data)
           return {
             ...t,
-            from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
-            to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
+            from_chain: getChain(t?.from_chain, evm_chains_data) || getChain(t?.from_chain, cosmos_chains_data),
+            to_chain: getChain(t?.to_chain, evm_chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
-            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
+            avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0
@@ -462,13 +456,13 @@ export default function Transfers() {
         }
 
         let highest_transfer_24h = _.orderBy(response?.data?.map(t => {
-          const asset = getDenom(t?.asset, denoms_data)
+          const asset = getDenom(t?.asset, assets_data)
           return {
             ...t,
-            from_chain: getChain(t?.from_chain, chains_data) || getChain(t?.from_chain, cosmos_chains_data),
-            to_chain: getChain(t?.to_chain, chains_data) || getChain(t?.to_chain, cosmos_chains_data),
+            from_chain: getChain(t?.from_chain, evm_chains_data) || getChain(t?.from_chain, cosmos_chains_data),
+            to_chain: getChain(t?.to_chain, evm_chains_data) || getChain(t?.to_chain, cosmos_chains_data),
             asset,
-            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, chains_data)),
+            max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
           }
         }).map(t => {
           const price = t?.asset?.token_data?.[currency] || 0
@@ -514,30 +508,7 @@ export default function Transfers() {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [chains_data, cosmos_chains_data, denoms_data])
-
-  useEffect(() => {
-    if (tvl_data) {
-      const data = Object.entries(tvl_data).map(([key, value]) => {
-        const chain = chains_data?.find(c => c?.id === _.head(key.split('_')))
-        const asset = assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === chain?.chain_id && c.contract_address === _.last(key.split('_'))) > -1)
-        const denom = denoms_data?.find(d => d?.id === asset?.id)
-        const amount = value
-        const price = denom?.token_data?.[currency] || 0
-        const _value = (price * amount) || 0
-
-        return {
-          chain,
-          asset,
-          denom,
-          amount,
-          value: _value,
-        }
-      })
-
-      setCrosschainTVLData({ data, updated_at: moment().valueOf() })
-    }
-  }, [denoms_data, tvl_data])
+  }, [evm_chains_data, cosmos_chains_data, assets_data])
 
   useEffect(() => {
     if (!assetSelect && chartData?.data?.[0]?.id) {
@@ -697,157 +668,6 @@ export default function Transfers() {
                 {crosschainSummaryData ?
                   <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono uppercase text-white font-semibold py-0.5 px-1.5">
                     {currency_symbol}{number_format(_.sumBy(crosschainSummaryData.total_transfers || [], 'value'), _.sumBy(crosschainSummaryData.total_transfers || [], 'value') >= 100000 ? '0,0.00a' : '0,0.000')}
-                  </div>
-                  :
-                  <div className="skeleton w-12 h-6" />
-                }
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          title={<span className="text-black dark:text-white text-base font-semibold">TVL on EVMs</span>}
-          description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Total Value Locked on Axelar Network</span>}
-          className="bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
-        >
-          <div className="flex flex-col space-y-2 mt-1">
-            {crosschainTVLData ?
-              <div className="h-52 flex flex-col overflow-y-auto space-y-3">
-                {_.orderBy(Object.entries(_.groupBy(crosschainTVLData.data || [], 'asset.id')).map(([key, value]) => {
-                  return {
-                    asset: _.head(value)?.asset,
-                    denom: _.head(value)?.denom,
-                    amount: _.sumBy(value, 'amount'),
-                    value: _.sumBy(value, 'value'),
-                    contracts: value.map(v => {
-                      return {
-                        chain: v.chain,
-                        contract: v.asset?.contracts?.find(c => c.chain_id === v.chain?.chain_id),
-                        denom: v.denom,
-                        amount: v.amount,
-                        value: v.value,
-                      }
-                    })
-                  }
-                }), ['value', 'amount'], ['desc', 'desc']).map((t, i) => (
-                  <div key={i} className="flex items-center justify-between my-1">
-                    <div className="flex items-center space-x-2">
-                      <img
-                        src={t.asset?.image}
-                        alt=""
-                        onClick={() => setAssetSelect(t.asset?.id)}
-                        className="w-7 h-7 rounded-full cursor-pointer"
-                      />
-                      <div
-                        onClick={() => setAssetSelect(t.asset?.id)}
-                        className="cursor-pointer flex flex-col space-y-1.5"
-                      >
-                        <span className="text-2xs font-semibold">
-                          {t.denom?.title}
-                        </span>
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-3xs font-semibold">
-                          {t.denom?.symbol}
-                        </span>
-                      </div>
-                    </div>
-                    <Popover
-                      placement="bottom"
-                      title={<span className="normal-case">Supply on EVMs</span>}
-                      content={<div className="w-60 space-y-2">
-                        {_.orderBy(t.contracts || [], ['amount'], ['desc']).map((c, j) => (
-                          <div key={j} className="flex items-center justify-between space-x-2">
-                            <div className="flex flex-col">
-                              <span className="font-semibold">{chainName(c.chain)}</span>
-                              <div className="flex items-center space-x-1">
-                                {c.contract?.contract_address ?
-                                  <>
-                                    <Copy
-                                      value={c.contract.contract_address}
-                                      copyTitle={<span className="text-xs font-normal">
-                                        {ellipse(c.contract.contract_address, 6)}
-                                      </span>}
-                                    />
-                                    {c.chain?.explorer?.url && (
-                                      <a
-                                        href={`${c.chain.explorer.url}${c.chain.explorer.contract_path?.replace('{address}', c.contract.contract_address)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="min-w-max text-blue-600 dark:text-white"
-                                      >
-                                        {c.chain.explorer.icon ?
-                                          <img
-                                            src={c.chain.explorer.icon}
-                                            alt=""
-                                            className="w-3.5 h-3.5 rounded-full opacity-60 hover:opacity-100"
-                                          />
-                                          :
-                                          <TiArrowRight size={16} className="transform -rotate-45" />
-                                        }
-                                      </a>
-                                    )}
-                                  </>
-                                  :
-                                  '-'
-                                }
-                              </div>
-                            </div>
-                            <div className="flex flex-col items-end space-y-1.5">
-                              <span className="text-2xs space-x-1">
-                                <span className="font-mono uppercase font-semibold">{number_format(c.amount, c.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
-                                <span className="text-gray-400 dark:text-gray-600">{c.denom?.symbol}</span>
-                              </span>
-                              {c.value > 0 && (
-                                <span className="font-mono uppercase text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                                  {currency_symbol}{number_format(c.value, c.value > 100000 ? '0,0.00a' : '0,0.00')}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>}
-                    >
-                      <div className="flex flex-col items-end space-y-1.5">
-                        <span className="text-2xs space-x-1">
-                          <span className="font-mono uppercase font-semibold">{number_format(t.amount, t.amount >= 100000 ? '0,0.00a' : '0,0.000')}</span>
-                          <span className="normal-case text-gray-400 dark:text-gray-600 font-normal">{t.asset?.symbol}</span>
-                        </span>
-                        {t.value > 0 && (
-                          <span className="font-mono text-gray-400 dark:text-gray-600 text-3xs font-medium">
-                            {currency_symbol}{number_format(t.value, t.value > 100000 ? '0,0.00a' : '0,0.00')}
-                          </span>
-                        )}
-                      </div>
-                    </Popover>
-                  </div>
-                ))}
-              </div>
-              :
-              <div className="flex flex-col space-y-3">
-                {[...Array(5).keys()].map(i => (
-                  <div key={i} className="flex items-center justify-between my-1">
-                    <div className="flex items-center space-x-2">
-                      <div className="skeleton w-7 h-7 rounded-full" />
-                      <div className="skeleton w-16 h-5" />
-                    </div>
-                    <div className="skeleton w-16 h-5 ml-auto" />
-                  </div>
-                ))}
-              </div>
-            }
-            <div className="flex items-center justify-between space-x-1.5">
-              <span className="flex items-center text-gray-400 dark:text-gray-600 text-sm font-normal space-x-1">
-                <span>on</span>
-                {crosschainTVLData ?
-                  <span className="whitespace-nowrap leading-4 text-gray-700 dark:text-gray-300 text-2xs font-medium">{moment(crosschainTVLData.updated_at).format('MMM D, h:mm A')}</span>
-                  :
-                  <div className="skeleton w-20 h-5" />
-                }
-              </span>
-              <span className="flex items-center text-gray-400 dark:text-gray-600 text-sm font-normal space-x-1 ml-auto">
-                <span>total</span>
-                {crosschainTVLData ?
-                  <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono uppercase text-white font-semibold py-0.5 px-1.5">
-                    {currency_symbol}{number_format(_.sumBy(crosschainTVLData.data || [], 'value'), _.sumBy(crosschainTVLData.data || [], 'value') >= 100000 ? '0,0.00a' : '0,0.000')}
                   </div>
                   :
                   <div className="skeleton w-12 h-6" />
@@ -1026,7 +846,7 @@ export default function Transfers() {
           </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto">
+      {/*<div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between">
           <span className="text-base sm:text-lg font-semibold">Asset Transfers</span>
           {assetSelect ?
@@ -1106,38 +926,8 @@ export default function Transfers() {
               txsData={chartData?.data?.find(t => t?.id === assetSelect)}
             />
           </div>
-          <div
-            title={<span className="text-black dark:text-white text-base font-semibold">TVL on EVMs</span>}
-            description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Total Value Locked on Axelar Network</span>}
-            right={assetSelect && crosschainTVLData?.updated_at && (
-              <div className="min-w-max text-right space-y-1.5 -mt-0.5">
-                <div className="flex items-center justify-end space-x-1.5">
-                  <span className="font-mono text-base font-semibold">
-                    {typeof _.sumBy(crosschainTVLData.data?.filter(d => d?.asset?.id === assetSelect), 'amount') === 'number' ? number_format(_.sumBy(crosschainTVLData.data?.filter(d => d?.asset?.id === assetSelect), 'amount'), '0,0.00000000') : '- '}
-                  </span>
-                  <span className="text-gray-400 dark:text-gray-600 text-base">{crosschainTVLData.data?.find(_t => _t?.asset?.id === assetSelect)?.asset?.symbol}</span>
-                </div>
-                <div className="text-gray-400 dark:text-gray-500 text-2xs font-medium">{moment(crosschainTVLData.updated_at).format('MMM, D YYYY h:mm:ss A')}</div>
-              </div>
-            )}
-            className="shadow border-0 pb-0 px-2 sm:px-4"
-          >
-            <TVLByChain
-              tvlData={crosschainTVLData?.data?.filter(d => d?.asset?.id === assetSelect)}
-            />
-          </div>
         </div>
-      </div>
-      <div className="max-w-7xl mx-auto">
-        <div
-          title={<span className="text-black dark:text-white text-base font-semibold">Traffics</span>}
-          description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Cross-Chain on Axelar Network</span>}
-          className="shadow border-0 my-6 px-4 sm:py-4"
-        >
-          <NetworkGraph data={transfersData?.ng_data} />
-        </div>
-        <TransfersTable data={transfersData} />
-      </div>
+      </div>*/}
     </div>
   )
 }

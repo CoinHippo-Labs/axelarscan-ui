@@ -1,4 +1,4 @@
-import Transfers from '../../components/validator'
+import Transfers from '../../components/transfers'
 
 export default () => {
   return (
