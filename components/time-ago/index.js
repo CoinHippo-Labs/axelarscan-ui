@@ -13,7 +13,7 @@ export default ({
     <Popover
       placement={placement}
       title={title}
-      content={<div className="w-40 text-xs font-medium mx-1">
+      content={<div className="w-36 text-xs font-medium mx-1">
         {_time.format('MMM D, YYYY h:mm:ss A')}
       </div>}
       titleClassName={titleClassName}

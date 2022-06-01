@@ -474,6 +474,7 @@ export default ({ data }) => {
                   ]}
                   data={delegations}
                   noPagination={delegations.length <= 10}
+                  noRecordPerPage={true}
                   defaultPageSize={10}
                   className="no-border"
                 />
@@ -608,6 +609,7 @@ export default ({ data }) => {
                   ]}
                   data={redelegations}
                   noPagination={redelegations.length <= 10}
+                  noRecordPerPage={true}
                   defaultPageSize={10}
                   className="no-border"
                 />
@@ -707,6 +709,7 @@ export default ({ data }) => {
                   ]}
                   data={unbondings}
                   noPagination={unbondings.length <= 10}
+                  noRecordPerPage={true}
                   defaultPageSize={10}
                   className="no-border"
                 />

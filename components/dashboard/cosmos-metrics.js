@@ -38,13 +38,13 @@ export default ({ data }) => {
         <div className={`${metricClassName} cursor-pointer`}>
           <div className="flex items-center justify-between space-x-2">
             <div className="flex items-center space-x-1.5">
-              <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+              <span className="whitespace-nowrap text-slate-500 dark:text-slate-300 text-base font-semibold">
                 {pre_votes > 0 ?
                   'Pre Votes' : 'Consensus State'
                 }
               </span>
               {pre_votes > 0 && (
-                <div className={`${pre_votes > 2 / 3 ? 'bg-green-500 dark:bg-green-600' : 'bg-red-500 dark:bg-red-600'} rounded-lg text-white text-xs py-0.5 px-2`}>
+                <div className={`${pre_votes > 2 / 3 ? 'bg-green-100 dark:bg-green-900 border border-green-500 dark:border-green-600 text-green-500 dark:text-green-600' : 'bg-red-100 dark:bg-red-900 border border-red-500 dark:border-red-600 text-red-500 dark:text-red-600'} rounded-lg text-xs font-semibold py-0.5 px-1.5`}>
                   {number_format(pre_votes, '0,0.00%')}
                 </div>
               )}
@@ -123,7 +123,7 @@ export default ({ data }) => {
             }
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-            seconds
+            seconds from last {number_format(process.env.NEXT_PUBLIC_NUM_AVG_BLOCK_TIME_BLOCKS, '0,0')} blocks
           </span>
         </a>
       </Link>
