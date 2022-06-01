@@ -124,10 +124,12 @@ export default ({ data }) => {
             </div>}
             className="w-7 h-7"
           >
-            <div
-              title={number_format(height, '0,0')}
-              className={`w-6 h-6 ${vote ? 'bg-green-500 dark:bg-green-600' : v && !vote ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
-            />
+            <Link href={`/evm-votes?pollId=${id}`}>
+              <div
+                title={number_format(height, '0,0')}
+                className={`w-6 h-6 ${vote ? 'bg-green-500 dark:bg-green-600' : v && !vote ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
+              />
+            </Link>
           </Popover>
           :
           <div

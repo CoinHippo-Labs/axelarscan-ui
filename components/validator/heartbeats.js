@@ -37,10 +37,12 @@ export default ({ data }) => {
             </div>}
             className="w-7 h-7"
           >
-            <div
-              title={number_format(b?.height, '0,0')}
-              className={`w-6 h-6 ${b?.up ? 'bg-green-500 dark:bg-green-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
-            />
+            <Link href={`/block/${b.height}`}>
+              <div
+                title={number_format(b?.height, '0,0')}
+                className={`w-6 h-6 ${b?.up ? 'bg-green-500 dark:bg-green-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
+              />
+            </Link>
           </Popover>
           :
           <div

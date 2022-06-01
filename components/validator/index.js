@@ -226,6 +226,7 @@ export default () => {
           const response = await getUptimes({
             query: { range: { height: {
               gt: latest_block - num_uptime_display_blocks,
+              lte: latest_block,
             } } },
             size: num_uptime_display_blocks,
             sort: [{ height: 'desc' }],
