@@ -3,19 +3,19 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { MdOutlineArrowBackIos, MdOutlineArrowForwardIos } from 'react-icons/md'
+import { FiBox, FiCode } from 'react-icons/fi'
+import { BiFileBlank, BiMessageDots } from 'react-icons/bi'
 
 import CosmosMetrics from './cosmos-metrics'
-// import NetworkGraph from '../transfers/network-graph'
+import NetworkGraph from './network-graph'
+import CrossChainQuantity from './cross-chain-quantity'
 import Blocks from '../blocks'
 import Transactions from '../transactions'
-import Image from '../image'
 import { consensus_state } from '../../lib/api/rpc'
 import { transfers as getTransfers } from '../../lib/api/index'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { hexToBech32 } from '../../lib/object/key'
-import { currency } from '../../lib/object/currency'
 import { number_format, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -30,9 +30,6 @@ export default () => {
   const [consensusState, setConsensusState] = useState(null)
   const [cosmosMetrics, setCosmosMetrics] = useState(null)
   const [transfers, setTransfers] = useState(null)
-
-  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-  const axelarChain = getChain('axelarnet', cosmos_chains_data)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -75,7 +72,7 @@ export default () => {
           validator_description: description,
           voting_power: proposer.voting_power,
           voting_power_percentage: bonded_tokens && (voting_power * 100 / Math.floor(bonded_tokens)),
-          pre_votes: _.max((votes || []).map(v => Number(_.last(v?.prevotes_bit_array?.split(' = ') || [])))),
+          // pre_votes: _.max((votes || []).map(v => Number(_.last(v?.prevotes_bit_array?.split(' = ') || [])))),
         },
         block_height: Number(latest_block_height),
         block_time: moment(latest_block_time).valueOf(),
@@ -94,229 +91,178 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (evm_chains_data && cosmos_chains_data && assets_data) {
+      if (evm_chains_data && cosmos_chains_data/* && assets_data*/) {
         if (!controller.signal.aborted) {
-          let response, data
-          response = await getTransfers({
+          const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+          const axelar_chain_data = getChain('axelarnet', chains_data)
+          const response = await getTransfers({
             aggs: {
-              from_chains: {
-                terms: { field: 'send.sender_chain.keyword', size: 10000 },
+              source_chains: {
+                terms: { field: 'source.sender_chain.keyword', size: 1000 },
                 aggs: {
-                  to_chains: {
-                    terms: { field: 'send.recipient_chain.keyword', size: 10000 },
-                    aggs: {
-                      assets: {
-                        terms: { field: 'send.denom.keyword', size: 10000 },
-                        aggs: {
-                          amounts: {
-                            sum: {
-                              field: 'send.amount',
-                            },
-                          },
-                          avg_amounts: {
-                            avg: {
-                              field: 'send.amount',
-                            },
-                          },
-                          max_amounts: {
-                            max: {
-                              field: 'send.amount',
-                            },
-                          },
-                          since: {
-                            min: {
-                              field: 'send.created_at.ms',
-                            },
-                          },
-                        },
-                      },
-                    },
+                  destination_chains: {
+                    terms: { field: 'source.recipient_chain.keyword', size: 1000 },
+                    // aggs: {
+                    //   assets: {
+                    //     terms: { field: 'source.denom.keyword', size: 1000 },
+                    //   },
+                    // },
                   },
                 },
               },
             },
           })
-          data = _.orderBy(response?.data?.map(t => {
-            const asset = getDenom(t?.asset, assets_data)
+          const data = _.orderBy(response?.data?.map(t => {
+            const { source_chain, destination_chain/*, asset*/ } = { ...t }
             return {
               ...t,
-              from_chain: getChain(t?.from_chain, evm_chains_data) || getChain(t?.from_chain, cosmos_chains_data),
-              to_chain: getChain(t?.to_chain, evm_chains_data) || getChain(t?.to_chain, cosmos_chains_data),
-              asset,
-              amount: denom_manager.amount(t?.amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
-              avg_amount: denom_manager.amount(t?.avg_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
-              max_amount: denom_manager.amount(t?.max_amount, asset?.id, assets_data, chain_manager.chain_id(t?.from_chain, evm_chains_data)),
+              source_chain_data: getChain(source_chain, chains_data),
+              destination_chain_data: getChain(destination_chain, chains_data),
+              // asset_data: getDenom(asset, assets_data),
             }
-          }).map(t => {
-            const price = t?.asset?.token_data?.[currency] || 0
-            return {
-              ...t,
-              value: (price * t.amount) || 0,
-              avg_value: (price * t.avg_amount) || 0,
-              max_value: (price * t.max_amount) || 0,
-            }
-          }), ['tx'], ['desc']).filter(t => assets_data?.findIndex(a => a?.id === t?.asset?.id && (!a.is_staging || staging)) > -1)
-          let _data = [], ng_data = []
-          for (let i = 0; i < data.length; i++) {
-            const transfer = data[i]
-            if (transfer?.from_chain?.id !== axelarChain?.id && transfer?.to_chain?.id !== axelarChain?.id) {
-              const from_transfer = _.cloneDeep(transfer)
-              from_transfer.to_chain = axelarChain
-              from_transfer.id = `${from_transfer.from_chain?.id}_${from_transfer.to_chain?.id}_${from_transfer.asset?.id}`
-              ng_data.push(from_transfer)
-
-              const to_transfer = _.cloneDeep(transfer)
-              to_transfer.from_chain = axelarChain
-              to_transfer.id = `${to_transfer.from_chain?.id}_${to_transfer.to_chain?.id}_${to_transfer.asset?.id}`
-              ng_data.push(to_transfer)
-
-              transfer.id = `${transfer.from_chain?.id}_${transfer.to_chain?.id}_${transfer.asset?.id}`
-              _data.push(transfer)
+          }) || [], ['num_txs'], ['desc'])
+          const network_graph_data = []
+          data.forEach(t => {
+            const { source_chain, destination_chain/*, asset*/ } = { ...t }
+            if (!equals_ignore_case(source_chain, axelar_chain_data?.id) && !equals_ignore_case(destination_chain, axelar_chain_data?.id)) {
+              const x = ['source', 'destination']
+              x.forEach(_x => {
+                const _t = _.cloneDeep(t)
+                const id_field = `${_x}_chain`, data_field = `${_x}_chain_data`
+                _t[id_field] = axelar_chain_data?.id
+                _t[data_field] = axelar_chain_data
+                _t.id = `${_t.source_chain_data?.id}_${_t.destination_chain_data?.id}`//_${asset}`
+                network_graph_data.push(_t)
+              })
             }
             else {
-              transfer.id = `${transfer.from_chain?.id}_${transfer.to_chain?.id}_${transfer.asset?.id}`
-              ng_data.push(transfer)
-              _data.push(transfer)
-            }
-          }
-
-          _data = Object.entries(_.groupBy(_data, 'id')).map(([key, value]) => {
-            return {
-              id: key,
-              ..._.head(value),
-              tx: _.sumBy(value, 'tx'),
-              amount: _.sumBy(value, 'amount'),
-              value: _.sumBy(value, 'value'),
-              avg_amount: _.sumBy(value, 'amount') / _.sumBy(value, 'tx'),
-              avg_value: _.sumBy(value, 'value') / _.sumBy(value, 'tx'),
-              max_amount: _.maxBy(value, 'max_amount')?.max_amount,
-              max_value: _.maxBy(value, 'max_value')?.max_value,
-              since: _.minBy(value, 'since')?.since,
+              t.id = `${t.source_chain_data?.id}_${t.destination_chain_data?.id}`//_${asset}`
+              network_graph_data.push(t)
             }
           })
-          data = _.orderBy(_data, ['tx'], ['desc'])
-
-          ng_data = Object.entries(_.groupBy(ng_data, 'id')).map(([key, value]) => {
-            return {
-              id: key,
-              ..._.head(value),
-              tx: _.sumBy(value, 'tx'),
-              amount: _.sumBy(value, 'amount'),
-              value: _.sumBy(value, 'value'),
-              avg_amount: _.sumBy(value, 'amount') / _.sumBy(value, 'tx'),
-              avg_value: _.sumBy(value, 'value') / _.sumBy(value, 'tx'),
-              max_amount: _.maxBy(value, 'max_amount')?.max_amount,
-              max_value: _.maxBy(value, 'max_value')?.max_value,
-              since: _.minBy(value, 'since')?.since,
-            }
+          setTransfers({
+            data: _.orderBy(Object.entries(_.groupBy(data, 'id')).map(([k, v]) => {
+              const d = {
+                ..._.head(v),
+                id: k,
+                num_txs: _.sumBy(v, 'num_txs'),
+                // assets: v.map(_v => _v?.asset),
+                // assets_data: v.map(_v => _v?.asset_data),
+              }
+              // delete d.asset
+              // delete d.asset_data
+              return {
+                ...d,
+              }
+            }), ['num_txs'], ['desc']),
+            network_graph_data: _.orderBy(Object.entries(_.groupBy(network_graph_data, 'id')).map(([k, v]) => {
+              const n = {
+                ..._.head(v),
+                id: k,
+                num_txs: _.sumBy(v, 'num_txs'),
+                // assets: v.map(_v => _v?.asset),
+                // assets_data: v.map(_v => _v?.asset_data),
+              }
+              // delete n.asset
+              // delete n.asset_data
+              return {
+                ...n,
+              }
+            }), ['num_txs'], ['desc']),
           })
-          ng_data = _.orderBy(ng_data, ['tx'], ['desc'])
-
-          setTransfers({ data, ng_data })
         }
       }
     }
     getData()
-    const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
+    const interval = setInterval(() => getData(), 1 * 60 * 1000)
     return () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [evm_chains_data, cosmos_chains_data, assets_data])
+  }, [evm_chains_data, cosmos_chains_data/*, assets_data*/])
 
   return (
-    <div className="space-y-6 mt-2 mb-6 mx-auto pb-10">
+    <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">
       <CosmosMetrics data={cosmosMetrics} />
-      {/*<div
-        title={<span className="text-black dark:text-white text-lg font-semibold ml-1">Cross-Chain Asset Transfers</span>}
-        className="bg-transparent border-0 mt-6 mb-0 py-0 px-3 sm:px-0"
-      >
-        <div className="w-full grid grid-cols-1 md:grid-cols-4 mt-2 gap-5">
-          <div
-            title={<span className="text-black dark:text-white text-base font-semibold">Transactions</span>}
-            description={<span className="text-gray-400 dark:text-gray-500 text-xs font-normal">Number of cross-chain transactions</span>}
-            className="md:col-span-2 lg:col-span-1 bg-transparent sm:bg-white sm:dark:bg-gray-900 shadow border-0 px-4 sm:py-4"
-          >
-            <div className="flex flex-col space-y-2 mt-1">
-              {transfersData ?
-                <div className="h-52 md:h-88 flex flex-col overflow-y-auto space-y-3">
-                  {transfersData.data?.map((t, i) => (
-                    <div key={i} className="flex items-center justify-between my-1">
-                      <div className="flex items-center space-x-2">
-                        <Image
-                          src={t.from_chain?.image}
-                          className="w-7 md:w-8 h-7 md:h-8 rounded-full"
-                        />
-                        <div className="flex items-center space-x-0.5 md:space-x-1">
-                          <MdOutlineArrowBackIos size={20} />
-                          <Image
-                            src={t.asset?.image}
-                            className="w-4 md:w-5 h-4 md:h-5 rounded-full"
-                          />
-                          <MdOutlineArrowForwardIos size={20} />
-                        </div>
-                        <Image
-                          src={t.to_chain?.image}
-                          className="w-7 md:w-8 h-7 md:h-8 rounded-full"
-                        />
-                      </div>
-                      <div className="flex items-center space-x-1">
-                        <span className="font-mono uppercase text-gray-800 dark:text-gray-100 text-base font-semibold">
-                          {number_format(t.tx, t.tx >= 100000 ? '0,0.00a' : '0,0')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                :
-                <div className="flex flex-col space-y-3">
-                  {[...Array(8).keys()].map(i => (
-                    <div key={i} className="flex items-center justify-between my-1">
-                      <div className="flex items-center space-x-2">
-                        <div className="skeleton w-7 md:w-8 h-7 md:h-8 rounded-full" />
-                        <div className="flex items-center space-x-0.5 md:space-x-1">
-                          <MdOutlineArrowBackIos size={20} />
-                          <div className="skeleton w-4 md:w-5 h-4 md:h-5 rounded-full" />
-                          <MdOutlineArrowForwardIos size={20} />
-                        </div>
-                        <div className="skeleton w-7 md:w-8 h-7 md:h-8 rounded-full" />
-                      </div>
-                      <div className="skeleton w-16 h-5 ml-auto" />
-                    </div>
-                  ))}
-                </div>
-              }
-              <span className="flex items-center text-gray-400 dark:text-gray-600 text-sm font-normal space-x-2 ml-auto">
-                <span>total</span>
-                {transfersData ?
-                  <div className="bg-blue-600 dark:bg-blue-700 rounded-lg font-mono text-white font-semibold py-0.5 px-1.5">
-                    {number_format(_.sumBy(transfersData.data, 'tx'), '0,0')}
-                  </div>
-                  :
-                  <div className="skeleton w-12 h-6" />
-                }
-                <span>transactions</span>
-              </span>
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between space-x-2">
+            <Link href="/transfers">
+              <a className="flex items-center space-x-2">
+                <FiCode size={20} />
+                <span className="uppercase text-base font-bold">
+                  Cross-chain transfers
+                </span>
+              </a>
+            </Link>
+            {transfers?.data && (
+              <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                <span className="text-base font-semibold">
+                  Total:
+                </span>
+                <span className="text-base font-bold">
+                  {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
+                </span>
+              </div>
+            )}
           </div>
-          <div className="md:col-span-2 hidden sm:block bg-transaparent sm:bg-white dark:bg-black rounded-2xl shadow border-0 sm:px-6 sm:py-4">
-            <NetworkGraph data={transfersData?.ng_data} mini={true} />
+          <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
+            <NetworkGraph
+              id="transfers"
+              data={transfers?.network_graph_data}
+            />
+            <CrossChainQuantity data={transfers?.data} />
           </div>
         </div>
-      </div>*/}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between space-x-2">
+            <Link href="/gmp">
+              <a className="flex items-center space-x-2">
+                <BiMessageDots size={20} />
+                <span className="uppercase text-base font-bold">
+                  General Message Passing
+                </span>
+              </a>
+            </Link>
+            {transfers?.data && (
+              <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                <span className="text-base font-semibold">
+                  Total:
+                </span>
+                <span className="text-base font-bold">
+                  {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
+            <NetworkGraph
+              id="gmp"
+              data={transfers?.network_graph_data}
+            />
+            <CrossChainQuantity data={transfers?.data} />
+          </div>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="space-y-2">
           <Link href="/blocks">
-            <a className="uppercase text-base font-bold">
-              Latest Blocks
+            <a className="flex items-center space-x-2">
+              <FiBox size={20} />
+              <span className="uppercase text-base font-bold">
+                Latest blocks
+              </span>
             </a>
           </Link>
           <Blocks n={10} />
         </div>
         <div className="space-y-2">
           <Link href="/transactions">
-            <a className="uppercase text-base font-bold">
-              Latest Transactions
+            <a className="flex items-center space-x-2">
+              <BiFileBlank size={20} />
+              <span className="uppercase text-base font-bold">
+                Latest transactions
+              </span>
             </a>
           </Link>
           <Transactions n={10} />

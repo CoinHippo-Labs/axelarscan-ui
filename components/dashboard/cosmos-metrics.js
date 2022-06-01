@@ -58,7 +58,7 @@ export default ({ data }) => {
           <div className="text-3xl font-bold">
             {latest_block && operator_address ?
               <Link href={`/validator/${operator_address}`}>
-                <a className="min-w-max flex items-center space-x-2">
+                <a className="min-w-max h-9 flex items-center space-x-2">
                   <ValidatorProfile
                     validator_description={validator_description}
                     className="w-8 h-8"

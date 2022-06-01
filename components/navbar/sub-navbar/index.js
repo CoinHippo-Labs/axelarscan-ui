@@ -8,8 +8,8 @@ import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
 import EVMVoteFilters from '../../evm-votes/filters'
 import TransactionFilters from '../../transactions/filters'
-// import GMPFilters from '../../gmp/filters'
 // import TransferFilters from '../../transfers/filters'
+// import GMPFilters from '../../gmp/filters'
 import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
@@ -170,50 +170,6 @@ export default () => {
         />
       )
       break
-    case 'gmp':
-    case 'gmp/search':
-      title = 'General Message Passing'
-      subtitle = (
-        <div className="flex items-center space-x-1">
-          {[
-            { title: 'Overview', path: '/gmp' },
-            { title: 'Search', path: '/gmp/search' },
-          ].map((r, i) => (
-            <div
-              key={i}
-              onClick={() => router.push(r.path)}
-              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
-            >
-              <span className="font-semibold">
-                {r.title}
-              </span>
-            </div>
-          ))}
-        </div>
-      )
-      // right = pathname.endsWith('/search') && (
-      //   <GMPFilters />
-      // )
-      break
-    case 'gmp/[tx]':
-      title = 'General Message Passing'
-      subtitle = (
-        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
-          <div>
-            <span className="xl:hidden">
-              {ellipse(tx, 16)}
-            </span>
-            <span className="hidden xl:block">
-              {ellipse(tx, 24)}
-            </span>
-          </div>
-          <Copy
-            value={tx}
-            size={18}
-          />
-        </div>
-      )
-      break
     case 'transfers':
     case 'transfers/search':
       title = 'Cross-chain Transfers'
@@ -241,6 +197,50 @@ export default () => {
       break
     case 'transfers/[tx]':
       title = 'Cross-chain Transfers'
+      subtitle = (
+        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+          <div>
+            <span className="xl:hidden">
+              {ellipse(tx, 16)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(tx, 24)}
+            </span>
+          </div>
+          <Copy
+            value={tx}
+            size={18}
+          />
+        </div>
+      )
+      break
+    case 'gmp':
+    case 'gmp/search':
+      title = 'General Message Passing'
+      subtitle = (
+        <div className="flex items-center space-x-1">
+          {[
+            { title: 'Overview', path: '/gmp' },
+            { title: 'Search', path: '/gmp/search' },
+          ].map((r, i) => (
+            <div
+              key={i}
+              onClick={() => router.push(r.path)}
+              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+            >
+              <span className="font-semibold">
+                {r.title}
+              </span>
+            </div>
+          ))}
+        </div>
+      )
+      // right = pathname.endsWith('/search') && (
+      //   <GMPFilters />
+      // )
+      break
+    case 'gmp/[tx]':
+      title = 'General Message Passing'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
           <div>

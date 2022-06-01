@@ -1,5 +1,5 @@
-import { FiBox } from 'react-icons/fi'
-import { BiServer, BiFileBlank, BiMessageDots, BiCode, BiCoinStack } from 'react-icons/bi'
+import { FiBox, FiCode } from 'react-icons/fi'
+import { BiServer, BiFileBlank, BiMessageDots, BiCoinStack } from 'react-icons/bi'
 import { RiKeyLine, RiStackLine } from 'react-icons/ri'
 import { MdOutlineHowToVote } from 'react-icons/md'
 
@@ -35,16 +35,16 @@ export default [
     icon: <RiKeyLine size={18} className="stroke-current" />,
   },
   {
+    id: 'transfers',
+    title: 'Transfers',
+    path: '/transfers',
+    icon: <FiCode size={18} className="stroke-current" />,
+  },
+  {
     id: 'gmp',
     title: 'GMP',
     path: '/gmp',
     icon: <BiMessageDots size={18} className="stroke-current" />,
-  },
-  {
-    id: 'transfers',
-    title: 'Transfers',
-    path: '/transfers',
-    icon: <BiCode size={18} className="stroke-current" />,
   },
   {
     id: 'batches',
