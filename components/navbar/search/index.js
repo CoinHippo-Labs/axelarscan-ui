@@ -51,7 +51,7 @@ export default () => {
             match: { 'source.id': input },
           },
         })
-        if (response?.data?.[0]) {
+        if (response?.total) {
           input_type = 'transfer'
         }
         else if (input_type === 'evm_tx') {

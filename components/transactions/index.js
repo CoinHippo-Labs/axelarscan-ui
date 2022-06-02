@@ -11,7 +11,7 @@ import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { transactions_by_events } from '../../lib/api/cosmos'
+import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
 import { transactions as getTransactions } from '../../lib/api/index'
 import { number_format, name, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -84,6 +84,10 @@ export default ({ n }) => {
             response = await transactions_by_events(`transfer.recipient='${address}'`, response?.data, true, assets_data)
             response = await transactions_by_events(`message.sender='${address}'`, response?.data, true, assets_data)
             response = await transactions_by_events(`link.depositAddress='${address}'`, response?.data, true, assets_data)
+            if (response?.data) {
+              console.log(response.data)
+              response.data.forEach(d => getTransaction(d?.txhash))
+            }
           }
           else {
             const must = [], must_not = []
