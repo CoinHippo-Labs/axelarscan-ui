@@ -242,8 +242,8 @@ export default () => {
         className="no-border"
       />
       :
-      <div className="py-2">
-        <TailSpin color={loader_color(theme)} width="32" height="32" />
+      <div className="h-full flex items-center justify-center pb-6">
+        <TailSpin color={loader_color(theme)} width="40" height="40" />
       </div>
   )
 }

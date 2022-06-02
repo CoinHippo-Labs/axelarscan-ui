@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { RotatingSquare } from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 
 import Image from '../../image'
 import { currency_symbol } from '../../../lib/object/currency'
@@ -91,7 +91,7 @@ export default () => {
         </div>
         :
         <div className="h-full flex items-center justify-center">
-          <RotatingSquare color={loader_color(theme)} width="56" height="56" strokeWidth="8" />
+          <TailSpin color={loader_color(theme)} width="40" height="40" strokeWidth="8" />
         </div>
       }
     </div>

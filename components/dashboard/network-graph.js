@@ -31,11 +31,11 @@ export default ({
         layout: {
           type: 'radial',
           preventOverlap: true,
-          linkDistance: 180,
+          linkDistance: 240,
           nodeSpacing: 16,
         },
         defaultNode: {
-          size: 36,
+          size: 32,
         },
         defaultEdge: {
           labelCfg: {
@@ -76,7 +76,7 @@ export default ({
           if (nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0) {
             nodes.push({
               id,
-              size: equals_ignore_case(id, axelar_chain_data?.id) ? 48 : 36,
+              size: equals_ignore_case(id, axelar_chain_data?.id) ? 40 : 32,
               type: 'image',
               img: _d?.image,
               label: chainName(_d),

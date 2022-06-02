@@ -272,7 +272,7 @@ export default () => {
                 const { params } = { ...props.row.original }
                 const { symbol, amount, newThreshold } = { ...params }
                 const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
-                const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
+                const contract_data = asset_data?.contracts?.find(_c => _c?.chain_id === chain_data?.chain_id)
                 const _decimals = contract_data?.decimals || asset_data?.decimals || 18
                 const _symbol = contract_data?.symbol || asset_data?.symbol || symbol
                 const image = contract_data?.image || asset_data?.image

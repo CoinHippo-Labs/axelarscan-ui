@@ -9,7 +9,7 @@ import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 import EVMVoteFilters from '../../evm-votes/filters'
 import TransactionFilters from '../../transactions/filters'
 // import TransferFilters from '../../transfers/filters'
-// import GMPFilters from '../../gmp/filters'
+import GMPFilters from '../../gmp/filters'
 import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
@@ -170,8 +170,8 @@ export default () => {
         />
       )
       break
-    case 'transfers':
-    case 'transfers/search':
+    case '/transfers':
+    case '/transfers/search':
       title = 'Cross-chain Transfers'
       subtitle = (
         <div className="flex items-center space-x-1">
@@ -214,8 +214,8 @@ export default () => {
         </div>
       )
       break
-    case 'gmp':
-    case 'gmp/search':
+    case '/gmp':
+    case '/gmp/search':
       title = 'General Message Passing'
       subtitle = (
         <div className="flex items-center space-x-1">
@@ -235,11 +235,11 @@ export default () => {
           ))}
         </div>
       )
-      // right = pathname.endsWith('/search') && (
-      //   <GMPFilters />
-      // )
+      right = pathname.endsWith('/search') && (
+        <GMPFilters />
+      )
       break
-    case 'gmp/[tx]':
+    case '/gmp/[tx]':
       title = 'General Message Passing'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">

@@ -137,6 +137,8 @@ export default () => {
                 const id_field = `${_x}_chain`, data_field = `${_x}_chain_data`
                 _t[id_field] = axelar_chain_data?.id
                 _t[data_field] = axelar_chain_data
+                _t.source_chain = _t.source_chain_data?.id
+                _t.destination_chain = _t.destination_chain_data?.id
                 _t.id = `${_t.source_chain_data?.id}_${_t.destination_chain_data?.id}`//_${asset}`
                 network_graph_data.push(_t)
               })
@@ -214,7 +216,7 @@ export default () => {
               source_chain_data: getChain(source_chain, chains_data),
               destination_chain_data: getChain(destination_chain, chains_data),
             }
-          }) || [], ['num_txs'], ['desc'])
+          }).filter(t => t?.source_chain_data && t.destination_chain_data) || [], ['num_txs'], ['desc'])
           const network_graph_data = []
           data.forEach(t => {
             const { source_chain, destination_chain/*, asset*/ } = { ...t }
@@ -225,6 +227,8 @@ export default () => {
                 const id_field = `${_x}_chain`, data_field = `${_x}_chain_data`
                 _t[id_field] = axelar_chain_data?.id
                 _t[data_field] = axelar_chain_data
+                _t.source_chain = _t.source_chain_data?.id
+                _t.destination_chain = _t.destination_chain_data?.id
                 _t.id = `${_t.source_chain_data?.id}_${_t.destination_chain_data?.id}`
                 network_graph_data.push(_t)
               })

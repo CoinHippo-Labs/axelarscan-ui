@@ -222,7 +222,7 @@ export default ({ n }) => {
               accessor: 'type',
               disableSortBy: true,
               Cell: props => (
-                <div className={`max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5`}>
+                <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
                   {name(props.value) || '-'}
                 </div>
               ),
