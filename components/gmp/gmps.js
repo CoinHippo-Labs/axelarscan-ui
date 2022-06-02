@@ -65,7 +65,9 @@ export default ({ n }) => {
     const triggering = is_interval => {
       setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
     }
-    triggering()
+    if (pathname && filters) {
+      triggering()
+    }
     const interval = setInterval(() => triggering(true), (address || ['/gmp/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
     return () => {
       clearInterval(interval)
@@ -489,18 +491,22 @@ export default ({ n }) => {
                 const source_chain_data = getChain(chain, chains_data)
                 const destination_chain_data = getChain(destinationChain, chains_data)
                 const steps = [{
+                  id: 'call',
                   title: 'Contract Call',
                   chain_data: source_chain_data,
                   data: call,
                 }, {
+                  id: 'gas_paid',
                   title: 'Gas Paid',
                   chain_data: source_chain_data,
                   data: gas_paid,
                 }, {
+                  id: 'approved',
                   title: 'Call Approved',
                   chain_data: destination_chain_data,
                   data: approved,
                 }, {
+                  id: 'executed',
                   title: 'Executed',
                   chain_data: destination_chain_data,
                   data: executed,
@@ -531,6 +537,8 @@ export default ({ n }) => {
                           i === 3 && error ?
                             'text-red-500 dark:text-red-600' :
                             'text-slate-400 dark:text-slate-600'
+                      const { explorer } = { ...s.chain_data }
+                      const { url, transaction_path, icon } = { ...explorer }
                       return (
                         <div
                           key={i}
@@ -558,16 +566,16 @@ export default ({ n }) => {
                                 {s.title}
                               </span>
                             }
-                            {s.data?.transactionHash && s.chain_data?.explorer?.url && (
+                            {s.data?.transactionHash && url && (
                               <a
-                                href={`${s.chain_data.explorer.url}${s.chain_data.explorer.transaction_path?.replace('{tx}', s.data.transactionHash)}`}
+                                href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 dark:text-white"
                               >
-                                {s.chain_data.explorer.icon ?
+                                {icon ?
                                   <Image
-                                    src={s.chain_data.explorer.icon}
+                                    src={icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                   />
                                   :

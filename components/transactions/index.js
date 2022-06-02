@@ -53,7 +53,9 @@ export default ({ n }) => {
     const triggering = is_interval => {
       setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
     }
-    triggering()
+    if (assets_data && pathname && filters) {
+      triggering()
+    }
     const interval = setInterval(() => triggering(true), (height || address || ['/transactions/search'].includes(pathname) ? 3 : 0.1) * 60 * 1000)
     return () => {
       clearInterval(interval)

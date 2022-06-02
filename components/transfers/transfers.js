@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
-import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { BiCheckCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -60,7 +60,9 @@ export default ({ n }) => {
     const triggering = is_interval => {
       setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
     }
-    triggering()
+    if (pathname && filters) {
+      triggering()
+    }
     const interval = setInterval(() => triggering(true), (address || ['/transfers/search'].includes(pathname) ? 3 : 0.5) * 60 * 1000)
     return () => {
       clearInterval(interval)
@@ -116,6 +118,7 @@ export default ({ n }) => {
             bool: {
               must,
               should,
+              minimum_should_match: should.length > 0 ? 1 : 0,
               must_not,
             },
           },
@@ -270,6 +273,8 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => {
                 const { sender_chain, recipient_address, amount, denom } = { ...props.value }
+                const { link } = { ...props.row.original }
+                const { asset } = { ...link }
                 const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : sender_chain, chains_data)
                 const asset_data = getDenom(denom, assets_data)
                 const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
@@ -280,7 +285,7 @@ export default ({ n }) => {
                 const { url, address_path, icon } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-1 mb-3">
-                    {amount && symbol && (
+                    {amount && asset_data && (
                       <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
                         {_image && (
                           <Image
@@ -289,16 +294,12 @@ export default ({ n }) => {
                           />
                         )}
                         <span className="text-sm font-semibold">
-                          {asset_data && (
-                            <>
-                              <span className="mr-1">
-                                {number_format(amount, '0,0.000', true)}
-                              </span>
-                              <span>
-                                {ellipse(symbol)}
-                              </span>
-                            </>
-                          )}
+                          <span className="mr-1">
+                            {number_format(amount, '0,0.000', true)}
+                          </span>
+                          <span>
+                            {ellipse(symbol)}
+                          </span>
                         </span>
                       </div>
                     )}
@@ -404,90 +405,108 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, approved, executed, is_executed, error, status } = { ...props.row.original }
-                const { chain, returnValues } = { ...call }
-                const { destinationChain } = { ...returnValues }
-                const source_chain_data = getChain(chain, chains_data)
-                const destination_chain_data = getChain(destinationChain, chains_data)
+                const { source, confirm_deposit, vote, sign_batch, link } = { ...props.row.original }
+                const { sender_chain, recipient_chain } = { ...source }
+                const source_chain_data = getChain(sender_chain, chains_data)
+                const destination_chain_data = getChain(recipient_chain, chains_data)
+                const axelar_chain_data = getChain('axelarnet', chains_data)
                 const steps = [{
-                  title: 'Contract Call',
+                  id: 'source',
+                  title: 'Send Asset',
                   chain_data: source_chain_data,
-                  data: call,
+                  data: source,
+                  id_field: 'id',
                 }, {
-                  title: 'Gas Paid',
-                  chain_data: source_chain_data,
-                  data: gas_paid,
-                }, {
-                  title: 'Call Approved',
-                  chain_data: destination_chain_data,
-                  data: approved,
-                }, {
+                  id: 'confirm_deposit',
+                  title: 'Confirm Deposit',
+                  chain_data: axelar_chain_data,
+                  data: confirm_deposit,
+                  id_field: 'id',
+                }, evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 && {
+                  id: 'vote',
+                  title: 'Vote Confirm',
+                  chain_data: axelar_chain_data,
+                  data: vote,
+                  id_field: 'id',
+                }, evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
+                  id: 'sign_batch',
+                  title: 'Sign Batch',
+                  chain_data: axelar_chain_data,
+                  data: sign_batch,
+                  id_field: 'batch_id',
+                  path: '/batch/{chain}/{id}',
+                  params: {
+                    chain: destination_chain_data?.id,
+                  },
+                }, evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
+                  id: 'executed',
                   title: 'Executed',
-                  chain_data: destination_chain_data,
-                  data: executed,
-                }]
-                let current_step
-                switch (status) {
-                  case 'called':
-                    current_step = gas_paid ? 2 : 1
-                    break
-                  case 'approved':
-                    current_step = 3
-                    break
-                  case 'executed':
-                  case 'error':
-                    current_step = 4
-                    break
-                  default:
-                    break
-                }
+                  chain_data: axelar_chain_data,
+                  data: sign_batch,
+                  id_field: 'batch_id',
+                  path: '/batch/{chain}/{id}',
+                  params: {
+                    chain: destination_chain_data?.id,
+                  },
+                }].filter(s => s).map((s, i) => {
+                  return {
+                    ...s,
+                    i,
+                    finish: !!(s.id === 'executed' ? s.data?.executed : s.data),
+                  }
+                })
+                const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.map((s, i) => {
-                      const text_color = s.data || (i === 3 && is_executed) ?
+                      const text_color = s.finish ?
                         'text-green-500 dark:text-green-600' :
                         i === current_step ?
                           'text-blue-500 dark:text-white' :
-                          i === 3 && error ?
-                            'text-red-500 dark:text-red-600' :
-                            'text-slate-400 dark:text-slate-600'
+                          'text-slate-400 dark:text-slate-600'
+                      const { title, chain_data, data, id_field, path, params, finish } = { ...s }
+                      const id = data?.[id_field]
+                      const { explorer } = { ...chain_data }
+                      const { url, transaction_path, icon } = { ...explorer }
+                      let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
+                      Object.entries({ ...params }).forEach(([k, v]) => {
+                        _path = _path?.replace(`{${k}}`, v)
+                      })
                       return (
                         <div
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {s.data || (i === 3 && is_executed) ?
+                          {finish ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
                             i === current_step ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              i === 3 && error ?
-                                <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
-                                <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
+                              <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
                           }
                           <div className="flex items-center space-x-1">
-                            {s.data?.transactionHash ?
+                            {id ?
                               <Copy
-                                value={s.data.transactionHash}
+                                value={id}
                                 title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
-                                  {s.title}
+                                  {title}
                                 </span>}
                                 size={18}
                               />
                               :
                               <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                {s.title}
+                                {title}
                               </span>
                             }
-                            {s.data?.transactionHash && s.chain_data?.explorer?.url && (
+                            {id && url && (
                               <a
-                                href={`${s.chain_data.explorer.url}${s.chain_data.explorer.transaction_path?.replace('{tx}', s.data.transactionHash)}`}
+                                href={`${url}${_path}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 dark:text-white"
                               >
-                                {s.chain_data.explorer.icon ?
+                                {icon ?
                                   <Image
-                                    src={s.chain_data.explorer.icon}
+                                    src={icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                   />
                                   :
