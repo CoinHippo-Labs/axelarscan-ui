@@ -31,7 +31,7 @@ export default ({
         layout: {
           type: 'radial',
           preventOverlap: true,
-          linkDistance: 240,
+          linkDistance: 180,
           nodeSpacing: 16,
         },
         defaultNode: {

@@ -8,7 +8,7 @@ import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
 import EVMVoteFilters from '../../evm-votes/filters'
 import TransactionFilters from '../../transactions/filters'
-// import TransferFilters from '../../transfers/filters'
+import TransferFilters from '../../transfers/filters'
 import GMPFilters from '../../gmp/filters'
 import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
@@ -191,9 +191,9 @@ export default () => {
           ))}
         </div>
       )
-      // right = pathname.endsWith('/search') && (
-      //   <TransferFilters />
-      // )
+      right = pathname.endsWith('/search') && (
+        <TransferFilters />
+      )
       break
     case 'transfers/[tx]':
       title = 'Cross-chain Transfers'
