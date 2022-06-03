@@ -72,7 +72,16 @@ export default () => {
         let updated_ids = assets_data.filter(a => a?.price).map(a => a.id)
         if (updated_ids.length < assets_data.length) {
           let updated = false
-          const denoms = assets_data.filter(a => a?.id && !updated_ids.includes(a.id)).map(a => a.id)
+          const denoms = assets_data.filter(a => a?.id && !updated_ids.includes(a.id)).map(a => {
+            const chain = _.head(a?.contracts?.map(c => c?.chain))
+            if (chain) {
+              return {
+                denom: a.id,
+                chain,
+              }
+            }
+            return a.id
+          })
           if (denoms.length > 0) {
             const response = await getAssetsPrice({ denoms })
             if (response) {

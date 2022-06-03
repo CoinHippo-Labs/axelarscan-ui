@@ -3,7 +3,7 @@ import { FiCode } from 'react-icons/fi'
 import { BiMessageDots } from 'react-icons/bi'
 
 import Transfers from '../transfers/transfers'
-import Gmps from '../gmp/gmps'
+import Gmps from '../gmps/gmps'
 
 export default () => {
   return (

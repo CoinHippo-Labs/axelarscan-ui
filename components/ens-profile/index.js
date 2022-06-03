@@ -43,7 +43,7 @@ export default ({
         {ellipse(ens_data[address].name, 12)}
       </span>
       <span className="hidden xl:block">
-        {ellipse(ens_data[address].name, 16)}
+        {ellipse(ens_data[address].name, 12)}
       </span>
     </span>
   )
