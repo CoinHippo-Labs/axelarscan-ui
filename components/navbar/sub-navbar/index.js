@@ -195,8 +195,8 @@ export default () => {
         <TransferFilters />
       )
       break
-    case 'transfers/[tx]':
-      title = 'Cross-chain Transfers'
+    case '/transfer/[tx]':
+      title = 'Cross-chain Transfer'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
           <div>
@@ -313,27 +313,6 @@ export default () => {
           </div>
         )}
       </div>
-      {token_data && (
-        <div className="bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center space-x-1.5 ml-4 py-2 px-3">
-          <div className="min-w-max flex items-center space-x-1.5">
-            <span className="uppercase font-bold">
-              {token_data.symbol}
-            </span>
-          </div>
-          {typeof token_data.market_data?.current_price?.[currency] === 'number' ?
-            <span className="font-mono font-semibold">
-              {currency_symbol}{number_format(token_data.market_data.current_price[currency], '0,0.00000000')}
-            </span>
-            :
-            <span>-</span>
-          }
-          {typeof token_data.market_data?.price_change_percentage_24h_in_currency?.[currency] === 'number' && (
-            <span className={`text-${token_data.market_data.price_change_percentage_24h_in_currency[currency] < 0 ? 'red' : 'green'}-500 font-medium`}>
-              {number_format(token_data.market_data.price_change_percentage_24h_in_currency[currency], '+0,0.000')}%
-            </span>
-          )}
-        </div>
-      )}
       <span className="sm:ml-auto" />
       {right ?
         <>
@@ -342,6 +321,27 @@ export default () => {
         </>
         :
         <>
+          {token_data && (
+            <div className="bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center space-x-1.5 ml-4 py-2 px-3">
+              <div className="min-w-max flex items-center space-x-1.5">
+                <span className="uppercase font-bold">
+                  {token_data.symbol}
+                </span>
+              </div>
+              {typeof token_data.market_data?.current_price?.[currency] === 'number' ?
+                <span className="font-mono font-semibold">
+                  {currency_symbol}{number_format(token_data.market_data.current_price[currency], '0,0.00000000')}
+                </span>
+                :
+                <span>-</span>
+              }
+              {typeof token_data.market_data?.price_change_percentage_24h_in_currency?.[currency] === 'number' && (
+                <span className={`text-${token_data.market_data.price_change_percentage_24h_in_currency[currency] < 0 ? 'red' : 'green'}-500 font-medium`}>
+                  {number_format(token_data.market_data.price_change_percentage_24h_in_currency[currency], '+0,0.000')}%
+                </span>
+              )}
+            </div>
+          )}
           {status_data?.latest_block_height && (
             <Link href={`/block/${status_data.latest_block_height}`}>
               <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">

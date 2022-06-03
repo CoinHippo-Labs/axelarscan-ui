@@ -83,7 +83,7 @@ export default ({ n }) => {
           size = n || LIMIT
         const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
         const must = [], should = [], must_not = []
-        must.push({ exists: { 'field': 'link' } })
+        // must.push({ exists: { 'field': 'link' } })
         if (address) {
           should.push({ match: { 'source.recipient_address': address } })
           should.push({ match: { 'source.sender_address': address } })

@@ -85,7 +85,6 @@ export default ({ n }) => {
             response = await transactions_by_events(`message.sender='${address}'`, response?.data, true, assets_data)
             response = await transactions_by_events(`link.depositAddress='${address}'`, response?.data, true, assets_data)
             if (response?.data) {
-              console.log(response.data)
               response.data.forEach(d => getTransaction(d?.txhash))
             }
           }
