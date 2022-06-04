@@ -1,193 +1,79 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
-import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-
+import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import Web3 from 'web3'
-import { BigNumber, constants, providers, utils } from 'ethers'
-import { Img } from 'react-image'
-import Loader from 'react-loader-spinner'
+import { BigNumber, providers, utils } from 'ethers'
+import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
+import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
-import { FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa'
-import { BsFileEarmarkX } from 'react-icons/bs'
-import { BiEditAlt, BiSave } from 'react-icons/bi'
-import { RiCloseCircleFill } from 'react-icons/ri'
-import { MdRefresh } from 'react-icons/md'
 
+import AddToken from '../add-token'
+import EnsProfile from '../ens-profile'
+import Image from '../image'
 import Copy from '../copy'
-import Popover from '../popover'
 import Notification from '../notifications'
 import Wallet from '../wallet'
-
 import { search } from '../../lib/api/gmp'
-import { chainName } from '../../lib/object/chain'
-import { number_format, ellipse, sleep } from '../../lib/utils'
+import { getChain } from '../../lib/object/chain'
+import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
-import { WALLET_DATA } from '../../reducers/types'
 
-export default function Transaction() {
-  const dispatch = useDispatch()
-  const { preferences, chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
+export default () => {
+  const { preferences, evm_chains, cosmos_chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
-  const { chains_data } = { ...chains }
+  const { evm_chains_data } = { ...evm_chains }
+  const { cosmos_chains_data } = { ...cosmos_chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
-  const { default_chain_id, chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
+  const { default_chain_id, chain_id, web3_provider, address, signer } = { ...wallet_data }
 
   const router = useRouter()
   const { query } = { ...router }
   const { tx } = { ...query }
 
-  const [transaction, setTransaction] = useState(null)
-  const [web3, setWeb3] = useState(null)
-  const [chainId, setChainId] = useState(null)
-  const [addTokenData, setAddTokenData] = useState(null)
-  const [executeResponse, setExecuteResponse] = useState(null)
-  const [executeResponseCountDown, setExecuteResponseCountDown] = useState(null)
+  const [gmp, setGmp] = useState(null)
   const [executing, setExecuting] = useState(null)
-  const [txHashExecutedEditing, setTxHashExecutedEditing] = useState(false)
-  const [txHashExecutedSaving, setTxHashExecutedSaving] = useState(false)
-  const [txHashExecuted, setTxHashExecuted] = useState(null)
-
-  useEffect(() => {
-    if (!web3) {
-      setWeb3(new Web3(Web3.givenProvider))
-    }
-    else {
-      try {
-        web3.currentProvider._handleChainChanged = async e => {
-          try {
-            setChainId(Web3.utils.hexToNumber(e?.chainId))
-
-            if (provider) {
-              const web3Provider = new providers.Web3Provider(provider)
-              const signer = web3Provider.getSigner()
-              const address = await signer.getAddress()
-              dispatch({
-                type: WALLET_DATA,
-                value: {
-                  chain_id: Web3.utils.hexToNumber(e?.chainId),
-                  web3_provider: web3Provider,
-                  address,
-                  signer,
-                },
-              })
-            }
-          } catch (error) {}
-        }
-      } catch (error) {}
-    }
-  }, [web3, provider])
-
-  useEffect(() => {
-    if (addTokenData?.chain_id === chainId && addTokenData?.contract) {
-      addTokenToMetaMask(addTokenData.chain_id, addTokenData.contract)
-    }
-  }, [chainId, addTokenData])
+  const [executeResponse, setExecuteResponse] = useState(null)
+  const [txHashEdit, setTxHashEdit] = useState(null)
+  const [txHashEditing, setTxHashEditing] = useState(false)
+  const [txHashEditUpdating, setTxHashEditUpdating] = useState(false)
 
   useEffect(() => {
     const getData = async () => {
       if (tx) {
-        let data
-        const params = {
-          txHash: tx,
+        if (gmp && gmp.tx !== tx) {
+          setGmp(null)
+          resetTxHashEdit()
         }
-        const response = await search(params)
-        setTransaction({ data: response?.data?.[0], tx })
+        const response = await search({
+          txHash: tx,
+        })
+        setGmp({
+          data: response?.data?.[0],
+          tx,
+        })
       }
     }
-
-    if (transaction?.tx !== tx) {
-      setTransaction(null)
-      resetEditTxHashExecuted()
-    }
-
-    if (!executing && !txHashExecutedEditing) {
+    if (!executing && !txHashEditing) {
       getData()
     }
-
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
-  }, [tx, executing, txHashExecutedEditing])
+  }, [tx, executing, txHashEditing])
 
-  useEffect(() => {
-    if (typeof executeResponseCountDown === 'number') {
-      if (executeResponseCountDown === 0) {
-        setExecuteResponse(null)
-      }
-      else {
-        const interval = setInterval(() => {
-          if (executeResponseCountDown - 1 > -1) {
-            setExecuteResponseCountDown(executeResponseCountDown - 1)
-          }
-        }, 1000)
-        return () => clearInterval(interval)
-      }
-    }
-  }, [executeResponseCountDown])
-
-  useEffect(() => {
-    if (['success'].includes(executeResponse?.status)) {
-      if (!executeResponseCountDown) {
-        setExecuteResponseCountDown(10)
-      }
-    }
-  }, [executeResponse])
-
-  const addTokenToMetaMask = async (chain_id, contract) => {
-    if (web3 && contract) {
-      if (chain_id === chainId) {
-        try {
-          const response = await web3.currentProvider.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: contract.contract_address,
-                symbol: contract.symbol,
-                decimals: contract.decimals,
-                image: `${contract.image?.startsWith('/') ? process.env.NEXT_PUBLIC_SITE_URL : ''}${contract.image}`,
-              },
-            },
-          })
-        } catch (error) {}
-
-        setAddTokenData(null)
-      }
-      else {
-        switchNetwork(chain_id, contract)
-      }
-    }
-  }
-
-  const switchNetwork = async (chain_id, contract) => {
-    try {
-      await web3.currentProvider.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: utils.hexValue(chain_id) }],
-      })
-    } catch (error) {
-      if (error.code === 4902) {
-        try {
-          await web3.currentProvider.request({
-            method: 'wallet_addEthereumChain',
-            params: chains_data?.find(c => c.chain_id === chain_id)?.provider_params,
-          })
-        } catch (error) {}
-      }
-    }
-
-    if (contract) {
-      setAddTokenData({ chain_id, contract })
-    }
+  const resetTxHashEdit = () => {
+    setExecuteResponse(null)
+    setTxHashEdit(null)
+    setTxHashEditing(false)
+    setTxHashEditUpdating(false)
   }
 
   const saveGMP = async (tx_hash, event, chain, contract_address, relayer_address, error) => {
     if (process.env.NEXT_PUBLIC_GMP_API_URL && event && chain && contract_address) {
-      // initial params
       const params = {
         method: 'saveGMP',
         event: {
@@ -206,868 +92,991 @@ export default function Transaction() {
         method: 'POST',
         body: JSON.stringify(params),
       }).catch(error => { return null })
-      resetEditTxHashExecuted()
+      resetTxHashEdit()
     }
   }
 
-  const resetEditTxHashExecuted = () => {
-    setTxHashExecutedEditing(false)
-    setTxHashExecuted(null)
-    setTxHashExecutedSaving(false)
-    setExecuteResponse(null)
-  }
-
   const execute = async data => {
-    setExecuting(true)
-    setExecuteResponse(null)
     if (signer && data) {
       try {
-        setExecuteResponse({ status: 'pending', message: 'Executing' })
-        const contract = new web3.eth.Contract(IAxelarExecutable.abi, data.call?.returnValues?.destinationContractAddress);
-        if (data.call?.event === 'ContractCall') {
-          contract.methods.execute(
-            data.approved?.returnValues?.commandId,
-            data.approved?.returnValues?.sourceChain,
-            data.approved?.returnValues?.sourceAddress,
-            data.call?.returnValues?.payload,
-          ).send({ from: address })
-          .on('transactionHash', hash => {
-            setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
-          })
-          .on('receipt', async receipt => {
-            setExecuteResponse({ status: 'success', message: 'Execute successful', tx_hash: receipt?.transactionHash })
-            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
-            await sleep(2 * 1000)
+        setExecuting(true)
+        setExecuteResponse({
+          status: 'pending',
+          message: 'Executing',
+        })
+        const { call, approved } = { ...data }
+        const { event } = { ...call }
+        const { destinationContractAddress, payload } = { ...call?.returnValues }
+        const { chain, contract_address } = { ...approved }
+        const { commandId, sourceChain, sourceAddress, symbol, amount } = { ...approved?.returnValues }
+        const contract = new web3_provider.eth.Contract(IAxelarExecutable.abi, destinationContractAddress)
+        switch (event) {
+          case 'ContractCall':
+            contract.methods.execute(commandId, sourceChain, sourceAddress, payload).send({ from: address })
+            .on('transactionHash', hash => {
+              const txHash = hash
+              setExecuteResponse({
+                status: 'pending',
+                message: 'Wait for confirmation',
+                txHash,
+              })
+            })
+            .on('receipt', async receipt => {
+              const txHash = receipt?.transactionHash
+              await saveGMP(txHash, approved, chain, contract_address, address)
+              await sleep(2 * 1000)
+              setExecuting(false)
+              setExecuteResponse({
+                status: 'success',
+                message: 'Execute successful',
+                txHash,
+              })
+            })
+            .on('error', async (error, receipt) => {
+              const txHash = receipt?.transactionHash
+              await saveGMP(txHash, approved, chain, contract_address, address, error)
+              await sleep(2 * 1000)
+              setExecuting(false)
+              setExecuteResponse({
+                status: 'failed',
+                message: error?.reason || error?.data?.message || error?.message,
+                tx_hash,
+              })
+            })
+            break
+          case 'ContractCallWithToken':
+            contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).send({ from: address })
+            .on('transactionHash', hash => {
+              const txHash = hash
+              setExecuteResponse({
+                status: 'pending',
+                message: 'Wait for confirmation',
+                txHash,
+              })
+            })
+            .on('receipt', async receipt => {
+              const txHash = receipt?.transactionHash
+              await saveGMP(txHash, approved, chain, contract_address, address)
+              await sleep(2 * 1000)
+              setExecuting(false)
+              setExecuteResponse({
+                status: 'success',
+                message: 'Execute successful',
+                txHash,
+              })
+            })
+            .on('error', async (error, receipt) => {
+              const txHash = receipt?.transactionHash
+              await saveGMP(txHash, approved, chain, contract_address, address, error)
+              await sleep(2 * 1000)
+              setExecuting(false)
+              setExecuteResponse({
+                status: 'failed',
+                message: error?.reason || error?.data?.message || error?.message,
+                tx_hash,
+              })
+            })
+            break
+          default:
             setExecuting(false)
-          })
-          .on('error', async (error, receipt) => {
-            setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message, tx_hash: receipt?.transactionHash })
-            await sleep(2 * 1000)
-            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
-            setExecuting(false)
-          })
-        }
-        else if (data.call?.event === 'ContractCallWithToken') {
-          contract.methods.executeWithToken(
-            data.approved?.returnValues?.commandId,
-            data.approved?.returnValues?.sourceChain,
-            data.approved?.returnValues?.sourceAddress,
-            data.call?.returnValues?.payload,
-            data.approved?.returnValues?.symbol,
-            BigNumber.from(data.approved?.returnValues?.amount).toString(),
-          ).send({ from: address })
-          .on('transactionHash', hash => {
-            setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', tx_hash: hash })
-          })
-          .on('receipt', async receipt => {
-            setExecuteResponse({ status: 'success', message: 'Execute successful', tx_hash: receipt?.transactionHash })
-            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address)
-            await sleep(2 * 1000)
-            setExecuting(false)
-          })
-          .on('error', async (error, receipt) => {
-            setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message, tx_hash: receipt?.transactionHash })
-            await sleep(2 * 1000)
-            await saveGMP(receipt?.transactionHash, data.approved, data.approved?.chain, data.approved?.contract_address, address, error)
-            setExecuting(false)
-          })
-        }
-        else {
-          setExecuteResponse({ status: 'failed', message: 'No response' })
-          setExecuting(false)
+            setExecuteResponse({
+              status: 'failed',
+              message: 'Method not support',
+            })
+            break
         }
       } catch (error) {
-        setExecuteResponse({ status: 'failed', message: error?.reason || error?.data?.message || error?.message })
         setExecuting(false)
+        setExecuteResponse({
+          status: 'failed',
+          message: error?.message,
+        })
       }
     }
   }
 
-  const { data } = { ...transaction }
-  const { call, gas_paid, approved, executed, error } = { ...data }
-
-  const asset = assets_data?.find(a => a?.symbol?.toLowerCase() === call?.returnValues?.symbol?.toLowerCase())
-  const fromChain = chains_data?.find(c => c.id === call?.chain)
-  const toChain = chains_data?.find(c => c.id === call?.returnValues?.destinationChain?.toLowerCase())
-  const fromContract = asset?.contracts?.find(c => c.chain_id === fromChain?.chain_id)
-  const toContract = asset?.contracts?.find(c => c.chain_id === toChain?.chain_id)
-
-  const addToMetaMaskButton = fromContract && fromContract.contract_address !== constants.AddressZero && (
-    <button
-      onClick={() => addTokenToMetaMask(fromChain?.chain_id, { ...asset, ...fromContract })}
-      className="w-auto bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 rounded flex items-center justify-center py-1 px-1.5"
-    >
-      <Img
-        src="/logos/wallets/metamask.png"
-        alt=""
-        className="w-3.5 h-3.5"
-      />
-    </button>
-  )
-
-  const mustSwitchChain = typeof chain_id === 'number' && chain_id !== toChain?.chain_id
-  const executeButton = call?.returnValues?.payload && approved && !executed && !data?.is_executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
+  const { data } = { ...gmp }
+  const { call, gas_paid, approved, executed, is_executed, error, status } = { ...data }
+  const { event, chain } = { ...call }
+  const { sender, destinationChain, destinationContractAddress, payload, symbol, amount } = { ...call?.returnValues }
+  const { from } = { ...call?.transaction }
+  const relayer = executed?.transaction?.from
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+  const source_chain_data = getChain(chain, chains_data)
+  const destination_chain_data = getChain(destinationChain, chains_data)
+  const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol))
+  const source_contract_data = asset_data?.contracts?.find(c => c.chain_id === source_chain_data?.chain_id)
+  const decimals = source_contract_data?.decimals || asset_data?.decimals || 18
+  const _symbol = source_contract_data?.symbol || asset_data?.symbol || symbol
+  const asset_image = source_contract_data?.image || asset_data?.image
+  const wrong_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
+  const executeButton = payload && approved && !executed && !is_executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
     <div className="flex items-center space-x-2">
-      {web3_provider && !mustSwitchChain && (
+      {web3_provider && !wrong_chain && (
         <button
+          disabled={executing}
           onClick={() => execute(data)}
-          className={`bg-green-400 hover:bg-green-500 dark:bg-green-600 dark:hover:bg-green-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white font-semibold space-x-1.5 py-1 px-2 sm:px-3`}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2 sm:px-3`}
         >
           {executing && (
-            <Loader type="Oval" color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" />
+            <TailSpin color="white" width="16" height="16" />
           )}
-          <span>Execute</span>
+          <span>
+            Execute
+          </span>
         </button>
       )}
       <Wallet
-        connectChainId={mustSwitchChain && (toChain?.chain_id || default_chain_id)}
+        connectChainId={wrong_chain && (destination_chain_data.chain_id || default_chain_id)}
       />
     </div>
   )
 
-  const call_timestamp = (call?.block_timestamp || 0) * 1000
-  const executed_timestamp = (executed?.block_timestamp || 0) * 1000
-  const time_spent = call_timestamp && executed_timestamp && moment(executed_timestamp).diff(moment(call_timestamp), 'seconds')
-  const time_spent_component = time_spent > 0 && (
-    <div className="flex items-center space-x-1">
-      <span className="whitespace-nowrap text-gray-400 dark:text-gray-500">
-        time spent:
-      </span>
-      <span className="whitespace-nowrap font-semibold">
-        {time_spent < 60 ?
-          `${time_spent}s` : time_spent < 60 * 60 ?
-          `${Math.floor(time_spent / 60)} min${time_spent % 60 > 0 ? ` ${time_spent % 60}s` : ''}` : time_spent < 24 * 60 * 60 ?
-          moment.utc(time_spent * 1000).format('HH:mm:ss') : `${moment(executed_timestamp).diff(moment(call_timestamp), 'days')} day`
-        }
-      </span>
-    </div>
-  )
+  const steps = [{
+    id: 'call',
+    title: 'Contract Call',
+    chain_data: source_chain_data,
+    data: call,
+  }, {
+    id: 'gas_paid',
+    title: 'Gas Paid',
+    chain_data: source_chain_data,
+    data: gas_paid,
+  }, {
+    id: 'approved',
+    title: 'Call Approved',
+    chain_data: destination_chain_data,
+    data: approved,
+  }, {
+    id: 'executed',
+    title: 'Executed',
+    chain_data: destination_chain_data,
+    data: executed,
+  }]
+  let current_step
+  switch (status) {
+    case 'called':
+      current_step = gas_paid ? 2 : 1
+      break
+    case 'approved':
+      current_step = 3
+      break
+    case 'executed':
+    case 'error':
+      current_step = 4
+      break
+    default:
+      break
+  }
+  const detail_steps = steps
+  const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
+  const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
+  const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
 
   return (
-    <div className="max-w-6.5xl mb-3 mx-auto">
-      {executeResponse && (
-        <Notification
-          hideButton={true}
-          outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
-          innerClassNames={`${executeResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : executeResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
-          animation="animate__animated animate__fadeInDown"
-          icon={executeResponse.status === 'failed' ?
-            <FaTimesCircle className="w-4 h-4 stroke-current mr-2" />
-            :
-            executeResponse.status === 'success' ?
-              <FaCheckCircle className="w-4 h-4 stroke-current mr-2" />
-              :
-              <FaClock className="w-4 h-4 stroke-current mr-2" />
-          }
-          content={<span className="flex flex-wrap items-center">
-            <span className="mr-1.5">{executeResponse.message}</span>
-            {executeResponse.status === 'pending' && (
-              <Loader type="TailSpin" color={theme === 'dark' ? 'white' : 'white'} width="16" height="16" className="mr-1.5" />
-            )}
-            {toChain?.explorer?.url && executeResponse.tx_hash && (
-              <a
-                href={`${toChain.explorer.url}${toChain.explorer.transaction_path?.replace('{tx}', executeResponse.tx_hash)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center font-semibold mx-1.5"
-              >
-                <span>View on {toChain.explorer.name}</span>
-                <TiArrowRight size={20} className="transform -rotate-45" />
-              </a>
-            )}
-            {['success'].includes(executeResponse.status) && typeof executeResponseCountDown === 'number' && (
-              <span className="font-mono">(close in {executeResponseCountDown}s)</span>
-            )}
-          </span>}
-        />
-      )}
-      {!transaction || data ?
+    <div className="space-y-4 mt-2 mb-6 mx-auto">
+      {tx && equals_ignore_case(gmp?.tx, tx) ?
         <>
-          <div className="mt-2 xl:mt-4">
-            <div
-              title={<div className="leading-4 uppercase text-gray-400 dark:text-gray-600 text-sm sm:text-base font-semibold mb-2">General Message Passing</div>}
-              right={executeButton || time_spent_component}
-              className="overflow-x-auto border-0 shadow-md rounded-2xl ml-auto px-5 lg:px-3 xl:px-5"
-            >
-              <div className="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between space-y-8 sm:space-y-0 my-2">
-                {transaction ?
-                  call?.returnValues?.sender ?
-                    <div className="min-w-max">
-                      <div className="flex items-center space-x-1">
-                      <Copy
-                        value={call.returnValues.sender}
-                        copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                          {ellipse(call.returnValues.sender, 8)}
-                        </span>}
-                      />
-                      {fromChain?.explorer?.url && (
-                        <a
-                          href={`${fromChain.explorer.url}${fromChain.explorer.address_path?.replace('{address}', call.returnValues.sender)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
-                        >
-                          {fromChain.explorer.icon ?
-                            <Img
-                              src={fromChain.explorer.icon}
-                              alt=""
-                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                            />
-                            :
-                            <TiArrowRight size={16} className="transform -rotate-45" />
-                          }
-                        </a>
-                      )}
+          {executeResponse && (
+            <Notification
+              hideButton={true}
+              outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
+              innerClassNames={`${executeResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : executeResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
+              animation="animate__animated animate__fadeInDown"
+              icon={executeResponse.status === 'failed' ?
+                <BiXCircle className="w-6 h-6 stroke-current mr-2" />
+                :
+                executeResponse.status === 'success' ?
+                  <BiCheckCircle className="w-6 h-6 stroke-current mr-2" />
+                  :
+                  <div className="mr-2">
+                    <Watch color="white" width="20" height="20" />
+                  </div>
+              }
+              content={<div className="flex items-center">
+                <span className="break-all mr-2">
+                  {executeResponse.message}
+                </span>
+                {destination_chain_data?.explorer?.url && executeResponse.txHash && (
+                  <a
+                    href={`${destination_chain_data.explorer.url}${destination_chain_data.explorer.transaction_path?.replace('{tx}', executeResponse.txHash)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mr-2"
+                  >
+                    <span className="font-semibold">
+                      View on {destination_chain_data.explorer.name}
+                    </span>
+                  </a>
+                )}
+                {executeResponse.status === 'failed' && executeResponse.message && (
+                  <Copy
+                    value={executeResponse.message}
+                    size={24}
+                    className="cursor-pointer text-slate-200 hover:text-white"
+                  />
+                )}
+              </div>}
+              onClose={() => setExecuteResponse(null)}
+            />
+          )}
+          <div className="grid sm:grid-cols-4 gap-6">
+            <div className={`${stepClassName} sm:col-span-4`}>
+              <div className={`${titleClassName}`}>
+                GMP
+              </div>
+              {data ?
+                <div className="overflow-x-auto flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                  <div className="flex flex-col space-y-2">
+                    <div className="pb-1">
+                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                        Method
+                      </span>
                     </div>
-                    {fromChain && (
-                      <div className="flex items-center space-x-2 mt-1.5">
-                        <Img
-                          src={fromChain.image}
-                          alt=""
-                          className="w-6 h-6 rounded-full"
-                        />
-                        <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainName(fromChain)}</span>
+                    <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
+                      {event === 'ContractCall' ?
+                        'callContract' :
+                        event === 'ContractCallWithToken' ?
+                          'callContractWithToken' :
+                          event || '-'
+                      }
+                    </div>
+                    {amount && _symbol && (
+                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                        {asset_image && (
+                          <Image
+                            src={asset_image}
+                            className="w-7 sm:w-5 lg:w-7 h-7 sm:h-5 lg:h-7 rounded-full"
+                          />
+                        )}
+                        <span className="text-base sm:text-sm lg:text-base font-semibold">
+                          {asset_data && (
+                            <span className="mr-1">
+                              {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000', true)}
+                            </span>
+                          )}
+                          <span>
+                            {_symbol}
+                          </span>
+                        </span>
                       </div>
                     )}
-                    </div>
-                    :
-                    <span className="font-mono text-gray-400 dark:text-gray-600 font-light">Unknown</span>
-                  :
-                  <div className="flex flex-col space-y-2.5 my-1">
-                    <div className="skeleton w-36 h-6" />
-                    <div className="skeleton w-24 h-7 mx-auto sm:ml-0" />
                   </div>
-                }
-                {transaction ?
-                  <div className="flex flex-col items-center justify-center space-y-1 mx-auto">
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={fromChain?.explorer?.url ? `${fromChain.explorer.url}${call ? fromChain.explorer.transaction_path?.replace('{tx}', call.transactionHash) : fromChain.explorer.address_path?.replace('{address}', call?.returnValues?.sender)}` : null}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`min-w-max max-w-min h-6 bg-gray-100 dark:bg-${call ? 'green-600' : 'blue-600'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}
-                      >
-                        {call ?
-                          <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
-                          :
-                          <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
-                        }
-                        <div className={`uppercase ${call ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{call ? 'Call' : 'Calling'}</div>
-                      </a>
-                      {call?.transactionHash && (
-                        <Copy value={call.transactionHash} />
-                      )}
+                  <div className="flex flex-col space-y-2">
+                    <div className="pb-1">
+                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                        Source
+                      </span>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={fromChain?.explorer?.url ? `${fromChain.explorer.url}${gas_paid ? fromChain.explorer.transaction_path?.replace('{tx}', gas_paid.transactionHash) : fromChain.explorer.address_path?.replace('{address}', call?.returnValues?.sender)}` : null}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`min-w-max max-w-min h-6 bg-gray-100 dark:bg-${gas_paid ? 'green-600' : 'blue-600'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}
-                      >
-                        {gas_paid ?
-                          <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
-                          :
-                          executed ?
-                            <FaCheckCircle size={14} className="text-gray-400 dark:text-gray-500 dark:text-white" />
-                            :
-                            <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
-                        }
-                        <div className={`uppercase ${gas_paid ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{gas_paid ? 'Gas Paid' : 'No Gas Paid'}</div>
-                      </a>
-                      {gas_paid?.transactionHash && (
-                        <Copy value={gas_paid.transactionHash} />
-                      )}
-                    </div>
-                  </div>
-                  :
-                  <div className="flex flex-col items-center justify-center space-y-2 my-1 mx-auto">
-                    <div className="skeleton w-16 h-6" />
-                    <div className="skeleton w-16 h-6" />
-                  </div>
-                }
-                <div className="mx-auto pt-1">
-                  {transaction ?
-                    call?.event ?
-                      <div className="min-w-max">
-                        <div className="flex items-center space-x-2">
-                          <div className="max-w-min bg-blue-100 dark:bg-blue-800 border border-blue-500 dark:border-blue-700 rounded-lg py-0.5 px-2 mb-1.5 mx-auto">
-                            {call.event === 'ContractCall' ?
-                              'callContract'
-                              :
-                              call.event === 'ContractCallWithToken' ?
-                                'callContractWithToken'
-                                :
-                                call.event
-                            }
-                          </div>
-                          {asset && (
-                            <div className="flex items-center justify-center space-x-2 -mt-2">
-                              <div className="min-w-max max-w-min bg-gray-100 dark:bg-gray-900 rounded-2xl flex items-center space-x-2 py-1 px-3">
-                                {asset?.image && (
-                                  <Img
-                                    src={asset.image}
-                                    alt=""
-                                    className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
-                                  />
-                                )}
-                                <span className="flex items-center text-gray-700 dark:text-gray-300 text-sm font-semibold">
-                                  <span className="font-mono mr-1.5">
-                                    {call.returnValues?.amount ?
-                                      number_format(utils.formatUnits(BigNumber.from(call.returnValues.amount).toString(), fromContract?.decimals || toContract?.decimals || 6), '0,0.00000000', true)
-                                      :
-                                      '-'
-                                    }
-                                  </span>
-                                  <span className="normal-case">
-                                    {ellipse(asset?.symbol || call.returnValues?.symbol, 12)}
-                                  </span>
-                                </span>
-                              </div>
-                              {addToMetaMaskButton && (
-                                <Popover
-                                  placement="top"
-                                  title={<span className="normal-case text-xs">Add token</span>}
-                                  content={<div className="w-36 text-xs">Add <span className="font-semibold">{asset.symbol}</span> to MetaMask</div>}
-                                  titleClassName="py-1"
-                                >
-                                  {addToMetaMaskButton}
-                                </Popover>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                          <Copy
-                            value={call.contract_address}
-                            copyTitle={<span className="normal-case text-gray-600 dark:text-gray-400 text-xs font-medium">
-                              {ellipse(call.contract_address, 8)}
-                            </span>}
-                          />
-                          {fromChain?.explorer?.url && (
-                            <a
-                              href={`${fromChain.explorer.url}${fromChain.explorer.address_path?.replace('{address}', call.contract_address)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
-                            >
-                              {fromChain.explorer.icon ?
-                                <Img
-                                  src={fromChain.explorer.icon}
-                                  alt=""
-                                  className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                />
-                                :
-                                <TiArrowRight size={20} className="transform -rotate-45" />
-                              }
-                            </a>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-center space-x-2.5 mt-0.5">
-                          <span className="text-gray-500 dark:text-gray-500 text-xs font-medium">Gateway Address</span>
-                        </div>
-                      </div>
-                      :
-                      <span className="font-mono text-gray-400 dark:text-gray-600 font-light">Unknown</span>
-                    :
-                    <div className="flex flex-col space-y-2.5 my-1">
-                      <div className="skeleton w-36 h-6" />
-                      <div className="skeleton w-24 h-5 mx-auto" />
-                    </div>
-                  }
-                </div>
-                {transaction ?
-                  <div className="flex flex-col items-center justify-center space-y-1 mx-auto">
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={toChain?.explorer?.url ? `${toChain.explorer.url}${approved ? toChain.explorer.transaction_path?.replace('{tx}', approved.transactionHash) : toChain.explorer.address_path?.replace('{address}', call?.returnValues?.sender)}` : null}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`min-w-max max-w-min h-6 bg-gray-100 dark:bg-${approved ? 'green-600' : 'blue-600'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}
-                      >
-                        {approved ?
-                          <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
-                          :
-                          <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
-                        }
-                        <div className={`uppercase ${approved ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{approved ? 'Approved' : 'Not Approved'}</div>
-                      </a>
-                      {approved?.transactionHash && (
-                        <Copy value={approved.transactionHash} />
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={toChain?.explorer?.url ? `${toChain.explorer.url}${executed ? toChain.explorer.transaction_path?.replace('{tx}', executed.transactionHash) : toChain.explorer.address_path?.replace('{address}', call?.transaction?.from || call?.receipt?.from || call?.returnValues?.sender)}` : null}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`min-w-max max-w-min h-6 bg-gray-100 dark:bg-${executed ? 'green-600' : 'blue-600'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}
-                      >
-                        {executed || data?.is_executed ?
-                          <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
-                          :
-                          error ?
-                            <FaTimesCircle size={14} className="text-red-700 dark:text-white" />
-                            :
-                            <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
-                        }
-                        <div className={`uppercase ${executed ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>{executed || data?.is_executed ? 'Executed' : 'Not Executed'}</div>
-                      </a>
-                      {executed?.transactionHash && (
-                        <Copy value={executed.transactionHash} />
-                      )}
-                    </div>
-                  </div>
-                  :
-                  <div className="flex flex-col items-center justify-center space-y-2 my-1 mx-auto">
-                    <div className="skeleton w-16 h-6" />
-                    <div className="skeleton w-16 h-6" />
-                  </div>
-                }
-                {transaction ?
-                  call?.returnValues?.destinationContractAddress ?
-                    <div className="min-w-max">
-                      <div className="flex items-center space-x-1">
-                        <Copy
-                          value={call.returnValues.destinationContractAddress}
-                          copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-xs font-medium">
-                            {ellipse(call.returnValues.destinationContractAddress, 8)}
-                          </span>}
+                    <div className="flex items-center space-x-1.5">
+                      {source_chain_data?.image && (
+                        <Image
+                          src={source_chain_data.image}
+                          className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
                         />
-                        {toChain?.explorer?.url && (
+                      )}
+                      <span className="text-base sm:text-sm lg:text-base font-bold">
+                        {source_chain_data?.name || chain}
+                      </span>
+                    </div>
+                    {from && (
+                      <div className="flex flex-col">
+                        <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                          Sender address
+                        </span>
+                        <div className="flex items-center space-x-1">
                           <a
-                            href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', call.returnValues.destinationContractAddress)}`}
+                            href={`${source_chain_data?.explorer?.url}${source_chain_data?.explorer?.address_path?.replace('{address}', from)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 dark:text-white"
                           >
-                            {toChain.explorer.icon ?
-                              <Img
-                                src={toChain.explorer.icon}
-                                alt=""
+                            <EnsProfile
+                              address={from}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(from, 8, source_chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(from, 12, source_chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={from}
+                            size={18}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {sender && (
+                      <div className="flex flex-col">
+                        <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                          Source address
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${source_chain_data?.explorer?.url}${source_chain_data?.explorer?.address_path?.replace('{address}', sender)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <EnsProfile
+                              address={sender}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(sender, 8, source_chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(sender, 12, source_chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={sender}
+                            size={18}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col space-y-2">
+                    <div className="pb-1">
+                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                        Destination
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1.5">
+                      {destination_chain_data?.image && (
+                        <Image
+                          src={destination_chain_data.image}
+                          className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                        />
+                      )}
+                      <span className="text-base sm:text-sm lg:text-base font-bold">
+                        {destination_chain_data?.name || destinationChain}
+                      </span>
+                    </div>
+                    {destinationContractAddress && (
+                      <div className="flex flex-col">
+                        <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                          Contract address
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.address_path?.replace('{address}', destinationContractAddress)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <EnsProfile
+                              address={destinationContractAddress}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(destinationContractAddress, 8, destination_chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(destinationContractAddress, 12, destination_chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={destinationContractAddress}
+                            size={18}
+                          />
+                        </div>
+                      </div>
+                    )}
+                    {equals_ignore_case(status, 'executed') && relayer && (
+                      <div className="flex flex-col">
+                        <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                          Relayer address
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.address_path?.replace('{address}', relayer)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <EnsProfile
+                              address={relayer}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(relayer, 8, destination_chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(relayer, 12, destination_chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={from}
+                            size={18}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-max flex flex-col space-y-1">
+                    <div className="pb-2">
+                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                        Status
+                      </span>
+                    </div>
+                    {steps.map((s, i) => {
+                      const text_color = s.data || (i === 3 && is_executed) ?
+                        'text-green-500 dark:text-green-600' :
+                        i === current_step ?
+                          'text-blue-500 dark:text-white' :
+                          i === 3 && error ?
+                            'text-red-500 dark:text-red-600' :
+                            'text-slate-400 dark:text-slate-600'
+                      const { explorer } = { ...s.chain_data }
+                      const { url, transaction_path, icon } = { ...explorer }
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center space-x-1.5 pb-0.5"
+                        >
+                          {s.data || (i === 3 && is_executed) ?
+                            <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
+                            i === current_step ?
+                              <Puff color={loader_color(theme)} width="20" height="20" /> :
+                              i === 3 && error ?
+                                <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
+                                <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
+                          }
+                          <div className="flex items-center space-x-1">
+                            {s.data?.transactionHash ?
+                              <Copy
+                                value={s.data.transactionHash}
+                                title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
+                                  {s.title}
+                                </span>}
+                                size={18}
+                              />
+                              :
+                              <span className={`uppercase ${text_color} text-xs font-medium`}>
+                                {s.title}
+                              </span>
+                            }
+                            {s.data?.transactionHash && url && (
+                              <a
+                                href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white"
+                              >
+                                {icon ?
+                                  <Image
+                                    src={icon}
+                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                  />
+                                  :
+                                  <TiArrowRight size={16} className="transform -rotate-45" />
+                                }
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {executeButton || (time_spent && (
+                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                          time spent:
+                        </span>
+                        <span className="whitespace-nowrap font-bold">
+                          {time_spent}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                :
+                <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
+                  Data not found
+                </span>
+              }
+            </div>
+            {data && detail_steps.map((s, i) => {
+              const error = gmp.data.error
+              const { title, chain_data, data } = { ...s }
+              const _data = i === 3 ? data || error : data
+              const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
+              const { sender } = { ...returnValues }
+              const from = receipt?.from || transaction?.from
+              const to = i < 3 ? contract_address : destinationContractAddress
+              const { explorer } = { ...chain_data }
+              const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
+              const rowClassName = 'flex space-x-4'
+              const rowTitleClassName = `w-32 text-black dark:text-slate-300 text-sm lg:text-base font-bold`
+              return (
+                <div
+                  key={i}
+                  className={`${stepClassName} sm:col-span-3 lg:col-span-2`}
+                >
+                  <div className={`${titleClassName}`}>
+                    {title}
+                  </div>
+                  <div className="flex flex-col space-y-3">
+                    {transactionHash ?
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Tx Hash:
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <div className="text-sm lg:text-base font-bold">
+                              <span className="xl:hidden">
+                                {ellipse(transactionHash, 12)}
+                              </span>
+                              <span className="hidden xl:block">
+                                {ellipse(transactionHash, 16)}
+                              </span>
+                            </div>
+                          </a>
+                          <Copy
+                            value={transactionHash}
+                            size={18}
+                          />
+                          <a
+                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {icon ?
+                              <Image
+                                src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                               />
                               :
                               <TiArrowRight size={16} className="transform -rotate-45" />
                             }
                           </a>
-                        )}
+                        </div>
                       </div>
-                      {toChain && (
-                        <div className="flex items-center space-x-2 mt-1.5">
-                          <Img
-                            src={toChain.image}
-                            alt=""
-                            className="w-6 h-6 rounded-full"
+                      :
+                      <FallingLines color={loader_color(theme)} width="32" height="32" />
+                    }
+                    {blockNumber && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Block:
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${block_path?.replace('{block}', blockNumber)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white text-sm lg:text-base font-bold"
+                          >
+                            {number_format(blockNumber, '0,0')}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {(_data || (i === 3 && is_executed)) && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Status:
+                        </span>
+                        <div className={`${data || (i === 3 && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                          {data || (i === 3 && is_executed) ?
+                            <BiCheckCircle size={20} /> :
+                            <BiXCircle size={20} />
+                          }
+                          <span>
+                            {receipt?.status || (i === 3 && is_executed) ?
+                              'Success' : 'Error'
+                            }
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    {block_timestamp && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Time:
+                        </span>
+                        <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
+                          {moment(block_timestamp * 1000).fromNow()} ({moment(block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})
+                        </span>
+                      </div>
+                    )}
+                    <div className={rowClassName}>
+                      <span className={rowTitleClassName}>
+                        {i === 1 ? 'Gas Receiver' : i === 3 ? 'Destination' : 'Gateway'}:
+                      </span>
+                      {to && (
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${address_path?.replace('{address}', to)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <EnsProfile
+                              address={to}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(to, 10, chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(to, 12, chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={to}
+                            size={18}
                           />
-                          <span className="text-gray-900 dark:text-white text-xs font-semibold">{chainName(toChain)}</span>
+                          <a
+                            href={`${url}${address_path?.replace('{address}', to)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {icon ?
+                              <Image
+                                src={icon}
+                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              />
+                              :
+                              <TiArrowRight size={16} className="transform -rotate-45" />
+                            }
+                          </a>
                         </div>
                       )}
                     </div>
-                    :
-                    <span className="font-mono text-gray-400 dark:text-gray-600 font-light">Unknown</span>
-                  :
-                  <div className="flex flex-col space-y-2.5 my-1">
-                    <div className="skeleton w-36 h-6" />
-                    <div className="skeleton w-24 h-7 mx-auto sm:mr-0" />
-                  </div>
-                }
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6 mt-4 xl:mt-6">
-            {[call, gas_paid, approved, executed || error].map((t, i) => (
-              <div
-                key={i}
-                title={<div className="flex items-center space-x-3 mb-4">
-                  <Img
-                    src={(i < 2 ? fromChain : toChain)?.image}
-                    alt=""
-                    className="w-6 h-6 rounded-full"
-                  />
-                  <span className="uppercase text-gray-400 dark:text-gray-600 text-base font-semibold">
-                    {i === 0 ? call?.event || 'Call' : i === 1 ? 'Gas Paid' : i === 2 ? 'Approved' : 'Execute'} Details
-                  </span>
-                </div>}
-                className="border-0 shadow-md rounded-2xl p-5 lg:px-3 xl:px-5"
-              >
-                <div className="w-full flex flex-col space-y-4">
-                  <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 whitespace-nowrap text-sm lg:text-base font-semibold">
-                      TX Hash:
-                    </span>
-                    {transaction ?
-                      <>
-                        {(i < 3 || !txHashExecutedEditing) && t?.transactionHash && (
-                          <div className="flex items-center">
-                            {(i < 2 ? fromChain : toChain)?.explorer?.url ?
-                              <a
-                                href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.transaction_path?.replace('{tx}', t.transactionHash)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white text-sm lg:text-base font-medium mr-1.5"
-                              >
-                                {ellipse(t.transactionHash, 16)}
-                              </a>
-                              :
-                              <span className="text-sm lg:text-base mr-1.5">{ellipse(t.transactionHash, 16)}</span>
-                            }
-                            <Copy size={18} value={t.transactionHash} />
-                            {i === 3 && !t.block_timestamp && (
-                              <button
-                                disabled={txHashExecutedSaving}
-                                onClick={async () => {
-                                  setTxHashExecutedSaving(true)
-                                  await saveGMP(t.transactionHash, approved, approved?.chain, approved?.contract_address, address)
-                                }}
-                                className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white ml-1"
-                              >
-                                {txHashExecutedSaving ?
-                                  <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
-                                  :
-                                  <MdRefresh size={20} />
-                                }
-                              </button>
-                            )}
-                          </div>
-                        )}
-                        <div className="flex items-center space-x-2">
-                          {i === 3 && txHashExecutedEditing ?
-                            <input
-                              disabled={txHashExecutedSaving}
-                              placement="Tx Hash"
-                              value={txHashExecuted}
-                              onChange={e => setTxHashExecuted(e.target.value)}
-                              className="bg-gray-50 dark:bg-gray-800 rounded text-base py-1 px-2"
-                            />
-                            :
-                            !t?.transactionHash && (
-                              <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                            )
-                          }
-                          {i === 3 && approved && address && (
-                            <div className="flex items-center space-x-1">
-                              {txHashExecutedEditing ?
-                                <>
-                                  <button
-                                    disabled={txHashExecutedSaving}
-                                    onClick={() => resetEditTxHashExecuted()}
-                                    className="text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-500"
-                                  >
-                                    <RiCloseCircleFill size={20} />
-                                  </button>
-                                  <button
-                                    disabled={!txHashExecuted || txHashExecutedSaving}
-                                    onClick={async () => {
-                                      setTxHashExecutedSaving(true)
-                                      await saveGMP(txHashExecuted, approved, approved.chain, approved.contract_address, address)
-                                    }}
-                                    className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white"
-                                  >
-                                    {txHashExecutedSaving ?
-                                      <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
-                                      :
-                                      <BiSave size={20} />
-                                    }
-                                  </button>
-                                </>
-                                :
-                                <button
-                                  onClick={() => setTxHashExecutedEditing(true)}
-                                  className="text-white hover:text-gray-400 dark:text-gray-900 dark:hover:text-gray-500"
-                                >
-                                  <BiEditAlt size={20} />
-                                </button>
-                              }
-                            </div>
-                          )}
-                        </div>
-                      </>
-                      :
-                      <div className="skeleton w-72 h-4 lg:h-6 mt-1" />
-                    }
-                  </div>
-                  <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Block:</span>
-                    {transaction ?
-                      t?.blockNumber ?
-                        (i < 2 ? fromChain : toChain)?.explorer?.url ?
+                    <div className={rowClassName}>
+                      <span className={rowTitleClassName}>
+                        {i < 2 ? 'Sender' : 'Relayer'}:
+                      </span>
+                      {from && (
+                        <div className="flex items-center space-x-1">
                           <a
-                            href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.block_path?.replace('{block}', t.blockNumber)}`}
+                            href={`${url}${address_path?.replace('{address}', from)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm lg:text-base"
+                            className="text-blue-600 dark:text-white"
                           >
-                            {number_format(t.blockNumber, '0,0')}
+                            <EnsProfile
+                              address={from}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(from, 10, chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(from, 12, chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
                           </a>
-                          :
-                          <span className="text-sm lg:text-base">{number_format(t.blockNumber, '0,0')}</span>
-                        :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                      :
-                      <div className="skeleton w-24 h-4 lg:h-6 mt-1" />
-                    }
-                  </div>
-                  <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Status:</span>
-                    {transaction ?
-                      <div className={`max-w-min h-6 bg-gray-100 dark:bg-${t ? t?.receipt?.status ? 'green-600' : 'red-700' : 'blue-700'} rounded-lg flex items-center space-x-1 py-1 px-1.5`}>
-                        {t || data?.is_executed ?
-                          t?.receipt?.status || data?.is_executed ?
-                            <FaCheckCircle size={14} className="text-green-600 dark:text-white" />
-                            :
-                            <FaTimesCircle size={14} className="text-red-700 dark:text-white" />
-                          :
-                          <Loader type="TailSpin" color={theme === 'dark' ? 'white' : '#3B82F6'} width="14" height="14" />
-                        }
-                        <div className={`whitespace-nowrap uppercase ${t ? 'text-black dark:text-white' : 'text-gray-400 dark:text-white'} text-xs font-semibold`}>
-                          {t || data?.is_executed ?
-                            t?.receipt?.status || data?.is_executed ?
-                              'Success'
+                          <Copy
+                            value={from}
+                            size={18}
+                          />
+                          <a
+                            href={`${url}${address_path?.replace('{address}', from)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {icon ?
+                              <Image
+                                src={icon}
+                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              />
                               :
-                              'Error'
-                            :
-                            'Pending'
-                          }
+                              <TiArrowRight size={16} className="transform -rotate-45" />
+                            }
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                    {i < 1 && sender && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Source:
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${address_path?.replace('{address}', sender)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <EnsProfile
+                              address={sender}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(sender, 10, chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(sender, 12, chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={sender}
+                            size={18}
+                          />
+                          <a
+                            href={`${url}${address_path?.replace('{address}', sender)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {icon ?
+                              <Image
+                                src={icon}
+                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              />
+                              :
+                              <TiArrowRight size={16} className="transform -rotate-45" />
+                            }
+                          </a>
                         </div>
                       </div>
-                      :
-                      <div className="skeleton w-24 h-5 lg:h-7 mt-1" />
-                    }
-                  </div>
-                  <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Time:</span>
-                    {transaction ?
-                      t?.block_timestamp ?
-                        <span className="text-sm lg:text-base">
-                          <span className="text-gray-400 dark:text-gray-600 mr-1">{moment(t.block_timestamp * 1000).fromNow()}</span>
-                          <span>({moment(t.block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})</span>
+                    )}
+                    {i === 3 && call?.transaction?.from && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Receiver:
                         </span>
-                        :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                      :
-                      <div className="skeleton w-60 h-4 lg:h-6 mt-1" />
-                    }
-                  </div>
-                  {i < 2 && (
-                    <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                      <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Sender Address:</span>
-                      {transaction ?
-                        t?.transaction?.from || t?.receipt?.from ?
-                          <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                            <Copy
-                              value={t?.transaction?.from || t?.receipt?.from}
-                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
-                                {ellipse(t?.transaction?.from || t?.receipt?.from, 8)}
-                              </span>}
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <EnsProfile
+                              address={call.transaction.from}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(call.transaction.from, 10, chain_data?.prefix_address)}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(call.transaction.from, 12, chain_data?.prefix_address)}
+                                  </span>
+                                </div>
+                              )}
                             />
-                            {fromChain?.explorer?.url && (
-                              <a
-                                href={`${fromChain.explorer.url}${fromChain.explorer.address_path?.replace('{address}', t?.transaction?.from || t?.receipt?.from)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white"
-                              >
-                                {fromChain.explorer.icon ?
-                                  <Img
-                                    src={fromChain.explorer.icon}
-                                    alt=""
-                                    className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                  />
-                                  :
-                                  <TiArrowRight size={20} className="transform -rotate-45" />
-                                }
-                              </a>
-                            )}
-                          </div>
-                          :
-                          <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                        :
-                        <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
-                      }
-                    </div>
-                  )}
-                  <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">{i < 2 ? 'Source' : 'Relayer'} Address:</span>
-                    {transaction ?
-                      (i < 2 ? call?.returnValues?.sender : (t?.transaction?.from || t?.from)) ?
-                        <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
+                          </a>
                           <Copy
-                            value={(i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from))}
-                            copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
-                              {ellipse((i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from)), 8)}
-                            </span>}
+                            value={call.transaction.from}
+                            size={18}
                           />
-                          {(i < 2 ? fromChain : toChain)?.explorer?.url && (
-                            <a
-                              href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.address_path?.replace('{address}', (i < 2 ? call.returnValues.sender : (t.transaction?.from || t.from)))}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
-                            >
-                              {(i < 2 ? fromChain : toChain).explorer.icon ?
-                                <Img
-                                  src={(i < 2 ? fromChain : toChain).explorer.icon}
-                                  alt=""
-                                  className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                />
-                                :
-                                <TiArrowRight size={20} className="transform -rotate-45" />
-                              }
-                            </a>
-                          )}
+                          <a
+                            href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {icon ?
+                              <Image
+                                src={icon}
+                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              />
+                              :
+                              <TiArrowRight size={16} className="transform -rotate-45" />
+                            }
+                          </a>
                         </div>
-                        :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                      :
-                      <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
-                    }
-                  </div>
-                  <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                    <span className="md:w-20 xl:w-40 min-w-max text-sm lg:text-base font-semibold">{i < 1 ? 'Gateway' : i < 2 ? 'Gas Receiver' : i < 3 ? 'Gateway' : 'Destination'} Contract:</span>
-                    {transaction ?
-                      (i < 3 ? t?.contract_address : call?.returnValues?.destinationContractAddress) ?
-                        <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                          <Copy
-                            value={i < 3 ? t.contract_address : call.returnValues.destinationContractAddress}
-                            copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
-                              {ellipse(i < 3 ? t.contract_address : call.returnValues.destinationContractAddress, 8)}
-                            </span>}
-                          />
-                          {(i < 2 ? fromChain : toChain)?.explorer?.url && (
-                            <a
-                              href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.address_path?.replace('{address}', i < 3 ? t.contract_address : call.returnValues.destinationContractAddress)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
-                            >
-                              {(i < 2 ? fromChain : toChain).explorer.icon ?
-                                <Img
-                                  src={(i < 2 ? fromChain : toChain).explorer.icon}
-                                  alt=""
-                                  className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                />
-                                :
-                                <TiArrowRight size={20} className="transform -rotate-45" />
-                              }
-                            </a>
-                          )}
-                        </div>
-                        :
-                        <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                      :
-                      <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
-                    }
-                  </div>
-                  {i === 3 && (
-                    <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                      <span className="md:w-20 xl:w-40 min-w-max text-sm lg:text-base font-semibold">Receiver Address:</span>
-                      {transaction ?
-                        call?.transaction?.from ?
-                          <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                            <Copy
-                              value={call.transaction.from}
-                              copyTitle={<span className="normal-case text-gray-700 dark:text-gray-300 text-sm lg:text-base font-medium">
-                                {ellipse(call.transaction.from, 8)}
-                              </span>}
-                            />
-                            {toChain?.explorer?.url && (
-                              <a
-                                href={`${toChain.explorer.url}${toChain.explorer.address_path?.replace('{address}', call.transaction.from)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white"
-                              >
-                                {toChain.explorer.icon ?
-                                  <Img
-                                    src={toChain.explorer.icon}
-                                    alt=""
-                                    className="w-5 sm:w-4 xl:w-5 h-5 sm:h-4 xl:h-5 rounded-full opacity-60 hover:opacity-100"
-                                  />
-                                  :
-                                  <TiArrowRight size={20} className="transform -rotate-45" />
-                                }
-                              </a>
-                            )}
-                          </div>
-                          :
-                          <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                        :
-                        <div className="skeleton w-48 h-4 lg:h-6 mt-1" />
-                      }
-                    </div>
-                  )}
-                  {i === 3 && !executed && error && (
-                    <div className="flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2">
-                      <span className="md:w-20 xl:w-40 text-sm lg:text-base font-semibold">Error:</span>
-                      {transaction ?
-                        <div className="flex items-center space-x-1.5 sm:space-x-1 xl:space-x-1.5">
-                          {error.error?.code && (
-                            <div className="max-w-min bg-red-100 dark:bg-red-800 border border-red-500 dark:border-red-700 rounded-lg py-0.5 px-2 mx-auto">
-                              {error.error.code}
+                      </div>
+                    )}
+                    {i === 3 && !data && _data && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Error:
+                        </span>
+                        <div className="flex flex-col space-y-1">
+                          {_data.error?.code && (
+                            <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2 mx-auto">
+                              {_data.error.code}
                             </div>
                           )}
-                          <span className="text-red-500">{error.error?.body?.replaceAll('"""', '') || error.error?.reason}</span>
+                          <span className="text-red-500 dark:text-red-600 font-semibold">
+                            {ellipse(_data.error?.body?.replaceAll('"""', '') || _data.error?.reason, 256)}
+                          </span>
                         </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+            {/*
+              {(i < 3 || !txHashExecutedEditing) && t?.transactionHash && (
+                <div className="flex items-center">
+                  {(i < 2 ? fromChain : toChain)?.explorer?.url ?
+                    <a
+                      href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.transaction_path?.replace('{tx}', t.transactionHash)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-white text-sm lg:text-base font-medium mr-1.5"
+                    >
+                      {ellipse(t.transactionHash, 16)}
+                    </a>
+                    :
+                    <span className="text-sm lg:text-base mr-1.5">{ellipse(t.transactionHash, 16)}</span>
+                  }
+                  <Copy size={18} value={t.transactionHash} />
+                  {i === 3 && !t.block_timestamp && (
+                    <button
+                      disabled={txHashExecutedSaving}
+                      onClick={async () => {
+                        setTxHashExecutedSaving(true)
+                        await saveGMP(t.transactionHash, approved, approved?.chain, approved?.contract_address, address)
+                      }}
+                      className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white ml-1"
+                    >
+                      {txHashExecutedSaving ?
+                        <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
                         :
-                        <div className="skeleton w-72 h-4 lg:h-6 mt-1" />
+                        <MdRefresh size={20} />
                       }
-                    </div>
+                    </button>
                   )}
                 </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 mb-6">
-            <div className="flex flex-col space-y-4">
-              <div className="flex flex-col space-y-2.5">
-                <span className="text-base font-semibold">Payload Hash</span>
-                {transaction ?
-                  call?.returnValues?.payloadHash ?
-                    <div className="flex items-start">
-                      <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
-                        {call.returnValues.payloadHash}
-                      </div>
-                      <Copy size={20} value={call.returnValues.payloadHash} className="mt-4" />
-                    </div>
-                    :
-                    <span className="text-sm lg:text-base">-</span>
+              )}
+              <div className="flex items-center space-x-2">
+                {i === 3 && txHashExecutedEditing ?
+                  <input
+                    disabled={txHashExecutedSaving}
+                    placement="Tx Hash"
+                    value={txHashExecuted}
+                    onChange={e => setTxHashExecuted(e.target.value)}
+                    className="bg-gray-50 dark:bg-gray-800 rounded text-base py-1 px-2"
+                  />
                   :
-                  <div className="flex flex-col space-y-3">
-                    {[...Array(1).keys()].map(i => (
-                      <div key={i} className="skeleton w-full h-4 lg:h-6" />
-                    ))}
-                  </div>
+                  !t?.transactionHash && (
+                    <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
+                  )
                 }
+                {i === 3 && approved && address && (
+                  <div className="flex items-center space-x-1">
+                    {txHashExecutedEditing ?
+                      <>
+                        <button
+                          disabled={txHashExecutedSaving}
+                          onClick={() => resetTxHashEdit()}
+                          className="text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-500"
+                        >
+                          <RiCloseCircleFill size={20} />
+                        </button>
+                        <button
+                          disabled={!txHashExecuted || txHashExecutedSaving}
+                          onClick={async () => {
+                            setTxHashExecutedSaving(true)
+                            await saveGMP(txHashExecuted, approved, approved.chain, approved.contract_address, address)
+                          }}
+                          className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white"
+                        >
+                          {txHashExecutedSaving ?
+                            <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
+                            :
+                            <BiSave size={20} />
+                          }
+                        </button>
+                      </>
+                      :
+                      <button
+                        onClick={() => setTxHashExecutedEditing(true)}
+                        className="text-white hover:text-gray-400 dark:text-gray-900 dark:hover:text-gray-500"
+                      >
+                        <BiEditAlt size={20} />
+                      </button>
+                    }
+                  </div>
+                )}
               </div>
-              <div className="flex flex-col space-y-2.5">
-                <span className="text-base font-semibold">Payload</span>
-                {transaction ?
-                  call?.returnValues?.payload ?
-                    <div className="flex items-start">
-                      <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
-                        {call.returnValues.payload}
+            <div className="mt-4 mb-6">
+              <div className="flex flex-col space-y-4">
+                <div className="flex flex-col space-y-2.5">
+                  <span className="text-base font-semibold">Payload Hash</span>
+                  {gmp ?
+                    call?.returnValues?.payloadHash ?
+                      <div className="flex items-start">
+                        <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
+                          {call.returnValues.payloadHash}
+                        </div>
+                        <Copy size={20} value={call.returnValues.payloadHash} className="mt-4" />
                       </div>
-                      <Copy size={20} value={call.returnValues.payload} className="mt-4" />
-                    </div>
+                      :
+                      <span className="text-sm lg:text-base">-</span>
                     :
-                    <span className="text-sm lg:text-base">-</span>
-                  :
-                  <div className="flex flex-col space-y-3">
-                    {[...Array(8).keys()].map(i => (
-                      <div key={i} className="skeleton w-full h-4 lg:h-6" />
-                    ))}
-                  </div>
-                }
+                    <div className="flex flex-col space-y-3">
+                      {[...Array(1).keys()].map(i => (
+                        <div key={i} className="skeleton w-full h-4 lg:h-6" />
+                      ))}
+                    </div>
+                  }
+                </div>
+                <div className="flex flex-col space-y-2.5">
+                  <span className="text-base font-semibold">Payload</span>
+                  {gmp ?
+                    call?.returnValues?.payload ?
+                      <div className="flex items-start">
+                        <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
+                          {call.returnValues.payload}
+                        </div>
+                        <Copy size={20} value={call.returnValues.payload} className="mt-4" />
+                      </div>
+                      :
+                      <span className="text-sm lg:text-base">-</span>
+                    :
+                    <div className="flex flex-col space-y-3">
+                      {[...Array(8).keys()].map(i => (
+                        <div key={i} className="skeleton w-full h-4 lg:h-6" />
+                      ))}
+                    </div>
+                  }
+                </div>
               </div>
-            </div>
+            </div>*/}
           </div>
         </>
         :
-        <div className="h-96 bg-transparent rounded-xl border-2 border-dashed border-gray-400 dark:border-gray-600 flex items-center justify-center text-gray-400 dark:text-gray-600 text-lg font-medium space-x-1.5 mt-2 xl:mt-4">
-          <BsFileEarmarkX size={32} />
-          <span>Transaction not found</span>
-        </div>
+        <TailSpin color={loader_color(theme)} width="32" height="32" />
       }
     </div>
   )

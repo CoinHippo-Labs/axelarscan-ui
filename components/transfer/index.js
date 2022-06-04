@@ -7,12 +7,13 @@ import { TailSpin, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { MdChevronLeft, MdChevronRight } from 'react-icons/md'
+import { TiArrowRight } from 'react-icons/ti'
 
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
-import { transactions_by_events } from '../../lib/api/cosmos'
-import { transfers as getTransfers, transactions as getTransactions } from '../../lib/api/index'
+import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
+import { transfers as getTransfers } from '../../lib/api/index'
 import { getChain } from '../../lib/object/chain'
 import { getDenom } from '../../lib/object/denom'
 import { number_format, name, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
@@ -152,249 +153,257 @@ export default () => {
             <div className={`${titleClassName}`}>
               Transfer
             </div>
-            <div className="overflow-x-auto flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-              <div className="flex flex-col space-y-2">
-                <div className="pb-1">
-                  <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                    Source
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1.5">
-                  {source_chain_data?.image && (
-                    <Image
-                      src={source_chain_data.image}
-                      className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
-                    />
-                  )}
-                  <span className="text-base sm:text-sm lg:text-base font-bold">
-                    {source_chain_data?.name || sender_chain}
-                  </span>
-                </div>
-                {sender_address && (
-                  <div className="flex flex-col">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                      Sender address
+            {data ?
+              <div className="overflow-x-auto flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="flex flex-col space-y-2">
+                  <div className="pb-1">
+                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                      Source
                     </span>
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={`${source_chain_data?.explorer?.url}${source_chain_data?.explorer?.address_path?.replace('{address}', sender_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 dark:text-white"
-                      >
-                        <EnsProfile
-                          address={sender_address}
-                          no_copy={true}
-                          fallback={(
-                            <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                              <span className="xl:hidden">
-                                {ellipse(sender_address, 8, source_chain_data?.prefix_address)}
-                              </span>
-                              <span className="hidden xl:block">
-                                {ellipse(sender_address, 12, source_chain_data?.prefix_address)}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      </a>
-                      <Copy
-                        value={sender_address}
-                        size={18}
-                      />
-                    </div>
                   </div>
-                )}
-              </div>
-              <div className="lg:min-h-full sm:hidden lg:flex items-center">
-                <MdChevronLeft size={36} className="transform rotate-90 sm:rotate-0" />
-              </div>
-              <div className="flex flex-col space-y-1">
-                <div className="pb-2">
-                  <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                    Asset
-                  </span>
-                </div>
-                {amount && asset_data && (
-                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                    {asset_image && (
+                  <div className="flex items-center space-x-1.5">
+                    {source_chain_data?.image && (
                       <Image
-                        src={asset_image}
-                        className="w-7 sm:w-5 lg:w-7 h-7 sm:h-5 lg:h-7 rounded-full"
+                        src={source_chain_data.image}
+                        className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
                       />
                     )}
-                    <span className="text-base sm:text-sm lg:text-base font-semibold">
-                      <span className="mr-1">
-                        {number_format(amount, '0,0.000', true)}
-                      </span>
-                      <span>
-                        {ellipse(symbol)}
-                      </span>
+                    <span className="text-base sm:text-sm lg:text-base font-bold">
+                      {source_chain_data?.name || sender_chain}
                     </span>
                   </div>
-                )}
-                <div className="flex flex-col">
-                  <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                    Deposit address
-                  </span>
-                  <div className="flex items-center space-x-1">
-                    <a
-                      href={`${deposit_chain_data?.explorer?.url}${deposit_chain_data?.explorer?.address_path?.replace('{address}', deposit_address)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-white"
-                    >
-                      <EnsProfile
-                        address={deposit_address}
-                        no_copy={true}
-                        fallback={(
-                          <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                            <span className="xl:hidden">
-                              {ellipse(deposit_address, 8, deposit_chain_data?.prefix_address)}
-                            </span>
-                            <span className="hidden xl:block">
-                              {ellipse(deposit_address, 12, deposit_chain_data?.prefix_address)}
-                            </span>
-                          </div>
-                        )}
-                      />
-                    </a>
-                    <Copy
-                      value={deposit_address}
-                      size={18}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="lg:min-h-full sm:hidden lg:flex items-center">
-                <MdChevronRight size={36} className="transform rotate-90 sm:rotate-0" />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <div className="pb-1">
-                  <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                    Destination
-                  </span>
-                </div>
-                <div className="flex items-center space-x-1.5">
-                  {destination_chain_data?.image && (
-                    <Image
-                      src={destination_chain_data.image}
-                      className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
-                    />
-                  )}
-                  <span className="text-base sm:text-sm lg:text-base font-bold">
-                    {destination_chain_data?.name || recipient_chain}
-                  </span>
-                </div>
-                {recipient_address && (
-                  <div className="flex flex-col">
-                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                      Recipient address
-                    </span>
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.address_path?.replace('{address}', recipient_address)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 dark:text-white"
-                      >
-                        <EnsProfile
-                          address={recipient_address}
-                          no_copy={true}
-                          fallback={(
-                            <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                              <span className="xl:hidden">
-                                {ellipse(recipient_address, 8, destination_chain_data?.prefix_address)}
-                              </span>
-                              <span className="hidden xl:block">
-                                {ellipse(recipient_address, 12, destination_chain_data?.prefix_address)}
-                              </span>
-                            </div>
-                          )}
-                        />
-                      </a>
-                      <Copy
-                        value={recipient_address}
-                        size={18}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="min-w-max flex flex-col space-y-1">
-                <div className="pb-2">
-                  <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                    Status
-                  </span>
-                </div>
-                {steps.map((s, i) => {
-                  const text_color = s.finish ?
-                    'text-green-500 dark:text-green-600' :
-                    i === current_step ?
-                      'text-blue-500 dark:text-white' :
-                      'text-slate-400 dark:text-slate-600'
-                  const { title, chain_data, data, id_field, path, params, finish } = { ...s }
-                  const id = data?.[id_field]
-                  const { explorer } = { ...chain_data }
-                  const { url, transaction_path, icon } = { ...explorer }
-                  let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
-                  Object.entries({ ...params }).forEach(([k, v]) => {
-                    _path = _path?.replace(`{${k}}`, v)
-                  })
-                  return (
-                    <div
-                      key={i}
-                      className="flex items-center space-x-1.5 pb-0.5"
-                    >
-                      {finish ?
-                        <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
-                        i === current_step ?
-                          <Puff color={loader_color(theme)} width="20" height="20" /> :
-                          <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
-                      }
+                  {sender_address && (
+                    <div className="flex flex-col">
+                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                        Sender address
+                      </span>
                       <div className="flex items-center space-x-1">
-                        {id ?
-                          <Copy
-                            value={id}
-                            title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
-                              {title}
-                            </span>}
-                            size={18}
+                        <a
+                          href={`${source_chain_data?.explorer?.url}${source_chain_data?.explorer?.address_path?.replace('{address}', sender_address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          <EnsProfile
+                            address={sender_address}
+                            no_copy={true}
+                            fallback={(
+                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(sender_address, 8, source_chain_data?.prefix_address)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(sender_address, 12, source_chain_data?.prefix_address)}
+                                </span>
+                              </div>
+                            )}
                           />
-                          :
-                          <span className={`uppercase ${text_color} text-xs font-medium`}>
-                            {title}
-                          </span>
-                        }
-                        {id && url && (
-                          <a
-                            href={`${url}${_path}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            {icon ?
-                              <Image
-                                src={icon}
-                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                              />
-                              :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
-                            }
-                          </a>
-                        )}
+                        </a>
+                        <Copy
+                          value={sender_address}
+                          size={18}
+                        />
                       </div>
                     </div>
-                  )
-                })}
+                  )}
+                </div>
+                <div className="lg:min-h-full sm:hidden lg:flex items-center">
+                  <MdChevronLeft size={36} className="transform rotate-90 sm:rotate-0" />
+                </div>
+                <div className="flex flex-col space-y-1">
+                  <div className="pb-2">
+                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                      Asset
+                    </span>
+                  </div>
+                  {amount && asset_data && (
+                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                      {asset_image && (
+                        <Image
+                          src={asset_image}
+                          className="w-7 sm:w-5 lg:w-7 h-7 sm:h-5 lg:h-7 rounded-full"
+                        />
+                      )}
+                      <span className="text-base sm:text-sm lg:text-base font-semibold">
+                        <span className="mr-1">
+                          {number_format(amount, '0,0.000', true)}
+                        </span>
+                        <span>
+                          {ellipse(symbol)}
+                        </span>
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                      Deposit address
+                    </span>
+                    {deposit_address && (
+                      <div className="flex items-center space-x-1">
+                        <a
+                          href={`${deposit_chain_data?.explorer?.url}${deposit_chain_data?.explorer?.address_path?.replace('{address}', deposit_address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          <EnsProfile
+                            address={deposit_address}
+                            no_copy={true}
+                            fallback={(
+                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(deposit_address, 8, deposit_chain_data?.prefix_address)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(deposit_address, 12, deposit_chain_data?.prefix_address)}
+                                </span>
+                              </div>
+                            )}
+                          />
+                        </a>
+                        <Copy
+                          value={deposit_address}
+                          size={18}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="lg:min-h-full sm:hidden lg:flex items-center">
+                  <MdChevronRight size={36} className="transform rotate-90 sm:rotate-0" />
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <div className="pb-1">
+                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                      Destination
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-1.5">
+                    {destination_chain_data?.image && (
+                      <Image
+                        src={destination_chain_data.image}
+                        className="w-8 sm:w-6 lg:w-8 h-8 sm:h-6 lg:h-8 rounded-full"
+                      />
+                    )}
+                    <span className="text-base sm:text-sm lg:text-base font-bold">
+                      {destination_chain_data?.name || recipient_chain}
+                    </span>
+                  </div>
+                  {recipient_address && (
+                    <div className="flex flex-col">
+                      <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                        Recipient address
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        <a
+                          href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.address_path?.replace('{address}', recipient_address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          <EnsProfile
+                            address={recipient_address}
+                            no_copy={true}
+                            fallback={(
+                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(recipient_address, 8, destination_chain_data?.prefix_address)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(recipient_address, 12, destination_chain_data?.prefix_address)}
+                                </span>
+                              </div>
+                            )}
+                          />
+                        </a>
+                        <Copy
+                          value={recipient_address}
+                          size={18}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-max flex flex-col space-y-1">
+                  <div className="pb-2">
+                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
+                      Status
+                    </span>
+                  </div>
+                  {steps.map((s, i) => {
+                    const text_color = s.finish ?
+                      'text-green-500 dark:text-green-600' :
+                      i === current_step ?
+                        'text-blue-500 dark:text-white' :
+                        'text-slate-400 dark:text-slate-600'
+                    const { title, chain_data, data, id_field, path, params, finish } = { ...s }
+                    const id = data?.[id_field]
+                    const { explorer } = { ...chain_data }
+                    const { url, transaction_path, icon } = { ...explorer }
+                    let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
+                    Object.entries({ ...params }).forEach(([k, v]) => {
+                      _path = _path?.replace(`{${k}}`, v)
+                    })
+                    return (
+                      <div
+                        key={i}
+                        className="flex items-center space-x-1.5 pb-0.5"
+                      >
+                        {finish ?
+                          <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
+                          i === current_step ?
+                            <Puff color={loader_color(theme)} width="20" height="20" /> :
+                            <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
+                        }
+                        <div className="flex items-center space-x-1">
+                          {id ?
+                            <Copy
+                              value={id}
+                              title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
+                                {title}
+                              </span>}
+                              size={18}
+                            />
+                            :
+                            <span className={`uppercase ${text_color} text-xs font-medium`}>
+                              {title}
+                            </span>
+                          }
+                          {id && url && (
+                            <a
+                              href={`${url}${_path}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              {icon ?
+                                <Image
+                                  src={icon}
+                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                />
+                                :
+                                <TiArrowRight size={16} className="transform -rotate-45" />
+                              }
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+              :
+              <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
+                Data not found
+              </span>
+            }
           </div>
-          {detail_steps.map((s, i) => {
+          {data && detail_steps.map((s, i) => {
             const { title, chain_data, data, id_field, path, params, finish } = { ...s }
             const { height, type, status, executed, transfer_id, command_id, created_at } = { ...data }
             const id = data?.[id_field]
             const { explorer } = { ...chain_data }
-            const { url, block_path, transaction_path, icon } = { ...explorer }
+            const { url, transaction_path, block_path, icon } = { ...explorer }
             let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
             Object.entries({ ...params }).forEach(([k, v]) => {
               _path = _path?.replace(`{${k}}`, v)
@@ -422,7 +431,7 @@ export default () => {
                           rel="noopener noreferrer"
                           className="text-blue-600 dark:text-white"
                         >
-                          <div className="text-blue-600 dark:text-white font-bold">
+                          <div className="font-bold">
                             <span className="xl:hidden">
                               {ellipse(id, 12)}
                             </span>
@@ -489,14 +498,25 @@ export default () => {
                       </span>
                       <div className={`${status === 'success' || executed ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
                         {status === 'success' || executed ?
-                          <BiCheckCircle size={20} />
-                          :
+                          <BiCheckCircle size={20} /> :
                           <BiXCircle size={20} />
                         }
                         <span>
-                          {executed ? 'Executed' : status}
+                          {executed ?
+                            'Executed' : status
+                        }
                         </span>
                       </div>
+                    </div>
+                  )}
+                  {created_at?.ms && (
+                    <div className={rowClassName}>
+                      <span className={rowTitleClassName}>
+                        Time:
+                      </span>
+                      <span className="text-slate-400 dark:text-slate-600 font-medium">
+                        {moment(created_at.ms).fromNow()} ({moment(created_at.ms).format('MMM D, YYYY h:mm:ss A')})
+                      </span>
                     </div>
                   )}
                   {transfer_id && (
@@ -525,16 +545,6 @@ export default () => {
                         </span>}
                         size={20}
                       />
-                    </div>
-                  )}
-                  {created_at?.ms && (
-                    <div className={rowClassName}>
-                      <span className={rowTitleClassName}>
-                        Time:
-                      </span>
-                      <span className="text-slate-400 dark:text-slate-600 font-medium">
-                        {moment(created_at.ms).fromNow()} ({moment(created_at.ms).format('MMM D, YYYY h:mm:ss A')})
-                      </span>
                     </div>
                   )}
                 </div>

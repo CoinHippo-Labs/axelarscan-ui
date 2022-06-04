@@ -246,7 +246,7 @@ export default ({ n }) => {
               Cell: props => {
                 const { call, chain } = { ...props.row.original }
                 const { returnValues } = { ...call }
-                const { amount, symbol } = { ...returnValues }
+                const { symbol, amount } = { ...returnValues }
                 const chain_data = getChain(chain, chains_data)
                 const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c.symbol, symbol)) > -1)
                 const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
