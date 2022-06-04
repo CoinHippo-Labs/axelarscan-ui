@@ -1,4 +1,4 @@
-import Gmps from '../../components/gmps/gmps'
+import Gmps from '../../components/gmps'
 
 export default () => {
   return (

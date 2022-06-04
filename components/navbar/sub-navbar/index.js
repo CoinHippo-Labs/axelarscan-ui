@@ -217,7 +217,7 @@ export default () => {
     case '/gmp':
     case '/gmp/search':
       title = 'General Message Passing'
-      subtitle = (
+      /*subtitle = (
         <div className="flex items-center space-x-1">
           {[
             { title: 'Overview', path: '/gmp' },
@@ -234,7 +234,7 @@ export default () => {
             </div>
           ))}
         </div>
-      )
+      )*/
       right = pathname.endsWith('/search') && (
         <GMPFilters />
       )
