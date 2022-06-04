@@ -1,4 +1,4 @@
-import Transfers from '../../components/transfers/transfers'
+import Transfers from '../../components/transfers'
 
 export default () => {
   return (

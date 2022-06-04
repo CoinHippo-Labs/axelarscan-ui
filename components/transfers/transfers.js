@@ -16,7 +16,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { transfers as getTransfers } from '../../lib/api/index'
 import { getChain } from '../../lib/object/chain'
-import { getDenom, denom_manager } from '../../lib/object/denom'
+import { getDenom } from '../../lib/object/denom'
 import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
@@ -63,7 +63,7 @@ export default ({ n }) => {
     if (pathname && filters) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (address || ['/transfers/search'].includes(pathname) ? 3 : 0.5) * 60 * 1000)
+    const interval = setInterval(() => triggering(true), (address || ['/transfers/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
@@ -154,14 +154,16 @@ export default ({ n }) => {
   return (
     data ?
       <div className="min-h-full grid gap-2">
-        <div className="flex items-center space-x-2 -mt-3">
-          <span className="text-lg font-bold">
-            {number_format(total, '0,0')}
-          </span>
-          <span className="text-base">
-            Results
-          </span>
-        </div>
+        {!n && (
+          <div className="flex items-center space-x-2 -mt-3">
+            <span className="text-lg font-bold">
+              {number_format(total, '0,0')}
+            </span>
+            <span className="text-base">
+              Results
+            </span>
+          </div>
+        )}
         <Datatable
           columns={[
             {
@@ -341,7 +343,7 @@ export default ({ n }) => {
             },
             {
               Header: 'Destination',
-              accessor: 'link.recipient_chain',
+              accessor: 'source.recipient_chain',
               disableSortBy: true,
               Cell: props => {
                 const { link } = { ...props.row.original }
@@ -541,7 +543,7 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />
-        {data.length > 0 && (
+        {data.length > 0 && !n && (
           !fetching ?
             <button
               onClick={() => {

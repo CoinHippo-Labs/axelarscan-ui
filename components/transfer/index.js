@@ -43,9 +43,9 @@ export default () => {
           })
           if (response) {
             let data = response.data?.[0]
-            const { source, link, confirm_deposit } = { ...data }
-            const { recipient_address } = { ...source }
-            if ((!link || !confirm_deposit) && recipient_address?.length >= 65) {
+            const { source, link, confirm_deposit, sign_batch } = { ...data }
+            const { recipient_chain, recipient_address } = { ...source }
+            if ((!link || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && recipient_address?.length >= 65) {
               let _response
               _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
               _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
