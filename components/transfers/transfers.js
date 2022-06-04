@@ -72,74 +72,76 @@ export default ({ n }) => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        setFetching(true)
-        if (!fetchTrigger) {
-          setTotal(null)
-          setData(null)
-          setOffet(0)
-        }
-        const _data = !fetchTrigger ? [] : (data || []),
-          size = n || LIMIT
-        const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
-        const must = [], should = [], must_not = []
-        // must.push({ exists: { 'field': 'link' } })
-        if (address) {
-          should.push({ match: { 'source.recipient_address': address } })
-          should.push({ match: { 'source.sender_address': address } })
-          should.push({ match: { 'link.recipient_address': address } })
-        }
-        else if (filters) {
-          const { txHash, sourceChain, destinationChain, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
-          if (txHash) {
-            must.push({ match: { 'source.id': txHash } })
+      if (filters && (!pathname?.includes('/[address]') || address)) {
+        if (!controller.signal.aborted) {
+          setFetching(true)
+          if (!fetchTrigger) {
+            setTotal(null)
+            setData(null)
+            setOffet(0)
           }
-          if (sourceChain) {
-            must.push({ match: { 'source.sender_chain': sourceChain } })
+          const _data = !fetchTrigger ? [] : (data || []),
+            size = n || LIMIT
+          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          const must = [], should = [], must_not = []
+          // must.push({ exists: { 'field': 'link' } })
+          if (address) {
+            should.push({ match: { 'source.recipient_address': address } })
+            should.push({ match: { 'source.sender_address': address } })
+            should.push({ match: { 'link.recipient_address': address } })
           }
-          if (destinationChain) {
-            must.push({ match: { 'source.recipient_chain': destinationChain } })
-          }
-          if (depositAddress) {
-            must.push({ match: { 'source.recipient_address': depositAddress } })
-          }
-          if (senderAddress) {
-            must.push({ match: { 'source.sender_address': senderAddress } })
-          }
-          if (recipientAddress) {
-            must.push({ match: { 'link.recipient_address': recipientAddress } })
-          }
-          if (time?.length > 1) {
-            must.push({ range: { 'source.created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
-          }
-        }
-        const response = await getTransfers({
-          query: {
-            bool: {
-              must,
-              should,
-              minimum_should_match: should.length > 0 ? 1 : 0,
-              must_not,
-            },
-          },
-          size,
-          from,
-          sort: [{ 'source.created_at.ms': 'desc' }],
-        })
-        if (response) {
-          setTotal(response.total)
-          response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
-            return {
-              ...d,
+          else if (filters) {
+            const { txHash, sourceChain, destinationChain, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
+            if (txHash) {
+              must.push({ match: { 'source.id': txHash } })
             }
-          }) || []), 'source.id'), ['source.created_at.ms'], ['desc'])
-          setData(response)
+            if (sourceChain) {
+              must.push({ match: { 'source.sender_chain': sourceChain } })
+            }
+            if (destinationChain) {
+              must.push({ match: { 'source.recipient_chain': destinationChain } })
+            }
+            if (depositAddress) {
+              must.push({ match: { 'source.recipient_address': depositAddress } })
+            }
+            if (senderAddress) {
+              must.push({ match: { 'source.sender_address': senderAddress } })
+            }
+            if (recipientAddress) {
+              must.push({ match: { 'link.recipient_address': recipientAddress } })
+            }
+            if (time?.length > 1) {
+              must.push({ range: { 'source.created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
+            }
+          }
+          const response = await getTransfers({
+            query: {
+              bool: {
+                must,
+                should,
+                minimum_should_match: should.length > 0 ? 1 : 0,
+                must_not,
+              },
+            },
+            size,
+            from,
+            sort: [{ 'source.created_at.ms': 'desc' }],
+          })
+          if (response) {
+            setTotal(response.total)
+            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+              return {
+                ...d,
+              }
+            }) || []), 'source.id'), ['source.created_at.ms'], ['desc'])
+            setData(response)
+          }
+          else if (!fetchTrigger) {
+            setTotal(0)
+            setData([])
+          }
+          setFetching(false)
         }
-        else if (!fetchTrigger) {
-          setTotal(0)
-          setData([])
-        }
-        setFetching(false)
       }
     }
     getData()

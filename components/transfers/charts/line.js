@@ -78,11 +78,7 @@ export default ({
                   setXFocus(e?.activePayload?.[0]?.payload?.timestamp)
                 }
               }}
-              onMouseLeave={e => {
-                if (e) {
-                  setXFocus(_.last(data)?.timestamp)
-                }
-              }}
+              onMouseLeave={() => setXFocus(_.last(data)?.timestamp)}
               margin={{
                 top: 10,
                 right: 2,

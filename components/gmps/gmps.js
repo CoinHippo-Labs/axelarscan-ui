@@ -77,73 +77,75 @@ export default ({ n }) => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        setFetching(true)
-        if (!fetchTrigger) {
-          setTotal(null)
-          setData(null)
-          setOffet(0)
-        }
-        const _data = !fetchTrigger ? [] : (data || []),
-          size = n || LIMIT
-        const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
-        let params
-        if (address) {
-          params = {
-            senderAddress: address,
+      if (filters && (!pathname?.includes('/[address]') || address)) {
+        if (!controller.signal.aborted) {
+          setFetching(true)
+          if (!fetchTrigger) {
+            setTotal(null)
+            setData(null)
+            setOffet(0)
           }
-        }
-        else if (filters) {
-          const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-          let event, fromTime, toTime
-          switch (method) {
-            case 'callContract':
-              event = 'ContractCall'
-              break
-            case 'callContractWithToken':
-              event = 'ContractCallWithToken'
-              break
-            default:
-              event = undefined
-              break
-          }
-          if (time?.length > 1) {
-            fromTime = time[0].unix()
-            toTime = time[1].unix()
-          }
-          params = {
-            txHash,
-            sourceChain,
-            destinationChain,
-            event,
-            status,
-            senderAddress,
-            sourceAddress,
-            contractAddress,
-            relayerAddress,
-            fromTime,
-            toTime,
-          }
-        }
-        const response = await search({
-          ...params,
-          size,
-          from,
-        })
-        if (response) {
-          setTotal(response.total)
-          response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
-            return {
-              ...d,
+          const _data = !fetchTrigger ? [] : (data || []),
+            size = n || LIMIT
+          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          let params
+          if (address) {
+            params = {
+              senderAddress: address,
             }
-          }) || []), 'call.id'), ['call.block_timestamp'], ['desc'])
-          setData(response)
+          }
+          else if (filters) {
+            const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
+            let event, fromTime, toTime
+            switch (method) {
+              case 'callContract':
+                event = 'ContractCall'
+                break
+              case 'callContractWithToken':
+                event = 'ContractCallWithToken'
+                break
+              default:
+                event = undefined
+                break
+            }
+            if (time?.length > 1) {
+              fromTime = time[0].unix()
+              toTime = time[1].unix()
+            }
+            params = {
+              txHash,
+              sourceChain,
+              destinationChain,
+              event,
+              status,
+              senderAddress,
+              sourceAddress,
+              contractAddress,
+              relayerAddress,
+              fromTime,
+              toTime,
+            }
+          }
+          const response = await search({
+            ...params,
+            size,
+            from,
+          })
+          if (response) {
+            setTotal(response.total)
+            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+              return {
+                ...d,
+              }
+            }) || []), 'call.id'), ['call.block_timestamp'], ['desc'])
+            setData(response)
+          }
+          else if (!fetchTrigger) {
+            setTotal(0)
+            setData([])
+          }
+          setFetching(false)
         }
-        else if (!fetchTrigger) {
-          setTotal(0)
-          setData([])
-        }
-        setFetching(false)
       }
     }
     getData()
