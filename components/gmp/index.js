@@ -9,7 +9,6 @@ import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
-import AddToken from '../add-token'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
@@ -198,7 +197,7 @@ export default () => {
   const { data } = { ...gmp }
   const { call, gas_paid, approved, executed, is_executed, error, status } = { ...data }
   const { event, chain } = { ...call }
-  const { sender, destinationChain, destinationContractAddress, payload, symbol, amount } = { ...call?.returnValues }
+  const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { from } = { ...call?.transaction }
   const relayer = executed?.transaction?.from
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
@@ -944,8 +943,43 @@ export default () => {
                 </div>
               )
             })}
-            {/*
-              {(i < 3 || !txHashExecutedEditing) && t?.transactionHash && (
+            {payloadHash && (
+              <div className="sm:col-span-4 space-y-2">
+                <span className="text-base font-semibold">
+                  Payload Hash
+                </span>
+                <div className="flex items-start">
+                  <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                    {payloadHash}
+                  </div>
+                  <div className="mt-4">
+                    <Copy
+                      value={payloadHash}
+                      size={20}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            {payload && (
+              <div className="sm:col-span-4 space-y-2">
+                <span className="text-base font-semibold">
+                  Payload
+                </span>
+                <div className="flex items-start">
+                  <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                    {payload}
+                  </div>
+                  <div className="mt-4">
+                    <Copy
+                      value={payload}
+                      size={20}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            {/*{(i < 3 || !txHashExecutedEditing) && t?.transactionHash && (
                 <div className="flex items-center">
                   {(i < 2 ? fromChain : toChain)?.explorer?.url ?
                     <a
@@ -1028,51 +1062,7 @@ export default () => {
                     }
                   </div>
                 )}
-              </div>
-            <div className="mt-4 mb-6">
-              <div className="flex flex-col space-y-4">
-                <div className="flex flex-col space-y-2.5">
-                  <span className="text-base font-semibold">Payload Hash</span>
-                  {gmp ?
-                    call?.returnValues?.payloadHash ?
-                      <div className="flex items-start">
-                        <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
-                          {call.returnValues.payloadHash}
-                        </div>
-                        <Copy size={20} value={call.returnValues.payloadHash} className="mt-4" />
-                      </div>
-                      :
-                      <span className="text-sm lg:text-base">-</span>
-                    :
-                    <div className="flex flex-col space-y-3">
-                      {[...Array(1).keys()].map(i => (
-                        <div key={i} className="skeleton w-full h-4 lg:h-6" />
-                      ))}
-                    </div>
-                  }
-                </div>
-                <div className="flex flex-col space-y-2.5">
-                  <span className="text-base font-semibold">Payload</span>
-                  {gmp ?
-                    call?.returnValues?.payload ?
-                      <div className="flex items-start">
-                        <div className="w-full bg-gray-100 dark:bg-gray-900 break-all rounded-xl text-gray-400 dark:text-gray-600 text-xs lg:text-sm mr-2 p-4">
-                          {call.returnValues.payload}
-                        </div>
-                        <Copy size={20} value={call.returnValues.payload} className="mt-4" />
-                      </div>
-                      :
-                      <span className="text-sm lg:text-base">-</span>
-                    :
-                    <div className="flex flex-col space-y-3">
-                      {[...Array(8).keys()].map(i => (
-                        <div key={i} className="skeleton w-full h-4 lg:h-6" />
-                      ))}
-                    </div>
-                  }
-                </div>
-              </div>
-            </div>*/}
+              </div>*/}
           </div>
         </>
         :

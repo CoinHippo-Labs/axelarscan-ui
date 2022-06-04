@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
-import { Img as Image } from 'react-image'
+// import { Img as Image } from 'react-image'
 
 import Copy from '../copy'
 import { ens as getEns } from '../../lib/api/ens'
@@ -15,6 +15,8 @@ export default ({
   const dispatch = useDispatch()
   const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
   const { ens_data } = { ...ens }
+
+  const [noImage, setNoImage] = useState(null)
 
   useEffect(() => {
     const getData = async () => {
@@ -50,11 +52,14 @@ export default ({
 
   return ens_name ?
     <div className="flex items-center space-x-2">
-      <Image
-        src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address].name}`}
-        alt=""
-        className="w-6 h-6 rounded-full"
-      />
+      {!noImage && (
+        <img
+          src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${ens_data[address].name}`}
+          alt=""
+          onError={() => setNoImage(true)}
+          className="w-6 h-6 rounded-full"
+        />
+      )}
       {no_copy ?
         ens_name
         :
