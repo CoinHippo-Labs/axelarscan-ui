@@ -5,9 +5,10 @@ import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, providers, utils } from 'ethers'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
-import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
+import { RiCloseCircleFill } from 'react-icons/ri'
 
 import EnsProfile from '../ens-profile'
 import Image from '../image'
@@ -636,50 +637,139 @@ export default () => {
                     {title}
                   </div>
                   <div className="flex flex-col space-y-3">
-                    {transactionHash ?
+                    {i === 3 && executeButton ?
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Tx Hash:
                         </span>
                         <div className="flex items-center space-x-1">
-                          <a
-                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <div className="text-sm lg:text-base font-bold">
-                              <span className="xl:hidden">
-                                {ellipse(transactionHash, 12)}
-                              </span>
-                              <span className="hidden xl:block">
-                                {ellipse(transactionHash, 16)}
-                              </span>
-                            </div>
-                          </a>
-                          <Copy
-                            value={transactionHash}
-                            size={18}
-                          />
-                          <a
-                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            {icon ?
-                              <Image
-                                src={icon}
-                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                              />
+                          {txHashEditing ?
+                            <input
+                              disabled={txHashEditUpdating}
+                              placement="Transaction Hash"
+                              value={txHashEdit}
+                              onChange={e => setTxHashEdit(e.target.value)}
+                              className="bg-slate-50 dark:bg-slate-800 rounded-lg text-base py-1 px-2"
+                            />
+                            :
+                            transactionHash ?
+                              <>
+                                <a
+                                  href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-white"
+                                >
+                                  <div className="text-sm lg:text-base font-bold">
+                                    <span className="xl:hidden">
+                                      {ellipse(transactionHash, 12)}
+                                    </span>
+                                    <span className="hidden xl:block">
+                                      {ellipse(transactionHash, 16)}
+                                    </span>
+                                  </div>
+                                </a>
+                                <Copy
+                                  value={transactionHash}
+                                  size={18}
+                                />
+                                <a
+                                  href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-white"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    />
+                                    :
+                                    <TiArrowRight size={16} className="transform -rotate-45" />
+                                  }
+                                </a>
+                              </>
                               :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
-                            }
-                          </a>
+                              <FallingLines color={loader_color(theme)} width="32" height="32" />
+                          }
+                          {txHashEditing ?
+                            <>
+                              <button
+                                disabled={txHashEditUpdating}
+                                onClick={() => resetTxHashEdit()}
+                                className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
+                              >
+                                <RiCloseCircleFill size={20} />
+                              </button>
+                              <button
+                                disabled={!txHashEdit || txHashEditUpdating}
+                                onClick={async () => {
+                                  setTxHashEditUpdating(true)
+                                  await saveGMP(txHashEdit, approved, approved.chain, approved.contract_address, address)
+                                }}
+                                className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
+                              >
+                                {txHashEditUpdating ?
+                                  <TailSpin color={loader_color(theme)} width="16" height="16" /> :
+                                  <BiSave size={20} />
+                                }
+                              </button>
+                            </>
+                            :
+                            <button
+                              onClick={() => setTxHashEditing(true)}
+                              className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                            >
+                              <BiEditAlt size={20} />
+                            </button>
+                          }
                         </div>
                       </div>
                       :
-                      <FallingLines color={loader_color(theme)} width="32" height="32" />
+                      transactionHash ?
+                        <div className={rowClassName}>
+                          <span className={rowTitleClassName}>
+                            Tx Hash:
+                          </span>
+                          <div className="flex items-center space-x-1">
+                            <a
+                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              <div className="text-sm lg:text-base font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(transactionHash, 12)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(transactionHash, 16)}
+                                </span>
+                              </div>
+                            </a>
+                            <Copy
+                              value={transactionHash}
+                              size={18}
+                            />
+                            <a
+                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              {icon ?
+                                <Image
+                                  src={icon}
+                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                />
+                                :
+                                <TiArrowRight size={16} className="transform -rotate-45" />
+                              }
+                            </a>
+                          </div>
+                        </div>
+                        :
+                        <FallingLines color={loader_color(theme)} width="32" height="32" />
                     }
                     {blockNumber && (
                       <div className={rowClassName}>
@@ -726,11 +816,11 @@ export default () => {
                         </span>
                       </div>
                     )}
-                    <div className={rowClassName}>
-                      <span className={rowTitleClassName}>
-                        {i === 1 ? 'Gas Receiver' : i === 3 ? 'Destination' : 'Gateway'}:
-                      </span>
-                      {to && (
+                    {to && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          {i === 1 ? 'Gas Receiver' : i === 3 ? 'Destination' : 'Gateway'}:
+                        </span>
                         <div className="flex items-center space-x-1">
                           <a
                             href={`${url}${address_path?.replace('{address}', to)}`}
@@ -773,13 +863,13 @@ export default () => {
                             }
                           </a>
                         </div>
-                      )}
-                    </div>
-                    <div className={rowClassName}>
-                      <span className={rowTitleClassName}>
-                        {i < 2 ? 'Sender' : 'Relayer'}:
-                      </span>
-                      {from && (
+                      </div>
+                    )}
+                    {from && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          {i < 2 ? 'Sender' : 'Relayer'}:
+                        </span>
                         <div className="flex items-center space-x-1">
                           <a
                             href={`${url}${address_path?.replace('{address}', from)}`}
@@ -822,8 +912,8 @@ export default () => {
                             }
                           </a>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                     {i < 1 && sender && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
@@ -924,12 +1014,15 @@ export default () => {
                     )}
                     {i === 3 && !data && _data && (
                       <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
+                        <span
+                          className={rowTitleClassName}
+                          style={{ minWidth: '8rem' }}
+                        >
                           Error:
                         </span>
                         <div className="flex flex-col space-y-1">
                           {_data.error?.code && (
-                            <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2 mx-auto">
+                            <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
                               {_data.error.code}
                             </div>
                           )}
@@ -979,90 +1072,6 @@ export default () => {
                 </div>
               </div>
             )}
-            {/*{(i < 3 || !txHashExecutedEditing) && t?.transactionHash && (
-                <div className="flex items-center">
-                  {(i < 2 ? fromChain : toChain)?.explorer?.url ?
-                    <a
-                      href={`${(i < 2 ? fromChain : toChain).explorer.url}${(i < 2 ? fromChain : toChain).explorer.transaction_path?.replace('{tx}', t.transactionHash)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-white text-sm lg:text-base font-medium mr-1.5"
-                    >
-                      {ellipse(t.transactionHash, 16)}
-                    </a>
-                    :
-                    <span className="text-sm lg:text-base mr-1.5">{ellipse(t.transactionHash, 16)}</span>
-                  }
-                  <Copy size={18} value={t.transactionHash} />
-                  {i === 3 && !t.block_timestamp && (
-                    <button
-                      disabled={txHashExecutedSaving}
-                      onClick={async () => {
-                        setTxHashExecutedSaving(true)
-                        await saveGMP(t.transactionHash, approved, approved?.chain, approved?.contract_address, address)
-                      }}
-                      className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white ml-1"
-                    >
-                      {txHashExecutedSaving ?
-                        <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
-                        :
-                        <MdRefresh size={20} />
-                      }
-                    </button>
-                  )}
-                </div>
-              )}
-              <div className="flex items-center space-x-2">
-                {i === 3 && txHashExecutedEditing ?
-                  <input
-                    disabled={txHashExecutedSaving}
-                    placement="Tx Hash"
-                    value={txHashExecuted}
-                    onChange={e => setTxHashExecuted(e.target.value)}
-                    className="bg-gray-50 dark:bg-gray-800 rounded text-base py-1 px-2"
-                  />
-                  :
-                  !t?.transactionHash && (
-                    <span className="font-mono text-gray-400 dark:text-gray-600 text-sm lg:text-base">n/a</span>
-                  )
-                }
-                {i === 3 && approved && address && (
-                  <div className="flex items-center space-x-1">
-                    {txHashExecutedEditing ?
-                      <>
-                        <button
-                          disabled={txHashExecutedSaving}
-                          onClick={() => resetTxHashEdit()}
-                          className="text-gray-300 hover:text-gray-400 dark:text-gray-600 dark:hover:text-gray-500"
-                        >
-                          <RiCloseCircleFill size={20} />
-                        </button>
-                        <button
-                          disabled={!txHashExecuted || txHashExecutedSaving}
-                          onClick={async () => {
-                            setTxHashExecutedSaving(true)
-                            await saveGMP(txHashExecuted, approved, approved.chain, approved.contract_address, address)
-                          }}
-                          className="text-blue-400 hover:text-blue-500 dark:text-gray-400 dark:hover:text-white"
-                        >
-                          {txHashExecutedSaving ?
-                            <Loader type="Oval" color={theme === 'dark' ? 'white' : '#3B82F6'} width="16" height="16" />
-                            :
-                            <BiSave size={20} />
-                          }
-                        </button>
-                      </>
-                      :
-                      <button
-                        onClick={() => setTxHashExecutedEditing(true)}
-                        className="text-white hover:text-gray-400 dark:text-gray-900 dark:hover:text-gray-500"
-                      >
-                        <BiEditAlt size={20} />
-                      </button>
-                    }
-                  </div>
-                )}
-              </div>*/}
           </div>
         </>
         :
