@@ -72,20 +72,14 @@ export default () => {
     setTxHashEditUpdating(false)
   }
 
-  const saveGMP = async (tx_hash, event, chain, contract_address, relayer_address, error) => {
-    if (process.env.NEXT_PUBLIC_GMP_API_URL && event && chain && contract_address) {
+  const saveGMP = async (sourceTransactionHash, transactionHash, relayerAddress, error) => {
+    if (process.env.NEXT_PUBLIC_GMP_API_URL) {
       const params = {
         method: 'saveGMP',
-        event: {
-          event: `${error ? 'errorE' : 'e'}xecute${event.event?.endsWith('WithMint') ? 'WithToken' : ''}`,
-          transactionHash: tx_hash,
-          sourceTransactionHash: event.returnValues?.sourceTxHash,
-          sourceChain: event.returnValues?.sourceChain,
-          from: relayer_address,
-          error,
-        },
-        chain,
-        contractAddress: contract_address,
+        sourceTransactionHash,
+        transactionHash,
+        relayerAddress,
+        error,
       }
       // request api
       await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, {
@@ -123,7 +117,7 @@ export default () => {
             })
             .on('receipt', async receipt => {
               const txHash = receipt?.transactionHash
-              await saveGMP(txHash, approved, chain, contract_address, address)
+              await saveGMP(call?.transactionHash, txHash, address)
               await sleep(2 * 1000)
               setExecuting(false)
               setExecuteResponse({
@@ -134,7 +128,7 @@ export default () => {
             })
             .on('error', async (error, receipt) => {
               const txHash = receipt?.transactionHash
-              await saveGMP(txHash, approved, chain, contract_address, address, error)
+              await saveGMP(call?.transactionHash, txHash, address, error)
               await sleep(2 * 1000)
               setExecuting(false)
               setExecuteResponse({
@@ -156,7 +150,7 @@ export default () => {
             })
             .on('receipt', async receipt => {
               const txHash = receipt?.transactionHash
-              await saveGMP(txHash, approved, chain, contract_address, address)
+              await saveGMP(call?.transactionHash, txHash, address)
               await sleep(2 * 1000)
               setExecuting(false)
               setExecuteResponse({
@@ -167,7 +161,7 @@ export default () => {
             })
             .on('error', async (error, receipt) => {
               const txHash = receipt?.transactionHash
-              await saveGMP(txHash, approved, chain, contract_address, address, error)
+              await saveGMP(call?.transactionHash, txHash, address, error)
               await sleep(2 * 1000)
               setExecuting(false)
               setExecuteResponse({
@@ -705,7 +699,7 @@ export default () => {
                                 disabled={!txHashEdit || txHashEditUpdating}
                                 onClick={async () => {
                                   setTxHashEditUpdating(true)
-                                  await saveGMP(txHashEdit, approved, approved.chain, approved.contract_address, address)
+                                  await saveGMP(call?.transactionHash, txHashEdit, address)
                                 }}
                                 className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
                               >
