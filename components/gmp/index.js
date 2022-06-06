@@ -631,7 +631,7 @@ export default () => {
                     {title}
                   </div>
                   <div className="flex flex-col space-y-3">
-                    {i === 3 && executeButton ?
+                    {i === 3 && (executeButton || (!data && is_executed)) ?
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Tx Hash:
@@ -684,7 +684,9 @@ export default () => {
                                 </a>
                               </>
                               :
-                              <FallingLines color={loader_color(theme)} width="32" height="32" />
+                              !(!data && is_executed) && (
+                                <FallingLines color={loader_color(theme)} width="32" height="32" />
+                              )
                           }
                           {txHashEditing ?
                             <>
