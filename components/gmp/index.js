@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import Web3 from 'web3'
 import { BigNumber, providers, utils } from 'ethers'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
@@ -17,7 +18,7 @@ import Notification from '../notifications'
 import Wallet from '../wallet'
 import { search } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
 export default () => {
@@ -27,7 +28,7 @@ export default () => {
   const { cosmos_chains_data } = { ...cosmos_chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
-  const { default_chain_id, chain_id, web3_provider, address, signer } = { ...wallet_data }
+  const { default_chain_id, chain_id, provider, web3_provider, address, signer } = { ...wallet_data }
 
   const router = useRouter()
   const { query } = { ...router }
@@ -43,9 +44,12 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (tx) {
-        if (gmp && gmp.tx !== tx) {
-          setGmp(null)
-          resetTxHashEdit()
+        if (gmp) {
+          await sleep(2 * 1000)
+          if (gmp.tx !== tx) {
+            setGmp(null)
+            resetTxHashEdit()
+          }
         }
         const response = await search({
           txHash: tx,
@@ -101,75 +105,71 @@ export default () => {
         const { call, approved } = { ...data }
         const { event } = { ...call }
         const { destinationContractAddress, payload } = { ...call?.returnValues }
-        const { chain, contract_address } = { ...approved }
         const { commandId, sourceChain, sourceAddress, symbol, amount } = { ...approved?.returnValues }
-        const contract = new web3_provider.eth.Contract(IAxelarExecutable.abi, destinationContractAddress)
+        const web3 = new Web3(provider)
+        const contract = new web3.eth.Contract(IAxelarExecutable.abi, destinationContractAddress)
         switch (event) {
           case 'ContractCall':
             contract.methods.execute(commandId, sourceChain, sourceAddress, payload).send({ from: address })
-            .on('transactionHash', hash => {
-              const txHash = hash
-              setExecuteResponse({
-                status: 'pending',
-                message: 'Wait for confirmation',
-                txHash,
+              .on('transactionHash', hash => {
+                const txHash = hash
+                setExecuteResponse({
+                  status: 'pending',
+                  message: 'Wait for confirmation',
+                  txHash,
+                })
               })
-            })
-            .on('receipt', async receipt => {
-              const txHash = receipt?.transactionHash
-              await saveGMP(call?.transactionHash, txHash, address)
-              await sleep(2 * 1000)
-              setExecuting(false)
-              setExecuteResponse({
-                status: 'success',
-                message: 'Execute successful',
-                txHash,
+              .on('receipt', async receipt => {
+                const txHash = receipt?.transactionHash
+                await saveGMP(call?.transactionHash, txHash, address)
+                setExecuting(false)
+                setExecuteResponse({
+                  status: 'success',
+                  message: 'Execute successful',
+                  txHash,
+                })
               })
-            })
-            .on('error', async (error, receipt) => {
-              const txHash = receipt?.transactionHash
-              await saveGMP(call?.transactionHash, txHash, address, error)
-              await sleep(2 * 1000)
-              setExecuting(false)
-              setExecuteResponse({
-                status: 'failed',
-                message: error?.reason || error?.data?.message || error?.message,
-                tx_hash,
+              .on('error', async (error, receipt) => {
+                const txHash = receipt?.transactionHash
+                await saveGMP(call?.transactionHash, txHash, address, error)
+                setExecuting(false)
+                setExecuteResponse({
+                  status: 'failed',
+                  message: error?.reason || error?.data?.message || error?.message,
+                  txHash,
+                })
               })
-            })
             break
           case 'ContractCallWithToken':
             contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).send({ from: address })
-            .on('transactionHash', hash => {
-              const txHash = hash
-              setExecuteResponse({
-                status: 'pending',
-                message: 'Wait for confirmation',
-                txHash,
+              .on('transactionHash', hash => {
+                const txHash = hash
+                setExecuteResponse({
+                  status: 'pending',
+                  message: 'Wait for confirmation',
+                  txHash,
+                })
               })
-            })
-            .on('receipt', async receipt => {
-              const txHash = receipt?.transactionHash
-              await saveGMP(call?.transactionHash, txHash, address)
-              await sleep(2 * 1000)
-              setExecuting(false)
-              setExecuteResponse({
-                status: 'success',
-                message: 'Execute successful',
-                txHash,
+              .on('receipt', async receipt => {
+                const txHash = receipt?.transactionHash
+                await saveGMP(call?.transactionHash, txHash, address)
+                setExecuting(false)
+                setExecuteResponse({
+                  status: 'success',
+                  message: 'Execute successful',
+                  txHash,
+                })
               })
-            })
-            .on('error', async (error, receipt) => {
-              const txHash = receipt?.transactionHash
-              await saveGMP(call?.transactionHash, txHash, address, error)
-              await sleep(2 * 1000)
-              setExecuting(false)
-              setExecuteResponse({
-                status: 'failed',
-                message: error?.reason || error?.data?.message || error?.message,
-                tx_hash,
+              .on('error', async (error, receipt) => {
+                const txHash = receipt?.transactionHash
+                await saveGMP(call?.transactionHash, txHash, address, error)
+                setExecuting(false)
+                setExecuteResponse({
+                  status: 'failed',
+                  message: error?.reason || error?.data?.message || error?.message,
+                  txHash,
+                })
               })
-            })
             break
           default:
             setExecuting(false)
