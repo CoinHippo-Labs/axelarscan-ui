@@ -61,90 +61,92 @@ export default () => {
     const controller = new AbortController()
     const getData = async () => {
       if (address && assets_data && status_data && validators_data) {
-        const validator_data = validators_data.find(v => equals_ignore_case(v?.operator_address, address))
-        if (validator_data?.start_proxy_height || validator_data?.start_height || validator_data?.deregistering) {
-          const {
-            start_height,
-            start_proxy_height,
-            broadcaster_loaded,
-            broadcaster_address,
-            tss_illegibility_info,
-          } = { ...validator_data }
-          setValidator({
-            data: validator_data,
-            address,
-            broadcaster_loaded,
-          })
-          if (broadcaster_loaded && 'tss_illegibility_info' in validator_data) {
-            const _health = {
-              broadcaster_registration: !tss_illegibility_info?.no_proxy_registered && broadcaster_address ? true : false,
-            }
-            if (broadcaster_address) {
-              const response = await all_bank_balances(broadcaster_address)
-              if (response?.data) {
-                _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => {
-                  const { denom, amount } = { ...b }
-                  return {
-                    denom: denom_manager.symbol(denom, assets_data),
-                    amount: denom_manager.amount(amount, denom, assets_data),
-                  }
-                }))
+        if (!controller.signal.aborted) {
+          const validator_data = validators_data.find(v => equals_ignore_case(v?.operator_address, address))
+          if (validator_data?.start_proxy_height || validator_data?.start_height || validator_data?.deregistering) {
+            const {
+              start_height,
+              start_proxy_height,
+              broadcaster_loaded,
+              broadcaster_address,
+              tss_illegibility_info,
+            } = { ...validator_data }
+            setValidator({
+              data: validator_data,
+              address,
+              broadcaster_loaded,
+            })
+            if (broadcaster_loaded && 'tss_illegibility_info' in validator_data) {
+              const _health = {
+                broadcaster_registration: !tss_illegibility_info?.no_proxy_registered && broadcaster_address ? true : false,
               }
-            }
-            else {
-              _health.broadcaster_funded = 'No Proxy'
-            }
-            const latest_block = Number(status_data.latest_block_height)
-            const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
-            const last = lastHeartbeatBlock(latest_block)
-            const response = await getHeartbeats({
-              query: {
-                bool: {
-                  must: [
-                    { match: { sender: broadcaster_address } },
-                    { range: { height: {
-                      gte: first,
-                      lte: latest_block,
-                    } } },
-                  ],
+              if (broadcaster_address) {
+                const response = await all_bank_balances(broadcaster_address)
+                if (response?.data) {
+                  _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => {
+                    const { denom, amount } = { ...b }
+                    return {
+                      denom: denom_manager.symbol(denom, assets_data),
+                      amount: denom_manager.amount(amount, denom, assets_data),
+                    }
+                  }))
+                }
+              }
+              else {
+                _health.broadcaster_funded = 'No Proxy'
+              }
+              const latest_block = Number(status_data.latest_block_height)
+              const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
+              const last = lastHeartbeatBlock(latest_block)
+              const response = await getHeartbeats({
+                query: {
+                  bool: {
+                    must: [
+                      { match: { sender: broadcaster_address } },
+                      { range: { height: {
+                        gte: first,
+                        lte: latest_block,
+                      } } },
+                    ],
+                  },
                 },
-              },
-              aggs: {
-                heartbeats: {
-                  terms: { field: 'sender.keyword' },
-                  aggs: {
-                    period_height: {
-                      terms: { field: 'period_height', size: 1000 },
+                aggs: {
+                  heartbeats: {
+                    terms: { field: 'sender.keyword' },
+                    aggs: {
+                      period_height: {
+                        terms: { field: 'period_height', size: 1000 },
+                      },
                     },
                   },
                 },
-              },
-              _source: false,
-            })
-            const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
-            const up = response?.data?.[broadcaster_address] || 0
-            let missed = total - up
-            missed = missed < 0 ? 0 :missed
-            let uptime = total > 0 ? up * 100 / total : 0
-            uptime = uptime > 100 ? 100 : uptime
-            setHealth({
-              data: {
-                ..._health,
-                total,
-                up,
-                missed,
-                heartbeats_uptime: uptime,
-              },
+                _source: false,
+              })
+              const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
+              const up = response?.data?.[broadcaster_address] || 0
+              let missed = total - up
+              missed = missed < 0 ? 0 :missed
+              let uptime = total > 0 ? up * 100 / total : 0
+              uptime = uptime > 100 ? 100 : uptime
+              setHealth({
+                data: {
+                  ..._health,
+                  total,
+                  up,
+                  missed,
+                  heartbeats_uptime: uptime,
+                },
+                address,
+              })
+            }
+          }
+          else {
+            setValidator({
+              data: null,
               address,
+              broadcaster_loaded: true,
             })
           }
-        }
-        else {
-          setValidator({
-            data: null,
-            address,
-            broadcaster_loaded: true,
-          })
         }
       }
     }

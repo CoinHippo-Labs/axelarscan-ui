@@ -327,7 +327,7 @@ export default () => {
     }
     const getData = is_interval => {
       if (assets_data && rpcs) {
-        if (['/[height]', '/[address]', '/[tx]', '/[id]'].findIndex(p => pathname?.includes(p)) < 0 && (!tvl_data || is_interval)) {
+        if (['/[height]', '/[address]', '/[tx]', '/[id]', '/tier'].findIndex(p => pathname?.includes(p)) < 0 && (!tvl_data || is_interval)) {
           Object.entries(rpcs).forEach(([k, v]) => getChainData(k, v))
         }
       }
@@ -497,7 +497,10 @@ export default () => {
               }
               break
             default:
-              response = await all_validators(null, validators_data, null, null, null, assets_data)
+              response = await all_validators(['/validators/tier'].includes(pathname) ? {} : null, validators_data, null, null, null, assets_data)
+              if (['/validators/tier'].includes(pathname)) {
+                response = await all_validators_broadcaster(response?.data, null, assets_data)
+              }
               break
           }
           if (response) {

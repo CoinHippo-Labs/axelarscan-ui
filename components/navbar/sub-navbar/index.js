@@ -33,6 +33,7 @@ export default () => {
       break
     case '/validators':
     case '/validators/[status]':
+    case '/validators/tier':
       title = 'Validators'
       break
     case '/validator/[address]':

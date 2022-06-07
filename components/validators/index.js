@@ -3,8 +3,8 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { FiBox } from 'react-icons/fi'
 import { TailSpin, ThreeDots, Grid } from 'react-loader-spinner'
+import { FiBox } from 'react-icons/fi'
 
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
@@ -26,7 +26,7 @@ export default () => {
   const { validators_chains_data } = { ...validators_chains }
 
   const router = useRouter()
-  const { pathname, query, asPath } = { ...router }
+  const { query } = { ...router }
   const { status } = { ...query }
 
   const [validatorsData, setValidatorsData] = useState(null)
