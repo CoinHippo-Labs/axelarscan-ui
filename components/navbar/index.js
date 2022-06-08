@@ -327,7 +327,7 @@ export default () => {
     }
     const getData = is_interval => {
       if (assets_data && rpcs) {
-        if (['/[height]', '/[address]', '/[tx]', '/[id]', '/tier'].findIndex(p => pathname?.includes(p)) < 0 && (!tvl_data || is_interval)) {
+        if (['/[height]', '/[address]', '/[tx]', '/[id]', '/tier'].findIndex(p => pathname?.includes(p)) < 0 && ['/transfers'].includes(pathname) && (!tvl_data || is_interval)) {
           Object.entries(rpcs).forEach(([k, v]) => getChainData(k, v))
         }
       }

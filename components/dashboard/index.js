@@ -4,12 +4,9 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { FiBox, FiCode } from 'react-icons/fi'
-import { BiDollarCircle, BiFileBlank, BiMessageDots } from 'react-icons/bi'
-import { BsSafe } from 'react-icons/bs'
+import { BiFileBlank, BiMessageDots } from 'react-icons/bi'
 
 import CosmosMetrics from './cosmos-metrics'
-import TvlTotal from './tvl/total'
-import Tvl from './tvl'
 import NetworkGraph from './network-graph'
 import CrossChainQuantity from './cross-chain-quantity'
 import Blocks from '../blocks'
@@ -20,7 +17,6 @@ import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { hexToBech32 } from '../../lib/object/key'
-import { currency } from '../../lib/object/currency'
 import { number_format, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -274,26 +270,6 @@ export default () => {
   return (
     <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">
       <CosmosMetrics data={cosmosMetrics} />
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <BiDollarCircle size={20} />
-            <span className="normal-case text-base font-bold">
-              TVL in {currency.toUpperCase()}
-            </span>
-          </div>
-          <TvlTotal />
-        </div>
-        <div className="lg:col-span-3 space-y-2">
-          <div className="flex items-center space-x-2">
-            <BsSafe size={20} />
-            <span className="normal-case text-base font-bold">
-              TVL on AXELAR NETWORK
-            </span>
-          </div>
-          <Tvl />
-        </div>
-      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between space-x-2">
@@ -327,38 +303,40 @@ export default () => {
             />
           </div>
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between space-x-2">
-            <Link href="/gmp">
-              <a className="flex items-center space-x-2">
-                <BiMessageDots size={20} />
-                <span className="uppercase text-base font-bold">
-                  General Message Passing
-                </span>
-              </a>
-            </Link>
-            {gmps?.data && (
-              <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
-                <span className="text-base font-semibold">
-                  Total:
-                </span>
-                <span className="text-base font-bold">
-                  {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
-                </span>
-              </div>
-            )}
+        {!['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between space-x-2">
+              <Link href="/gmp">
+                <a className="flex items-center space-x-2">
+                  <BiMessageDots size={20} />
+                  <span className="uppercase text-base font-bold">
+                    General Message Passing
+                  </span>
+                </a>
+              </Link>
+              {gmps?.data && (
+                <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                  <span className="text-base font-semibold">
+                    Total:
+                  </span>
+                  <span className="text-base font-bold">
+                    {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
+              <NetworkGraph
+                id="gmp"
+                data={gmps?.network_graph_data}
+              />
+              <CrossChainQuantity
+                data={gmps?.data}
+                pathname="/gmp/search"
+              />
+            </div>
           </div>
-          <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
-            <NetworkGraph
-              id="gmp"
-              data={gmps?.network_graph_data}
-            />
-            <CrossChainQuantity
-              data={gmps?.data}
-              pathname="/gmp/search"
-            />
-          </div>
-        </div>
+        )}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="space-y-2">
