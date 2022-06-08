@@ -10,8 +10,9 @@ import Modal from '../modals'
 import { params_to_obj } from '../../lib/utils'
 
 export default () => {
-  const { evm_chains } = useSelector(state => ({ evm_chains: state.evm_chains }), shallowEqual)
+  const { evm_chains, cosmos_chains } = useSelector(state => ({ evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
   const { evm_chains_data } = { ...evm_chains }
+  const { cosmos_chains_data } = { ...cosmos_chains }
 
   const router = useRouter()
   const { pathname, query, asPath } = { ...router }
@@ -62,6 +63,7 @@ export default () => {
     }
   }, [filter])
 
+  const chains_data = _.concat(evm_chains_data || [], cosmos_chains_data || [])
   const fields = [
     {
       label: 'Tx Hash',
@@ -77,7 +79,7 @@ export default () => {
       placeholder: 'Select source chain',
       options: _.concat(
         { value: '', title: 'Any' },
-        evm_chains_data?.map(c => {
+        chains_data?.map(c => {
           return {
             value: c.id,
             title: c.name,
@@ -92,7 +94,7 @@ export default () => {
       placeholder: 'Select destination chain',
       options: _.concat(
         { value: '', title: 'Any' },
-        evm_chains_data?.map(c => {
+        chains_data?.map(c => {
           return {
             value: c.id,
             title: c.name,
@@ -133,7 +135,7 @@ export default () => {
   return (
     <Modal
       hidden={hidden}
-      disabled={!evm_chains_data}
+      disabled={!evm_chains_data || !cosmos_chains_data}
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
       buttonClassName={`${filtered ? 'border-2 border-blue-600 dark:border-white text-blue-600 dark:text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-semibold'} rounded-lg text-sm sm:text-base py-1 px-2.5`}
