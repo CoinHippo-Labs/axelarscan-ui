@@ -219,7 +219,7 @@ export default ({ n }) => {
                 const { sender_address } = { ...source }
                 const chain_data = getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
-                const { url, address_path, icon } = { ...explorer }
+                const { url, address_path } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="flex items-center space-x-1.5">
@@ -286,7 +286,7 @@ export default ({ n }) => {
                 const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
                 const _image = contract_data?.image || ibc_data?.image || asset_data?.image
                 const { name, image, explorer, prefix_address } = { ...chain_data }
-                const { url, address_path, icon } = { ...explorer }
+                const { url, address_path } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-1 mb-3">
                     {amount && asset_data && (
@@ -352,7 +352,7 @@ export default ({ n }) => {
                 const { recipient_address } = { ...link }
                 const chain_data = getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
-                const { url, address_path, icon } = { ...explorer }
+                const { url, address_path } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="flex items-center space-x-1.5">

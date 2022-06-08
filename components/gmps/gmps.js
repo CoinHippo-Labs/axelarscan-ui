@@ -298,7 +298,7 @@ export default ({ n }) => {
                 const { from } = { ...transaction }
                 const chain_data = getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
-                const { url, address_path, icon } = { ...explorer }
+                const { url, address_path } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="flex items-center space-x-1.5">
@@ -396,7 +396,7 @@ export default ({ n }) => {
                 const { from } = { ...transaction }
                 const chain_data = getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
-                const { url, address_path, icon } = { ...explorer }
+                const { url, address_path } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="flex items-center space-x-1.5">
