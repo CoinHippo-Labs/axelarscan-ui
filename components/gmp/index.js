@@ -5,6 +5,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import Web3 from 'web3'
 import { BigNumber, providers, utils } from 'ethers'
+import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
@@ -35,6 +36,8 @@ export default () => {
   const { tx } = { ...query }
 
   const [gmp, setGmp] = useState(null)
+  const [approving, setApproving] = useState(null)
+  const [approveResponse, setApproveResponse] = useState(null)
   const [executing, setExecuting] = useState(null)
   const [executeResponse, setExecuteResponse] = useState(null)
   const [txHashEdit, setTxHashEdit] = useState(null)
@@ -60,20 +63,57 @@ export default () => {
         })
       }
     }
-    if (!executing && !txHashEditing) {
+    if (!approving && !executing && !txHashEditing) {
       getData()
     }
     const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
-  }, [tx, executing, txHashEditing])
+  }, [tx, approving, executing, txHashEditing])
 
   const resetTxHashEdit = () => {
+    setApproveResponse(null)
     setExecuteResponse(null)
     setTxHashEdit(null)
     setTxHashEditing(false)
     setTxHashEditUpdating(false)
+  }
+
+  const approve = async data => {
+    if (data) {
+      try {
+        setApproving(true)
+        setApproveResponse({
+          status: 'pending',
+          message: 'Approving',
+        })
+        const { call } = { ...data }
+        const { chain, transactionHash } = { ...call }
+        const { destinationChain } = { ...call?.returnValues }
+        if (chain && transactionHash && destinationChain) {
+          const api = new AxelarGMPRecoveryAPI({ environment: process.env.NEXT_PUBLIC_ENVIRONMENT })
+          await api.confirmGatewayTx({
+            chain,
+            txHash: transactionHash,
+          })
+          await api.signCommands({
+            chain: destinationChain,
+          })
+        }
+        setApproving(false)
+        setApproveResponse({
+          status: 'success',
+          message: 'Approve successful',
+        })
+      } catch (error) {
+        setApproving(false)
+        setApproveResponse({
+          status: 'failed',
+          message: error?.message,
+        })
+      }
+    }
   }
 
   const saveGMP = async (sourceTransactionHash, transactionHash, relayerAddress, error) => {
@@ -204,13 +244,29 @@ export default () => {
   const _symbol = source_contract_data?.symbol || asset_data?.symbol || symbol
   const asset_image = source_contract_data?.image || asset_data?.image
   const wrong_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
+  const approveButton = call && !approved && !executed && !is_executed && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
+    <div className="flex items-center space-x-2">
+      <button
+        disabled={approving}
+        onClick={() => approve(data)}
+        className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${approving ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+      >
+        {approving && (
+          <TailSpin color="white" width="16" height="16" />
+        )}
+        <span>
+          Approve
+        </span>
+      </button>
+    </div>
+  )
   const executeButton = payload && approved && !executed && !is_executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
     <div className="flex items-center space-x-2">
       {web3_provider && !wrong_chain && (
         <button
           disabled={executing}
           onClick={() => execute(data)}
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2 sm:px-3`}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
         >
           {executing && (
             <TailSpin color="white" width="16" height="16" />
@@ -266,21 +322,22 @@ export default () => {
   const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
+  const notificationResponse = executeResponse || approveResponse
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
       {tx && equals_ignore_case(gmp?.tx, tx) ?
         <>
-          {executeResponse && (
+          {notificationResponse && (
             <Notification
               hideButton={true}
               outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
-              innerClassNames={`${executeResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : executeResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
+              innerClassNames={`${notificationResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : notificationResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
               animation="animate__animated animate__fadeInDown"
-              icon={executeResponse.status === 'failed' ?
+              icon={notificationResponse.status === 'failed' ?
                 <BiXCircle className="w-6 h-6 stroke-current mr-2" />
                 :
-                executeResponse.status === 'success' ?
+                notificationResponse.status === 'success' ?
                   <BiCheckCircle className="w-6 h-6 stroke-current mr-2" />
                   :
                   <div className="mr-2">
@@ -289,11 +346,11 @@ export default () => {
               }
               content={<div className="flex items-center">
                 <span className="break-all mr-2">
-                  {executeResponse.message}
+                  {notificationResponse.message}
                 </span>
-                {destination_chain_data?.explorer?.url && executeResponse.txHash && (
+                {destination_chain_data?.explorer?.url && notificationResponse.txHash && (
                   <a
-                    href={`${destination_chain_data.explorer.url}${destination_chain_data.explorer.transaction_path?.replace('{tx}', executeResponse.txHash)}`}
+                    href={`${destination_chain_data.explorer.url}${destination_chain_data.explorer.transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mr-2"
@@ -303,15 +360,18 @@ export default () => {
                     </span>
                   </a>
                 )}
-                {executeResponse.status === 'failed' && executeResponse.message && (
+                {notificationResponse.status === 'failed' && notificationResponse.message && (
                   <Copy
-                    value={executeResponse.message}
+                    value={notificationResponse.message}
                     size={24}
                     className="cursor-pointer text-slate-200 hover:text-white"
                   />
                 )}
               </div>}
-              onClose={() => setExecuteResponse(null)}
+              onClose={() => {
+                setApproveResponse(null)
+                setExecuteResponse(null)
+              }}
             />
           )}
           <div className="grid sm:grid-cols-4 gap-6">
@@ -592,7 +652,7 @@ export default () => {
                         </div>
                       )
                     })}
-                    {executeButton || (time_spent && (
+                    {approveButton || executeButton || (time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
                           time spent:
