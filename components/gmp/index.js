@@ -66,7 +66,7 @@ export default () => {
     if (!approving && !executing && !txHashEditing) {
       getData()
     }
-    const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
+    const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
@@ -113,7 +113,7 @@ export default () => {
             }
             txHash = sign.transactionHash
           }
-          await sleep(10 * 1000)
+          await sleep(20 * 1000)
         }
         setApproving(false)
         setApproveResponse({
