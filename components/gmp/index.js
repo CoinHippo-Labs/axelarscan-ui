@@ -100,6 +100,7 @@ export default () => {
           await api.signCommands({
             chain: destinationChain,
           })
+          await sleep(10 * 1000)
         }
         setApproving(false)
         setApproveResponse({
