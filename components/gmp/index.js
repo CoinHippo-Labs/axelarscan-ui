@@ -91,21 +91,36 @@ export default () => {
         const { call } = { ...data }
         const { chain, transactionHash } = { ...call }
         const { destinationChain } = { ...call?.returnValues }
+        let status, message, txHash
         if (chain && transactionHash && destinationChain) {
           const api = new AxelarGMPRecoveryAPI({ environment: process.env.NEXT_PUBLIC_ENVIRONMENT })
           await api.confirmGatewayTx({
             chain,
             txHash: transactionHash,
           })
-          await api.signCommands({
+          await api.createPendingTransfers({
             chain: destinationChain,
           })
+          const sign = await api.signCommands({
+            chain: destinationChain,
+          })
+          if (sign) {
+            if (!sign.code) {
+              status = 'success'
+            }
+            else {
+              message = sign.rawLog
+            }
+            txHash = sign.transactionHash
+          }
           await sleep(10 * 1000)
         }
         setApproving(false)
         setApproveResponse({
-          status: 'success',
-          message: 'Approve successful',
+          status: status || 'failed',
+          message: message || 'Approve successful',
+          txHash,
+          is_axelar_transaction: true,
         })
       } catch (error) {
         setApproving(false)
@@ -238,6 +253,7 @@ export default () => {
   const relayer = executed?.transaction?.from
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
   const source_chain_data = getChain(chain, chains_data)
+  const axelar_chain_data = getChain('axelarnet', chains_data)
   const destination_chain_data = getChain(destinationChain, chains_data)
   const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol))
   const source_contract_data = asset_data?.contracts?.find(c => c.chain_id === source_chain_data?.chain_id)
@@ -349,15 +365,15 @@ export default () => {
                 <span className="break-all mr-2">
                   {notificationResponse.message}
                 </span>
-                {destination_chain_data?.explorer?.url && notificationResponse.txHash && (
+                {(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data)?.explorer?.url && notificationResponse.txHash && (
                   <a
-                    href={`${destination_chain_data.explorer.url}${destination_chain_data.explorer.transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
+                    href={`${(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data).explorer.url}${(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data).explorer.transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mr-2"
                   >
                     <span className="font-semibold">
-                      View on {destination_chain_data.explorer.name}
+                      View on {(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data).explorer.name}
                     </span>
                   </a>
                 )}
