@@ -688,7 +688,7 @@ export default () => {
               }
             </div>
             {data && detail_steps.map((s, i) => {
-              const error = gmp.data.error
+              const { error, is_not_enough_gas } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = i === 3 ? data || error : data
               const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
@@ -1094,11 +1094,18 @@ export default () => {
                           Error:
                         </span>
                         <div className="flex flex-col space-y-1">
-                          {_data.error?.code && (
-                            <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
-                              {_data.error.code}
-                            </div>
-                          )}
+                          <div className="flex items-center space-x-1.5">
+                            {_data.error?.code && (
+                              <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
+                                {_data.error.code}
+                              </div>
+                            )}
+                            {is_not_enough_gas && (
+                              <div className="max-w-min bg-yellow-100 dark:bg-yellow-500 border border-yellow-500 dark:border-yellow-600 rounded-lg whitespace-nowrap uppercase font-semibold py-0.5 px-2">
+                                Not enough gas
+                              </div>
+                            )}
+                          </div>
                           <span className="text-red-500 dark:text-red-600 font-semibold">
                             {ellipse(_data.error?.body?.replaceAll('"""', '') || _data.error?.reason, 256)}
                           </span>
