@@ -34,28 +34,28 @@ export default [
     path: '/participations',
     icon: <RiKeyLine size={18} className="stroke-current" />,
   },
-  {
+  process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && {
     id: 'transfers',
     title: 'Transfers',
     path: '/transfers',
     icon: <FiCode size={18} className="stroke-current" />,
   },
-  {
+  process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && {
     id: 'gmp',
     title: 'GMP',
     path: '/gmp',
     icon: <BiMessageDots size={18} className="stroke-current" />,
   },
-  {
+  (process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' || process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true') && {
     id: 'batches',
     title: 'Batches',
     path: '/batches',
     icon: <RiStackLine size={18} className="stroke-current" />,
   },
-  {
+  (process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' || process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true') && {
     id: 'assets',
     title: 'Assets',
     path: '/assets',
     icon: <BiCoinStack size={18} className="stroke-current" />,
   },
-].filter(m => process.env.NEXT_PUBLIC_GMP_API_URL || !['gmp', 'transfers', 'assets'].includes(m?.id))
+].filter(m => m?.path)

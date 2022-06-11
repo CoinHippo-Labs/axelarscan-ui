@@ -270,74 +270,78 @@ export default () => {
   return (
     <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">
       <CosmosMetrics data={cosmosMetrics} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between space-x-2">
-            <Link href="/transfers">
-              <a className="flex items-center space-x-2">
-                <FiCode size={20} />
-                <span className="uppercase text-base font-bold">
-                  Cross-chain transfers
-                </span>
-              </a>
-            </Link>
-            {transfers?.data && (
-              <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
-                <span className="text-base font-semibold">
-                  Total:
-                </span>
-                <span className="text-base font-bold">
-                  {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
-                </span>
+      {(process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' || process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true') && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between space-x-2">
+                <Link href="/transfers">
+                  <a className="flex items-center space-x-2">
+                    <FiCode size={20} />
+                    <span className="uppercase text-base font-bold">
+                      Cross-chain transfers
+                    </span>
+                  </a>
+                </Link>
+                {transfers?.data && (
+                  <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                    <span className="text-base font-semibold">
+                      Total:
+                    </span>
+                    <span className="text-base font-bold">
+                      {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
-            <NetworkGraph
-              id="transfers"
-              data={transfers?.network_graph_data}
-            />
-            <CrossChainQuantity
-              data={transfers?.data}
-              pathname="/transfers/search"
-            />
-          </div>
+              <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
+                <NetworkGraph
+                  id="transfers"
+                  data={transfers?.network_graph_data}
+                />
+                <CrossChainQuantity
+                  data={transfers?.data}
+                  pathname="/transfers/search"
+                />
+              </div>
+            </div>
+          )}
+          {process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between space-x-2">
+                <Link href="/gmp">
+                  <a className="flex items-center space-x-2">
+                    <BiMessageDots size={20} />
+                    <span className="uppercase text-base font-bold">
+                      General Message Passing
+                    </span>
+                  </a>
+                </Link>
+                {gmps?.data && (
+                  <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                    <span className="text-base font-semibold">
+                      Total:
+                    </span>
+                    <span className="text-base font-bold">
+                      {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
+                <NetworkGraph
+                  id="gmp"
+                  data={gmps?.network_graph_data}
+                />
+                <CrossChainQuantity
+                  data={gmps?.data}
+                  pathname="/gmp/search"
+                />
+              </div>
+            </div>
+          )}
         </div>
-        {!['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between space-x-2">
-              <Link href="/gmp">
-                <a className="flex items-center space-x-2">
-                  <BiMessageDots size={20} />
-                  <span className="uppercase text-base font-bold">
-                    General Message Passing
-                  </span>
-                </a>
-              </Link>
-              {gmps?.data && (
-                <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
-                  <span className="text-base font-semibold">
-                    Total:
-                  </span>
-                  <span className="text-base font-bold">
-                    {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="overflow-x-auto flex justify-between space-x-2 -ml-12">
-              <NetworkGraph
-                id="gmp"
-                data={gmps?.network_graph_data}
-              />
-              <CrossChainQuantity
-                data={gmps?.data}
-                pathname="/gmp/search"
-              />
-            </div>
-          </div>
-        )}
-      </div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <div className="space-y-2">
           <Link href="/blocks">
