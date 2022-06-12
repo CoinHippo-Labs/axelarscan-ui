@@ -67,18 +67,18 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        setFetching(true)
-        if (!fetchTrigger) {
-          setTotal(null)
-          setData(null)
-          setOffet(0)
-        }
-        const _data = !fetchTrigger ? [] : (data || []),
-          size = LIMIT
-        const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
-        const must = [], must_not = []
-        if (filters) {
+      if (filters) {
+        if (!controller.signal.aborted) {
+          setFetching(true)
+          if (!fetchTrigger) {
+            setTotal(null)
+            setData(null)
+            setOffet(0)
+          }
+          const _data = !fetchTrigger ? [] : (data || []),
+            size = LIMIT
+          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          const must = [], must_not = []
           const { chain, txHash, pollId, transactionId, voter, vote, time } = { ...filters }
           if (chain) {
             must.push({ match: { sender_chain: chain } })
@@ -108,33 +108,33 @@ export default () => {
           if (time?.length > 1) {
             must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
           }
-        }
-        const response = await getEvmVotes({
-          query: {
-            bool: {
-              must,
-              must_not,
+          const response = await getEvmVotes({
+            query: {
+              bool: {
+                must,
+                must_not,
+              },
             },
-          },
-          size,
-          from,
-          sort: [{ 'created_at.ms': 'desc' }],
-          track_total_hits: true,
-        })
-        if (response) {
-          setTotal(response.total)
-          response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
-            return {
-              ...d,
-            }
-          }) || []), 'txhash'), ['created_at.ms'], ['desc'])
-          setData(response)
+            size,
+            from,
+            sort: [{ 'created_at.ms': 'desc' }],
+            track_total_hits: true,
+          })
+          if (response) {
+            setTotal(response.total)
+            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+              return {
+                ...d,
+              }
+            }) || []), 'txhash'), ['created_at.ms'], ['desc'])
+            setData(response)
+          }
+          else if (!fetchTrigger) {
+            setTotal(0)
+            setData([])
+          }
+          setFetching(false)
         }
-        else if (!fetchTrigger) {
-          setTotal(0)
-          setData([])
-        }
-        setFetching(false)
       }
     }
     getData()

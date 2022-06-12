@@ -72,18 +72,18 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        setFetching(true)
-        if (!fetchTrigger) {
-          setData(null)
-          setOffet(0)
-        }
-        const _data = !fetchTrigger ? [] : (data || []),
-          size = LIMIT
-        const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
-        response
-        const must = [], must_not = []
-        if (filters) {
+      if (filters) {
+        if (!controller.signal.aborted) {
+          setFetching(true)
+          if (!fetchTrigger) {
+            setData(null)
+            setOffet(0)
+          }
+          const _data = !fetchTrigger ? [] : (data || []),
+            size = LIMIT
+          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          response
+          const must = [], must_not = []
           const { chain, batchId, keyId, type, status, time } = { ...filters }
           if (chain) {
             must.push({ match: { chain } })
@@ -110,44 +110,44 @@ export default () => {
           if (time?.length > 1) {
             must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
           }
-        }
-        const response = await getBatches({
-          query: {
-            bool: {
-              must,
-              must_not,
-            },
-          },
-          size,
-          from,
-          sort: [{ 'created_at.ms': 'desc' }],
-          fields: ['batch_id', 'chain', 'key_id', 'commands.*', 'status', 'created_at.*'],
-          _source: false,
-        })
-        if (response) {
-          response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
-            d = fieldsToObj(d)
-            const { batch_id, chain, key_id, status } = { ...d }
-              return {
-              ...d,
-              batch_id: Array.isArray(batch_id) ? _.last(batch_id) : batch_id,
-              chain: Array.isArray(chain) ? _.last(chain) : chain,
-              key_id: Array.isArray(key_id) ? _.last(key_id) : key_id,
-              status: Array.isArray(status) ? _.last(status) : status,
-              created_at: {
-                ms: d?.created_at?.ms ? d.created_at.ms : Array.isArray(d?.['created_at.ms']) ?
-                  _.last(d['created_at.ms']) : d?.['created_at.ms'],
-                ...(Array.isArray(d?.created_at) ? _.last(d.created_at) : d?.created_at),
+          const response = await getBatches({
+            query: {
+              bool: {
+                must,
+                must_not,
               },
-            }
-          }) || []), 'batch_id'), ['created_at.ms'], ['desc'])
-          response = await updateSigningBatches(response, true)
-          setData(response)
+            },
+            size,
+            from,
+            sort: [{ 'created_at.ms': 'desc' }],
+            fields: ['batch_id', 'chain', 'key_id', 'commands.*', 'status', 'created_at.*'],
+            _source: false,
+          })
+          if (response) {
+            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+              d = fieldsToObj(d)
+              const { batch_id, chain, key_id, status } = { ...d }
+                return {
+                ...d,
+                batch_id: Array.isArray(batch_id) ? _.last(batch_id) : batch_id,
+                chain: Array.isArray(chain) ? _.last(chain) : chain,
+                key_id: Array.isArray(key_id) ? _.last(key_id) : key_id,
+                status: Array.isArray(status) ? _.last(status) : status,
+                created_at: {
+                  ms: d?.created_at?.ms ? d.created_at.ms : Array.isArray(d?.['created_at.ms']) ?
+                    _.last(d['created_at.ms']) : d?.['created_at.ms'],
+                  ...(Array.isArray(d?.created_at) ? _.last(d.created_at) : d?.created_at),
+                },
+              }
+            }) || []), 'batch_id'), ['created_at.ms'], ['desc'])
+            response = await updateSigningBatches(response, true)
+            setData(response)
+          }
+          else if (!fetchTrigger) {
+            setData([])
+          }
+          setFetching(false)
         }
-        else if (!fetchTrigger) {
-          setData([])
-        }
-        setFetching(false)
       }
     }
     getData()
