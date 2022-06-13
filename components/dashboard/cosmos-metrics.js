@@ -69,8 +69,7 @@ export default ({ data }) => {
                     }
                   </span>
                 </a>
-              </Link>
-              :
+              </Link> :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -100,8 +99,7 @@ export default ({ data }) => {
           </span>
           <div className="text-3xl font-bold">
             {!isNaN(block_height) ?
-              number_format(block_height, '0,0')
-              :
+              number_format(block_height, '0,0') :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -117,8 +115,7 @@ export default ({ data }) => {
           </span>
           <div className="text-3xl font-bold">
             {!isNaN(avg_block_time) ?
-              number_format(avg_block_time, '0,0.00')
-              :
+              number_format(avg_block_time, '0,0.00') :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -134,8 +131,7 @@ export default ({ data }) => {
           </span>
           <div className="text-3xl font-bold">
             {!isNaN(active_validators) ?
-              number_format(active_validators, '0,0')
-              :
+              number_format(active_validators, '0,0') :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -151,8 +147,7 @@ export default ({ data }) => {
           </span>
           <div className="uppercase text-3xl font-bold">
             {!isNaN(online_voting_power) ?
-              number_format(online_voting_power, '0,0.00a')
-              :
+              number_format(online_voting_power, '0,0.00a') :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
