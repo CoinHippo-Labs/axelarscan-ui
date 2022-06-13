@@ -21,7 +21,7 @@ export default ({ data }) => {
         const { id, height, sender_chain } = { ...p }
         const chain_data = evm_chains_data?.find(c => equals_ignore_case(c?.id, sender_chain))
         const v = data?.votes?.find(v => equals_ignore_case(v?.poll_id, id))
-        const { txhash, vote } = { ...v }
+        const { txhash, vote, late } = { ...v }
         let { transaction_id } = { ...v }
         transaction_id = transaction_id || _.head(id?.split('_') || [])
         return !p?.skeleton ?
@@ -127,7 +127,7 @@ export default ({ data }) => {
             <Link href={`/evm-votes?pollId=${id}`}>
               <div
                 title={number_format(height, '0,0')}
-                className={`w-6 h-6 ${vote ? 'bg-green-500 dark:bg-green-600' : v && !vote ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
+                className={`w-6 h-6 ${vote ? late ? 'bg-yellow-400 dark:bg-yellow-600' : 'bg-green-500 dark:bg-green-600' : v && !vote ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
               />
             </Link>
           </Popover>

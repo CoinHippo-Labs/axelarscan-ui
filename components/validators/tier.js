@@ -579,7 +579,7 @@ export default () => {
                               {number_format(v?.votes?.false || 0, '0,0')} N
                             </span>
                             {v?.total_polls - v?.total > 0 && (
-                              <span className="text-yellow-400 dark:text-yellow-500 font-bold -mt-0.5">
+                              <span className="text-slate-400 dark:text-slate-500 font-bold -mt-0.5">
                                 {number_format(v.total_polls - v.total, '0,0')} UN
                               </span>
                             )}

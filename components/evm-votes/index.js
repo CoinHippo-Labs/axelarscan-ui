@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { TailSpin, ThreeDots } from 'react-loader-spinner'
-import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { BiCheckCircle, BiMinusCircle, BiXCircle } from 'react-icons/bi'
 
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
@@ -19,10 +19,11 @@ import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color
 const LIMIT = 100
 
 export default () => {
-  const { preferences, evm_chains, validators } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, validators: state.validators }), shallowEqual)
+  const { preferences, evm_chains, validators, validators_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
   const { theme } = { ...preferences }
   const { evm_chains_data } = { ...evm_chains }
   const { validators_data } = { ...validators }
+  const { validators_chains_data } = { ...validators_chains }
 
   const router = useRouter()
   const { pathname, asPath } = { ...router }
@@ -62,12 +63,12 @@ export default () => {
     return () => {
       clearInterval(interval)
     }
-  }, [evm_chains_data, pathname, filters])
+  }, [evm_chains_data, validators_data, validators_chains_data, pathname, filters])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (filters) {
+      if (filters && validators_data?.findIndex(v => v?.broadcaster_address) > -1 && validators_chains_data) {
         if (!controller.signal.aborted) {
           setFetching(true)
           if (!fetchTrigger) {
@@ -127,6 +128,37 @@ export default () => {
                 ...d,
               }
             }) || []), 'txhash'), ['created_at.ms'], ['desc'])
+            if (!txHash && !voter && !vote && !time) {
+              let polls = _.orderBy(Object.entries(_.groupBy(response, 'poll_id')).map(([k, v]) => {
+                return {
+                  id: k,
+                  votes: v,
+                  time: _.minBy(v, 'created_at.ms')?.created_at?.ms,
+                }
+              }), ['time'], ['desc'])
+              polls = _.slice(polls, 0, polls.length - (polls.length > 1 ? 1 : 0))
+              polls.forEach(p => {
+                const { id, votes } = { ...p }
+                const height = _.maxBy(votes, 'height')?.height
+                const sender_chain = _.head(votes?.map(v => v?.sender_chain).filter(c => c) || [])
+                const voters_unsubmit_vote = validators_data.filter(v => v?.start_proxy_height < height && ['BOND_STATUS_BONDED'].includes(v?.status) && Object.entries({ ...validators_chains_data }).filter(([k, _v]) => equals_ignore_case(k, sender_chain) && _v?.includes(v?.operator_address)))
+                  .map(v => v?.broadcaster_address)
+                  .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
+                voters_unsubmit_vote.forEach(v => {
+                  response.push({
+                    sender_chain,
+                    poll_id: id,
+                    transaction_id: _.head(votes?.map(v => v?.transaction_id).filter(t => t) || []),
+                    voter: v,
+                    vote: 'unsubmitted',
+                    created_at: {
+                      ms: _.maxBy(votes, 'created_at.ms')?.created_at?.ms + 1,
+                    },
+                  })
+                })
+              })
+            }
+            response = _.orderBy(response, ['created_at.ms'], ['desc'])
             setData(response)
           }
           else if (!fetchTrigger) {
@@ -162,15 +194,23 @@ export default () => {
               disableSortBy: true,
               Cell: props => (
                 <div className="flex items-center space-x-1 mb-3">
-                  <Link href={`/tx/${props.value}`}>
-                    <a className="uppercase text-blue-600 dark:text-white font-bold">
-                      {ellipse(props.value, 8)}
-                    </a>
-                  </Link>
-                  <Copy
-                    value={props.value}
-                    size={18}
-                  />
+                  {props.value ?
+                    <>
+                      <Link href={`/tx/${props.value}`}>
+                        <a className="uppercase text-blue-600 dark:text-white font-bold">
+                          {ellipse(props.value, 8)}
+                        </a>
+                      </Link>
+                      <Copy
+                        value={props.value}
+                        size={18}
+                      />
+                    </>
+                    :
+                    <span>
+                      -
+                    </span>
+                  }
                 </div>
               ),
             },
@@ -179,11 +219,16 @@ export default () => {
               accessor: 'height',
               disableSortBy: true,
               Cell: props => (
-                <Link href={`/block/${props.value}`}>
-                  <a className="text-blue-600 dark:text-white font-semibold">
-                    {number_format(props.value, '0,0')}
-                  </a>
-                </Link>
+                props.value ?
+                  <Link href={`/block/${props.value}`}>
+                    <a className="text-blue-600 dark:text-white font-semibold">
+                      {number_format(props.value, '0,0')}
+                    </a>
+                  </Link>
+                  :
+                  <span>
+                    -
+                  </span>
               ),
             },
             {
@@ -295,18 +340,21 @@ export default () => {
               disableSortBy: true,
               Cell: props => (
                 <div className="flex flex-col space-y-1">
-                  <div className={`flex items-center ${props.value ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} space-x-1`}>
+                  <div className={`flex items-center ${props.value ? props.value === 'unsubmitted' ? 'text-slate-400 dark:text-slate-600' : 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} space-x-1`}>
                     {props.value ?
-                      <BiCheckCircle size={20} /> :
+                      props.value === 'unsubmitted' ?
+                        <BiMinusCircle size={20} /> :
+                        <BiCheckCircle size={20} /> :
                       <BiXCircle size={20} />
                     }
                     <span className="uppercase font-bold">
                       {props.value ?
-                        'yes' : 'no'
+                        props.value === 'unsubmitted' ?
+                        'unsubmitted' : 'yes' : 'no'
                       }
                     </span>
                   </div>
-                  {(props.row.original.confirmation || props.row.original.late || !props.row.original.unconfirmed) && (
+                  {!['unsubmitted'].includes(props.value) && (props.row.original.confirmation || props.row.original.late || !props.row.original.unconfirmed) && (
                     <div className={`max-w-min ${props.row.original.confirmation ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 dark:border-blue-600 text-blue-500 dark:text-blue-600 font-bold' : props.row.original.late ? 'bg-yellow-50 dark:bg-yellow-900 border border-yellow-500 dark:border-yellow-600 text-yellow-500 dark:text-yellow-600 font-semibold' : 'bg-slate-100 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 text-slate-400 dark:text-slate-600 font-medium'} rounded-lg capitalize text-xs py-0.5 px-1.5`}>
                       {props.row.original.confirmation ?
                         'succeed' :

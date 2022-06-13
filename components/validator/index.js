@@ -638,7 +638,7 @@ export default () => {
                         {number_format(v?.votes?.false || 0, '0,0')} N
                       </span>
                       {evmVotes?.polls?.[k] - v?.total > 0 && (
-                        <span className="text-yellow-400 dark:text-yellow-500 font-bold">
+                        <span className="text-slate-400 dark:text-slate-500 font-bold">
                           {number_format(evmVotes.polls[k] - v.total, '0,0')} UN
                         </span>
                       )}

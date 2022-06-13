@@ -535,7 +535,7 @@ export default () => {
       }
     }
     const getData = () => {
-      const is_validator_path = ['/validator', '/participations', '/proposals'].findIndex(p => pathname?.includes(p)) > -1
+      const is_validator_path = ['/validator', '/participations', '/proposals', '/evm-votes'].findIndex(p => pathname?.includes(p)) > -1
       if (evm_chains_data && is_validator_path) {
         evm_chains_data.map(c => c?.id).forEach(id => getChainData(id, evm_chains_data))
       }
