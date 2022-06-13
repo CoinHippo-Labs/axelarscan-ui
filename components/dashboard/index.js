@@ -17,6 +17,7 @@ import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { hexToBech32 } from '../../lib/object/key'
+import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -104,6 +105,11 @@ export default () => {
                 aggs: {
                   destination_chains: {
                     terms: { field: 'source.recipient_chain.keyword', size: 1000 },
+                    aggs: {
+                      volume: {
+                        sum: { field: 'source.value' },
+                      },
+                    },
                     // aggs: {
                     //   assets: {
                     //     terms: { field: 'source.denom.keyword', size: 1000 },
@@ -274,7 +280,7 @@ export default () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && (
             <div className="space-y-2">
-              <div className="flex items-center justify-between space-x-2">
+              <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Link href="/transfers">
                   <a className="flex items-center space-x-2">
                     <FiCode size={20} />
@@ -284,13 +290,23 @@ export default () => {
                   </a>
                 </Link>
                 {transfers?.data && (
-                  <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
-                    <span className="text-base font-semibold">
-                      Total:
-                    </span>
-                    <span className="text-base font-bold">
-                      {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
-                    </span>
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                      <span className="text-base font-semibold">
+                        Volume:
+                      </span>
+                      <span className="uppercase text-base font-bold">
+                        {currency_symbol}{number_format(_.sumBy(transfers.data, 'volume'), _.sumBy(transfers.data, 'volume') > 50000000 ? '0,0.00a' : _.sumBy(transfers.data, 'volume') > 10000000 ? '0,0' : '0,0.00')}
+                      </span>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                      <span className="text-base font-semibold">
+                        Total:
+                      </span>
+                      <span className="text-base font-bold">
+                        {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -308,7 +324,7 @@ export default () => {
           )}
           {process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && (
             <div className="space-y-2">
-              <div className="flex items-center justify-between space-x-2">
+              <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Link href="/gmp">
                   <a className="flex items-center space-x-2">
                     <BiMessageDots size={20} />
@@ -318,13 +334,15 @@ export default () => {
                   </a>
                 </Link>
                 {gmps?.data && (
-                  <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
-                    <span className="text-base font-semibold">
-                      Total:
-                    </span>
-                    <span className="text-base font-bold">
-                      {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
-                    </span>
+                  <div className="flex items-center space-x-2">
+                    <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
+                      <span className="text-base font-semibold">
+                        Total:
+                      </span>
+                      <span className="text-base font-bold">
+                        {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>

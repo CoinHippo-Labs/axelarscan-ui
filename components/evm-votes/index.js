@@ -306,10 +306,12 @@ export default () => {
                       }
                     </span>
                   </div>
-                  {(props.row.original.confirmation || !props.row.original.unconfirmed) && (
-                    <div className={`max-w-min ${props.row.original.confirmation ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 dark:border-blue-600 text-blue-500 dark:text-blue-600 font-bold' : 'bg-slate-100 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 text-slate-400 dark:text-slate-600 font-medium'} rounded-lg capitalize text-xs py-0.5 px-1.5`}>
+                  {(props.row.original.confirmation || props.row.original.late || !props.row.original.unconfirmed) && (
+                    <div className={`max-w-min ${props.row.original.confirmation ? 'bg-blue-100 dark:bg-blue-900 border-2 border-blue-500 dark:border-blue-600 text-blue-500 dark:text-blue-600 font-bold' : props.row.original.late ? 'bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-600 text-yellow-400 dark:text-yellow-600 font-medium' : 'bg-slate-100 dark:bg-slate-900 border border-slate-400 dark:border-slate-600 text-slate-400 dark:text-slate-600 font-medium'} rounded-lg capitalize text-xs py-0.5 px-1.5`}>
                       {props.row.original.confirmation ?
-                        'succeed' : 'concluded'
+                        'succeed' :
+                        props.row.original.late ?
+                          'late' : 'concluded'
                       }
                     </div>
                   )}

@@ -94,25 +94,31 @@ export default () => {
         let status, message, txHash
         if (chain && transactionHash && destinationChain) {
           const api = new AxelarGMPRecoveryAPI({ environment: process.env.NEXT_PUBLIC_ENVIRONMENT })
-          await api.confirmGatewayTx({
-            chain,
+          // await api.confirmGatewayTx({
+          //   chain,
+          //   txHash: transactionHash,
+          // })
+          // await api.createPendingTransfers({
+          //   chain: destinationChain,
+          // })
+          // const sign = await api.signCommands({
+          //   chain: destinationChain,
+          // })
+          // if (sign) {
+          //   if (!sign.code) {
+          //     status = 'success'
+          //   }
+          //   else {
+          //     message = sign.rawLog
+          //   }
+          //   txHash = sign.transactionHash
+          // }
+          await api.manualRelayToDestChain({
             txHash: transactionHash,
+            src: chain,
+            dest: destinationChain,
+            debug: true,
           })
-          await api.createPendingTransfers({
-            chain: destinationChain,
-          })
-          const sign = await api.signCommands({
-            chain: destinationChain,
-          })
-          if (sign) {
-            if (!sign.code) {
-              status = 'success'
-            }
-            else {
-              message = sign.rawLog
-            }
-            txHash = sign.transactionHash
-          }
           await sleep(20 * 1000)
         }
         setApproving(false)
