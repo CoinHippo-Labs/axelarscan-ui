@@ -66,7 +66,7 @@ export default () => {
     if (!approving && !executing && !txHashEditing) {
       getData()
     }
-    const interval = setInterval(() => getData(), 0.25 * 60 * 1000)
+    const interval = setInterval(() => getData(), 0.15 * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
@@ -94,36 +94,17 @@ export default () => {
         let status, message, txHash
         if (chain && transactionHash && destinationChain) {
           const api = new AxelarGMPRecoveryAPI({ environment: process.env.NEXT_PUBLIC_ENVIRONMENT })
-          // await api.confirmGatewayTx({
-          //   chain,
-          //   txHash: transactionHash,
-          // })
-          // await api.createPendingTransfers({
-          //   chain: destinationChain,
-          // })
-          // const sign = await api.signCommands({
-          //   chain: destinationChain,
-          // })
-          // if (sign) {
-          //   if (!sign.code) {
-          //     status = 'success'
-          //   }
-          //   else {
-          //     message = sign.rawLog
-          //   }
-          //   txHash = sign.transactionHash
-          // }
           await api.manualRelayToDestChain({
             txHash: transactionHash,
             src: chain,
             dest: destinationChain,
             debug: true,
           })
-          await sleep(20 * 1000)
+          await sleep(15 * 1000)
         }
         setApproving(false)
         setApproveResponse({
-          status: status || 'failed',
+          status: status || 'success',
           message: message || 'Approve successful',
           txHash,
           is_axelar_transaction: true,
@@ -386,7 +367,7 @@ export default () => {
                 {notificationResponse.status === 'failed' && notificationResponse.message && (
                   <Copy
                     value={notificationResponse.message}
-                    size={24}
+                    size={20}
                     className="cursor-pointer text-slate-200 hover:text-white"
                   />
                 )}

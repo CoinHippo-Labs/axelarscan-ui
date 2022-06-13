@@ -228,7 +228,7 @@ export default () => {
   // rpcs
   useEffect(() => {
     const init = async => {
-      if (evm_chains_data) {
+      if (evm_chains_data && ['/transfers'].includes(pathname)) {
         const _rpcs = {}
         for (let i = 0; i < evm_chains_data.length; i++) {
           const chain_data = evm_chains_data[i]
@@ -247,7 +247,7 @@ export default () => {
       }
     }
     init()
-  }, [evm_chains_data])
+  }, [evm_chains_data, pathname])
 
   // ens
   useEffect(() => {
