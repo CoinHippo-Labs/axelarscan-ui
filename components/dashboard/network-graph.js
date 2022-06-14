@@ -73,7 +73,7 @@ export default ({
         const x = ['source', 'destination']
         x.forEach(_x => {
           const id = d?.[`${_x}_chain`], _d = d?.[`${_x}_chain_data`]
-          if (nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0) {
+          if (id && nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0) {
             nodes.push({
               id,
               size: equals_ignore_case(id, axelar_chain_data?.id) ? 40 : 32,

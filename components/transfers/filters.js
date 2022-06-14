@@ -7,6 +7,7 @@ import { DatePicker } from 'antd'
 import { BiX } from 'react-icons/bi'
 
 import Modal from '../modals'
+import { getChain } from '../../lib/object/chain'
 import { params_to_obj } from '../../lib/utils'
 
 export default () => {
@@ -22,20 +23,21 @@ export default () => {
   const [hidden, setHidden] = useState(true)
 
   useEffect(() => {
-    if (asPath) {
+    if (evm_chains_data && cosmos_chains_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
       const { txHash, sourceChain, destinationChain, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
-        sourceChain,
-        destinationChain,
+        sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
+        destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
         depositAddress,
         senderAddress,
         recipientAddress,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
     }
-  }, [asPath])
+  }, [evm_chains_data, cosmos_chains_data, asPath])
 
   useEffect(() => {
     if (filter !== undefined) {
