@@ -69,7 +69,7 @@ export default ({
           fill: theme === 'dark' ? '#fff' : '#000',
         },
       }
-      _.orderBy(data, ['num_txs'], ['asc']).forEach(d => {
+      _.orderBy(data, ['destination_chain'], ['asc']).forEach(d => {
         const x = ['source', 'destination']
         x.forEach(_x => {
           const id = d?.[`${_x}_chain`], _d = d?.[`${_x}_chain_data`]
