@@ -170,25 +170,34 @@ export default () => {
         switch (event) {
           case 'ContractCall':
             try {
-              value = await destination_contract.methods.execute(commandId, sourceChain, sourceAddress, payload).estimateGas({ from: address, gas: 1000000 })
-            } catch (error) {}
+              value = await destination_contract.methods.execute(commandId, sourceChain, sourceAddress, payload).estimateGas()
+            } catch (error) {
+              // (temporary hardcoded for now)
+              value = 1e9
+            }
             break
           case 'ContractCallWithToken':
             try {
-              value = await destination_contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).estimateGas({ from: address, gas: 1000000 })
-            } catch (error) {}
+              value = await destination_contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).estimateGas()
+            } catch (error) {
+              // (temporary hardcoded for now)
+              value = 1e9
+            }
             break
           default:
             break
         }
         if (typeof value === 'number') {
+          /* use getGasPrice method from GMP api
+             convert price rate
+          */
           web3 = new Web3(provider)
           // abi (IAxelarGasService) & contract address (temporary hardcoded for now)
           const gas_service_contract = new web3.eth.Contract(
             [{ "inputs": [{ "internalType": "bytes32", "name": "txHash", "type": "bytes32" }, { "internalType": "uint256", "name": "txIndex", "type": "uint256" }, { "internalType": "address", "name": "gasToken", "type": "address" }, { "internalType": "uint256", "name": "gasFeeAmount", "type": "uint256" }, { "internalType": "address", "name": "refundAddress", "type": "address" }], "name": "addGas", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "txHash", "type": "bytes32" }, { "internalType": "uint256", "name": "logIndex", "type": "uint256" }, { "internalType": "address", "name": "refundAddress", "type": "address" }], "name": "addNativeGas", "outputs": [], "stateMutability": "payable", "type": "function" }],
             data.gas_paid?.contract_address || '0xbE406F0189A0B4cf3A05C286473D23791Dd44Cc6'
           )
-          gas_service_contract.methods.addNativeGas(transactionHash, logIndex, address).send({ from: address, value: utils.parseEther(value) })
+          gas_service_contract.methods.addNativeGas(transactionHash, logIndex, address).send({ from: address, value })
             .on('transactionHash', hash => {
               const txHash = hash
               setGasAddResponse({
