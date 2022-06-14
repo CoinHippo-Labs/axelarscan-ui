@@ -544,21 +544,6 @@ export default () => {
         </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Heartbeats
-          </span>
-          <div className="text-3xl font-bold">
-            {typeof heartbeats_uptime === 'number' ?
-              `${number_format(heartbeats_uptime, '0,0.00')}%`
-              :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
-            }
-          </div>
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-            Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
-          </span>
-        </div>
-        <div className={`${metricClassName}`}>
-          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Broadcaster
           </span>
           <div className={`h-9 flex items-center ${broadcaster_funded ? broadcaster_funded.amount >= min_broadcaster_fund ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600' : ''} text-3xl font-bold space-x-1.5`}>
@@ -582,6 +567,21 @@ export default () => {
                 ({broadcaster_funded.denom})
               </>
             )}
+          </span>
+        </div>
+        <div className={`${metricClassName}`}>
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
+            Heartbeats
+          </span>
+          <div className="text-3xl font-bold">
+            {typeof heartbeats_uptime === 'number' ?
+              `${number_format(heartbeats_uptime, '0,0.00')}%`
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+            Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
           </span>
         </div>
         <div className={`${metricClassName}`}>

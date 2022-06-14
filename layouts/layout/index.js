@@ -5,18 +5,19 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
-
 import meta from '../../lib/meta'
-
+import { equals_ignore_case } from '../../lib/utils'
 import { THEME } from '../../reducers/types'
 
 export default function Layout({ children }) {
   const dispatch = useDispatch()
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
+  const { preferences, validators } = useSelector(state => ({ preferences: state.preferences, validators: state.validators }), shallowEqual)
   const { theme } = { ...preferences }
+  const { validators_data } = { ...validators }
 
   const router = useRouter()
-  const { asPath } = { ...router }
+  const { pathname, query, asPath } = { ...router }
+  const { address } = { ...query }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -29,7 +30,16 @@ export default function Layout({ children }) {
     }
   }, [theme])
 
-  const headMeta = meta(asPath)
+  let data
+  if (['/validator/[address]'].includes(pathname) && address) {
+    data = validators_data?.find(v => equals_ignore_case(v?.operator_address, address))
+    data = {
+      ...data,
+      id: address,
+      name: data?.description?.moniker,
+    }
+  }
+  const headMeta = meta(asPath, data)
 
   return (
     <>

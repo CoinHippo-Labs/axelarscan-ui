@@ -152,13 +152,21 @@ export default () => {
                     voter: v,
                     vote: 'unsubmitted',
                     created_at: {
-                      ms: _.maxBy(votes, 'created_at.ms')?.created_at?.ms + 1,
+                      ms: _.maxBy(votes, 'created_at.ms')?.created_at?.ms + 1000,
                     },
                   })
                 })
               })
             }
-            response = _.orderBy(response, ['created_at.ms'], ['desc'])
+            response = _.orderBy(response.map(d => {
+              return {
+                ...d,
+                created_at: {
+                  ...d?.created_at,
+                  s: moment(d?.created_at?.ms).startOf('seconds').valueOf(),
+                },
+              }
+            }), ['created_at.s', 'late', 'confirmation', 'unconfirmed'], ['desc', 'desc', 'desc', 'asc'])
             setData(response)
           }
           else if (!fetchTrigger) {
