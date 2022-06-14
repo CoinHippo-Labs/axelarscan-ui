@@ -29,8 +29,8 @@ export default () => {
       const { txHash, sourceChain, destinationChain, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
-        sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
+        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
+        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         depositAddress,
         senderAddress,
         recipientAddress,

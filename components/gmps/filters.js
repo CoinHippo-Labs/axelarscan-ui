@@ -29,8 +29,8 @@ export default () => {
       const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
-        sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
+        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
+        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
         status: ['called', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         senderAddress,
