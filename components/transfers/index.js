@@ -16,11 +16,8 @@ import { currency } from '../../lib/object/currency'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default () => {
-  const { preferences, evm_chains, cosmos_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)
+  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
-  const { assets_data } = { ...assets }
 
   const [cumulativeVolume, setCumulativeVolume] = useState(null)
   const [topPaths, setTopPaths] = useState(null)
@@ -70,10 +67,10 @@ export default () => {
         const response = await getTransfers({
           aggs: {
             source_chains: {
-              terms: { field: 'source.sender_chain.keyword', size: 1000 },
+              terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
               aggs: {
                 destination_chains: {
-                  terms: { field: 'source.recipient_chain.keyword', size: 1000 },
+                  terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
                   aggs: {
                     assets: {
                       terms: { field: 'source.denom.keyword', size: 1000 },
@@ -107,10 +104,10 @@ export default () => {
         const response = await getTransfers({
           aggs: {
             source_chains: {
-              terms: { field: 'source.sender_chain.keyword', size: 1000 },
+              terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
               aggs: {
                 destination_chains: {
-                  terms: { field: 'source.recipient_chain.keyword', size: 1000 },
+                  terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
                   aggs: {
                     volume: {
                       sum: { field: 'source.value' },

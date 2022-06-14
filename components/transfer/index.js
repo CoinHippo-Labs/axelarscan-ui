@@ -90,12 +90,13 @@ export default () => {
   const { data } = { ...transfer }
   const { source, confirm_deposit, vote, sign_batch, link } = { ...data }
   const { sender_chain, recipient_chain, sender_address, amount, denom } = { ...source }
+  const { original_sender_chain, original_recipient_chain } = { ...link }
   const { recipient_address } = { ...link }
-  const source_chain_data = getChain(sender_chain, chains_data)
-  const destination_chain_data = getChain(recipient_chain, chains_data)
+  const source_chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
+  const destination_chain_data = getChain(original_recipient_chain, chains_data) || getChain(recipient_chain, chains_data)
   const axelar_chain_data = getChain('axelarnet', chains_data)
   const deposit_address = link?.deposit_address || source?.recipient_address
-  const deposit_chain_data = getChain(deposit_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : sender_chain, chains_data)
+  const deposit_chain_data = getChain(deposit_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
   const asset_data = getDenom(denom, assets_data)
   const contract_data = asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
   const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === source_chain_data?.id)

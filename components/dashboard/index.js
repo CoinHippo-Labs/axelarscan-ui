@@ -105,10 +105,10 @@ export default () => {
           const response = await getTransfers({
             aggs: {
               source_chains: {
-                terms: { field: 'source.sender_chain.keyword', size: 1000 },
+                terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
                 aggs: {
                   destination_chains: {
-                    terms: { field: 'source.recipient_chain.keyword', size: 1000 },
+                    terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
                     aggs: {
                       volume: {
                         sum: { field: 'source.value' },

@@ -20,6 +20,7 @@ import { staking_params, bank_supply, staking_pool, slashing_params, distributio
 import { ens as getEns } from '../../lib/api/ens'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
+import { getChain } from '../../lib/object/chain'
 import { denom_manager } from '../../lib/object/denom'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
 import { equals_ignore_case } from '../../lib/utils'
@@ -136,7 +137,7 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (cosmos_chains_data && assets_data) {
-        const chain_data = cosmos_chains_data.find(c => equals_ignore_case(c?.id, 'axelarnet'))
+        const chain_data = getChain('axelarnet', cosmos_chains_data)
         dispatch({
           type: CHAIN_DATA,
           value: { ...chain_data },

@@ -7,6 +7,7 @@ import Info from './info'
 import Transactions from '../transactions'
 import { all_bank_balances, all_staking_delegations, all_staking_redelegations, all_staking_unbonding, distribution_rewards, distribution_commissions } from '../../lib/api/cosmos'
 import { deposit_addresses } from '../../lib/api/index'
+import { getChain } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { equals_ignore_case } from '../../lib/utils'
 
@@ -276,15 +277,15 @@ export default () => {
             sort: [{ height: 'desc' }],
           })
           setDepositAddresses(response?.data?.map(d => {
-            const { denom, sender_chain, recipient_chain } = { ...d }
+            const { denom, sender_chain, recipient_chain, original_sender_chain, original_recipient_chain } = { ...d }
             return {
               ...d,
               denom: denom_manager.symbol(denom, assets_data),
               asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
               source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
-                cosmos_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)),
+                getChain(original_sender_chain, cosmos_chains_data) || getChain(sender_chain, cosmos_chains_data),
               destination_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, recipient_chain)) ||
-                cosmos_chains_data?.find(c => equals_ignore_case(c?.id, recipient_chain)),
+                getChain(original_recipient_chain, cosmos_chains_data) || getChain(recipient_chain, cosmos_chains_data),
             }
           }) || [])
         }

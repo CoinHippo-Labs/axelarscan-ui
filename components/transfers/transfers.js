@@ -173,9 +173,10 @@ export default ({ n }) => {
               accessor: 'source.id',
               disableSortBy: true,
               Cell: props => {
-                const { source } = { ...props.row.original }
+                const { source, link } = { ...props.row.original }
                 const { sender_chain } = { ...source }
-                const chain_data = getChain(sender_chain, chains_data)
+                const { original_sender_chain } = { ...link }
+                const chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
                 const { explorer } = { ...chain_data }
                 const { url, transaction_path, icon } = { ...explorer }
                 return (
@@ -219,9 +220,10 @@ export default ({ n }) => {
               accessor: 'source.sender_chain',
               disableSortBy: true,
               Cell: props => {
-                const { source } = { ...props.row.original }
+                const { source, link } = { ...props.row.original }
                 const { sender_address } = { ...source }
-                const chain_data = getChain(props.value, chains_data)
+                const { original_sender_chain } = { ...link }
+                const chain_data = getChain(original_sender_chain, chains_data) || getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
                 const { url, address_path } = { ...explorer }
                 return (
@@ -282,8 +284,8 @@ export default ({ n }) => {
               Cell: props => {
                 const { sender_chain, recipient_address, amount, denom } = { ...props.value }
                 const { link } = { ...props.row.original }
-                const { asset } = { ...link }
-                const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : sender_chain, chains_data)
+                const { original_sender_chain, asset } = { ...link }
+                const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
                 const asset_data = getDenom(denom, assets_data)
                 const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
                 const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === chain_data?.id)
@@ -353,8 +355,8 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => {
                 const { link } = { ...props.row.original }
-                const { recipient_address } = { ...link }
-                const chain_data = getChain(props.value, chains_data)
+                const { original_recipient_chain, recipient_address } = { ...link }
+                const chain_data = getChain(original_recipient_chain, chains_data) || getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
                 const { url, address_path } = { ...explorer }
                 return (
@@ -415,8 +417,9 @@ export default ({ n }) => {
               Cell: props => {
                 const { source, confirm_deposit, vote, sign_batch, link } = { ...props.row.original }
                 const { sender_chain, recipient_chain } = { ...source }
-                const source_chain_data = getChain(sender_chain, chains_data)
-                const destination_chain_data = getChain(recipient_chain, chains_data)
+                const { original_sender_chain, original_recipient_chain } = { ...link }
+                const source_chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
+                const destination_chain_data = getChain(original_recipient_chain, chains_data) || getChain(recipient_chain, chains_data)
                 const axelar_chain_data = getChain('axelarnet', chains_data)
                 const steps = [{
                   id: 'source',
