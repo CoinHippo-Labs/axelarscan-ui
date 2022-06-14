@@ -696,7 +696,7 @@ export default () => {
               accessor: 'tier',
               sortType: (a, b) => a.original.i > b.original.i ? 1 : -1,
               Cell: props => (
-                <div className={`${props.value === 1 ? 'bg-blue-600 font-bold' : props.value === 2 ? 'bg-blue-400 font-semibold' : 'bg-blue-300 font-medium'} rounded-lg text-white text-left sm:text-right py-0.5 px-1.5`}>
+                <div className={`max-w-min ${props.value === 1 ? 'bg-blue-600 font-bold' : props.value === 2 ? 'bg-blue-400 font-semibold' : 'bg-blue-300 font-medium'} rounded-lg text-white text-left sm:text-right sm:ml-auto py-0.5 px-1.5`}>
                   Tier {props.value}
                 </div>
               ),
