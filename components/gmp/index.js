@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, utils } from 'ethers'
+import Web3 from 'web3'
+import { BigNumber, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
@@ -38,6 +39,8 @@ export default () => {
   const [approveResponse, setApproveResponse] = useState(null)
   const [executing, setExecuting] = useState(null)
   const [executeResponse, setExecuteResponse] = useState(null)
+  const [gasAdding, setGasAdding] = useState(null)
+  const [gasAddResponse, setGasAddResponse] = useState(null)
   const [txHashEdit, setTxHashEdit] = useState(null)
   const [txHashEditing, setTxHashEditing] = useState(false)
   const [txHashEditUpdating, setTxHashEditUpdating] = useState(false)
@@ -80,6 +83,7 @@ export default () => {
   const resetTxHashEdit = () => {
     setApproveResponse(null)
     setExecuteResponse(null)
+    setGasAddResponse(null)
     setTxHashEdit(null)
     setTxHashEditing(false)
     setTxHashEditUpdating(false)
@@ -144,8 +148,94 @@ export default () => {
     }
   }
 
+  const addGas = async data => {
+    if (api && signer && data) {
+      try {
+        setGasAdding(true)
+        setGasAddResponse({
+          status: 'pending',
+          message: 'Paying gas',
+        })
+        const { call, approved } = { ...data }
+        const { transactionHash, logIndex, event } = { ...call }
+        const { destinationChain, destinationContractAddress, payload } = { ...call?.returnValues }
+        const { commandId, sourceChain, sourceAddress, symbol, amount } = { ...approved?.returnValues }
+        let web3 = new Web3(getChain(destinationChain, evm_chains_data)?.provider_params?.[0]?.rpcUrls?.[0])
+        // abi (IAxelarExecutable) (temporary hardcoded for now)
+        const destination_contract = new web3.eth.Contract(
+          [{ "inputs": [{ "internalType": "bytes32", "name": "commandId", "type": "bytes32" }, { "internalType": "string", "name": "sourceChain", "type": "string" }, { "internalType": "string", "name": "sourceAddress", "type": "string" }, { "internalType": "bytes", "name": "payload", "type": "bytes" }], "name": "execute", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "commandId", "type": "bytes32" }, { "internalType": "string", "name": "sourceChain", "type": "string" }, { "internalType": "string", "name": "sourceAddress", "type": "string" }, { "internalType": "bytes", "name": "payload", "type": "bytes" }, { "internalType": "string", "name": "tokenSymbol", "type": "string" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "executeWithToken", "outputs": [], "stateMutability": "nonpayable", "type": "function" }],
+          destinationContractAddress
+        )
+        let value
+        switch (event) {
+          case 'ContractCall':
+            try {
+              value = await destination_contract.methods.execute(commandId, sourceChain, sourceAddress, payload).estimateGas({ from: address, gas: 1000000 })
+            } catch (error) {}
+            break
+          case 'ContractCallWithToken':
+            try {
+              value = await destination_contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).estimateGas({ from: address, gas: 1000000 })
+            } catch (error) {}
+            break
+          default:
+            break
+        }
+        if (typeof value === 'number') {
+          web3 = new Web3(provider)
+          // abi (IAxelarGasService) & contract address (temporary hardcoded for now)
+          const gas_service_contract = new web3.eth.Contract(
+            [{ "inputs": [{ "internalType": "bytes32", "name": "txHash", "type": "bytes32" }, { "internalType": "uint256", "name": "txIndex", "type": "uint256" }, { "internalType": "address", "name": "gasToken", "type": "address" }, { "internalType": "uint256", "name": "gasFeeAmount", "type": "uint256" }, { "internalType": "address", "name": "refundAddress", "type": "address" }], "name": "addGas", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "txHash", "type": "bytes32" }, { "internalType": "uint256", "name": "logIndex", "type": "uint256" }, { "internalType": "address", "name": "refundAddress", "type": "address" }], "name": "addNativeGas", "outputs": [], "stateMutability": "payable", "type": "function" }],
+            data.gas_paid?.contract_address || '0xbE406F0189A0B4cf3A05C286473D23791Dd44Cc6'
+          )
+          gas_service_contract.methods.addNativeGas(transactionHash, logIndex, address).send({ from: address, value: utils.parseEther(value) })
+            .on('transactionHash', hash => {
+              const txHash = hash
+              setGasAddResponse({
+                status: 'pending',
+                message: 'Wait for confirmation',
+                txHash,
+              })
+            })
+            .on('receipt', async receipt => {
+              const txHash = receipt?.transactionHash
+              await sleep(15 * 1000)
+              setGasAdding(false)
+              setGasAddResponse({
+                status: 'success',
+                message: 'Pay gas successful',
+                txHash,
+              })
+            })
+            .on('error', (error, receipt) => {
+              const txHash = receipt?.transactionHash
+              setGasAdding(false)
+              setGasAddResponse({
+                status: 'failed',
+                message: error?.reason || error?.data?.message || error?.message,
+                txHash,
+              })
+            })
+        }
+        else {
+          setGasAdding(false)
+          setGasAddResponse({
+            status: 'failed',
+            message: 'Cannot estimate gas',
+          })
+        }
+      } catch (error) {
+        setGasAdding(false)
+        setGasAddResponse({
+          status: 'failed',
+          message: error?.message,
+        })
+      }
+    }
+  }
+
   const { data } = { ...gmp }
-  const { call, gas_paid, approved, executed, is_executed, error, status } = { ...data }
+  const { call, gas_paid, approved, executed, is_executed, error, is_not_enough_gas, status } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { from } = { ...call?.transaction }
@@ -159,7 +249,8 @@ export default () => {
   const decimals = source_contract_data?.decimals || asset_data?.decimals || 18
   const _symbol = source_contract_data?.symbol || asset_data?.symbol || symbol
   const asset_image = source_contract_data?.image || asset_data?.image
-  const wrong_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
+  const wrong_source_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !gasAdding
+  const wrong_destination_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
   const approveButton = call && !approved && !executed && !is_executed && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
     <div className="flex items-center space-x-2">
       <button
@@ -177,25 +268,56 @@ export default () => {
     </div>
   )
   const executeButton = payload && approved && !executed && !is_executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
-    <div className="flex items-center space-x-2">
-      {web3_provider && !wrong_chain && (
-        <button
-          disabled={executing}
-          onClick={() => execute(data)}
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
-        >
-          {executing && (
-            <TailSpin color="white" width="16" height="16" />
-          )}
-          <span>
-            Execute
-          </span>
-        </button>
-      )}
-      <Wallet
-        connectChainId={wrong_chain && (destination_chain_data.chain_id || default_chain_id)}
-      />
-    </div>
+    <>
+      <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs pt-1">
+        Execute at destination chain
+      </span>
+      <div className="flex items-center space-x-2">
+        {web3_provider && !wrong_destination_chain && (
+          <button
+            disabled={executing}
+            onClick={() => execute(data)}
+            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+          >
+            {executing && (
+              <TailSpin color="white" width="16" height="16" />
+            )}
+            <span>
+              Execute
+            </span>
+          </button>
+        )}
+        <Wallet
+          connectChainId={wrong_destination_chain && (destination_chain_data.chain_id || default_chain_id)}
+        />
+      </div>
+    </>
+  )
+  const gasAddButton = executeButton && (is_not_enough_gas || !gas_paid) && (
+    <>
+      <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
+        Pay new gas at source chain
+      </span>
+      <div className="flex items-center space-x-2">
+        {web3_provider && !wrong_source_chain && (
+          <button
+            disabled={gasAdding}
+            onClick={() => addGas(data)}
+            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+          >
+            {gasAdding && (
+              <TailSpin color="white" width="16" height="16" />
+            )}
+            <span className="whitespace-nowrap">
+              Pay new gas
+            </span>
+          </button>
+        )}
+        <Wallet
+          connectChainId={wrong_source_chain && (source_chain_data.chain_id || default_chain_id)}
+        />
+      </div>
+    </>
   )
 
   const steps = [{
@@ -238,7 +360,7 @@ export default () => {
   const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
-  const notificationResponse = executeResponse || approveResponse
+  const notificationResponse = executeResponse || gasAddResponse || approveResponse
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
@@ -287,6 +409,7 @@ export default () => {
               onClose={() => {
                 setApproveResponse(null)
                 setExecuteResponse(null)
+                setGasAddResponse(null)
               }}
             />
           )}
@@ -568,6 +691,7 @@ export default () => {
                         </div>
                       )
                     })}
+                    {gasAddButton}
                     {approveButton || executeButton || (time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">

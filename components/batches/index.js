@@ -52,7 +52,9 @@ export default () => {
         status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
-      setFetchTrigger(moment().valueOf())
+      if (typeof fetchTrigger === 'number') {
+        setFetchTrigger(moment().valueOf())
+      }
     }
   }, [asPath])
 
@@ -81,7 +83,7 @@ export default () => {
           }
           const _data = !fetchTrigger ? [] : (data || []),
             size = LIMIT
-          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           response
           const must = [], must_not = []
           const { chain, batchId, keyId, type, status, time } = { ...filters }

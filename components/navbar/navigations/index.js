@@ -26,7 +26,7 @@ export default () => {
             <FaHandPointLeft size={18} />
           </HeadShake> : m.external ?
           <TiArrowRight size={18} className="transform -rotate-45" /> : null
-        const className = `bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-black dark:text-white text-xs ${!m.external && pathname === m.path ? 'font-extrabold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-2`
+        const className = `bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-black dark:text-white text-xs ${!m.external && (pathname === m.path || m.others_paths?.includes(pathname)) ? 'font-extrabold' : 'font-medium hover:font-bold'} space-x-1.5 py-2.5 px-2`
         return m.external ?
           <a
             key={i}

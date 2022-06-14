@@ -58,7 +58,9 @@ export default ({ n }) => {
         relayerAddress,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
-      setFetchTrigger(moment().valueOf())
+      if (typeof fetchTrigger === 'number') {
+        setFetchTrigger(moment().valueOf())
+      }
     }
   }, [evm_chains_data, cosmos_chains_data, asPath])
 
@@ -88,7 +90,7 @@ export default ({ n }) => {
           }
           const _data = !fetchTrigger ? [] : (data || []),
             size = n || LIMIT
-          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           let params
           if (address) {
             params = {

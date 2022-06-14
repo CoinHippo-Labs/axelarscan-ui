@@ -14,7 +14,7 @@ import Participations from '../participations/participations'
 import Image from '../image'
 import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
 import { keygens_by_validator } from '../../lib/api/executor'
-import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
+import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { base64ToBech32 } from '../../lib/object/key'
@@ -48,6 +48,7 @@ export default () => {
   const [votingPower, setVotingPower] = useState(null)
   const [delegations, setDelegations] = useState(null)
   const [uptimes, setUptimes] = useState(null)
+  const [numberTimeJailed, setNumberTimeJailed] = useState(null)
   const [heartbeats, setHeartbeats] = useState(null)
   const [evmVotes, setEvmVotes] = useState(null)
   const [evmPolls, setEvmPolls] = useState(null)
@@ -247,6 +248,36 @@ export default () => {
             }),
             address,
           })
+        }
+      }
+    }
+    getData()
+    return () => {
+      controller?.abort()
+    }
+  }, [address, validator])
+
+  // number time jailed
+  useEffect(() => {
+    const controller = new AbortController()
+    const getData = async () => {
+      if (address && equals_ignore_case(validator?.address, address) && status_data && (typeof numberTimeJailed !== 'number' || !validator.broadcaster_loaded)) {
+        if (!controller.signal.aborted) {
+          const { operator_address, jailed } = { ...validator.data }
+          const response = await getTransactions({
+            query: {
+              bool: {
+                must: [
+                  { match: { types: 'MsgUnjail' } },
+                  { match: { addresses: operator_address } },
+                  { match: { code: 0 } },
+                ],
+              },
+            },
+            size: 0,
+            track_total_hits: true,
+          })
+          setNumberTimeJailed((response?.total || 0) + (jailed ? 1 : 0))
         }
       }
     }
@@ -526,7 +557,7 @@ export default () => {
           <Delegations data={delegations?.address === address && delegations?.data} />
         </div>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Uptimes
@@ -540,6 +571,36 @@ export default () => {
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             Last {number_format(num_uptime_blocks, '0,0')} Blocks
+          </span>
+        </div>
+        <div className={`${metricClassName}`}>
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
+            Jailed
+          </span>
+          <div className="text-3xl font-bold">
+            {typeof numberTimeJailed === 'number' ?
+              number_format(numberTimeJailed, '0,0')
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+            Number time jailed
+          </span>
+        </div>
+        <div className={`${metricClassName}`}>
+          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
+            Heartbeats
+          </span>
+          <div className="text-3xl font-bold">
+            {typeof heartbeats_uptime === 'number' ?
+              `${number_format(heartbeats_uptime, '0,0.00')}%`
+              :
+              <FallingLines color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+            Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
           </span>
         </div>
         <div className={`${metricClassName}`}>
@@ -571,21 +632,6 @@ export default () => {
         </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Heartbeats
-          </span>
-          <div className="text-3xl font-bold">
-            {typeof heartbeats_uptime === 'number' ?
-              `${number_format(heartbeats_uptime, '0,0.00')}%`
-              :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
-            }
-          </div>
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-            Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
-          </span>
-        </div>
-        <div className={`${metricClassName}`}>
-          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Supported
           </span>
           <div className="h-9 flex items-center overflow-x-auto text-3xl font-bold space-x-1.5">
@@ -611,7 +657,7 @@ export default () => {
             EVM Chains
           </span>
         </div>
-        <div className={`${metricClassName} col-span-2 lg:col-span-1 xl:col-span-2`}>
+        <div className={`${metricClassName} px-3 col-span-2 lg:col-span-1 xl:col-span-1`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             EVM votes
           </span>
@@ -621,9 +667,9 @@ export default () => {
                 Object.entries(evmVotes.votes).map(([k, v]) => (
                   <div
                     key={k}
-                    className="min-w-max flex items-center justify-between text-xs space-x-1 my-1 mr-2"
+                    className="min-w-max flex items-center justify-between text-2xs space-x-1 my-0.5 mr-2"
                   >
-                    <div className="flex items-center space-x-0.5">
+                    <div className="flex items-center space-x-1">
                       {chain_manager.image(k, evm_chains_data) && (
                         <Image
                           src={chain_manager.image(k, evm_chains_data)}

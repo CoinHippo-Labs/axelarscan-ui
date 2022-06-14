@@ -47,7 +47,7 @@ export default ({ n }) => {
         }
         const _data = !fetchTrigger ? [] : (data || []),
           size = n || LIMIT
-        const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+        const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
         let response = await getBlocks({
           size,
           from,

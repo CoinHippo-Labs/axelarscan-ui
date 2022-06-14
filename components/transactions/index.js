@@ -45,7 +45,9 @@ export default ({ n }) => {
         type,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
-      setFetchTrigger(moment().valueOf())
+      if (typeof fetchTrigger === 'number') {
+        setFetchTrigger(moment().valueOf())
+      }
     }
   }, [asPath])
 
@@ -74,7 +76,7 @@ export default ({ n }) => {
           }
           const _data = !fetchTrigger ? [] : (data || []),
             size = n || LIMIT
-          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           let response
           if (height) {
             response = await transactions_by_events(`tx.height=${height}`, _data, true, assets_data)
@@ -264,7 +266,7 @@ export default ({ n }) => {
               accessor: 'sender',
               disableSortBy: true,
               Cell: props => {
-                const validator_data = validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, props.value))
+                const validator_data = validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, props.value) || equals_ignore_case(v?.operator_address, props.value))
                 const { operator_address, description } = { ...validator_data }
                 const { moniker } = { ...description }
                 return validator_data ?

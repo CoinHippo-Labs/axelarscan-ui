@@ -48,7 +48,9 @@ export default () => {
         vote: ['yes', 'no'].includes(vote?.toLowerCase()) ? vote.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
-      setFetchTrigger(moment().valueOf())
+      if (typeof fetchTrigger === 'number') {
+        setFetchTrigger(moment().valueOf())
+      }
     }
   }, [asPath])
 
@@ -78,7 +80,7 @@ export default () => {
           }
           const _data = !fetchTrigger ? [] : (data || []),
             size = LIMIT
-          const from = fetchTrigger === 'true' || fetchTrigger === 1 ? _data.length : 0
+          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           const must = [], must_not = []
           const { chain, txHash, pollId, transactionId, voter, vote, time } = { ...filters }
           if (chain) {
