@@ -197,7 +197,11 @@ export default () => {
                   {props.value ?
                     <>
                       <Link href={`/tx/${props.value}`}>
-                        <a className="uppercase text-blue-600 dark:text-white font-bold">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="uppercase text-blue-600 dark:text-white font-bold"
+                        >
                           {ellipse(props.value, 8)}
                         </a>
                       </Link>
@@ -221,7 +225,11 @@ export default () => {
               Cell: props => (
                 props.value ?
                   <Link href={`/block/${props.value}`}>
-                    <a className="text-blue-600 dark:text-white font-semibold">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-white font-semibold"
+                    >
                       {number_format(props.value, '0,0')}
                     </a>
                   </Link>
@@ -296,21 +304,32 @@ export default () => {
                 return validator_data ?
                   <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
                     <Link href={`/validator/${operator_address}`}>
-                      <a>
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <ValidatorProfile validator_description={description} />
                       </a>
                     </Link>
                     <div className="flex flex-col">
                       {moniker && (
                         <Link href={`/validator/${operator_address}`}>
-                          <a className="text-blue-600 dark:text-white font-bold">
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white font-bold"
+                          >
                             {ellipse(moniker, 12)}
                           </a>
                         </Link>
                       )}
                       <div className="flex items-center space-x-1">
                         <Link href={`/validator/${operator_address}`}>
-                          <a className="text-slate-400 dark:text-slate-600 font-medium">
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-400 dark:text-slate-600 font-medium"
+                          >
                             {ellipse(operator_address, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                           </a>
                         </Link>
@@ -322,7 +341,11 @@ export default () => {
                   props.value ?
                     <div className="flex items-center space-x-1">
                       <Link href={`/account/${props.value}`}>
-                        <a className="text-blue-600 dark:text-white font-medium">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white font-medium"
+                        >
                           {ellipse(props.value, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
                         </a>
                       </Link>

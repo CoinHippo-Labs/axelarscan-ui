@@ -241,7 +241,11 @@ export default () => {
               Cell: props => (
                 <div className="flex items-center space-x-1 mb-3">
                   <Link href={`/batch/${props.row.original.chain}/${props.value}`}>
-                    <a className="uppercase text-blue-600 dark:text-white font-bold">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="uppercase text-blue-600 dark:text-white font-bold"
+                    >
                       {ellipse(props.value)}
                     </a>
                   </Link>

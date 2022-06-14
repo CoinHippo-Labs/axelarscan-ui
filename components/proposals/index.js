@@ -54,7 +54,11 @@ export default () => {
               Cell: props => (
                 <div className="flex flex-col items-start space-y-1">
                   <Link href={`/proposal/${props.row.original.proposal_id}`}>
-                    <a className="text-blue-600 dark:text-white font-semibold">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-white font-semibold"
+                    >
                       {props.value || props.row.original.content?.plan?.name}
                     </a>
                   </Link>

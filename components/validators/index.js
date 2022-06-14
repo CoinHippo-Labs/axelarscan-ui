@@ -94,21 +94,32 @@ export default () => {
                 props.row.original.description ?
                   <div className={`min-w-max flex items-${props.row.original.description.moniker ? 'start' : 'center'} space-x-2`}>
                     <Link href={`/validator/${props.value}`}>
-                      <a>
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <ValidatorProfile validator_description={props.row.original.description} />
                       </a>
                     </Link>
                     <div className="flex flex-col">
                       {props.row.original.description.moniker && (
                         <Link href={`/validator/${props.value}`}>
-                          <a className="text-blue-600 dark:text-white font-bold">
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white font-bold"
+                          >
                             {ellipse(props.row.original.description.moniker, 12)}
                           </a>
                         </Link>
                       )}
                       <div className="flex items-center space-x-1">
                         <Link href={`/validator/${props.value}`}>
-                          <a className="text-slate-400 dark:text-slate-600 font-medium">
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-slate-400 dark:text-slate-600 font-medium"
+                          >
                             {ellipse(props.value, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                           </a>
                         </Link>
@@ -120,7 +131,11 @@ export default () => {
                   props.value ?
                     <div className="flex items-center space-x-1">
                       <Link href={`/validator/${props.value}`}>
-                        <a className="text-blue-600 dark:text-white font-medium">
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white font-medium"
+                        >
                           {ellipse(props.value, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                         </a>
                       </Link>

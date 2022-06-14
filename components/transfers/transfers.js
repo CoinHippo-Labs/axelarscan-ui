@@ -181,7 +181,11 @@ export default ({ n }) => {
                 return (
                   <div className="flex items-center space-x-1">
                     <Link href={`/transfer/${props.value}`}>
-                      <a className="text-blue-600 dark:text-white font-bold">
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-white font-bold"
+                      >
                         {ellipse(props.value)}
                       </a>
                     </Link>
