@@ -18,7 +18,6 @@ import Notification from '../notifications'
 import Wallet from '../wallet'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
-import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
 export default () => {
   const { preferences, evm_chains, cosmos_chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
