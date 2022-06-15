@@ -163,7 +163,7 @@ export default () => {
     return res && await res.json()
   }
 
-  const addGas = async data => {
+  const addNativeGas = async data => {
     if (api && signer && data) {
       try {
         const { call, approved } = { ...data }
@@ -325,7 +325,7 @@ export default () => {
       </div>
     </>
   )
-  const gasAddButton = executeButton && (is_not_enough_gas || !gas_paid) && (
+  const gasAddButton = executeButton && (true || is_not_enough_gas || !gas_paid) && (
     <>
       <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
         Pay new gas at source chain
@@ -334,7 +334,7 @@ export default () => {
         {web3_provider && !wrong_source_chain && (
           <button
             disabled={gasAdding}
-            onClick={() => addGas(data)}
+            onClick={() => addNativeGas(data)}
             className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
           >
             {gasAdding && (
