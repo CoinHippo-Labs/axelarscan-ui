@@ -4,7 +4,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import Web3 from 'web3'
-import { BigNumber, providers, utils } from 'ethers'
+import { BigNumber, FixedNumber, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
@@ -148,49 +148,72 @@ export default () => {
     }
   }
 
+  const getGasPrice = async (sourceChain, destinationChain, sourceTokenSymbol) => {
+    const params = {
+      method: 'getGasPrice',
+      sourceChain,
+      destinationChain,
+      sourceTokenSymbol,
+    }
+    // request api
+    const res = await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }).catch(error => { return null })
+    return res && await res.json()
+  }
+
   const addGas = async data => {
     if (api && signer && data) {
       try {
-        setGasAdding(true)
-        setGasAddResponse({
-          status: 'pending',
-          message: 'Paying gas',
-        })
         const { call, approved } = { ...data }
         const { transactionHash, logIndex, event } = { ...call }
         const { destinationChain, destinationContractAddress, payload } = { ...call?.returnValues }
         const { commandId, sourceChain, sourceAddress, symbol, amount } = { ...approved?.returnValues }
+        setGasAdding(true)
+        setGasAddResponse({
+          status: 'pending',
+          message: `Estimating gas for execution on ${destinationChain}`,
+        })
         let web3 = new Web3(getChain(destinationChain, evm_chains_data)?.provider_params?.[0]?.rpcUrls?.[0])
         // abi (IAxelarExecutable) (temporary hardcoded for now)
         const destination_contract = new web3.eth.Contract(
           [{ "inputs": [{ "internalType": "bytes32", "name": "commandId", "type": "bytes32" }, { "internalType": "string", "name": "sourceChain", "type": "string" }, { "internalType": "string", "name": "sourceAddress", "type": "string" }, { "internalType": "bytes", "name": "payload", "type": "bytes" }], "name": "execute", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "commandId", "type": "bytes32" }, { "internalType": "string", "name": "sourceChain", "type": "string" }, { "internalType": "string", "name": "sourceAddress", "type": "string" }, { "internalType": "bytes", "name": "payload", "type": "bytes" }, { "internalType": "string", "name": "tokenSymbol", "type": "string" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "executeWithToken", "outputs": [], "stateMutability": "nonpayable", "type": "function" }],
           destinationContractAddress
         )
-        let value
+        let value, errorEstimateGas
         switch (event) {
           case 'ContractCall':
             try {
               value = await destination_contract.methods.execute(commandId, sourceChain, sourceAddress, payload).estimateGas()
             } catch (error) {
-              // (temporary hardcoded for now)
-              value = 1e9
+              errorEstimateGas = error
             }
             break
           case 'ContractCallWithToken':
             try {
               value = await destination_contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).estimateGas()
             } catch (error) {
-              // (temporary hardcoded for now)
-              value = 1e9
+              errorEstimateGas = error
             }
             break
           default:
             break
         }
         if (typeof value === 'number') {
-          /* use getGasPrice method from GMP api
-             convert price rate
-          */
+          const response = await getGasPrice(sourceChain, destinationChain, getChain(sourceChain, evm_chains_data)?.provider_params?.[0]?.nativeCurrency?.symbol)
+          const { source_token, destination_native_token } = { ...response?.result }
+          if (source_token?.token_price?.usd && destination_native_token?.token_price?.usd) {
+            value = FixedNumber.fromString(value.toString())
+              .mulUnsafe(FixedNumber.fromString(destination_native_token.gas_price.toString()))
+              .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+              .mulUnsafe(FixedNumber.fromString(utils.parseUnits('1.5', source_token.decimals).toString()))
+              .round(0).toString().replace('.0', '')
+          }
+          setGasAddResponse({
+            status: 'pending',
+            message: `Paying gas${source_token ? ` (${number_format(utils.formatUnits(value.toString(), source_token.decimals), '0,0.000000')} ${source_token.symbol})` : ''}`,
+          })
           web3 = new Web3(provider)
           // abi (IAxelarGasService) & contract address (temporary hardcoded for now)
           const gas_service_contract = new web3.eth.Contract(
@@ -230,7 +253,7 @@ export default () => {
           setGasAdding(false)
           setGasAddResponse({
             status: 'failed',
-            message: 'Cannot estimate gas',
+            message: `Cannot estimate gas on ${destinationChain}${errorEstimateGas ? `: ${errorEstimateGas.message}` : ''}`,
           })
         }
       } catch (error) {
@@ -370,6 +393,11 @@ export default () => {
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
   const notificationResponse = executeResponse || gasAddResponse || approveResponse
+  const explorer = notificationResponse && (
+    notificationResponse.is_axelar_transaction ?
+      axelar_chain_data : executeResponse ?
+      destination_chain_data : source_chain_data
+  )?.explorer
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
@@ -395,15 +423,15 @@ export default () => {
                 <span className="break-all mr-2">
                   {notificationResponse.message}
                 </span>
-                {(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data)?.explorer?.url && notificationResponse.txHash && (
+                {explorer?.url && notificationResponse.txHash && (
                   <a
-                    href={`${(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data).explorer.url}${(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data).explorer.transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
+                    href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mr-2"
                   >
                     <span className="font-semibold">
-                      View on {(notificationResponse.is_axelar_transaction ? axelar_chain_data : destination_chain_data).explorer.name}
+                      View on {explorer.name}
                     </span>
                   </a>
                 )}

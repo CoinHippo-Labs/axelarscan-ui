@@ -26,12 +26,13 @@ export default () => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, sourceChain, destinationChain, depositAddress, confirmed, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         depositAddress,
+        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
         senderAddress,
         recipientAddress,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
@@ -109,7 +110,17 @@ export default () => {
       name: 'depositAddress',
       type: 'text',
       placeholder: 'Deposit address',
-      className: 'col-span-2',
+    },
+    {
+      label: 'Confirmed',
+      name: 'confirmed',
+      type: 'select',
+      placeholder: 'Select confirmed',
+      options: [
+        { value: '', title: 'Any' },
+        { value: 'confirmed', title: 'Confirmed' },
+        { value: 'unconfirmed', title: 'Unconfirmed' },
+      ],
     },
     {
       label: 'Sender',
