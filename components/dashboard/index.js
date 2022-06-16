@@ -98,7 +98,7 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (evm_chains_data && cosmos_chains_data/* && assets_data*/) {
+      if (process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && evm_chains_data && cosmos_chains_data/* && assets_data*/) {
         if (!controller.signal.aborted) {
           const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
           const axelar_chain_data = getChain('axelarnet', chains_data)
@@ -198,7 +198,7 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (evm_chains_data && cosmos_chains_data) {
+      if (process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && evm_chains_data && cosmos_chains_data) {
         if (!controller.signal.aborted) {
           const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
           const axelar_chain_data = getChain('axelarnet', chains_data)
