@@ -555,7 +555,7 @@ export default () => {
           </Link>
           <Blocks n={10} />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-3">
           <Link href="/transactions">
             <a className="flex items-center space-x-2">
               <BiFileBlank size={20} />
