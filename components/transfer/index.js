@@ -17,6 +17,7 @@ import { transfers as getTransfers } from '../../lib/api/index'
 import { transfer as getTransfer } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getDenom } from '../../lib/object/denom'
+import { type } from '../../lib/object/id'
 import { number_format, name, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 
 export default () => {
@@ -47,11 +48,13 @@ export default () => {
             let data = response.data?.[0]
             const { source, link, confirm_deposit, sign_batch } = { ...data }
             const { recipient_chain, recipient_address, amount, value } = { ...source }
-            if ((!link || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && recipient_address?.length >= 65) {
+            if ((!link || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
               let _response
-              _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
-              _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
-              _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
+              if (type(recipient_address) === 'account') {
+                _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
+                _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
+                _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
+              }
               _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
               if (_response?.data) {
                 _response.data.forEach(d => getTransaction(d?.txhash))
