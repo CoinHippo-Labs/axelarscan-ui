@@ -8,6 +8,7 @@ import { BiX } from 'react-icons/bi'
 
 import Modal from '../modals'
 import { getChain } from '../../lib/object/chain'
+import { getDenom } from '../../lib/object/denom'
 import { params_to_obj } from '../../lib/utils'
 
 export default () => {

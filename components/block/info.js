@@ -14,8 +14,8 @@ export default ({ data }) => {
 
   const { height, hash, time, num_txs, proposer_address, validator_addresses } = { ...data }
   const validator_data = validators_data?.find(v => equals_ignore_case(v?.consensus_address, proposer_address))
-  const signed_validators_data = validators_data?.filter(v => validator_addresses.includes(v?.consensus_address))
-  const unsigned_validators_data = validators_data?.filter(v => !validator_addresses.includes(v?.consensus_address) && v?.start_height <= Number(height) && ['BOND_STATUS_BONDED'].includes(v?.status))
+  const signed_validators_data = validators_data?.filter(v => validator_addresses?.includes(v?.consensus_address))
+  const unsigned_validators_data = validators_data?.filter(v => !validator_addresses?.includes(v?.consensus_address) && v?.start_height <= Number(height) && ['BOND_STATUS_BONDED'].includes(v?.status))
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 text-sm lg:text-base font-bold'
 
@@ -166,8 +166,8 @@ export default ({ data }) => {
               </div>}
               titleClassName="normal-case py-1.5"
             >
-              <span className="font-mono text-sm lg:text-base font-semibold">
-                {signed_validators_data ? `${number_format(signed_validators_data.length, '0,0')} (${number_format(_.sumBy(signed_validators_data, 'tokens') * 100 / _.sumBy(validators_data.filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)), 'tokens'), '0,0')} %)` : '-'}
+              <span className="text-sm lg:text-base font-semibold">
+                {signed_validators_data ? `${number_format(signed_validators_data.length, '0,0')} (${number_format(_.sumBy(signed_validators_data, 'tokens') * 100 / _.sumBy(_.concat(signed_validators_data, unsigned_validators_data || []), 'tokens'), '0,0')} %)` : '-'}
               </span>
             </Popover>
             <span>
@@ -219,7 +219,7 @@ export default ({ data }) => {
               </div>}
               titleClassName="normal-case py-1.5"
             >
-              <span className="font-mono text-sm lg:text-base font-semibold">
+              <span className="text-sm lg:text-base font-semibold">
                 {unsigned_validators_data ? number_format(unsigned_validators_data.length, '0,0') : '-'}
               </span>
             </Popover>
@@ -231,7 +231,7 @@ export default ({ data }) => {
           Transactions:
         </span>
         {data ?
-          <span className="font-mono text-sm lg:text-base font-semibold">
+          <span className="text-sm lg:text-base font-semibold">
             {num_txs > -1 ?
               `${number_format(num_txs, '0,0')}` : '-'
             }

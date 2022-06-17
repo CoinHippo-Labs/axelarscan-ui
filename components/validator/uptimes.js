@@ -18,7 +18,11 @@ export default ({ data }) => {
               <span className="normal-case text-base font-semibold">Block:</span>
               {b?.height && (
                 <Link href={`/block/${b.height}`}>
-                  <a className="text-base text-blue-600 dark:text-white font-bold">
+                  <a
+                    target="_blank"
+                    rel="noopenner noreferrer"
+                    className="text-base text-blue-600 dark:text-white font-bold"
+                  >
                     {number_format(b.height, '0,0')}
                   </a>
                 </Link>
@@ -38,10 +42,15 @@ export default ({ data }) => {
             className="w-7 h-7"
           >
             <Link href={`/block/${b.height}`}>
+              <a
+                target="_blank"
+                rel="noopenner noreferrer"
+              >
               <div
                 title={number_format(b?.height, '0,0')}
                 className={`w-6 h-6 ${b?.up ? 'bg-green-500 dark:bg-green-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
               />
+              </a>
             </Link>
           </Popover>
           :

@@ -32,7 +32,11 @@ export default ({ data }) => {
               <span className="normal-case text-base font-semibold">Block:</span>
               {height && (
                 <Link href={`/block/${height}`}>
-                  <a className="text-base text-blue-600 dark:text-white font-bold">
+                  <a
+                    target="_blank"
+                    rel="noopenner noreferrer"
+                    className="text-base text-blue-600 dark:text-white font-bold"
+                  >
                     {number_format(height, '0,0')}
                   </a>
                 </Link>
@@ -58,7 +62,11 @@ export default ({ data }) => {
                   </span>
                   <div className="flex items-center space-x-1">
                     <Link href={`/evm-votes?pollId=${id}`}>
-                      <a className="text-blue-600 dark:text-white font-semibold">
+                      <a
+                        target="_blank"
+                        rel="noopenner noreferrer"
+                        className="text-blue-600 dark:text-white font-semibold"
+                      >
                         {ellipse(id, 8)}
                       </a>
                     </Link>
@@ -110,7 +118,11 @@ export default ({ data }) => {
                 {txhash && (
                   <div className="flex items-center space-x-1">
                     <Link href={`/tx/${txhash}`}>
-                      <a className="text-blue-600 dark:text-white font-semibold">
+                      <a
+                        target="_blank"
+                        rel="noopenner noreferrer"
+                        className="text-blue-600 dark:text-white font-semibold"
+                      >
                         {ellipse(txhash, 6)}
                       </a>
                     </Link>
@@ -125,10 +137,15 @@ export default ({ data }) => {
             className="w-7 h-7"
           >
             <Link href={`/evm-votes?pollId=${id}`}>
-              <div
-                title={number_format(height, '0,0')}
-                className={`w-6 h-6 ${vote ? late ? 'bg-yellow-400 dark:bg-yellow-600' : 'bg-green-500 dark:bg-green-600' : v && !vote ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
-              />
+              <a
+                target="_blank"
+                rel="noopenner noreferrer"
+              >
+                <div
+                  title={number_format(height, '0,0')}
+                  className={`w-6 h-6 ${vote ? late ? 'bg-yellow-400 dark:bg-yellow-600' : 'bg-green-500 dark:bg-green-600' : v && !vote ? 'bg-red-500 dark:bg-red-600' : 'bg-slate-400 dark:bg-slate-600'} rounded m-1`}
+                />
+              </a>
             </Link>
           </Popover>
           :
