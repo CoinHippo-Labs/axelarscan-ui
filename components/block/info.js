@@ -167,7 +167,7 @@ export default ({ data }) => {
               titleClassName="normal-case py-1.5"
             >
               <span className="text-sm lg:text-base font-semibold">
-                {signed_validators_data ? `${number_format(signed_validators_data.length, '0,0')} (${number_format(_.sumBy(signed_validators_data, 'tokens') * 100 / _.sumBy(_.concat(signed_validators_data, unsigned_validators_data || []), 'tokens'), '0,0')} %)` : '-'}
+                {signed_validators_data ? `${number_format(signed_validators_data.length, '0,0')} (${number_format(_.sumBy(signed_validators_data, 'tokens') * 100 / _.sumBy(_.concat(signed_validators_data, unsigned_validators_data || []), 'tokens'), '0,0.000')} %)` : '-'}
               </span>
             </Popover>
             <span>
