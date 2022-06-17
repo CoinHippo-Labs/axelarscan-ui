@@ -141,7 +141,12 @@ export default ({ n }) => {
                 txhash: Array.isArray(txhash) ? _.last(txhash) : txhash,
                 timestamp: Array.isArray(timestamp) ? _.last(timestamp) : timestamp,
                 transfer: activities?.findIndex(a => equals_ignore_case(a?.sender, address)) > -1 ? 'out' :
-                  activities?.findIndex(a => equals_ignore_case(a?.receiver, address)) > -1 ? 'in' : null
+                  activities?.findIndex(a => equals_ignore_case(a?.receiver, address) ||
+                    (Array.isArray(a?.recipient) ?
+                      a?.recipient?.findIndex(_a => equals_ignore_case(_a, address)) > -1 :
+                      equals_ignore_case(a?.recipient, address)
+                    )
+                  ) > -1 ? 'in' : null
               }
             }) || []), 'txhash'), ['timestamp'], ['desc'])
             setData(response)
@@ -334,7 +339,7 @@ export default ({ n }) => {
                   <div className="flex flex-col items-start sm:items-end space-y-1.5">
                     {typeof props.value === 'number' ?
                       <span className="uppercase text-xs lg:text-sm font-semibold">
-                        {number_format(props.value, '0,0.00000000')} {props.row.original.symbol}
+                        {number_format(props.value, '0,0.00000000')} {ellipse(props.row.original.symbol, 8)}
                       </span>
                       :
                       props.row.original.activities?.findIndex(a => a?.amount && a.amount !== props.row.original.fee) > -1 ?
@@ -343,7 +348,7 @@ export default ({ n }) => {
                             key={i}
                             className="uppercase text-xs lg:text-sm font-semibold"
                           >
-                            {number_format(a.amount, '0,0.00000000')} {a.symbol || a.denom}
+                            {number_format(a.amount, '0,0.00000000')} {ellipse(a.symbol || a.denom, 8)}
                           </span>
                         ))
                         :

@@ -40,16 +40,17 @@ export default ({ n }) => {
   const [filters, setFilters] = useState(null)
 
   useEffect(() => {
-    if (evm_chains_data && cosmos_chains_data && asPath) {
+    if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, depositAddress, confirmed, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        depositAddress,
+        asset: getDenom(asset, assets_data)?.id || asset,
         confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
+        depositAddress,
         senderAddress,
         recipientAddress,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
@@ -58,7 +59,7 @@ export default ({ n }) => {
         setFetchTrigger(moment().valueOf())
       }
     }
-  }, [evm_chains_data, cosmos_chains_data, asPath])
+  }, [evm_chains_data, cosmos_chains_data, assets_data, asPath])
 
   useEffect(() => {
     const triggering = is_interval => {
@@ -95,7 +96,7 @@ export default ({ n }) => {
             should.push({ match: { 'link.recipient_address': address } })
           }
           else if (filters) {
-            const { txHash, sourceChain, destinationChain, depositAddress, confirmed, senderAddress, recipientAddress, time } = { ...filters }
+            const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
             if (txHash) {
               must.push({ match: { 'source.id': txHash } })
             }
@@ -105,8 +106,8 @@ export default ({ n }) => {
             if (destinationChain) {
               must.push({ match: { 'source.recipient_chain': destinationChain } })
             }
-            if (depositAddress) {
-              must.push({ match: { 'source.recipient_address': depositAddress } })
+            if (asset) {
+              must.push({ match: { 'source.denom': asset } })
             }
             if (confirmed) {
               switch (confirmed) {
@@ -121,6 +122,9 @@ export default ({ n }) => {
                 default:
                   break
               }
+            }
+            if (depositAddress) {
+              must.push({ match: { 'source.recipient_address': depositAddress } })
             }
             if (senderAddress) {
               must.push({ match: { 'source.sender_address': senderAddress } })

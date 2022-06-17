@@ -11,9 +11,10 @@ import { getChain } from '../../lib/object/chain'
 import { params_to_obj } from '../../lib/utils'
 
 export default () => {
-  const { evm_chains, cosmos_chains } = useSelector(state => ({ evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
+  const { evm_chains, cosmos_chains, assets } = useSelector(state => ({ evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)
   const { evm_chains_data } = { ...evm_chains }
   const { cosmos_chains_data } = { ...cosmos_chains }
+  const { assets_data } = { ...assets }
 
   const router = useRouter()
   const { pathname, query, asPath } = { ...router }
@@ -26,19 +27,20 @@ export default () => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, depositAddress, confirmed, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        depositAddress,
+        asset: getDenom(asset, assets_data)?.id || asset,
         confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
+        depositAddress,
         senderAddress,
         recipientAddress,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
     }
-  }, [evm_chains_data, cosmos_chains_data, asPath])
+  }, [evm_chains_data, cosmos_chains_data, assets_data, asPath])
 
   useEffect(() => {
     if (filter !== undefined) {
@@ -106,10 +108,19 @@ export default () => {
       ),
     },
     {
-      label: 'Deposit Address',
-      name: 'depositAddress',
-      type: 'text',
-      placeholder: 'Deposit address',
+      label: 'Asset',
+      name: 'asset',
+      type: 'select',
+      placeholder: 'Select asset',
+      options: _.concat(
+        { value: '', title: 'Any' },
+        assets_data?.map(a => {
+          return {
+            value: a.id,
+            title: a.symbol,
+          }
+        }) || [],
+      ),
     },
     {
       label: 'Confirmed',
@@ -121,6 +132,13 @@ export default () => {
         { value: 'confirmed', title: 'Confirmed' },
         { value: 'unconfirmed', title: 'Unconfirmed' },
       ],
+    },
+    {
+      label: 'Deposit Address',
+      name: 'depositAddress',
+      type: 'text',
+      placeholder: 'Deposit address',
+      className: 'col-span-2',
     },
     {
       label: 'Sender',

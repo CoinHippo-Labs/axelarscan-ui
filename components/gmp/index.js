@@ -202,11 +202,10 @@ export default () => {
         }
         if (typeof value === 'number') {
           const response = await getGasPrice(sourceChain, destinationChain, getChain(sourceChain, evm_chains_data)?.provider_params?.[0]?.nativeCurrency?.symbol)
-          const { source_token, destination_native_token } = { ...response?.result }
-          if (source_token?.token_price?.usd && destination_native_token?.token_price?.usd) {
+          const { source_token } = { ...response?.result }
+          if (source_token?.gas_price) {
             value = FixedNumber.fromString(value.toString())
-              .mulUnsafe(FixedNumber.fromString(destination_native_token.gas_price.toString()))
-              .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+              .mulUnsafe(FixedNumber.fromString(source_token.gas_price.toString()))
               .mulUnsafe(FixedNumber.fromString(utils.parseUnits('1.5', source_token.decimals).toString()))
               .round(0).toString().replace('.0', '')
           }
