@@ -286,7 +286,7 @@ export default () => {
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-5">
           {process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && (
             <div className="space-y-3">
-              <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-2">
+              <div className="sm:flex items-center justify-start space-y-1.5 sm:space-y-0 sm:space-x-3">
                 <Link href="/transfers">
                   <a className="flex items-center space-x-2">
                     <FiCode size={20} />
@@ -295,6 +295,9 @@ export default () => {
                     </span>
                   </a>
                 </Link>
+                <div className="bg-red-100 dark:bg-yellow-700 border border-red-500 dark:border-yellow-400 rounded-lg whitespace-nowrap text-red-500 dark:text-yellow-400 py-0.5 px-2">
+                  The transfer volume is missing. It will be updated soon.
+                </div>
                 {/*transfers?.data && (
                   <div className="flex items-center space-x-2">
                     <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
@@ -370,15 +373,15 @@ export default () => {
                     </a>
                   </Link>
                 </div>
-                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -ml-12">
+                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -mt-3 -ml-0 lg:ml-8">
                   <NetworkGraph
                     id="transfers"
                     data={transfers?.network_graph_data}
                   />
-                  <CrossChainQuantity
+                  {/*<CrossChainQuantity
                     data={transfers?.data}
                     pathname="/transfers/search"
-                  />
+                  />*/}
                 </div>
                 <div className="order-2 lg:order-3">
                   <div className={`${metricClassName}`}>
@@ -485,15 +488,15 @@ export default () => {
                     </a>
                   </Link>
                 </div>
-                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -ml-12">
+                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -mt-3 -ml-0 lg:ml-8">
                   <NetworkGraph
                     id="gmp"
                     data={gmps?.network_graph_data}
                   />
-                  <CrossChainQuantity
+                  {/*<CrossChainQuantity
                     data={gmps?.data}
                     pathname="/gmp/search"
-                  />
+                  />*/}
                 </div>
                 <div className="order-2 lg:order-3">
                   <div className={`${metricClassName}`}>

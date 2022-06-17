@@ -117,12 +117,12 @@ export default ({ data }) => {
       {validator_addresses && validators_data && (
         <div className={rowClassName}>
           <span className={titleClassName}>
-            Signed Validators:
+            Signer / Absent:
           </span>
           <div className="flex items-center space-x-2">
             <Popover
               placement="bottom"
-              title="Signed Validators"
+              title="Signed by"
               content={<div className="h-88 overflow-y-auto grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                 {signed_validators_data?.length > 0 ?
                   signed_validators_data.map((a, i) => {
@@ -175,7 +175,7 @@ export default ({ data }) => {
             </span>
             <Popover
               placement="bottom"
-              title="Unsigned Validators"
+              title="Missing"
               content={<div className="overflow-y-auto grid grid-flow-row grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                 {unsigned_validators_data?.length > 0 ?
                   unsigned_validators_data.map((a, i) => {

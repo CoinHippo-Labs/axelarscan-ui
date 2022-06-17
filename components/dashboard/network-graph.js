@@ -23,8 +23,8 @@ export default ({
     if (rendered && !graph) {
       setGraph(new G6.Graph({
         container: id,
-        width: 536,
-        height: 402,
+        width: 564,
+        height: 423,
         fitView: true,
         fitViewPadding: [10, 10, 10, 10],
         fitCenter: true,
@@ -152,7 +152,7 @@ export default ({
         className={`${data?.length > 0 ? 'flex' : 'hidden'} items-center justify-start`}
       />
       {!data && (
-        <div className="w-3/4 h-88 flex items-center justify-center">
+        <div className="w-4/4 h-88 flex items-center justify-center">
           <BallTriangle color={loader_color(theme)} width="36" height="36" />
         </div>
       )}
