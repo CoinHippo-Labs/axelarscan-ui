@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { CSVLink } from 'react-csv'
 import { TailSpin, ThreeDots } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiLeftArrowCircle, BiRightArrowCircle } from 'react-icons/bi'
 
@@ -39,11 +40,12 @@ export default ({ n }) => {
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { txHash, status, type, fromTime, toTime } = { ...params }
+      const { txHash, status, type, account, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         status: ['success', 'failed'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         type,
+        account,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
       if (typeof fetchTrigger === 'number') {
@@ -99,7 +101,7 @@ export default ({ n }) => {
               must.push({ match: { addresses: address } })
             }
             else if (filters) {
-              const { txHash, status, type, time } = { ...filters }
+              const { txHash, status, type, account, time } = { ...filters }
               if (txHash) {
                 must.push({ match: { txhash: txHash } })
               }
@@ -115,6 +117,9 @@ export default ({ n }) => {
               }
               if (type) {
                 must.push({ match: { types: type } })
+              }
+              if (account) {
+                must.push({ match: { addresses: account } })
               }
               if (time?.length > 1) {
                 must.push({ range: { timestamp: { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
@@ -173,31 +178,65 @@ export default ({ n }) => {
     }
   }, [data])
 
+  const toCSV = () => data?.filter(d => d).map(d => {
+    return {
+      ...d,
+      amount: d.activities.filter(a => a?.amount && a.amount !== d.fee && (
+        !(address || filters?.account) ||
+        equals_ignore_case(a?.recipient, address || filters?.account) ||
+        equals_ignore_case(a?.sender, address || filters?.account)
+      )).map(a => {
+        const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
+        return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}`.trim()
+      }).join('\n'),
+    }
+  }) || []
+
   const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type) || (filterTypes.includes('undefined') && !d?.type)), 0, n || undefined)
 
   return (
     data ?
       <div className="min-h-full grid gap-2">
         {!n && (
-          <div className="block sm:flex sm:flex-wrap items-center justify-end overflow-x-auto space-x-1 mb-2">
-            {Object.entries({ ...types }).map(([k, v]) => (
-              <div
-                key={k}
-                onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
-                style={{ textTransform: 'none' }}
-              >
-                <span>
-                  {k === 'undefined' ?
-                    'Failed' :
-                    k?.endsWith('Request') ? k.replace('Request', '') : k
-                  }
-                </span>
-                <span className="text-blue-600 dark:text-blue-400">
-                  {number_format(v, '0,0')}
-                </span>
-              </div>
-            ))}
+          <div className="flex items-center justify-between space-x-2 mb-2">
+            <div className="block sm:flex sm:flex-wrap items-center justify-start overflow-x-auto space-x-1">
+              {Object.entries({ ...types }).map(([k, v]) => (
+                <div
+                  key={k}
+                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
+                  className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
+                  style={{ textTransform: 'none' }}
+                >
+                  <span>
+                    {k === 'undefined' ?
+                      'Failed' :
+                      k?.endsWith('Request') ? k.replace('Request', '') : k
+                    }
+                  </span>
+                  <span className="text-blue-600 dark:text-blue-400">
+                    {number_format(v, '0,0')}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <CSVLink
+              headers={[
+                { label: 'Tx Hash', key: 'txhash' },
+                { label: 'Block', key: 'height' },
+                { label: 'Type', key: 'type' },
+                { label: 'Status', key: 'status' },
+                { label: 'Amount', key: 'amount' },
+                { label: 'Fee', key: 'fee' },
+                { label: 'Time', key: 'timestamp' },
+              ]}
+              data={toCSV()}
+              filename={`transactions${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('')}.csv`}
+              className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg py-1 px-2.5`}
+            >
+              <span className="font-bold">
+                Export CSV
+              </span>
+            </CSVLink>
           </div>
         )}
         <Datatable
@@ -258,8 +297,7 @@ export default ({ n }) => {
                 props.value && (
                   <div className={`${props.value === 'success' ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm font-bold space-x-1`}>
                     {props.value === 'success' ?
-                      <BiCheckCircle size={20} />
-                      :
+                      <BiCheckCircle size={20} /> :
                       <BiXCircle size={20} />
                     }
                     <span>
@@ -342,16 +380,16 @@ export default ({ n }) => {
                   <div className="flex flex-col items-start sm:items-end space-y-1.5">
                     {typeof props.value === 'number' ?
                       <span className="uppercase text-xs lg:text-sm font-semibold">
-                        {number_format(props.value, '0,0.00000000')} {ellipse(props.row.original.symbol, 8)}
+                        {number_format(props.value, '0,0.00000000')} {ellipse(props.row.original.symbol, 4, 'ibc/')}
                       </span>
                       :
                       props.row.original.activities?.findIndex(a => a?.amount && a.amount !== props.row.original.fee) > -1 ?
                         props.row.original.activities.filter(a => a?.amount && a.amount !== props.row.original.fee).map((a, i) => (
                           <span
                             key={i}
-                            className="uppercase text-xs lg:text-sm font-semibold"
+                            className={`uppercase ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-500 dark:text-green-600 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold`}
                           >
-                            {number_format(a.amount, '0,0.00000000')} {ellipse(a.symbol || a.denom, 8)}
+                            {number_format(a.amount, '0,0.00000000')} {ellipse(a.symbol || a.denom, 4, 'ibc/')}
                           </span>
                         ))
                         :

@@ -295,9 +295,11 @@ export default () => {
                     </span>
                   </a>
                 </Link>
-                <div className="bg-red-100 dark:bg-yellow-700 border border-red-500 dark:border-yellow-400 rounded-lg whitespace-nowrap text-red-500 dark:text-yellow-400 py-0.5 px-2">
-                  The transfer volume is missing. It will be updated soon.
-                </div>
+                {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
+                  <div className="bg-red-100 dark:bg-yellow-700 border border-red-500 dark:border-yellow-400 rounded-lg whitespace-nowrap text-red-500 dark:text-yellow-400 py-0.5 px-2">
+                    The transfer volume is missing. It will be updated soon.
+                  </div>
+                )}
                 {/*transfers?.data && (
                   <div className="flex items-center space-x-2">
                     <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">

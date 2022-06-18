@@ -36,11 +36,12 @@ export default () => {
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { txHash, status, type, fromTime, toTime } = { ...params }
+      const { txHash, status, type, account, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         status: ['success', 'failed'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         type,
+        account,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
     }
@@ -104,6 +105,12 @@ export default () => {
           }
         }) || [],
       ),
+    },
+    {
+      label: 'Account',
+      name: 'account',
+      type: 'text',
+      placeholder: 'Axelar Address',
     },
     {
       label: 'Time',
