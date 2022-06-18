@@ -12,7 +12,7 @@ import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import { axelard } from '../../lib/api/executor'
-import { number_format, ellipse, to_json, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, to_json, loader_color } from '../../lib/utils'
 
 export default ({ chain_data }) => {
   const { preferences, assets } = useSelector(state => ({ preferences: state.preferences, assets: state.assets }), shallowEqual)
