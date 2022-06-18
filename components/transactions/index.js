@@ -232,9 +232,9 @@ export default ({ n }) => {
                 ]}
                 data={toCSV()}
                 filename={`transactions${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('') || (address || height ? `_${address || height}` : '')}.csv`}
-                className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg py-1 px-2.5`}
+                className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg mb-1 py-1 px-2.5`}
               >
-                <span className="font-bold">
+                <span className="whitespace-nowrap font-bold">
                   Export CSV
                 </span>
               </CSVLink>
@@ -286,7 +286,7 @@ export default ({ n }) => {
               accessor: 'type',
               disableSortBy: true,
               Cell: props => (
-                <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
+                <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold lg:-mt-0.5 py-0.5 px-1.5">
                   {name(props.value) || '-'}
                 </div>
               ),
@@ -378,21 +378,21 @@ export default ({ n }) => {
               accessor: 'amount',
               disableSortBy: true,
               Cell: props => (
-                <div className="flex flex-col text-left sm:text-right">
-                  <div className="flex flex-col items-start sm:items-end space-y-1.5">
+                <div className="text-left sm:text-right">
+                  <div className="flex flex-col items-start sm:items-end justify-center space-y-1.5">
                     {typeof props.value === 'number' ?
-                      <span className="uppercase text-xs lg:text-sm font-semibold">
+                      <div className="h-5 flex items-center uppercase text-xs lg:text-sm font-semibold">
                         {number_format(props.value, '0,0.00000000')} {ellipse(props.row.original.symbol, 4, 'ibc/')}
-                      </span>
+                      </div>
                       :
                       props.row.original.activities?.findIndex(a => a?.amount && a.amount !== props.row.original.fee) > -1 ?
                         props.row.original.activities.filter(a => a?.amount && a.amount !== props.row.original.fee).map((a, i) => (
-                          <span
+                          <div
                             key={i}
-                            className={`uppercase ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-500 dark:text-green-600 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold`}
+                            className={`h-5 flex items-center uppercase ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-500 dark:text-green-600 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold`}
                           >
                             {number_format(a.amount, '0,0.00000000')} {ellipse(a.symbol || a.denom, 4, 'ibc/')}
-                          </span>
+                          </div>
                         ))
                         :
                         <span>

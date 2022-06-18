@@ -296,7 +296,7 @@ export default () => {
                   </a>
                 </Link>
                 {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
-                  <div className="bg-red-100 dark:bg-yellow-700 border border-red-500 dark:border-yellow-400 rounded-lg whitespace-nowrap text-red-500 dark:text-yellow-400 py-0.5 px-2">
+                  <div className="bg-red-100 dark:bg-yellow-700 border border-red-500 dark:border-yellow-400 rounded-lg whitespace-nowrap text-red-500 dark:text-yellow-400 text-xs sm:text-sm py-0.5 px-2">
                     The transfer volume is missing. It will be updated soon.
                   </div>
                 )}
