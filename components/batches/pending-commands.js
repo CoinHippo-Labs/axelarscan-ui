@@ -318,7 +318,7 @@ export default ({ chain_data }) => {
         <TailSpin color={loader_color(theme)} width="32" height="32" />
       }
       confirmButtonTitle="Ok"
-      className="max-w-full"
+      modalClassName="max-w-full"
     />
   )
 }
