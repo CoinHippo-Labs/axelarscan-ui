@@ -324,7 +324,7 @@ export default () => {
       </div>
     </>
   )
-  const gasAddButton = executeButton && (true || is_not_enough_gas || !gas_paid) && (
+  const gasAddButton = executeButton && (is_not_enough_gas || !gas_paid) && (
     <>
       <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
         Pay new gas at source chain
@@ -1161,7 +1161,7 @@ export default () => {
                             )}
                             {is_not_enough_gas && (
                               <div className="max-w-min bg-yellow-100 dark:bg-yellow-500 border border-yellow-500 dark:border-yellow-600 rounded-lg whitespace-nowrap uppercase font-semibold py-0.5 px-2">
-                                Not enough gas
+                                {`${_data.error?.reason === 'transaction failed' ? 'Can be n' : 'N'}ot enough gas`}
                               </div>
                             )}
                           </div>

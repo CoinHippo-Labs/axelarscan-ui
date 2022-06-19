@@ -52,10 +52,10 @@ export default () => {
               let _response
               if (type(recipient_address) === 'account') {
                 _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
-                _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
                 _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
               }
               _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
+              _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
               if (_response?.data) {
                 _response.data.forEach(d => getTransaction(d?.txhash))
                 await sleep(1 * 1000)

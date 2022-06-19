@@ -15,7 +15,7 @@ import TimeAgo from '../time-ago'
 import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
 import { transactions as getTransactions } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
-import { number_format, name, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, name, ellipse, equals_ignore_case, sleep, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
 
@@ -87,12 +87,13 @@ export default ({ n }) => {
           else if (address?.length >= 65 || type(address) === 'evm_address') {
             if (type(address) === 'account') {
               response = await transactions_by_events(`transfer.sender='${address}'`, response?.data, true, assets_data)
-              response = await transactions_by_events(`transfer.recipient='${address}'`, response?.data, true, assets_data)
               response = await transactions_by_events(`message.sender='${address}'`, response?.data, true, assets_data)
             }
             response = await transactions_by_events(`link.depositAddress='${address}'`, response?.data, true, assets_data)
+            response = await transactions_by_events(`transfer.recipient='${address}'`, response?.data, true, assets_data)
             if (response?.data) {
               response.data.forEach(d => getTransaction(d?.txhash))
+              await sleep(1 * 1000)
             }
           }
           else {
