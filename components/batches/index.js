@@ -6,7 +6,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { TailSpin, ThreeDots } from 'react-loader-spinner'
-import { BiRightArrowCircle, BiCheckCircle } from 'react-icons/bi'
+import { BiRightArrowCircle, BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { HiOutlineClock } from 'react-icons/hi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -458,9 +458,10 @@ export default () => {
                 props.value && (
                   <div className={`max-w-min ${equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 py-0.5 px-1.5`}>
                     {equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
-                      <BiCheckCircle size={20} />
-                      :
-                      <HiOutlineClock size={20} />
+                      <BiCheckCircle size={20} /> :
+                      equals_ignore_case(status, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
+                        <HiOutlineClock size={20} /> :
+                        <BiXCircle size={20} />
                     }
                     <span className="capitalize">
                       {props.value.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()}

@@ -148,6 +148,24 @@ export default () => {
     }
   }
 
+  /*const addNativeGas = async data => {
+    if (api && signer && data) {
+      setGasAddResponse({
+        status: 'pending',
+        message: 'Paying gas',
+      })
+      const { call } = { ...data }
+      const { chain, transactionHash } = { ...call }
+      const response = await api.addNativeGas(chain, transactionHash)
+      setGasAdding(false)
+      setGasAddResponse({
+        status: response?.success ? 'success' : 'failed',
+        message: response?.error ? response.error.reason || response.error.data?.message || response.error.message : 'Pay gas successful',
+        txHash: response?.transaction?.transactionHash,
+      })
+    }
+  }*/
+
   const getGasPrice = async (sourceChain, destinationChain, sourceTokenSymbol) => {
     const params = {
       method: 'getGasPrice',
