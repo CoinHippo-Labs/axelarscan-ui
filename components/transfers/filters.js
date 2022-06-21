@@ -25,7 +25,7 @@ export default () => {
   const [hidden, setHidden] = useState(true)
 
   useEffect(() => {
-    if (evm_chains_data && cosmos_chains_data && asPath) {
+    if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
       const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
@@ -162,12 +162,12 @@ export default () => {
     },
   ]
 
-  const filtered = !!filter && Object.keys({ ...query }).length > 0
+  const filtered = (!!filter || filter === undefined) && Object.keys({ ...query }).length > 0
 
   return (
     <Modal
       hidden={hidden}
-      disabled={!evm_chains_data || !cosmos_chains_data}
+      disabled={!evm_chains_data || !cosmos_chains_data || !assets_data}
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
       buttonClassName={`${filtered ? 'border-2 border-blue-600 dark:border-white text-blue-600 dark:text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-semibold'} rounded-lg text-sm sm:text-base py-1 px-2.5`}

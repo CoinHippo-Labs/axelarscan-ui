@@ -107,7 +107,7 @@ export default ({ n }) => {
               must.push({ match: { 'source.recipient_chain': destinationChain } })
             }
             if (asset) {
-              must.push({ match: { 'source.denom': asset } })
+              must.push({ match_phrase: { 'source.denom': asset } })
             }
             if (confirmed) {
               switch (confirmed) {

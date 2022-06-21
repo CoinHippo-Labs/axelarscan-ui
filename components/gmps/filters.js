@@ -163,7 +163,7 @@ export default () => {
     },
   ]
 
-  const filtered = !!filter && Object.keys({ ...query }).length > 0
+  const filtered = (!!filter || filter === undefined) && Object.keys({ ...query }).length > 0
 
   return (
     <Modal
