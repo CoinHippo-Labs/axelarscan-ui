@@ -20,7 +20,7 @@ export default () => {
   const { validators_data } = { ...validators }
 
   const router = useRouter()
-  const { query } = { ...router }
+  const { pathname, query } = { ...router }
   const { address } = { ...query }
 
   const [balances, setBalances] = useState(null)
@@ -34,7 +34,10 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && assets_data) {
+      if (address?.startsWith('"') || address?.endsWith('"')) {
+        router.push(`${pathname.replace('[address]', address.split('"').join(''))}`)
+      }
+      else if (address && assets_data) {
         if (!controller.signal.aborted) {
           const response = await all_bank_balances(address)
           setBalances(response?.data?.map(b => {

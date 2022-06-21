@@ -105,8 +105,8 @@ export default () => {
 
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
   const { data } = { ...transfer }
-  const { source, confirm_deposit, vote, sign_batch, link } = { ...data }
-  const { sender_chain, recipient_chain, sender_address, amount, denom } = { ...source }
+  const { source, confirm_deposit, vote, sign_batch, ibc_send, link } = { ...data }
+  const { sender_chain, recipient_chain, sender_address, amount, denom, fee, insufficient_fee } = { ...source }
   const { original_sender_chain, original_recipient_chain } = { ...link }
   const { recipient_address } = { ...link }
   const source_chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
@@ -157,6 +157,12 @@ export default () => {
     params: {
       chain: destination_chain_data?.id,
     },
+  }, cosmos_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
+    id: 'ibc_send',
+    title: 'IBC Transfer',
+    chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
+    data: ibc_send,
+    id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.recv_txhash ? 'ack_txhash' : 'id',
   }].filter(s => s).map((s, i) => {
     return {
       ...s,
@@ -256,6 +262,16 @@ export default () => {
                           {ellipse(symbol)}
                         </span>
                       </span>
+                      {fee && (
+                        <span className="text-xs lg:text-sm font-semibold">
+                          (<span className="mr-1">
+                            Fee:
+                          </span>
+                          <span>
+                            {number_format(fee, '0,0.000', true)}
+                          </span>)
+                        </span>
+                      )}
                     </div>
                   )}
                   <div className="flex flex-col">
@@ -414,6 +430,11 @@ export default () => {
                       </div>
                     )
                   })}
+                  {insufficient_fee && (
+                    <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                      Insufficient Fee
+                    </div>
+                  )}
                 </div>
               </div>
               :
@@ -425,13 +446,14 @@ export default () => {
           {data && detail_steps.map((s, i) => {
             const { title, chain_data, data, id_field, path, params, finish } = { ...s }
             const { height, type, status, executed, transfer_id, command_id, created_at } = { ...data }
-            const id = data?.[id_field]
+            const _id = data?.[id_field]
             const { explorer } = { ...chain_data }
             const { url, transaction_path, block_path, icon } = { ...explorer }
-            let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
+            let _path = path?.replace('{id}', _id) || transaction_path?.replace('{tx}', _id)
             Object.entries({ ...params }).forEach(([k, v]) => {
               _path = _path?.replace(`{${k}}`, v)
             })
+            const { id, ack_txhash, recv_txhash } = { ...data }
             const rowClassName = 'flex flex-col space-y-1'
             const rowTitleClassName = `text-black dark:text-slate-300 text-sm lg:text-base font-bold`
             return (
@@ -443,50 +465,102 @@ export default () => {
                   {title}
                 </div>
                 <div className="flex flex-col space-y-3">
-                  {id ?
-                    <div className={rowClassName}>
-                      <span className={rowTitleClassName}>
-                        {s.id === 'sign_batch' ? 'Batch' : 'Transaction'}:
-                      </span>
-                      <div className="flex items-center space-x-1">
-                        <a
-                          href={`${url}${_path}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
+                  {s.id === 'ibc_send' && _id ?
+                    [id, ack_txhash, recv_txhash].filter(tx => tx).map((tx, j) => {
+                      const _chain_data = tx === recv_txhash ? destination_chain_data : axelar_chain_data
+                      const _explorer = _chain_data?.explorer
+                      return (
+                        <div
+                          key={j}
+                          className={rowClassName}
                         >
-                          <div className="font-bold">
-                            <span className="xl:hidden">
-                              {ellipse(id, 12)}
-                            </span>
-                            <span className="hidden xl:block">
-                              {ellipse(id, 16)}
-                            </span>
-                          </div>
-                        </a>
-                        <Copy
-                          value={id}
-                          size={18}
-                        />
-                        <a
-                          href={`${url}${_path}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
-                        >
-                          {icon ?
-                            <Image
-                              src={icon}
-                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                          <span className={rowTitleClassName}>
+                            {tx === recv_txhash ? 'IBC Recv' : tx === ack_txhash ? 'IBC Ack' : 'IBC Send'}:
+                          </span>
+                          <div className="flex items-center space-x-1">
+                            <a
+                              href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              <div className="font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(tx, 12)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(tx, 16)}
+                                </span>
+                              </div>
+                            </a>
+                            <Copy
+                              value={tx}
+                              size={18}
                             />
-                            :
-                            <TiArrowRight size={16} className="transform -rotate-45" />
-                          }
-                        </a>
-                      </div>
-                    </div>
+                            <a
+                              href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              {_explorer?.icon ?
+                                <Image
+                                  src={_explorer.icon}
+                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                />
+                                :
+                                <TiArrowRight size={16} className="transform -rotate-45" />
+                              }
+                            </a>
+                          </div>
+                        </div>
+                      )
+                    })
                     :
-                    <FallingLines color={loader_color(theme)} width="32" height="32" />
+                    _id ?
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          {s.id === 'sign_batch' ? 'Batch' : 'Transaction'}:
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            <div className="font-bold">
+                              <span className="xl:hidden">
+                                {ellipse(_id, 12)}
+                              </span>
+                              <span className="hidden xl:block">
+                                {ellipse(_id, 16)}
+                              </span>
+                            </div>
+                          </a>
+                          <Copy
+                            value={_id}
+                            size={18}
+                          />
+                          <a
+                            href={`${url}${_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white"
+                          >
+                            {icon ?
+                              <Image
+                                src={icon}
+                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              />
+                              :
+                              <TiArrowRight size={16} className="transform -rotate-45" />
+                            }
+                          </a>
+                        </div>
+                      </div>
+                      :
+                      <FallingLines color={loader_color(theme)} width="32" height="32" />
                   }
                   {height && (
                     <div className={rowClassName}>

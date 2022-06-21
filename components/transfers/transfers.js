@@ -132,6 +132,17 @@ export default ({ n }) => {
                   should.push({
                     bool: {
                       must: [
+                        { exists: { field: 'ibc_send' } }
+                      ],
+                      should: cosmos_chains_data?.map(c => {
+                        return { match: { 'source.recipient_chain': c?.id } }
+                      }) || [],
+                      minimum_should_match: 1,
+                    },
+                  })
+                  /*should.push({
+                    bool: {
+                      must: [
                         {
                           bool: {
                             should: [
@@ -163,7 +174,7 @@ export default ({ n }) => {
                       }) || [],
                       minimum_should_match: 1,
                     },
-                  })
+                  })*/
                   break
                 case 'pending':
                   must_not.push({
@@ -181,6 +192,17 @@ export default ({ n }) => {
                           },
                         },
                         {
+                          bool: {
+                            must: [
+                              { exists: { field: 'ibc_send' } }
+                            ],
+                            should: cosmos_chains_data?.map(c => {
+                              return { match: { 'source.recipient_chain': c?.id } }
+                            }) || [],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        /*{
                           bool: {
                             must: [
                               {
@@ -214,7 +236,7 @@ export default ({ n }) => {
                             }) || [],
                             minimum_should_match: 1,
                           },
-                        },
+                        },*/
                       ],
                     },
                   })
@@ -413,7 +435,7 @@ export default ({ n }) => {
               accessor: 'source',
               disableSortBy: true,
               Cell: props => {
-                const { sender_chain, recipient_address, amount, denom } = { ...props.value }
+                const { sender_chain, recipient_address, amount, denom, fee } = { ...props.value }
                 const { link } = { ...props.row.original }
                 const { original_sender_chain, asset } = { ...link }
                 const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
@@ -442,6 +464,16 @@ export default ({ n }) => {
                             {ellipse(symbol)}
                           </span>
                         </span>
+                        {fee && (
+                          <span className="text-xs font-semibold">
+                            (<span className="mr-1">
+                              Fee:
+                            </span>
+                            <span >
+                              {number_format(fee, '0,0.000', true)}
+                            </span>)
+                          </span>
+                        )}
                       </div>
                     )}
                     <div className="flex flex-col">
@@ -546,8 +578,8 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { source, confirm_deposit, vote, sign_batch, link } = { ...props.row.original }
-                const { sender_chain, recipient_chain } = { ...source }
+                const { source, confirm_deposit, vote, sign_batch, ibc_send, link } = { ...props.row.original }
+                const { sender_chain, recipient_chain, insufficient_fee } = { ...source }
                 const { original_sender_chain, original_recipient_chain } = { ...link }
                 const source_chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
                 const destination_chain_data = getChain(original_recipient_chain, chains_data) || getChain(recipient_chain, chains_data)
@@ -590,6 +622,12 @@ export default ({ n }) => {
                   params: {
                     chain: destination_chain_data?.id,
                   },
+                }, cosmos_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
+                  id: 'ibc_send',
+                  title: 'IBC Transfer',
+                  chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
+                  data: ibc_send,
+                  id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.recv_txhash ? 'ack_txhash' : 'id',
                 }].filter(s => s).map((s, i) => {
                   return {
                     ...s,
@@ -660,6 +698,11 @@ export default ({ n }) => {
                         </div>
                       )
                     })}
+                    {insufficient_fee && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Insufficient Fee
+                      </div>
+                    )}
                   </div>
                 )
               },

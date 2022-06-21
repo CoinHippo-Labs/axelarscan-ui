@@ -9,6 +9,7 @@ import Image from '../image'
 import ValidatorProfile from '../validator-profile'
 import EnsProfile from '../ens-profile'
 import Copy from '../copy'
+import { type } from '../../lib/object/id'
 import { denom_manager } from '../../lib/object/denom'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -68,13 +69,33 @@ export default ({ data }) => {
                     {source_chain_data.name || sender_chain}
                   </span>
                   {sender_address && (
-                    <Copy
-                      value={sender_address}
-                      title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
-                        {ellipse(sender_address, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
-                      </span>}
-                      size={18}
-                    />
+                    <div className="flex items-center space-x-1">
+                      <a
+                        href={`${source_chain_data.explorer?.url}${source_chain_data.explorer?.address_path?.replace('{address}', sender_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-white"
+                      >
+                        <EnsProfile
+                          address={sender_address}
+                          no_copy={true}
+                          fallback={(
+                            <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                              <span className="xl:hidden">
+                                {ellipse(sender_address, 6, source_chain_data.prefix_address)}
+                              </span>
+                              <span className="hidden xl:block">
+                                {ellipse(sender_address, 8, source_chain_data.prefix_address)}
+                              </span>
+                            </div>
+                          )}
+                        />
+                      </a>
+                      <Copy
+                        value={sender_address}
+                        size={18}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -116,13 +137,33 @@ export default ({ data }) => {
                     {destination_chain_data.name || recipient_chain}
                   </span>
                   {recipient_address && (
-                    <Copy
-                      value={recipient_address}
-                      title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
-                        {ellipse(recipient_address, 8, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
-                      </span>}
-                      size={18}
-                    />
+                    <div className="flex items-center space-x-1">
+                      <a
+                        href={`${destination_chain_data.explorer?.url}${destination_chain_data.explorer?.address_path?.replace('{address}', sender_address)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-white"
+                      >
+                        <EnsProfile
+                          address={recipient_address}
+                          no_copy={true}
+                          fallback={(
+                            <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                              <span className="xl:hidden">
+                                {ellipse(recipient_address, 6, destination_chain_data.prefix_address)}
+                              </span>
+                              <span className="hidden xl:block">
+                                {ellipse(recipient_address, 8, destination_chain_data.prefix_address)}
+                              </span>
+                            </div>
+                          )}
+                        />
+                      </a>
+                      <Copy
+                        value={recipient_address}
+                        size={18}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -233,21 +274,23 @@ export default ({ data }) => {
               </div>
             </div>
           )}
-          <div className={rowClassName}>
-            <span className={titleClassName}>
-              Rewards:
-            </span>
-            {rewards ?
-              <span className="text-sm lg:text-base font-semibold">
-                {reward?.amount > -1 ?
-                  `${number_format(reward.amount, '0,0.00000000')} ${reward.denom || ''}` :
-                  'No Rewards'
-                }
+          {type(address) === 'account' && (
+            <div className={rowClassName}>
+              <span className={titleClassName}>
+                Rewards:
               </span>
-              :
-              <div className="skeleton w-40 h-6 mt-1" />
-            }
-          </div>
+              {rewards ?
+                <span className="text-sm lg:text-base font-semibold">
+                  {reward?.amount > -1 ?
+                    `${number_format(reward.amount, '0,0.00000000')} ${reward.denom || ''}` :
+                    'No Rewards'
+                  }
+                </span>
+                :
+                <div className="skeleton w-40 h-6 mt-1" />
+              }
+            </div>
+          )}
           {equals_ignore_case(validator_data?.delegator_address, address) && (
             <div className={rowClassName}>
               <span className={titleClassName}>
@@ -380,7 +423,7 @@ export default ({ data }) => {
             <TailSpin color={loader_color(theme)} width="32" height="32" />
           }
         </div>
-        {validators_data && !equals_ignore_case(validator_data?.broadcaster_address, address) && (
+        {type(address) === 'account' && validators_data && !equals_ignore_case(validator_data?.broadcaster_address, address) && (
           <>
             <div className="sm:col-span-3 lg:col-span-2 space-y-2">
               <div className="text-sm lg:text-base font-bold">
