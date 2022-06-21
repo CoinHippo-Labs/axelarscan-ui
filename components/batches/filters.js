@@ -130,6 +130,7 @@ export default () => {
         { value: '', title: 'Any' },
         { value: 'signed', title: 'Signed' },
         { value: 'signing', title: 'Signing' },
+        { value: 'aborted', title: 'Aborted' },
       ],
     },
     {

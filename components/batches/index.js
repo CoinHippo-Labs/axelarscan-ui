@@ -33,6 +33,7 @@ export default () => {
   const { pathname, asPath } = { ...router }
 
   const [data, setData] = useState(null)
+  const [total, setTotal] = useState(null)
   const [offset, setOffet] = useState(0)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -78,6 +79,7 @@ export default () => {
         if (!controller.signal.aborted) {
           setFetching(true)
           if (!fetchTrigger) {
+            setTotal(null)
             setData(null)
             setOffet(0)
           }
@@ -126,6 +128,7 @@ export default () => {
             _source: false,
           })
           if (response) {
+            setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
               d = fieldsToObj(d)
               const { batch_id, chain, key_id, status } = { ...d }
@@ -146,6 +149,7 @@ export default () => {
             setData(response)
           }
           else if (!fetchTrigger) {
+            setTotal(0)
             setData([])
           }
           setFetching(false)
@@ -488,7 +492,7 @@ export default () => {
           defaultPageSize={50}
           className="min-h-full no-border"
         />
-        {data.length > 0 && (
+        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
           !fetching ?
             <button
               onClick={() => {

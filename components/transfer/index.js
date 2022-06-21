@@ -46,19 +46,33 @@ export default () => {
           })
           if (response) {
             let data = response.data?.[0]
-            const { source, link, confirm_deposit, sign_batch } = { ...data }
+            const { source, link, confirm_deposit, vote, sign_batch } = { ...data }
             const { recipient_chain, recipient_address, amount, value } = { ...source }
-            if ((!link || !confirm_deposit || !recipient_address || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
+            if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
               let _response
-              if (type(recipient_address) === 'account') {
-                _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
-                _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
+              if (recipient_address) {
+                if (type(recipient_address) === 'account') {
+                  _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
+                  _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
+                }
+                _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
+                _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
               }
-              _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
-              _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
-              if (_response?.data) {
+              if ((!link?.recipient_address || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && confirm_deposit?.id) {
+                _response = {
+                  ..._response,
+                  data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: confirm_deposit.id }], 'txhash'))
+                }
+              }
+              if (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1 && vote?.id) {
+                _response = {
+                  ..._response,
+                  data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: vote.id }], 'txhash'))
+                }
+              }
+              if (_response?.data?.length > 0) {
                 _response.data.forEach(d => getTransaction(d?.txhash))
-                await sleep(1 * 1000)
+                await sleep(2 * 1000)
                 _response = await getTransfers({
                   query: {
                     match: { 'source.id': tx },
