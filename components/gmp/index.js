@@ -359,39 +359,13 @@ export default () => {
   const gasAddButton = executeButton && (is_not_enough_gas || !gas_paid) && (
     <>
       <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
-        Pay new gas (SDK) at source chain
-      </span>
-      <div className="flex items-center space-x-2">
-        {web3_provider && !wrong_source_chain && (
-          <button
-            disabled={gasAdding}
-            onClick={() => addNativeGas(data)}
-            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
-          >
-            {gasAdding && (
-              <TailSpin color="white" width="16" height="16" />
-            )}
-            <span className="whitespace-nowrap">
-              Pay new gas
-            </span>
-          </button>
-        )}
-        <Wallet
-          connectChainId={wrong_source_chain && (source_chain_data.chain_id || default_chain_id)}
-        />
-      </div>
-    </>
-  )
-  const _gasAddButton = executeButton && (is_not_enough_gas || !gas_paid) && (
-    <>
-      <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
         Pay new gas at source chain
       </span>
       <div className="flex items-center space-x-2">
         {web3_provider && !wrong_source_chain && (
           <button
             disabled={gasAdding}
-            onClick={() => _addNativeGas(data)}
+            onClick={() => addNativeGas(data)}
             className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
           >
             {gasAdding && (
@@ -786,7 +760,6 @@ export default () => {
                       )
                     })}
                     {gasAddButton}
-                    {_gasAddButton}
                     {approveButton || executeButton || (time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
