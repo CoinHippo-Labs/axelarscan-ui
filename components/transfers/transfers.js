@@ -43,13 +43,14 @@ export default ({ n }) => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, confirmed, finished, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
+        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
+        finished: ['finished', 'unfinished'].includes(finished?.toLowerCase()) ? finished.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         asset: getDenom(asset, assets_data)?.id || asset,
-        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
         depositAddress,
         senderAddress,
         recipientAddress,
@@ -96,18 +97,9 @@ export default ({ n }) => {
             should.push({ match: { 'link.recipient_address': address } })
           }
           else if (filters) {
-            const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
+            const { txHash, confirmed, finished, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
             if (txHash) {
               must.push({ match: { 'source.id': txHash } })
-            }
-            if (sourceChain) {
-              must.push({ match: { 'source.sender_chain': sourceChain } })
-            }
-            if (destinationChain) {
-              must.push({ match: { 'source.recipient_chain': destinationChain } })
-            }
-            if (asset) {
-              must.push({ match_phrase: { 'source.denom': asset } })
             }
             if (confirmed) {
               switch (confirmed) {
@@ -122,6 +114,123 @@ export default ({ n }) => {
                 default:
                   break
               }
+            }
+            if (finished) {
+              switch (finished) {
+                case 'finished':
+                  should.push({
+                    bool: {
+                      must: [
+                        { exists: { field: 'sign_batch' } }
+                      ],
+                      should: evm_chains_data?.map(c => {
+                        return { match: { 'source.recipient_chain': c?.id } }
+                      }) || [],
+                      minimum_should_match: 1,
+                    },
+                  })
+                  should.push({
+                    bool: {
+                      must: [
+                        {
+                          bool: {
+                            should: [
+                              {
+                                bool: {
+                                  must: [
+                                    { exists: { field: 'confirm_deposit' } },
+                                  ],
+                                  must_not: [
+                                    { match: { 'source.type': 'evm_transfer' } },
+                                  ],
+                                },
+                              },
+                              {
+                                bool: {
+                                  must: [
+                                    { exists: { field: 'vote' } },
+                                    { match: { 'source.type': 'evm_transfer' } },
+                                  ],
+                                },
+                              },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                      should: cosmos_chains_data?.map(c => {
+                        return { match: { 'source.recipient_chain': c?.id } }
+                      }) || [],
+                      minimum_should_match: 1,
+                    },
+                  })
+                  break
+                case 'unfinished':
+                  must_not.push({
+                    bool: {
+                      should: [
+                        {
+                          bool: {
+                            must: [
+                              { exists: { field: 'sign_batch' } }
+                            ],
+                            should: evm_chains_data?.map(c => {
+                              return { match: { 'source.recipient_chain': c?.id } }
+                            }) || [],
+                            minimum_should_match: 1,
+                          },
+                        },
+                        {
+                          bool: {
+                            must: [
+                              {
+                                bool: {
+                                  should: [
+                                    {
+                                      bool: {
+                                        must: [
+                                          { exists: { field: 'confirm_deposit' } },
+                                        ],
+                                        must_not: [
+                                          { match: { 'source.type': 'evm_transfer' } },
+                                        ],
+                                      },
+                                    },
+                                    {
+                                      bool: {
+                                        must: [
+                                          { exists: { field: 'vote' } },
+                                          { match: { 'source.type': 'evm_transfer' } },
+                                        ],
+                                      },
+                                    },
+                                  ],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                            should: cosmos_chains_data?.map(c => {
+                              return { match: { 'source.recipient_chain': c?.id } }
+                            }) || [],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  })
+                  break
+                default:
+                  break
+              }
+            }
+            if (sourceChain) {
+              must.push({ match: { 'source.sender_chain': sourceChain } })
+            }
+            if (destinationChain) {
+              must.push({ match: { 'source.recipient_chain': destinationChain } })
+            }
+            if (asset) {
+              must.push({ match_phrase: { 'source.denom': asset } })
             }
             if (depositAddress) {
               must.push({ match: { 'source.recipient_address': depositAddress } })

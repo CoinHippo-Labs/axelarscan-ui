@@ -28,13 +28,14 @@ export default () => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, asset, confirmed, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, confirmed, finished, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
+        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
+        finished: ['finished', 'unfinished'].includes(finished?.toLowerCase()) ? finished.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         asset: getDenom(asset, assets_data)?.id || asset,
-        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
         depositAddress,
         senderAddress,
         recipientAddress,
@@ -77,6 +78,28 @@ export default () => {
       type: 'text',
       placeholder: 'Transaction Hash',
       className: 'col-span-2',
+    },
+    {
+      label: 'Confirmed',
+      name: 'confirmed',
+      type: 'select',
+      placeholder: 'Select confirmed',
+      options: [
+        { value: '', title: 'Any' },
+        { value: 'confirmed', title: 'Confirmed' },
+        { value: 'unconfirmed', title: 'Unconfirmed' },
+      ],
+    },
+    {
+      label: 'Finished',
+      name: 'finished',
+      type: 'select',
+      placeholder: 'Select finished',
+      options: [
+        { value: '', title: 'Any' },
+        { value: 'finished', title: 'Finished' },
+        { value: 'unfinished', title: 'Unfinished' },
+      ],
     },
     {
       label: 'Source Chain',
@@ -124,22 +147,10 @@ export default () => {
       ),
     },
     {
-      label: 'Confirmed',
-      name: 'confirmed',
-      type: 'select',
-      placeholder: 'Select confirmed',
-      options: [
-        { value: '', title: 'Any' },
-        { value: 'confirmed', title: 'Confirmed' },
-        { value: 'unconfirmed', title: 'Unconfirmed' },
-      ],
-    },
-    {
       label: 'Deposit Address',
       name: 'depositAddress',
       type: 'text',
       placeholder: 'Deposit address',
-      className: 'col-span-2',
     },
     {
       label: 'Sender',

@@ -148,23 +148,32 @@ export default () => {
     }
   }
 
-  /*const addNativeGas = async data => {
+  const addNativeGas = async data => {
     if (api && signer && data) {
-      setGasAddResponse({
-        status: 'pending',
-        message: 'Paying gas',
-      })
-      const { call } = { ...data }
-      const { chain, transactionHash } = { ...call }
-      const response = await api.addNativeGas(chain, transactionHash)
-      setGasAdding(false)
-      setGasAddResponse({
-        status: response?.success ? 'success' : 'failed',
-        message: response?.error ? response.error.reason || response.error.data?.message || response.error.message : 'Pay gas successful',
-        txHash: response?.transaction?.transactionHash,
-      })
+      try {
+        setGasAdding(true)
+        setGasAddResponse({
+          status: 'pending',
+          message: 'Estimating & Paying gas',
+        })
+        const { call } = { ...data }
+        const { chain, transactionHash } = { ...call }
+        const response = await api.addNativeGas(chain, transactionHash)
+        setGasAdding(false)
+        setGasAddResponse({
+          status: response?.success ? 'success' : 'failed',
+          message: response?.error || 'Pay gas successful',
+          txHash: response?.transaction?.transactionHash,
+        })
+      } catch (error) {
+        setGasAdding(false)
+        setGasAddResponse({
+          status: 'failed',
+          message: error?.reason || error?.data?.message || error?.message,
+        })
+      }
     }
-  }*/
+  }
 
   const getGasPrice = async (sourceChain, destinationChain, sourceTokenSymbol) => {
     const params = {
@@ -181,7 +190,7 @@ export default () => {
     return res && await res.json()
   }
 
-  const addNativeGas = async data => {
+  /*const addNativeGas = async data => {
     if (api && signer && data) {
       try {
         const { call, approved } = { ...data }
@@ -281,7 +290,7 @@ export default () => {
         })
       }
     }
-  }
+  }*/
 
   const { data } = { ...gmp }
   const { call, gas_paid, approved, executed, is_executed, error, is_not_enough_gas, status } = { ...data }
