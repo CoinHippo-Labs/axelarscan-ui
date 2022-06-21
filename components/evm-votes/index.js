@@ -417,7 +417,7 @@ export default () => {
           defaultPageSize={50}
           className="no-border"
         />
-        {data.length > 0 && (
+        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
           !fetching ?
             <button
               onClick={() => {

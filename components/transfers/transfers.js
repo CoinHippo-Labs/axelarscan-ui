@@ -43,11 +43,11 @@ export default ({ n }) => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, confirmed, finished, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, confirmed, status, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
-        finished: ['finished', 'unfinished'].includes(finished?.toLowerCase()) ? finished.toLowerCase() : undefined,
+        status: ['completed', 'pending'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         asset: getDenom(asset, assets_data)?.id || asset,
@@ -97,7 +97,7 @@ export default ({ n }) => {
             should.push({ match: { 'link.recipient_address': address } })
           }
           else if (filters) {
-            const { txHash, confirmed, finished, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
+            const { txHash, confirmed, status, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
             if (txHash) {
               must.push({ match: { 'source.id': txHash } })
             }
@@ -115,9 +115,9 @@ export default ({ n }) => {
                   break
               }
             }
-            if (finished) {
-              switch (finished) {
-                case 'finished':
+            if (status) {
+              switch (status) {
+                case 'completed':
                   should.push({
                     bool: {
                       must: [
@@ -165,7 +165,7 @@ export default ({ n }) => {
                     },
                   })
                   break
-                case 'unfinished':
+                case 'pending':
                   must_not.push({
                     bool: {
                       should: [
@@ -683,7 +683,7 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />
-        {data.length > 0 && !n && (
+        {data.length > 0 && !n && (typeof total !== 'number' || data.length < total) && (
           !fetching ?
             <button
               onClick={() => {

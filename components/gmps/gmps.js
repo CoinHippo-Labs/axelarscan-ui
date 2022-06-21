@@ -647,7 +647,7 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />
-        {data.length > 0 && (
+        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
           !fetching ?
             <button
               onClick={() => {
