@@ -158,7 +158,9 @@ export default () => {
         })
         const { call } = { ...data }
         const { chain, transactionHash } = { ...call }
-        const response = await api.addNativeGas(chain, transactionHash)
+        const response = await api.addNativeGas(chain, transactionHash, {
+          refundAddress: address,
+        })
         setGasAdding(false)
         setGasAddResponse({
           status: response?.success ? 'success' : 'failed',
@@ -169,7 +171,7 @@ export default () => {
         setGasAdding(false)
         setGasAddResponse({
           status: 'failed',
-          message: error?.reason || error?.data?.message || error?.message,
+          message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
         })
       }
     }
