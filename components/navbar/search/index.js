@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { FiSearch } from 'react-icons/fi'
 
 import { ens as getEns, domainFromEns } from '../../../lib/api/ens'
-import { transfers } from '../../../lib/api/index'
+import { transfers, deposit_addresses } from '../../../lib/api/index'
 import { type } from '../../../lib/object/id'
 import { equals_ignore_case } from '../../../lib/utils'
 import { ENS_DATA } from '../../../reducers/types'
@@ -43,7 +43,34 @@ export default () => {
         input_type = 'address'
       }
       else if (['evm_address', 'cosmos_address'].includes(input_type)) {
-        input_type = 'address'
+        let response = await transfers({
+          query: {
+            bool: {
+              should: [
+                { match: { 'source.sender_address': input } },
+                { match: { 'source.recipient_address': input } },
+                { match: { 'link.recipient_address': input } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        })
+        if (response?.total) {
+          input_type = 'address'
+        }
+        else {
+          response = await deposit_addresses({
+            query: {
+              match: { 'deposit_address': input },
+            },
+          })
+          if (response?.total) {
+            input_type = 'account'
+          }
+          else {
+            input_type = 'address'
+          }
+        }
       }
       else if (['evm_tx', 'tx'].includes(input_type)) {
         const response = await transfers({

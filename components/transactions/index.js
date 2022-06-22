@@ -12,9 +12,11 @@ import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
+import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
 import { transactions as getTransactions } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
+import { currency_symbol } from '../../lib/object/currency'
 import { number_format, name, ellipse, equals_ignore_case, sleep, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
@@ -30,6 +32,8 @@ export default ({ n }) => {
   const { height, address } = { ...query }
 
   const [data, setData] = useState(null)
+  const [dataForExport, setDataForExport] = useState(null)
+  const [numLoadedData, setNumLoadedData] = useState(0)
   const [offset, setOffet] = useState(0)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -75,6 +79,7 @@ export default ({ n }) => {
           setFetching(true)
           if (!fetchTrigger) {
             setData(null)
+            setDataForExport(null)
             setOffet(0)
           }
           const _data = !fetchTrigger ? [] : (data || []),
@@ -159,9 +164,11 @@ export default ({ n }) => {
               }
             }) || []), 'txhash'), ['timestamp'], ['desc'])
             setData(response)
+            setDataForExport(await toCSV(response))
           }
           else if (!fetchTrigger) {
             setData([])
+            setDataForExport([])
           }
           setFetching(false)
         }
@@ -179,19 +186,71 @@ export default ({ n }) => {
     }
   }, [data])
 
-  const toCSV = () => data?.filter(d => d).map(d => {
-    return {
-      ...d,
-      amount: d.activities.filter(a => a?.amount && a.amount !== d.fee && (
-        !(address || filters?.account) ||
-        equals_ignore_case(a?.recipient, address || filters?.account) ||
-        equals_ignore_case(a?.sender, address || filters?.account)
-      )).map(a => {
-        const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
-        return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}`.trim()
-      }).join('\n'),
+  const toCSV = async data => {
+    setNumLoadedData(0)
+    data = data?.filter(d => d).map(d => {
+      return {
+        ...d,
+        amount: d.activities?.filter(a => a?.amount && a.amount !== d.fee && (
+          !(address || filters?.account) ||
+          equals_ignore_case(a?.recipient, address || filters?.account) ||
+          equals_ignore_case(a?.sender, address || filters?.account)
+        )) || [],
+      }
+    }) || []
+    if ((address || filters?.account) && data?.length > 0) {
+      const assets_price = {}
+      for (let i = 0; i < data.length; i++) {
+        const d = data[i]
+        const { amount, timestamp } = { ...d }
+        if (amount) {
+          const time_string = moment(timestamp).format('DD-MM-YYYY')
+          for (let j = 0; j < amount.length; j++) {
+            const a = amount[j]
+            const { denom } = { ...a }
+            let { value } = { ...a }
+            if (typeof value !== 'number') {
+              if (typeof assets_price[denom]?.[time_string] === 'number') {
+                value = assets_price[denom][time_string]
+              }
+              else {
+                const response = await getAssetsPrice({ denom, timestamp })
+                if (typeof response?.[0]?.price === 'number') {
+                  value = response[0].price
+                  assets_price[denom] = {
+                    ...assets_price[denom],
+                    [`${time_string}`]: value,
+                  }
+                }
+              }
+            }
+            a.value = value
+            amount[j] = a
+          }
+          d.amount = amount
+          data[i] = d
+        }
+        setNumLoadedData(i + 1)
+      }
     }
-  }) || []
+    data = data.map(d => {
+      return {
+        ...d,
+        amount: d.amount.map(a => {
+          const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
+          return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}${(address || filters?.account) ? ` (${currency_symbol}${number_format(a.value * multipier, '0,0.00000000', true)})` : ''}`.trim()
+        }).join('\n'),
+        value: _.sumBy(d.amount.map(a => {
+          const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
+          return {
+            ...a,
+            value: a.value * multipier,
+          }
+        }), 'value'),
+      }
+    }) || []
+    return data
+  }
 
   const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type) || (filterTypes.includes('undefined') && !d?.type)), 0, n || undefined)
 
@@ -220,25 +279,38 @@ export default ({ n }) => {
                 </div>
               ))}
             </div>
-            {data.length > 0 && (
-              <CSVLink
-                headers={[
-                  { label: 'Tx Hash', key: 'txhash' },
-                  { label: 'Block', key: 'height' },
-                  { label: 'Type', key: 'type' },
-                  { label: 'Status', key: 'status' },
-                  { label: 'Amount', key: 'amount' },
-                  { label: 'Fee', key: 'fee' },
-                  { label: 'Time', key: 'timestamp' },
-                ]}
-                data={toCSV()}
-                filename={`transactions${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('') || (address || height ? `_${address || height}` : '')}.csv`}
-                className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg mb-1 py-1 px-2.5`}
-              >
-                <span className="whitespace-nowrap font-bold">
-                  Export CSV
-                </span>
-              </CSVLink>
+            {data?.length > 0 && (
+              <>
+                {dataForExport ?
+                  dataForExport.length > 0 && (
+                    <CSVLink
+                      headers={[
+                        { label: 'Tx Hash', key: 'txhash' },
+                        { label: 'Block', key: 'height' },
+                        { label: 'Type', key: 'type' },
+                        { label: 'Status', key: 'status' },
+                        { label: 'Amount', key: 'amount' },
+                        (address || filters?.account) && { label: 'Value', key: 'value' },
+                        { label: 'Fee', key: 'fee' },
+                        { label: 'Time', key: 'timestamp' },
+                      ].filter(h => h)}
+                      data={dataForExport}
+                      filename={`transactions${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('') || (address || height ? `_${address || height}` : '')}.csv`}
+                      className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg mb-1 py-1 px-2.5`}
+                    >
+                      <span className="whitespace-nowrap font-bold">
+                        Export CSV
+                      </span>
+                    </CSVLink>
+                  ) :
+                  <div className="flex items-center space-x-2">
+                    <ThreeDots color={loader_color(theme)} width="20" height="20" />
+                    <span className="text-slate-400 dark:text-slate-600 font-medium">
+                      {number_format(numLoadedData, '0,0')} / {number_format(data.length, '0,0')}
+                    </span>
+                  </div>
+                }
+              </>
             )}
           </div>
         )}

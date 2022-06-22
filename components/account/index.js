@@ -7,6 +7,7 @@ import Info from './info'
 import Transactions from '../transactions'
 import { all_bank_balances, all_staking_delegations, all_staking_redelegations, all_staking_unbonding, distribution_rewards, distribution_commissions } from '../../lib/api/cosmos'
 import { deposit_addresses } from '../../lib/api/index'
+import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
 import { equals_ignore_case } from '../../lib/utils'
@@ -270,7 +271,7 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && address.length >= 65 && evm_chains_data && cosmos_chains_data && assets_data) {
+      if (address && (address.length >= 65 || type(address) === 'evm_address') && evm_chains_data && cosmos_chains_data && assets_data) {
         if (!controller.signal.aborted) {
           const response = await deposit_addresses({
             query: {
@@ -303,7 +304,7 @@ export default () => {
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto">
       <Info
-        data={address?.length >= 65 ?
+        data={address?.length >= 65 || depositAddresses?.length > 0 ?
           { depositAddresses } :
           {
             balances,
