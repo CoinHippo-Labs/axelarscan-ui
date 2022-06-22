@@ -298,7 +298,7 @@ export default () => {
   }
 
   const { data } = { ...gmp }
-  const { call, gas_paid, approved, executed, is_executed, error, is_not_enough_gas, status } = { ...data }
+  const { call, gas_paid, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { from } = { ...call?.transaction }
@@ -403,7 +403,12 @@ export default () => {
     title: 'Executed',
     chain_data: destination_chain_data,
     data: executed,
-  }]
+  }, refunded && {
+    id: 'refunded',
+    title: 'Refunded',
+    chain_data: source_chain_data,
+    data: refunded,
+  }].filter(s => s)
   let current_step
   switch (status) {
     case 'called':
@@ -702,11 +707,11 @@ export default () => {
                       </span>
                     </div>
                     {steps.map((s, i) => {
-                      const text_color = s.data || (i === 3 && is_executed) ?
+                      const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
-                        i === current_step ?
+                        i === current_step && ![4].includes(i) ?
                           'text-blue-500 dark:text-white' :
-                          i === 3 && error ?
+                          (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
                             'text-red-500 dark:text-red-600' :
                             'text-slate-400 dark:text-slate-600'
                       const { explorer } = { ...s.chain_data }
@@ -716,11 +721,11 @@ export default () => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {s.data || (i === 3 && is_executed) ?
+                          {(i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
-                            i === current_step ?
+                            i === current_step && ![4].includes(i) ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              i === 3 && error ?
+                              (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
                                 <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
                                 <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
                           }
@@ -779,7 +784,7 @@ export default () => {
               }
             </div>
             {data && detail_steps.map((s, i) => {
-              const { call, gas_paid, executed, error, is_not_enough_gas } = { ...gmp.data }
+              const { call, gas_paid, executed, error, is_not_enough_gas, gas_price_rate } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = i === 3 ? data || error : data
               const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
@@ -788,7 +793,7 @@ export default () => {
               const destination_chain = call?.returnValues?.destinationChain
               const source_chain_data = getChain(source_chain, evm_chains_data)
               const destination_chain_data = getChain(destination_chain, evm_chains_data)
-              const { gasToken, gasFeeAmount } = { ...gas_paid?.returnValues }
+              const { gasToken, gasFeeAmount, refundAddress } = { ...gas_paid?.returnValues }
               const { gasUsed, effectiveGasPrice } = { ...executed?.receipt || error?.receipt }
               let source_gas_data, destination_gas_data
               if (gasFeeAmount) {
@@ -811,8 +816,9 @@ export default () => {
                   image: destination_chain_data?.image,
                 }
               }
+              const { source_token, destination_native_token } = { ...gas_price_rate }
               const from = receipt?.from || transaction?.from
-              const to = i < 3 ? contract_address : destinationContractAddress
+              const to = i < 3 ? contract_address : i === 4 ? _data?.to || refundAddress : destinationContractAddress
               const { explorer } = { ...chain_data }
               const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
               const rowClassName = 'flex space-x-4'
@@ -984,8 +990,8 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Status:
                         </span>
-                        <div className={`${data || (i === 3 && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
-                          {data || (i === 3 && is_executed) ?
+                        <div className={`${receipt?.status || (i === 3 && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                          {receipt?.status || (i === 3 && is_executed) ?
                             <BiCheckCircle size={20} /> :
                             <BiXCircle size={20} />
                           }
@@ -1021,7 +1027,7 @@ export default () => {
                           )}
                           <span className="text-sm font-semibold">
                             <span className="mr-1">
-                              {number_format(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals), '0,0.000', true)}
+                              {number_format(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals), '0,0.000000', true)}
                             </span>
                             <span>
                               {ellipse(source_gas_data.symbol)}
@@ -1044,7 +1050,7 @@ export default () => {
                           )}
                           <span className="text-sm font-semibold">
                             <span className="mr-1">
-                              {number_format(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed).toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals), '0,0.000', true)}
+                              {number_format(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed).toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals), '0,0.000000', true)}
                             </span>
                             <span>
                               {ellipse(destination_gas_data.symbol)}
@@ -1053,10 +1059,82 @@ export default () => {
                         </div>
                       </div>
                     )}
+                    {['refunded'].includes(s.id) && source_token && destination_native_token && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Gas Price:
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {destination_gas_data.image && (
+                              <Image
+                                src={destination_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(source_token.token_price?.usd / destination_native_token.token_price?.usd, '0,0.000000', true)}
+                              </span>
+                              <span>
+                                {ellipse(destination_gas_data.symbol)}
+                              </span>
+                            </span>
+                          </div>
+                          <span className="text-sm font-medium">
+                            =
+                          </span>
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {source_gas_data.image && (
+                              <Image
+                                src={source_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(1, '0,0.000000', true)}
+                              </span>
+                              <span>
+                                {ellipse(source_gas_data.symbol)}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {['refunded'].includes(s.id) && receipt?.status && source_token && destination_native_token && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Refunded:
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {source_gas_data.image && (
+                              <Image
+                                src={source_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(
+                                  Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals)) -
+                                  Number(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).mulUnsafe(FixedNumber.fromString((source_token.token_price?.usd / destination_native_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals))
+                                , '0,0.000000', true)}
+                              </span>
+                              <span>
+                                {ellipse(source_gas_data.symbol)}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     {to && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {i === 1 ? 'Gas Service' : i === 3 ? 'Destination' : 'Gateway'}:
+                          {i === 1 ? 'Gas Service' : i === 3 ? 'Destination' : i === 4 ? 'Receiver' : 'Gateway'}:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -1105,7 +1183,7 @@ export default () => {
                     {from && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {i < 2 ? 'Sender' : 'Relayer'}:
+                          {i < 2 ? 'Sender' : i === 4 ? 'Sender' : 'Relayer'}:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a

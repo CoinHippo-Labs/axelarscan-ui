@@ -494,7 +494,7 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, approved, executed, is_executed, error, status } = { ...props.row.original }
+                const { call, gas_paid, approved, executed, is_executed, error, refunded, status } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
@@ -519,7 +519,12 @@ export default ({ n }) => {
                   title: 'Executed',
                   chain_data: destination_chain_data,
                   data: executed,
-                }]
+                }, refunded && {
+                  id: 'refunded',
+                  title: 'Refunded',
+                  chain_data: source_chain_data,
+                  data: refunded,
+                }].filter(s => s)
                 let current_step
                 switch (status) {
                   case 'called':
@@ -539,11 +544,11 @@ export default ({ n }) => {
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.map((s, i) => {
-                      const text_color = s.data || (i === 3 && is_executed) ?
+                      const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
-                        i === current_step ?
+                        i === current_step && ![4].includes(i) ?
                           'text-blue-500 dark:text-white' :
-                          i === 3 && error ?
+                          (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
                             'text-red-500 dark:text-red-600' :
                             'text-slate-400 dark:text-slate-600'
                       const { explorer } = { ...s.chain_data }
@@ -553,11 +558,11 @@ export default ({ n }) => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {s.data || (i === 3 && is_executed) ?
+                          {(i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
-                            i === current_step ?
+                            i === current_step && ![4].includes(i) ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              i === 3 && error ?
+                              (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
                                 <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
                                 <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
                           }

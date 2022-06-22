@@ -466,7 +466,7 @@ export default () => {
                 </div>
                 <div className="flex flex-col space-y-3">
                   {s.id === 'ibc_send' && _id ?
-                    [id, ack_txhash, recv_txhash].filter(tx => tx).map((tx, j) => {
+                    [id, recv_txhash, ack_txhash].filter(tx => tx).map((tx, j) => {
                       const _chain_data = tx === recv_txhash ? destination_chain_data : axelar_chain_data
                       const _explorer = _chain_data?.explorer
                       return (
@@ -475,7 +475,7 @@ export default () => {
                           className={rowClassName}
                         >
                           <span className={rowTitleClassName}>
-                            {tx === recv_txhash ? 'IBC Recv' : tx === ack_txhash ? 'IBC Ack' : 'IBC Send'}:
+                            {tx === ack_txhash ? 'Acknowledge' : tx === recv_txhash ? 'Receive' : 'Send'}:
                           </span>
                           <div className="flex items-center space-x-1">
                             <a
