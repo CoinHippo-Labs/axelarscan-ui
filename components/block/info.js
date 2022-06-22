@@ -97,21 +97,32 @@ export default ({ data }) => {
           validator_data ?
             <div className="min-w-max flex items-start space-x-2">
               <Link href={`/validator/${validator_data.operator_address}`}>
-                <a>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <ValidatorProfile validator_description={validator_data.description} />
                 </a>
               </Link>
               <div className="flex flex-col">
                 {validator_data.description?.moniker && (
                   <Link href={`/validator/${validator_data.operator_address}`}>
-                    <a className="text-blue-600 dark:text-white font-bold">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 dark:text-white font-bold"
+                    >
                       {ellipse(validator_data.description.moniker, 16)}
                     </a>
                   </Link>
                 )}
                 <div className="flex items-center space-x-1">
                   <Link href={`/validator/${validator_data.operator_address}`}>
-                    <a className="text-slate-400 dark:text-slate-600 font-medium">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 dark:text-slate-600 font-medium"
+                    >
                       {ellipse(validator_data.operator_address, 12, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                     </a>
                   </Link>
@@ -155,14 +166,21 @@ export default ({ data }) => {
                         className="min-w-max flex items-start space-x-2"
                       >
                         <Link href={`/validator/${validator_data.operator_address}`}>
-                          <a>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <ValidatorProfile validator_description={validator_data.description} />
                           </a>
                         </Link>
                         <div className="flex flex-col">
                           {validator_data.description?.moniker && (
                             <Link href={`/validator/${validator_data.operator_address}`}>
-                              <a className="text-blue-600 dark:text-white font-bold">
+                              <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white font-bold"
+                              >
                                 {ellipse(validator_data.description.moniker, 10)}
                               </a>
                             </Link>
@@ -210,14 +228,21 @@ export default ({ data }) => {
                         className="min-w-max flex items-start space-x-2"
                       >
                         <Link href={`/validator/${validator_data.operator_address}`}>
-                          <a>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <ValidatorProfile validator_description={validator_data.description} />
                           </a>
                         </Link>
                         <div className="flex flex-col">
                           {validator_data.description?.moniker && (
                             <Link href={`/validator/${validator_data.operator_address}`}>
-                              <a className="text-blue-600 dark:text-white font-bold">
+                              <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white font-bold"
+                              >
                                 {ellipse(validator_data.description.moniker, 10)}
                               </a>
                             </Link>

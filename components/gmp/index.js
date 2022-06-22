@@ -4,7 +4,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import Web3 from 'web3'
-import { BigNumber, FixedNumber, providers, utils } from 'ethers'
+import { BigNumber, FixedNumber, constants, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
@@ -779,11 +779,38 @@ export default () => {
               }
             </div>
             {data && detail_steps.map((s, i) => {
-              const { error, is_not_enough_gas } = { ...gmp.data }
+              const { call, gas_paid, executed, error, is_not_enough_gas } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = i === 3 ? data || error : data
               const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
               const { sender } = { ...returnValues }
+              const source_chain = call?.chain
+              const destination_chain = call?.returnValues?.destinationChain
+              const source_chain_data = getChain(source_chain, evm_chains_data)
+              const destination_chain_data = getChain(destination_chain, evm_chains_data)
+              const { gasToken, gasFeeAmount } = { ...gas_paid?.returnValues }
+              const { gasUsed, effectiveGasPrice } = { ...executed?.receipt || error?.receipt }
+              let source_gas_data, destination_gas_data
+              if (gasFeeAmount) {
+                source_gas_data = gasToken && gasToken !== constants.AddressZero ?
+                  assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
+                  {
+                    ...source_chain_data?.provider_params?.[0]?.nativeCurrency,
+                    image: source_chain_data?.image,
+                  }
+                if (source_gas_data?.contracts) {
+                  source_gas_data = {
+                    ...source_gas_data,
+                    ...source_gas_data.contracts.find(c => c?.chain_id === source_chain_data?.chain_id),
+                  }
+                }
+              }
+              if (gasUsed) {
+                destination_gas_data = {
+                  ...destination_chain_data?.provider_params?.[0]?.nativeCurrency,
+                  image: destination_chain_data?.image,
+                }
+              }
               const from = receipt?.from || transaction?.from
               const to = i < 3 ? contract_address : destinationContractAddress
               const { explorer } = { ...chain_data }
@@ -978,6 +1005,52 @@ export default () => {
                         <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
                           {moment(block_timestamp * 1000).fromNow()} ({moment(block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})
                         </span>
+                      </div>
+                    )}
+                    {['gas_paid', 'refunded'].includes(s.id) && gasFeeAmount && source_gas_data && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Gas Paid:
+                        </span>
+                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                          {source_gas_data.image && (
+                            <Image
+                              src={source_gas_data.image}
+                              className="w-5 h-5 rounded-full"
+                            />
+                          )}
+                          <span className="text-sm font-semibold">
+                            <span className="mr-1">
+                              {number_format(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals), '0,0.000', true)}
+                            </span>
+                            <span>
+                              {ellipse(source_gas_data.symbol)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    {['executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Gas Used:
+                        </span>
+                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                          {destination_gas_data.image && (
+                            <Image
+                              src={destination_gas_data.image}
+                              className="w-5 h-5 rounded-full"
+                            />
+                          )}
+                          <span className="text-sm font-semibold">
+                            <span className="mr-1">
+                              {number_format(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed).toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals), '0,0.000', true)}
+                            </span>
+                            <span>
+                              {ellipse(destination_gas_data.symbol)}
+                            </span>
+                          </span>
+                        </div>
                       </div>
                     )}
                     {to && (

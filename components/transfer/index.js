@@ -247,7 +247,7 @@ export default () => {
                     </span>
                   </div>
                   {amount && asset_data && (
-                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
                       {asset_image && (
                         <Image
                           src={asset_image}
