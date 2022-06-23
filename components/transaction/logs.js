@@ -28,7 +28,7 @@ export default ({ data }) => {
         </div>
       )}
       <div className="text-lg font-bold">
-        Event
+        Events
       </div>
       {data?.raw_log && (
         <div className="text-sm lg:text-base font-semibold">
