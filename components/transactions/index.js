@@ -199,7 +199,7 @@ export default ({ n }) => {
         )) || [],
       }
     }) || []
-    const need_price = (address || filters?.account) && data?.length > 0 && data.filter(d => ['ExecutePendingTransfers'].includes(d.type)).length === data.length
+    const need_price = (process.env.NEXT_PUBLIC_SUPPORT_EXPORT_ADDRESSES?.split(',') || []).includes(address || filters?.account) || ((address || filters?.account) && data?.length > 0 && data.filter(d => ['ExecutePendingTransfers', 'MsgSend'].includes(d.type)).length === data.length)
     if (need_price) {
       const assets_price = {}
       for (let i = 0; i < data.length; i++) {
@@ -244,6 +244,7 @@ export default ({ n }) => {
             ...a,
             amount: typeof a.amount === 'number' ? a.amount * multipier : '',
             value: typeof a.amount === 'number' && typeof a.price === 'number' ? a.amount * a.price * multipier : '',
+            type: d.type,
           }
         })
       }
@@ -261,7 +262,7 @@ export default ({ n }) => {
   }
 
   const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type) || (filterTypes.includes('undefined') && !d?.type)), 0, n || undefined)
-  const need_price = (address || filters?.account) && data?.length > 0 && data.filter(d => ['ExecutePendingTransfers'].includes(d.type)).length === data.length
+  const need_price = (process.env.NEXT_PUBLIC_SUPPORT_EXPORT_ADDRESSES?.split(',') || []).includes(address || filters?.account) || ((address || filters?.account) && data?.length > 0 && data.filter(d => ['ExecutePendingTransfers', 'MsgSend'].includes(d.type)).length === data.length)
 
   return (
     data ?
