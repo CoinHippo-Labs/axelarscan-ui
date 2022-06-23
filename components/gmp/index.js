@@ -1120,7 +1120,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals)) -
-                                  Number(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).mulUnsafe(FixedNumber.fromString((source_token.token_price?.usd / destination_native_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals))
+                                  Number(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).mulUnsafe(FixedNumber.fromString((destination_native_token.token_price?.usd / source_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals))
                                 , '0,0.000000', true)}
                               </span>
                               <span>

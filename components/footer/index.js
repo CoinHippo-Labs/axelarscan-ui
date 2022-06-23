@@ -3,6 +3,7 @@ import moment from 'moment'
 import { FaHeart } from 'react-icons/fa'
 
 import Image from '../image'
+import _package from '../../package.json'
 
 export default () => {
   const { preferences, chain } = useSelector(state => ({ preferences: state.preferences, chain: state.chain }), shallowEqual)
@@ -42,6 +43,11 @@ export default () => {
         {chain_data?.['axelar-core_version'] && (
           <span className="text-slate-400 dark:text-white font-semibold">
             ({chain_data['axelar-core_version']})
+          </span>
+        )}
+        {_package?.dependencies?.['@axelar-network/axelarjs-sdk'] && (
+          <span className="text-slate-400 dark:text-white font-semibold">
+            (SDK v{_package.dependencies['@axelar-network/axelarjs-sdk'].replace('^', '')})
           </span>
         )}
       </div>
