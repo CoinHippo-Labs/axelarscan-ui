@@ -11,7 +11,7 @@ export default ({ data }) => {
   return (
     <div className="space-y-2">
       <div className="text-lg font-bold">
-        Body
+        Transaction
       </div>
       {data?.tx && (
         <div className="text-sm lg:text-base font-semibold">
@@ -28,7 +28,7 @@ export default ({ data }) => {
         </div>
       )}
       <div className="text-lg font-bold">
-        Logs
+        Event
       </div>
       {data?.raw_log && (
         <div className="text-sm lg:text-base font-semibold">

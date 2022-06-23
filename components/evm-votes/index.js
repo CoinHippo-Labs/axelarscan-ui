@@ -90,7 +90,7 @@ export default () => {
             must.push({ match: { txhash: txHash } })
           }
           if (pollId) {
-            must.push({ match: { poll_id: pollId } })
+            must.push({ match_phrase: { poll_id: pollId } })
           }
           if (transactionId) {
             must.push({ match: { transaction_id: transactionId } })
