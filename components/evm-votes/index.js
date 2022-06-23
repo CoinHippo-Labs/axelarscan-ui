@@ -12,18 +12,19 @@ import ValidatorProfile from '../validator-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
+import { validator_sets } from '../../lib/api/cosmos'
+import { axelard } from '../../lib/api/executor'
 import { evm_votes as getEvmVotes } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
 
 export default () => {
-  const { preferences, evm_chains, validators, validators_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
+  const { preferences, evm_chains, validators } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, validators: state.validators }), shallowEqual)
   const { theme } = { ...preferences }
   const { evm_chains_data } = { ...evm_chains }
   const { validators_data } = { ...validators }
-  const { validators_chains_data } = { ...validators_chains }
 
   const router = useRouter()
   const { pathname, asPath } = { ...router }
@@ -65,12 +66,12 @@ export default () => {
     return () => {
       clearInterval(interval)
     }
-  }, [evm_chains_data, validators_data, validators_chains_data, pathname, filters])
+  }, [evm_chains_data, validators_data, pathname, filters])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (filters && validators_data?.findIndex(v => v?.broadcaster_address) > -1 && validators_chains_data) {
+      if (filters && validators_data?.findIndex(v => v?.broadcaster_address) > -1) {
         if (!controller.signal.aborted) {
           setFetching(true)
           if (!fetchTrigger) {
@@ -139,18 +140,33 @@ export default () => {
                 }
               }), ['time'], ['desc'])
               polls = _.slice(polls, 0, polls.length - (polls.length > 1 ? 1 : 0))
-              polls.forEach(p => {
+              for (let i = 0; i < polls.length; i++) {
+                const p = polls[i]
                 const { id, votes } = { ...p }
-                const height = _.maxBy(votes, 'height')?.height
+                const min_height = _.minBy(votes, 'height')?.height
+                const max_height = _.maxBy(votes, 'height')?.height
                 const sender_chain = _.head(votes?.map(v => v?.sender_chain).filter(c => c) || [])
-                const voters_unsubmit_vote = validators_data.filter(v => v?.start_proxy_height < height && ['BOND_STATUS_BONDED'].includes(v?.status) && Object.entries({ ...validators_chains_data }).filter(([k, _v]) => equals_ignore_case(k, sender_chain) && _v?.includes(v?.operator_address)))
+                let _response = await axelard({
+                  cmd: `axelard q nexus chain-maintainers ${chain_manager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
+                  cache: true,
+                  cache_timeout: 1,
+                })
+                const chain_maintainers = _response && Object.values({ ...to_json(_response?.stdout)?.maintainers })
+                _response = await validator_sets(min_height)
+                const _validators_data = _response?.result?.validators?.map(v => {
+                  return {
+                    ...v,
+                    ...validators_data.find(_v => equals_ignore_case(_v?.consensus_address, v?.address)),
+                  }
+                }) || []
+                const voters_unsubmit_vote = _validators_data.filter(v => !chain_maintainers || chain_maintainers.includes(v?.operator_address))
                   .map(v => v?.broadcaster_address)
                   .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
                 voters_unsubmit_vote.forEach(v => {
                   response.push({
                     sender_chain,
                     poll_id: id,
-                    transaction_id: _.head(votes?.map(v => v?.transaction_id).filter(t => t) || []),
+                    transaction_id: _.head(votes?.map(_v => _v?.transaction_id).filter(t => t) || []),
                     voter: v,
                     vote: 'unsubmitted',
                     created_at: {
@@ -158,7 +174,7 @@ export default () => {
                     },
                   })
                 })
-              })
+              }
             }
             response = _.orderBy(response.map(d => {
               return {
