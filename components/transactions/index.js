@@ -164,6 +164,7 @@ export default ({ n }) => {
               }
             }) || []), 'txhash'), ['timestamp'], ['desc'])
             setData(response)
+            setFetching(false)
             setDataForExport(await toCSV(response))
           }
           else if (!fetchTrigger) {
@@ -198,7 +199,8 @@ export default ({ n }) => {
         )) || [],
       }
     }) || []
-    if ((address || filters?.account) && data?.length > 0) {
+    const need_price = (address || filters?.account) && data?.length > 0 && data.filter(d => ['ExecutePendingTransfers'].includes(d.type)).length === data.length
+    if (need_price) {
       const assets_price = {}
       for (let i = 0; i < data.length; i++) {
         const d = data[i]
@@ -208,23 +210,23 @@ export default ({ n }) => {
           for (let j = 0; j < amount.length; j++) {
             const a = amount[j]
             const { denom } = { ...a }
-            let { value } = { ...a }
-            if (typeof value !== 'number') {
+            let { price } = { ...a }
+            if (typeof price !== 'number') {
               if (typeof assets_price[denom]?.[time_string] === 'number') {
-                value = assets_price[denom][time_string]
+                price = assets_price[denom][time_string]
               }
               else {
                 const response = await getAssetsPrice({ denom, timestamp })
                 if (typeof response?.[0]?.price === 'number') {
-                  value = response[0].price
+                  price = response[0].price
                   assets_price[denom] = {
                     ...assets_price[denom],
-                    [`${time_string}`]: value,
+                    [`${time_string}`]: price,
                   }
                 }
               }
             }
-            a.value = value
+            a.price = price
             amount[j] = a
           }
           d.amount = amount
@@ -233,26 +235,33 @@ export default ({ n }) => {
         setNumLoadedData(i + 1)
       }
     }
-    data = data.map(d => {
-      return {
-        ...d,
-        amount: d.amount.map(a => {
-          const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
-          return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}${(address || filters?.account) ? ` (${currency_symbol}${number_format(a.value * multipier, '0,0.00000000', true)})` : ''}`.trim()
-        }).join('\n'),
-        value: _.sumBy(d.amount.map(a => {
-          const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
+    data = data.flatMap(d => {
+      if (need_price) {
+        return d.amount.map(a => {
+          const multipier = equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
           return {
+            ...d,
             ...a,
-            value: a.value * multipier,
+            amount: typeof a.amount === 'number' ? a.amount * multipier : '',
+            value: typeof a.amount === 'number' && typeof a.price === 'number' ? a.amount * a.price * multipier : '',
           }
-        }), 'value'),
+        })
+      }
+      else {
+        return [{
+          ...d,
+          amount: d.amount.map(a => {
+            const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ? -1 : 1
+            return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}`.trim()
+          }).join('\n'),
+        }]
       }
     }) || []
     return data
   }
 
   const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type) || (filterTypes.includes('undefined') && !d?.type)), 0, n || undefined)
+  const need_price = (address || filters?.account) && data?.length > 0 && data.filter(d => ['ExecutePendingTransfers'].includes(d.type)).length === data.length
 
   return (
     data ?
@@ -290,7 +299,9 @@ export default ({ n }) => {
                         { label: 'Type', key: 'type' },
                         { label: 'Status', key: 'status' },
                         { label: 'Amount', key: 'amount' },
-                        (address || filters?.account) && { label: 'Value', key: 'value' },
+                        need_price && { label: 'Symbol', key: 'symbol' },
+                        need_price && { label: 'Price', key: 'price' },
+                        need_price && { label: 'Value', key: 'value' },
                         { label: 'Fee', key: 'fee' },
                         { label: 'Time', key: 'timestamp' },
                       ].filter(h => h)}
