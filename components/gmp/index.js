@@ -1041,21 +1041,46 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Gas Used:
                         </span>
-                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                          {destination_gas_data.image && (
-                            <Image
-                              src={destination_gas_data.image}
-                              className="w-5 h-5 rounded-full"
-                            />
+                        <div className="flex items-center space-x-2">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {destination_gas_data.image && (
+                              <Image
+                                src={destination_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed).toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals), '0,0.000000', true)}
+                              </span>
+                              <span>
+                                {ellipse(destination_gas_data.symbol)}
+                              </span>
+                            </span>
+                          </div>
+                          {source_token && destination_native_token && (
+                            <>
+                              <span className="text-sm font-medium">
+                                =
+                              </span>
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                                {source_gas_data.image && (
+                                  <Image
+                                    src={source_gas_data.image}
+                                    className="w-5 h-5 rounded-full"
+                                  />
+                                )}
+                                <span className="text-sm font-semibold">
+                                  <span className="mr-1">
+                                    {number_format(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed).toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).mulUnsafe(FixedNumber.fromString((destination_native_token.token_price?.usd / source_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals), '0,0.000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                            </>
                           )}
-                          <span className="text-sm font-semibold">
-                            <span className="mr-1">
-                              {number_format(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed).toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals), '0,0.000000', true)}
-                            </span>
-                            <span>
-                              {ellipse(destination_gas_data.symbol)}
-                            </span>
-                          </span>
                         </div>
                       </div>
                     )}
@@ -1103,7 +1128,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['refunded'].includes(s.id) && receipt?.status && source_token && destination_native_token && (
+                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token && destination_native_token && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Refunded:
@@ -1349,7 +1374,29 @@ export default () => {
                             )}
                           </div>
                           <span className="text-red-500 dark:text-red-600 font-semibold">
-                            {ellipse(_data.error?.body?.replaceAll('"""', '') || _data.error?.reason, 256)}
+                            {ellipse([_data.error?.reason, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    {i === 4 && _data?.error && !receipt?.status && (
+                      <div className={rowClassName}>
+                        <span
+                          className={rowTitleClassName}
+                          style={{ minWidth: '8rem' }}
+                        >
+                          Error:
+                        </span>
+                        <div className="flex flex-col space-y-1">
+                          <div className="flex items-center space-x-1.5">
+                            {_data.error?.code && (
+                              <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
+                                {_data.error.code}
+                              </div>
+                            )}
+                          </div>
+                          <span className="text-red-500 dark:text-red-600 font-semibold">
+                            {ellipse([_data.error?.reason, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
                           </span>
                         </div>
                       </div>
