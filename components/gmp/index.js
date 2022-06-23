@@ -405,7 +405,7 @@ export default () => {
     data: executed,
   }, refunded && {
     id: 'refunded',
-    title: 'Refunded',
+    title: 'Gas Refunded',
     chain_data: source_chain_data,
     data: refunded,
   }].filter(s => s)
@@ -706,7 +706,7 @@ export default () => {
                         Status
                       </span>
                     </div>
-                    {steps.map((s, i) => {
+                    {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
                       const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
                         i === current_step && ![4].includes(i) ?
@@ -1143,9 +1143,10 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                {number_format(
+                                ~{number_format(
                                   Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals)) -
-                                  Number(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).mulUnsafe(FixedNumber.fromString((destination_native_token.token_price?.usd / source_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals))
+                                  Number(utils.formatUnits(FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())).mulUnsafe(FixedNumber.fromString((destination_native_token.token_price?.usd / source_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals)) -
+                                  Number(utils.formatUnits(FixedNumber.fromString(BigNumber.from(receipt?.gasUsed || '0').toString()).mulUnsafe(FixedNumber.fromString(BigNumber.from(receipt?.effectiveGasPrice || '0').toString())).mulUnsafe(FixedNumber.fromString((destination_native_token.token_price?.usd / source_token.token_price?.usd).toString())).round(0).toString().replace('.0', ''), destination_gas_data.decimals))
                                 , '0,0.000000', true)}
                               </span>
                               <span>

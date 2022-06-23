@@ -521,7 +521,7 @@ export default ({ n }) => {
                   data: executed,
                 }, refunded && {
                   id: 'refunded',
-                  title: 'Refunded',
+                  title: 'Gas Refunded',
                   chain_data: source_chain_data,
                   data: refunded,
                 }].filter(s => s)
@@ -543,7 +543,7 @@ export default ({ n }) => {
                 const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
-                    {steps.map((s, i) => {
+                    {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
                       const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
                         i === current_step && ![4].includes(i) ?
