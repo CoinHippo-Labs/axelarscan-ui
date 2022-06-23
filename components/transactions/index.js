@@ -298,6 +298,8 @@ export default ({ n }) => {
                         { label: 'Block', key: 'height' },
                         { label: 'Type', key: 'type' },
                         { label: 'Status', key: 'status' },
+                        need_price && { label: 'Sender', key: 'sender' },
+                        need_price && { label: 'Recipient', key: 'recipient' },
                         { label: 'Amount', key: 'amount' },
                         need_price && { label: 'Symbol', key: 'symbol' },
                         need_price && { label: 'Price', key: 'price' },
