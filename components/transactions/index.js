@@ -32,6 +32,7 @@ export default ({ n }) => {
   const { height, address } = { ...query }
 
   const [data, setData] = useState(null)
+  const [total, setTotal] = useState(null)
   const [dataForExport, setDataForExport] = useState(null)
   const [numLoadedData, setNumLoadedData] = useState(0)
   const [offset, setOffet] = useState(0)
@@ -78,6 +79,7 @@ export default ({ n }) => {
         if (!controller.signal.aborted) {
           setFetching(true)
           if (!fetchTrigger) {
+            setTotal(null)
             setData(null)
             setDataForExport(null)
             setOffet(0)
@@ -145,9 +147,11 @@ export default ({ n }) => {
               _source: {
                 includes: 'logs'
               },
+              track_total_hits: true,
             }, assets_data)
           }
           if (response) {
+            setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
               const { txhash, timestamp, activities } = { ...d }
               return {
@@ -168,6 +172,7 @@ export default ({ n }) => {
             setDataForExport(await toCSV(response))
           }
           else if (!fetchTrigger) {
+            setTotal(0)
             setData([])
             setDataForExport([])
           }
@@ -245,6 +250,7 @@ export default ({ n }) => {
             amount: typeof a.amount === 'number' ? a.amount * multipier : '',
             value: typeof a.amount === 'number' && typeof a.price === 'number' ? a.amount * a.price * multipier : '',
             type: d.type,
+            timestamp_utc_string: moment(d.timestamp).format('DD-MM-YYYY HH:mm:ss A'),
           }
         })
       }
@@ -269,25 +275,35 @@ export default ({ n }) => {
       <div className="min-h-full grid gap-2">
         {!n && (
           <div className="flex items-center justify-between space-x-2 mb-2">
-            <div className="block sm:flex sm:flex-wrap items-center justify-start overflow-x-auto space-x-1">
-              {Object.entries({ ...types }).map(([k, v]) => (
-                <div
-                  key={k}
-                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                  className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
-                  style={{ textTransform: 'none' }}
-                >
-                  <span>
-                    {k === 'undefined' ?
-                      'Failed' :
-                      k?.endsWith('Request') ? k.replace('Request', '') : k
-                    }
-                  </span>
-                  <span className="text-blue-600 dark:text-blue-400">
-                    {number_format(v, '0,0')}
-                  </span>
-                </div>
-              ))}
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+              <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
+                <span className="text-sm font-bold">
+                  {number_format(total, '0,0')}
+                </span>
+                <span className="text-sm">
+                  Results
+                </span>
+              </div>
+              <div className="block sm:flex sm:flex-wrap items-center justify-start overflow-x-auto space-x-1">
+                {Object.entries({ ...types }).map(([k, v]) => (
+                  <div
+                    key={k}
+                    onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
+                    className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
+                    style={{ textTransform: 'none' }}
+                  >
+                    <span>
+                      {k === 'undefined' ?
+                        'Failed' :
+                        k?.endsWith('Request') ? k.replace('Request', '') : k
+                      }
+                    </span>
+                    <span className="text-blue-600 dark:text-blue-400">
+                      {number_format(v, '0,0')}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
             {data?.length > 0 && (
               <>
@@ -306,7 +322,8 @@ export default ({ n }) => {
                         need_price && { label: 'Price', key: 'price' },
                         need_price && { label: 'Value', key: 'value' },
                         { label: 'Fee', key: 'fee' },
-                        { label: 'Time', key: 'timestamp' },
+                        { label: 'Time (ms)', key: 'timestamp' },
+                        need_price && { label: 'Time (DD-MM-YYYY HH:mm:ss A)', key: 'timestamp_utc_string' },
                       ].filter(h => h)}
                       data={dataForExport}
                       filename={`transactions${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('') || (address || height ? `_${address || height}` : '')}.csv`}
@@ -547,7 +564,7 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : height || address ? 25 : 100}
           className="min-h-full no-border"
         />
-        {data.length > 0 && !n && !height && !(address?.length >= 65) && (
+        {data.length > 0 && !n && !height && !(address?.length >= 65) && (typeof total !== 'number' || data.length < total) && (
           !fetching ?
             <button
               onClick={() => {
