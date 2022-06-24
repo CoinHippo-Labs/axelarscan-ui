@@ -113,7 +113,7 @@ export default () => {
           if (time?.length > 1) {
             must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
           }
-          const response = await getBatches({
+          let response = await getBatches({
             query: {
               bool: {
                 must,
