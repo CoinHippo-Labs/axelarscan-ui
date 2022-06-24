@@ -51,6 +51,7 @@ export default () => {
           }),
           'asset'
         )).map(([k, v]) => {
+          const asset_data = assets_data.find(a => equals_ignore_case(a?.id, k))
           return {
             ..._.head(v),
             asset: k,
@@ -58,12 +59,36 @@ export default () => {
             amount: {
               supply: _.sumBy(v, 'amount.supply'),
               gateway_balance: _.sumBy(v, 'amount.gateway_balance'),
-              total: _.sumBy(v, 'amount.total'),
+              total:  _.sumBy(v.map(_v => {
+                const { amount } = { ..._v }
+                const { supply, gateway_balance, total } = { ...amount }
+                return {
+                  ..._v,
+                  amount: {
+                    ...amount,
+                    total: asset_data?.contracts?.findIndex(c => c?.is_native) > -1 ?
+                      gateway_balance :
+                      total,
+                  }
+                }
+              }), 'amount.total'),
             },
             value: {
               supply: _.sumBy(v, 'value.supply'),
               gateway_balance: _.sumBy(v, 'value.gateway_balance'),
-              total: _.sumBy(v, 'value.total'),
+              total: _.sumBy(v.map(_v => {
+                const { value } = { ..._v }
+                const { supply, gateway_balance, total } = { ...value }
+                return {
+                  ..._v,
+                  value: {
+                    ...value,
+                    total: asset_data?.contracts?.findIndex(c => c?.is_native) > -1 ?
+                      gateway_balance :
+                      total,
+                  }
+                }
+              }), 'value.total'),
             },
           }
         }).map(d => {

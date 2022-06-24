@@ -44,6 +44,23 @@ export default () => {
               total * price : null,
           } : null,
         }
+      }).map(d => {
+        const { asset_data, amount, value } = { ...d }
+        return {
+          ...d,
+          amount: {
+            ...amount,
+            total: asset_data?.contracts?.findIndex(c => c?.is_native) > -1 ?
+              amount?.gateway_balance :
+              amount?.total,
+          },
+          value: {
+            ...value,
+            total: asset_data?.contracts?.findIndex(c => c?.is_native) > -1 ?
+              value?.gateway_balance :
+              value?.total,
+          },
+        }
       }))
     }
   }, [evm_chains_data, assets_data, tvl_data])
