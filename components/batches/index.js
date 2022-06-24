@@ -86,7 +86,6 @@ export default () => {
           const _data = !fetchTrigger ? [] : (data || []),
             size = LIMIT
           const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
-          response
           const must = [], must_not = []
           const { chain, batchId, keyId, type, status, time } = { ...filters }
           if (chain) {
