@@ -795,7 +795,8 @@ export default () => {
               const destination_chain_data = getChain(destination_chain, evm_chains_data)
               const { gasToken, gasFeeAmount, refundAddress } = { ...gas_paid?.returnValues }
               const { gasUsed, effectiveGasPrice } = { ...executed?.receipt || error?.receipt }
-              let source_gas_data, destination_gas_data
+              const { source_token, destination_native_token } = { ...gas_price_rate }
+              let source_gas_data, destination_gas_data, source_gas_used, source_refuned_gas_used
               if (gasFeeAmount) {
                 source_gas_data = gasToken && gasToken !== constants.AddressZero ?
                   assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
@@ -816,7 +817,28 @@ export default () => {
                   image: destination_chain_data?.image,
                 }
               }
-              const { source_token, destination_native_token } = { ...gas_price_rate }
+              try {
+                source_gas_used = Number(utils.formatUnits(
+                  FixedNumber.fromString(BigNumber.from(gasUsed).toString())
+                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
+                    .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+                    .round(0).toString().replace('.0', '')
+                  , destination_gas_data.decimals
+                ))
+              } catch (error) {
+                source_gas_used = 0
+              }
+              try {
+                source_refuned_gas_used = Number(utils.formatUnits(
+                  FixedNumber.fromString(BigNumber.from(receipt?.gasUsed || '0').toString())
+                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(receipt?.effectiveGasPrice || '0').toString()))
+                    .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+                    .round(0).toString().replace('.0', '')
+                  , destination_native_token.decimals
+                ))
+              } catch (error) {
+                source_refuned_gas_used = 0
+              }
               const from = receipt?.from || transaction?.from
               const to = i < 3 ? contract_address : i === 4 ? _data?.to || refundAddress : destinationContractAddress
               const { explorer } = { ...chain_data }
@@ -1077,15 +1099,7 @@ export default () => {
                                 )}
                                 <span className="text-sm font-semibold">
                                   <span className="mr-1">
-                                    {number_format(
-                                      Number(utils.formatUnits(
-                                        FixedNumber.fromString(BigNumber.from(gasUsed).toString())
-                                          .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
-                                          .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
-                                          .round(0).toString().replace('.0', '')
-                                        , destination_gas_data.decimals
-                                      )), '0,0.000000', true
-                                    )}
+                                    {number_format(source_gas_used, '0,0.000000', true)}
                                   </span>
                                   <span>
                                     {ellipse(source_gas_data?.symbol)}
@@ -1159,20 +1173,8 @@ export default () => {
                                 ~
                                 {number_format(
                                   Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals)) -
-                                  Number(utils.formatUnits(
-                                    FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
-                                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString()))
-                                      .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
-                                      .round(0).toString().replace('.0', '')
-                                    , destination_native_token.decimals
-                                  )) -
-                                  Number(utils.formatUnits(
-                                    FixedNumber.fromString(BigNumber.from(receipt?.gasUsed || '0').toString())
-                                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(receipt?.effectiveGasPrice || '0').toString()))
-                                      .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
-                                      .round(0).toString().replace('.0', '')
-                                    , destination_native_token.decimals
-                                  )), '0,0.000000', true
+                                  source_gas_used - source_refuned_gas_used,
+                                  '0,0.000000', true
                                 )}
                               </span>
                               <span>
