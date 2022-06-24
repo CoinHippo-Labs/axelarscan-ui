@@ -124,7 +124,7 @@ export default () => {
       placeholder: 'Select status',
       options: [
         { value: '', title: 'Any' },
-        { value: 'called', title: 'Wait for Approve' },
+        { value: 'called', title: 'Wait for Approval' },
         { value: 'approved', title: 'Approved' },
         { value: 'executed', title: 'Executed' },
         { value: 'error', title: 'Error Execution' },
