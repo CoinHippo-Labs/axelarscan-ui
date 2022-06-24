@@ -151,7 +151,7 @@ export default ({ n }) => {
             }, assets_data)
           }
           if (response) {
-            setTotal(response.total)
+            let total = response.total
             response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
               const { txhash, timestamp, activities } = { ...d }
               return {
@@ -167,6 +167,7 @@ export default ({ n }) => {
                   ) > -1 ? 'in' : null
               }
             }) || []), 'txhash'), ['timestamp'], ['desc'])
+            setTotal(response.length > total ? response.length : total)
             setData(response)
             setFetching(false)
             setDataForExport(await toCSV(response))
@@ -276,14 +277,16 @@ export default ({ n }) => {
         {!n && (
           <div className="flex items-center justify-between space-x-2 mb-2">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
-              <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
-                <span className="text-sm font-bold">
-                  {number_format(total, '0,0')}
-                </span>
-                <span className="text-sm">
-                  Results
-                </span>
-              </div>
+              {typeof total === 'number' && (
+                <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
+                  <span className="text-sm font-bold">
+                    {number_format(total, '0,0')}
+                  </span>
+                  <span className="text-sm">
+                    Results
+                  </span>
+                </div>
+              )}
               <div className="block sm:flex sm:flex-wrap items-center justify-start overflow-x-auto space-x-1">
                 {Object.entries({ ...types }).map(([k, v]) => (
                   <div
