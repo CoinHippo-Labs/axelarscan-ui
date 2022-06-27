@@ -5,7 +5,7 @@ export default ({
   return (
     <img
       alt={alt}
-      {...rest}
+      { ...rest }
     />
   )
 }

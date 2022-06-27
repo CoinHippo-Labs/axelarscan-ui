@@ -134,17 +134,29 @@ export default () => {
 
   const execute = async data => {
     if (api && signer && data) {
-      setExecuting(true)
-      setExecuteResponse({
-        status: 'pending',
-        message: 'Executing',
-      })
-      await api.executeManually(data, response => {
-        if (response?.status !== 'pending') {
-          setExecuting(false)
-        }
-        setExecuteResponse(response)
-      })
+      try {
+        setExecuting(true)
+        setExecuteResponse({
+          status: 'pending',
+          message: 'Executing',
+        })
+        const { call } = { ...data }
+        const { transactionHash } = { ...call }
+        const response = await api.execute(transactionHash)
+        const { success, error, transaction } = { ...response }
+        setExecuting(false)
+        setExecuteResponse({
+          status: success ? 'success' : 'failed',
+          message: error || 'Execute successful',
+          txHash: transaction?.transactionHash,
+        })
+      } catch (error) {
+        setExecuting(false)
+        setExecuteResponse({
+          status: 'failed',
+          message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
+        })
+      }
     }
   }
 
@@ -161,14 +173,15 @@ export default () => {
         const response = await api.addNativeGas(chain, transactionHash, {
           refundAddress: address,
         })
-        if (response?.success) {
+        const { success, error, transaction } = { ...response }
+        if (success) {
           await sleep(15 * 1000)
         }
         setGasAdding(false)
         setGasAddResponse({
-          status: response?.success ? 'success' : 'failed',
-          message: response?.error || 'Pay gas successful',
-          txHash: response?.transaction?.transactionHash,
+          status: success ? 'success' : 'failed',
+          message: error || 'Pay gas successful',
+          txHash: transaction?.transactionHash,
         })
       } catch (error) {
         setGasAdding(false)
