@@ -41,7 +41,7 @@ export default ({ data }) => {
             </div>}
             className="w-7 h-7"
           >
-            <Link href={`/block/${b.height}`}>
+            <Link href={b.txhash ? `/tx/${b.txhash}` : `/block/${b.height}`}>
               <a
                 target="_blank"
                 rel="noopenner noreferrer"
