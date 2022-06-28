@@ -14,7 +14,7 @@ import Image from '../image'
 import Copy from '../copy'
 import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
 import { transfers as getTransfers } from '../../lib/api/index'
-import { transfer as getTransfer } from '../../lib/api/transfer'
+import { transfers_status as getTransfersStatus } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getDenom } from '../../lib/object/denom'
 import { type } from '../../lib/object/id'
@@ -47,7 +47,7 @@ export default () => {
           if (response) {
             let data = response.data?.[0]
             const { source, link, confirm_deposit, vote, sign_batch } = { ...data }
-            const { recipient_chain, recipient_address, amount, value } = { ...source }
+            const { sender_chain, recipient_chain, recipient_address, amount, value } = { ...source }
             if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
               let _response
               if (recipient_address) {
@@ -83,8 +83,9 @@ export default () => {
               }
             }
             if (!(recipient_chain && typeof amount === 'number' && value)) {
-              await getTransfer({
+              await getTransfersStatus({
                 txHash: tx,
+                sourceChain: sender_chain,
               })
             }
             setTransfer({
