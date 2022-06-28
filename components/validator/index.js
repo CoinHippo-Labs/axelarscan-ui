@@ -460,11 +460,11 @@ export default () => {
           }
         }
         if (!controller.signal.aborted) {
-          let data, total = 0
+          let data, total = 0, total_participations = 0
           const results = [true, false]
           for (let i = 0; i < results.length; i++) {
             const result = results[i]
-            const response = await getKeygens({
+            let response = await getKeygens({
               size: 1000,
               sort: [{ height: 'desc' }],
               track_total_hits: true,
@@ -480,11 +480,19 @@ export default () => {
                   snapshot_non_participant_validators?.validators?.findIndex(v => equals_ignore_case(v?.validator, address)) < 0,
               }
             }) || []), 'key_id'), ['height'], ['desc'])
+            if (result) {
+              response = await getKeygens({
+                query: { match: { 'snapshot_validators.validators.validator': address } },
+                size: 0,
+                track_total_hits: true,
+              }, result)
+              total_participations += (response?.total || 0)
+            }
           }
           setKeygens({
             data,
             total,
-            total_participations: data?.filter(d => d.participated).length || 0,
+            total_participations,
             address,
           })
         }
@@ -493,13 +501,12 @@ export default () => {
           const results = [true, false]
           for (let i = 0; i < results.length; i++) {
             const result = results[i]
-            const response = await getSignAttempts({
+            let response = await getSignAttempts({
               query: { match: { [`${!result ? 'non_' : ''}participants`]: address } },
               size: 1000,
               sort: [{ height: 'desc' }],
               track_total_hits: true,
             })
-            total += (response?.total || 0)
             if (result) {
               total_participations += (response?.total || 0)
             }
@@ -512,6 +519,13 @@ export default () => {
                   non_participants?.findIndex(a => equals_ignore_case(a, address)) < 0,
               }
             }) || []), 'sig_id'), ['height'], ['desc'])
+            if (result) {
+              response = await getSignAttempts({
+                size: 0,
+                track_total_hits: true,
+              })
+              total += (response?.total || 0)
+            }
           }
           setSigns({
             data,
