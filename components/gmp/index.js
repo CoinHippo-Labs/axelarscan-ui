@@ -1406,7 +1406,7 @@ export default () => {
                           <div className="flex items-center space-x-1.5">
                             {_data.error?.code && (
                               <a
-                                href={`https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().split('_').join('-')}` : 'ethereum'}`}
+                                href={`https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().replace('unpredicatable_gas_limit', 'unpredictable_gas_limit').split('_').join('-')}` : 'ethereum'}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
