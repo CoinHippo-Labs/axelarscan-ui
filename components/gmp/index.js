@@ -1405,9 +1405,14 @@ export default () => {
                         <div className="flex flex-col space-y-1">
                           <div className="flex items-center space-x-1.5">
                             {_data.error?.code && (
-                              <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
+                              <a
+                                href={`https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().split('_').join('-')}` : 'ethereum'}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
+                              >
                                 {_data.error.code}
-                              </div>
+                              </a>
                             )}
                             {is_not_enough_gas && (
                               <div className="max-w-min bg-yellow-100 dark:bg-yellow-500 border border-yellow-500 dark:border-yellow-600 rounded-lg whitespace-nowrap uppercase font-semibold py-0.5 px-2">
@@ -1416,7 +1421,7 @@ export default () => {
                             )}
                           </div>
                           <span className="text-red-500 dark:text-red-600 font-semibold">
-                            {ellipse([_data.error?.reason, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
+                            {ellipse([_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
                           </span>
                         </div>
                       </div>
