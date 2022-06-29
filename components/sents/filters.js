@@ -94,7 +94,7 @@ export default () => {
       placeholder: 'Select destination chain',
       options: _.concat(
         { value: '', title: 'Any' },
-        evm_chains_data?.map(c => {
+        cosmos_chains_data?.map(c => {
           return {
             value: c.id,
             title: c.name,
