@@ -9,6 +9,7 @@ import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 import EVMVoteFilters from '../../evm-votes/filters'
 import TransactionFilters from '../../transactions/filters'
 import TransferFilters from '../../transfers/filters'
+import SentFilters from '../../sents/filters'
 import GMPFilters from '../../gmps/filters'
 import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
@@ -198,6 +199,32 @@ export default () => {
       break
     case '/transfer/[tx]':
       title = 'Cross-chain Transfer'
+      subtitle = (
+        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+          <div>
+            <span className="xl:hidden">
+              {ellipse(tx, 16)}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(tx, 24)}
+            </span>
+          </div>
+          <Copy
+            value={tx}
+            size={18}
+          />
+        </div>
+      )
+      break
+    case '/sent':
+    case '/sent/search':
+      title = 'Send Token'
+      right = pathname.endsWith('/search') && (
+        <SentFilters />
+      )
+      break
+    case '/sent/[tx]':
+      title = 'Send Token'
       subtitle = (
         <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
           <div>

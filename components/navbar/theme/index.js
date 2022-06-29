@@ -16,7 +16,7 @@ export default function Theme() {
           value: theme === 'light' ? 'dark' : 'light',
         })
       }}
-      className="w-10 sm:w-12 h-16 btn-transparent flex items-center justify-center"
+      className="w-8 h-16 btn-transparent flex items-center justify-center"
     >
       <div className="w-6 h-6 flex items-center justify-center">
         {theme === 'light' ? <FiMoon size={16} /> : <FiSun size={16} />}

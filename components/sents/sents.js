@@ -15,11 +15,11 @@ import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { search } from '../../lib/api/gmp'
+import { token_sent } from '../../lib/api/gateway'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
-const LIMIT = 25
+const LIMIT = 100
 
 export default ({ n }) => {
   const { preferences, evm_chains, cosmos_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)
@@ -38,24 +38,18 @@ export default ({ n }) => {
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
   const [filters, setFilters] = useState(null)
-  const [types, setTypes] = useState(null)
-  const [filterTypes, setFilterTypes] = useState(null)
 
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, fromTime, toTime } = { ...params }
+      const { txHash, sourceChain, destinationChain, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
-        status: ['called', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
+        recipientAddress,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
       if (typeof fetchTrigger === 'number') {
@@ -71,7 +65,7 @@ export default ({ n }) => {
     if (pathname && filters) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (address || ['/gmp/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
+    const interval = setInterval(() => triggering(true), (address || ['/sent/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
@@ -98,19 +92,8 @@ export default ({ n }) => {
             }
           }
           else if (filters) {
-            const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-            let event, fromTime, toTime
-            switch (method) {
-              case 'callContract':
-                event = 'ContractCall'
-                break
-              case 'callContractWithToken':
-                event = 'ContractCallWithToken'
-                break
-              default:
-                event = undefined
-                break
-            }
+            const { txHash, sourceChain, destinationChain, senderAddress, recipientAddress, time } = { ...filters }
+            let fromTime, toTime
             if (time?.length > 1) {
               fromTime = time[0].unix()
               toTime = time[1].unix()
@@ -119,17 +102,13 @@ export default ({ n }) => {
               txHash,
               sourceChain,
               destinationChain,
-              event,
-              status,
               senderAddress,
-              sourceAddress,
-              contractAddress,
-              relayerAddress,
+              recipientAddress,
               fromTime,
               toTime,
             }
           }
-          const response = await search({
+          const response = await token_sent({
             ...params,
             size,
             from,
@@ -140,7 +119,7 @@ export default ({ n }) => {
               return {
                 ...d,
               }
-            }) || []), 'call.id'), ['call.block_timestamp'], ['desc'])
+            }) || []), 'event.transactionHash'), ['event.block_timestamp'], ['desc'])
             setData(response)
           }
           else if (!fetchTrigger) {
@@ -157,14 +136,7 @@ export default ({ n }) => {
     }
   }, [fetchTrigger])
 
-  useEffect(() => {
-    if (data) {
-      setTypes(_.countBy(_.uniqBy(data, 'call.id').map(t => t?.call?.event).filter(t => t)))
-    }
-  }, [data])
-
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-  const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.call?.event) || (filterTypes.includes('undefined') && !d?.call?.event)), 0, n || undefined)
 
   return (
     data ?
@@ -178,41 +150,22 @@ export default ({ n }) => {
               Results
             </span>
           </div>
-          <div className="block sm:flex sm:flex-wrap items-center justify-end overflow-x-auto space-x-1">
-            {Object.entries({ ...types }).map(([k, v]) => (
-              <div
-                key={k}
-                onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
-                style={{ textTransform: 'none' }}
-              >
-                <span>
-                  {k === 'undefined' ?
-                    'Failed' : k
-                  }
-                </span>
-                <span className="text-blue-600 dark:text-blue-400">
-                  {number_format(v, '0,0')}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
         <Datatable
           columns={[
             {
               Header: 'Tx Hash',
-              accessor: 'call.transactionHash',
+              accessor: 'event.transactionHash',
               disableSortBy: true,
               Cell: props => {
-                const { call } = { ...props.row.original }
-                const { chain } = { ...call }
+                const { event } = { ...props.row.original }
+                const { chain } = { ...event }
                 const chain_data = getChain(chain, chains_data)
                 const { explorer } = { ...chain_data }
                 const { url, transaction_path, icon } = { ...explorer }
                 return (
                   <div className="flex items-center space-x-1">
-                    <Link href={`/gmp/${props.value}`}>
+                    <Link href={`/sent/${props.value}`}>
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
@@ -248,11 +201,11 @@ export default ({ n }) => {
             },
             {
               Header: 'Method',
-              accessor: 'call.event',
+              accessor: 'event.event',
               disableSortBy: true,
               Cell: props => {
-                const { call } = { ...props.row.original }
-                const { chain, returnValues } = { ...call }
+                const { event } = { ...props.row.original }
+                const { chain, returnValues } = { ...event }
                 const { symbol, amount } = { ...returnValues }
                 const chain_data = getChain(chain, chains_data)
                 const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c.symbol, symbol)) > -1)
@@ -263,11 +216,9 @@ export default ({ n }) => {
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
-                      {props.value === 'ContractCall' ?
-                        'callContract' :
-                        props.value === 'ContractCallWithToken' ?
-                          'callContractWithToken' :
-                          props.value || '-'
+                      {props.value === 'TokenSent' ?
+                        'sendToken' :
+                        props.value || '-'
                       }
                     </div>
                     {amount && _symbol && (
@@ -296,13 +247,12 @@ export default ({ n }) => {
             },
             {
               Header: 'Source',
-              accessor: 'call.chain',
+              accessor: 'event.chain',
               disableSortBy: true,
               Cell: props => {
-                const { call } = { ...props.row.original }
-                const { returnValues, transaction } = { ...call }
+                const { event } = { ...props.row.original }
+                const { returnValues, transaction } = { ...event }
                 const { sender } = { ...returnValues }
-                const { from } = { ...transaction }
                 const chain_data = getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
                 const { url, address_path } = { ...explorer }
@@ -319,44 +269,10 @@ export default ({ n }) => {
                         {name || props.value}
                       </span>
                     </div>
-                    {from && (
-                      <div className="flex flex-col">
-                        <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                          Sender address
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <a
-                            href={`${url}${address_path?.replace('{address}', from)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <EnsProfile
-                              address={from}
-                              no_copy={true}
-                              fallback={(
-                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(from, 6, prefix_address)}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(from, 8, prefix_address)}
-                                  </span>
-                                </div>
-                              )}
-                            />
-                          </a>
-                          <Copy
-                            value={from}
-                            size={18}
-                          />
-                        </div>
-                      </div>
-                    )}
                     {sender && (
                       <div className="flex flex-col">
                         <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                          Source address
+                          Sender address
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -393,14 +309,12 @@ export default ({ n }) => {
             },
             {
               Header: 'Destination',
-              accessor: 'call.returnValues.destinationChain',
+              accessor: 'event.returnValues.destinationChain',
               disableSortBy: true,
               Cell: props => {
-                const { call, executed, status } = { ...props.row.original }
-                const { returnValues } = { ...call }
-                const { destinationContractAddress } = { ...returnValues }
-                const { transaction } = { ...executed }
-                const { from } = { ...transaction }
+                const { event } = { ...props.row.original }
+                const { returnValues } = { ...event }
+                const { destinationAddress } = { ...returnValues }
                 const chain_data = getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
                 const { url, address_path } = { ...explorer }
@@ -417,69 +331,35 @@ export default ({ n }) => {
                         {name || props.value}
                       </span>
                     </div>
-                    {destinationContractAddress && (
+                    {destinationAddress && (
                       <div className="flex flex-col">
                         <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                          Contract address
+                          Recipient address
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
-                            href={`${url}${address_path?.replace('{address}', destinationContractAddress)}`}
+                            href={`${url}${address_path?.replace('{address}', destinationAddress)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 dark:text-white"
                           >
                             <EnsProfile
-                              address={destinationContractAddress}
+                              address={destinationAddress}
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(destinationContractAddress, 6, prefix_address)}
+                                    {ellipse(destinationAddress, 6, prefix_address)}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(destinationContractAddress, 8, prefix_address)}
+                                    {ellipse(destinationAddress, 8, prefix_address)}
                                   </span>
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
-                            value={destinationContractAddress}
-                            size={18}
-                          />
-                        </div>
-                      </div>
-                    )}
-                    {equals_ignore_case(status, 'executed') && from && (
-                      <div className="flex flex-col">
-                        <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                          Relayer address
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <a
-                            href={`${url}${address_path?.replace('{address}', from)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <EnsProfile
-                              address={from}
-                              no_copy={true}
-                              fallback={(
-                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(from, 6, prefix_address)}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(from, 8, prefix_address)}
-                                  </span>
-                                </div>
-                              )}
-                            />
-                          </a>
-                          <Copy
-                            value={from}
+                            value={destinationAddress}
                             size={18}
                           />
                         </div>
@@ -491,64 +371,38 @@ export default ({ n }) => {
             },
             {
               Header: 'Status',
-              accessor: 'status',
+              accessor: 'event.receipt.status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, approved, executed, is_executed, error, refunded, status } = { ...props.row.original }
-                const { chain, returnValues } = { ...call }
+                const { event } = { ...props.row.original }
+                const { chain, returnValues } = { ...event }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
                 const destination_chain_data = getChain(destinationChain, chains_data)
                 const steps = [{
-                  id: 'call',
-                  title: 'Contract Call',
+                  id: 'send',
+                  title: 'Send Token',
                   chain_data: source_chain_data,
-                  data: call,
-                }, {
-                  id: 'gas_paid',
-                  title: 'Gas Paid',
-                  chain_data: source_chain_data,
-                  data: gas_paid,
-                }, {
-                  id: 'approved',
-                  title: 'Call Approved',
-                  chain_data: destination_chain_data,
-                  data: approved,
-                }, {
-                  id: 'executed',
-                  title: 'Executed',
-                  chain_data: destination_chain_data,
-                  data: executed,
-                }, refunded && {
-                  id: 'refunded',
-                  title: 'Gas Refunded',
-                  chain_data: source_chain_data,
-                  data: refunded,
+                  data: event,
                 }].filter(s => s)
                 let current_step
-                switch (status) {
-                  case 'called':
-                    current_step = gas_paid ? 2 : 1
-                    break
-                  case 'approved':
-                    current_step = 3
-                    break
-                  case 'executed':
-                  case 'error':
-                    current_step = 4
+                switch (props.value) {
+                  case 0:
+                  case 1:
+                    current_step = 1
                     break
                   default:
+                    current_step = 0
                     break
                 }
-                const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
-                    {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
-                      const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
+                    {steps.map((s, i) => {
+                      const text_color = s?.data?.receipt?.status ?
                         'text-green-500 dark:text-green-600' :
-                        i === current_step && ![4].includes(i) ?
+                        i === current_step ?
                           'text-blue-500 dark:text-white' :
-                          (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
+                          s?.data?.receipt && !s.data.receipt.status ?
                             'text-red-500 dark:text-red-600' :
                             'text-slate-400 dark:text-slate-600'
                       const { explorer } = { ...s.chain_data }
@@ -558,11 +412,11 @@ export default ({ n }) => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {(i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
+                          {s?.data?.receipt?.status ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
-                            i === current_step && ![4].includes(i) ?
+                            i === current_step ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
+                              s?.data?.receipt && !s.data.receipt.status ?
                                 <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
                                 <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
                           }
@@ -601,54 +455,30 @@ export default ({ n }) => {
                         </div>
                       )
                     })}
-                    {time_spent && (
-                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
-                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                          time spent:
-                        </span>
-                        <span className="whitespace-nowrap font-bold">
-                          {time_spent}
-                        </span>
-                      </div>
-                    )}
                   </div>
                 )
               },
             },
             {
-              Header: 'Contract Call Time',
-              accessor: 'call.block_timestamp',
+              Header: 'Time',
+              accessor: 'event.block_timestamp',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, approved, executed, error } = { ...props.row.original }
-                const updated_at = executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp
                 return (
                   <div className="space-y-2">
                     <TimeAgo
                       time={props.value * 1000}
-                      title="Contract Call Time"
+                      title="Time"
                       className="ml-auto"
                     />
-                    {updated_at && (
-                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg flex flex-col items-end py-1 px-2 ml-auto -mr-1">
-                        <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                          Updated at
-                        </span>
-                        <TimeAgo
-                          time={updated_at * 1000}
-                          title="Updated Time"
-                          className="text-xs ml-auto"
-                        />
-                      </div>
-                    )}
                   </div>
                 )
               },
               headerClassName: 'whitespace-nowrap justify-end text-right',
             },
           ]}
-          data={data_filtered}
-          noPagination={data_filtered.length <= 10 || (!n && !(address || ['/gmp/search'].includes(pathname)))}
+          data={data}
+          noPagination={data.length <= 10 || (!n && !(address || ['/sent/search'].includes(pathname)))}
           defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />

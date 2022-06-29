@@ -6,6 +6,7 @@ import { FiSearch } from 'react-icons/fi'
 
 import { ens as getEns, domainFromEns } from '../../../lib/api/ens'
 import { transfers, deposit_addresses } from '../../../lib/api/index'
+import { token_sent } from '../../../lib/api/gateway'
 import { type } from '../../../lib/object/id'
 import { equals_ignore_case } from '../../../lib/utils'
 import { ENS_DATA } from '../../../reducers/types'
@@ -73,7 +74,7 @@ export default () => {
         }
       }
       else if (['evm_tx', 'tx'].includes(input_type)) {
-        const response = await transfers({
+        let response = await transfers({
           query: {
             match: { 'source.id': input },
           },
@@ -81,8 +82,16 @@ export default () => {
         if (response?.total) {
           input_type = 'transfer'
         }
-        else if (input_type === 'evm_tx') {
-          input_type = process.env.NEXT_PUBLIC_GMP_API_URL ? 'gmp' : 'tx'
+        else {
+          response = await token_sent({
+            txHash: input,
+          })
+          if (response?.total) {
+            input_type = 'sent'
+          }
+          else if (input_type === 'evm_tx') {
+            input_type = process.env.NEXT_PUBLIC_GMP_API_URL ? 'gmp' : 'tx'
+          }
         }
       }
       if (input_type === 'address') {
@@ -104,7 +113,7 @@ export default () => {
   const canSearch = inputSearch && [address, tx].filter(s => s).findIndex(s => equals_ignore_case(s, inputSearch)) < 0
 
   return (
-    <div className="navbar-search mr-2 sm:mx-3">
+    <div className="navbar-search mr-2 sm:mx-2">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="relative">
           <input

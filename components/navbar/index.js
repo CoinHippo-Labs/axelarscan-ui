@@ -347,7 +347,7 @@ export default () => {
     const getData = async () => {
       if (assets_data &&
         status_data &&
-        ['/address', '/gmp', '/transfers', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
+        ['/address', '/transfers', '/sent', '/gmp', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
       ) {
         if (!controller.signal.aborted) {
           let response

@@ -32,7 +32,7 @@ export default () => {
               {process.env.NEXT_PUBLIC_APP_NAME}
             </div>
             {status_data?.chain_id && (
-              <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded whitespace-nowrap text-xs pb-0.5 px-1.5 mt-0.5">
+              <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded whitespace-nowrap text-2xs font-medium pb-0.5 px-1.5 mt-0.5">
                 {status_data.chain_id}
               </div>
             )}
