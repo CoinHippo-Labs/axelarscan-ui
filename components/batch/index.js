@@ -164,7 +164,10 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => (
                   props.value ?
-                    <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize font-semibold py-1 px-2">
+                    <div
+                      title={props.row.original.executed ? 'Executed' : ''}
+                      className={`max-w-min ${props.row.original.executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize`}
+                    >
                       {props.value}
                     </div>
                     :
@@ -178,7 +181,7 @@ export default () => {
                 accessor: 'params.account',
                 disableSortBy: true,
                 Cell: props => {
-                  const { params } = { ...props.row.original }
+                  const { params, deposit_address } = { ...props.row.original }
                   const { salt, newOwners, newOperators, name, decimals, cap, sourceChain, sourceTxHash, contractAddress } = { ...params }
                   const source_chain_data = sourceChain && getChain(sourceChain, evm_chains_data)
                   return props.value ?
@@ -305,12 +308,12 @@ export default () => {
                       salt ?
                         <div className="flex items-center space-x-1">
                           <span className="text-slate-400 dark:text-slate-600 font-medium">
-                            Salt:
+                            {deposit_address ? 'Deposit address' : 'Salt'}:
                           </span>
                           <Copy
-                            value={salt}
+                            value={deposit_address || salt}
                             title={<span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                              {ellipse(salt, 8)}
+                              {ellipse(deposit_address || salt, 8)}
                             </span>}
                           />
                         </div> :

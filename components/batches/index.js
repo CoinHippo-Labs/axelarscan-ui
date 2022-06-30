@@ -327,7 +327,7 @@ export default () => {
                   props.value?.length > 0 ?
                     <div className="flex flex-col space-y-2.5 mb-4">
                       {props.value.filter(c => c).map((c, i) => {
-                        const { params, type } = { ...c }
+                        const { params, type, executed, deposit_address } = { ...c }
                         const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
                         const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
                         const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
@@ -340,7 +340,10 @@ export default () => {
                             key={i}
                             className="flex items-center space-x-2"
                           >
-                            <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize font-semibold py-1 px-2">
+                            <div
+                              title={executed ? 'Executed' : ''}
+                              className={`max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize`}
+                            >
                               {type}
                             </div>
                             {source_chain_data && (
@@ -389,7 +392,7 @@ export default () => {
                             )}
                             {contractAddress && (
                               <>
-                                <BiRightArrowCircle size={20} />
+                                <BiRightArrowCircle size={20} className="min-w-max" />
                                 <div className="flex items-center space-x-1">
                                   <EnsProfile
                                     address={contractAddress}
@@ -510,13 +513,13 @@ export default () => {
                               :
                               salt && (
                                 <div className="flex items-center space-x-1">
-                                  <span className="text-slate-400 dark:text-slate-600 font-medium">
-                                    Salt:
+                                  <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                                    {deposit_address ? 'Deposit address' : 'Salt'}:
                                   </span>
                                   <Copy
-                                    value={salt}
+                                    value={deposit_address || salt}
                                     title={<span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                                      {ellipse(salt, 8)}
+                                      {ellipse(deposit_address || salt, 8)}
                                     </span>}
                                   />
                                 </div>
