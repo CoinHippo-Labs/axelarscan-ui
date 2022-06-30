@@ -142,7 +142,7 @@ export default ({ n }) => {
               },
               size,
               from,
-              sort: [{ timestamp: 'desc', txhash: height ? 'asc' : 'desc' }],
+              sort: [{ timestamp: 'desc' }],
               fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'tx.body.messages.signer', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
               _source: {
                 includes: 'logs'
@@ -166,7 +166,7 @@ export default ({ n }) => {
                     )
                   ) > -1 ? 'in' : null
               }
-            }) || []), 'txhash'), ['timestamp'], ['desc'])
+            }) || []), 'txhash'), ['timestamp', 'txhash'], ['desc', height ? 'asc' : 'desc'])
             setTotal(response.length > total ? response.length : total)
             setData(response)
             setFetching(false)
