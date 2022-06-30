@@ -338,16 +338,16 @@ export default () => {
                         return (
                           <div
                             key={i}
-                            className="flex items-center space-x-2"
+                            className="flex flex-wrap items-center"
                           >
                             <div
                               title={executed ? 'Executed' : ''}
-                              className={`max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize`}
+                              className={`max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize mb-1 mr-2`}
                             >
                               {type}
                             </div>
                             {source_chain_data && (
-                              <>
+                              <div className="flex items-center space-x-1 mb-1 mr-2">
                                 {source_chain_data.image ?
                                   <Image
                                     src={source_chain_data.image}
@@ -388,51 +388,51 @@ export default () => {
                                     )}
                                   </div>
                                 )}
-                              </>
-                            )}
-                            {contractAddress && (
-                              <>
-                                <BiRightArrowCircle size={20} className="min-w-max" />
-                                <div className="flex items-center space-x-1">
-                                  <EnsProfile
-                                    address={contractAddress}
-                                    fallback={contractAddress && (
-                                      <Copy
-                                        value={contractAddress}
-                                        title={<span className="text-slate-400 dark:text-slate-200 text-sm">
-                                          <span className="xl:hidden">
-                                            {ellipse(contractAddress, 6)}
-                                          </span>
-                                          <span className="hidden xl:block">
-                                            {ellipse(contractAddress, 8)}
-                                          </span>
-                                        </span>}
-                                        size={18}
+                                {contractAddress && (
+                                  <>
+                                    <BiRightArrowCircle size={20} className="min-w-max" />
+                                    <div className="flex items-center space-x-1">
+                                      <EnsProfile
+                                        address={contractAddress}
+                                        fallback={contractAddress && (
+                                          <Copy
+                                            value={contractAddress}
+                                            title={<span className="text-slate-400 dark:text-slate-200 text-sm">
+                                              <span className="xl:hidden">
+                                                {ellipse(contractAddress, 6)}
+                                              </span>
+                                              <span className="hidden xl:block">
+                                                {ellipse(contractAddress, 8)}
+                                              </span>
+                                            </span>}
+                                            size={18}
+                                          />
+                                        )}
                                       />
-                                    )}
-                                  />
-                                  {chain_data?.explorer?.url && (
-                                    <a
-                                      href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', contractAddress)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="min-w-max text-blue-600 dark:text-white"
-                                    >
-                                      {chain_data.explorer.icon ?
-                                        <Image
-                                          src={chain_data.explorer.icon}
-                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                        />
-                                        :
-                                        <TiArrowRight size={16} className="transform -rotate-45" />
-                                      }
-                                    </a>
-                                  )}
-                                </div>
-                              </>
+                                      {chain_data?.explorer?.url && (
+                                        <a
+                                          href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', contractAddress)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="min-w-max text-blue-600 dark:text-white"
+                                        >
+                                          {chain_data.explorer.icon ?
+                                            <Image
+                                              src={chain_data.explorer.icon}
+                                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                            />
+                                            :
+                                            <TiArrowRight size={16} className="transform -rotate-45" />
+                                          }
+                                        </a>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                              </div>
                             )}
                             {symbol && (
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-1 mr-2">
                                 {image && (
                                   <Image
                                     src={image}
@@ -452,7 +452,7 @@ export default () => {
                               </div>
                             )}
                             {name && (
-                              <div className="flex flex-col">
+                              <div className="flex flex-col mb-1 mr-2">
                                 <span className="font-semibold">
                                   {name}
                                 </span>
@@ -471,7 +471,7 @@ export default () => {
                               </div>
                             )}
                             {account ?
-                              <>
+                              <div className="flex items-center space-x-1 mb-1 mr-2">
                                 <BiRightArrowCircle size={20} />
                                 <div className="flex items-center space-x-1">
                                   <EnsProfile
@@ -509,10 +509,10 @@ export default () => {
                                     </a>
                                   )}
                                 </div>
-                              </>
+                              </div>
                               :
                               salt && (
-                                <div className="flex items-center space-x-1">
+                                <div className="flex items-center space-x-1 mb-1 mr-2">
                                   <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
                                     {deposit_address ? 'Deposit address' : 'Salt'}:
                                   </span>
@@ -526,7 +526,7 @@ export default () => {
                               )
                             }
                             {newOwners && (
-                              <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2">
+                              <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
                                 <span className="font-semibold">
                                   {number_format(newOwners.split(';').length, '0,0')}
                                 </span>
@@ -536,7 +536,7 @@ export default () => {
                               </div>
                             )}
                             {newOperators && (
-                              <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2">
+                              <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
                                 <span className="font-semibold">
                                   {number_format(newOperators.split(';').length, '0,0')}
                                 </span>
@@ -546,7 +546,7 @@ export default () => {
                               </div>
                             )}
                             {newThreshold && (
-                              <div className="flex items-center space-x-1">
+                              <div className="flex items-center space-x-1 mb-1 mr-2">
                                 <span className="font-medium">
                                   Threshold:
                                 </span>
