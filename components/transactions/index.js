@@ -142,7 +142,7 @@ export default ({ n }) => {
               },
               size,
               from,
-              sort: [{ timestamp: 'desc' }],
+              sort: [{ timestamp: 'desc', txhash: height ? 'asc' : 'desc' }],
               fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'tx.body.messages.signer', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
               _source: {
                 includes: 'logs'
@@ -292,7 +292,7 @@ export default ({ n }) => {
                   <div
                     key={k}
                     onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                    className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
+                    className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1.5 ml-1 mb-1 py-0.5 px-1.5`}
                     style={{ textTransform: 'none' }}
                   >
                     <span>

@@ -18,7 +18,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { axelard } from '../../lib/api/executor'
 import { batches as getBatches, fieldsToObj } from '../../lib/api/index'
-import { chain_manager } from '../../lib/object/chain'
+import { getChain, chain_manager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
 
 const LIMIT = 100
@@ -123,13 +123,13 @@ export default () => {
             size,
             from,
             sort: [{ 'created_at.ms': 'desc' }],
-            fields: ['batch_id', 'chain', 'key_id', 'commands.*', 'status', 'created_at.*'],
-            _source: false,
+            // fields: ['batch_id', 'chain', 'key_id', 'commands.*', 'status', 'created_at.*'],
+            // _source: false,
           })
           if (response) {
             setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
-              d = fieldsToObj(d)
+              // d = fieldsToObj(d)
               const { batch_id, chain, key_id, status } = { ...d }
                 return {
                 ...d,
@@ -222,7 +222,7 @@ export default () => {
               <div
                 key={k}
                 onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center space-x-1.5 text-xs ml-1 mb-1 py-0.5 px-1.5`}
+                className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1.5 ml-1 mb-1 py-0.5 px-1.5`}
                 style={{ textTransform: 'none' }}
               >
                 <span>
@@ -243,23 +243,47 @@ export default () => {
               Header: 'Batch ID',
               accessor: 'batch_id',
               disableSortBy: true,
-              Cell: props => (
-                <div className="flex items-center space-x-1 mb-3">
-                  <Link href={`/batch/${props.row.original.chain}/${props.value}`}>
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="uppercase text-blue-600 dark:text-white font-bold"
-                    >
-                      {ellipse(props.value)}
-                    </a>
-                  </Link>
-                  <Copy
-                    value={props.value}
-                    size={18}
-                  />
-                </div>
-              ),
+              Cell: props => {
+                const { commands } = { ...props.row.original }
+                const _types = _.countBy(_.uniqBy(commands || [], 'id').map(c => c?.type).filter(t => t))
+                return (
+                  <div className="flex flex-col space-y-2 mb-3">
+                    <div className="flex items-center space-x-1">
+                      <Link href={`/batch/${props.row.original.chain}/${props.value}`}>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="uppercase text-blue-600 dark:text-white font-bold"
+                        >
+                          {ellipse(props.value)}
+                        </a>
+                      </Link>
+                      <Copy
+                        value={props.value}
+                        size={18}
+                      />
+                    </div>
+                    <div className="block sm:flex sm:flex-wrap items-center justify-start overflow-x-auto">
+                      {Object.entries({ ..._types }).map(([k, v]) => (
+                        <div
+                          key={k}
+                          className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-2.5 mb-1.5"
+                          style={{ textTransform: 'none' }}
+                        >
+                          <span>
+                            {k === 'undefined' ?
+                              'Unknown' : k
+                            }
+                          </span>
+                          <span className="text-blue-600 dark:text-blue-400">
+                            {number_format(v, '0,0')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              },
             },
             {
               Header: 'Chain',
@@ -298,18 +322,19 @@ export default () => {
               accessor: 'commands',
               disableSortBy: true,
               Cell: props => {
-                const chain_data = evm_chains_data?.find(c => equals_ignore_case(c?.id, props.row.original.chain))
+                const chain_data = getChain(props.row.original.chain, evm_chains_data)
                 return assets_data && (
                   props.value?.length > 0 ?
                     <div className="flex flex-col space-y-2.5 mb-4">
                       {props.value.filter(c => c).map((c, i) => {
                         const { params, type } = { ...c }
-                        const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newThreshold } = { ...params }
+                        const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
                         const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
                         const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
                         const _decimals = contract_data?.decimals || asset_data?.decimals || 18
                         const _symbol = contract_data?.symbol || asset_data?.symbol || symbol
                         const image = contract_data?.image || asset_data?.image
+                        const source_chain_data = sourceChain && getChain(sourceChain, evm_chains_data)
                         return (
                           <div
                             key={i}
@@ -318,6 +343,91 @@ export default () => {
                             <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize font-semibold py-1 px-2">
                               {type}
                             </div>
+                            {source_chain_data && (
+                              <>
+                                {source_chain_data.image ?
+                                  <Image
+                                    src={source_chain_data.image}
+                                    className="w-5 h-5 rounded-full"
+                                  />
+                                  :
+                                  <span className="font-semibold">
+                                    {source_chain_data.name}
+                                  </span>
+                                }
+                                {sourceTxHash && (
+                                  <div className="flex items-center space-x-1">
+                                    <Link href={`/gmp/${sourceTxHash}`}>
+                                      <a
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 dark:text-white font-semibold"
+                                      >
+                                        GMP
+                                      </a>
+                                    </Link>
+                                    {source_chain_data.explorer?.url && (
+                                      <a
+                                        href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', sourceTxHash)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="min-w-max text-blue-600 dark:text-white"
+                                      >
+                                        {source_chain_data.explorer.icon ?
+                                          <Image
+                                            src={source_chain_data.explorer.icon}
+                                            className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                          />
+                                          :
+                                          <TiArrowRight size={16} className="transform -rotate-45" />
+                                        }
+                                      </a>
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+                            {contractAddress && (
+                              <>
+                                <BiRightArrowCircle size={20} />
+                                <div className="flex items-center space-x-1">
+                                  <EnsProfile
+                                    address={contractAddress}
+                                    fallback={contractAddress && (
+                                      <Copy
+                                        value={contractAddress}
+                                        title={<span className="text-slate-400 dark:text-slate-200 text-sm">
+                                          <span className="xl:hidden">
+                                            {ellipse(contractAddress, 6)}
+                                          </span>
+                                          <span className="hidden xl:block">
+                                            {ellipse(contractAddress, 8)}
+                                          </span>
+                                        </span>}
+                                        size={18}
+                                      />
+                                    )}
+                                  />
+                                  {chain_data?.explorer?.url && (
+                                    <a
+                                      href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', contractAddress)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="min-w-max text-blue-600 dark:text-white"
+                                    >
+                                      {chain_data.explorer.icon ?
+                                        <Image
+                                          src={chain_data.explorer.icon}
+                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                        />
+                                        :
+                                        <TiArrowRight size={16} className="transform -rotate-45" />
+                                      }
+                                    </a>
+                                  )}
+                                </div>
+                              </>
+                            )}
                             {symbol && (
                               <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
                                 {image && (
