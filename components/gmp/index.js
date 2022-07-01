@@ -1185,7 +1185,7 @@ export default () => {
                               <span className="mr-1">
                                 ~
                                 {number_format(
-                                  Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals)) -
+                                  Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
                                   source_gas_used - source_refuned_gas_used,
                                   '0,0.000000', true
                                 )}
