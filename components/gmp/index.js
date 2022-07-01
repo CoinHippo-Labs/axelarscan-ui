@@ -797,7 +797,7 @@ export default () => {
               }
             </div>
             {data && detail_steps.map((s, i) => {
-              const { call, gas_paid, executed, error, is_not_enough_gas, gas_price_rate } = { ...gmp.data }
+              const { call, gas_paid, executed, error, is_not_enough_gas, gas_price_rate, status } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = i === 3 ? data || error : data
               const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
@@ -1001,7 +1001,12 @@ export default () => {
                           </div>
                         </div>
                         :
-                        <FallingLines color={loader_color(theme)} width="32" height="32" />
+                        i === 1 && ['executed', 'error'].includes(status) ?
+                          <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
+                            No transaction
+                          </span>
+                          :
+                          <FallingLines color={loader_color(theme)} width="32" height="32" />
                     }
                     {blockNumber && (
                       <div className={rowClassName}>
