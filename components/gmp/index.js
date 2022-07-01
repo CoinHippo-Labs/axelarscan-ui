@@ -65,8 +65,23 @@ export default () => {
           method: 'searchGMP',
           txHash: tx,
         })
+        const data = response?.[0]
+
+        // callback data for 2-way if exists
+        let {
+          callback,
+        } = { ...data }
+        if (callback?.transactionHash) {
+          const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
+            method: 'searchGMP',
+            txHash: callback.transactionHash,
+          })
+          callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
+        }
+
         setGmp({
-          data: response?.[0],
+          data,
+          callback,
           tx,
         })
       }
@@ -797,6 +812,7 @@ export default () => {
               }
             </div>
             {data && detail_steps.map((s, i) => {
+              const { callback } = { ...gmp }
               const { call, gas_paid, executed, error, is_not_enough_gas, gas_price_rate, status } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = i === 3 ? data || error : data
@@ -807,9 +823,9 @@ export default () => {
               const source_chain_data = getChain(source_chain, evm_chains_data)
               const destination_chain_data = getChain(destination_chain, evm_chains_data)
               const { gasToken, gasFeeAmount, refundAddress } = { ...gas_paid?.returnValues }
-              const { gasUsed, effectiveGasPrice } = { ...executed?.receipt || error?.receipt }
+              const { gasUsed, effectiveGasPrice } = { ...(executed?.receipt || error?.receipt) }
               const { source_token, destination_native_token } = { ...gas_price_rate }
-              let source_gas_data, destination_gas_data, source_gas_used, source_refuned_gas_used
+              let source_gas_data, destination_gas_data, source_gas_used, source_refuned_gas_used, callback_gas_used
               if (gasFeeAmount) {
                 source_gas_data = gasToken && gasToken !== constants.AddressZero ?
                   assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
@@ -836,7 +852,7 @@ export default () => {
                     .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
                     .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
                     .round(0).toString().replace('.0', '')
-                  , destination_gas_data.decimals
+                  , destination_native_token.decimals
                 ))
               } catch (error) {
                 source_gas_used = 0
@@ -851,6 +867,19 @@ export default () => {
                 ))
               } catch (error) {
                 source_refuned_gas_used = 0
+              }
+              if (callback) {
+                const { gasUsed, effectiveGasPrice } = { ...(callback.executed?.receipt || callback.error?.receipt) }
+                try {
+                  callback_gas_used = Number(utils.formatUnits(
+                    FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
+                      .mulUnsafe(FixedNumber.fromString(effectiveGasPrice || '0').toString())
+                      .round(0).toString().replace('.0', '')
+                    , source_token.decimals
+                  ))
+                } catch (error) {
+                  callback_gas_used = 0
+                }
               }
               const from = receipt?.from || transaction?.from
               const to = i < 3 ? contract_address : i === 4 ? _data?.to || refundAddress : destinationContractAddress
@@ -1059,7 +1088,7 @@ export default () => {
                           Gas Paid:
                         </span>
                         <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                          {source_gas_data?.image && (
+                          {source_gas_data.image && (
                             <Image
                               src={source_gas_data.image}
                               className="w-5 h-5 rounded-full"
@@ -1129,6 +1158,31 @@ export default () => {
                         </div>
                       </div>
                     )}
+                    {['refunded'].includes(s.id) && callback_gas_used && source_gas_data && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Gas Used Callback:
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {source_gas_data.image && (
+                              <Image
+                                src={source_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(callback_gas_used, '0,0.000000', true)}
+                              </span>
+                              <span>
+                                {ellipse(source_gas_data.symbol)}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     {['refunded'].includes(s.id) && source_token && destination_native_token && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
@@ -1191,7 +1245,7 @@ export default () => {
                                 ~
                                 {number_format(
                                   Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
-                                  source_gas_used - source_refuned_gas_used,
+                                  source_gas_used - source_refuned_gas_used - (callback_gas_used || 0),
                                   '0,0.000000', true
                                 )}
                               </span>
