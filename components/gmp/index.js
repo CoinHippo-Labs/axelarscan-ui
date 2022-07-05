@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
@@ -8,6 +9,7 @@ import { BigNumber, FixedNumber, constants, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
+import { HiArrowSmRight } from 'react-icons/hi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 import { RiCloseCircleFill } from 'react-icons/ri'
@@ -325,7 +327,7 @@ export default () => {
     }
   }
 
-  const { data } = { ...gmp }
+  const { data, callback } = { ...gmp }
   const { call, gas_paid, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
@@ -521,46 +523,78 @@ export default () => {
               </div>
               {data ?
                 <div className="overflow-x-auto flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
-                  <div className="flex flex-col space-y-2">
-                    <div className="pb-1">
-                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                        Method
-                      </span>
+                  <div className="flex flex-col space-y-4">
+                    <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                      Method
                     </div>
-                    <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
-                      {event === 'ContractCall' ?
-                        'callContract' :
-                        event === 'ContractCallWithToken' ?
-                          'callContractWithToken' :
-                          event || '-'
-                      }
-                    </div>
-                    {amount && _symbol && (
-                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                        {asset_image && (
-                          <Image
-                            src={asset_image}
-                            className="w-7 sm:w-5 lg:w-7 h-7 sm:h-5 lg:h-7 rounded-full"
-                          />
-                        )}
-                        <span className="text-base sm:text-sm lg:text-base font-semibold">
-                          {asset_data && (
-                            <span className="mr-1">
-                              {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000', true)}
-                            </span>
+                    <div className="space-y-1">
+                      <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-xs lg:text-sm font-semibold py-0.5 px-1.5">
+                        {event === 'ContractCall' ?
+                          'callContract' :
+                          event === 'ContractCallWithToken' ?
+                            'callContractWithToken' :
+                            event || '-'
+                        }
+                      </div>
+                      {amount && _symbol && (
+                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                          {asset_image && (
+                            <Image
+                              src={asset_image}
+                              className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                            />
                           )}
-                          <span>
-                            {_symbol}
+                          <span className="text-base sm:text-sm lg:text-base font-semibold">
+                            {asset_data && (
+                              <span className="mr-1">
+                                {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000', true)}
+                              </span>
+                            )}
+                            <span>
+                              {_symbol}
+                            </span>
                           </span>
-                        </span>
+                        </div>
+                      )}
+                    </div>
+                    {callback && (
+                      <div className="space-y-1.5">
+                        <Link href={`/gmp/${callback.transactionHash}`}>
+                          <div className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-2 pr-1">
+                            <span className="text-xs font-semibold hover:font-bold">
+                              2-Way Call
+                            </span>
+                            <HiArrowSmRight size={16} />
+                          </div>
+                        </Link>
+                        <div className="flex items-center space-x-1">
+                          <Link href={`/gmp/${callback.transactionHash}`}>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(callback.transactionHash, 8)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(callback.transactionHash, 12)}
+                                </span>
+                              </div>
+                            </a>
+                          </Link>
+                          <Copy
+                            value={callback.transactionHash}
+                            size={18}
+                          />
+                        </div>
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col space-y-2">
-                    <div className="pb-1">
-                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                        Source
-                      </span>
+                    <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                      Source
                     </div>
                     <div className="flex items-center space-x-1.5">
                       {source_chain_data?.image && (
@@ -643,10 +677,8 @@ export default () => {
                     )}
                   </div>
                   <div className="flex flex-col space-y-2">
-                    <div className="pb-1">
-                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                        Destination
-                      </span>
+                    <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                      Destination
                     </div>
                     <div className="flex items-center space-x-1.5">
                       {destination_chain_data?.image && (
@@ -729,10 +761,8 @@ export default () => {
                     )}
                   </div>
                   <div className="min-w-max flex flex-col space-y-1">
-                    <div className="pb-2">
-                      <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                        Status
-                      </span>
+                    <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                      Status
                     </div>
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
                       const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?

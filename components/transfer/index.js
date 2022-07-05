@@ -187,10 +187,8 @@ export default () => {
             {data ?
               <div className="overflow-x-auto flex flex-col sm:flex-row justify-between space-y-4 sm:space-y-0 sm:space-x-4">
                 <div className="flex flex-col space-y-2">
-                  <div className="pb-1">
-                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                      Source
-                    </span>
+                  <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                    Source
                   </div>
                   <div className="flex items-center space-x-1.5">
                     {source_chain_data?.image && (
@@ -242,17 +240,15 @@ export default () => {
                   <MdChevronLeft size={36} className="transform rotate-90 sm:rotate-0" />
                 </div>
                 <div className="flex flex-col space-y-1">
-                  <div className="pb-2">
-                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                      Asset
-                    </span>
+                  <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                    Asset
                   </div>
                   {amount && asset_data && (
                     <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
                       {asset_image && (
                         <Image
                           src={asset_image}
-                          className="w-7 sm:w-5 lg:w-7 h-7 sm:h-5 lg:h-7 rounded-full"
+                          className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
                         />
                       )}
                       <span className="text-base sm:text-sm lg:text-base font-semibold">
@@ -314,10 +310,8 @@ export default () => {
                   <MdChevronRight size={36} className="transform rotate-90 sm:rotate-0" />
                 </div>
                 <div className="flex flex-col space-y-2">
-                  <div className="pb-1">
-                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                      Destination
-                    </span>
+                  <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                    Destination
                   </div>
                   <div className="flex items-center space-x-1.5">
                     {destination_chain_data?.image && (
@@ -366,10 +360,8 @@ export default () => {
                   )}
                 </div>
                 <div className="min-w-max flex flex-col space-y-1">
-                  <div className="pb-2">
-                    <span className="bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-1.5 px-2.5">
-                      Status
-                    </span>
+                  <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                    Status
                   </div>
                   {steps.map((s, i) => {
                     const text_color = s.finish ?
@@ -585,7 +577,7 @@ export default () => {
                       <span className={rowTitleClassName}>
                         Type:
                       </span>
-                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
+                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
                         {name(type)}
                       </div>
                     </div>
