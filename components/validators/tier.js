@@ -351,6 +351,7 @@ export default () => {
             setFromBlock(block && !isNaN(block) ? Number(block) : block)
           }}
           onWheel={e => e.target.blur()}
+          onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
           className={`w-24 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${fetching ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-lg text-base font-semibold py-1 px-2.5`}
         />
         <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
@@ -373,6 +374,7 @@ export default () => {
             setToBlock(block && !isNaN(block) ? Number(block) : block)
           }}
           onWheel={e => e.target.blur()}
+          onKeyDown={e => ['e', 'E', '-'].includes(e.key) && e.preventDefault()}
           className={`w-24 bg-slate-100 focus:bg-slate-200 dark:bg-slate-800 dark:focus:bg-slate-700 ${fetching ? 'cursor-not-allowed' : ''} border-0 focus:ring-0 rounded-lg text-base font-semibold py-1 px-2.5`}
         />
         <button
