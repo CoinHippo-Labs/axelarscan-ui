@@ -1258,7 +1258,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['refunded'].includes(s.id) && callback_gas_used && source_gas_data && (
+                    {['refunded'].includes(s.id) && callback_gas_used > 0 && source_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Gas Used Callback:
