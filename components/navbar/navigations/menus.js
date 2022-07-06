@@ -1,6 +1,6 @@
 import { FiBox, FiCode } from 'react-icons/fi'
-import { BiServer, BiFileBlank, BiMessageDots, BiCoinStack } from 'react-icons/bi'
-import { RiKeyLine, RiCoinsLine, RiStackLine } from 'react-icons/ri'
+import { BiServer, BiFileBlank, BiMessageDots, BiCoinStack, BiCircle } from 'react-icons/bi'
+import { RiKeyLine, RiStackLine } from 'react-icons/ri'
 import { MdOutlineHowToVote } from 'react-icons/md'
 
 export default [
@@ -49,7 +49,7 @@ export default [
     title: 'Sent',
     path: '/sent',
     others_paths: ['/sent/search', '/sent/[tx]'],
-    icon: <RiCoinsLine size={18} className="stroke-current" />,
+    icon: <BiCircle size={18} className="stroke-current" />,
   },
   process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && {
     id: 'gmp',

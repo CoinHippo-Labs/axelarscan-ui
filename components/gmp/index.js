@@ -328,7 +328,7 @@ export default () => {
   }
 
   const { data, callback } = { ...gmp }
-  const { call, gas_paid, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
+  const { call, gas_paid, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { from } = { ...call?.transaction }
@@ -423,6 +423,11 @@ export default () => {
     title: 'Gas Paid',
     chain_data: source_chain_data,
     data: gas_paid,
+  }, forecalled && {
+    id: 'forecalled',
+    title: 'Forecalled',
+    chain_data: destination_chain_data,
+    data: forecalled,
   }, {
     id: 'approved',
     title: 'Call Approved',
@@ -442,14 +447,14 @@ export default () => {
   let current_step
   switch (status) {
     case 'called':
-      current_step = gas_paid ? 2 : 1
+      current_step = steps.findIndex(s => s.id === (gas_paid ? 'gas_paid' : 'call')) + 1
       break
     case 'approved':
-      current_step = 3
+      current_step = steps.findIndex(s => s.id === status) + 1
       break
     case 'executed':
     case 'error':
-      current_step = 4
+      current_step = steps.findIndex(s => s.id === 'executed') + 1
       break
     default:
       break
@@ -765,11 +770,11 @@ export default () => {
                       Status
                     </div>
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
-                      const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
+                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
-                        i === current_step && ![4].includes(i) ?
+                        i === current_step && !['refunded'].includes(s.id) ?
                           'text-blue-500 dark:text-white' :
-                          (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
+                          (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
                             'text-red-500 dark:text-red-600' :
                             'text-slate-400 dark:text-slate-600'
                       const { explorer } = { ...s.chain_data }
@@ -779,11 +784,11 @@ export default () => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {(i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
+                          {(!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
-                            i === current_step && ![4].includes(i) ?
+                            i === current_step && !['refunded'].includes(s.id) ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
+                              (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
                                 <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
                                 <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
                           }
@@ -843,9 +848,9 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, executed, error, is_not_enough_gas, gas_price_rate, status } = { ...gmp.data }
+              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, status } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
-              const _data = i === 3 ? data || error : data
+              const _data = ['executed'].includes(s.id) ? data || error : data
               const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
               const { sender } = { ...returnValues }
               const source_chain = call?.chain
@@ -855,7 +860,7 @@ export default () => {
               const { gasToken, gasFeeAmount, refundAddress } = { ...gas_paid?.returnValues }
               const { gasUsed, effectiveGasPrice } = { ...(executed?.receipt || error?.receipt) }
               const { source_token, destination_native_token } = { ...gas_price_rate }
-              let source_gas_data, destination_gas_data, source_gas_used, source_refuned_gas_used, callback_gas_used
+              let source_gas_data, destination_gas_data, source_gas_used, source_refuned_gas_used, callback_gas_used, source_forecalled_gas_used
               if (gasFeeAmount) {
                 source_gas_data = gasToken && gasToken !== constants.AddressZero ?
                   assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
@@ -911,8 +916,19 @@ export default () => {
                   callback_gas_used = 0
                 }
               }
+              try {
+                source_forecalled_gas_used = Number(utils.formatUnits(
+                  FixedNumber.fromString(BigNumber.from(forecalled?.receipt?.gasUsed || '0').toString())
+                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(forecalled?.receipt?.effectiveGasPrice || '0').toString()))
+                    .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+                    .round(0).toString().replace('.0', '')
+                  , destination_native_token.decimals
+                ))
+              } catch (error) {
+                source_forecalled_gas_used = 0
+              }
               const from = receipt?.from || transaction?.from
-              const to = i < 3 ? contract_address : i === 4 ? _data?.to || refundAddress : destinationContractAddress
+              const to = !['forecalled', 'executed', 'refunded'].includes(s.id) ? contract_address : ['refunded'].includes(s.id) ? _data?.to || refundAddress : destinationContractAddress
               const { explorer } = { ...chain_data }
               const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
               const rowClassName = 'flex space-x-4'
@@ -926,7 +942,7 @@ export default () => {
                     {title}
                   </div>
                   <div className="flex flex-col space-y-3">
-                    {i === 3 && (executeButton || (!data && is_executed)) ?
+                    {['executed'].includes(s.id) && (executeButton || (!data && is_executed)) ?
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Tx Hash:
@@ -1060,7 +1076,7 @@ export default () => {
                           </div>
                         </div>
                         :
-                        i === 1 && ['executed', 'error'].includes(status) ?
+                        ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
                           <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
                             No transaction
                           </span>
@@ -1084,18 +1100,18 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {(_data || (i === 3 && is_executed)) && (
+                    {(_data || (['executed'].includes(s.id) && is_executed)) && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Status:
                         </span>
-                        <div className={`${receipt?.status || (i === 3 && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
-                          {receipt?.status || (i === 3 && is_executed) ?
+                        <div className={`${receipt?.status || (['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                          {receipt?.status || (['executed'].includes(s.id) && is_executed) ?
                             <BiCheckCircle size={20} /> :
                             <BiXCircle size={20} />
                           }
                           <span>
-                            {receipt?.status || (i === 3 && is_executed) ?
+                            {receipt?.status || (['executed'].includes(s.id) && is_executed) ?
                               'Success' : 'Error'
                             }
                           </span>
@@ -1132,6 +1148,59 @@ export default () => {
                               {ellipse(source_gas_data.symbol)}
                             </span>
                           </span>
+                        </div>
+                      </div>
+                    )}
+                    {['forecalled', 'refunded'].includes(s.id) && forecalled?.receipt?.gasUsed && forecalled.receipt.effectiveGasPrice && destination_gas_data && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          {['refunded'].includes(s.id) ? 'Forecall Gas' : 'Gas Used'}:
+                        </span>
+                        <div className="flex items-center space-x-2">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {destination_gas_data?.image && (
+                              <Image
+                                src={destination_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(utils.formatUnits(
+                                  FixedNumber.fromString(BigNumber.from(forecalled.receipt.gasUsed).toString())
+                                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(forecalled.receipt.effectiveGasPrice).toString()))
+                                    .round(0).toString().replace('.0', '')
+                                  , destination_gas_data.decimals
+                                ), '0,0.000000', true)}
+                              </span>
+                              <span>
+                                {ellipse(destination_gas_data.symbol)}
+                              </span>
+                            </span>
+                          </div>
+                          {source_token?.token_price?.usd && destination_native_token?.token_price?.usd && (
+                            <>
+                              <span className="text-sm font-medium">
+                                =
+                              </span>
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                                {source_gas_data?.image && (
+                                  <Image
+                                    src={source_gas_data.image}
+                                    className="w-5 h-5 rounded-full"
+                                  />
+                                )}
+                                <span className="text-sm font-semibold">
+                                  <span className="mr-1">
+                                    {number_format(source_forecalled_gas_used, '0,0.000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data?.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     )}
@@ -1275,7 +1344,7 @@ export default () => {
                                 ~
                                 {number_format(
                                   Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
-                                  source_gas_used - source_refuned_gas_used - (callback_gas_used || 0),
+                                  source_gas_used - source_forecalled_gas_used - source_refuned_gas_used - (callback_gas_used || 0),
                                   '0,0.000000', true
                                 )}
                               </span>
@@ -1290,7 +1359,7 @@ export default () => {
                     {to && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {i === 1 ? 'Gas Service' : i === 3 ? 'Destination' : i === 4 ? 'Receiver' : 'Gateway'}:
+                          {['gas_paid'].includes(s.id) ? 'Gas Service' : ['forecalled', 'executed'].includes(s.id) ? 'Destination' : ['refunded'].includes(s.id) ? 'Receiver' : 'Gateway'}:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -1339,7 +1408,7 @@ export default () => {
                     {from && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {i < 2 ? 'Sender' : i === 4 ? 'Sender' : 'Relayer'}:
+                          {!['forecalled', 'approved', 'executed'].includes(s.id) ? 'Sender' : ['refunded'].includes(s.id) ? 'Sender' : ['forecalled'].includes(s.id) ? 'Forecaller' : 'Relayer'}:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -1385,7 +1454,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {i < 1 && sender && (
+                    {['call'].includes(s.id) && sender && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Source:
@@ -1434,7 +1503,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {i === 3 && call?.transaction?.from && (
+                    {['forecalled', 'executed'].includes(s.id) && call?.transaction?.from && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Receiver:
@@ -1483,7 +1552,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {i === 3 && !data && _data && (
+                    {['executed'].includes(s.id) && !data && _data && (
                       <div className={rowClassName}>
                         <span
                           className={rowTitleClassName}
@@ -1515,7 +1584,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {i === 4 && _data?.error && !receipt?.status && (
+                    {['refunded'].includes(s.id) && _data?.error && !receipt?.status && (
                       <div className={rowClassName}>
                         <span
                           className={rowTitleClassName}

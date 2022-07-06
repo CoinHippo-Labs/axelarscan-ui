@@ -1,5 +1,6 @@
 import { RiRadioButtonLine } from 'react-icons/ri'
 import { HiCode } from 'react-icons/hi'
+import { VscCode } from 'react-icons/vsc'
 
 export default [
   {
@@ -21,6 +22,6 @@ export default [
     title: 'Testnet 2',
     path: 'https://testnet-2.axelarscan.io',
     external: true,
-    icon: <HiCode size={20} className="stroke-current" />,
+    icon: <VscCode size={20} className="stroke-current" />,
   },
 ]

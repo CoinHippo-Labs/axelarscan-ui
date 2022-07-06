@@ -51,7 +51,7 @@ export default ({ n }) => {
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
-        status: ['called', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        status: ['called', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         senderAddress,
         sourceAddress,
         contractAddress,
@@ -494,7 +494,7 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, approved, executed, is_executed, error, refunded, status } = { ...props.row.original }
+                const { call, gas_paid, forecalled, approved, executed, is_executed, error, refunded, status } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
@@ -509,6 +509,11 @@ export default ({ n }) => {
                   title: 'Gas Paid',
                   chain_data: source_chain_data,
                   data: gas_paid,
+                }, forecalled && {
+                  id: 'forecalled',
+                  title: 'Forecalled',
+                  chain_data: destination_chain_data,
+                  data: forecalled,
                 }, {
                   id: 'approved',
                   title: 'Call Approved',
@@ -528,14 +533,14 @@ export default ({ n }) => {
                 let current_step
                 switch (status) {
                   case 'called':
-                    current_step = gas_paid ? 2 : 1
+                    current_step = steps.findIndex(s => s.id === (gas_paid ? 'gas_paid' : 'call')) + 1
                     break
                   case 'approved':
-                    current_step = 3
+                    current_step = steps.findIndex(s => s.id === status) + 1
                     break
                   case 'executed':
                   case 'error':
-                    current_step = 4
+                    current_step = steps.findIndex(s => s.id === 'executed') + 1
                     break
                   default:
                     break
@@ -544,11 +549,11 @@ export default ({ n }) => {
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
-                      const text_color = (i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
+                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
-                        i === current_step && ![4].includes(i) ?
+                        i === current_step && !['refunded'].includes(s.id) ?
                           'text-blue-500 dark:text-white' :
-                          (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
+                          (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
                             'text-red-500 dark:text-red-600' :
                             'text-slate-400 dark:text-slate-600'
                       const { explorer } = { ...s.chain_data }
@@ -558,11 +563,11 @@ export default ({ n }) => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {(i !== 4 && s.data) || (i === 3 && is_executed) || (i === 4 && s?.data?.receipt?.status) ?
+                          {(!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
-                            i === current_step && ![4].includes(i) ?
+                            i === current_step && !['refunded'].includes(s.id) ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              (i === 3 && error) || (i === 4 && !s?.data?.receipt?.status) ?
+                              (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
                                 <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
                                 <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
                           }
