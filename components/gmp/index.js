@@ -565,12 +565,16 @@ export default () => {
                     {callback?.call && (
                       <div className="space-y-1.5">
                         <Link href={`/gmp/${callback.call.transactionHash}`}>
-                          <div className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-2 pr-1">
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-2 pr-1"
+                          >
                             <span className="text-xs font-semibold hover:font-bold">
                               2-Way Call
                             </span>
                             <HiArrowSmRight size={16} />
-                          </div>
+                          </a>
                         </Link>
                         <div className="flex items-center space-x-1">
                           <Link href={`/gmp/${callback.call.transactionHash}`}>
