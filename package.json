@@ -30,6 +30,7 @@
     "@antv/g6": "^4.6.8",
     "@axelar-network/axelarjs-sdk": "0.6.10",
     "@headlessui/react": "^1.6.5",
+    "@popperjs/core": "^2.11.5",
     "@redux-devtools/extension": "^3.2.2",
     "antd": "^4.21.3",
     "bech32": "^2.0.0",
