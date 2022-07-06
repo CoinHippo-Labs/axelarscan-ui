@@ -130,21 +130,18 @@ export default () => {
         message: 'Approving',
       })
       const { call } = { ...data }
-      const { chain, transactionHash } = { ...call }
-      const { destinationChain } = { ...call?.returnValues }
-      if (transactionHash && chain && destinationChain) {
-        await api.manualRelayToDestChain({
-          txHash: transactionHash,
-          src: chain,
-          dest: destinationChain,
-          debug: true,
-        })
+      const { transactionHash } = { ...call }
+      const response = await api.manualRelayToDestChain(transactionHash)
+      const { success, error, signCommandTx } = { ...response }
+      if (success) {
         await sleep(15 * 1000)
       }
       setApproving(false)
       setApproveResponse({
-        status: 'success',
-        message: 'Approve successful',
+        status: success ? 'success' : 'failed',
+        message: error || 'Approve successful',
+        txHash: signCommandTx?.txhash,
+        is_axelar_transaction: true,
       })
     }
   }
