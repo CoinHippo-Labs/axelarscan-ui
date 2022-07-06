@@ -562,9 +562,9 @@ export default () => {
                         </div>
                       )}
                     </div>
-                    {callback && (
+                    {callback?.call && (
                       <div className="space-y-1.5">
-                        <Link href={`/gmp/${callback.transactionHash}`}>
+                        <Link href={`/gmp/${callback.call.transactionHash}`}>
                           <div className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-2 pr-1">
                             <span className="text-xs font-semibold hover:font-bold">
                               2-Way Call
@@ -573,7 +573,7 @@ export default () => {
                           </div>
                         </Link>
                         <div className="flex items-center space-x-1">
-                          <Link href={`/gmp/${callback.transactionHash}`}>
+                          <Link href={`/gmp/${callback.call.transactionHash}`}>
                             <a
                               target="_blank"
                               rel="noopener noreferrer"
@@ -581,16 +581,16 @@ export default () => {
                             >
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                 <span className="xl:hidden">
-                                  {ellipse(callback.transactionHash, 8)}
+                                  {ellipse(callback.call.transactionHash, 8)}
                                 </span>
                                 <span className="hidden xl:block">
-                                  {ellipse(callback.transactionHash, 12)}
+                                  {ellipse(callback.call.transactionHash, 12)}
                                 </span>
                               </div>
                             </a>
                           </Link>
                           <Copy
-                            value={callback.transactionHash}
+                            value={callback.call.transactionHash}
                             size={18}
                           />
                         </div>
