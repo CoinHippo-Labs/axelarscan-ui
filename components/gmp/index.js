@@ -158,7 +158,7 @@ export default () => {
         })
         const { call } = { ...data }
         const { transactionHash, transactionIndex } = { ...call }
-        const response = await api.execute(`${transactionHash}:${transactionIndex}`)
+        const response = await api.execute(transactionHash)
         const { success, error, transaction } = { ...response }
         setExecuting(false)
         setExecuteResponse({
@@ -186,7 +186,7 @@ export default () => {
         })
         const { call } = { ...data }
         const { chain, transactionHash, transactionIndex } = { ...call }
-        const response = await api.addNativeGas(chain, `${transactionHash}:${transactionIndex}`, {
+        const response = await api.addNativeGas(chain, transactionHash, {
           refundAddress: address,
         })
         const { success, error, transaction } = { ...response }
