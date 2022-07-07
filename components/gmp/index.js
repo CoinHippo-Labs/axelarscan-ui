@@ -77,6 +77,7 @@ export default () => {
           const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
             method: 'searchGMP',
             txHash: callback.transactionHash,
+            txIndex: callback.transactionIndex,
           })
           callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
         }
@@ -106,10 +107,11 @@ export default () => {
     setTxHashEditUpdating(false)
   }
 
-  const saveGMP = async (sourceTransactionHash, transactionHash, relayerAddress, error) => {
+  const saveGMP = async (sourceTransactionHash, sourceTransactionIndex, transactionHash, relayerAddress, error) => {
     const params = {
       method: 'saveGMP',
       sourceTransactionHash,
+      sourceTransactionIndex,
       transactionHash,
       relayerAddress,
       error,
@@ -155,8 +157,8 @@ export default () => {
           message: 'Executing',
         })
         const { call } = { ...data }
-        const { transactionHash } = { ...call }
-        const response = await api.execute(transactionHash)
+        const { transactionHash, transactionIndex } = { ...call }
+        const response = await api.execute(`${transactionHash}:${transactionIndex}`)
         const { success, error, transaction } = { ...response }
         setExecuting(false)
         setExecuteResponse({
@@ -183,8 +185,8 @@ export default () => {
           message: 'Estimating & Paying gas',
         })
         const { call } = { ...data }
-        const { chain, transactionHash } = { ...call }
-        const response = await api.addNativeGas(chain, transactionHash, {
+        const { chain, transactionHash, transactionIndex } = { ...call }
+        const response = await api.addNativeGas(chain, `${transactionHash}:${transactionIndex}`, {
           refundAddress: address,
         })
         const { success, error, transaction } = { ...response }
@@ -1013,7 +1015,7 @@ export default () => {
                                 disabled={!txHashEdit || txHashEditUpdating}
                                 onClick={async () => {
                                   setTxHashEditUpdating(true)
-                                  await saveGMP(call?.transactionHash, txHashEdit, address)
+                                  await saveGMP(call?.transactionHash, call?.transactionIndex, txHashEdit, address)
                                 }}
                                 className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
                               >
