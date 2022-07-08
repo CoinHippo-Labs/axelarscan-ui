@@ -911,7 +911,7 @@ export default () => {
                 try {
                   callback_gas_used = Number(utils.formatUnits(
                     FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
-                      .mulUnsafe(FixedNumber.fromString(effectiveGasPrice || '0').toString())
+                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString()))
                       .round(0).toString().replace('.0', '')
                     , source_token.decimals
                   ))
@@ -1263,7 +1263,7 @@ export default () => {
                     {['refunded'].includes(s.id) && callback_gas_used > 0 && source_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          Gas Used Callback:
+                          Gas Callback:
                         </span>
                         <div className="flex items-center space-x-2">
                           <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
