@@ -134,6 +134,7 @@ export default () => {
       const { call } = { ...data }
       const { transactionHash } = { ...call }
       const response = await api.manualRelayToDestChain(transactionHash)
+      console.log('[approve response]', response)
       const { success, error, signCommandTx } = { ...response }
       if (success) {
         await sleep(15 * 1000)
@@ -159,6 +160,7 @@ export default () => {
         const { call } = { ...data }
         const { transactionHash, transactionIndex } = { ...call }
         const response = await api.execute(transactionHash)
+        console.log('[execute response]', response)
         const { success, error, transaction } = { ...response }
         setExecuting(false)
         setExecuteResponse({
@@ -189,6 +191,7 @@ export default () => {
         const response = await api.addNativeGas(chain, transactionHash, {
           refundAddress: address,
         })
+        console.log('[addNativeGas response]', response)
         const { success, error, transaction } = { ...response }
         if (success) {
           await sleep(15 * 1000)
