@@ -1001,7 +1001,7 @@ export default () => {
                                 </a>
                               </>
                               :
-                              !(!data && is_executed) && (
+                              !(!data && is_executed) && !error && (
                                 <FallingLines color={loader_color(theme)} width="32" height="32" />
                               )
                           }
@@ -1570,7 +1570,7 @@ export default () => {
                           <div className="flex items-center space-x-1.5">
                             {_data.error?.code && (
                               <a
-                                href={`https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().replace('unpredicatable_gas_limit', 'unpredictable_gas_limit').split('_').join('-')}` : 'ethereum'}`}
+                                href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().replace('unpredicatable_gas_limit', 'unpredictable_gas_limit').split('_').join('-')}` : 'ethereum'}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
@@ -1585,7 +1585,7 @@ export default () => {
                             )}
                           </div>
                           <span className="text-red-500 dark:text-red-600 font-semibold">
-                            {ellipse([_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
+                            {ellipse([_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.data?.message || _data.error?.body?.replaceAll('"""', '') || _data.error?.message].filter(m => m).join(' - '), 256)}
                           </span>
                         </div>
                       </div>
