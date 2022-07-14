@@ -20,7 +20,7 @@ import Copy from '../copy'
 import Notification from '../notifications'
 import Wallet from '../wallet'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
+import { number_format, capitalize, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
 
 export default () => {
   const { preferences, evm_chains, cosmos_chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
@@ -1619,17 +1619,21 @@ export default () => {
               )
             })}
             <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
-              <div className="sm:col-span-4 space-y-2">
-                <div className="text-lg font-bold">
-                  Methods
-                </div>
-                <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-base font-semibold py-0.5 px-1.5">
-                  execute{symbol ? 'WithToken' : ''}
-                </div>
-              </div>
-              <div className="sm:col-span-4 text-lg font-bold">
-                Arguments
-              </div>
+              {approved && (
+                <>
+                  <div className="sm:col-span-4 space-y-2">
+                    <div className="text-lg font-bold">
+                      Methods
+                    </div>
+                    <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-base font-semibold py-0.5 px-1.5">
+                      execute{symbol ? 'WithToken' : ''}
+                    </div>
+                  </div>
+                  <div className="sm:col-span-4 text-lg font-bold">
+                    Arguments
+                  </div>
+                </>
+              )}
               {commandId && (
                 <div className="sm:col-span-4 space-y-2">
                   <span className="text-base font-semibold">
@@ -1648,18 +1652,18 @@ export default () => {
                   </div>
                 </div>
               )}
-              {sourceChain && (
+              {(sourceChain || chain) && (
                 <div className="sm:col-span-4 space-y-2">
                   <span className="text-base font-semibold">
                     sourceChain
                   </span>
                   <div className="flex items-start">
                     <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                      {sourceChain}
+                      {sourceChain || capitalize(chain)}
                     </div>
                     <div className="mt-4">
                       <Copy
-                        value={sourceChain}
+                        value={sourceChain || capitalize(chain)}
                         size={20}
                       />
                     </div>
@@ -1720,18 +1724,18 @@ export default () => {
                   </div>
                 </div>
               )}
-              {amount && (
+              {approved?.returnValues?.amount && (
                 <div className="sm:col-span-4 space-y-2">
                   <span className="text-base font-semibold">
                     amount
                   </span>
                   <div className="flex items-start">
                     <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                      {BigNumber.from(approved?.returnValues?.amount).toString()}
+                      {BigNumber.from(approved.returnValues.amount).toString()}
                     </div>
                     <div className="mt-4">
                       <Copy
-                        value={BigNumber.from(approved?.returnValues?.amount).toString()}
+                        value={BigNumber.from(approved.returnValues.amount).toString()}
                         size={20}
                       />
                     </div>
