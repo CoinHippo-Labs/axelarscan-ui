@@ -333,6 +333,7 @@ export default () => {
   const { call, gas_paid, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
+  const { commandId, sourceChain } = { ...approved?.returnValues }
   const { from } = { ...call?.transaction }
   const relayer = executed?.transaction?.from
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
@@ -857,7 +858,9 @@ export default () => {
               const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, status } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ? data || error : data
-              const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
+              const { blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
+              let { transactionHash } = { ..._data }
+              transactionHash = transactionHash || receipt?.transactionHash
               const { sender } = { ...returnValues }
               const source_chain = call?.chain
               const destination_chain = call?.returnValues?.destinationChain
@@ -1615,42 +1618,145 @@ export default () => {
                 </div>
               )
             })}
-            {payloadHash && (
+            <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
               <div className="sm:col-span-4 space-y-2">
-                <span className="text-base font-semibold">
-                  Payload Hash
-                </span>
-                <div className="flex items-start">
-                  <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                    {payloadHash}
-                  </div>
-                  <div className="mt-4">
-                    <Copy
-                      value={payloadHash}
-                      size={20}
-                    />
-                  </div>
+                <div className="text-lg font-bold">
+                  Methods
+                </div>
+                <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-base font-semibold py-0.5 px-1.5">
+                  execute{symbol ? 'WithToken' : ''}
                 </div>
               </div>
-            )}
-            {payload && (
-              <div className="sm:col-span-4 space-y-2">
-                <span className="text-base font-semibold">
-                  Payload
-                </span>
-                <div className="flex items-start">
-                  <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                    {payload}
-                  </div>
-                  <div className="mt-4">
-                    <Copy
-                      value={payload}
-                      size={20}
-                    />
+              <div className="sm:col-span-4 text-lg font-bold">
+                Arguments
+              </div>
+              {commandId && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    commandId
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {commandId}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={commandId}
+                        size={20}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+              {sourceChain && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    sourceChain
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {sourceChain}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={sourceChain}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {sender && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    sourceAddress
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {sender}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={sender}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {payload && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    payload
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {payload}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={payload}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {symbol && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    symbol
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {symbol}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={symbol}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {amount && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    amount
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {BigNumber.from(amount).toString()}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={BigNumber.from(amount).toString()}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/*payloadHash && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    Payload Hash
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {payloadHash}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={payloadHash}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )*/}
+            </div>
           </div>
         </>
         :
