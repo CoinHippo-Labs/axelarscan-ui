@@ -1727,11 +1727,11 @@ export default () => {
                   </span>
                   <div className="flex items-start">
                     <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                      {BigNumber.from(amount).toString()}
+                      {BigNumber.from(approved?.returnValues?.amount).toString()}
                     </div>
                     <div className="mt-4">
                       <Copy
-                        value={BigNumber.from(amount).toString()}
+                        value={BigNumber.from(approved?.returnValues?.amount).toString()}
                         size={20}
                       />
                     </div>
