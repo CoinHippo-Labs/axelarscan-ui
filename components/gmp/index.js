@@ -1619,6 +1619,24 @@ export default () => {
               )
             })}
             <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
+              {payloadHash && (
+                <div className="sm:col-span-4 space-y-2">
+                  <span className="text-base font-semibold">
+                    Payload Hash
+                  </span>
+                  <div className="flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {payloadHash}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={payloadHash}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
               {approved && (
                 <>
                   <div className="sm:col-span-4 space-y-2">
@@ -1742,24 +1760,6 @@ export default () => {
                   </div>
                 </div>
               )}
-              {/*payloadHash && (
-                <div className="sm:col-span-4 space-y-2">
-                  <span className="text-base font-semibold">
-                    Payload Hash
-                  </span>
-                  <div className="flex items-start">
-                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                      {payloadHash}
-                    </div>
-                    <div className="mt-4">
-                      <Copy
-                        value={payloadHash}
-                        size={20}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )*/}
             </div>
           </div>
         </>
