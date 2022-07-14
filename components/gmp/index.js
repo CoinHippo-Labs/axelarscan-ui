@@ -933,6 +933,8 @@ export default () => {
               } catch (error) {
                 source_forecalled_gas_used = 0
               }
+              const refunded_amount = gasFeeAmount && (Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
+                source_gas_used - source_forecalled_gas_used - source_refuned_gas_used - (callback_gas_used || 0))
               const from = receipt?.from || transaction?.from
               const to = !['forecalled', 'executed', 'refunded'].includes(s.id) ? contract_address : ['refunded'].includes(s.id) ? _data?.to || refundAddress : destinationContractAddress
               const { explorer } = { ...chain_data }
@@ -1332,7 +1334,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && (
+                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Refunded:
@@ -1348,10 +1350,7 @@ export default () => {
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
                                 ~
-                                {number_format(
-                                  Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
-                                  source_gas_used - source_forecalled_gas_used - source_refuned_gas_used - (callback_gas_used || 0),
-                                  '0,0.000000', true
+                                {number_format(refunded_amount, '0,0.000000', true
                                 )}
                               </span>
                               <span>

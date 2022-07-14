@@ -71,7 +71,7 @@ export default ({ n }) => {
     if (pathname && filters) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (address || ['/gmp/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
+    const interval = setInterval(() => triggering(true), (address || ['/gmp/search'].includes(pathname) ? 1 : 0.25) * 60 * 1000)
     return () => {
       clearInterval(interval)
     }
