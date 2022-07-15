@@ -1586,9 +1586,14 @@ export default () => {
                               </div>
                             )}
                           </div>
-                          <span className="text-red-500 dark:text-red-600 font-semibold">
-                            {ellipse([_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.data?.message || _data.error?.message, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
-                          </span>
+                          {[_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.data?.message || _data.error?.message, _data.error?.body?.replaceAll('"""', '')].filter(m => m).map((m, j) => (
+                            <div
+                              key={j}
+                              className="text-red-500 dark:text-red-600 font-semibold"
+                            >
+                              {ellipse(m, 256)}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}
