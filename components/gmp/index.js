@@ -1337,7 +1337,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 && block_timestamp > (executed?.block_timestamp || error?.block_timestamp) && (
+                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 && (!(executed?.block_timestamp || error?.block_timestamp) || block_timestamp > (executed?.block_timestamp || error?.block_timestamp)) && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Refunded:
