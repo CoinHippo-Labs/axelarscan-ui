@@ -1337,7 +1337,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 && (
+                    {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 && block_timestamp > (executed?.block_timestamp || error?.block_timestamp) && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Refunded:
@@ -1587,7 +1587,7 @@ export default () => {
                             )}
                           </div>
                           <span className="text-red-500 dark:text-red-600 font-semibold">
-                            {ellipse([_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.data?.message || _data.error?.body?.replaceAll('"""', '') || _data.error?.message].filter(m => m).join(' - '), 256)}
+                            {ellipse([_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.data?.message || _data.error?.message, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
                           </span>
                         </div>
                       </div>
