@@ -14,7 +14,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { validator_sets } from '../../lib/api/cosmos'
 import { axelard } from '../../lib/api/executor'
-import { evm_votes as getEvmVotes } from '../../lib/api/index'
+import { evm_votes as getEvmVotes } from '../../lib/api/evm-vote'
 import { chain_manager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -84,45 +84,57 @@ export default () => {
           const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           const must = [], must_not = []
           const { chain, txHash, pollId, transactionId, voter, vote, time } = { ...filters }
-          if (chain) {
-            must.push({ match: { sender_chain: chain } })
-          }
-          if (txHash) {
-            must.push({ match: { txhash: txHash } })
-          }
-          if (pollId) {
-            must.push({ match_phrase: { poll_id: pollId } })
-          }
-          if (transactionId) {
-            must.push({ match: { transaction_id: transactionId } })
-          }
-          if (voter) {
-            must.push({ match: { voter } })
-          }
-          if (vote) {
-            switch (vote) {
-              case 'yes':
-              case 'no':
-                must.push({ match: { vote: vote === 'yes' } })
-                break
-              default:
-                break
-            }
-          }
-          if (time?.length > 1) {
-            must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
-          }
+          // if (chain) {
+          //   must.push({ match: { sender_chain: chain } })
+          // }
+          // if (txHash) {
+          //   must.push({ match: { txhash: txHash } })
+          // }
+          // if (pollId) {
+          //   must.push({ match_phrase: { poll_id: pollId } })
+          // }
+          // if (transactionId) {
+          //   must.push({ match: { transaction_id: transactionId } })
+          // }
+          // if (voter) {
+          //   must.push({ match: { voter } })
+          // }
+          // if (vote) {
+          //   switch (vote) {
+          //     case 'yes':
+          //     case 'no':
+          //       must.push({ match: { vote: vote === 'yes' } })
+          //       break
+          //     default:
+          //       break
+          //   }
+          // }
+          // if (time?.length > 1) {
+          //   must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
+          // }
+          // const response = await getEvmVotes({
+          //   query: {
+          //     bool: {
+          //       must,
+          //       must_not,
+          //     },
+          //   },
+          //   size,
+          //   from,
+          //   sort: [{ 'created_at.ms': 'desc' }],
+          //   track_total_hits: true,
+          // })
           const response = await getEvmVotes({
-            query: {
-              bool: {
-                must,
-                must_not,
-              },
-            },
-            size,
+            chain,
+            txHash,
+            pollId,
+            transactionId,
+            voter,
+            vote,
+            fromTime: time?.[0]?.unix(),
+            toTime: time?.[1]?.unix(),
             from,
-            sort: [{ 'created_at.ms': 'desc' }],
-            track_total_hits: true,
+            size,
           })
           if (response) {
             setTotal(response.total)

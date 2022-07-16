@@ -13,8 +13,7 @@ import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
-import { transfers as getTransfers } from '../../lib/api/index'
-import { transfers_status as getTransfersStatus } from '../../lib/api/transfer'
+import { transfers_status as getTransfersStatus, transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getDenom } from '../../lib/object/denom'
 import { type } from '../../lib/object/id'
@@ -39,9 +38,7 @@ export default () => {
       if (tx && assets_data) {
         if (!controller.signal.aborted) {
           const response = await getTransfers({
-            query: {
-              match: { 'source.id': tx },
-            },
+            txHash: tx,
             size: 1,
           })
           if (response) {
@@ -74,9 +71,7 @@ export default () => {
                 _response.data.forEach(d => getTransaction(d?.txhash))
                 await sleep(2 * 1000)
                 _response = await getTransfers({
-                  query: {
-                    match: { 'source.id': tx },
-                  },
+                  txHash: tx,
                   size: 1,
                 })
                 data = _response.data?.[0] || data

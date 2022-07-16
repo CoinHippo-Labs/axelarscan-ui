@@ -14,6 +14,7 @@ import Participations from '../participations/participations'
 import Image from '../image'
 import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
 import { keygens_by_validator } from '../../lib/api/executor'
+import { heartbeats as searchHeartbeats } from '../../lib/api/heartbeat'
 import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
@@ -301,20 +302,11 @@ export default () => {
           const heartbeats = []
           let data
           if (broadcaster_address) {
-            const response = await getHeartbeats({
-              query: {
-                bool: {
-                  must: [
-                    { match: { sender: broadcaster_address } },
-                    { range: { height: {
-                      gte: first,
-                      lte: latest_block,
-                    } } },
-                  ],
-                },
-              },
+            const response = await searchHeartbeats({
+              sender: broadcaster_address,
+              fromBlock: first,
+              toBlock: latest_block,
               size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
-              sort: [{ period_height: 'desc' }],
             })
             data = response?.data || []
           }
