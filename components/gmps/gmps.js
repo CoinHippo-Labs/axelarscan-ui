@@ -494,7 +494,7 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, forecalled, approved, executed, is_executed, error, refunded, status } = { ...props.row.original }
+                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
@@ -549,7 +549,7 @@ export default ({ n }) => {
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
-                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
+                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
                         i === current_step && !['refunded'].includes(s.id) ?
                           'text-blue-500 dark:text-white' :
@@ -563,7 +563,7 @@ export default ({ n }) => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {(!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
+                          {(!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
                             i === current_step && !['refunded'].includes(s.id) ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :

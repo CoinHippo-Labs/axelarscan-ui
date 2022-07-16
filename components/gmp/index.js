@@ -9,7 +9,7 @@ import { BigNumber, FixedNumber, constants, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
-import { HiArrowSmRight } from 'react-icons/hi'
+import { HiArrowSmRight, HiArrowSmLeft } from 'react-icons/hi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 import { RiCloseCircleFill } from 'react-icons/ri'
@@ -69,7 +69,7 @@ export default () => {
         })
         const data = response?.[0]
 
-        // callback data for 2-way if exists
+        // callback data of 2-way call (if exists)
         let {
           callback,
         } = { ...data }
@@ -82,9 +82,25 @@ export default () => {
           callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
         }
 
+        // origin data of 2-way call (query on 2nd call only)
+        let origin
+        const {
+          call,
+          gas_paid,
+          gas_paid_to_callback,
+        } = { ...data }
+        if (call && !gas_paid && gas_paid_to_callback) {
+          const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
+            method: 'searchGMP',
+            txHash: call.transactionHash,
+          })
+          origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
+        }
+
         setGmp({
           data,
           callback,
+          origin,
           tx,
         })
       }
@@ -329,8 +345,8 @@ export default () => {
     }
   }
 
-  const { data, callback } = { ...gmp }
-  const { call, gas_paid, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
+  const { data, callback, origin } = { ...gmp }
+  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { commandId, sourceChain } = { ...approved?.returnValues }
@@ -603,6 +619,44 @@ export default () => {
                         </div>
                       </div>
                     )}
+                    {origin?.call && (
+                      <div className="space-y-1.5">
+                        <Link href={`/gmp/${origin.call.transactionHash}`}>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
+                          >
+                            <HiArrowSmLeft size={16} />
+                            <span className="text-xs font-semibold hover:font-bold">
+                              2-Way Call
+                            </span>
+                          </a>
+                        </Link>
+                        <div className="flex items-center space-x-1">
+                          <Link href={`/gmp/${origin.call.transactionHash}`}>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 dark:text-white"
+                            >
+                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                <span className="xl:hidden">
+                                  {ellipse(origin.call.transactionHash, 8)}
+                                </span>
+                                <span className="hidden xl:block">
+                                  {ellipse(origin.call.transactionHash, 12)}
+                                </span>
+                              </div>
+                            </a>
+                          </Link>
+                          <Copy
+                            value={origin.call.transactionHash}
+                            size={18}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col space-y-2">
                     <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
@@ -777,7 +831,7 @@ export default () => {
                       Status
                     </div>
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
-                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
+                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                         'text-green-500 dark:text-green-600' :
                         i === current_step && !['refunded'].includes(s.id) ?
                           'text-blue-500 dark:text-white' :
@@ -791,7 +845,7 @@ export default () => {
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {(!['refunded'].includes(s.id) && s.data) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
+                          {(!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
                             i === current_step && !['refunded'].includes(s.id) ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
@@ -884,11 +938,9 @@ export default () => {
                   }
                 }
               }
-              if (gasUsed) {
-                destination_gas_data = {
-                  ...destination_chain_data?.provider_params?.[0]?.nativeCurrency,
-                  image: destination_chain_data?.image,
-                }
+              destination_gas_data = {
+                ...destination_chain_data?.provider_params?.[0]?.nativeCurrency,
+                image: destination_chain_data?.image,
               }
               try {
                 source_gas_used = Number(utils.formatUnits(
@@ -1087,12 +1139,50 @@ export default () => {
                           </div>
                         </div>
                         :
-                        ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
-                          <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
-                            No transaction
-                          </span>
+                        ['gas_paid'].includes(s.id) && origin?.call ?
+                          <div className="space-y-1.5">
+                            <Link href={`/gmp/${origin.call.transactionHash}`}>
+                              <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
+                              >
+                                <HiArrowSmLeft size={16} />
+                                <span className="text-xs font-semibold hover:font-bold">
+                                  from 1st Call
+                                </span>
+                              </a>
+                            </Link>
+                            <div className="flex items-center space-x-1">
+                              <Link href={`/gmp/${origin.call.transactionHash}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-white"
+                                >
+                                  <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                    <span className="xl:hidden">
+                                      {ellipse(origin.call.transactionHash, 8)}
+                                    </span>
+                                    <span className="hidden xl:block">
+                                      {ellipse(origin.call.transactionHash, 12)}
+                                    </span>
+                                  </div>
+                                </a>
+                              </Link>
+                              <Copy
+                                value={origin.call.transactionHash}
+                                size={18}
+                              />
+                            </div>
+                          </div>
                           :
-                          <FallingLines color={loader_color(theme)} width="32" height="32" />
+                          ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
+                            <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
+                              No transaction
+                            </span>
+                            :
+                            <FallingLines color={loader_color(theme)} width="32" height="32" />
                     }
                     {blockNumber && (
                       <div className={rowClassName}>
