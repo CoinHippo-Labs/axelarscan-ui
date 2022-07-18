@@ -1659,7 +1659,7 @@ export default () => {
                         >
                           Error:
                         </span>
-                        <div className="flex flex-col space-y-1">
+                        <div className="flex flex-col space-y-1.5">
                           <div className="flex items-center space-x-1.5">
                             {_data.error?.code && (
                               <a
@@ -1677,14 +1677,25 @@ export default () => {
                               </div>
                             )}
                           </div>
-                          {[_data.error?.reason && `Reason: ${_data.error.reason}`, _data.error?.data?.message || _data.error?.message, _data.error?.body?.replaceAll('"""', '')].filter(m => m).map((m, j) => (
-                            <div
-                              key={j}
-                              className="text-red-500 dark:text-red-600 font-semibold"
-                            >
-                              {ellipse(m, 256)}
-                            </div>
-                          ))}
+                          <div className="flex flex-col space-y-1.5">
+                            {[{
+                              id: 'reason',
+                              value: _data.error?.reason && `Reason: ${_data.error.reason}`,
+                            }, {
+                              id: 'message',
+                              value: _data.error?.data?.message || _data.error?.message,
+                            }, {
+                              id: 'body',
+                              value: _data.error?.body?.replaceAll('"""', ''),
+                            }].filter(e => e?.value).map((e, j) => (
+                              <div
+                                key={j}
+                                className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                              >
+                                {ellipse(e.value, 256)}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     )}
