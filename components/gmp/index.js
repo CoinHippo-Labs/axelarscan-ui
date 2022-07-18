@@ -88,8 +88,9 @@ export default () => {
           call,
           gas_paid,
           gas_paid_to_callback,
+          is_call_from_relayer,
         } = { ...data }
-        if (call && !gas_paid && gas_paid_to_callback) {
+        if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
           const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
             method: 'searchGMP',
             txHash: call.transactionHash,
