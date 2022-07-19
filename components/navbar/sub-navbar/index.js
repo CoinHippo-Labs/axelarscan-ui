@@ -14,6 +14,7 @@ import GMPFilters from '../../gmps/filters'
 import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
+import Image from '../../image'
 import { currency, currency_symbol } from '../../../lib/object/currency'
 import { number_format, ellipse } from '../../../lib/utils'
 
@@ -351,21 +352,30 @@ export default () => {
         <>
           {token_data && (
             <div className="bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center space-x-1.5 ml-4 py-2 px-3">
+              {token_data.image?.small && (
+                <Image
+                  src={token_data.image.small}
+                  className="w-6 h-6 rounded-full"
+                />
+              )}
               <div className="min-w-max flex items-center space-x-1.5">
                 <span className="uppercase font-bold">
                   {token_data.symbol}
                 </span>
               </div>
               {typeof token_data.market_data?.current_price?.[currency] === 'number' ?
-                <span className="font-mono font-semibold">
-                  {currency_symbol}{number_format(token_data.market_data.current_price[currency], '0,0.00000000')}
+                <span className="font-mono text-base font-semibold">
+                  {currency_symbol}
+                  {number_format(token_data.market_data.current_price[currency], '0,0.000')}
                 </span>
                 :
-                <span>-</span>
+                <span>
+                  -
+                </span>
               }
-              {typeof token_data.market_data?.price_change_percentage_24h_in_currency?.[currency] === 'number' && (
+              {typeof token_data.market_data?.price_change_percentage_24h_in_currency?.[currency] === 'number' && token_data.market_data.price_change_percentage_24h_in_currency[currency] !== 0 && (
                 <span className={`text-${token_data.market_data.price_change_percentage_24h_in_currency[currency] < 0 ? 'red' : 'green'}-500 font-medium`}>
-                  {number_format(token_data.market_data.price_change_percentage_24h_in_currency[currency], '+0,0.000')}%
+                  {number_format(token_data.market_data.price_change_percentage_24h_in_currency[currency], '+0,0.000000')}%
                 </span>
               )}
             </div>
