@@ -114,9 +114,11 @@ export default ({ data }) => {
           })}
         </div>
         <div className={`${metricClassName}`}>
-          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Avg. Time Spent
-          </span>
+          <div className="flex items-center justify-between space-x-2">
+            <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
+              Avg. Time Spent
+            </span>
+          </div>
           {avg_time_spent_approve?.value > 0 && (
             <div className="flex items-center justify-between space-x-2">
               <div className="text-slate-400 dark:text-slate-200 font-medium">

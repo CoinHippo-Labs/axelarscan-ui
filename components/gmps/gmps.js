@@ -222,23 +222,24 @@ export default ({ n }) => {
                 chain_pairs: response?.data,
               }
 
-              if (_total > 100 && !params?.fromTime) {
-                response = await search({
-                  ...params,
-                  from: 100,
-                  size: 1,
-                })
-                if (response?.data?.[0]?.call?.block_timestamp) {
-                  const {
-                    block_timestamp,
-                  } = { ...response.data[0].call }
-                  params = {
-                    ...params,
-                    fromTime: block_timestamp,
-                    toTime: moment().unix(),
-                  }
-                }
-              }
+              // if (_total > 100 && !params?.fromTime) {
+              //   response = await search({
+              //     ...params,
+              //     status: 'executed',
+              //     from: 100,
+              //     size: 1,
+              //   })
+              //   if (response?.data?.[0]?.call?.block_timestamp) {
+              //     const {
+              //       block_timestamp,
+              //     } = { ...response.data[0].call }
+              //     params = {
+              //       ...params,
+              //       fromTime: block_timestamp,
+              //       toTime: moment().unix(),
+              //     }
+              //   }
+              // }
               response = await search({
                 ...params,
                 aggs: {
