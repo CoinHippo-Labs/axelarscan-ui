@@ -64,7 +64,7 @@ export default ({ data }) => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Methods
           </span>
-          {methods.map((m, i) => (
+          {methods?.map((m, i) => (
             <div
               key={i}
               className="flex items-center justify-between space-x-2"
@@ -82,7 +82,7 @@ export default ({ data }) => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Chain Pairs
           </span>
-          {_.slice(chain_pairs, 0, 3).map((p, i) => {
+          {_.slice(chain_pairs || [], 0, 3).map((p, i) => {
             const {
               source_chain,
               destination_chain,
@@ -115,7 +115,7 @@ export default ({ data }) => {
         </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Time Spent
+            Avg. Time Spent
           </span>
           {avg_time_spent_approve?.value > 0 && (
             <div className="flex items-center justify-between space-x-2">
