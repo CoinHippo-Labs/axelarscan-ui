@@ -143,26 +143,34 @@ export default () => {
 
   const approve = async data => {
     if (api && data) {
-      setApproving(true)
-      setApproveResponse({
-        status: 'pending',
-        message: 'Approving',
-      })
-      const { call } = { ...data }
-      const { transactionHash } = { ...call }
-      const response = await api.manualRelayToDestChain(transactionHash)
-      console.log('[approve response]', response)
-      const { success, error, signCommandTx } = { ...response }
-      if (success) {
-        await sleep(15 * 1000)
+      try {
+        setApproving(true)
+        setApproveResponse({
+          status: 'pending',
+          message: 'Approving',
+        })
+        const { call } = { ...data }
+        const { transactionHash } = { ...call }
+        const response = await api.manualRelayToDestChain(transactionHash)
+        console.log('[approve response]', response)
+        const { success, error, signCommandTx } = { ...response }
+        if (success) {
+          await sleep(15 * 1000)
+        }
+        setApproving(false)
+        setApproveResponse({
+          status: success ? 'success' : 'failed',
+          message: error?.message || error || 'Approve successful',
+          txHash: signCommandTx?.txhash,
+          is_axelar_transaction: true,
+        })
+      } catch (error) {
+        setApproving(false)
+        setApproveResponse({
+          status: 'failed',
+          message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
+        })
       }
-      setApproving(false)
-      setApproveResponse({
-        status: success ? 'success' : 'failed',
-        message: error || 'Approve successful',
-        txHash: signCommandTx?.txhash,
-        is_axelar_transaction: true,
-      })
     }
   }
 
@@ -182,7 +190,7 @@ export default () => {
         setExecuting(false)
         setExecuteResponse({
           status: success ? 'success' : 'failed',
-          message: error || 'Execute successful',
+          message: error?.message || error || 'Execute successful',
           txHash: transaction?.transactionHash,
         })
       } catch (error) {
@@ -216,7 +224,7 @@ export default () => {
         setGasAdding(false)
         setGasAddResponse({
           status: success ? 'success' : 'failed',
-          message: error || 'Pay gas successful',
+          message: error?.message || error || 'Pay gas successful',
           txHash: transaction?.transactionHash,
         })
       } catch (error) {
