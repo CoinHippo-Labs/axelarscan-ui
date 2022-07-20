@@ -1201,7 +1201,9 @@ export default () => {
                               No transaction
                             </span>
                             :
-                            <FallingLines color={loader_color(theme)} width="32" height="32" />
+                            !is_invalid_destination_chain && !is_insufficient_minimum_amount && (
+                              <FallingLines color={loader_color(theme)} width="32" height="32" />
+                            )
                     }
                     {blockNumber && (
                       <div className={rowClassName}>
