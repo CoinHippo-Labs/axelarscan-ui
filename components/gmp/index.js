@@ -928,7 +928,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, status } = { ...gmp.data }
+              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ? data || error : data
               const { blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
@@ -1077,7 +1077,7 @@ export default () => {
                                 </a>
                               </>
                               :
-                              !(!data && is_executed) && !error && (
+                              !(!data && is_executed) && !error && !is_invalid_destination_chain && !is_insufficient_minimum_amount && (
                                 <FallingLines color={loader_color(theme)} width="32" height="32" />
                               )
                           }
