@@ -282,11 +282,11 @@ export default ({ n }) => {
           })
           if (response) {
             setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               return {
                 ...d,
               }
-            }) || []), 'source.id'), ['source.created_at.ms'], ['desc'])
+            }) || [], _data), 'source.id'), ['source.created_at.ms'], ['desc'])
             setData(response)
           }
           else if (!fetchTrigger) {

@@ -140,11 +140,11 @@ export default ({ n }) => {
           if (response) {
             const _total = response.total
             setTotal(_total)
-            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               return {
                 ...d,
               }
-            }) || []), 'call.id'), ['call.block_timestamp'], ['desc'])
+            }) || [], _data), 'call.id'), ['call.block_timestamp'], ['desc'])
             setData(response)
 
             // if (!address) {

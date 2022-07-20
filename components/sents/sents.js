@@ -115,11 +115,11 @@ export default ({ n }) => {
           })
           if (response) {
             setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               return {
                 ...d,
               }
-            }) || []), 'event.transactionHash'), ['event.block_timestamp'], ['desc'])
+            }) || [], _data), 'event.transactionHash'), ['event.block_timestamp'], ['desc'])
             setData(response)
           }
           else if (!fetchTrigger) {

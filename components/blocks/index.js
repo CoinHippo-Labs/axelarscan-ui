@@ -54,7 +54,7 @@ export default ({ n }) => {
           sort: [{ height: 'desc' }],
         })
         if (response) {
-          response = _.orderBy(_.uniqBy(_.concat(_data, response?.data || []), 'height'), ['height'], ['desc'])
+          response = _.orderBy(_.uniqBy(_.concat(response?.data || [], _data), 'height'), ['height'], ['desc'])
           setData(response)
         }
         else if (!fetchTrigger) {

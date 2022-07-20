@@ -152,7 +152,7 @@ export default ({ n }) => {
           }
           if (response) {
             let total = response.total
-            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               const { txhash, timestamp, activities } = { ...d }
               return {
                 ...d,
@@ -166,7 +166,7 @@ export default ({ n }) => {
                     )
                   ) > -1 ? 'in' : null
               }
-            }) || []), 'txhash'), ['timestamp', 'txhash'], ['desc', height ? 'asc' : 'desc'])
+            }) || [], _data), 'txhash'), ['timestamp', 'txhash'], ['desc', height ? 'asc' : 'desc'])
             setTotal(response.length > total ? response.length : total)
             setData(response)
             setFetching(false)

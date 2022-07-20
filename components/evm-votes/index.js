@@ -138,11 +138,11 @@ export default () => {
           })
           if (response) {
             setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               return {
                 ...d,
               }
-            }) || []), 'txhash'), ['created_at.ms'], ['desc'])
+            }) || [], _data), 'txhash'), ['created_at.ms'], ['desc'])
             if (!txHash && !voter && !vote && !time) {
               let polls = _.orderBy(Object.entries(_.groupBy(response, 'poll_id')).map(([k, v]) => {
                 return {

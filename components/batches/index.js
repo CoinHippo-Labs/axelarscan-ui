@@ -128,7 +128,7 @@ export default () => {
           })
           if (response) {
             setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(_data, response.data?.map(d => {
+            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               // d = fieldsToObj(d)
               const { batch_id, chain, key_id, status } = { ...d }
                 return {
@@ -143,7 +143,7 @@ export default () => {
                   ...(Array.isArray(d?.created_at) ? _.last(d.created_at) : d?.created_at),
                 },
               }
-            }) || []), 'batch_id'), ['created_at.ms'], ['desc'])
+            }) || [], _data), 'batch_id'), ['created_at.ms'], ['desc'])
             response = await updateSigningBatches(response, true)
             setData(response)
           }
