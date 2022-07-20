@@ -14,7 +14,7 @@ export default ({ data }) => {
   const { cosmos_chains_data } = { ...cosmos_chains }
 
   const {
-    called,
+    approving,
     executed,
     error,
     methods,
@@ -33,13 +33,13 @@ export default ({ data }) => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Messages
           </span>
-          {called > 0 && (
+          {approving > 0 && (
             <div className="flex items-center justify-between space-x-2">
               <div className="text-slate-400 dark:text-slate-200 font-medium">
                 Wait for Approval
               </div>
               <div className="text-base font-bold">
-                {number_format(called, '0,0')}
+                {number_format(approving, '0,0')}
               </div>
             </div>
           )}

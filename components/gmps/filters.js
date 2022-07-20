@@ -32,7 +32,7 @@ export default () => {
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
-        status: ['called', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        status: ['approving', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         senderAddress,
         sourceAddress,
         contractAddress,
@@ -124,7 +124,7 @@ export default () => {
       placeholder: 'Select status',
       options: [
         { value: '', title: 'Any' },
-        { value: 'called', title: 'Wait for Approval' },
+        { value: 'approving', title: 'Wait for Approval' },
         { value: 'forecalled', title: 'Forecalled' },
         { value: 'approved', title: 'Approved' },
         { value: 'executed', title: 'Executed' },

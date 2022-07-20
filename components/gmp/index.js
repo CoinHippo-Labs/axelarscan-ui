@@ -771,6 +771,11 @@ export default () => {
                         {destination_chain_data?.name || destinationChain}
                       </span>
                     </div>
+                    {is_invalid_destination_chain && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Invalid Chain
+                      </div>
+                    )}
                     {destinationContractAddress && (
                       <div className="flex flex-col">
                         <span className="text-slate-400 dark:text-slate-600 font-semibold">
@@ -837,11 +842,6 @@ export default () => {
                             size={18}
                           />
                         </div>
-                      </div>
-                    )}
-                    {is_invalid_destination_chain && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
-                        Invalid
                       </div>
                     )}
                   </div>
