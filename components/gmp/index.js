@@ -355,7 +355,7 @@ export default () => {
   }
 
   const { data, callback, origin } = { ...gmp }
-  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { commandId, sourceChain } = { ...approved?.returnValues }
@@ -475,10 +475,10 @@ export default () => {
   let current_step
   switch (status) {
     case 'called':
-      current_step = steps.findIndex(s => s.id === (gas_paid ? 'gas_paid' : 'call')) + 1
+      current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (!is_invalid_destination_chain && !is_insufficient_minimum_amount ? 1 : 0)
       break
     case 'approved':
-      current_step = steps.findIndex(s => s.id === status) + 1
+      current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? status : 'call')) + 1
       break
     case 'executed':
     case 'error':
@@ -587,6 +587,11 @@ export default () => {
                               {_symbol}
                             </span>
                           </span>
+                        </div>
+                      )}
+                      {is_insufficient_minimum_amount && (
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                          Insufficient Amount
                         </div>
                       )}
                     </div>
@@ -832,6 +837,11 @@ export default () => {
                             size={18}
                           />
                         </div>
+                      </div>
+                    )}
+                    {is_invalid_destination_chain && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Invalid
                       </div>
                     )}
                   </div>
