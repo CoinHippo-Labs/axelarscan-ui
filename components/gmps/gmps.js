@@ -10,13 +10,12 @@ import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
-import Statistics from './statistics'
 import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { search } from '../../lib/api/gmp'
+import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -35,7 +34,6 @@ export default ({ n }) => {
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
-  const [statsData, setStatsData] = useState(null)
   const [offset, setOffet] = useState(0)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -88,7 +86,6 @@ export default ({ n }) => {
           if (!fetchTrigger) {
             setTotal(null)
             setData(null)
-            setStatsData(null)
             setOffet(0)
           }
           const _data = !fetchTrigger ? [] : (data || []),
@@ -132,7 +129,7 @@ export default ({ n }) => {
               toTime,
             }
           }
-          let response = await search({
+          let response = await searchGMP({
             ...params,
             size,
             from,
@@ -146,127 +143,10 @@ export default ({ n }) => {
               }
             }) || [], _data), 'call.id'), ['call.block_timestamp'], ['desc'])
             setData(response)
-
-            // if (!address) {
-            //   let _statsData
-
-            //   response = await search({
-            //     ...params,
-            //     status: 'approving',
-            //     size: 0,
-            //   })
-            //   _statsData = {
-            //     ..._statsData,
-            //     approving: response?.total,
-            //   }
-
-            //   response = await search({
-            //     ...params,
-            //     status: 'executed',
-            //     size: 0,
-            //   })
-            //   _statsData = {
-            //     ..._statsData,
-            //     executed: response?.total,
-            //   }
-
-            //   response = await search({
-            //     ...params,
-            //     status: 'error',
-            //     size: 0,
-            //   })
-            //   _statsData = {
-            //     ..._statsData,
-            //     error: response?.total,
-            //   }
-
-            //   response = await search({
-            //     ...params,
-            //     aggs: {
-            //       events: {
-            //         terms: { field: 'call.event.keyword' },
-            //       },
-            //     },
-            //     size: 0,
-            //   })
-            //   _statsData = {
-            //     ..._statsData,
-            //     methods: response?.aggs?.events?.buckets?.map(b => {
-            //       const {
-            //         key,
-            //         doc_count,
-            //       } = { ...b }
-            //       return {
-            //         method: key?.replace('ContractCall', 'callContract'),
-            //         count: doc_count,
-            //       }
-            //     }),
-            //   }
-
-            //   response = await search({
-            //     ...params,
-            //     aggs: {
-            //       source_chains: {
-            //         terms: { field: 'call.chain.keyword', size: 1000 },
-            //         aggs: {
-            //           destination_chains: {
-            //             terms: { field: 'call.returnValues.destinationChain.keyword', size: 1000 },
-            //           },
-            //         },
-            //       },
-            //     },
-            //     size: 0,
-            //   })
-            //   _statsData = {
-            //     ..._statsData,
-            //     chain_pairs: response?.data,
-            //   }
-
-            //   // if (_total > 100 && !params?.fromTime) {
-            //   //   response = await search({
-            //   //     ...params,
-            //   //     status: 'executed',
-            //   //     from: 100,
-            //   //     size: 1,
-            //   //   })
-            //   //   if (response?.data?.[0]?.call?.block_timestamp) {
-            //   //     const {
-            //   //       block_timestamp,
-            //   //     } = { ...response.data[0].call }
-            //   //     params = {
-            //   //       ...params,
-            //   //       fromTime: block_timestamp,
-            //   //       toTime: moment().unix(),
-            //   //     }
-            //   //   }
-            //   // }
-            //   response = await search({
-            //     ...params,
-            //     aggs: {
-            //       avg_time_spent_approve: {
-            //         avg: { field: 'time_spent.call_approved' },
-            //       },
-            //       avg_time_spent_execute: {
-            //         avg: { field: 'time_spent.approved_executed' },
-            //       },
-            //       avg_time_spent_total: {
-            //         avg: { field: 'time_spent.total' },
-            //       },
-            //     },
-            //     size: 0,
-            //   })
-            //   _statsData = {
-            //     ..._statsData,
-            //     ...response?.aggs,
-            //   }
-
-            //   setStatsData(_statsData)
-            // }
           }
           else if (!fetchTrigger) {
             setTotal(0)
             setData([])
-            setStatsData(null)
           }
           setFetching(false)
         }
@@ -290,11 +170,6 @@ export default ({ n }) => {
   return (
     data ?
       <div className="min-h-full grid gap-2">
-        {/*!address && (
-          <div className="-mt-3 pb-3">
-            <Statistics data={statsData} />
-          </div>
-        )*/}
         <div className="flex items-center justify-between space-x-2 -mt-3">
           <div className="flex items-center space-x-2">
             <span className="text-lg font-bold">

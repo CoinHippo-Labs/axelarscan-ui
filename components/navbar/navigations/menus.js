@@ -55,7 +55,7 @@ export default [
     id: 'gmp',
     title: 'GMP',
     path: '/gmp',
-    others_paths: ['/gmp/search', '/gmp/[tx]'],
+    others_paths: ['/gmp/search', '/gmp/stats', '/gmp/[tx]'],
     icon: <BiMessageDots size={18} className="stroke-current" />,
   },
   (process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' || process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true') && {

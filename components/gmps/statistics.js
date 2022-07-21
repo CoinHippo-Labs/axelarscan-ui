@@ -1,157 +1,522 @@
+import { useRouter } from 'next/router'
+import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { ThreeDots } from 'react-loader-spinner'
+import moment from 'moment'
+import { TailSpin } from 'react-loader-spinner'
 import { HiArrowSmRight } from 'react-icons/hi'
 
 import Image from '../image'
+import { ProgressBar } from '../progress-bars'
+import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, _total_time_string, loader_color } from '../../lib/utils'
+import { number_format, capitalize, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
-export default ({ data }) => {
+export default () => {
   const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
   const { theme } = { ...preferences }
   const { evm_chains_data } = { ...evm_chains }
   const { cosmos_chains_data } = { ...cosmos_chains }
 
-  const {
-    approving,
-    executed,
-    error,
-    methods,
-    chain_pairs,
-    avg_time_spent_approve,
-    avg_time_spent_execute,
-    avg_time_spent_total,
-  } = { ...data }
+  const router = useRouter()
+  const { pathname, asPath } = { ...router }
+
+  const [statuses, setStatuses] = useState(null)
+  const [methods, setMethods] = useState(null)
+  const [chainPairs, setChainPairs] = useState(null)
+  const [timeSpents, setTimeSpents] = useState(null)
+  const [fetchTrigger, setFetchTrigger] = useState(null)
+  const [filters, setFilters] = useState(null)
+
+  useEffect(() => {
+    if (evm_chains_data && cosmos_chains_data && asPath) {
+      const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+      const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, fromTime, toTime } = { ...params }
+      setFilters({
+        txHash,
+        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
+        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
+        method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
+        status: ['approving', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        senderAddress,
+        sourceAddress,
+        contractAddress,
+        relayerAddress,
+        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+      })
+      if (typeof fetchTrigger === 'number') {
+        setFetchTrigger(moment().valueOf())
+      }
+    }
+  }, [evm_chains_data, cosmos_chains_data, asPath])
+
+  useEffect(() => {
+    const triggering = is_interval => {
+      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+    }
+    if (pathname && filters) {
+      triggering()
+    }
+    const interval = setInterval(() => triggering(true), (['/gmp/stats'].includes(pathname) ? 1 : 0.25) * 60 * 1000)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [pathname, filters])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const getData = () => {
+      if (filters) {
+        if (!controller.signal.aborted) {
+          if (!fetchTrigger) {
+            setStatuses(null)
+            setMethods(null)
+            setChainPairs(null)
+            setTimeSpents(null)
+          }
+
+          let params, response
+          if (filters) {
+            const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
+            let event, fromTime, toTime
+            switch (method) {
+              case 'callContract':
+                event = 'ContractCall'
+                break
+              case 'callContractWithToken':
+                event = 'ContractCallWithToken'
+                break
+              default:
+                event = undefined
+                break
+            }
+            if (time?.length > 1) {
+              fromTime = time[0].unix()
+              toTime = time[1].unix()
+            }
+            params = {
+              txHash,
+              sourceChain,
+              destinationChain,
+              event,
+              status,
+              senderAddress,
+              sourceAddress,
+              contractAddress,
+              relayerAddress,
+              fromTime,
+              toTime,
+            }
+          }
+
+          getStatuses(params)
+          getMethods(params)
+          getChainPairs(params)
+          getTimeSpents(params)
+        }
+      }
+    }
+    getData()
+    return () => {
+      controller?.abort()
+    }
+  }, [fetchTrigger])
+
+  const getStatuses = async params => {
+    let data, response
+
+    response = await searchGMP({
+      ...params,
+      status: 'called',
+      size: 0,
+    })
+    data = {
+      ...data,
+      called: response?.total || 0,
+    }
+
+    response = await searchGMP({
+      ...params,
+      status: 'approving',
+      size: 0,
+    })
+    data = {
+      ...data,
+      approving: response?.total || 0,
+    }
+
+    data = {
+      ...data,
+      invalid: data.called - data.approving,
+    }
+
+    response = await searchGMP({
+      ...params,
+      status: 'executed',
+      size: 0,
+    })
+    data = {
+      ...data,
+      executed: response?.total,
+    }
+
+    response = await searchGMP({
+      ...params,
+      status: 'error',
+      size: 0,
+    })
+    data = {
+      ...data,
+      error: response?.total,
+    }
+
+    setStatuses(_.orderBy(Object.entries(data).map(([k, v]) => {
+      return {
+        key: k,
+        name: k === 'invalid' ?
+          'Invalid Data' :
+          k === 'approving' ?
+            'Wait for Approval' :
+            k === 'error' ?
+              'Error Execution' :
+                capitalize(k),
+        color: k === 'invalid' ?
+          'bg-slate-500' :
+          k === 'approving' ?
+            'bg-yellow-500' :
+            k === 'executed' ?
+              'bg-green-500' :
+              k === 'error' ?
+                'bg-red-500' :
+                  undefined,
+        value: v,
+      }
+    }), ['value'], ['desc']))
+  }
+
+  const getMethods = async params => {
+    const response = await searchGMP({
+      ...params,
+      aggs: {
+        events: {
+          terms: { field: 'call.event.keyword' },
+        },
+      },
+      size: 0,
+    })
+    const data = response?.aggs?.events?.buckets?.map(b => {
+      const {
+        key,
+        doc_count,
+      } = { ...b }
+      return {
+        key: key?.replace('ContractCall', 'callContract'),
+        value: doc_count,
+      }
+    }) || []
+    setMethods(_.orderBy(data, ['value'], ['desc']))
+  }
+
+  const getChainPairs = async params => {
+    const response = await searchGMP({
+      ...params,
+      aggs: {
+        source_chains: {
+          terms: { field: 'call.chain.keyword', size: 1000 },
+          aggs: {
+            destination_chains: {
+              terms: { field: 'call.returnValues.destinationChain.keyword', size: 1000 },
+            },
+          },
+        },
+      },
+      size: 0,
+    })
+    const data = response?.data || []
+    setChainPairs(_.orderBy(data.map(d => {
+      const {
+        id,
+        source_chain,
+        destination_chain,
+        num_txs,
+      } = { ...d }
+      return {
+        key: id,
+        source_chain,
+        destination_chain,
+        value: num_txs,
+      }
+    }), ['value'], ['desc']))
+  }
+
+  const getTimeSpents = async params => {
+    const response = await searchGMP({
+      ...params,
+      aggs: {
+        chains: {
+          terms: { field: 'call.chain.keyword', size: 1000 },
+          aggs: {
+            approve: {
+              percentiles: { field: 'time_spent.call_approved' },
+            },
+            execute: {
+              percentiles: { field: 'time_spent.approved_executed' },
+            },
+            total: {
+              percentiles: { field: 'time_spent.total' },
+            },
+          },
+        },
+      },
+      size: 0,
+    })
+    const data = response?.aggs?.chains?.buckets?.map(b => {
+      const {
+        key,
+        doc_count,
+        approve,
+        execute,
+        total,
+      } = { ...b }
+      return {
+        key,
+        approve: approve?.values?.['50.0'],
+        execute: execute?.values?.['50.0'],
+        total: total?.values?.['50.0'],
+        value: doc_count,
+      }
+    }) || []
+    setTimeSpents(_.orderBy(data, ['value'], ['desc']))
+  }
+
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+  const total = _.sumBy(statuses?.filter(s => !['called'].includes(s?.key)) || [], 'value')
   const metricClassName = 'bg-white dark:bg-black border dark:border-slate-400 shadow dark:shadow-slate-200 rounded-lg space-y-1 p-4'
+  const colors = ['bg-yellow-500', 'bg-blue-500', 'bg-green-500', 'bg-red-500']
 
   return (
-    data ?
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className={`${metricClassName}`}>
-          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Messages
-          </span>
-          {approving > 0 && (
-            <div className="flex items-center justify-between space-x-2">
-              <div className="text-slate-400 dark:text-slate-200 font-medium">
-                Wait for Approval
-              </div>
-              <div className="text-base font-bold">
-                {number_format(approving, '0,0')}
-              </div>
-            </div>
-          )}
-          <div className="flex items-center justify-between space-x-2">
-            <div className="text-slate-400 dark:text-slate-200 font-medium">
-              Error Execution
-            </div>
-            <div className="text-base font-bold">
-              {number_format(error, '0,0')}
-            </div>
-          </div>
-          <div className="flex items-center justify-between space-x-2">
-            <div className="text-slate-400 dark:text-slate-200 font-medium">
-              Executed
-            </div>
-            <div className="text-base font-bold">
-              {number_format(executed, '0,0')}
-            </div>
-          </div>
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className={`${metricClassName}`}>
+        <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+          Messages
+        </span>
+        <div className="text-3xl font-bold">
+          {statuses ?
+            number_format(total, '0,0')
+            :
+            <TailSpin color={loader_color(theme)} width="36" height="36" />
+          }
         </div>
-        <div className={`${metricClassName}`}>
-          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Methods
-          </span>
-          {methods?.map((m, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between space-x-2"
-            >
-              <div className="text-slate-400 dark:text-slate-200 font-medium">
-                {m?.method}
-              </div>
-              <div className="text-base font-bold">
-                {number_format(m?.count, '0,0')}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className={`${metricClassName}`}>
-          <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-            Chain Pairs
-          </span>
-          {_.slice(chain_pairs || [], 0, 3).map((p, i) => {
-            const {
-              source_chain,
-              destination_chain,
-              num_txs,
-            } = { ...p }
-            const source_chain_data = getChain(source_chain, chains_data)
-            const destination_chain_data = getChain(destination_chain, chains_data)
-            return (
-              <div
-                key={i}
-                className="flex items-center justify-between space-x-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <Image
-                    src={source_chain_data?.image}
-                    className="w-5 h-5 rounded-full"
-                  />
-                  <HiArrowSmRight size={20} />
-                  <Image
-                    src={destination_chain_data?.image}
-                    className="w-5 h-5 rounded-full"
-                  />
-                </div>
-                <div className="text-base font-bold">
-                  {number_format(num_txs, '0,0')}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <div className={`${metricClassName}`}>
-          <div className="flex items-center justify-between space-x-2">
-            <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
-              Avg. Time Spent
-            </span>
-          </div>
-          {avg_time_spent_approve?.value > 0 && (
-            <div className="flex items-center justify-between space-x-2">
-              <div className="text-slate-400 dark:text-slate-200 font-medium">
-                Approve
-              </div>
-              <div className="text-base font-bold">
-                {_total_time_string(avg_time_spent_approve.value)}
-              </div>
-            </div>
-          )}
-          {avg_time_spent_execute?.value > 0 && (
-            <div className="flex items-center justify-between space-x-2">
-              <div className="text-slate-400 dark:text-slate-200 font-medium">
-                Execute
-              </div>
-              <div className="text-base font-bold">
-                {_total_time_string(avg_time_spent_execute.value)}
-              </div>
-            </div>
-          )}
-          {avg_time_spent_total?.value > 0 && (
-            <div className="flex items-center justify-between space-x-2">
-              <div className="text-slate-400 dark:text-slate-200 font-medium">
-                Total
-              </div>
-              <div className="text-base font-bold">
-                {_total_time_string(avg_time_spent_total.value)}
-              </div>
-            </div>
-          )}
+        <div className="text-slate-400 dark:text-slate-600 text-sm font-medium">
+          messages passed through the network
         </div>
       </div>
-      :
-      <ThreeDots color={loader_color(theme)} width="32" height="32" />
+      <div className={`${metricClassName}`}>
+        <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+          Methods
+        </span>
+        <div className="space-y-1">
+          {methods && statuses ?
+            methods.map((m, i) => (
+              <div
+                key={i}
+                className="space-y-0"
+              >
+                <div className="flex items-center justify-between space-x-2">
+                  <span className="text-base font-bold">
+                    {m?.key}
+                  </span>
+                  <span className="font-bold">
+                    {number_format(m?.value, '0,0')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  <ProgressBar
+                    width={m?.value * 100 / total}
+                    color={`${colors[i % colors.length]}`}
+                    className="h-1.5 rounded-lg"
+                  />
+                  <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                    {number_format(m?.value / total, '0,0.000%')}
+                  </span>
+                </div>
+              </div>
+            ))
+            :
+            <TailSpin color={loader_color(theme)} width="36" height="36" />
+          }
+        </div>
+      </div>
+      <div className={`sm:col-span-2 ${metricClassName}`}>
+        <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+          Statuses
+        </span>
+        <div className="grid sm:grid-cols-2 gap-y-1 gap-x-5">
+          {statuses ?
+            statuses.filter(s => !['called'].includes(s?.key)).map((m, i) => (
+              <div
+                key={i}
+                className="space-y-0"
+              >
+                <div className="flex items-center justify-between space-x-2">
+                  <span className="text-base font-bold">
+                    {m?.name}
+                  </span>
+                  <span className="font-bold">
+                    {number_format(m?.value, '0,0')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between space-x-2">
+                  <ProgressBar
+                    width={m?.value * 100 / total}
+                    color={`${m?.color || colors[i % colors.length]}`}
+                    className="h-1.5 rounded-lg"
+                  />
+                  <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                    {number_format(m?.value / total, '0,0.000%')}
+                  </span>
+                </div>
+              </div>
+            ))
+            :
+            <TailSpin color={loader_color(theme)} width="36" height="36" />
+          }
+        </div>
+      </div>
+      <div className={`sm:col-span-2 ${metricClassName}`}>
+        <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
+          Chain Pairs
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-y-1 gap-x-10">
+          {chainPairs && statuses ?
+            chainPairs.map((p, i) => {
+              const {
+                source_chain,
+                destination_chain,
+                value,
+              } = { ...p }
+              const source_chain_data = getChain(source_chain, chains_data)
+              const destination_chain_data = getChain(destination_chain, chains_data)
+              return (
+                <div
+                  key={i}
+                  className="space-y-0"
+                >
+                  <div className="flex items-center justify-between space-x-2">
+                    <div className="flex items-center space-x-2">
+                      <Image
+                        src={source_chain_data?.image}
+                        className="w-5 h-5 rounded-full"
+                      />
+                      <HiArrowSmRight size={20} />
+                      {destination_chain_data ?
+                        <Image
+                          src={destination_chain_data?.image}
+                          className="w-5 h-5 rounded-full"
+                        />
+                        :
+                        <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                          {destination_chain}
+                        </span>
+                      }
+                    </div>
+                    <span className="font-bold">
+                      {number_format(value, '0,0')}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between space-x-2">
+                    <ProgressBar
+                      width={value * 100 / total}
+                      color={`${colors[i % colors.length]}`}
+                      className="h-1.5 rounded-lg"
+                    />
+                    <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                      {number_format(value / total, '0,0.000%')}
+                    </span>
+                  </div>
+                </div>
+              )
+            })
+            :
+            <TailSpin color={loader_color(theme)} width="36" height="36" />
+          }
+        </div>
+      </div>
+      <div className={`sm:col-span-2 ${metricClassName}`}>
+        <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
+          Avg. Time Spent
+        </div>
+        <div className="space-y-2">
+          {timeSpents ?
+            timeSpents.map((t, i) => {
+              const {
+                key,
+                approve,
+                execute,
+              } = { ...t }
+              const source_chain_data = getChain(key, chains_data)
+              return (
+                <div
+                  key={i}
+                  className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-2 gap-2 space-y-1 sm:space-y-0 p-3"
+                >
+                  <div className="flex flex-col space-y-0.5">
+                    <span className="text-slate-400 dark:text-slate-500 text-xs">
+                      From chain
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      {source_chain_data?.image && (
+                        <Image
+                          src={source_chain_data.image}
+                          className="w-8 h-8 rounded-full"
+                        />
+                      )}
+                      <span className="text-lg font-bold">
+                        {source_chain_data?.name || key}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-y-1.5">
+                    <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
+                      Time spent (Percentiles)
+                    </span>
+                    <div className="grid grid-cols-2 gap-y-1 gap-x-4">
+                      <div className="w-full col-span-2">
+                        <ProgressBar
+                          width={approve * 100 / (approve + execute)}
+                          color="bg-yellow-500"
+                          backgroundClassName="h-1.5 bg-green-500"
+                          className="h-1.5"
+                        />
+                      </div>
+                      <div className="font-semibold text-left">
+                        Approve ({approve ? _total_time_string(approve) : '-'})
+                      </div>
+                      <div className="font-semibold text-right">
+                        Execute ({execute ? _total_time_string(execute) : '-'})
+                      </div>
+                      <div className="col-span-2" />
+                      <div className="w-full col-span-2">
+                        <ProgressBar
+                          width={100}
+                          color="bg-blue-500"
+                          className="h-1.5"
+                        />
+                      </div>
+                      <div className="col-span-2 font-semibold text-right">
+                        Total ({t?.total ? _total_time_string(t.total) : '-'})
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })
+            :
+            <TailSpin color={loader_color(theme)} width="36" height="36" />
+          }
+        </div>
+      </div>
+    </div>
   )
 }

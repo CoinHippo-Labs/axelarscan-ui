@@ -245,12 +245,14 @@ export default () => {
       break
     case '/gmp':
     case '/gmp/search':
+    case '/gmp/stats':
       title = 'General Message Passing'
-      /*subtitle = (
+      subtitle = (
         <div className="flex items-center space-x-1">
           {[
-            { title: 'Overview', path: '/gmp' },
+            // { title: 'Overview', path: '/gmp' },
             { title: 'Search', path: '/gmp/search' },
+            { title: 'Statistics', path: '/gmp/stats' },
           ].map((r, i) => (
             <div
               key={i}
@@ -263,8 +265,8 @@ export default () => {
             </div>
           ))}
         </div>
-      )*/
-      right = pathname.endsWith('/search') && (
+      )
+      right = ['/gmp/search', '/gmp/stats'].includes(pathname) && (
         <GMPFilters />
       )
       break
