@@ -352,7 +352,7 @@ export default () => {
         </>
         :
         <>
-          {token_data && (
+          {false && token_data && (
             <div className="bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center space-x-1.5 ml-4 py-2 px-3">
               {token_data.image?.small && (
                 <Image
