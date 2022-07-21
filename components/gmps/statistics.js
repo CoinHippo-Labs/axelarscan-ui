@@ -479,7 +479,7 @@ export default () => {
                   </div>
                   <div className="flex flex-col space-y-1.5">
                     <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
-                      Time spent (Percentiles)
+                      Time spent (Percentile)
                     </span>
                     <div className="grid grid-cols-2 gap-y-1 gap-x-4">
                       <div className="w-full col-span-2">
