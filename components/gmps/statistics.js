@@ -445,7 +445,7 @@ export default () => {
       </div>
       <div className={`sm:col-span-2 ${metricClassName}`}>
         <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-          Avg. Time Spent
+          Average Time Spent
         </div>
         <div className="space-y-2">
           {timeSpents ?

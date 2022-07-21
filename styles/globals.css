@@ -164,6 +164,10 @@ body {
   max-width: 76rem;
 }
 
+.h-1\.5 {
+  height: .375rem !important;
+}
+
 .h-84 {
   height: 21rem !important;
 }
