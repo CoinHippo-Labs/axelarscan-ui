@@ -153,7 +153,7 @@ export default () => {
     params: {
       chain: destination_chain_data?.id,
     },
-  }, cosmos_chains_data?.findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
+  }, cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
     id: 'ibc_send',
     title: 'IBC Transfer',
     chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
