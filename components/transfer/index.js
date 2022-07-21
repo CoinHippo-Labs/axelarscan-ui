@@ -254,13 +254,13 @@ export default () => {
                           {ellipse(symbol)}
                         </span>
                       </span>
-                      {fee && (
+                      {fee > 0 && (
                         <span className="text-xs lg:text-sm font-semibold">
                           (<span className="mr-1">
                             Fee:
                           </span>
                           <span>
-                            {number_format(fee, '0,0.000', true)}
+                            {number_format(fee, '0,0.000000', true)}
                           </span>)
                         </span>
                       )}

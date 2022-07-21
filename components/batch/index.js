@@ -407,9 +407,9 @@ export default () => {
                             />
                           )}
                           <span className="text-sm font-semibold">
-                            {amount && (
+                            {amount > 0 && (
                               <span className="mr-1">
-                                {number_format(utils.formatUnits(BigNumber.from(amount), _decimals), '0,0.000', true)}
+                                {number_format(utils.formatUnits(BigNumber.from(amount), _decimals), '0,0.000000', true)}
                               </span>
                             )}
                             <span>
