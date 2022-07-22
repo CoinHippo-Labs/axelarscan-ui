@@ -477,7 +477,7 @@ export default () => {
       </div>
       <div className={`sm:col-span-2 ${metricClassName}`}>
         <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-          Average Time Spent
+          Time Spent
         </div>
         <div className="space-y-2">
           {timeSpents ?
@@ -511,7 +511,7 @@ export default () => {
                   </div>
                   <div className="flex flex-col space-y-1.5">
                     <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
-                      Time spent (Percentile)
+                      Time spent (50th percentile)
                     </span>
                     <div className="grid grid-cols-2 gap-y-1 gap-x-4">
                       <div className="w-full col-span-2">
