@@ -10,7 +10,7 @@ import Image from '../image'
 import { ProgressBar } from '../progress-bars'
 import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, capitalize, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, capitalize, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 export default () => {
   const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
@@ -251,26 +251,58 @@ export default () => {
   }
 
   const getTimeSpents = async params => {
-    const response = await searchGMP({
-      ...params,
-      aggs: {
-        chains: {
-          terms: { field: 'call.chain.keyword', size: 1000 },
-          aggs: {
-            approve: {
-              percentiles: { field: 'time_spent.call_approved' },
+    const n_refine = 1
+    let response
+
+    for (let i = -1; i < n_refine; i++) {
+      response = await searchGMP({
+        ...params,
+        // filter less than percentile 95
+        query: i >= 0 ?
+          {
+            bool: {
+              should: response?.aggs?.chains?.buckets?.map(b => {
+                const {
+                  key,
+                  total,
+                } = { ...b }
+                if (total?.values?.['95.0'] && (!params?.sourceChain || equals_ignore_case(key, params.sourceChain))) {
+                  return {
+                    bool: {
+                      must: [
+                        { match: { 'call.chain': key } },
+                        { range: { 'time_spent.total': { lt: total.values['95.0'] } } },
+                      ],
+                    },
+                  }
+                }
+                else {
+                  return null
+                }
+              }).filter(s => s) || [],
+              minimum_should_match: 1,
             },
-            execute: {
-              percentiles: { field: 'time_spent.approved_executed' },
-            },
-            total: {
-              percentiles: { field: 'time_spent.total' },
+          } : undefined,
+        aggs: {
+          chains: {
+            terms: { field: 'call.chain.keyword', size: 1000 },
+            aggs: {
+              approve: {
+                percentiles: { field: 'time_spent.call_approved' },
+              },
+              execute: {
+                percentiles: { field: 'time_spent.approved_executed' },
+              },
+              total: {
+                percentiles: { field: 'time_spent.total' },
+              },
             },
           },
         },
-      },
-      size: 0,
-    })
+        size: 0,
+      })
+    }
+
     const data = response?.aggs?.chains?.buckets?.map(b => {
       const {
         key,
