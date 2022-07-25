@@ -928,7 +928,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
+              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ? data || error : data
               const { blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
@@ -962,13 +962,18 @@ export default () => {
                 image: destination_chain_data?.image,
               }
               try {
-                source_gas_used = Number(utils.formatUnits(
-                  FixedNumber.fromString(BigNumber.from(gasUsed).toString())
-                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
-                    .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
-                    .round(0).toString().replace('.0', '')
-                  , destination_native_token.decimals
-                ))
+                if (executed?.receipt ? is_execute_from_relayer === false : error?.receipt ? is_error_from_relayer === false : false) {
+                  source_gas_used = 0
+                }
+                else {
+                  source_gas_used = Number(utils.formatUnits(
+                    FixedNumber.fromString(BigNumber.from(gasUsed).toString())
+                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
+                      .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+                      .round(0).toString().replace('.0', '')
+                    , destination_native_token.decimals
+                  ))
+                }
               } catch (error) {
                 source_gas_used = 0
               }
@@ -986,12 +991,17 @@ export default () => {
               if (callback) {
                 const { gasUsed, effectiveGasPrice } = { ...(callback.executed?.receipt || callback.error?.receipt) }
                 try {
-                  callback_gas_used = Number(utils.formatUnits(
-                    FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
-                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString()))
-                      .round(0).toString().replace('.0', '')
-                    , source_token.decimals
-                  ))
+                  if (callback.executed?.receipt ? callback.is_execute_from_relayer === false : callback.error?.receipt ? callback.is_error_from_relayer === false : false) {
+                    callback_gas_used = 0
+                  }
+                  else {
+                    callback_gas_used = Number(utils.formatUnits(
+                      FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
+                        .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString()))
+                        .round(0).toString().replace('.0', '')
+                      , source_token.decimals
+                    ))
+                  }
                 } catch (error) {
                   callback_gas_used = 0
                 }
