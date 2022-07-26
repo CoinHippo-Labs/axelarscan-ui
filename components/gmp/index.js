@@ -477,6 +477,9 @@ export default () => {
     case 'called':
       current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (!is_invalid_destination_chain && !is_insufficient_minimum_amount ? 1 : 0)
       break
+    case 'forecalled':
+      current_step = steps.findIndex(s => s.id === 'forecalled') + 1
+      break
     case 'approved':
       current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? status : 'call')) + 1
       break
@@ -1690,23 +1693,25 @@ export default () => {
                           Error:
                         </span>
                         <div className="flex flex-col space-y-1.5">
-                          <div className="flex items-center space-x-1.5">
-                            {_data.error?.code && (
-                              <a
-                                href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().replace('unpredicatable_gas_limit', 'unpredictable_gas_limit').split('_').join('-')}` : 'ethereum'}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
-                              >
-                                {_data.error.code}
-                              </a>
-                            )}
-                            {is_not_enough_gas && (
-                              <div className="max-w-min bg-yellow-100 dark:bg-yellow-500 border border-yellow-500 dark:border-yellow-600 rounded-lg whitespace-nowrap uppercase font-semibold py-0.5 px-2">
-                                {`${_data.error?.reason === 'transaction failed' ? 'Can be n' : 'N'}ot enough gas`}
-                              </div>
-                            )}
-                          </div>
+                          {(_data.error?.code || is_not_enough_gas) && (
+                            <div className="flex items-center space-x-1.5">
+                              {_data.error?.code && (
+                                <a
+                                  href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().replace('unpredicatable_gas_limit', 'unpredictable_gas_limit').split('_').join('-')}` : 'ethereum'}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
+                                >
+                                  {_data.error.code}
+                                </a>
+                              )}
+                              {is_not_enough_gas && (
+                                <div className="max-w-min bg-yellow-100 dark:bg-yellow-500 border border-yellow-500 dark:border-yellow-600 rounded-lg whitespace-nowrap uppercase font-semibold py-0.5 px-2">
+                                  {`${_data.error?.reason === 'transaction failed' ? 'Can be n' : 'N'}ot enough gas`}
+                                </div>
+                              )}
+                            </div>
+                          )}
                           <div className="flex flex-col space-y-1.5">
                             {[{
                               id: 'reason',

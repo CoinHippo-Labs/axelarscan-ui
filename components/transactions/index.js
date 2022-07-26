@@ -488,17 +488,27 @@ export default ({ n }) => {
                 <div className="text-left sm:text-right">
                   <div className="flex flex-col items-start sm:items-end justify-center space-y-1.5">
                     {typeof props.value === 'number' ?
-                      <div className="h-5 flex items-center uppercase text-xs lg:text-sm font-semibold">
-                        {number_format(props.value, '0,0.00000000')} {ellipse(props.row.original.symbol, 4, 'ibc/')}
+                      <div className="h-5 flex items-center text-xs lg:text-sm font-semibold space-x-1">
+                        <span className="uppercase">
+                          {number_format(props.value, '0,0.00000000')}
+                        </span>
+                        <span>
+                          {ellipse(props.row.original.symbol, 4, 'ibc/')}
+                        </span>
                       </div>
                       :
                       props.row.original.activities?.findIndex(a => a?.amount && a.amount !== props.row.original.fee) > -1 ?
                         props.row.original.activities.filter(a => a?.amount && a.amount !== props.row.original.fee).map((a, i) => (
                           <div
                             key={i}
-                            className={`h-5 flex items-center uppercase ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-500 dark:text-green-600 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold`}
+                            className={`h-5 flex items-center ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-500 dark:text-green-600 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold space-x-1`}
                           >
-                            {number_format(a.amount, '0,0.00000000')} {ellipse(a.symbol || a.denom, 4, 'ibc/')}
+                            <span className="uppercase">
+                              {number_format(a.amount, '0,0.00000000')}
+                            </span>
+                            <span>
+                              {ellipse(a.symbol || a.denom, 4, 'ibc/')}
+                            </span>
                           </div>
                         ))
                         :
