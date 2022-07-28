@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
@@ -12,7 +13,25 @@ import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
-const DEFAULT_AVG_TIME_SPENT_DAYS = 7
+const DEFAULT_TIMEFRAME_DAYS = 7
+const TIMEFRAME_OPTIONS = [
+  {
+    title: 'All times',
+    n_day: null,
+  },
+  {
+    title: 'Last 90 days',
+    n_day: 90,
+  },
+  {
+    title: 'Last 30 days',
+    n_day: 30,
+  },
+  {
+    title: 'Last 7 days',
+    n_day: 7,
+  },
+]
 
 export default () => {
   const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
@@ -23,6 +42,7 @@ export default () => {
   const router = useRouter()
   const { pathname, asPath } = { ...router }
 
+  const [timeframeSelected, setTimeframeSelected] = useState(false)
   const [statuses, setStatuses] = useState(null)
   const [methods, setMethods] = useState(null)
   const [chainPairs, setChainPairs] = useState(null)
@@ -45,7 +65,7 @@ export default () => {
         sourceAddress,
         contractAddress,
         relayerAddress,
-        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+        time: fromTime && [moment(Number(fromTime)), toTime ? moment(Number(toTime)) : moment()],
       })
       if (typeof fetchTrigger === 'number') {
         setFetchTrigger(moment().valueOf())
@@ -67,6 +87,33 @@ export default () => {
   }, [pathname, filters])
 
   useEffect(() => {
+    if (pathname && !timeframeSelected) {
+      if (!filters?.time) {
+        const qs = new URLSearchParams()
+        Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
+          let key, value
+          switch (k) {
+            case 'time':
+              break
+            default:
+              key = k
+              value = v
+              break
+          }
+          if (key) {
+            qs.append(key, value)
+          }
+        })
+        qs.append('fromTime', moment().subtract(DEFAULT_TIMEFRAME_DAYS, 'days').valueOf())
+        qs.append('toTime', moment().valueOf())
+        const qs_string = qs.toString()
+        router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
+      }
+      setTimeframeSelected(true)
+    }
+  }, [pathname, timeframeSelected])
+
+  useEffect(() => {
     const controller = new AbortController()
     const getData = () => {
       if (filters) {
@@ -78,10 +125,10 @@ export default () => {
             setTimeSpents(null)
           }
 
-          let params, response, fromTime, toTime
+          let params, response
           if (filters) {
             const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-            let event
+            let event, fromTime, toTime
             switch (method) {
               case 'callContract':
                 event = 'ContractCall'
@@ -115,15 +162,6 @@ export default () => {
           getStatuses(params)
           getMethods(params)
           getChainPairs(params)
-          if (params && !fromTime && !toTime) {
-            fromTime = moment().subtract(DEFAULT_AVG_TIME_SPENT_DAYS, 'days').unix()
-            toTime = moment().unix()
-            params = {
-              ...params,
-              fromTime,
-              toTime,
-            }
-          }
           getTimeSpents(params)
         }
       }
@@ -339,232 +377,280 @@ export default () => {
   const colors = ['bg-yellow-500', 'bg-blue-500', 'bg-green-500', 'bg-red-500']
 
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div className={`${metricClassName}`}>
-        <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
-          Messages
-        </span>
-        <div className="text-3xl font-bold">
-          {statuses ?
-            number_format(total, '0,0')
-            :
-            <TailSpin color={loader_color(theme)} width="36" height="36" />
+    <>
+      <div className="flex items-center mb-2">
+        {TIMEFRAME_OPTIONS.map((o, i) => {
+          const {
+            title,
+            n_day,
+          } = { ...o }
+          const selected = (!n_day && !(filters?.time?.length > 0)) ||
+            (
+              filters?.time?.length > 0 &&
+              Math.abs(filters.time[0].diff(moment().subtract(n_day, 'days'), 'minutes')) < 30 &&
+              Math.abs((filters.time[1] || moment()).diff(moment(), 'minutes')) < 30
+            )
+          const qs = new URLSearchParams()
+          Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
+            let key, value
+            switch (k) {
+              case 'time':
+                break
+              default:
+                key = k
+                value = v
+                break
+            }
+            if (key) {
+              qs.append(key, value)
+            }
+          })
+          switch (n_day) {
+            case null:
+              break
+            default:
+              qs.append('fromTime', moment().subtract(n_day, 'days').valueOf())
+              qs.append('toTime', moment().valueOf())
+              break
           }
-        </div>
-        <div className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-          messages passed through the network
-        </div>
-      </div>
-      <div className={`${metricClassName}`}>
-        <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
-          Methods
-        </span>
-        <div className="space-y-1">
-          {methods && statuses ?
-            methods.map((m, i) => (
-              <div
-                key={i}
-                className="space-y-0"
+          const qs_string = qs.toString()
+          return (
+            <Link
+              key={i}
+              href={`${pathname}${qs_string ? `?${qs_string}` : ''}`}
+            >
+              <a
+                onClick={() => setTimeframeSelected(true)}
+                className={`${selected ? 'bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold' : 'bg-slate-100 dark:bg-slate-900 text-blue-400 hover:text-blue-500 dark:text-blue-600 dark:hover:text-blue-500 font-medium'} rounded-lg whitespace-nowrap mr-1.5 py-0.5 px-1.5`}
               >
-                <div className="flex items-center justify-between space-x-2">
-                  <span className="text-base font-bold">
-                    {m?.key}
-                  </span>
-                  <span className="font-bold">
-                    {number_format(m?.value, '0,0')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between space-x-2">
-                  <ProgressBar
-                    width={m?.value * 100 / total}
-                    color={`${colors[i % colors.length]}`}
-                    className="h-1.5 rounded-lg"
-                  />
-                  <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                    {number_format(m?.value / total, '0,0.000%')}
-                  </span>
-                </div>
-              </div>
-            ))
-            :
-            <TailSpin color={loader_color(theme)} width="36" height="36" />
-          }
-        </div>
+                {title}
+              </a>
+            </Link>
+          )
+        })}
       </div>
-      <div className={`sm:col-span-2 ${metricClassName}`}>
-        <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
-          Statuses
-        </span>
-        <div className="grid sm:grid-cols-2 gap-y-1 gap-x-5">
-          {statuses ?
-            statuses.filter(s => !['called'].includes(s?.key)).map((m, i) => (
-              <div
-                key={i}
-                className="space-y-0"
-              >
-                <div className="flex items-center justify-between space-x-2">
-                  <span className="text-base font-bold">
-                    {m?.name}
-                  </span>
-                  <span className="font-bold">
-                    {number_format(m?.value, '0,0')}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between space-x-2">
-                  <ProgressBar
-                    width={m?.value * 100 / total}
-                    color={`${m?.color || colors[i % colors.length]}`}
-                    className="h-1.5 rounded-lg"
-                  />
-                  <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                    {number_format(m?.value / total, '0,0.000%')}
-                  </span>
-                </div>
-              </div>
-            ))
-            :
-            <TailSpin color={loader_color(theme)} width="36" height="36" />
-          }
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className={`${metricClassName}`}>
+          <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+            Messages
+          </span>
+          <div className="text-3xl font-bold">
+            {statuses ?
+              number_format(total, '0,0')
+              :
+              <TailSpin color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+          <div className="text-slate-400 dark:text-slate-600 text-sm font-medium">
+            messages passed through the network
+          </div>
         </div>
-      </div>
-      <div className={`sm:col-span-2 ${metricClassName}`}>
-        <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-          Chain Pairs
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-y-1 gap-x-10">
-          {chainPairs && statuses ?
-            chainPairs.map((p, i) => {
-              const {
-                source_chain,
-                destination_chain,
-                value,
-              } = { ...p }
-              const source_chain_data = getChain(source_chain, chains_data)
-              const destination_chain_data = getChain(destination_chain, chains_data)
-              return (
+        <div className={`${metricClassName}`}>
+          <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+            Methods
+          </span>
+          <div className="space-y-1">
+            {methods && statuses ?
+              methods.map((m, i) => (
                 <div
                   key={i}
                   className="space-y-0"
                 >
                   <div className="flex items-center justify-between space-x-2">
-                    <div className="flex items-center space-x-2">
-                      <Image
-                        src={source_chain_data?.image}
-                        className="w-5 h-5 rounded-full"
-                      />
-                      <HiArrowSmRight size={20} />
-                      {destination_chain_data ?
-                        <Image
-                          src={destination_chain_data?.image}
-                          className="w-5 h-5 rounded-full"
-                        />
-                        :
-                        <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                          {destination_chain}
-                        </span>
-                      }
-                    </div>
+                    <span className="text-base font-bold">
+                      {m?.key}
+                    </span>
                     <span className="font-bold">
-                      {number_format(value, '0,0')}
+                      {number_format(m?.value, '0,0')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between space-x-2">
                     <ProgressBar
-                      width={value * 100 / total}
+                      width={m?.value * 100 / total}
                       color={`${colors[i % colors.length]}`}
                       className="h-1.5 rounded-lg"
                     />
                     <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                      {number_format(value / total, '0,0.000%')}
+                      {number_format(m?.value / total, '0,0.000%')}
                     </span>
                   </div>
                 </div>
-              )
-            })
-            :
-            <TailSpin color={loader_color(theme)} width="36" height="36" />
-          }
+              ))
+              :
+              <TailSpin color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
         </div>
-      </div>
-      <div className={`sm:col-span-2 ${metricClassName}`}>
-        <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-          Time Spent
-          {timeSpents && filters && !filters.time?.[0] && (
-            <span className="ml-2">
-              (Last {DEFAULT_AVG_TIME_SPENT_DAYS} days)
-            </span>
-          )}
-        </div>
-        <div className="space-y-2">
-          {timeSpents ?
-            timeSpents.map((t, i) => {
-              const {
-                key,
-                approve,
-                execute,
-              } = { ...t }
-              const source_chain_data = getChain(key, chains_data)
-              return (
+        <div className={`sm:col-span-2 ${metricClassName}`}>
+          <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
+            Statuses
+          </span>
+          <div className="grid sm:grid-cols-2 gap-y-1 gap-x-5">
+            {statuses ?
+              statuses.filter(s => !['called'].includes(s?.key)).map((m, i) => (
                 <div
                   key={i}
-                  className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-2 gap-2 space-y-1 sm:space-y-0 p-3"
+                  className="space-y-0"
                 >
-                  <div className="flex flex-col space-y-0.5">
-                    <span className="text-slate-400 dark:text-slate-500 text-xs">
-                      From chain
+                  <div className="flex items-center justify-between space-x-2">
+                    <span className="text-base font-bold">
+                      {m?.name}
                     </span>
-                    <div className="flex items-center space-x-2">
-                      {source_chain_data?.image && (
+                    <span className="font-bold">
+                      {number_format(m?.value, '0,0')}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between space-x-2">
+                    <ProgressBar
+                      width={m?.value * 100 / total}
+                      color={`${m?.color || colors[i % colors.length]}`}
+                      className="h-1.5 rounded-lg"
+                    />
+                    <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                      {number_format(m?.value / total, '0,0.000%')}
+                    </span>
+                  </div>
+                </div>
+              ))
+              :
+              <TailSpin color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+        </div>
+        <div className={`sm:col-span-2 ${metricClassName}`}>
+          <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
+            Chain Pairs
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-y-1 gap-x-10">
+            {chainPairs && statuses ?
+              chainPairs.map((p, i) => {
+                const {
+                  source_chain,
+                  destination_chain,
+                  value,
+                } = { ...p }
+                const source_chain_data = getChain(source_chain, chains_data)
+                const destination_chain_data = getChain(destination_chain, chains_data)
+                return (
+                  <div
+                    key={i}
+                    className="space-y-0"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <div className="flex items-center space-x-2">
                         <Image
-                          src={source_chain_data.image}
-                          className="w-8 h-8 rounded-full"
+                          src={source_chain_data?.image}
+                          className="w-5 h-5 rounded-full"
                         />
-                      )}
-                      <span className="text-lg font-bold">
-                        {source_chain_data?.name || key}
+                        <HiArrowSmRight size={20} />
+                        {destination_chain_data ?
+                          <Image
+                            src={destination_chain_data?.image}
+                            className="w-5 h-5 rounded-full"
+                          />
+                          :
+                          <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                            {destination_chain}
+                          </span>
+                        }
+                      </div>
+                      <span className="font-bold">
+                        {number_format(value, '0,0')}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <ProgressBar
+                        width={value * 100 / total}
+                        color={`${colors[i % colors.length]}`}
+                        className="h-1.5 rounded-lg"
+                      />
+                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                        {number_format(value / total, '0,0.000%')}
                       </span>
                     </div>
                   </div>
-                  <div className="flex flex-col space-y-1.5">
-                    <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
-                      Time spent (Median)
-                    </span>
-                    <div className="grid grid-cols-2 gap-y-1 gap-x-4">
-                      <div className="w-full col-span-2">
-                        <ProgressBar
-                          width={approve * 100 / (approve + execute)}
-                          color="bg-yellow-500"
-                          backgroundClassName="h-1.5 bg-green-500"
-                          className="h-1.5"
-                        />
+                )
+              })
+              :
+              <TailSpin color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
+        </div>
+        <div className={`sm:col-span-2 ${metricClassName}`}>
+          <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
+            Time Spent
+          </div>
+          <div className="space-y-2">
+            {timeSpents ?
+              timeSpents.map((t, i) => {
+                const {
+                  key,
+                  approve,
+                  execute,
+                } = { ...t }
+                const source_chain_data = getChain(key, chains_data)
+                return (
+                  <div
+                    key={i}
+                    className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-2 gap-2 space-y-1 sm:space-y-0 p-3"
+                  >
+                    <div className="flex flex-col space-y-0.5">
+                      <span className="text-slate-400 dark:text-slate-500 text-xs">
+                        From chain
+                      </span>
+                      <div className="flex items-center space-x-2">
+                        {source_chain_data?.image && (
+                          <Image
+                            src={source_chain_data.image}
+                            className="w-8 h-8 rounded-full"
+                          />
+                        )}
+                        <span className="text-lg font-bold">
+                          {source_chain_data?.name || key}
+                        </span>
                       </div>
-                      <div className="font-semibold text-left">
-                        Approve ({approve ? _total_time_string(approve) : '-'})
-                      </div>
-                      <div className="font-semibold text-right">
-                        Execute ({execute ? _total_time_string(execute) : '-'})
-                      </div>
-                      <div className="col-span-2" />
-                      <div className="w-full col-span-2">
-                        <ProgressBar
-                          width={100}
-                          color="bg-blue-500"
-                          className="h-1.5"
-                        />
-                      </div>
-                      <div className="col-span-2 font-semibold text-right">
-                        Total ({t?.total ? _total_time_string(t.total) : '-'})
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
+                        Time spent (Median)
+                      </span>
+                      <div className="grid grid-cols-2 gap-y-1 gap-x-4">
+                        <div className="w-full col-span-2">
+                          <ProgressBar
+                            width={approve * 100 / (approve + execute)}
+                            color="bg-yellow-500"
+                            backgroundClassName="h-1.5 bg-green-500"
+                            className="h-1.5"
+                          />
+                        </div>
+                        <div className="font-semibold text-left">
+                          Approve ({approve ? _total_time_string(approve) : '-'})
+                        </div>
+                        <div className="font-semibold text-right">
+                          Execute ({execute ? _total_time_string(execute) : '-'})
+                        </div>
+                        <div className="col-span-2" />
+                        <div className="w-full col-span-2">
+                          <ProgressBar
+                            width={100}
+                            color="bg-blue-500"
+                            className="h-1.5"
+                          />
+                        </div>
+                        <div className="col-span-2 font-semibold text-right">
+                          Total ({t?.total ? _total_time_string(t.total) : '-'})
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })
-            :
-            <TailSpin color={loader_color(theme)} width="36" height="36" />
-          }
+                )
+              })
+              :
+              <TailSpin color={loader_color(theme)} width="36" height="36" />
+            }
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
