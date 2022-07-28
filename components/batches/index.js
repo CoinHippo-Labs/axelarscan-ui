@@ -53,9 +53,9 @@ export default () => {
         status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
-      if (typeof fetchTrigger === 'number') {
-        setFetchTrigger(moment().valueOf())
-      }
+      // if (typeof fetchTrigger === 'number') {
+      //   setFetchTrigger(moment().valueOf())
+      // }
     }
   }, [asPath])
 

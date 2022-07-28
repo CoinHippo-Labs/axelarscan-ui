@@ -49,9 +49,9 @@ export default () => {
         vote: ['yes', 'no'].includes(vote?.toLowerCase()) ? vote.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
-      if (typeof fetchTrigger === 'number') {
-        setFetchTrigger(moment().valueOf())
-      }
+      // if (typeof fetchTrigger === 'number') {
+      //   setFetchTrigger(moment().valueOf())
+      // }
     }
   }, [asPath])
 
