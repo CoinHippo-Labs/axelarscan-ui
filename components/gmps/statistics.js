@@ -16,7 +16,7 @@ import { number_format, capitalize, equals_ignore_case, _total_time_string, para
 const DEFAULT_TIMEFRAME_DAYS = 7
 const TIMEFRAME_OPTIONS = [
   {
-    title: 'All times',
+    title: 'All-Time',
     n_day: null,
   },
   {
@@ -55,23 +55,28 @@ export default () => {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
       const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, fromTime, toTime } = { ...params }
-      setFilters({
-        txHash,
-        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
-        status: ['approving', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
-        senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
-        time: fromTime && [moment(Number(fromTime)), toTime ? moment(Number(toTime)) : moment()],
-      })
-      if (typeof fetchTrigger === 'number') {
-        setFetchTrigger(moment().valueOf())
+      if (!timeframeSelected) {
+        setTimeframeSelected(true)
+      }
+      else {
+        setFilters({
+          txHash,
+          sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
+          destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
+          method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
+          status: ['approving', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+          senderAddress,
+          sourceAddress,
+          contractAddress,
+          relayerAddress,
+          time: fromTime && [moment(Number(fromTime)), toTime ? moment(Number(toTime)) : moment()],
+        })
+        // if (typeof fetchTrigger === 'number') {
+        //   setFetchTrigger(moment().valueOf())
+        // }
       }
     }
-  }, [evm_chains_data, cosmos_chains_data, asPath])
+  }, [evm_chains_data, cosmos_chains_data, asPath, timeframeSelected])
 
   useEffect(() => {
     const triggering = is_interval => {
@@ -109,7 +114,6 @@ export default () => {
         const qs_string = qs.toString()
         router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
       }
-      setTimeframeSelected(true)
     }
   }, [pathname, timeframeSelected])
 
@@ -125,38 +129,35 @@ export default () => {
             setTimeSpents(null)
           }
 
-          let params, response
-          if (filters) {
-            const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-            let event, fromTime, toTime
-            switch (method) {
-              case 'callContract':
-                event = 'ContractCall'
-                break
-              case 'callContractWithToken':
-                event = 'ContractCallWithToken'
-                break
-              default:
-                event = undefined
-                break
-            }
-            if (time?.length > 0) {
-              fromTime = time[0].unix()
-              toTime = time[1].unix() || moment().unix()
-            }
-            params = {
-              txHash,
-              sourceChain,
-              destinationChain,
-              event,
-              status,
-              senderAddress,
-              sourceAddress,
-              contractAddress,
-              relayerAddress,
-              fromTime,
-              toTime,
-            }
+          const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
+          let event, fromTime, toTime
+          switch (method) {
+            case 'callContract':
+              event = 'ContractCall'
+              break
+            case 'callContractWithToken':
+              event = 'ContractCallWithToken'
+              break
+            default:
+              event = undefined
+              break
+          }
+          if (time?.length > 0) {
+            fromTime = time[0].unix()
+            toTime = time[1].unix() || moment().unix()
+          }
+          const params = {
+            txHash,
+            sourceChain,
+            destinationChain,
+            event,
+            status,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            fromTime,
+            toTime,
           }
 
           getStatuses(params)
@@ -578,7 +579,7 @@ export default () => {
         </div>
         <div className={`sm:col-span-2 ${metricClassName}`}>
           <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-            Time Spent
+            The Median Time Spent
           </div>
           <div className="space-y-2">
             {timeSpents ?
@@ -612,7 +613,7 @@ export default () => {
                     </div>
                     <div className="flex flex-col space-y-1.5">
                       <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
-                        Time spent (Median)
+                        Time spent
                       </span>
                       <div className="grid grid-cols-2 gap-y-1 gap-x-4">
                         <div className="w-full col-span-2">

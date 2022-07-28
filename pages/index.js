@@ -15,7 +15,7 @@ export default () => {
     setSsr(false)
   }, [])
 
-  if (typeof window !== 'undefined' && pathname !== _asPath && !ssr) {
+  if (!ssr && typeof window !== 'undefined' && pathname !== _asPath && !ssr) {
     router.push(is_route_exist(_asPath) ? asPath : '/')
   }
   return !ssr && ['/'].includes(asPath) && (

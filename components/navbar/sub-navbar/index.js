@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
+import moment from 'moment'
 import { FiBox } from 'react-icons/fi'
 import { BiServer } from 'react-icons/bi'
 import { HiOutlineExternalLink } from 'react-icons/hi'
@@ -252,12 +253,12 @@ export default () => {
           {[
             // { title: 'Overview', path: '/gmp' },
             { title: 'Search', path: '/gmp/search' },
-            { title: 'Statistics', path: '/gmp/stats' },
+            { title: 'Statistics', path: `/gmp/stats?fromTime=${moment().subtract(7, 'days').valueOf()}` },
           ].map((r, i) => (
             <div
               key={i}
               onClick={() => router.push(r.path)}
-              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+              className={`${r.path?.startsWith(pathname) ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
             >
               <span className="font-semibold">
                 {r.title}
