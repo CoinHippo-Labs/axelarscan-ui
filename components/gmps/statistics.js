@@ -12,6 +12,8 @@ import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
+const DEFAULT_AVG_TIME_SPENT_DAYS = 7
+
 export default () => {
   const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
   const { theme } = { ...preferences }
@@ -76,10 +78,10 @@ export default () => {
             setTimeSpents(null)
           }
 
-          let params, response
+          let params, response, fromTime, toTime
           if (filters) {
             const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-            let event, fromTime, toTime
+            let event
             switch (method) {
               case 'callContract':
                 event = 'ContractCall'
@@ -91,9 +93,9 @@ export default () => {
                 event = undefined
                 break
             }
-            if (time?.length > 1) {
+            if (time?.length > 0) {
               fromTime = time[0].unix()
-              toTime = time[1].unix()
+              toTime = time[1].unix() || moment().unix()
             }
             params = {
               txHash,
@@ -113,6 +115,15 @@ export default () => {
           getStatuses(params)
           getMethods(params)
           getChainPairs(params)
+          if (params && !fromTime && !toTime) {
+            fromTime = moment().subtract(DEFAULT_AVG_TIME_SPENT_DAYS, 'days').unix()
+            toTime = moment().unix()
+            params = {
+              ...params,
+              fromTime,
+              toTime,
+            }
+          }
           getTimeSpents(params)
         }
       }
@@ -478,6 +489,11 @@ export default () => {
       <div className={`sm:col-span-2 ${metricClassName}`}>
         <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
           Time Spent
+          {timeSpents && filters && !filters.time?.[0] && (
+            <span className="ml-2">
+              (Last {DEFAULT_AVG_TIME_SPENT_DAYS} days)
+            </span>
+          )}
         </div>
         <div className="space-y-2">
           {timeSpents ?
@@ -511,7 +527,7 @@ export default () => {
                   </div>
                   <div className="flex flex-col space-y-1.5">
                     <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
-                      Time spent (50th percentile)
+                      Time spent (Median)
                     </span>
                     <div className="grid grid-cols-2 gap-y-1 gap-x-4">
                       <div className="w-full col-span-2">

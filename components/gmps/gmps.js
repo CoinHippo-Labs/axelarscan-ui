@@ -252,7 +252,7 @@ export default ({ n }) => {
               accessor: 'call.event',
               disableSortBy: true,
               Cell: props => {
-                const { call, is_insufficient_minimum_amount } = { ...props.row.original }
+                const { call, fees, is_insufficient_minimum_amount } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { symbol, amount } = { ...returnValues }
                 const chain_data = getChain(chain, chains_data)
@@ -292,8 +292,13 @@ export default ({ n }) => {
                       </div>
                     )}
                     {is_insufficient_minimum_amount && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-2">
                         Insufficient Amount
+                      </div>
+                    )}
+                    {fees?.base_fee > 0 && (
+                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-1.5">
+                        {number_format(fees.base_fee, '0,0.000000')} {fees.destination_native_token?.symbol}
                       </div>
                     )}
                   </div>
@@ -559,6 +564,7 @@ export default ({ n }) => {
                   default:
                     break
                 }
+                const forecall_time_spent = total_time_string(call?.block_timestamp, forecalled?.block_timestamp)
                 const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
@@ -620,6 +626,16 @@ export default ({ n }) => {
                         </div>
                       )
                     })}
+                    {forecall_time_spent && (
+                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                          forecall time:
+                        </span>
+                        <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-medium">
+                          {forecall_time_spent}
+                        </span>
+                      </div>
+                    )}
                     {time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
@@ -639,8 +655,8 @@ export default ({ n }) => {
               accessor: 'call.block_timestamp',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, approved, executed, error } = { ...props.row.original }
-                const updated_at = executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp
+                const { call, gas_paid, forecalled, approved, executed, error } = { ...props.row.original }
+                const updated_at = executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || forecalled?.block_timestamp
                 return (
                   <div className="space-y-2">
                     <TimeAgo

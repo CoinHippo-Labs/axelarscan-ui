@@ -355,7 +355,7 @@ export default () => {
   }
 
   const { data, callback, origin } = { ...gmp }
-  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { commandId, sourceChain } = { ...approved?.returnValues }
@@ -491,6 +491,7 @@ export default () => {
       break
   }
   const detail_steps = steps
+  const forecall_time_spent = total_time_string(call?.block_timestamp, forecalled?.block_timestamp)
   const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
@@ -593,8 +594,13 @@ export default () => {
                         </div>
                       )}
                       {is_insufficient_minimum_amount && (
-                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-2">
                           Insufficient Amount
+                        </div>
+                      )}
+                      {fees?.base_fee > 0 && (
+                        <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-1.5">
+                          {number_format(fees.base_fee, '0,0.000000')} {fees.destination_native_token?.symbol}
                         </div>
                       )}
                     </div>
@@ -910,6 +916,16 @@ export default () => {
                         </div>
                       )
                     })}
+                    {forecall_time_spent && (
+                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                          forecall time:
+                        </span>
+                        <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-medium">
+                          {forecall_time_spent}
+                        </span>
+                      </div>
+                    )}
                     {gasAddButton}
                     {approveButton || executeButton || (time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
@@ -931,7 +947,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
+              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ? data || error : data
               const { blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
@@ -992,36 +1008,51 @@ export default () => {
                 source_refuned_gas_used = 0
               }
               if (callback) {
-                const { gasUsed, effectiveGasPrice } = { ...(callback.executed?.receipt || callback.error?.receipt) }
-                try {
-                  if (callback.executed?.receipt ? callback.is_execute_from_relayer === false : callback.error?.receipt ? callback.is_error_from_relayer === false : false) {
+                if (typeof gas?.gas_callback_amount === 'number') {
+                  callback_gas_used = gas.gas_callback_amount
+                }
+                else {
+                  const { gasUsed, effectiveGasPrice } = { ...(callback.executed?.receipt || callback.error?.receipt) }
+                  try {
+                    if (callback.executed?.receipt ? callback.is_execute_from_relayer === false : callback.error?.receipt ? callback.is_error_from_relayer === false : false) {
+                      callback_gas_used = 0
+                    }
+                    else {
+                      callback_gas_used = Number(utils.formatUnits(
+                        FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
+                          .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString()))
+                          .round(0).toString().replace('.0', '')
+                        , source_token.decimals
+                      ))
+                    }
+                  } catch (error) {
                     callback_gas_used = 0
                   }
-                  else {
-                    callback_gas_used = Number(utils.formatUnits(
-                      FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
-                        .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString()))
-                        .round(0).toString().replace('.0', '')
-                      , source_token.decimals
-                    ))
-                  }
-                } catch (error) {
-                  callback_gas_used = 0
                 }
               }
               try {
                 source_forecalled_gas_used = Number(utils.formatUnits(
                   FixedNumber.fromString(BigNumber.from(forecalled?.receipt?.gasUsed || '0').toString())
                     .mulUnsafe(FixedNumber.fromString(BigNumber.from(forecalled?.receipt?.effectiveGasPrice || '0').toString()))
-                    .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
+                    .mulUnsafe(FixedNumber.fromString((
+                      (forecall_gas_price_rate?.destination_native_token?.token_price?.usd || destination_native_token?.token_price?.usd) /
+                      (forecall_gas_price_rate?.source_token?.token_price?.usd || source_token?.token_price?.usd)
+                    ).toString()))
                     .round(0).toString().replace('.0', '')
                   , destination_native_token.decimals
                 ))
               } catch (error) {
                 source_forecalled_gas_used = 0
               }
-              const refunded_amount = gasFeeAmount && (Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
-                source_gas_used - source_forecalled_gas_used - source_refuned_gas_used - (callback_gas_used || 0))
+              const refunded_amount = gasFeeAmount && (
+                (
+                  typeof gas?.gas_remain_amount === 'number' ?
+                    gas.gas_remain_amount :
+                    Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
+                    source_gas_used - source_forecalled_gas_used - (callback_gas_used || 0)
+                )
+                - source_refuned_gas_used
+              )
               const from = receipt?.from || transaction?.from
               const to = !['forecalled', 'executed', 'refunded'].includes(s.id) ? contract_address : ['refunded'].includes(s.id) ? _data?.to || refundAddress : destinationContractAddress
               const { explorer } = { ...chain_data }
@@ -1289,7 +1320,7 @@ export default () => {
                     {['forecalled', 'refunded'].includes(s.id) && forecalled?.receipt?.gasUsed && forecalled.receipt.effectiveGasPrice && destination_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {['refunded'].includes(s.id) ? 'Forecall Gas' : 'Gas Used'}:
+                          {['refunded'].includes(s.id) ? 'Gas Forecall' : 'Gas Used'}:
                         </span>
                         <div className="flex items-center space-x-2">
                           <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
@@ -1313,7 +1344,7 @@ export default () => {
                               </span>
                             </span>
                           </div>
-                          {source_token?.token_price?.usd && destination_native_token?.token_price?.usd && (
+                          {(forecall_gas_price_rate || gas_price_rate) && (
                             <>
                               <span className="text-sm font-medium">
                                 =
@@ -1342,7 +1373,7 @@ export default () => {
                     {['executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          Gas Used:
+                          {['refunded'].includes(s.id) ? 'Gas Execute' : 'Gas Used'}:
                         </span>
                         <div className="flex items-center space-x-2">
                           <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
@@ -1742,17 +1773,31 @@ export default () => {
                         >
                           Error:
                         </span>
-                        <div className="flex flex-col space-y-1">
-                          <div className="flex items-center space-x-1.5">
-                            {_data.error?.code && (
-                              <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
-                                {_data.error.code}
+                        <div className="flex flex-col space-y-1.5">
+                          {_data.error?.code && (
+                            <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
+                              {_data.error.code}
+                            </div>
+                          )}
+                          <div className="flex flex-col space-y-1.5">
+                            {[{
+                              id: 'reason',
+                              value: _data.error?.reason && `Reason: ${_data.error.reason}`,
+                            }, {
+                              id: 'message',
+                              value: _data.error?.data?.message || _data.error?.message,
+                            }, {
+                              id: 'body',
+                              value: _data.error?.body?.replaceAll('"""', ''),
+                            }].filter(e => e?.value).map((e, j) => (
+                              <div
+                                key={j}
+                                className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                              >
+                                {ellipse(e.value, 256)}
                               </div>
-                            )}
+                            ))}
                           </div>
-                          <span className="text-red-500 dark:text-red-600 font-semibold">
-                            {ellipse([_data.error?.reason, _data.error?.body?.replaceAll('"""', '')].filter(m => m).join(' - '), 256)}
-                          </span>
                         </div>
                       </div>
                     )}
