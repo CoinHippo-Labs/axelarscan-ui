@@ -286,8 +286,25 @@ export default ({ n }) => {
           if (response) {
             setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
+              const {
+                confirm_deposit,
+                vote,
+                sign_batch,
+                ibc_send,
+              } = { ...d }
               return {
                 ...d,
+                status: ibc_send ?
+                  'ibc_sent' :
+                  sign_batch?.executed ?
+                    'executed' :
+                     sign_batch ?
+                      'sign_batch' :
+                      vote ?
+                        'voted' :
+                        confirm_deposit ?
+                          'deposit_confirmed' :
+                          'asset_sent',
               }
             }) || [], _data), 'source.id'), ['source.created_at.ms'], ['desc'])
             setData(response)
