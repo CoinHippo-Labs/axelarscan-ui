@@ -990,7 +990,7 @@ export default () => {
                       .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
                       .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
                       .round(0).toString().replace('.0', '')
-                    , destination_native_token.decimals
+                    , forecall_gas_price_rate?.destination_native_token?.decimals || destination_native_token.decimals
                   ))
                 }
               } catch (error) {
@@ -1002,7 +1002,7 @@ export default () => {
                     .mulUnsafe(FixedNumber.fromString(BigNumber.from(receipt?.effectiveGasPrice || '0').toString()))
                     .mulUnsafe(FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toString()))
                     .round(0).toString().replace('.0', '')
-                  , destination_native_token.decimals
+                  , forecall_gas_price_rate?.destination_native_token?.decimals || destination_native_token.decimals
                 ))
               } catch (error) {
                 source_refuned_gas_used = 0
@@ -1039,7 +1039,7 @@ export default () => {
                       (forecall_gas_price_rate?.source_token?.token_price?.usd || source_token?.token_price?.usd)
                     ).toString()))
                     .round(0).toString().replace('.0', '')
-                  , destination_native_token.decimals
+                  , forecall_gas_price_rate?.destination_native_token?.decimals || destination_native_token.decimals
                 ))
               } catch (error) {
                 source_forecalled_gas_used = 0
