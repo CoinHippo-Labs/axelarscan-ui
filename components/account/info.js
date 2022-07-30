@@ -345,7 +345,7 @@ export default ({ data }) => {
                               <span className="font-bold">
                                 {ellipse(props.row.original.denom, 6)}
                               </span>
-                              {props.value.price && (
+                              {props.value.price > 0 && (
                                 <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg font-mono text-xs font-bold py-0.5 px-2">
                                   {currency_symbol}
                                   {number_format(props.value.price, '0,0.00000000')}
@@ -398,7 +398,7 @@ export default ({ data }) => {
                   Cell: props => (
                     <div className="flex flex-col text-left sm:text-right">
                       <div className="flex flex-col items-start sm:items-end space-y-1.5">
-                        {typeof props.value === 'number' ?
+                        {typeof props.value === 'number' && props.row.original.asset_data?.price > 0 ?
                           <span className="font-mono uppercase text-xs lg:text-sm font-bold">
                             {currency_symbol}
                             {number_format(props.value, props.value > 100000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.00000000')}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { CSVLink } from 'react-csv'
 import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
 import { BiCheckCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
@@ -34,6 +35,7 @@ export default ({ n }) => {
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
+  const [dataForExport, setDataForExport] = useState(null)
   const [offset, setOffet] = useState(0)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -84,6 +86,7 @@ export default ({ n }) => {
           if (!fetchTrigger) {
             setTotal(null)
             setData(null)
+            setDataForExport(null)
             setOffet(0)
           }
           const _data = !fetchTrigger ? [] : (data || []),
@@ -288,10 +291,13 @@ export default ({ n }) => {
               }
             }) || [], _data), 'source.id'), ['source.created_at.ms'], ['desc'])
             setData(response)
+            setFetching(false)
+            setDataForExport(await toCSV(response))
           }
           else if (!fetchTrigger) {
             setTotal(0)
             setData([])
+            setDataForExport([])
           }
           setFetching(false)
         }
@@ -303,6 +309,35 @@ export default ({ n }) => {
     }
   }, [fetchTrigger])
 
+  const toCSV = async data => {
+    data = data?.filter(d => d).map(d => {
+      const {
+        source,
+        link,
+      } = { ...d }
+      const {
+        sender_chain,
+        recipient_address,
+        denom,
+        created_at,
+      } = { ...source }
+      const {
+        original_sender_chain,
+      } = { ...link }
+      const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
+      const asset_data = getDenom(denom, assets_data)
+      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
+      const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === chain_data?.id)
+      const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
+      return {
+        ...d,
+        symbol,
+        timestamp_utc_string: moment(created_at?.ms).format('DD-MM-YYYY HH:mm:ss A'),
+      }
+    }) || []
+    return data
+  }
+
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
   const data_filtered = _.slice(data, 0, n || undefined)
 
@@ -310,13 +345,40 @@ export default ({ n }) => {
     data ?
       <div className="min-h-full grid gap-2">
         {!n && (
-          <div className="flex items-center space-x-2 -mt-3">
-            <span className="text-lg font-bold">
-              {number_format(total, '0,0')}
-            </span>
-            <span className="text-base">
-              Results
-            </span>
+          <div className="flex items-center justify-between space-x-2 -mt-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg font-bold">
+                {number_format(total, '0,0')}
+              </span>
+              <span className="text-base">
+                Results
+              </span>
+            </div>
+            {dataForExport?.length > 0 && (
+              <CSVLink
+                headers={[
+                  { label: 'Tx Hash', key: 'source.id' },
+                  { label: 'Source Chain', key: 'source.sender_chain' },
+                  { label: 'Sender Address', key: 'source.sender_address' },
+                  { label: 'Symbol', key: 'symbol' },
+                  { label: 'Amount', key: 'source.amount' },
+                  { label: 'Fee', key: 'source.fee' },
+                  { label: 'Deposit Address', key: 'source.recipient_address' },
+                  { label: 'Destination Chain', key: 'source.recipient_chain' },
+                  { label: 'Recipient Address', key: 'link.recipient_address' },
+                  { label: 'Status', key: 'status' },
+                  { label: 'Time (ms)', key: 'source.created_at.ms' },
+                  { label: 'Time (DD-MM-YYYY HH:mm:ss A)', key: 'timestamp_utc_string' },
+                ]}
+                data={dataForExport}
+                filename={`tranfers${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('') || (address ? `_${address}` : '')}.csv`}
+                className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg mb-1 py-1 px-2.5`}
+              >
+                <span className="whitespace-nowrap font-bold">
+                  Export CSV
+                </span>
+              </CSVLink>
+            )}
           </div>
         )}
         <Datatable
@@ -437,7 +499,7 @@ export default ({ n }) => {
               Cell: props => {
                 const { sender_chain, recipient_address, amount, denom, fee } = { ...props.value }
                 const { link } = { ...props.row.original }
-                const { original_sender_chain, asset } = { ...link }
+                const { original_sender_chain } = { ...link }
                 const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
                 const asset_data = getDenom(denom, assets_data)
                 const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)

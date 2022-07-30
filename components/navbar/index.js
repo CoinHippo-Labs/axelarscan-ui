@@ -70,7 +70,7 @@ export default () => {
       if (response) {
         const assets_data = response
         // price
-        let updated_ids = assets_data.filter(a => a?.price).map(a => a.id)
+        let updated_ids = assets_data.filter(a => a?.id === 'uaxl' || typeof a?.price === 'number').map(a => a.id)
         if (updated_ids.length < assets_data.length) {
           let updated = false
           const denoms = assets_data.filter(a => a?.id && !updated_ids.includes(a.id)).map(a => {
@@ -89,10 +89,10 @@ export default () => {
               response.forEach(t => {
                 const asset_index = assets_data.findIndex(a => equals_ignore_case(a?.id, t?.denom))
                 if (asset_index > -1) {
-                  const asset = assets_data[asset_index]
-                  asset.price = t?.price || asset.price
-                  assets_data[asset_index] = asset
-                  updated_ids = _.uniq(_.concat(updated_ids, asset.id))
+                  const asset_data = assets_data[asset_index]
+                  asset_data.price = asset_data.id === 'uaxl' ? null : (t?.price || asset_data.price || 0)
+                  assets_data[asset_index] = asset_data
+                  updated_ids = _.uniq(_.concat(updated_ids, asset_data.id))
                   updated = true
                 }
               })
