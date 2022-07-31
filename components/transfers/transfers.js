@@ -379,6 +379,8 @@ export default ({ n }) => {
                   { label: 'Sender Address', key: 'source.sender_address' },
                   { label: 'Symbol', key: 'symbol' },
                   { label: 'Amount', key: 'source.amount' },
+                  { label: 'Price (USD)', key: 'link.price' },
+                  { label: 'Value (USD)', key: 'source.value' },
                   { label: 'Fee', key: 'source.fee' },
                   { label: 'Deposit Address', key: 'source.recipient_address' },
                   { label: 'Destination Chain', key: 'source.recipient_chain' },
