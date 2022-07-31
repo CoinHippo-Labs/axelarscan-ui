@@ -287,13 +287,29 @@ export default ({ n }) => {
             setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               const {
+                source,
+                link,
                 confirm_deposit,
                 vote,
                 sign_batch,
                 ibc_send,
               } = { ...d }
+              const {
+                amount,
+                value,
+              } = { ...source }
+              let {
+                price,
+              } = { ...link }
+              if (typeof price !== 'number' && typeof amount === 'number' && typeof value === 'number') {
+                price = value / amount
+              }
               return {
                 ...d,
+                link: link && {
+                  ...link,
+                  price,
+                },
                 status: ibc_send ?
                   'ibc_sent' :
                   sign_batch?.executed ?
