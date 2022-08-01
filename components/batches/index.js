@@ -44,10 +44,11 @@ export default () => {
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { chain, batchId, keyId, type, status, fromTime, toTime } = { ...params }
+      const { chain, batchId, commandId, keyId, type, status, fromTime, toTime } = { ...params }
       setFilters({
         chain,
         batchId,
+        commandId,
         keyId,
         type,
         status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
@@ -87,12 +88,15 @@ export default () => {
             size = LIMIT
           const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           const must = [], must_not = []
-          const { chain, batchId, keyId, type, status, time } = { ...filters }
+          const { chain, batchId, commandId, keyId, type, status, time } = { ...filters }
           if (chain) {
             must.push({ match: { chain } })
           }
           if (batchId) {
             must.push({ match: { batch_id: batchId } })
+          }
+          if (commandId) {
+            must.push({ match: { command_ids: commandId } })
           }
           if (keyId) {
             must.push({ match: { key_id: keyId } })

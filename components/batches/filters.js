@@ -40,10 +40,11 @@ export default () => {
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { chain, batchId, keyId, type, status, fromTime, toTime } = { ...params }
+      const { chain, batchId, commandId, keyId, type, status, fromTime, toTime } = { ...params }
       setFilters({
         chain,
         batchId,
+        commandId,
         keyId,
         type,
         status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
@@ -99,6 +100,12 @@ export default () => {
       name: 'batchId',
       type: 'text',
       placeholder: 'Batch ID',
+    },
+    {
+      label: 'Command ID',
+      name: 'commandId',
+      type: 'text',
+      placeholder: 'Command ID',
     },
     {
       label: 'Key ID',

@@ -31,7 +31,7 @@ export default () => {
               </span>
             </a>
           </Link>
-          <Gmps />
+          <Sents />
         </div>
         <div className="space-y-3">
           <Link href="/gmp/search">
