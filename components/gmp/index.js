@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import Web3 from 'web3'
-import { BigNumber, FixedNumber, constants, providers, utils } from 'ethers'
+import { BigNumber, Contract, FixedNumber, constants, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
@@ -21,6 +21,7 @@ import Notification from '../notifications'
 import Wallet from '../wallet'
 import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
+import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
 export default () => {
   const { preferences, evm_chains, cosmos_chains, assets, wallet } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
@@ -55,7 +56,7 @@ export default () => {
 
   useEffect(() => {
     const getData = async () => {
-      if (tx && api) {
+      if (evm_chains_data && tx && api) {
         if (gmp) {
           await sleep(2 * 1000)
           if (gmp.tx !== tx) {
@@ -68,6 +69,9 @@ export default () => {
           txHash: tx,
         })
         const data = response?.[0]
+        const {
+          approved,
+        } = { ...data }
 
         // callback data of 2-way call (if exists)
         let {
@@ -98,8 +102,54 @@ export default () => {
           origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
         }
 
+        let execute_data
+        if (approved) {
+          const {
+            destinationChain,
+            payload,
+          } = { ...data.call?.returnValues }
+          const {
+            contractAddress,
+            commandId,
+            sourceChain,
+            sourceAddress,
+            symbol,
+            amount,
+          } = { ...approved.returnValues }
+
+          // setup provider
+          const rpcs = getChain(destinationChain, evm_chains_data)?.provider_params?.[0]?.rpcUrls || []
+          const provider = rpcs.length === 1 ?
+            new providers.JsonRpcProvider(rpcs[0]) :
+            new providers.FallbackProvider(rpcs.map((url, i) => {
+              return {
+                provider: new providers.JsonRpcProvider(url),
+                priority: i + 1,
+                stallTimeout: 1000,
+              }
+            }))
+          const executable_contract = new Contract(contractAddress, IAxelarExecutable.abi, provider)
+
+          let _response
+          const method = `execute${symbol ? 'WithToken' : ''}`
+          switch (method) {
+            case 'execute':
+              _response = await executable_contract.populateTransaction.execute(commandId, sourceChain, sourceAddress, payload)
+              break
+            case 'executeWithToken':
+              _response = await executable_contract.populateTransaction.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount))
+              break
+            default:
+              break
+          }
+          if (_response?.data) {
+            execute_data = _response.data
+          }
+        }
+
         setGmp({
           data,
+          execute_data,
           callback,
           origin,
           tx,
@@ -113,7 +163,7 @@ export default () => {
     return () => {
       clearInterval(interval)
     }
-  }, [tx, api, approving, executing, txHashEditing])
+  }, [evm_chains_data, tx, api, approving, executing, txHashEditing])
 
   const resetTxHashEdit = () => {
     setApproveResponse(null)
@@ -354,7 +404,7 @@ export default () => {
     }
   }
 
-  const { data, callback, origin } = { ...gmp }
+  const { data, execute_data, callback, origin } = { ...gmp }
   const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
@@ -1946,6 +1996,24 @@ export default () => {
                     </div>
                   </div>
                 </div>
+              )}
+              {execute_data && (
+                <>
+                  <div className="sm:col-span-4 text-lg font-bold">
+                    Execute Data
+                  </div>
+                  <div className="sm:col-span-4 flex items-start">
+                    <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                      {execute_data}
+                    </div>
+                    <div className="mt-4">
+                      <Copy
+                        value={execute_data}
+                        size={20}
+                      />
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
