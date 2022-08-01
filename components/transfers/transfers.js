@@ -15,7 +15,7 @@ import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { transfers as getTransfers } from '../../lib/api/index'
+import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getDenom } from '../../lib/object/denom'
 import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
@@ -45,18 +45,19 @@ export default ({ n }) => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, confirmed, status, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, confirmed, state, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
-        status: ['completed', 'pending'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         asset: getDenom(asset, assets_data)?.id || asset,
         depositAddress,
         senderAddress,
         recipientAddress,
-        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+        fromTime: fromTime && moment(Number(fromTime)).unix(),
+        toTime: toTime && moment(Number(toTime)).unix(),
       })
       // if (typeof fetchTrigger === 'number') {
       //   setFetchTrigger(moment().valueOf())
@@ -93,234 +94,38 @@ export default ({ n }) => {
             size = n || LIMIT
           const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           const must = [], should = [], must_not = []
-          // must.push({ exists: { 'field': 'link' } })
+          let response
           if (address) {
             should.push({ match: { 'source.recipient_address': address } })
             should.push({ match: { 'source.sender_address': address } })
             should.push({ match: { 'link.recipient_address': address } })
+            response = await getTransfers({
+              query: {
+                bool: {
+                  must,
+                  should,
+                  minimum_should_match: should.length > 0 ? 1 : 0,
+                  must_not,
+                },
+              },
+              size,
+              from,
+              sort: [{ 'source.created_at.ms': 'desc' }],
+            })
           }
           else if (filters) {
-            const { txHash, confirmed, status, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, time } = { ...filters }
-            if (txHash) {
-              must.push({ match: { 'source.id': txHash } })
-            }
-            if (confirmed) {
-              switch (confirmed) {
-                case 'confirmed':
-                  should.push({ exists: { field: 'confirm_deposit' } })
-                  should.push({ exists: { field: 'vote' } })
-                  break
-                case 'unconfirmed':
-                  must_not.push({ exists: { field: 'confirm_deposit' } })
-                  must_not.push({ exists: { field: 'vote' } })
-                  break
-                default:
-                  break
-              }
-            }
-            if (status) {
-              switch (status) {
-                case 'completed':
-                  should.push({
-                    bool: {
-                      must: [
-                        { exists: { field: 'sign_batch' } }
-                      ],
-                      should: evm_chains_data?.map(c => {
-                        return { match: { 'source.recipient_chain': c?.id } }
-                      }) || [],
-                      minimum_should_match: 1,
-                    },
-                  })
-                  should.push({
-                    bool: {
-                      must: [
-                        { exists: { field: 'ibc_send' } }
-                      ],
-                      should: cosmos_chains_data?.map(c => {
-                        return { match: { 'source.recipient_chain': c?.id } }
-                      }) || [],
-                      minimum_should_match: 1,
-                    },
-                  })
-                  /*should.push({
-                    bool: {
-                      must: [
-                        {
-                          bool: {
-                            should: [
-                              {
-                                bool: {
-                                  must: [
-                                    { exists: { field: 'confirm_deposit' } },
-                                  ],
-                                  must_not: [
-                                    { match: { 'source.type': 'evm_transfer' } },
-                                  ],
-                                },
-                              },
-                              {
-                                bool: {
-                                  must: [
-                                    { exists: { field: 'vote' } },
-                                    { match: { 'source.type': 'evm_transfer' } },
-                                  ],
-                                },
-                              },
-                            ],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
-                      should: cosmos_chains_data?.map(c => {
-                        return { match: { 'source.recipient_chain': c?.id } }
-                      }) || [],
-                      minimum_should_match: 1,
-                    },
-                  })*/
-                  break
-                case 'pending':
-                  must_not.push({
-                    bool: {
-                      should: [
-                        {
-                          bool: {
-                            must: [
-                              { exists: { field: 'sign_batch' } }
-                            ],
-                            should: evm_chains_data?.map(c => {
-                              return { match: { 'source.recipient_chain': c?.id } }
-                            }) || [],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        {
-                          bool: {
-                            must: [
-                              { exists: { field: 'ibc_send' } }
-                            ],
-                            should: cosmos_chains_data?.map(c => {
-                              return { match: { 'source.recipient_chain': c?.id } }
-                            }) || [],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        /*{
-                          bool: {
-                            must: [
-                              {
-                                bool: {
-                                  should: [
-                                    {
-                                      bool: {
-                                        must: [
-                                          { exists: { field: 'confirm_deposit' } },
-                                        ],
-                                        must_not: [
-                                          { match: { 'source.type': 'evm_transfer' } },
-                                        ],
-                                      },
-                                    },
-                                    {
-                                      bool: {
-                                        must: [
-                                          { exists: { field: 'vote' } },
-                                          { match: { 'source.type': 'evm_transfer' } },
-                                        ],
-                                      },
-                                    },
-                                  ],
-                                  minimum_should_match: 1,
-                                },
-                              },
-                            ],
-                            should: cosmos_chains_data?.map(c => {
-                              return { match: { 'source.recipient_chain': c?.id } }
-                            }) || [],
-                            minimum_should_match: 1,
-                          },
-                        },*/
-                      ],
-                    },
-                  })
-                  break
-                default:
-                  break
-              }
-            }
-            if (sourceChain) {
-              must.push({ match: { 'source.sender_chain': sourceChain } })
-            }
-            if (destinationChain) {
-              must.push({ match: { 'source.recipient_chain': destinationChain } })
-            }
-            if (asset) {
-              must.push({ match_phrase: { 'source.denom': asset } })
-            }
-            if (depositAddress) {
-              must.push({ match: { 'source.recipient_address': depositAddress } })
-            }
-            if (senderAddress) {
-              must.push({ match: { 'source.sender_address': senderAddress } })
-            }
-            if (recipientAddress) {
-              must.push({ match: { 'link.recipient_address': recipientAddress } })
-            }
-            if (time?.length > 1) {
-              must.push({ range: { 'source.created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
-            }
+            response = await getTransfers({
+              ...filters,
+              size,
+              from,
+              sort: [{ 'source.created_at.ms': 'desc' }],
+            })
           }
-          const response = await getTransfers({
-            query: {
-              bool: {
-                must,
-                should,
-                minimum_should_match: should.length > 0 ? 1 : 0,
-                must_not,
-              },
-            },
-            size,
-            from,
-            sort: [{ 'source.created_at.ms': 'desc' }],
-          })
           if (response) {
             setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              const {
-                source,
-                link,
-                confirm_deposit,
-                vote,
-                sign_batch,
-                ibc_send,
-              } = { ...d }
-              const {
-                amount,
-                value,
-              } = { ...source }
-              let {
-                price,
-              } = { ...link }
-              if (typeof price !== 'number' && typeof amount === 'number' && typeof value === 'number') {
-                price = value / amount
-              }
               return {
                 ...d,
-                link: link && {
-                  ...link,
-                  price,
-                },
-                status: ibc_send ?
-                  'ibc_sent' :
-                  sign_batch?.executed ?
-                    'executed' :
-                     sign_batch ?
-                      'sign_batch' :
-                      vote ?
-                        'voted' :
-                        confirm_deposit ?
-                          'deposit_confirmed' :
-                          'asset_sent',
               }
             }) || [], _data), 'source.id'), ['source.created_at.ms'], ['desc'])
             setData(response)

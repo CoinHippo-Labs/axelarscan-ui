@@ -28,11 +28,11 @@ export default () => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, confirmed, status, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
+      const { txHash, confirmed, state, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({
         txHash,
         confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
-        status: ['completed', 'pending'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
         asset: getDenom(asset, assets_data)?.id || asset,
@@ -91,10 +91,10 @@ export default () => {
       ],
     },
     {
-      label: 'Status',
-      name: 'status',
+      label: 'State',
+      name: 'state',
       type: 'select',
-      placeholder: 'Select status',
+      placeholder: 'Select state',
       options: [
         { value: '', title: 'Any' },
         { value: 'completed', title: 'Completed' },
