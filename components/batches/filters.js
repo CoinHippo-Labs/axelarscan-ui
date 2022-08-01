@@ -40,11 +40,11 @@ export default () => {
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { chain, batchId, commandId, keyId, type, status, fromTime, toTime } = { ...params }
+      const { batchId, commandId, chain, keyId, type, status, fromTime, toTime } = { ...params }
       setFilters({
-        chain,
         batchId,
         commandId,
+        chain,
         keyId,
         type,
         status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
@@ -81,6 +81,20 @@ export default () => {
 
   const fields = [
     {
+      label: 'Batch ID',
+      name: 'batchId',
+      type: 'text',
+      placeholder: 'Batch ID',
+      className: 'col-span-2',
+    },
+    {
+      label: 'Command ID',
+      name: 'commandId',
+      type: 'text',
+      placeholder: 'Command ID',
+      className: 'col-span-2',
+    },
+    {
       label: 'Chain',
       name: 'chain',
       type: 'select',
@@ -94,18 +108,6 @@ export default () => {
           }
         }) || [],
       ),
-    },
-    {
-      label: 'Batch ID',
-      name: 'batchId',
-      type: 'text',
-      placeholder: 'Batch ID',
-    },
-    {
-      label: 'Command ID',
-      name: 'commandId',
-      type: 'text',
-      placeholder: 'Command ID',
     },
     {
       label: 'Key ID',
@@ -135,6 +137,8 @@ export default () => {
       placeholder: 'Select batch status',
       options: [
         { value: '', title: 'Any' },
+        { value: 'executed', title: 'Executed' },
+        { value: 'unexecuted', title: 'Unexecuted' },
         { value: 'signed', title: 'Signed' },
         { value: 'signing', title: 'Signing' },
         { value: 'aborted', title: 'Aborted' },
@@ -145,6 +149,7 @@ export default () => {
       name: 'time',
       type: 'datetime-range',
       placeholder: 'Select transaction time',
+      className: 'col-span-2',
     },
   ]
 
@@ -168,9 +173,9 @@ export default () => {
           <BiX size={18} />
         </div>
       </div>}
-      body={<div className="form mt-2 -mb-3">
+      body={<div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
         {fields.map((f, i) => (
-          <div key={i} className="form-element">
+          <div key={i} className={`form-element ${f.className || ''}`}>
             {f.label && (
               <div className="form-label text-slate-600 dark:text-slate-400 font-medium">
                 {f.label}

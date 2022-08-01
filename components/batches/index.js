@@ -44,14 +44,14 @@ export default () => {
   useEffect(() => {
     if (asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { chain, batchId, commandId, keyId, type, status, fromTime, toTime } = { ...params }
+      const { batchId, commandId, chain, keyId, type, status, fromTime, toTime } = { ...params }
       setFilters({
-        chain,
         batchId,
         commandId,
+        chain,
         keyId,
         type,
-        status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        status: ['executed', 'unexecuted', 'signed', 'signing', 'aborted'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
       // if (typeof fetchTrigger === 'number') {
@@ -106,8 +106,32 @@ export default () => {
           }
           if (status) {
             switch (status) {
+              case 'executed':
+                must.push({ match: { status: 'BATCHED_COMMANDS_STATUS_SIGNED' } })
+                must.push({ match: { 'commands.executed': true } })
+                must_not.push({ match: { 'commands.executed': false } })
+                break
+              case 'unexecuted':
+                must.push({ match: { status: 'BATCHED_COMMANDS_STATUS_SIGNED' } })
+                must.push({
+                  bool: {
+                    should: [
+                      { match: { 'commands.executed': false } },
+                      {
+                        bool: {
+                          must_not: [
+                            { exists: { field: 'commands.executed' } },
+                          ],
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                })
+                break
               case 'signed':
               case 'signing':
+              case 'aborted':
                 must.push({ match: { status: `BATCHED_COMMANDS_STATUS_${status}` } })
                 break
               default:
@@ -172,7 +196,7 @@ export default () => {
   }, [data])
 
   const updateSigningBatches = async (_data = [], is_after_search) => {
-    const data = _.cloneDeep(_data)?.filter(b => ['BATCHED_COMMANDS_STATUS_SIGNING'].includes(b?.status))
+    const data = _.cloneDeep(_data)?.filter(b => ['BATCHED_COMMANDS_STATUS_SIGNING'].includes(b?.status) || (['BATCHED_COMMANDS_STATUS_SIGNED'].includes(b?.status) && b?.commands?.findIndex(c => !c?.executed) > -1))
     if (data?.length > 0) {
       if (is_after_search) {
         await sleep(0.5 * 1000)
@@ -584,7 +608,10 @@ export default () => {
                         <BiXCircle size={20} />
                     }
                     <span className="capitalize">
-                      {props.value.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()}
+                      {(props.row.original.commands && props.row.original.commands.filter(c => c?.executed).length === props.row.original.commands.length ?
+                        'Executed' :
+                        props.value.replace('BATCHED_COMMANDS_STATUS_', '')
+                      ).toLowerCase()}
                     </span>
                   </div>
                 )
