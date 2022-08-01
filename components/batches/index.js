@@ -172,7 +172,12 @@ export default () => {
                 },
               }
             }) || [], _data), 'batch_id'), ['created_at.ms'], ['desc'])
-            response = await updateSigningBatches(response, true)
+            if (['unexecuted'].includes(status)) {
+              updateSigningBatches(response, true)
+            }
+            else {
+              response = await updateSigningBatches(response, true)
+            }
             setData(response)
           }
           else if (!fetchTrigger) {
