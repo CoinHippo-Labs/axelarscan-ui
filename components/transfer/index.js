@@ -77,7 +77,7 @@ export default () => {
                 data = _response.data?.[0] || data
               }
             }
-            if (!(recipient_chain && typeof amount === 'number' && value)) {
+            if (!(recipient_chain && typeof amount === 'number' && typeof value === 'number')) {
               await getTransfersStatus({
                 txHash: tx,
                 sourceChain: sender_chain,
