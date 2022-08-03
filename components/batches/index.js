@@ -172,7 +172,7 @@ export default () => {
                 },
               }
             }) || [], _data), 'batch_id'), ['created_at.ms'], ['desc'])
-            if (['unexecuted'].includes(status)) {
+            if (['signing', 'unexecuted'].includes(status)) {
               updateSigningBatches(response, true)
             }
             else {
