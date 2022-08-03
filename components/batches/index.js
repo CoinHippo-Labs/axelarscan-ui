@@ -21,7 +21,7 @@ import { batches as getBatches, fieldsToObj } from '../../lib/api/index'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
 
-const LIMIT = 50
+const LIMIT = 25
 
 export default () => {
   const { preferences, evm_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets }), shallowEqual)
@@ -156,6 +156,9 @@ export default () => {
           })
           if (response) {
             setTotal(response.total)
+            if (['signing', 'unexecuted'].includes(status)) {
+              updateSigningBatches(response.data, true)
+            }
             response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
               // d = fieldsToObj(d)
               const { batch_id, chain, key_id, status } = { ...d }
@@ -172,10 +175,7 @@ export default () => {
                 },
               }
             }) || [], _data), 'batch_id'), ['created_at.ms'], ['desc'])
-            if (['signing', 'unexecuted'].includes(status)) {
-              updateSigningBatches(response, true)
-            }
-            else {
+            if (!['signing', 'unexecuted'].includes(status)) {
               response = await updateSigningBatches(response, true)
             }
             setData(response)
@@ -371,7 +371,7 @@ export default () => {
                 return assets_data && (
                   props.value?.length > 0 ?
                     <div className="flex flex-col space-y-2.5 mb-4">
-                      {props.value.filter(c => c).map((c, i) => {
+                      {_.slice(props.value, 0, 10).filter(c => c).map((c, i) => {
                         const { params, type, executed, deposit_address } = { ...c }
                         const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
                         const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
@@ -439,10 +439,11 @@ export default () => {
                                     <div className="flex items-center space-x-1">
                                       <EnsProfile
                                         address={contractAddress}
+                                        no_image={true}
                                         fallback={contractAddress && (
                                           <Copy
                                             value={contractAddress}
-                                            title={<span className="text-slate-400 dark:text-slate-200 text-sm">
+                                            title={<span className="text-slate-400 dark:text-slate-200 text-xs">
                                               <span className="xl:hidden">
                                                 {ellipse(contractAddress, 6)}
                                               </span>
@@ -450,9 +451,10 @@ export default () => {
                                                 {ellipse(contractAddress, 8)}
                                               </span>
                                             </span>}
-                                            size={18}
+                                            size={16}
                                           />
                                         )}
+                                        className="normal-case text-black dark:text-white text-xs font-semibold"
                                       />
                                       {chain_data?.explorer?.url && (
                                         <a
@@ -521,10 +523,11 @@ export default () => {
                                 <div className="flex items-center space-x-1">
                                   <EnsProfile
                                     address={account}
+                                    no_image={true}
                                     fallback={account && (
                                       <Copy
                                         value={account}
-                                        title={<span className="text-slate-400 dark:text-slate-200 text-sm">
+                                        title={<span className="text-slate-400 dark:text-slate-200 text-xs">
                                           <span className="xl:hidden">
                                             {ellipse(account, 6)}
                                           </span>
@@ -532,9 +535,10 @@ export default () => {
                                             {ellipse(account, 8)}
                                           </span>
                                         </span>}
-                                        size={18}
+                                        size={16}
                                       />
                                     )}
+                                    className="normal-case text-black dark:text-white text-xs font-semibold"
                                   />
                                   {chain_data?.explorer?.url && (
                                     <a
@@ -603,6 +607,17 @@ export default () => {
                           </div>
                         )
                       })}
+                      {props.value.length > 10 && (
+                        <Link href={`/batch/${props.row.original.chain}/${props.row.original.batch_id}`}>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white ml-1"
+                          >
+                            and {number_format(props.value.length - 10, '0,0')} more
+                          </a>
+                        </Link>
+                      )}
                     </div>
                     :
                     <span>
@@ -649,7 +664,7 @@ export default () => {
           ]}
           data={data_filtered}
           noPagination={data_filtered.length <= 10}
-          defaultPageSize={50}
+          defaultPageSize={25}
           className="min-h-full no-border"
         />
         {data.length > 0 && (typeof total !== 'number' || data.length < total) && (

@@ -47,7 +47,7 @@ export default () => {
         chain,
         keyId,
         type,
-        status: ['signed', 'signing'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+        status: ['executed', 'unexecuted', 'signed', 'signing', 'aborted'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
         time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
       })
     }

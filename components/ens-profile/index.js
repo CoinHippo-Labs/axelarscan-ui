@@ -10,13 +10,15 @@ import { ENS_DATA } from '../../reducers/types'
 export default ({
   address,
   no_copy = false,
+  no_image = false,
   fallback,
+  className = '',
 }) => {
   const dispatch = useDispatch()
   const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
   const { ens_data } = { ...ens }
 
-  const [noImage, setNoImage] = useState(null)
+  const [noImage, setNoImage] = useState(no_image)
 
   useEffect(() => {
     const getData = async () => {
@@ -60,7 +62,7 @@ export default ({
   const ens_name = ens_data?.[address]?.name && (
     <span
       title={ens_data[address].name}
-      className="normal-case text-black dark:text-white text-base font-semibold"
+      className={className || 'normal-case text-black dark:text-white text-base font-semibold'}
     >
       <span className="xl:hidden">
         {ellipse(ens_data[address].name, 12)}
