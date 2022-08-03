@@ -64,23 +64,23 @@ export default ({ chain_data }) => {
 
   return (
     <Modal
-      buttonTitle={<div className="flex items-center space-x-2">
+      buttonTitle={<div className="flex items-center space-x-1">
         {chain_data?.image && (
           <Image
             src={chain_data.image}
-            className="w-5 h-5 rounded-full"
+            className="w-4 h-4 rounded-full"
           />
         )}
         {data && (
-          <span className="font-mono font-bold">
+          <span className="text-xs font-bold">
             ({number_format(data.length || 0, '0,0')})
           </span>
         )}
         {fetching && (
-          <ThreeDots color={loader_color(theme)} width="20" height="20" />
+          <ThreeDots color={loader_color(theme)} width="16" height="16" />
         )}
       </div>}
-      buttonClassName="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg text-base space-x-1.5 py-1 px-2.5"
+      buttonClassName="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg text-base space-x-1.5 py-1 px-2"
       title={<div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           {chain_data?.image && (

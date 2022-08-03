@@ -239,16 +239,28 @@ export default () => {
   return (
     data ?
       <div className="min-h-full grid gap-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0 space-x-2 mb-2">
-          <div className="flex flex-wrap items-center">
-            {evm_chains_data?.map((c, i) => (
-              <div
-                key={i}
-                className="mb-1 mr-1.5"
-              >
-                <PendingCommands chain_data={c} />
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-2 mb-2">
+          <div className="space-y-1">
+            {typeof total === 'number' && (
+              <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
+                <span className="text-sm font-bold">
+                  {number_format(total, '0,0')}
+                </span>
+                <span className="text-sm">
+                  Results
+                </span>
               </div>
-            ))}
+            )}
+            <div className="flex flex-wrap items-center">
+              {evm_chains_data?.map((c, i) => (
+                <div
+                  key={i}
+                  className="mb-1 mr-1.5"
+                >
+                  <PendingCommands chain_data={c} />
+                </div>
+              ))}
+            </div>
           </div>
           <div className="block sm:flex sm:flex-wrap items-center justify-start sm:justify-end overflow-x-auto space-x-1">
             {Object.entries({ ...types }).map(([k, v]) => (
