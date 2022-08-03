@@ -21,7 +21,7 @@ import { batches as getBatches, fieldsToObj } from '../../lib/api/index'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
 
-const LIMIT = 100
+const LIMIT = 50
 
 export default () => {
   const { preferences, evm_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets }), shallowEqual)
