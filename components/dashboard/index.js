@@ -277,7 +277,7 @@ export default () => {
     }
   }, [evm_chains_data, cosmos_chains_data])
 
-  const metricClassName = 'bg-white dark:bg-black border hover:border-transparent dark:border-slate-900 hover:dark:border-transparent shadow hover:shadow-lg dark:shadow-slate-400 rounded-lg py-4 px-5'
+  const metricClassName = 'bg-white dark:bg-black border hover:border-transparent dark:border-slate-900 hover:dark:border-transparent shadow hover:shadow-lg dark:shadow-slate-600 rounded-lg py-4 px-5'
 
   return (
     <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">

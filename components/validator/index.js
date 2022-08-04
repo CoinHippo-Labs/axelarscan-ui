@@ -340,12 +340,19 @@ export default () => {
     const getData = async () => {
       if (address && equals_ignore_case(validator?.address, address) && validator.broadcaster_loaded) {
         if (!controller.signal.aborted) {
-          const { broadcaster_address, start_height } = { ...validator.data }
+          const {
+            broadcaster_address,
+            start_height,
+          } = { ...validator.data }
           let votes = {}, polls = {}
           if (broadcaster_address) {
             let response = await getEvmVotes({
               query: {
-                match: { voter: broadcaster_address },
+                bool: {
+                  must: [
+                    { match: { voter: broadcaster_address } },
+                  ],
+                },
               },
               aggs: {
                 chains: {
@@ -358,12 +365,17 @@ export default () => {
                 },
               },
             })
-            votes = { ...response?.data }
+            votes = {
+              ...response?.data,
+            }
+
             response = await getEvmPolls({
               query: {
-                range: { height: {
-                  gte: start_height || 1,
-                } },
+                bool: {
+                  must: [
+                    { range: { height: { gte: start_height || 1 } } },
+                  ],
+                },
               },
               aggs: {
                 chains: {
@@ -371,7 +383,9 @@ export default () => {
                 },
               },
             })
-            polls = { ...response?.data }
+            polls = {
+              ...response?.data,
+            }
           }
           setEvmVotes({
             votes,
@@ -393,7 +407,9 @@ export default () => {
     const getData = async () => {
       if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded) {
         if (!controller.signal.aborted) {
-          const { broadcaster_address } = { ...validator.data }
+          const {
+            broadcaster_address,
+          } = { ...validator.data }
           let votes = [], polls = []
           if (broadcaster_address) {
             const latest_block = Number(status_data.latest_block_height)
@@ -402,9 +418,7 @@ export default () => {
                 bool: {
                   must: [
                     { match: { voter: broadcaster_address } },
-                    { range: { height: {
-                      gte: latest_block - num_evm_votes_blocks,
-                    } } },
+                    { range: { height: { gte: latest_block - num_evm_votes_blocks } } },
                   ],
                 },
               },
@@ -414,9 +428,11 @@ export default () => {
             votes = response?.data || []
             response = await getEvmPolls({
               query: {
-                range: { height: {
-                  gte: latest_block - num_evm_votes_blocks,
-                } },
+                bool: {
+                  must: [
+                    { range: { height: { gte: latest_block - num_evm_votes_blocks } } },
+                  ],
+                }
               },
               size: num_evm_votes_polls,
               sort: [{ 'created_at.ms': 'desc' }],
@@ -435,7 +451,7 @@ export default () => {
     return () => {
       controller?.abort()
     }
-  }, [address, validator])
+  }, [address, validator, supportedChains])
 
   // keyshares & keygens & signs
   useEffect(() => {
@@ -547,7 +563,7 @@ export default () => {
   const { uptime, heartbeats_uptime } = { ...validator?.data }
   const { broadcaster_funded } = { ...health?.data }
   const supported_chains = supportedChains?.data
-  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-400 shadow dark:shadow-slate-200 rounded-lg p-4'
+  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg p-4'
 
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto pb-16">
@@ -758,7 +774,10 @@ export default () => {
               )}
             </div>
           </div>
-          <EVMVotes data={evmPolls?.address === address && evmPolls} />
+          <EVMVotes
+            data={evmPolls?.address === address && evmPolls}
+            supportedChains={supportedChains?.data}
+          />
         </div>
       </div>
       <div className="sm:grid sm:grid-cols-2 xl:grid-cols-3 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">

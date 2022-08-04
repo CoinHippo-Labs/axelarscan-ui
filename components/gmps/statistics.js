@@ -374,7 +374,7 @@ export default () => {
 
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
   const total = _.sumBy(statuses?.filter(s => !['called'].includes(s?.key)) || [], 'value')
-  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-400 shadow dark:shadow-slate-200 rounded-lg space-y-1 p-4'
+  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg space-y-1 p-4'
   const colors = ['bg-yellow-500', 'bg-blue-500', 'bg-green-500', 'bg-red-500']
 
   return (

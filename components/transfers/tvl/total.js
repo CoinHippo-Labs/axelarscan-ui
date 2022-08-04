@@ -70,7 +70,7 @@ export default () => {
   const supply = _.sumBy(data, 'value.supply')
 
   return (
-    <div className="h-80 bg-white dark:bg-black shadow dark:shadow-slate-400 rounded-lg space-y-0.5 p-5">
+    <div className="h-80 bg-white dark:bg-black shadow dark:shadow-slate-600 rounded-lg space-y-0.5 p-5">
       {data ?
         <div className="space-y-4">
           <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl uppercase text-4xl font-extrabold text-center py-20">

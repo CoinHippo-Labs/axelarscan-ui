@@ -44,7 +44,7 @@ export default () => {
         return {
           ...v,
           supported_chains,
-          votes: {
+          votes: votes && {
             ...votes,
             chains: Object.fromEntries(Object.entries({ ...votes?.chains }).filter(([k, v]) => supported_chains?.includes(k))),
           },

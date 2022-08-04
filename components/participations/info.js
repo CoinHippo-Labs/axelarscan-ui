@@ -62,7 +62,7 @@ export default ({ data }) => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div className="bg-white dark:bg-black border dark:border-slate-900 shadow dark:shadow-slate-400 rounded-lg p-4">
+      <div className="bg-white dark:bg-black border dark:border-slate-900 shadow dark:shadow-slate-600 rounded-lg p-4">
         <div className="space-y-2">
           <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
             Keygen Min Participation Requirement
@@ -125,7 +125,7 @@ export default ({ data }) => {
           </div>
         </div>
       </div>
-      <div className="bg-white dark:bg-black border dark:border-slate-900 shadow dark:shadow-slate-400 rounded-lg p-4">
+      <div className="bg-white dark:bg-black border dark:border-slate-900 shadow dark:shadow-slate-600 rounded-lg p-4">
         <div className="space-y-2">
           <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
             Sign Safety Threshold
@@ -183,7 +183,7 @@ export default ({ data }) => {
           </div>
         </div>
       </div>
-      <div className="lg:col-span-2 bg-white dark:bg-black border dark:border-slate-900 shadow dark:shadow-slate-400 rounded-lg p-4">
+      <div className="lg:col-span-2 bg-white dark:bg-black border dark:border-slate-900 shadow dark:shadow-slate-600 rounded-lg p-4">
         <div className="space-y-2">
           <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
             EVM Votes Threshold
