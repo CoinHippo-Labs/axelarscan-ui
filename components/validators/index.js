@@ -34,9 +34,20 @@ export default () => {
   useEffect(() => {
     if (validators_data) {
       setValidatorsData(validators_data.map(v => {
+        const {
+          votes,
+        } = { ...v }
+        let {
+          supported_chains,
+        } = { ...v }
+        supported_chains = Object.entries({ ...validators_chains_data }).filter(([k, _v]) => _v?.includes(v?.operator_address)).map(([k, _v]) => k)
         return {
           ...v,
-          supported_chains: Object.entries({ ...validators_chains_data }).filter(([k, _v]) => _v?.includes(v?.operator_address)).map(([k, _v]) => k),
+          supported_chains,
+          votes: {
+            ...votes,
+            chains: Object.fromEntries(Object.entries({ ...votes?.chains }).filter(([k, v]) => supported_chains?.includes(k))),
+          },
         }
       }))
     }
