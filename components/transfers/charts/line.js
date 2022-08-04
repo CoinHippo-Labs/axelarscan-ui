@@ -16,30 +16,38 @@ import { currency_symbol } from '../../../lib/object/currency'
 import { number_format, loader_color, chart_color } from '../../../lib/utils'
 
 export default ({
+  id = 'volumes',
   title = '',
   description = '',
-  chartData,
+  date_format = 'D MMM',
+  timeframe = 'day',
+  value_field = 'volume',
+  chart_data,
 }) => {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
   const [data, setData] = useState(null)
-  const [xFocus, setXFocus] = useState(moment().utc().startOf('month').valueOf())
+  const [xFocus, setXFocus] = useState(moment().utc().startOf(timeframe).valueOf())
 
   useEffect(() => {
-    if (chartData) {
-      const { data } = { ...chartData }
+    if (chart_data) {
+      const {
+        data,
+      } = { ...chart_data }
       setData(data.map((d, i) => {
         return {
           ...d,
-          time_string: moment(d.timestamp).utc().format('MMM YYYY'),
+          time_string: moment(d.timestamp).utc().format(date_format),
         }
       }))
     }
-  }, [chartData])
+  }, [chart_data])
 
   const d = data?.find(d => d.timestamp === xFocus)
-  const { time_string, cumulative_volume } = { ...d }
+  const {
+    time_string,
+  } = { ...d }
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg space-y-2 pt-4 pb-0 sm:pb-1 px-4">
@@ -55,7 +63,7 @@ export default ({
         {data && (
           <div className="flex flex-col items-end space-y-0.5">
             <span className="uppercase font-bold">
-              {currency_symbol}{number_format(cumulative_volume, cumulative_volume > 50000000 ? '0,0.00a' : cumulative_volume > 10000000 ? '0,0' : '0,0.00')}
+              {currency_symbol}{number_format(d?.[value_field], d?.[value_field] > 50000000 ? '0,0.00a' : d?.[value_field] > 10000000 ? '0,0' : '0,0.00')}
             </span>
             <span className="text-slate-400 dark:text-slate-200 text-xs font-medium">
               {time_string}
@@ -85,10 +93,11 @@ export default ({
                 bottom: 4,
                 left: 2,
               }}
+              className="small-x"
             >
               <defs>
                 <linearGradient
-                  id="gradient-volume"
+                  id={`gradient-${id}`}
                   x1="0"
                   y1="0"
                   x2="0"
@@ -96,12 +105,12 @@ export default ({
                 >
                   <stop
                     offset="50%"
-                    stopColor={chart_color(theme)}
+                    stopColor={chart_color(theme, timeframe)}
                     stopOpacity={0.66}
                   />
                   <stop
                     offset="100%"
-                    stopColor={chart_color(theme)}
+                    stopColor={chart_color(theme, timeframe)}
                     stopOpacity={0.33}
                   />
                 </linearGradient>
@@ -113,10 +122,10 @@ export default ({
               />
               <Area
                 type="basis"
-                dataKey="cumulative_volume"
-                stroke={chart_color(theme)}
+                dataKey={value_field}
+                stroke={chart_color(theme, timeframe)}
                 fillOpacity={1}
-                fill="url(#gradient-volume)"
+                fill={`url(#gradient-${id})`}
               />
             </AreaChart>
           </ResponsiveContainer>

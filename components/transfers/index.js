@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import moment from 'moment'
 import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
 import { FiCode } from 'react-icons/fi'
 
@@ -15,11 +16,14 @@ import { transfers as getTransfers } from '../../lib/api/index'
 import { currency } from '../../lib/object/currency'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
+const NUM_STATS_DAYS = 30
+
 export default () => {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
-  const [cumulativeVolume, setCumulativeVolume] = useState(null)
+  const [cumulativeStats, setCumulativeStats] = useState(null)
+  const [dailyStats, setDailyStats] = useState(null)
   const [topPaths, setTopPaths] = useState(null)
   const [topChainPairs, setTopChainPairs] = useState(null)
 
@@ -49,7 +53,43 @@ export default () => {
             },
           },
         })
-        setCumulativeVolume({ ...response })
+        setCumulativeStats({
+          ...response,
+        })
+      }
+    }
+    getData()
+    const interval = setInterval(() => getData(), 5 * 60 * 1000)
+    return () => {
+      controller?.abort()
+      clearInterval(interval)
+    }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const getData = async () => {
+      if (!controller.signal.aborted) {
+        const response = await getTransfers({
+          query: {
+            range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } },
+          },
+          aggs: {
+            stats: {
+              terms: { field: 'source.created_at.day', size: 100 },
+              aggs: {
+                volume: {
+                  sum: {
+                    field: 'source.value',
+                  },
+                },
+              },
+            },
+          },
+        })
+        setDailyStats({
+          ...response,
+        })
       }
     }
     getData()
@@ -86,7 +126,9 @@ export default () => {
             },
           },
         })
-        setTopPaths({ ...response })
+        setTopPaths({
+          ...response,
+        })
       }
     }
     getData()
@@ -118,7 +160,9 @@ export default () => {
             },
           },
         })
-        setTopChainPairs({ ...response })
+        setTopChainPairs({
+          ...response,
+        })
       }
     }
     getData()
@@ -133,16 +177,39 @@ export default () => {
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 pb-8">
       <div className="lg:col-span-2">
         <LineChart
+          id="cumulative_volume"
           title="Cumulative Volume"
           description="Cumulative transfers volume by month"
-          chartData={cumulativeVolume}
+          date_format="MMM YYYY"
+          timeframe="month"
+          value_field="cumulative_volume"
+          chart_data={cumulativeStats}
         />
       </div>
       <div className="lg:col-span-2">
         <BarChart
+          id="total_transfers"
           title="Transfers"
           description="Number of transfers by month"
-          chartData={cumulativeVolume}
+          date_format="MMM YYYY"
+          timeframe="month"
+          chart_data={cumulativeStats}
+        />
+      </div>
+      <div className="lg:col-span-2">
+        <LineChart
+          id="daily_volumes"
+          title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Volumes`}
+          description={`The number of volumes transferred in the past ${number_format(NUM_STATS_DAYS, '0,0')} days`}
+          chart_data={dailyStats}
+        />
+      </div>
+      <div className="lg:col-span-2">
+        <BarChart
+          id="daily_transfers"
+          title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Transfers`}
+          description={`The number of transfers in the past ${number_format(NUM_STATS_DAYS, '0,0')} days`}
+          chart_data={dailyStats}
         />
       </div>
       <TopPath
