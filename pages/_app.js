@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import { Provider } from 'react-redux'
 import NProgress from 'nprogress'
+import TagManager from 'react-gtm-module'
 
 import { useStore } from '../store'
 import * as ga from '../lib/ga'
@@ -47,6 +48,14 @@ export default ({
     // from the event with the `off` method
     return () => router.events.off('routeChangeComplete', handleRouteChange)
   }, [router.events])
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_GTM_ID) {
+      TagManager.initialize({
+        gtmId: process.env.NEXT_PUBLIC_GTM_ID,
+      })
+    }
+  }, [])
 
   return (
     <>
