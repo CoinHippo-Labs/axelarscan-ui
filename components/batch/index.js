@@ -96,7 +96,10 @@ export default () => {
                   <BiXCircle size={20} />
               }
               <span className="capitalize">
-                {status.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()}
+                {(commands && commands.filter(c => c?.executed).length === commands.length ?
+                  'Executed' :
+                  status.replace('BATCHED_COMMANDS_STATUS_', '')
+                ).toLowerCase()}
               </span>
             </div>
           )}

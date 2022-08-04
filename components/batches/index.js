@@ -112,7 +112,15 @@ export default () => {
                 must_not.push({ match: { 'commands.executed': false } })
                 break
               case 'unexecuted':
-                must.push({ match: { status: 'BATCHED_COMMANDS_STATUS_SIGNED' } })
+                must.push({
+                  bool: {
+                    should: [
+                      { match: { status: 'BATCHED_COMMANDS_STATUS_SIGNED' } },
+                      { match: { status: 'BATCHED_COMMANDS_STATUS_SIGNING' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                })
                 must.push({
                   bool: {
                     should: [
@@ -635,7 +643,7 @@ export default () => {
                   <div className={`max-w-min ${equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 py-0.5 px-1.5`}>
                     {equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
                       <BiCheckCircle size={20} /> :
-                      equals_ignore_case(status, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
+                      equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
                         <HiOutlineClock size={20} /> :
                         <BiXCircle size={20} />
                     }

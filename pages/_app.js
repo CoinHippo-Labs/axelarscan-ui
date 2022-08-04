@@ -6,6 +6,7 @@ import { Provider } from 'react-redux'
 import NProgress from 'nprogress'
 
 import { useStore } from '../store'
+import * as ga from '../lib/ga'
 import Layout from '../layouts'
 import 'antd/dist/antd.css'
 import '../styles/globals.css'
