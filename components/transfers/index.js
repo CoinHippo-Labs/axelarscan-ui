@@ -196,7 +196,7 @@ export default () => {
           chart_data={cumulativeStats}
         />
       </div>
-      <div className="lg:col-span-2">
+      {/*<div className="lg:col-span-2">
         <LineChart
           id="daily_volumes"
           title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Volumes`}
@@ -211,7 +211,7 @@ export default () => {
           description={`The number of transfers in the past ${number_format(NUM_STATS_DAYS, '0,0')} days`}
           chart_data={dailyStats}
         />
-      </div>
+      </div>*/}
       <TopPath
         title="Top Paths"
         description="Top transfers paths by volume"
