@@ -22,13 +22,14 @@ export default ({
   date_format = 'D MMM',
   timeframe = 'day',
   value_field = 'num_txs',
+  is_cumulative = false,
   chart_data,
 }) => {
   const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
   const { theme } = { ...preferences }
 
   const [data, setData] = useState(null)
-  const [xFocus, setXFocus] = useState(moment().utc().startOf(timeframe).valueOf())
+  const [xFocus, setXFocus] = useState(null)
 
   useEffect(() => {
     if (chart_data) {
@@ -45,9 +46,8 @@ export default ({
   }, [chart_data])
 
   const d = data?.find(d => d.timestamp === xFocus)
-  const {
-    time_string,
-  } = { ...d }
+  const focus_value = d || is_cumulative ? (d || _.last(data))?.[value_field] : data ? _.sumBy(data, value_field) : null
+  const focus_time_string = d || is_cumulative ? (d || _.last(data))?.time_string : data ? _.concat(_.head(data)?.time_string, _.last(data)?.time_string).filter(s => s).join(' - ') : null
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg space-y-2 pt-4 pb-0 sm:pb-1 px-4">
@@ -60,13 +60,13 @@ export default ({
             {description}
           </span>
         </div>
-        {data && (
+        {typeof focus_value === 'number' && (
           <div className="flex flex-col items-end space-y-0.5">
             <span className="uppercase font-bold">
-              {number_format(d?.[value_field], d?.[value_field] > 1000000 ? '0,0.00a' : '0,0')}
+              {number_format(focus_value, focus_value > 1000000 ? '0,0.00a' : '0,0')}
             </span>
             <span className="text-slate-400 dark:text-slate-200 text-xs font-medium">
-              {time_string}
+              {focus_time_string}
             </span>
           </div>
         )}
@@ -86,7 +86,7 @@ export default ({
                   setXFocus(e?.activePayload?.[0]?.payload?.timestamp)
                 }
               }}
-              onMouseLeave={() => setXFocus(_.last(data)?.timestamp)}
+              onMouseLeave={() => setXFocus(null)}
               margin={{
                 top: 10,
                 right: 2,
