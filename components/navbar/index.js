@@ -14,6 +14,7 @@ import Theme from './theme'
 import SubNavbar from './sub-navbar'
 import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
+import { tvl as getTVL } from '../../lib/api/transfer'
 import { coin } from '../../lib/api/coingecko'
 import { status as getStatus } from '../../lib/api/rpc'
 import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, mint_inflation, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
@@ -271,75 +272,46 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-    const getContractSupply = async (contract_data, rpc) => {
-      let supply, decimals = 18
-      if (contract_data && rpc) {
-        const { contract_address } = { ...contract_data }
-        decimals = contract_data.decimals
-        const contract = new Contract(contract_address, ['function totalSupply() view returns (uint256)'], rpc)
-        supply = await contract.totalSupply()
-      }
-      return Number(utils.formatUnits(BigNumber.from((supply || 0).toString()), decimals))
-    }
-    const getBalance = async (address, contract_data, rpc) => {
-      let balance, decimals = 18
-      if (address && contract_data && rpc) {
-        const { contract_address } = { ...contract_data }
-        decimals = contract_data.decimals
-        if (contract_address === constants.AddressZero) {
-          balance = await rpc.getBalance(address)
-        }
-        else {
-          const contract = new Contract(contract_address, ['function balanceOf(address owner) view returns (uint256)'], rpc)
-          balance = await contract.balanceOf(address)
-        }
-      }
-      return Number(utils.formatUnits(BigNumber.from((balance || 0).toString()), decimals))
-    }
-    const getChainData = async (chain_id, rpc) => {
+    const getAssetData = async asset_data => {
       if (!controller.signal.aborted) {
-        if (chain_id && rpc && assets_data) {
-          chain_id = Number(chain_id)
-          const chain_data = evm_chains_data?.find(c => c?.chain_id === chain_id)
-          if (chain_data) {
-            for (let i = 0; i < assets_data.length; i++) {
-              const asset_data = assets_data[i]
-              if (asset_data) {
-                const contract_data = (!asset_data.is_staging || staging) && asset_data.contracts?.find(c => c?.chain_id === chain_id)
-                if (contract_data) {
-                  const supply = !contract_data.is_native ? await getContractSupply(contract_data, rpc) : 0
-                  const balance = await getBalance(chain_data.gateway_address, contract_data, rpc)
-                  dispatch({
-                    type: TVL_DATA,
-                    value: {
-                      [`${chain_data.id}_${asset_data.id}`]: {
-                        supply,
-                        gateway_balance: balance,
-                        total: supply + balance,
-                      },
-                    },
-                  })
-                }
-              }
-            }
-          }
+        if (asset_data) {
+          const {
+            id,
+          } = { ...asset_data }
+          const response = await getTVL({
+            asset: id,
+          })
+          const {
+            data,
+            updated_at,
+          } = { ...response }
+          dispatch({
+            type: TVL_DATA,
+            value: {
+              [id]: {
+                ..._.head(data),
+                updated_at,
+              },
+            },
+          })
         }
       }
     }
     const getData = is_interval => {
-      if (assets_data && rpcs) {
-        if (['/[height]', '/[address]', '/[tx]', '/[id]', '/tier'].findIndex(p => pathname?.includes(p)) < 0 && ['/tvl'].includes(pathname) && (!tvl_data || is_interval)) {
-          Object.entries(rpcs).forEach(([k, v]) => getChainData(k, v))
+      if (assets_data) {
+        if (['/tvl'].includes(pathname) && (!tvl_data || is_interval)) {
+          assets_data.filter(a => a && (!a.is_staging || staging))
+            .forEach(a => getAssetData(a))
         }
       }
     }
     getData()
-    const interval = setInterval(() => getData(true), 60 * 1000)
+    const interval = setInterval(() => getData(true), 3 * 60 * 1000)
     return () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [assets_data, rpcs, pathname])
+  }, [assets_data, pathname])
 
   // validators
   useEffect(() => {

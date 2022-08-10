@@ -13,6 +13,7 @@ import TransferFilters from '../../transfers/filters'
 import SentFilters from '../../sents/filters'
 import GMPFilters from '../../gmps/filters'
 import BatchFilters from '../../batches/filters'
+import TotalTVL from '../../tvl/total'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
 import Image from '../../image'
@@ -228,6 +229,9 @@ export default () => {
     case '/tvl':
       title = 'TVL'
       subtitle = 'total assets on Axelar Network'
+      right = (
+        <TotalTVL />
+      )
       break
     case '/sent/[tx]':
       title = 'Send Token'

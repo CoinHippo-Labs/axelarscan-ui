@@ -3,6 +3,9 @@
   &.inline-table {
     display: inline-table;
   }
+  &.block-table {
+    display: block;
+  }
   &.no-border thead tr th,
   &.no-border tbody tr td {
     @apply border-0 border-none;
