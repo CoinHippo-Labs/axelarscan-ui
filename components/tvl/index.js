@@ -186,7 +186,10 @@ export default () => {
                       title={number_format(total_on_evm, '0,0.00000000')}
                       className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
                     >
-                      {number_format(total_on_evm, total_on_evm > 100000 ? '0,0.00a' : total_on_evm > 10000 ? '0,0.00' : '0,0.000000')} {symbol}
+                      {number_format(total_on_evm, total_on_evm > 100000 ? '0,0.00a' : total_on_evm > 10000 ? '0,0.00' : '0,0.000000')}
+                      <span className="normal-case ml-1">
+                        {symbol}
+                      </span>
                     </span>
                     :
                     <span>
@@ -232,7 +235,10 @@ export default () => {
                       title={number_format(total_on_cosmos, '0,0.00000000')}
                       className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
                     >
-                      {number_format(total_on_cosmos, total_on_cosmos > 100000 ? '0,0.00a' : total_on_cosmos > 10000 ? '0,0.00' : '0,0.000000')} {symbol}
+                      {number_format(total_on_cosmos, total_on_cosmos > 100000 ? '0,0.00a' : total_on_cosmos > 10000 ? '0,0.00' : '0,0.000000')}
+                      <span className="normal-case ml-1">
+                        {symbol}
+                      </span>
                     </span>
                     :
                     <span>
@@ -278,7 +284,10 @@ export default () => {
                       title={number_format(total, '0,0.00000000')}
                       className="uppercase text-slate-500 dark:text-slate-400 text-xs font-semibold"
                     >
-                      {number_format(total, total > 100000 ? '0,0.00a' : total > 10000 ? '0,0.00' : '0,0.000000')} {symbol}
+                      {number_format(total, total > 100000 ? '0,0.00a' : total > 10000 ? '0,0.00' : '0,0.000000')}
+                      <span className="normal-case ml-1">
+                        {symbol}
+                      </span>
                     </span>
                     :
                     <span>
