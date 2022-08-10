@@ -16,7 +16,7 @@ import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
-import { axelard } from '../../lib/api/executor'
+import { axelard } from '../../lib/api/cli'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, loader_color } from '../../lib/utils'
 

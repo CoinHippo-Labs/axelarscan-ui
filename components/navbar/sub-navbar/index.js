@@ -174,30 +174,37 @@ export default () => {
         />
       )
       break
+    case '/sent':
+    case '/sent/search':
+      right = pathname.endsWith('/search') && (
+        <SentFilters />
+      )
     case '/transfers':
     case '/transfers/search':
       title = 'Cross-chain Transfers'
       subtitle = (
-        <div className="flex items-center space-x-1">
+        <div className="flex flex-wrap items-center">
           {[
             { title: 'Overview', path: '/transfers' },
-            { title: 'Search', path: '/transfers/search' },
-          ].map((r, i) => (
+            { title: pathname.endsWith('/search') ? 'via Deposit Address' : 'Search', path: '/transfers/search' },
+            process.env.NEXT_PUBLIC_SUPPORT_TOKEN_SENT === 'true' && pathname.endsWith('/search') &&
+              { title: 'via sendToken', path: '/sent/search' },
+          ].filter(r => r).map((r, i) => (
             <div
               key={i}
               onClick={() => router.push(r.path)}
-              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg mb-1 sm:mb-0 mr-1 py-1 px-2.5`}
             >
-              <span className="font-semibold">
+              <span className="whitespace-nowrap font-semibold">
                 {r.title}
               </span>
             </div>
           ))}
         </div>
       )
-      right = pathname.endsWith('/search') && (
+      right = right || (pathname.endsWith('/search') && (
         <TransferFilters />
-      )
+      ))
       break
     case '/transfer/[tx]':
       title = 'Cross-chain Transfer'
@@ -216,13 +223,6 @@ export default () => {
             size={18}
           />
         </div>
-      )
-      break
-    case '/sent':
-    case '/sent/search':
-      title = 'Send Token'
-      right = pathname.endsWith('/search') && (
-        <SentFilters />
       )
       break
     case '/sent/[tx]':
@@ -258,7 +258,7 @@ export default () => {
             <div
               key={i}
               onClick={() => router.push(r.path)}
-              className={`${r.path?.startsWith(pathname) ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
+              className={`${(r?.path.includes('?') ? r.path.substring(0, r.path.indexOf('?')) : r?.path) === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
             >
               <span className="font-semibold">
                 {r.title}

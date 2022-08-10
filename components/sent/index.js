@@ -47,7 +47,7 @@ export default () => {
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
   const source_chain_data = getChain(chain, chains_data)
   const destination_chain_data = getChain(destinationChain, chains_data)
-  const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol))
+  const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c.symbol, symbol)) > -1)
   const source_contract_data = asset_data?.contracts?.find(c => c.chain_id === source_chain_data?.chain_id)
   const decimals = source_contract_data?.decimals || asset_data?.decimals || 18
   const _symbol = source_contract_data?.symbol || asset_data?.symbol || symbol

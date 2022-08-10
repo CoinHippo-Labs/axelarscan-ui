@@ -15,7 +15,7 @@ import Transactions from '../transactions'
 import Image from '../image'
 import AddChain from '../add-chain'
 import { consensus_state } from '../../lib/api/rpc'
-import { transfers as getTransfers } from '../../lib/api/index'
+import { transfers as getTransfers, token_sents as getTokenSents } from '../../lib/api/index'
 import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain, chain_manager } from '../../lib/object/chain'
 import { getDenom, denom_manager } from '../../lib/object/denom'
@@ -102,7 +102,8 @@ export default () => {
         if (!controller.signal.aborted) {
           const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
           const axelar_chain_data = getChain('axelarnet', chains_data)
-          const response = await getTransfers({
+          let response,
+          _response = await getTransfers({
             aggs: {
               source_chains: {
                 terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
@@ -124,8 +125,67 @@ export default () => {
               },
             },
           })
+          response = {
+            ..._response,
+          }
+
+          _response = await getTokenSents({
+            aggs: {
+              source_chains: {
+                terms: { field: 'chain.keyword', size: 1000 },
+                aggs: {
+                  destination_chains: {
+                    terms: { field: 'returnValues.destinationChain.keyword', size: 1000 },
+                    aggs: {
+                      volume: {
+                        sum: { field: 'value' },
+                      },
+                    },
+                    // aggs: {
+                    //   assets: {
+                    //     terms: { field: 'denom.keyword', size: 1000 },
+                    //   },
+                    // },
+                  },
+                },
+              },
+            },
+          })
+          response = {
+            ...response,
+            data: Object.entries(_.groupBy(
+              _.concat(response.data || [], _response?.data || []).map(d => {
+                const {
+                  source_chain,
+                  /*asset,*/
+                } = { ...d }
+                let {
+                  destination_chain,
+                } = { ...d }
+                destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
+                return {
+                  ...d,
+                  destination_chain,
+                  id: `${source_chain}_${destination_chain}`,//_${asset}`
+                }
+              }),
+              'id'
+            )).map(([k, v]) => {
+              return {
+                ..._.head(v),
+                volume: _.sumBy(v, 'volume'),
+                num_txs: _.sumBy(v, 'num_txs'),
+              }
+            }),
+            total: (response.total || 0) + _response?.total,
+          }
+
           const data = _.orderBy(response?.data?.map(t => {
-            const { source_chain, destination_chain/*, asset*/ } = { ...t }
+            const {
+              source_chain,
+              destination_chain,
+              /*asset,*/
+            } = { ...t }
             return {
               ...t,
               source_chain_data: getChain(source_chain, chains_data),
@@ -135,7 +195,11 @@ export default () => {
           }) || [], ['num_txs'], ['desc'])
           const network_graph_data = []
           data.forEach(t => {
-            const { source_chain, destination_chain/*, asset*/ } = { ...t }
+            const {
+              source_chain,
+              destination_chain,
+              /*asset,*/
+            } = { ...t }
             if (!equals_ignore_case(source_chain, axelar_chain_data?.id) && !equals_ignore_case(destination_chain, axelar_chain_data?.id)) {
               const x = ['source', 'destination']
               x.forEach(_x => {

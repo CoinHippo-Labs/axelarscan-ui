@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 import moment from 'moment'
 import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
 import { FiCode } from 'react-icons/fi'
@@ -12,15 +13,18 @@ import Tvl from './tvl'
 import TopPath from './top/path'
 import TopChainPair from './top/chain-pair'
 import Transfers from './transfers'
-import { transfers as getTransfers } from '../../lib/api/index'
+import { transfers as getTransfers, token_sents as getTokenSents } from '../../lib/api/index'
+import { getChain } from '../../lib/object/chain'
 import { currency } from '../../lib/object/currency'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 const NUM_STATS_DAYS = 30
 
 export default () => {
-  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
+  const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
   const { theme } = { ...preferences }
+  const { evm_chains_data } = { ...evm_chains }
+  const { cosmos_chains_data } = { ...cosmos_chains }
 
   const [cumulativeStats, setCumulativeStats] = useState(null)
   const [dailyStats, setDailyStats] = useState(null)
@@ -31,7 +35,8 @@ export default () => {
     const controller = new AbortController()
     const getData = async () => {
       if (!controller.signal.aborted) {
-        const response = await getTransfers({
+        let response,
+        _response = await getTransfers({
           aggs: {
             cumulative_volume: {
               date_histogram: {
@@ -53,9 +58,49 @@ export default () => {
             },
           },
         })
-        setCumulativeStats({
-          ...response,
+        response = {
+          ..._response,
+        }
+
+        _response = await getTokenSents({
+          aggs: {
+            cumulative_volume: {
+              date_histogram: {
+                field: 'created_at.month',
+                calendar_interval: 'month',
+              },
+              aggs: {
+                volume: {
+                  sum: {
+                    field: 'value',
+                  },
+                },
+                cumulative_volume: {
+                  cumulative_sum: {
+                    buckets_path: 'volume',
+                  },
+                },
+              },
+            },
+          },
         })
+        response = {
+          ...response,
+          data: Object.entries(_.groupBy(
+            _.concat(response.data || [], _response?.data || []),
+            'timestamp'
+          )).map(([k, v]) => {
+            return {
+              ..._.head(v),
+              volume: _.sumBy(v, 'volume'),
+              cumulative_volume: _.sumBy(v, 'cumulative_volume'),
+              num_txs: _.sumBy(v, 'num_txs'),
+            }
+          }),
+          total: (response.total || 0) + _response?.total,
+        }
+
+        setCumulativeStats(response)
       }
     }
     getData()
@@ -70,7 +115,8 @@ export default () => {
     const controller = new AbortController()
     const getData = async () => {
       if (!controller.signal.aborted) {
-        const response = await getTransfers({
+        let response,
+        _response = await getTransfers({
           query: {
             range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } },
           },
@@ -87,9 +133,43 @@ export default () => {
             },
           },
         })
-        setDailyStats({
-          ...response,
+        response = {
+          ..._response,
+        }
+
+        _response = await getTokenSents({
+          query: {
+            range: { block_timestamp: { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').unix() } },
+          },
+          aggs: {
+            stats: {
+              terms: { field: 'created_at.day', size: 100 },
+              aggs: {
+                volume: {
+                  sum: {
+                    field: 'value',
+                  },
+                },
+              },
+            },
+          },
         })
+        response = {
+          ...response,
+          data: Object.entries(_.groupBy(
+            _.concat(response.data || [], _response?.data || []),
+            'timestamp'
+          )).map(([k, v]) => {
+            return {
+              ..._.head(v),
+              volume: _.sumBy(v, 'volume'),
+              num_txs: _.sumBy(v, 'num_txs'),
+            }
+          }),
+          total: (response.total || 0) + _response?.total,
+        }
+
+        setDailyStats(response)
       }
     }
     getData()
@@ -103,8 +183,10 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        const response = await getTransfers({
+      if (!controller.signal.aborted && evm_chains_data && cosmos_chains_data) {
+        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+        let response,
+        _response = await getTransfers({
           aggs: {
             source_chains: {
               terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
@@ -126,9 +208,62 @@ export default () => {
             },
           },
         })
-        setTopPaths({
-          ...response,
+        response = {
+          ..._response,
+        }
+
+        _response = await getTokenSents({
+          aggs: {
+            source_chains: {
+              terms: { field: 'chain.keyword', size: 1000 },
+              aggs: {
+                destination_chains: {
+                  terms: { field: 'returnValues.destinationChain.keyword', size: 1000 },
+                  aggs: {
+                    assets: {
+                      terms: { field: 'denom.keyword', size: 1000 },
+                      aggs: {
+                        volume: {
+                          sum: { field: 'value' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         })
+        response = {
+          ...response,
+          data: Object.entries(_.groupBy(
+            _.concat(response.data || [], _response?.data || []).map(d => {
+              const {
+                source_chain,
+                asset,
+              } = { ...d }
+              let {
+                destination_chain,
+              } = { ...d }
+              destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
+              return {
+                ...d,
+                destination_chain,
+                id: `${source_chain}_${destination_chain}_${asset}`,
+              }
+            }),
+            'id'
+          )).map(([k, v]) => {
+            return {
+              ..._.head(v),
+              volume: _.sumBy(v, 'volume'),
+              num_txs: _.sumBy(v, 'num_txs'),
+            }
+          }),
+          total: (response.total || 0) + _response?.total,
+        }
+
+        setTopPaths(response)
       }
     }
     getData()
@@ -137,13 +272,15 @@ export default () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [])
+  }, [evm_chains_data, cosmos_chains_data])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        const response = await getTransfers({
+      if (!controller.signal.aborted && evm_chains_data && cosmos_chains_data) {
+        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+        let response,
+        _response = await getTransfers({
           aggs: {
             source_chains: {
               terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
@@ -160,9 +297,56 @@ export default () => {
             },
           },
         })
-        setTopChainPairs({
-          ...response,
+        response = {
+          ..._response,
+        }
+
+         _response = await getTokenSents({
+          aggs: {
+            source_chains: {
+              terms: { field: 'chain.keyword', size: 1000 },
+              aggs: {
+                destination_chains: {
+                  terms: { field: 'returnValues.destinationChain.keyword', size: 1000 },
+                  aggs: {
+                    volume: {
+                      sum: { field: 'value' },
+                    },
+                  },
+                },
+              },
+            },
+          },
         })
+        response = {
+          ...response,
+          data: Object.entries(_.groupBy(
+            _.concat(response.data || [], _response?.data || []).map(d => {
+              const {
+                source_chain,
+              } = { ...d }
+              let {
+                destination_chain,
+              } = { ...d }
+              destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
+              return {
+                ...d,
+                destination_chain,
+                id: `${source_chain}_${destination_chain}`,
+              }
+            }),
+            'id'
+          )).map(([k, v]) => {
+            return {
+              ..._.head(v),
+              volume: _.sumBy(v, 'volume'),
+              num_txs: _.sumBy(v, 'num_txs'),
+            }
+          }),
+          total: (response.total || 0) + _response?.total,
+        }
+
+        setTopChainPairs(response)
       }
     }
     getData()
@@ -171,7 +355,7 @@ export default () => {
       controller?.abort()
       clearInterval(interval)
     }
-  }, [])
+  }, [evm_chains_data, cosmos_chains_data])
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 pb-8">
