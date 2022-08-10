@@ -2,6 +2,7 @@ import { FiBox, FiCode } from 'react-icons/fi'
 import { BiServer, BiFileBlank, BiMessageDots, BiCoinStack } from 'react-icons/bi'
 import { RiKeyLine, RiStackLine } from 'react-icons/ri'
 import { MdOutlineHowToVote } from 'react-icons/md'
+import { TbLockSquare } from 'react-icons/tb'
 
 export default [
   {
@@ -43,6 +44,12 @@ export default [
     path: '/transfers',
     others_paths: ['/transfers/search', '/transfer/[tx]'],
     icon: <FiCode size={18} className="stroke-current" />,
+  },
+  process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && {
+    id: 'tvl',
+    title: 'TVL',
+    path: '/tvl',
+    icon: <TbLockSquare size={20} className="stroke-current" />,
   },
   process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && {
     id: 'gmp',

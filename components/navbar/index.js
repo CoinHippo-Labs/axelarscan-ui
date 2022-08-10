@@ -229,7 +229,7 @@ export default () => {
   // rpcs
   useEffect(() => {
     const init = async => {
-      if (evm_chains_data && ['/transfers'].includes(pathname)) {
+      if (evm_chains_data && ['/tvl'].includes(pathname)) {
         const _rpcs = {}
         for (let i = 0; i < evm_chains_data.length; i++) {
           const chain_data = evm_chains_data[i]
@@ -328,7 +328,7 @@ export default () => {
     }
     const getData = is_interval => {
       if (assets_data && rpcs) {
-        if (['/[height]', '/[address]', '/[tx]', '/[id]', '/tier'].findIndex(p => pathname?.includes(p)) < 0 && ['/transfers'].includes(pathname) && (!tvl_data || is_interval)) {
+        if (['/[height]', '/[address]', '/[tx]', '/[id]', '/tier'].findIndex(p => pathname?.includes(p)) < 0 && ['/tvl'].includes(pathname) && (!tvl_data || is_interval)) {
           Object.entries(rpcs).forEach(([k, v]) => getChainData(k, v))
         }
       }
@@ -347,7 +347,7 @@ export default () => {
     const getData = async () => {
       if (assets_data &&
         status_data &&
-        ['/address', '/transfers', '/sent', '/gmp', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
+        ['/address', '/transfers', '/tvl', '/sent', '/gmp', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
       ) {
         if (!controller.signal.aborted) {
           let response

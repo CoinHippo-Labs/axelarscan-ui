@@ -3,11 +3,11 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { TailSpin, ThreeDots } from 'react-loader-spinner'
 
-import Datatable from '../../datatable'
-import Image from '../../image'
-import { chainName } from '../../../lib/object/chain'
-import { currency_symbol } from '../../../lib/object/currency'
-import { number_format, equals_ignore_case, loader_color } from '../../../lib/utils'
+import Datatable from '../datatable'
+import Image from '../image'
+import { chainName } from '../../lib/object/chain'
+import { currency_symbol } from '../../lib/object/currency'
+import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default () => {
   const { preferences, evm_chains, assets, tvl } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets, tvl: state.tvl }), shallowEqual)
@@ -262,12 +262,12 @@ export default () => {
         data={data}
         noPagination={data.length <= 5}
         noRecordPerPage={true}
-        defaultPageSize={5}
-        pageSizes={[5]}
+        defaultPageSize={50}
+        pageSizes={[50]}
         className="no-border"
       />
       :
-      <div className="h-full flex items-center justify-center pb-6">
+      <div className="h-full flex items-center justify-start pb-6">
         <TailSpin color={loader_color(theme)} width="40" height="40" />
       </div>
   )

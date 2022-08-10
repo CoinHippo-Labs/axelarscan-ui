@@ -225,6 +225,10 @@ export default () => {
         </div>
       )
       break
+    case '/tvl':
+      title = 'TVL'
+      subtitle = 'total assets on Axelar Network'
+      break
     case '/sent/[tx]':
       title = 'Send Token'
       subtitle = (
@@ -330,6 +334,7 @@ export default () => {
 
   const is_validator_path = ['/validator', '/participations', '/proposals'].findIndex(p => pathname?.includes(p)) > -1
   const is_block_path = ['/block'].findIndex(p => pathname?.includes(p)) > -1
+  const is_assets_path = ['/transfers', '/tvl', '/assets'].findIndex(p => pathname?.includes(p)) > -1
 
   return (
     <div className="w-full overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
@@ -383,7 +388,7 @@ export default () => {
               )}
             </div>
           )}
-          {status_data?.latest_block_height && (
+          {status_data?.latest_block_height && !is_assets_path && (
             <Link href={`/block/${status_data.latest_block_height}`}>
               <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
                 <FiBox size={16} />

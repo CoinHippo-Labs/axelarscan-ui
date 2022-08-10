@@ -8,8 +8,6 @@ import { FiCode } from 'react-icons/fi'
 
 import LineChart from './charts/line'
 import BarChart from './charts/bar'
-import TvlTotal from './tvl/total'
-import Tvl from './tvl'
 import TopPath from './top/path'
 import TopChainPair from './top/chain-pair'
 import Transfers from './transfers'
@@ -421,24 +419,6 @@ export default () => {
         topData={topChainPairs}
         by="num_txs"
       />
-      <div className="sm:col-span-2 lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-5">
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <span className="normal-case text-base font-bold">
-              TVL in {currency.toUpperCase()}
-            </span>
-          </div>
-          <TvlTotal />
-        </div>
-        <div className="lg:col-span-3 space-y-2">
-          <div className="flex items-center space-x-2">
-            <span className="normal-case text-base font-bold">
-              TVL on AXELAR NETWORK
-            </span>
-          </div>
-          <Tvl />
-        </div>
-      </div>
       <div className="sm:col-span-2 lg:col-span-4 space-y-2 pt-1">
         <Link href="/transfers/search">
           <a className="flex items-center space-x-2">
