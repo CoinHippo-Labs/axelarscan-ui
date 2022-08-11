@@ -148,8 +148,7 @@ export default () => {
                           className="uppercase text-slate-400 dark:text-slate-400 text-xs font-bold"
                         >
                           {amount_formatted}
-                        </span>
-                      :
+                        </span> :
                       <span>
                         -
                       </span>
@@ -193,13 +192,12 @@ export default () => {
                         <span className="normal-case ml-1">
                           {symbol}
                         </span>
-                      </span>
-                      :
+                      </span> :
                       <span>
                         -
                       </span>
                     }
-                    {typeof total_on_evm === 'number' && props.value > -1 ?
+                    {typeof total_on_evm === 'number' && props.value > -1  && (
                       <span
                         title={number_format(props.value, `${currency_symbol}0,0.000`)}
                         className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
@@ -207,11 +205,7 @@ export default () => {
                         {currency_symbol}
                         {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
                       </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
+                    )}
                   </div>
                 )
               },
@@ -242,13 +236,12 @@ export default () => {
                         <span className="normal-case ml-1">
                           {symbol}
                         </span>
-                      </span>
-                      :
+                      </span> :
                       <span>
                         -
                       </span>
                     }
-                    {typeof total_on_cosmos === 'number' && props.value > -1 ?
+                    {typeof total_on_cosmos === 'number' && props.value > -1 && (
                       <span
                         title={number_format(props.value, `${currency_symbol}0,0.000`)}
                         className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
@@ -256,11 +249,7 @@ export default () => {
                         {currency_symbol}
                         {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
                       </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
+                    )}
                   </div>
                 )
               },
@@ -291,13 +280,12 @@ export default () => {
                         <span className="normal-case ml-1">
                           {symbol}
                         </span>
-                      </span>
-                      :
+                      </span> :
                       <span>
                         -
                       </span>
                     }
-                    {typeof total === 'number' && props.value > -1 ?
+                    {typeof total === 'number' && props.value > -1 && (
                       <span
                         title={number_format(props.value, `${currency_symbol}0,0.000`)}
                         className="uppercase text-sm font-bold"
@@ -305,11 +293,7 @@ export default () => {
                         {currency_symbol}
                         {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
                       </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
+                    )}
                   </div>
                 )
               },

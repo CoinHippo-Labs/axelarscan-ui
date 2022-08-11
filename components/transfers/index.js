@@ -64,13 +64,13 @@ export default () => {
           aggs: {
             cumulative_volume: {
               date_histogram: {
-                field: 'created_at.month',
+                field: 'event.created_at.month',
                 calendar_interval: 'month',
               },
               aggs: {
                 volume: {
                   sum: {
-                    field: 'value',
+                    field: 'event.value',
                   },
                 },
                 cumulative_volume: {
@@ -137,15 +137,15 @@ export default () => {
 
         _response = await getTokenSents({
           query: {
-            range: { block_timestamp: { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').unix() } },
+            range: { 'event.block_timestamp': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').unix() } },
           },
           aggs: {
             stats: {
-              terms: { field: 'created_at.day', size: 100 },
+              terms: { field: 'event.created_at.day', size: 100 },
               aggs: {
                 volume: {
                   sum: {
-                    field: 'value',
+                    field: 'event.value',
                   },
                 },
               },
@@ -213,16 +213,16 @@ export default () => {
         _response = await getTokenSents({
           aggs: {
             source_chains: {
-              terms: { field: 'chain.keyword', size: 1000 },
+              terms: { field: 'event.chain.keyword', size: 1000 },
               aggs: {
                 destination_chains: {
-                  terms: { field: 'returnValues.destinationChain.keyword', size: 1000 },
+                  terms: { field: 'event.returnValues.destinationChain.keyword', size: 1000 },
                   aggs: {
                     assets: {
-                      terms: { field: 'denom.keyword', size: 1000 },
+                      terms: { field: 'event.denom.keyword', size: 1000 },
                       aggs: {
                         volume: {
-                          sum: { field: 'value' },
+                          sum: { field: 'event.value' },
                         },
                       },
                     },
@@ -302,13 +302,13 @@ export default () => {
          _response = await getTokenSents({
           aggs: {
             source_chains: {
-              terms: { field: 'chain.keyword', size: 1000 },
+              terms: { field: 'event.chain.keyword', size: 1000 },
               aggs: {
                 destination_chains: {
-                  terms: { field: 'returnValues.destinationChain.keyword', size: 1000 },
+                  terms: { field: 'event.returnValues.destinationChain.keyword', size: 1000 },
                   aggs: {
                     volume: {
-                      sum: { field: 'value' },
+                      sum: { field: 'event.value' },
                     },
                   },
                 },

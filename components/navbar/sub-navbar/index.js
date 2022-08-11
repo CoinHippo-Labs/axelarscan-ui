@@ -228,7 +228,7 @@ export default () => {
       break
     case '/tvl':
       title = 'TVL'
-      subtitle = 'total assets on Axelar Network'
+      subtitle = 'Total assets on Axelar Network'
       right = (
         <TotalTVL />
       )
