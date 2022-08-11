@@ -89,8 +89,8 @@ export default () => {
       <div className="h-full flex items-center justify-end">
         <ThreeDots
           color={loader_color(theme)}
-          width="40"
-          height="40"
+          width="32"
+          height="32"
         />
       </div>
   )
