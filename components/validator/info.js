@@ -21,7 +21,6 @@ export default ({
     tombstoned,
     jailed,
     status,
-    tss_illegibility_info,
     operator_address,
     consensus_address,
     delegator_address,
@@ -59,33 +58,25 @@ export default ({
         </div>
         <div className="flex flex-wrap items-center space-x-1.5">
           {deregistering && (
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs sm:text-sm font-bold py-1 px-1.5">
+            <div className="bg-slate-100 dark:bg-slate-900 rounded capitalize text-xs sm:text-sm font-bold py-1 px-1.5">
               Deregistering
             </div>
           )}
           {tombstoned && (
-            <div className="bg-slate-400 dark:bg-slate-500 rounded-lg capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5">
+            <div className="bg-slate-400 dark:bg-slate-500 rounded capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5">
               Tombstoned
             </div>
           )}
           {jailed && (
-            <div className="bg-red-500 dark:bg-red-600 rounded-lg capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5">
+            <div className="bg-red-500 dark:bg-red-600 rounded capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5">
               Jailed
             </div>
           )}
           {status && (
-            <div className={`${status.includes('UN') ? status.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded-lg capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5`}>
+            <div className={`${status.includes('UN') ? status.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5`}>
               {status.replace('BOND_STATUS_', '').toLowerCase()}
             </div>
           )}
-          {Object.entries({ ...tss_illegibility_info }).filter(([k, v]) => v).map(([k, v]) => (
-            <div
-              key={k}
-              className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs sm:text-sm font-bold py-1 px-1.5"
-            >
-              {name(k)}
-            </div>
-          ))}
         </div>
       </div>
       <div className={rowClassName}>

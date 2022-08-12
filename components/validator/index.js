@@ -71,16 +71,15 @@ export default () => {
               start_proxy_height,
               broadcaster_loaded,
               broadcaster_address,
-              tss_illegibility_info,
             } = { ...validator_data }
             setValidator({
               data: validator_data,
               address,
               broadcaster_loaded,
             })
-            if (broadcaster_loaded && 'tss_illegibility_info' in validator_data) {
+            if (broadcaster_loaded) {
               const _health = {
-                broadcaster_registration: !tss_illegibility_info?.no_proxy_registered && broadcaster_address ? true : false,
+                broadcaster_registration: broadcaster_address ? true : false,
               }
               if (broadcaster_address) {
                 const response = await all_bank_balances(broadcaster_address)
@@ -292,7 +291,7 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded && (!heartbeats || 'tss_illegibility_info' in { ...validator.data })) {
+      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded && heartbeats) {
         if (!controller.signal.aborted) {
           const { broadcaster_address } = { ...validator.data }
           let { start_proxy_height } = { ...validator.data }

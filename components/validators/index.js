@@ -400,39 +400,30 @@ export default () => {
               accessor: 'status',
               sortType: (a, b) => a.original.tombstoned > b.original.tombstoned ? -1 : a.original.tombstoned < b.original.tombstoned ? 1 :
                 a.original.jailed > b.original.jailed ? -1 : a.original.jailed < b.original.jailed ? 1 :
-                a.original.status > b.original.status ? 1 : a.original.status < b.original.status ? -1 :
-                Object.values({ ...a.original.tss_illegibility_info }).filter(v => v).length < Object.values({ ...b.original.tss_illegibility_info }).filter(v => v).length ? 1 : -1,
+                a.original.status > b.original.status ? 1 : a.original.status < b.original.status ? -1 : -1,
               Cell: props => (
                 <div className="flex flex-col text-left sm:text-right">
                   <div className="flex flex-col items-start sm:items-end space-y-0.5 my-0.5">
                     {props.value ?
                       <>
                         {props.row.original.deregistering && (
-                          <div className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs font-bold px-1.5 py-0.5">
+                          <div className="bg-slate-100 dark:bg-slate-900 rounded capitalize text-xs font-boldpy-0.5 px-1.5">
                             Deregistering
                           </div>
                         )}
                         {props.row.original.tombstoned && (
-                          <div className="bg-slate-400 dark:bg-slate-500 rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5">
+                          <div className="bg-slate-400 dark:bg-slate-500 rounded capitalize text-white text-xs font-bold py-0.5 px-1.5">
                             Tombstoned
                           </div>
                         )}
                         {props.row.original.jailed && (
-                          <div className="bg-red-500 dark:bg-red-600 rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5">
+                          <div className="bg-red-500 dark:bg-red-600 rounded capitalize text-white text-xs font-bold py-0.5 px-1.5">
                             Jailed
                           </div>
                         )}
-                        <div className={`${props.value.includes('UN') ? props.value.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded-lg capitalize text-white text-xs font-bold px-1.5 py-0.5`}>
+                        <div className={`${props.value.includes('UN') ? props.value.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded capitalize text-white text-xs font-bold py-0.5 px-1.5`}>
                           {props.value.replace('BOND_STATUS_', '').toLowerCase()}
                         </div>
-                        {Object.entries({ ...props.row.original.tss_illegibility_info }).filter(([k, v]) => v).map(([k, v]) => (
-                          <div
-                            key={k}
-                            className="bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs font-bold px-1.5 py-0.5"
-                          >
-                            {name(k)}
-                          </div>
-                        ))}
                       </>
                       :
                       <span>

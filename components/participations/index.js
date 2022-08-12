@@ -47,27 +47,51 @@ export default () => {
         }, is_success)
         const _data = {
           data: response?.data?.map(d => {
-            const { key_id, height, key_role, snapshot_validators, snapshot_non_participant_validators } = { ...d }
+            const {
+              key_id,
+              height,
+              key_role,
+              participants,
+              non_participants,
+              snapshot_validators,
+              snapshot_non_participant_validators,
+            } = { ...d }
             return {
               ...d,
               id: `${key_id}_${height}`,
               key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
-              validators: snapshot_validators?.validators?.map(v => {
-                const { validator, share_count } = { ...v }
+              validators: (participants || snapshot_validators?.validators)?.map(v => {
+                const {
+                  validator,
+                  share_count,
+                  weight,
+                } = { ...v }
+                let {
+                  address,
+                } = { ...v }
+                address = address || validator
                 return {
                   ...v,
-                  address: validator,
-                  ...validators_data?.find(_v => equals_ignore_case(_v?.operator_address, validator)),
-                  share: share_count,
+                  address,
+                  ...validators_data?.find(_v => equals_ignore_case(_v?.operator_address, address)),
+                  share: weight || share_count,
                 }
               }),
-              non_participant_validators: snapshot_non_participant_validators?.validators?.map(v => {
-                const { validator, share_count } = { ...v }
+              non_participant_validators: (non_participants || snapshot_non_participant_validators?.validators)?.map(v => {
+                const {
+                  validator,
+                  share_count,
+                  weight,
+                } = { ...v }
+                let {
+                  address,
+                } = { ...v }
+                address = address || validator
                 return {
                   ...v,
-                  address: validator,
-                  ...validators_data?.find(_v => equals_ignore_case(_v?.operator_address, validator)),
-                  share: share_count,
+                  address,
+                  ...validators_data?.find(_v => equals_ignore_case(_v?.operator_address, address)),
+                  share: weight || share_count,
                 }
               }),
             }
@@ -179,24 +203,33 @@ export default () => {
             }
             break
         }
-        let { data } = { ..._data }
+        let {
+          data,
+        } = { ..._data }
         if (data) {
           data = data.map(d => {
-            const { validators, non_participant_validators } = { ...d }
+            const {
+              validators,
+              non_participant_validators,
+            } = { ...d }
             return {
               ...d,
               validators: validators?.map(v => {
-                const { address } = { ...v }
+                const {
+                  address,
+                } = { ...v }
                 return {
                   ...v,
-                  ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, address))
+                  ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, address)),
                 }
               }),
               non_participant_validators: non_participant_validators?.map(v => {
-                const { address } = { ...v }
+                const {
+                  address,
+                } = { ...v }
                 return {
                   ...v,
-                  ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, address))
+                  ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, address)),
                 }
               }),
             }
@@ -205,20 +238,32 @@ export default () => {
             case 'signs':
               switch (is_success) {
                 case false:
-                  setSignsFailed({ ..._data, data })
+                  setSignsFailed({
+                    ..._data,
+                    data,
+                  })
                   break
                 default:
-                  setSignsSuccess({ ..._data, data })
+                  setSignsSuccess({
+                    ..._data,
+                    data,
+                  })
                   break
               }
               break
             default:
               switch (is_success) {
                 case false:
-                  setKeygensFailed({ ..._data, data })
+                  setKeygensFailed({
+                    ..._data,
+                    data,
+                  })
                   break
                 default:
-                  setKeygensSuccess({ ..._data, data })
+                  setKeygensSuccess({
+                    ..._data,
+                    data,
+                  })
                   break
               }
               break

@@ -143,22 +143,15 @@ export default ({
           },
           {
             Header: 'Signing Threshold',
-            accessor: 'corruption_signing_threshold',
-            sortType: (a, b) => a.original.corruption_signing_threshold > b.original.corruption_signing_threshold ? 1 : -1,
-            disableSortBy: !corruption_signing_threshold,
+            accessor: 'signing_threshold',
+            disableSortBy: true,
             Cell: props => (
               <div className="flex flex-col text-left sm:text-right">
                 <div className="flex flex-col items-start sm:items-end text-xs font-semibold space-y-0.5">
-                  {props.value > -1 ?
-                    <>
-                      <span className="font-bold">
-                        {number_format(props.value + 1, '0,0')} / {number_format(_.sumBy(props.row.original.validator_shares || props.row.original.validators, 'share'), '0,0')}
-                      </span>
-                      <span className="text-slate-400 dark:text-slate-200 text-2xs">
-                        ({number_format((props.value + 1) * 100 / _.sumBy(props.row.original.validator_shares || props.row.original.validators, 'share'), '0,0.00')}%)
-                      </span>
-                    </>
-                    :
+                  {props.value ?
+                    <span className="font-bold">
+                      {props.value}
+                    </span> :
                     <span>
                       -
                     </span>
@@ -195,8 +188,14 @@ export default ({
                       )}
                     </div>
                     {_.slice(props.value, 0, seeMoreKeyIds.includes(props.row.original.id) ? props.value.length : COLLAPSE_VALIDATORS_SIZE).map((v, i) => {
-                      const { address, operator_address, description } = { ...v }
-                      const { moniker } = { ...description }
+                      const {
+                        address,
+                        operator_address,
+                        description,
+                      } = { ...v }
+                      const {
+                        moniker,
+                      } = { ...description }
                       return (
                         <div
                           key={i}
@@ -209,7 +208,9 @@ export default ({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <ValidatorProfile validator_description={description} />
+                                  <ValidatorProfile
+                                    validator_description={description}
+                                  />
                                 </a>
                               </Link>
                               <div className="flex flex-col">
@@ -234,11 +235,12 @@ export default ({
                                       {ellipse(operator_address, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                                     </a>
                                   </Link>
-                                  <Copy value={operator_address} />
+                                  <Copy
+                                    value={operator_address}
+                                  />
                                 </div>
                               </div>
-                            </div>
-                            :
+                            </div> :
                             address ?
                               <div className="flex items-center space-x-1">
                                 <Link href={`/validator/${props.value}`}>
@@ -250,7 +252,9 @@ export default ({
                                     {ellipse(address, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                                   </a>
                                 </Link>
-                                <Copy value={address} />
+                                <Copy
+                                  value={address}
+                                />
                               </div>
                               :
                               <span>
@@ -289,8 +293,7 @@ export default ({
                         }
                       </button>
                     )}
-                  </>
-                  :
+                  </> :
                   <span>
                     -
                   </span>
@@ -326,8 +329,14 @@ export default ({
                       )}
                     </div>
                     {_.slice(props.value, 0, seeMoreKeyIdsNon.includes(props.row.original.id) ? props.value.length : COLLAPSE_VALIDATORS_SIZE).map((v, i) => {
-                      const { address, operator_address, description } = { ...v }
-                      const { moniker } = { ...description }
+                      const {
+                        address,
+                        operator_address,
+                        description,
+                      } = { ...v }
+                      const {
+                        moniker,
+                      } = { ...description }
                       return (
                         <div
                           key={i}
@@ -340,7 +349,9 @@ export default ({
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
-                                  <ValidatorProfile validator_description={description} />
+                                  <ValidatorProfile
+                                    validator_description={description}
+                                  />
                                 </a>
                               </Link>
                               <div className="flex flex-col">
@@ -365,11 +376,12 @@ export default ({
                                       {ellipse(operator_address, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                                     </a>
                                   </Link>
-                                  <Copy value={operator_address} />
+                                  <Copy
+                                    value={operator_address}
+                                  />
                                 </div>
                               </div>
-                            </div>
-                            :
+                            </div> :
                             address ?
                               <div className="flex items-center space-x-1">
                                 <Link href={`/validator/${props.value}`}>
@@ -381,9 +393,10 @@ export default ({
                                     {ellipse(address, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
                                   </a>
                                 </Link>
-                                <Copy value={address} />
-                              </div>
-                              :
+                                <Copy
+                                  value={address}
+                                />
+                              </div> :
                               <span>
                                 -
                               </span>
@@ -420,8 +433,7 @@ export default ({
                         }
                       </button>
                     )}
-                  </>
-                  :
+                  </> :
                   <span>
                     -
                   </span>
@@ -469,30 +481,37 @@ export default ({
             headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
           },
         ].filter(c => ['/validator/[address]'].includes(pathname) ?
-          !['key_role', table?.startsWith('keyshares') ? 'height' : 'snapshot_block_number', 'num_validator_shares', 'corruption_signing_threshold', 'validators', 'non_participant_validators', 'result', 'participated'].filter(a => !(table?.startsWith('keyshares') ? ['num_validator_shares'] : ['result', 'participated']).includes(a)).includes(c.accessor) :
-          !['snapshot_block_number', 'num_validator_shares', 'corruption_signing_threshold', 'result', 'participated'].filter(a => !(table?.startsWith('keygens_success') ? ['corruption_signing_threshold'] : []).includes(a)).includes(c.accessor)
+          !['key_role', table?.startsWith('keyshares') ? 'height' : 'snapshot_block_number', 'num_validator_shares', 'signing_threshold', 'validators', 'non_participant_validators', 'result', 'participated'].filter(a => !(table?.startsWith('keyshares') ? ['num_validator_shares'] : ['result', 'participated']).includes(a)).includes(c.accessor) :
+          !['snapshot_block_number', 'num_validator_shares', 'signing_threshold', 'result', 'participated'].filter(a => !(table?.startsWith('keygens_success') ? ['signing_threshold'] : []).includes(a)).includes(c.accessor)
         )}
         data={data.map((d, i) => {
-          const { key_id, threshold, height, result, failed, participated, validators } = { ...d }
+          const {
+            height,
+            result,
+            failed,
+            participated,
+            validators,
+          } = { ...d }
           return {
             ...d,
             i,
-            corruption_signing_threshold: typeof corruption_signing_threshold?.[key_id] === 'number' ?
-              corruption_signing_threshold[key_id] :
-              typeof threshold === 'number' ?
-                threshold : -1,
             height: height || -1,
-            result: typeof result === 'boolean' ? result : !failed,
+            result: typeof result === 'boolean' ?
+              result : !failed,
             participated: typeof participated === 'boolean' ?
-              participated : validators?.findIndex(v => equals_ignore_case(v?.address, address)) > -1,
+              participated :
+              validators?.findIndex(v => equals_ignore_case(v?.address, address)) > -1,
           }
         })}
         noPagination={data.length <= 10}
         noRecordPerPage={!['/participations'].includes(pathname)}
         defaultPageSize={['/participations'].includes(pathname) ? 25 : 10}
         className={`no-border ${className}`}
+      /> :
+      <TailSpin
+        color={loader_color(theme)}
+        width="32"
+        height="32"
       />
-      :
-      <TailSpin color={loader_color(theme)} width="32" height="32" />
   )
 }
