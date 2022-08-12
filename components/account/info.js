@@ -98,8 +98,7 @@ export default ({ data }) => {
                     </div>
                   )}
                 </div>
-              </div>
-              :
+              </div> :
               sender_address ?
                 <div className="flex items-center space-x-1">
                   <Copy
@@ -109,8 +108,7 @@ export default ({ data }) => {
                     </span>}
                     size={18}
                   />
-                </div>
-                :
+                </div> :
                 <span>
                   -
                 </span>
@@ -139,7 +137,7 @@ export default ({ data }) => {
                   {recipient_address && (
                     <div className="flex items-center space-x-1">
                       <a
-                        href={`${destination_chain_data.explorer?.url}${destination_chain_data.explorer?.address_path?.replace('{address}', sender_address)}`}
+                        href={`${destination_chain_data.explorer?.url}${destination_chain_data.explorer?.address_path?.replace('{address}', recipient_address)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 dark:text-white"
@@ -166,8 +164,7 @@ export default ({ data }) => {
                     </div>
                   )}
                 </div>
-              </div>
-              :
+              </div> :
               recipient_address ?
                 <div className="flex items-center space-x-1">
                   <Copy
@@ -177,8 +174,7 @@ export default ({ data }) => {
                     </span>}
                     size={18}
                   />
-                </div>
-                :
+                </div> :
                 <span>
                   -
                 </span>
@@ -205,8 +201,7 @@ export default ({ data }) => {
                     {asset_data.name || denom}
                   </span>
                 </div>
-              </div>
-              :
+              </div> :
               denom ?
                 <div className="flex items-center space-x-1">
                   <Copy
@@ -216,8 +211,7 @@ export default ({ data }) => {
                     </span>}
                     size={18}
                   />
-                </div>
-                :
+                </div> :
                 <span>
                   -
                 </span>
@@ -285,8 +279,7 @@ export default ({ data }) => {
                     `${number_format(reward.amount, '0,0.00000000')} ${reward.denom || ''}` :
                     'No Rewards'
                   }
-                </span>
-                :
+                </span> :
                 <div className="skeleton w-40 h-6 mt-1" />
               }
             </div>
@@ -302,8 +295,7 @@ export default ({ data }) => {
                     `${number_format(commission.amount, '0,0.00000000')} ${commission.denom || ''}` :
                     'No Commissions'
                   }
-                </span>
-                :
+                </span> :
                 <div className="skeleton w-40 h-6 mt-1" />
               }
             </div>
@@ -418,9 +410,12 @@ export default ({ data }) => {
               noPagination={balances.length <= 10}
               defaultPageSize={10}
               className="no-border"
+            /> :
+            <TailSpin
+              color={loader_color(theme)}
+              width="32"
+              height="32"
             />
-            :
-            <TailSpin color={loader_color(theme)} width="32" height="32" />
           }
         </div>
         {type(address) === 'account' && validators_data && !equals_ignore_case(validator_data?.broadcaster_address, address) && (
@@ -520,9 +515,12 @@ export default ({ data }) => {
                   noRecordPerPage={true}
                   defaultPageSize={10}
                   className="no-border"
+                /> :
+                <TailSpin
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
                 />
-                :
-                <TailSpin color={loader_color(theme)} width="32" height="32" />
               }
             </div>
             <div className="sm:col-span-3 lg:col-span-2 space-y-2">
@@ -655,9 +653,12 @@ export default ({ data }) => {
                   noRecordPerPage={true}
                   defaultPageSize={10}
                   className="no-border"
+                /> :
+                <TailSpin
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
                 />
-                :
-                <TailSpin color={loader_color(theme)} width="32" height="32" />
               }
             </div>
             <div className="sm:col-span-3 lg:col-span-2 space-y-2">
@@ -755,9 +756,12 @@ export default ({ data }) => {
                   noRecordPerPage={true}
                   defaultPageSize={10}
                   className="no-border"
+                /> :
+                <TailSpin
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
                 />
-                :
-                <TailSpin color={loader_color(theme)} width="32" height="32" />
               }
             </div>
           </>

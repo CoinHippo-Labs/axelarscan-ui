@@ -291,10 +291,14 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded && heartbeats) {
+      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded && !heartbeats) {
         if (!controller.signal.aborted) {
-          const { broadcaster_address } = { ...validator.data }
-          let { start_proxy_height } = { ...validator.data }
+          const {
+            broadcaster_address,
+          } = { ...validator.data }
+          let {
+            start_proxy_height,
+          } = { ...validator.data }
           start_proxy_height = start_proxy_height || 0
           const latest_block = Number(status_data.latest_block_height)
           const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks > start_proxy_height ? latest_block - num_heartbeat_blocks : start_proxy_height)
@@ -312,7 +316,9 @@ export default () => {
           for (let height = latest_block; height >= first; height--) {
             if (height % num_blocks_per_heartbeat === 1 && heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat) {
               const h = data?.find(d => d?.period_height === height)
-              const { sender } = { ...h }
+              const {
+                sender,
+              } = { ...h }
               heartbeats.push({
                 ...h,
                 height,
