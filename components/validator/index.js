@@ -566,7 +566,7 @@ export default () => {
 
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto pb-16">
-      <div className="sm:grid sm:grid-cols-2 space-y-6 sm:space-y-0 gap-6">
+      <div className="sm:grid sm:grid-cols-2 space-y-6 sm:space-y-0 gap-6 mb-16">
         <Info
           data={validator?.address === address && validator?.data}
           votingPower={votingPower}
@@ -575,7 +575,9 @@ export default () => {
           <div className="text-lg font-bold lg:mt-1">
             Delegations
           </div>
-          <Delegations data={delegations?.address === address && delegations?.data} />
+          <Delegations
+            data={delegations?.address === address && delegations?.data}
+          />
         </div>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
@@ -585,8 +587,7 @@ export default () => {
           </span>
           <div className="text-3xl font-bold">
             {typeof uptime === 'number' ?
-              `${number_format(uptime, '0,0.00')}%`
-              :
+              `${number_format(uptime, '0,0.00')}%` :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -600,8 +601,7 @@ export default () => {
           </span>
           <div className="text-3xl font-bold">
             {typeof numberTimeJailed === 'number' ?
-              number_format(numberTimeJailed, '0,0')
-              :
+              number_format(numberTimeJailed, '0,0') :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -615,8 +615,7 @@ export default () => {
           </span>
           <div className="text-3xl font-bold">
             {typeof heartbeats_uptime === 'number' ?
-              `${number_format(heartbeats_uptime, '0,0.00')}%`
-              :
+              `${number_format(heartbeats_uptime, '0,0.00')}%` :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -638,8 +637,7 @@ export default () => {
                   <BiCheckCircle size={28} /> :
                   <BiXCircle size={28} />
                 }
-              </>
-              :
+              </> :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -655,7 +653,7 @@ export default () => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Supported
           </span>
-          <div className="h-9 flex items-center overflow-x-auto text-3xl font-bold space-x-1.5">
+          <div className="flex flex-wrap items-center overflow-x-auto text-3xl font-bold mt-1.5">
             {supportedChains ?
               supported_chains?.length > 0 ?
                 supported_chains.filter(c => chain_manager.image(c, evm_chains_data)).map((c, i) => (
@@ -663,14 +661,12 @@ export default () => {
                     key={i}
                     src={chain_manager.image(c, evm_chains_data)}
                     title={chain_manager.name(c, evm_chains_data)}
-                    className="w-6 h-6 rounded-full"
+                    className="w-6 h-6 rounded-full mb-1.5 mr-1.5"
                   />
-                ))
-                :
+                )) :
                 <span className="lg:text-xl font-semibold">
                   No EVM Supported
-                </span>
-              :
+                </span> :
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
@@ -714,12 +710,10 @@ export default () => {
                       [{number_format(evmVotes?.polls?.[k] || 0, '0,0')}]
                     </span>
                   </div>
-                ))
-                :
+                )) :
                 <span className="text-3xl font-semibold">
                   No Votes
-                </span>
-              :
+                </span> :
               <div className="h-9">
                 <FallingLines color={loader_color(theme)} width="36" height="36" />
               </div>

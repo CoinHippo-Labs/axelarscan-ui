@@ -73,8 +73,11 @@ export default ({ data }) => {
         defaultPageSize={10}
         className="no-border"
         style={{ minHeight: 'calc(100% - 48px)' }}
+      /> :
+      <TailSpin
+        color={loader_color(theme)}
+        width="32"
+        height="32"
       />
-      :
-      <TailSpin color={loader_color(theme)} width="32" height="32" />
   )
 }
