@@ -142,6 +142,26 @@ export default ({
             headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
           },
           {
+            Header: 'Keygen Threshold',
+            accessor: 'keygen_threshold',
+            disableSortBy: true,
+            Cell: props => (
+              <div className="flex flex-col text-left sm:text-right">
+                <div className="flex flex-col items-start sm:items-end text-xs font-semibold space-y-0.5">
+                  {props.value ?
+                    <span className="font-bold">
+                      {props.value}
+                    </span> :
+                    <span>
+                      -
+                    </span>
+                  }
+                </div>
+              </div>
+            ),
+            headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+          },
+          {
             Header: 'Signing Threshold',
             accessor: 'signing_threshold',
             disableSortBy: true,
@@ -169,24 +189,26 @@ export default ({
               <div className="flex flex-col space-y-1.5">
                 {props.value?.length > 0 ?
                   <>
-                    <div className="flex items-center space-x-1">
-                      {typeof props.row.original.snapshot === 'number' && (
-                        <div className="uppercase text-xs font-bold">
-                          #{number_format(props.row.original.snapshot, '0,0')}
-                        </div>
-                      )}
-                      <span className="text-xs font-semibold">
-                        Participants:
-                      </span>
-                      <span className="text-xs font-bold">
-                        {number_format(props.value.length, '0,0')}
-                      </span>
-                      {props.value.findIndex(v => typeof v?.share === 'number') > -1 && (
-                        <span className="text-xs font-bold">
-                          [{number_format(_.sumBy(props.value, 'share'), '0,0')}]
+                    {!props.row.original.participant_addresses && (
+                      <div className="flex items-center space-x-1">
+                        {typeof props.row.original.snapshot === 'number' && (
+                          <div className="uppercase text-xs font-bold">
+                            #{number_format(props.row.original.snapshot, '0,0')}
+                          </div>
+                        )}
+                        <span className="text-xs font-semibold">
+                          Participants:
                         </span>
-                      )}
-                    </div>
+                        <span className="text-xs font-bold">
+                          {number_format(props.value.length, '0,0')}
+                        </span>
+                        {props.value.findIndex(v => typeof v?.share === 'number') > -1 && (
+                          <span className="text-xs font-bold">
+                            [{number_format(_.sumBy(props.value, 'share'), '0,0')}]
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {_.slice(props.value, 0, seeMoreKeyIds.includes(props.row.original.id) ? props.value.length : COLLAPSE_VALIDATORS_SIZE).map((v, i) => {
                       const {
                         address,
@@ -310,24 +332,26 @@ export default ({
               <div className="flex flex-col space-y-1.5">
                 {props.value?.length > 0 ?
                   <>
-                    <div className="flex items-center space-x-1">
-                      {typeof props.row.original.snapshot === 'number' && (
-                        <div className="uppercase text-xs font-bold">
-                          #{number_format(props.row.original.snapshot, '0,0')}
-                        </div>
-                      )}
-                      <span className="text-xs font-semibold">
-                        Non-Participants:
-                      </span>
-                      <span className="text-xs font-bold">
-                        {number_format(props.value.length, '0,0')}
-                      </span>
-                      {props.value.findIndex(v => typeof v?.share === 'number') > -1 && (
-                        <span className="text-xs font-bold">
-                          [{number_format(_.sumBy(props.value, 'share'), '0,0')}]
+                    {!props.row.original.participant_addresses && (
+                      <div className="flex items-center space-x-1">
+                        {typeof props.row.original.snapshot === 'number' && (
+                          <div className="uppercase text-xs font-bold">
+                            #{number_format(props.row.original.snapshot, '0,0')}
+                          </div>
+                        )}
+                        <span className="text-xs font-semibold">
+                          Non-Participants:
                         </span>
-                      )}
-                    </div>
+                        <span className="text-xs font-bold">
+                          {number_format(props.value.length, '0,0')}
+                        </span>
+                        {props.value.findIndex(v => typeof v?.share === 'number') > -1 && (
+                          <span className="text-xs font-bold">
+                            [{number_format(_.sumBy(props.value, 'share'), '0,0')}]
+                          </span>
+                        )}
+                      </div>
+                    )}
                     {_.slice(props.value, 0, seeMoreKeyIdsNon.includes(props.row.original.id) ? props.value.length : COLLAPSE_VALIDATORS_SIZE).map((v, i) => {
                       const {
                         address,
@@ -481,8 +505,8 @@ export default ({
             headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
           },
         ].filter(c => ['/validator/[address]'].includes(pathname) ?
-          !['key_role', table?.startsWith('keyshares') ? 'height' : 'snapshot_block_number', 'num_validator_shares', 'signing_threshold', 'validators', 'non_participant_validators', 'result', 'participated'].filter(a => !(table?.startsWith('keyshares') ? ['num_validator_shares'] : ['result', 'participated']).includes(a)).includes(c.accessor) :
-          !['snapshot_block_number', 'num_validator_shares', 'signing_threshold', 'result', 'participated'].filter(a => !(table?.startsWith('keygens_success') ? ['signing_threshold'] : []).includes(a)).includes(c.accessor)
+          !['key_role', table?.startsWith('keyshares') ? 'height' : 'snapshot_block_number', 'num_validator_shares', 'keygen_threshold', 'signing_threshold', 'validators', 'non_participant_validators', 'result', 'participated'].filter(a => !(table?.startsWith('keyshares') ? ['num_validator_shares'] : ['result', 'participated']).includes(a)).includes(c.accessor) :
+          !['key_role', 'snapshot_block_number', 'num_validator_shares', 'keygen_threshold', 'signing_threshold', 'result', 'participated'].filter(a => !(table?.startsWith('keygens_success') ? ['keygen_threshold', 'signing_threshold'] : table?.startsWith('signs_') ? ['key_role'] : []).includes(a)).includes(c.accessor)
         )}
         data={data.map((d, i) => {
           const {

@@ -53,6 +53,8 @@ export default () => {
               key_role,
               participants,
               non_participants,
+              participant_addresses,
+              non_participant_addresses,
               snapshot_validators,
               snapshot_non_participant_validators,
             } = { ...d }
@@ -60,7 +62,11 @@ export default () => {
               ...d,
               id: `${key_id}_${height}`,
               key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
-              validators: (participants || snapshot_validators?.validators)?.map(v => {
+              validators: (participants || participant_addresses?.map(a => {
+                return {
+                  address: a,
+                }
+              }) || snapshot_validators?.validators)?.map(v => {
                 const {
                   validator,
                   share_count,
@@ -77,7 +83,11 @@ export default () => {
                   share: weight || share_count,
                 }
               }),
-              non_participant_validators: (non_participants || snapshot_non_participant_validators?.validators)?.map(v => {
+              non_participant_validators: (non_participants || non_participant_addresses?.map(a => {
+                return {
+                  address: a,
+                }
+              }) || snapshot_non_participant_validators?.validators)?.map(v => {
                 const {
                   validator,
                   share_count,
