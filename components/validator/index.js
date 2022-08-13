@@ -565,8 +565,14 @@ export default () => {
     }
   }, [address, validators_chains_data])
 
-  const { uptime, heartbeats_uptime } = { ...validator?.data }
-  const { broadcaster_funded } = { ...health?.data }
+  const {
+    uptime,
+    heartbeats_uptime,
+    stale_heartbeats,
+  } = { ...validator?.data }
+  const {
+    broadcaster_funded,
+  } = { ...health?.data }
   const supported_chains = supportedChains?.data
   const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg p-4'
 
@@ -625,6 +631,11 @@ export default () => {
               <FallingLines color={loader_color(theme)} width="36" height="36" />
             }
           </div>
+          {stale_heartbeats && (
+            <div className="max-w-min bg-red-100 dark:bg-red-500 border border-red-500 dark:border-red-100 rounded whitespace-nowrap capitalize text-black dark:text-white text-xs font-bold py-1 px-1.5">
+              Stale Heartbeats
+            </div>
+          )}
           <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
           </span>

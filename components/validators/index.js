@@ -305,6 +305,11 @@ export default () => {
                       </span>
                     </div>
                   )}
+                  {props.row.original.stale_heartbeats && (
+                    <div className="max-w-min bg-red-100 dark:bg-red-500 border border-red-500 dark:border-red-100 rounded whitespace-nowrap capitalize text-black dark:text-white text-xs font-bold py-1 px-1.5">
+                      Stale Heartbeats
+                    </div>
+                  )}
                 </div>
               ),
               headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
@@ -406,24 +411,24 @@ export default () => {
                   <div className="flex flex-col items-start sm:items-end space-y-0.5 my-0.5">
                     {props.value ?
                       <>
+                        <div className={`${props.value.includes('UN') ? props.value.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded capitalize text-white text-xs font-bold py-1 px-1.5`}>
+                          {props.value.replace('BOND_STATUS_', '').toLowerCase()}
+                        </div>
                         {props.row.original.deregistering && (
-                          <div className="bg-slate-100 dark:bg-slate-900 rounded capitalize text-xs font-boldpy-0.5 px-1.5">
+                          <div className="bg-slate-100 dark:bg-slate-900 rounded capitalize text-xs font-bold py-1 px-1.5">
                             Deregistering
                           </div>
                         )}
                         {props.row.original.tombstoned && (
-                          <div className="bg-slate-400 dark:bg-slate-500 rounded capitalize text-white text-xs font-bold py-0.5 px-1.5">
+                          <div className="bg-slate-400 dark:bg-slate-500 rounded capitalize text-white text-xs font-bold py-1 px-1.5">
                             Tombstoned
                           </div>
                         )}
                         {props.row.original.jailed && (
-                          <div className="bg-red-500 dark:bg-red-600 rounded capitalize text-white text-xs font-bold py-0.5 px-1.5">
+                          <div className="bg-red-500 dark:bg-red-600 rounded capitalize text-white text-xs font-bold py-1 px-1.5">
                             Jailed
                           </div>
                         )}
-                        <div className={`${props.value.includes('UN') ? props.value.endsWith('ED') ? 'bg-red-500 dark:bg-red-600' : 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-500 dark:bg-green-600'} rounded capitalize text-white text-xs font-bold py-0.5 px-1.5`}>
-                          {props.value.replace('BOND_STATUS_', '').toLowerCase()}
-                        </div>
                       </>
                       :
                       <span>
