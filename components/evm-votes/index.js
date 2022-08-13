@@ -15,6 +15,7 @@ import TimeAgo from '../time-ago'
 import { validator_sets } from '../../lib/api/cosmos'
 import { axelard } from '../../lib/api/cli'
 import { evm_votes as getEvmVotes } from '../../lib/api/evm-vote'
+import { evm_polls as getEvmPolls } from '../../lib/api/index'
 import { chain_manager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -83,47 +84,15 @@ export default () => {
             size = LIMIT
           const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
           const must = [], must_not = []
-          const { chain, txHash, pollId, transactionId, voter, vote, time } = { ...filters }
-          // if (chain) {
-          //   must.push({ match: { sender_chain: chain } })
-          // }
-          // if (txHash) {
-          //   must.push({ match: { txhash: txHash } })
-          // }
-          // if (pollId) {
-          //   must.push({ match_phrase: { poll_id: pollId } })
-          // }
-          // if (transactionId) {
-          //   must.push({ match: { transaction_id: transactionId } })
-          // }
-          // if (voter) {
-          //   must.push({ match: { voter } })
-          // }
-          // if (vote) {
-          //   switch (vote) {
-          //     case 'yes':
-          //     case 'no':
-          //       must.push({ match: { vote: vote === 'yes' } })
-          //       break
-          //     default:
-          //       break
-          //   }
-          // }
-          // if (time?.length > 1) {
-          //   must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
-          // }
-          // const response = await getEvmVotes({
-          //   query: {
-          //     bool: {
-          //       must,
-          //       must_not,
-          //     },
-          //   },
-          //   size,
-          //   from,
-          //   sort: [{ 'created_at.ms': 'desc' }],
-          //   track_total_hits: true,
-          // })
+          const {
+            chain,
+            txHash,
+            pollId,
+            transactionId,
+            voter,
+            vote,
+            time,
+          } = { ...filters }
           const response = await getEvmVotes({
             chain,
             txHash,
@@ -152,28 +121,57 @@ export default () => {
                 }
               }), ['time'], ['desc'])
               polls = _.slice(polls, 0, polls.length - (polls.length > 1 ? 1 : 0))
-              for (let i = 0; i < polls.length; i++) {
-                const p = polls[i]
-                const { id, votes } = { ...p }
+              for (const poll of polls) {
+                const {
+                  id,
+                  votes,
+                } = { ...poll }
                 const min_height = _.minBy(votes, 'height')?.height
                 const max_height = _.maxBy(votes, 'height')?.height
                 const sender_chain = _.head(votes?.map(v => v?.sender_chain).filter(c => c) || [])
-                let _response = await axelard({
-                  cmd: `axelard q nexus chain-maintainers ${chain_manager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
-                  cache: true,
-                  cache_timeout: 1,
+                let _response = await getEvmPolls({
+                  query: {
+                    bool: {
+                      must: [
+                        { match: { _id: id } },
+                        { match: { sender_chain } },
+                        { exists: { field: 'participants' } },
+                      ],
+                    },
+                  },
+                  size: 1,
                 })
-                const chain_maintainers = _response && Object.values({ ...to_json(_response?.stdout)?.maintainers })
-                _response = await validator_sets(min_height)
-                const _validators_data = _response?.result?.validators?.map(v => {
-                  return {
-                    ...v,
-                    ...validators_data.find(_v => equals_ignore_case(_v?.consensus_address, v?.address)),
-                  }
-                }) || []
-                const voters_unsubmit_vote = _validators_data.filter(v => !chain_maintainers || chain_maintainers.includes(v?.operator_address))
-                  .map(v => v?.broadcaster_address)
-                  .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
+                const {
+                  participants,
+                } = { ..._response?.data?.[0] }
+                let voters_unsubmit_vote = []
+                if (participants) {
+                  voters_unsubmit_vote = participants.map(a => {
+                    const validator_data = validators_data.find(_v => equals_ignore_case(_v?.operator_address, a))
+                    const {
+                      broadcaster_address,
+                    } = { ...validator_data }
+                    return broadcaster_address
+                  }).filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
+                }
+                else {
+                  _response = await axelard({
+                    cmd: `axelard q nexus chain-maintainers ${chain_manager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
+                    cache: true,
+                    cache_timeout: 1,
+                  })
+                  const chain_maintainers = _response && Object.values({ ...to_json(_response?.stdout)?.maintainers })
+                  _response = await validator_sets(min_height)
+                  const _validators_data = _response?.result?.validators?.map(v => {
+                    return {
+                      ...v,
+                      ...validators_data.find(_v => equals_ignore_case(_v?.consensus_address, v?.address)),
+                    }
+                  }) || []
+                  voters_unsubmit_vote = _validators_data.filter(v => !chain_maintainers || chain_maintainers.includes(v?.operator_address))
+                    .map(v => v?.broadcaster_address)
+                    .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
+                }
                 voters_unsubmit_vote.forEach(v => {
                   response.push({
                     sender_chain,
