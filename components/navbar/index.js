@@ -86,7 +86,7 @@ export default () => {
           })
           if (denoms.length > 0) {
             const response = await getAssetsPrice({ denoms })
-            if (response) {
+            if (Array.isArray(response)) {
               response.forEach(t => {
                 const asset_index = assets_data.findIndex(a => equals_ignore_case(a?.id, t?.denom))
                 if (asset_index > -1) {

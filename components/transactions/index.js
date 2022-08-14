@@ -14,7 +14,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
-import { transactions as getTransactions } from '../../lib/api/index'
+import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, name, ellipse, equals_ignore_case, sleep, params_to_obj, loader_color } from '../../lib/utils'
@@ -92,15 +92,39 @@ export default ({ n }) => {
             response = await transactions_by_events(`tx.height=${height}`, _data, true, assets_data)
           }
           else if (address?.length >= 65 || type(address) === 'evm_address') {
-            if (type(address) === 'account') {
-              response = await transactions_by_events(`transfer.sender='${address}'`, response?.data, true, assets_data)
-              response = await transactions_by_events(`message.sender='${address}'`, response?.data, true, assets_data)
+            const _response = await deposit_addresses({
+              query: {
+                match: { deposit_address: address },
+              },
+              size: 10,
+              sort: [{ height: 'desc' }],
+            })
+            if (_response?.data?.length > 0) {
+              if (type(address) === 'account') {
+                response = await transactions_by_events(`transfer.sender='${address}'`, response?.data, false, assets_data, 10)
+                response = await transactions_by_events(`message.sender='${address}'`, response?.data, false, assets_data, 10)
+              }
+              response = await transactions_by_events(`link.depositAddress='${address}'`, response?.data, false, assets_data, 10)
+              response = await transactions_by_events(`transfer.recipient='${address}'`, response?.data, false, assets_data, 10)
+              if (response?.data) {
+                response.data.forEach(d => getTransaction(d?.txhash))
+                await sleep(1 * 1000)
+              }
             }
-            response = await transactions_by_events(`link.depositAddress='${address}'`, response?.data, true, assets_data)
-            response = await transactions_by_events(`transfer.recipient='${address}'`, response?.data, true, assets_data)
-            if (response?.data) {
-              response.data.forEach(d => getTransaction(d?.txhash))
-              await sleep(1 * 1000)
+            else {
+              response = await getTransactions({
+                query: {
+                  match: { addresses: address },
+                },
+                size,
+                from,
+                sort: [{ timestamp: 'desc' }],
+                fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'tx.body.messages.signer', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
+                _source: {
+                  includes: 'logs'
+                },
+                track_total_hits: true,
+              }, assets_data)
             }
           }
           else {

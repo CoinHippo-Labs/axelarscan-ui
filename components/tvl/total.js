@@ -42,8 +42,8 @@ export default () => {
   }, [evm_chains_data, cosmos_chains_data, assets_data, tvl_data])
 
   const value_on_evm = _.sumBy(data, 'value_on_evm')
-  const value_on_cosmos = _.sumBy(data, 'value_on_cosmos')
-  const value = _.sumBy(data, 'value')
+  const value_on_cosmos = _.sumBy(data?.filter(d => !['uaxl'].includes(d?.asset)), 'value_on_cosmos')
+  const value = _.sumBy(data?.filter(d => !['uaxl'].includes(d?.asset)), 'value')
 
   return (
     data ?
