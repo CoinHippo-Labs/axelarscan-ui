@@ -84,10 +84,144 @@ export default () => {
                   </div>
                 )
               },
+              headerClassName: 'w-34',
               className: 'bg-violet-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-0 z-50',
               order: 0,
             },
-          ], _.concat(evm_chains_data || [], cosmos_chains_data || []).map((c, i) => {
+            {
+              Header: 'Total Supply',
+              accessor: 'value',
+              sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
+              Cell: props => {
+                const {
+                  asset_data,
+                  total,
+                } = { ...props.row.original }
+                const {
+                  symbol,
+                } = { ...asset_data }
+                return (
+                  <div className="flex flex-col items-start sm:items-end space-y-0.5">
+                    {typeof total === 'number' ?
+                      <span
+                        title={number_format(total, '0,0.00000000')}
+                        className="uppercase text-slate-500 dark:text-slate-400 text-xs font-semibold"
+                      >
+                        {number_format(total, total > 100000 ? '0,0.00a' : total > 10000 ? '0,0.00' : '0,0.000000')}
+                        <span className="normal-case ml-1">
+                          {symbol}
+                        </span>
+                      </span> :
+                      <span>
+                        -
+                      </span>
+                    }
+                    {typeof total === 'number' && props.value > -1 && (
+                      <span
+                        title={number_format(props.value, `${currency_symbol}0,0.000`)}
+                        className="uppercase text-sm font-bold"
+                      >
+                        {currency_symbol}
+                        {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
+                      </span>
+                    )}
+                  </div>
+                )
+              },
+              headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+              className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-40',
+              order: 1,
+            },
+            {
+              Header: 'Moved to EVM',
+              accessor: 'value_on_evm',
+              sortType: (a, b) => a.original.value_on_evm > b.original.value_on_evm ? 1 : -1,
+              Cell: props => {
+                const {
+                  asset_data,
+                  total_on_evm,
+                } = { ...props.row.original }
+                const {
+                  symbol,
+                } = { ...asset_data }
+                return (
+                  <div className="flex flex-col items-start sm:items-end space-y-0">
+                    {typeof total_on_evm === 'number' ?
+                      <span
+                        title={number_format(total_on_evm, '0,0.00000000')}
+                        className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
+                      >
+                        {number_format(total_on_evm, total_on_evm > 100000 ? '0,0.00a' : total_on_evm > 10000 ? '0,0.00' : '0,0.000000')}
+                        <span className="normal-case ml-1">
+                          {symbol}
+                        </span>
+                      </span> :
+                      <span>
+                        -
+                      </span>
+                    }
+                    {typeof total_on_evm === 'number' && props.value > -1  && (
+                      <span
+                        title={number_format(props.value, `${currency_symbol}0,0.000`)}
+                        className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
+                      >
+                        {currency_symbol}
+                        {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
+                      </span>
+                    )}
+                  </div>
+                )
+              },
+              headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+              className: 'bg-zinc-100 dark:bg-zinc-900 sticky z-30',
+              order: 2,
+            },
+            {
+              Header: 'Moved to Cosmos',
+              accessor: 'value_on_cosmos',
+              sortType: (a, b) => a.original.value_on_cosmos > b.original.value_on_cosmos ? 1 : -1,
+              Cell: props => {
+                const {
+                  asset_data,
+                  total_on_cosmos,
+                } = { ...props.row.original }
+                const {
+                  symbol,
+                } = { ...asset_data }
+                return (
+                  <div className="flex flex-col items-start sm:items-end space-y-0">
+                    {typeof total_on_cosmos === 'number' ?
+                      <span
+                        title={number_format(total_on_cosmos, '0,0.00000000')}
+                        className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
+                      >
+                        {number_format(total_on_cosmos, total_on_cosmos > 100000 ? '0,0.00a' : total_on_cosmos > 10000 ? '0,0.00' : '0,0.000000')}
+                        <span className="normal-case ml-1">
+                          {symbol}
+                        </span>
+                      </span> :
+                      <span>
+                        -
+                      </span>
+                    }
+                    {typeof total_on_cosmos === 'number' && props.value > -1 && (
+                      <span
+                        title={number_format(props.value, `${currency_symbol}0,0.000`)}
+                        className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
+                      >
+                        {currency_symbol}
+                        {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
+                      </span>
+                    )}
+                  </div>
+                )
+              },
+              headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+              className: 'bg-zinc-100 dark:bg-zinc-900 sticky z-20',
+              order: 3,
+            },
+          ],
+          _.concat(evm_chains_data || [], cosmos_chains_data || []).map((c, i) => {
             const {
               id,
               image,
@@ -166,142 +300,9 @@ export default () => {
                 )
               },
               headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
-              order: 2 + i + (cosmos_chains_data.findIndex(_c => _c?.id === id) > -1 ? 1 : 0),
+              order: 4 + i + (cosmos_chains_data.findIndex(_c => _c?.id === id) > -1 ? 1 : 0),
             }
-          }), [
-            {
-              Header: 'Total on EVM',
-              accessor: 'value_on_evm',
-              sortType: (a, b) => a.original.value_on_evm > b.original.value_on_evm ? 1 : -1,
-              Cell: props => {
-                const {
-                  asset_data,
-                  total_on_evm,
-                } = { ...props.row.original }
-                const {
-                  symbol,
-                } = { ...asset_data }
-                return (
-                  <div className="flex flex-col items-start sm:items-end space-y-0">
-                    {typeof total_on_evm === 'number' ?
-                      <span
-                        title={number_format(total_on_evm, '0,0.00000000')}
-                        className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
-                      >
-                        {number_format(total_on_evm, total_on_evm > 100000 ? '0,0.00a' : total_on_evm > 10000 ? '0,0.00' : '0,0.000000')}
-                        <span className="normal-case ml-1">
-                          {symbol}
-                        </span>
-                      </span> :
-                      <span>
-                        -
-                      </span>
-                    }
-                    {typeof total_on_evm === 'number' && props.value > -1  && (
-                      <span
-                        title={number_format(props.value, `${currency_symbol}0,0.000`)}
-                        className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
-                      >
-                        {currency_symbol}
-                        {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
-                      </span>
-                    )}
-                  </div>
-                )
-              },
-              headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-              className: 'bg-zinc-100 dark:bg-zinc-900',
-              order: 1,
-            },
-            {
-              Header: 'Total on Cosmos',
-              accessor: 'value_on_cosmos',
-              sortType: (a, b) => a.original.value_on_cosmos > b.original.value_on_cosmos ? 1 : -1,
-              Cell: props => {
-                const {
-                  asset_data,
-                  total_on_cosmos,
-                } = { ...props.row.original }
-                const {
-                  symbol,
-                } = { ...asset_data }
-                return (
-                  <div className="flex flex-col items-start sm:items-end space-y-0">
-                    {typeof total_on_cosmos === 'number' ?
-                      <span
-                        title={number_format(total_on_cosmos, '0,0.00000000')}
-                        className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
-                      >
-                        {number_format(total_on_cosmos, total_on_cosmos > 100000 ? '0,0.00a' : total_on_cosmos > 10000 ? '0,0.00' : '0,0.000000')}
-                        <span className="normal-case ml-1">
-                          {symbol}
-                        </span>
-                      </span> :
-                      <span>
-                        -
-                      </span>
-                    }
-                    {typeof total_on_cosmos === 'number' && props.value > -1 && (
-                      <span
-                        title={number_format(props.value, `${currency_symbol}0,0.000`)}
-                        className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
-                      >
-                        {currency_symbol}
-                        {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
-                      </span>
-                    )}
-                  </div>
-                )
-              },
-              headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-              className: 'bg-zinc-100 dark:bg-zinc-900',
-              order: 2 + evm_chains_data?.length,
-            },
-            {
-              Header: 'Total Supply',
-              accessor: 'value',
-              sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
-              Cell: props => {
-                const {
-                  asset_data,
-                  total,
-                } = { ...props.row.original }
-                const {
-                  symbol,
-                } = { ...asset_data }
-                return (
-                  <div className="flex flex-col items-start sm:items-end space-y-0.5">
-                    {typeof total === 'number' ?
-                      <span
-                        title={number_format(total, '0,0.00000000')}
-                        className="uppercase text-slate-500 dark:text-slate-400 text-xs font-semibold"
-                      >
-                        {number_format(total, total > 100000 ? '0,0.00a' : total > 10000 ? '0,0.00' : '0,0.000000')}
-                        <span className="normal-case ml-1">
-                          {symbol}
-                        </span>
-                      </span> :
-                      <span>
-                        -
-                      </span>
-                    }
-                    {typeof total === 'number' && props.value > -1 && (
-                      <span
-                        title={number_format(props.value, `${currency_symbol}0,0.000`)}
-                        className="uppercase text-sm font-bold"
-                      >
-                        {currency_symbol}
-                        {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
-                      </span>
-                    )}
-                  </div>
-                )
-              },
-              headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-              className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky right-0',
-              order: 3 + evm_chains_data?.length + cosmos_chains_data?.length,
-            },
-          ]), ['order'], ['asc'])}
+          })), ['order'], ['asc'])}
           data={data}
           noPagination={data.length <= 50}
           noRecordPerPage={true}

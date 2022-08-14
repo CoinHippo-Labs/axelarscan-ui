@@ -44,7 +44,7 @@ export default () => {
           if (response) {
             let data = response.data?.[0]
             const { source, link, confirm_deposit, vote, sign_batch } = { ...data }
-            const { sender_chain, recipient_chain, recipient_address, amount, value } = { ...source }
+            const { sender_chain, recipient_chain, recipient_address, amount, fee, value } = { ...source }
             if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
               let _response
               if (recipient_address) {
@@ -77,7 +77,7 @@ export default () => {
                 data = _response.data?.[0] || data
               }
             }
-            if (!(recipient_chain && typeof amount === 'number' && typeof value === 'number')) {
+            if (!(recipient_chain && typeof amount === 'number' && typeof value === 'number' && typeof fee === 'number')) {
               await getTransfersStatus({
                 txHash: tx,
                 sourceChain: sender_chain,

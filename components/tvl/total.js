@@ -57,7 +57,7 @@ export default () => {
             {number_format(value_on_evm, value_on_evm > 1000000 ? '0,0.00a' : value_on_evm > 10000 ? '0,0.00' : '0,0.000000')}
           </div>
           <div className="text-slate-400 dark:text-slate-500 text-2xs">
-            on EVM
+            to EVM
           </div>
         </div>
         <div className="bg-zinc-100 dark:bg-zinc-900 rounded-xl shadow dark:shadow-zinc-600 text-center p-2 sm:pt-3.5 sm:pb-2.5 sm:px-4">
@@ -69,7 +69,7 @@ export default () => {
             {number_format(value_on_cosmos, value_on_cosmos > 1000000 ? '0,0.00a' : value_on_cosmos > 10000 ? '0,0.00' : '0,0.000000')}
           </div>
           <div className="text-slate-400 dark:text-slate-500 text-2xs">
-            on Cosmos
+            to Cosmos
           </div>
         </div>
         <div className="bg-green-100 dark:bg-green-800 rounded-xl shadow dark:shadow-green-400 border-2 border-green-600 dark:border-green-400 text-center p-1.5 sm:pt-3 sm:pb-2 sm:px-3">
