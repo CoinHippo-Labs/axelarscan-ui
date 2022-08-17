@@ -77,7 +77,15 @@ export default () => {
                 data = _response.data?.[0] || data
               }
             }
-            if (!(recipient_chain && typeof amount === 'number' && typeof value === 'number' && typeof fee === 'number')) {
+            if (!(
+              recipient_chain &&
+              typeof amount === 'number' &&
+              typeof value === 'number' &&
+              typeof fee === 'number'
+            ) || (
+              !sign_batch?.executed &&
+              evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
+            )) {
               await getTransfersStatus({
                 txHash: tx,
                 sourceChain: sender_chain,
