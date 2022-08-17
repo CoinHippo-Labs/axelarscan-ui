@@ -329,7 +329,7 @@ export default ({ n }) => {
                     <span>
                       {k === 'undefined' ?
                         'Failed' :
-                        k?.endsWith('Request') ? k.replace('Request', '') : k
+                        /*k?.endsWith('Request') ? k.replace('Request', '') : */k
                       }
                     </span>
                     <span className="text-blue-600 dark:text-blue-400">
