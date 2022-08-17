@@ -296,14 +296,20 @@ export default () => {
               accessor: 'poll_id',
               disableSortBy: true,
               Cell: props => (
-                <Copy
-                  value={props.value}
-                  title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
-                    {ellipse(props.value, 8)}
-                  </span>}
-                  size={18}
-                />
+                props.value ?
+                  <Copy
+                    value={props.value}
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                      {ellipse(props.value, 8)}
+                    </span>}
+                    size={18}
+                  />
+                  :
+                  <span>
+                    -
+                  </span>
               ),
+              headerClassName: 'whitespace-nowrap',
             },
             {
               Header: 'EVM Transaction ID',
@@ -312,22 +318,28 @@ export default () => {
               Cell: props => {
                 const chain_data = evm_chains_data?.find(c => equals_ignore_case(c?.id, props.row.original.sender_chain))
                 return (
-                  <div className="flex items-center space-x-1">
-                    <a
-                      href={`${chain_data?.explorer?.url}${chain_data?.explorer?.transaction_path?.replace('{tx}', props.value)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-white font-semibold"
-                    >
-                      {ellipse(props.value, 8)}
-                    </a>
-                    <Copy
-                      value={props.value}
-                      size={18}
-                    />
-                  </div>
+                  props.value ?
+                    <div className="flex items-center space-x-1">
+                      <a
+                        href={`${chain_data?.explorer?.url}${chain_data?.explorer?.transaction_path?.replace('{tx}', props.value)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 dark:text-white font-semibold"
+                      >
+                        {ellipse(props.value, 8)}
+                      </a>
+                      <Copy
+                        value={props.value}
+                        size={18}
+                      />
+                    </div>
+                    :
+                    <span>
+                      -
+                    </span>
                 )
               },
+              headerClassName: 'whitespace-nowrap',
             },
             {
               Header: 'Voter',

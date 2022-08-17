@@ -317,7 +317,7 @@ export default () => {
             </span>
           </div>
           <Copy
-            value={tx}
+            value={id}
             size={18}
           />
         </div>
