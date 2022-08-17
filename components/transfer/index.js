@@ -6,7 +6,7 @@ import moment from 'moment'
 import { TailSpin, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
-import { MdChevronLeft, MdChevronRight } from 'react-icons/md'
+import { MdChevronRight } from 'react-icons/md'
 import { TiArrowRight } from 'react-icons/ti'
 
 import EnsProfile from '../ens-profile'
@@ -240,7 +240,7 @@ export default () => {
                   )}
                 </div>
                 <div className="lg:min-h-full sm:hidden lg:flex items-center">
-                  <MdChevronLeft size={36} className="transform rotate-90 sm:rotate-0" />
+                  <MdChevronRight size={36} className="transform rotate-90 sm:rotate-0" />
                 </div>
                 <div className="flex flex-col space-y-1">
                   <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">

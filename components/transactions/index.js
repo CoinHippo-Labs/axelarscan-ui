@@ -177,10 +177,17 @@ export default ({ n }) => {
           if (response) {
             let total = response.total
             response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              const { txhash, timestamp, activities } = { ...d }
+              const {
+                txhash,
+                type,
+                types,
+                timestamp,
+                activities,
+              } = { ...d }
               return {
                 ...d,
                 txhash: Array.isArray(txhash) ? _.last(txhash) : txhash,
+                type: _.head(types) || type,
                 timestamp: Array.isArray(timestamp) ? _.last(timestamp) : timestamp,
                 transfer: activities?.findIndex(a => equals_ignore_case(a?.sender, address)) > -1 ? 'out' :
                   activities?.findIndex(a => equals_ignore_case(a?.receiver, address) ||
