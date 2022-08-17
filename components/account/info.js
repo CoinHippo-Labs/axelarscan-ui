@@ -68,7 +68,7 @@ export default ({ data }) => {
                   <span className="text-sm font-bold">
                     {source_chain_data.name || sender_chain}
                   </span>
-                  {sender_address && (
+                  {sender_address && sender_address.startsWith(source_chain_data.prefix_address || '0x') && (
                     <div className="flex items-center space-x-1">
                       <a
                         href={`${source_chain_data.explorer?.url}${source_chain_data.explorer?.address_path?.replace('{address}', sender_address)}`}
