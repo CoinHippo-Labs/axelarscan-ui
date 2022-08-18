@@ -31,7 +31,7 @@ export default ({
       {BLOCK_EVENTS_FIELDS.map((f,i) => (
         <div
           key={i}
-          className="space-y-2"
+          className="space-y-3"
         >
           <div className="capitalize text-base font-bold">
             {f.split('_').join(' ')}
@@ -45,8 +45,8 @@ export default ({
                     accessor: 'type',
                     disableSortBy: true,
                     Cell: props => (
-                      <div className="flex items-center">
-                        <span className="text-base font-bold mr-1.5">
+                      <div className="flex items-center mt-0.5">
+                        <span className="font-bold mr-1.5">
                           {props.value}
                         </span>
                         {props.row.original.data?.length > 1 && (
@@ -86,7 +86,7 @@ export default ({
                                   key={j}
                                   className="rounded-lg"
                                 >
-                                  <pre className="bg-slate-50 dark:bg-slate-900 dark:bg-opacity-90 text-2xs font-medium py-1 px-2">
+                                  <pre className="bg-slate-50 dark:bg-slate-900 dark:bg-opacity-90 break-all text-2xs font-medium py-1 px-2">
                                     {JSON.stringify(d, null, 2)}
                                   </pre>
                                 </div>

@@ -67,10 +67,7 @@ export default () => {
       const {
         latest_block_height,
         latest_block_time,
-        earliest_block_height_for_cal,
-        earliest_block_time_for_cal,
-        earliest_block_height,
-        earliest_block_time,
+        avg_block_time,
       } = { ...status_data }
       setCosmosMetrics({
         latest_block: {
@@ -83,8 +80,7 @@ export default () => {
         },
         block_height: Number(latest_block_height),
         block_time: moment(latest_block_time).valueOf(),
-        avg_block_time: moment(latest_block_time).diff(moment(earliest_block_time_for_cal || earliest_block_time), 'seconds') /
-          (Number(latest_block_height) - Number(earliest_block_height_for_cal || earliest_block_height)),
+        avg_block_time,
         active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)).length,
         total_validators: validators_data?.length,
         denom: denom_manager.symbol(bond_denom, assets_data),

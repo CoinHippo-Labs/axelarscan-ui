@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 
 import Info from './info'
 import Events from './events'
@@ -69,7 +70,7 @@ export default () => {
                 )
               ).map(([k, v]) => {
                 return {
-                  type: k,
+                  type: _.last(k?.split('.')),
                   data: v?.map(e => {
                     const {
                       attributes,
@@ -91,7 +92,7 @@ export default () => {
                   })
                 }
               })
-              .filter(e => e?.type && e.data)
+              .filter(e => e.type && e.data)
             }
           }
 
@@ -115,14 +116,16 @@ export default () => {
   }, [height, status_data])
 
   return (
-    <div className="space-y-4 mt-2 mb-6 mx-auto">
-      <Info
-        data={
-          data?.height === height &&
-          { ...data?.block?.header }
-        }
-      />
-      <Transactions />
+    <div className="space-y-8 mt-2 mb-6 mx-auto">
+      <div className="space-y-3">
+        <Info
+          data={
+            data?.height === height &&
+            { ...data?.block?.header }
+          }
+        />
+        <Transactions />
+      </div>
       <Events
         data={
           data?.height === height &&
