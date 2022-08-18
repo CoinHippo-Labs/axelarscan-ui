@@ -72,9 +72,9 @@ export default ({
                       } = { ...props.row.original }
 
                       return (
-                        <div className="flex flex-wrap">
-                          {props.value?.length > 0 ?
-                            <>
+                        props.value?.length > 0 ?
+                          <>
+                            <div className="flex flex-col space-y-2">
                               {_.slice(
                                 props.value,
                                 0,
@@ -84,65 +84,64 @@ export default ({
                               ).map((d, j) => (
                                 <div
                                   key={j}
-                                  className="rounded-lg mr-2 mb-3"
+                                  className="rounded-lg"
                                 >
                                   <pre className="bg-slate-50 dark:bg-slate-900 dark:bg-opacity-90 text-2xs font-medium py-1 px-2">
                                     {JSON.stringify(d, null, 2)}
                                   </pre>
                                 </div>
                               ))}
-                              {(
-                                props.value.length > COLLAPSE_SIZE ||
-                                seeMoreTypes.includes(type)
-                              ) && (
-                                <button
-                                  onClick={() => setSeeMoreTypes(
-                                    seeMoreTypes.includes(type) ?
-                                      seeMoreTypes.filter(t => t !== type) :
-                                      _.uniq(
-                                        _.concat(
-                                          seeMoreTypes,
-                                          type,
-                                        )
+                            </div>
+                            {(
+                              props.value.length > COLLAPSE_SIZE ||
+                              seeMoreTypes.includes(type)
+                            ) && (
+                              <button
+                                onClick={() => setSeeMoreTypes(
+                                  seeMoreTypes.includes(type) ?
+                                    seeMoreTypes.filter(t => t !== type) :
+                                    _.uniq(
+                                      _.concat(
+                                        seeMoreTypes,
+                                        type,
                                       )
                                     )
+                                  )
+                                }
+                                className="max-w-min flex items-center capitalize text-blue-500 dark:text-white text-xs font-semibold space-x-0.5 mt-1"
+                              >
+                                <span>
+                                  See {seeMoreTypes.includes(type) ?
+                                    'Less' :
+                                    'More'
                                   }
-                                  className="max-w-min flex items-center capitalize text-blue-500 dark:text-white text-xs font-semibold space-x-0.5"
-                                >
+                                </span>
+                                {!seeMoreTypes.includes(type) && (
                                   <span>
-                                    See {seeMoreTypes.includes(type) ?
-                                      'Less' :
-                                      'More'
-                                    }
+                                    (
+                                      {number_format(
+                                        props.value.length - COLLAPSE_SIZE,
+                                        '0,0',
+                                      )}
+                                    )
                                   </span>
-                                  {!seeMoreTypes.includes(type) && (
-                                    <span>
-                                      (
-                                        {number_format(
-                                          props.value.length - COLLAPSE_SIZE,
-                                          '0,0',
-                                        )}
-                                      )
-                                    </span>
-                                  )}
-                                  {seeMoreTypes.includes(type) ?
-                                    <IoCaretUpCircle
-                                      size={16}
-                                      className="mt-0.5"
-                                    /> :
-                                    <IoCaretDownCircle
-                                      size={16}
-                                      className="mt-0.5"
-                                    />
-                                  }
-                                </button>
-                              )}
-                            </> :
-                            <div className="text-slate-400 dark:text-slate-200 text-base">
-                              -
-                            </div>
-                          }
-                        </div>
+                                )}
+                                {seeMoreTypes.includes(type) ?
+                                  <IoCaretUpCircle
+                                    size={16}
+                                    className="mt-0.5"
+                                  /> :
+                                  <IoCaretDownCircle
+                                    size={16}
+                                    className="mt-0.5"
+                                  />
+                                }
+                              </button>
+                            )}
+                          </> :
+                          <div className="text-slate-400 dark:text-slate-200 text-base">
+                            -
+                          </div>
                       )
                     },
                   },
