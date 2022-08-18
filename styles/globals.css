@@ -30,11 +30,10 @@ h6 {
 }
 
 code {
-  @apply font-mono p-1 inline rounded font-semibold;
+  @apply inline rounded font-mono font-semibold p-1;
 }
 pre {
-  @apply font-mono p-2 block rounded font-semibold;
-  @apply whitespace-pre-wrap;
+  @apply block rounded whitespace-pre-wrap font-mono font-semibold p-2;
 }
 
 ul {
@@ -145,7 +144,7 @@ body {
 }
 
 .recharts-label {
-  @apply font-mono text-2xs sm:text-xs md:text-sm lg:text-sm xl:text-sm font-semibold;
+  @apply text-2xs sm:text-xs md:text-sm lg:text-sm xl:text-sm font-semibold;
 }
 
 .font-default .recharts-label {

@@ -42,7 +42,7 @@ export default () => {
               accessor: 'proposal_id',
               sortType: (a, b) => a.original.proposal_id > b.original.proposal_id ? 1 : -1,
               Cell: props => (
-                <span className="font-mono font-semibold">
+                <span className="font-semibold">
                   {number_format(props.value, '0,0')}
                 </span>
               ),

@@ -323,7 +323,7 @@ export default () => {
                 {_.head(t.split('_'))}
               </span>
               {typeof total === 'number' && (
-                <span className="font-mono font-bold">
+                <span className="font-bold">
                   ({number_format(total, '0,0')})
                 </span>
               )}

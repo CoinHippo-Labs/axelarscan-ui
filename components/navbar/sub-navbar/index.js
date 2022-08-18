@@ -376,7 +376,7 @@ export default () => {
                 </span>
               </div>
               {typeof token_data.market_data?.current_price?.[currency] === 'number' ?
-                <span className="font-mono text-base font-semibold">
+                <span className="text-base font-semibold">
                   {currency_symbol}
                   {number_format(token_data.market_data.current_price[currency], '0,0.000')}
                 </span>

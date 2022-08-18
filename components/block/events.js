@@ -1,0 +1,168 @@
+import { useState } from 'react'
+import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
+import { TailSpin } from 'react-loader-spinner'
+import { IoCaretUpCircle, IoCaretDownCircle } from 'react-icons/io5'
+
+import Datatable from '../datatable'
+import { number_format, loader_color } from '../../lib/utils'
+
+const COLLAPSE_SIZE = 3
+const BLOCK_EVENTS_FIELDS = [
+  'begin_block_events',
+  'end_block_events',
+]
+
+export default ({
+  data,
+}) => {
+  const { preferences } = useSelector(state => ({ preferences: state.preferences }), shallowEqual)
+  const { theme } = { ...preferences }
+
+  const [seeMoreTypes, setSeeMoreTypes] = useState([])
+
+  const {
+    begin_block_events,
+    end_block_events,
+  } = { ...data }
+
+  return (
+    <div className="grid sm:grid-cols-2 gap-5">
+      {BLOCK_EVENTS_FIELDS.map((f,i) => (
+        <div
+          key={i}
+          className="space-y-2"
+        >
+          <div className="capitalize text-base font-bold">
+            {f.split('_').join(' ')}
+          </div>
+          {data ?
+            data[f]?.length > 0 ?
+              <Datatable
+                columns={[
+                  {
+                    Header: 'Type',
+                    accessor: 'type',
+                    disableSortBy: true,
+                    Cell: props => (
+                      <div className="flex items-center">
+                        <span className="text-base font-bold mr-1.5">
+                          {props.value}
+                        </span>
+                        {props.row.original.data?.length > 1 && (
+                          <span>
+                            [
+                              {number_format(
+                                props.row.original.data.length,
+                                '0,0',
+                              )}
+                            ]
+                          </span>
+                        )}
+                      </div>
+                    ),
+                  },
+                  {
+                    Header: 'Data',
+                    accessor: 'data',
+                    disableSortBy: true,
+                    Cell: props => {
+                      const {
+                        type,
+                      } = { ...props.row.original }
+
+                      return (
+                        <div className="flex flex-wrap">
+                          {props.value?.length > 0 ?
+                            <>
+                              {_.slice(
+                                props.value,
+                                0,
+                                seeMoreTypes.includes(type) ?
+                                  props.value.length :
+                                  COLLAPSE_SIZE,
+                              ).map((d, j) => (
+                                <div
+                                  key={j}
+                                  className="rounded-lg mr-2 mb-3"
+                                >
+                                  <pre className="bg-slate-50 dark:bg-slate-900 dark:bg-opacity-90 text-2xs font-medium py-1 px-2">
+                                    {JSON.stringify(d, null, 2)}
+                                  </pre>
+                                </div>
+                              ))}
+                              {(
+                                props.value.length > COLLAPSE_SIZE ||
+                                seeMoreTypes.includes(type)
+                              ) && (
+                                <button
+                                  onClick={() => setSeeMoreTypes(
+                                    seeMoreTypes.includes(type) ?
+                                      seeMoreTypes.filter(t => t !== type) :
+                                      _.uniq(
+                                        _.concat(
+                                          seeMoreTypes,
+                                          type,
+                                        )
+                                      )
+                                    )
+                                  }
+                                  className="max-w-min flex items-center capitalize text-blue-500 dark:text-white text-xs font-semibold space-x-0.5"
+                                >
+                                  <span>
+                                    See {seeMoreTypes.includes(type) ?
+                                      'Less' :
+                                      'More'
+                                    }
+                                  </span>
+                                  {!seeMoreTypes.includes(type) && (
+                                    <span>
+                                      (
+                                        {number_format(
+                                          props.value.length - COLLAPSE_SIZE,
+                                          '0,0',
+                                        )}
+                                      )
+                                    </span>
+                                  )}
+                                  {seeMoreTypes.includes(type) ?
+                                    <IoCaretUpCircle
+                                      size={16}
+                                      className="mt-0.5"
+                                    /> :
+                                    <IoCaretDownCircle
+                                      size={16}
+                                      className="mt-0.5"
+                                    />
+                                  }
+                                </button>
+                              )}
+                            </> :
+                            <div className="text-slate-400 dark:text-slate-200 text-base">
+                              -
+                            </div>
+                          }
+                        </div>
+                      )
+                    },
+                  },
+                ]}
+                data={data[f]}
+                noPagination={data[f].length <= 10}
+                defaultPageSize={10}
+                className="no-border"
+              /> :
+              <div className="text-slate-400 dark:text-slate-200 text-base">
+                No events
+              </div> :
+            <TailSpin
+              color={loader_color(theme)}
+              width="32"
+              height="32"
+            />
+          }
+        </div>
+      ))}
+    </div>
+  )
+}

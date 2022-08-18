@@ -73,7 +73,7 @@ export default () => {
                   {s}
                 </span>
                 {typeof total === 'number' && (
-                  <span className={`whitespace-nowrap font-mono ${selected ? 'text-white' : 'text-black dark:text-white'} font-bold`}>
+                  <span className={`whitespace-nowrap ${selected ? 'text-white' : 'text-black dark:text-white'} font-bold`}>
                     ({number_format(total, '0,0')})
                   </span>
                 )}
@@ -90,7 +90,7 @@ export default () => {
               accessor: 'i',
               sortType: (a, b) => a.original.i > b.original.i ? 1 : -1,
               Cell: props => (
-                <span className="font-mono font-semibold">
+                <span className="font-semibold">
                   {number_format((props.flatRows?.indexOf(props.row) > -1 ?
                     props.flatRows.indexOf(props.row) : props.value
                   ) + 1, '0,0')}

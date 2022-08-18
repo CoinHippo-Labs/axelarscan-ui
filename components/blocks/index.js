@@ -163,7 +163,7 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => (
                 <div className="text-right">
-                  <span className="font-mono font-semibold">
+                  <span className="font-semibold">
                     {props.value > -1 ?
                       number_format(props.value, '0,0') : '-'
                     }

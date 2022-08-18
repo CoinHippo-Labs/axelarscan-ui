@@ -16,7 +16,7 @@ import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { tvl as getTVL } from '../../lib/api/transfer'
 import { coin } from '../../lib/api/coingecko'
-import { status as getStatus } from '../../lib/api/rpc'
+import { getStatus } from '../../lib/api/rpc'
 import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, mint_inflation, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
 import { ens as getEns } from '../../lib/api/ens'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
@@ -114,24 +114,36 @@ export default () => {
   // status
   useEffect(() => {
     const getData = async is_interval => {
-      if (!status_data || is_interval) {
-        const response = await getStatus(null, is_interval && status_data)
+      if (
+        !status_data ||
+        is_interval
+      ) {
+        const response = await getStatus(
+          undefined,
+          is_interval && status_data,
+        )
+
         if (response) {
           dispatch({
             type: STATUS_DATA,
             value: response,
           })
+
           if (!is_interval) {
             setValidatorsTrigger(moment().valueOf())
           }
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(true), 6 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(true),
+        6 * 1000,
+      )
+    )
   }, [status_data])
 
   // chain

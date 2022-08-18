@@ -3,8 +3,9 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 
 import Info from './info'
+import Events from './events'
 import Transactions from '../transactions'
-import { block as getBlock } from '../../lib/api/cosmos'
+import { getBlock } from '../../lib/api/cosmos'
 import { base64ToBech32 } from '../../lib/object/key'
 
 export default () => {
@@ -15,42 +16,119 @@ export default () => {
   const { query } = { ...router }
   const { height } = { ...query }
 
-  const [block, setBlock] = useState(null)
+  const [data, setData] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (height && status_data) {
-        if (!controller.signal.aborted) {
-          const response = await getBlock(height)
-          if (response?.data) {
-            const { latest_block_height } = { ...status_data }
-            if (latest_block_height >= Number(height) + 1) {
-              const _response = await getBlock(Number(height) + 1, undefined, true)
-              if (_response?.data) {
-                response.data.validator_addresses = _response.data.block?.last_commit?.signatures?.filter(s => s?.validator_address).map(s => base64ToBech32(s.validator_address, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS))
-              }
+      if (
+        height &&
+        status_data
+      ) {
+        const response = await getBlock(height)
+
+        if (response) {
+          const {
+            latest_block_height,
+          } = { ...status_data }
+          let {
+            validator_addresses,
+          } = { ...response }
+
+          const _latest_block_height = Number(height) + 1
+
+          if (latest_block_height >= _latest_block_height) {
+            const _response = await getBlock(_latest_block_height)
+
+            const {
+              signatures,
+            } = { ..._response?.block?.last_commit }
+
+            if (signatures) {
+              validator_addresses = signatures
+                .filter(s => s?.validator_address)
+                .map(s =>
+                  base64ToBech32(
+                    s.validator_address,
+                    process.env.NEXT_PUBLIC_PREFIX_CONSENSUS
+                  )
+                )
             }
-            setBlock({
-              data: { ...response.data },
-              height,
-            })
           }
+
+          const block_events_fields = [
+            'begin_block_events',
+            'end_block_events',
+          ]
+
+          for (const field of block_events_fields) {
+            if (Array.isArray(response?.[field])) {
+              response[field] = Object.entries(
+                _.groupBy(
+                  response[field],
+                  'type',
+                )
+              ).map(([k, v]) => {
+                return {
+                  type: k,
+                  data: v?.map(e => {
+                    const {
+                      attributes,
+                    } = { ...e }
+
+                    return Object.fromEntries(
+                      attributes?.map(a => {
+                        const {
+                          key,
+                          value,
+                        } = { ...a }
+
+                        return [
+                          key,
+                          value,
+                        ]
+                      }) || []
+                    )
+                  })
+                }
+              })
+              .filter(e => e?.type && e.data)
+            }
+          }
+
+          setData({
+            ...response,
+            validator_addresses,
+            height,
+          })
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(),
+        5 * 60 * 1000,
+      )
+    )
   }, [height, status_data])
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
-      <Info data={block?.height === height && block?.data} />
+      <Info
+        data={
+          data?.height === height &&
+          { ...data?.block?.header }
+        }
+      />
       <Transactions />
+      <Events
+        data={
+          data?.height === height &&
+          data
+        }
+      />
     </div>
   )
 }

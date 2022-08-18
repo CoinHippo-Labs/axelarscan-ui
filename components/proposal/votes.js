@@ -24,7 +24,7 @@ export default ({ data }) => {
             accessor: 'i',
             sortType: (a, b) => a.original.i > b.original.i ? 1 : -1,
             Cell: props => (
-              <span className="font-mono font-semibold">
+              <span className="font-semibold">
                 {number_format((props.flatRows?.indexOf(props.row) > -1 ?
                   props.flatRows.indexOf(props.row) : props.value
                 ) + 1, '0,0')}
