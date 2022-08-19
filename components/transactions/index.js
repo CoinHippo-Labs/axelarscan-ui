@@ -329,7 +329,7 @@ export default ({ n }) => {
                     <span>
                       {k === 'undefined' ?
                         'Failed' :
-                        /*k?.endsWith('Request') ? k.replace('Request', '') : */k
+                        k?.endsWith('Request') ? k.replace('Request', '') : k
                       }
                     </span>
                     <span className="text-blue-600 dark:text-blue-400">
@@ -425,7 +425,7 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => (
                 <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-xs lg:text-sm font-semibold lg:-mt-0.5 py-0.5 px-1.5">
-                  {name(props.value) || '-'}
+                  {name(props.value?.replace('Request', '')) || '-'}
                 </div>
               ),
             },
