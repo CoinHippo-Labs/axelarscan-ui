@@ -82,6 +82,7 @@ export default () => {
             method: 'searchGMP',
             txHash: callback.transactionHash,
             txIndex: callback.transactionIndex,
+            txLogIndex: callback.logIndex,
           })
           callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
         }
@@ -174,11 +175,19 @@ export default () => {
     setTxHashEditUpdating(false)
   }
 
-  const saveGMP = async (sourceTransactionHash, sourceTransactionIndex, transactionHash, relayerAddress, error) => {
+  const saveGMP = async (
+    sourceTransactionHash,
+    sourceTransactionIndex,
+    sourceTransactionLogIndex,
+    transactionHash,
+    relayerAddress,
+    error,
+  ) => {
     const params = {
       method: 'saveGMP',
       sourceTransactionHash,
       sourceTransactionIndex,
+      sourceTransactionLogIndex,
       transactionHash,
       relayerAddress,
       error,
@@ -200,7 +209,7 @@ export default () => {
           message: 'Approving',
         })
         const { call } = { ...data }
-        const { transactionHash } = { ...call }
+        const { transactionHash, transactionIndex, logIndex } = { ...call }
         const response = await api.manualRelayToDestChain(transactionHash)
         console.log('[approve response]', response)
         const { success, error, signCommandTx } = { ...response }
@@ -233,7 +242,7 @@ export default () => {
           message: 'Executing',
         })
         const { call } = { ...data }
-        const { transactionHash, transactionIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex } = { ...call }
         const response = await api.execute(transactionHash)
         console.log('[execute response]', response)
         const { success, error, transaction } = { ...response }
@@ -262,7 +271,7 @@ export default () => {
           message: 'Estimating & Paying gas',
         })
         const { call } = { ...data }
-        const { chain, transactionHash, transactionIndex } = { ...call }
+        const { chain, transactionHash, transactionIndex, logIndex } = { ...call }
         const response = await api.addNativeGas(chain, transactionHash, {
           refundAddress: address,
         })
@@ -306,7 +315,7 @@ export default () => {
     if (api && signer && data) {
       try {
         const { call, approved } = { ...data }
-        const { transactionHash, logIndex, event } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, event } = { ...call }
         const { destinationChain, destinationContractAddress, payload } = { ...call?.returnValues }
         const { commandId, sourceChain, sourceAddress, symbol, amount } = { ...approved?.returnValues }
         setGasAdding(true)
@@ -1188,7 +1197,13 @@ export default () => {
                                 disabled={!txHashEdit || txHashEditUpdating}
                                 onClick={async () => {
                                   setTxHashEditUpdating(true)
-                                  await saveGMP(call?.transactionHash, call?.transactionIndex, txHashEdit, address)
+                                  await saveGMP(
+                                    call?.transactionHash,
+                                    call?.transactionIndex,
+                                    call?.logIndex,
+                                    txHashEdit,
+                                    address,
+                                  )
                                 }}
                                 className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
                               >

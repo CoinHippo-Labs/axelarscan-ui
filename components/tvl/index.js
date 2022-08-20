@@ -6,7 +6,7 @@ import { TailSpin, ThreeDots } from 'react-loader-spinner'
 import Datatable from '../datatable'
 import Image from '../image'
 import { chainName, getChain } from '../../lib/object/chain'
-import { getDenom } from '../../lib/object/denom'
+import { getAsset } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
@@ -37,7 +37,7 @@ export default () => {
           price = typeof price === 'number' ? price : -1
           return {
             ...v,
-            asset_data: getDenom(k, assets_data),
+            asset_data: getAsset(k, assets_data),
             value_on_evm: price * (total_on_evm || 0),
             value_on_cosmos: price * (total_on_cosmos || 0),
             value: price * (total || 0),

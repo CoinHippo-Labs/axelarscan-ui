@@ -8,7 +8,7 @@ import { MdChevronLeft, MdChevronRight } from 'react-icons/md'
 
 import Image from '../../image'
 import { getChain } from '../../../lib/object/chain'
-import { getDenom } from '../../../lib/object/denom'
+import { getAsset } from '../../../lib/object/asset'
 import { currency_symbol } from '../../../lib/object/currency'
 import { number_format, loader_color } from '../../../lib/utils'
 
@@ -38,7 +38,7 @@ export default ({
         const { source_chain, destination_chain, asset } = { ...d }
         const source_chain_data = getChain(source_chain, chains_data)
         const destination_chain_data = getChain(destination_chain, chains_data)
-        const asset_data = getDenom(asset, assets_data)
+        const asset_data = getAsset(asset, assets_data)
         return {
           ...d,
           source_chain_data,

@@ -5,7 +5,7 @@ import Linkify from 'react-linkify'
 
 import Copy from '../copy'
 import ValidatorProfile from '../validator-profile'
-import { denom_manager } from '../../lib/object/denom'
+import { assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse } from '../../lib/utils'
 
 export default ({
@@ -208,14 +208,14 @@ export default ({
                 {!isNaN(voting_power) ?
                   number_format(voting_power, '0,0') :
                   !isNaN(tokens) ?
-                    number_format(Math.floor(denom_manager.amount(tokens, assets_data[0]?.id, assets_data)), '0,0') : '-'
+                    number_format(Math.floor(assetManager.amount(tokens, assets_data[0]?.id, assets_data)), '0,0') : '-'
                 }
               </span>
               {!isNaN(bonded_tokens) && (
                 <span className="whitespace-nowrap">
                   ({number_format(
                     (!isNaN(voting_power) ?
-                      Number(voting_power) : Math.floor(denom_manager.amount(tokens, assets_data[0]?.id, assets_data))
+                      Number(voting_power) : Math.floor(assetManager.amount(tokens, assets_data[0]?.id, assets_data))
                     )
                     * 100 / Math.floor(bonded_tokens),
                     '0,0.00'

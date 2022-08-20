@@ -22,8 +22,8 @@ import { ens as getEns } from '../../lib/api/ens'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
-import { denom_manager } from '../../lib/object/denom'
-import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
+import { assetManager } from '../../lib/object/asset'
+import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { equals_ignore_case } from '../../lib/utils'
 import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
 
@@ -168,7 +168,7 @@ export default () => {
               value: {
                 bank_supply: Object.fromEntries(
                   Object.entries({ ...response?.amount }).map(([k, v]) =>
-                    [k, k === 'denom' ? denom_manager.symbol(v, assets_data) : denom_manager.amount(v, response.amount.denom, assets_data)]
+                    [k, k === 'denom' ? assetManager.symbol(v, assets_data) : assetManager.amount(v, response.amount.denom, assets_data)]
                   )
                 ),
               },
@@ -182,7 +182,7 @@ export default () => {
             value: {
               staking_pool: Object.fromEntries(
                 Object.entries({ ...response?.pool }).map(([k, v]) =>
-                  [k, denom_manager.amount(v, assets_data[0]?.id, assets_data)]
+                  [k, assetManager.amount(v, assets_data[0]?.id, assets_data)]
                 )
               ),
             },

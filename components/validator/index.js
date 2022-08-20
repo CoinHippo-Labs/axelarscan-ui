@@ -16,10 +16,10 @@ import { all_bank_balances, validator_sets, all_delegations } from '../../lib/ap
 import { keygens_by_validator } from '../../lib/api/cli'
 import { heartbeats as searchHeartbeats } from '../../lib/api/heartbeat'
 import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
-import { chain_manager } from '../../lib/object/chain'
-import { getDenom, denom_manager } from '../../lib/object/denom'
+import { chainManager } from '../../lib/object/chain'
+import { getAsset, assetManager } from '../../lib/object/asset'
 import { base64ToBech32 } from '../../lib/object/key'
-import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
+import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
 
 const num_uptime_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
@@ -87,8 +87,8 @@ export default () => {
                   _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => {
                     const { denom, amount } = { ...b }
                     return {
-                      denom: denom_manager.symbol(denom, assets_data),
-                      amount: denom_manager.amount(amount, denom, assets_data),
+                      denom: assetManager.symbol(denom, assets_data),
+                      amount: assetManager.amount(amount, denom, assets_data),
                     }
                   }))
                 }
@@ -200,11 +200,11 @@ export default () => {
               return {
                 ...delegation,
                 self: equals_ignore_case(delegator_address, validator.data?.delegator_address),
-                shares: isNaN(shares) ? -1 : denom_manager.amount(shares, denom, assets_data),
+                shares: isNaN(shares) ? -1 : assetManager.amount(shares, denom, assets_data),
                 ...balance,
-                denom: denom_manager.symbol(denom, assets_data),
-                amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
-                asset_data: getDenom(denom, assets_data),
+                denom: assetManager.symbol(denom, assets_data),
+                amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
+                asset_data: getAsset(denom, assets_data),
               }
             }) || [], ['self', 'shares'], ['desc', 'desc']),
             address,
@@ -673,11 +673,11 @@ export default () => {
           <div className="flex flex-wrap items-center overflow-x-auto text-3xl font-bold mt-1.5">
             {supportedChains ?
               supported_chains?.length > 0 ?
-                supported_chains.filter(c => chain_manager.image(c, evm_chains_data)).map((c, i) => (
+                supported_chains.filter(c => chainManager.image(c, evm_chains_data)).map((c, i) => (
                   <Image
                     key={i}
-                    src={chain_manager.image(c, evm_chains_data)}
-                    title={chain_manager.name(c, evm_chains_data)}
+                    src={chainManager.image(c, evm_chains_data)}
+                    title={chainManager.name(c, evm_chains_data)}
                     className="w-6 h-6 rounded-full mb-1.5 mr-1.5"
                   />
                 )) :
@@ -704,10 +704,10 @@ export default () => {
                     className="min-w-max flex items-center justify-between text-2xs space-x-1 my-0.5 mr-2"
                   >
                     <div className="flex items-center space-x-1">
-                      {chain_manager.image(k, evm_chains_data) && (
+                      {chainManager.image(k, evm_chains_data) && (
                         <Image
-                          src={chain_manager.image(k, evm_chains_data)}
-                          title={chain_manager.name(k, evm_chains_data)}
+                          src={chainManager.image(k, evm_chains_data)}
+                          title={chainManager.name(k, evm_chains_data)}
                           className="w-4 h-4 rounded-full"
                         />
                       )}

@@ -3,8 +3,8 @@ import _ from 'lodash'
 import { ThreeDots } from 'react-loader-spinner'
 
 import Image from '../image'
-import { chain_manager } from '../../lib/object/chain'
-import { denom_manager } from '../../lib/object/denom'
+import { chainManager } from '../../lib/object/chain'
+import { assetManager } from '../../lib/object/asset'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({ data }) => {
@@ -42,15 +42,15 @@ export default ({ data }) => {
     })
   }
   evm_votes_thresholds = evm_votes_thresholds?.map(c => {
-    const maintaining_validators_data = active_validators_data?.filter(v => v?.supported_chains?.includes(chain_manager.maintainer_id(c?.params?.chain, evm_chains_data)))
+    const maintaining_validators_data = active_validators_data?.filter(v => v?.supported_chains?.includes(chainManager.maintainer_id(c?.params?.chain, evm_chains_data)))
     return {
       ...c,
       num_maintaining_validators: maintaining_validators_data?.length,
       maintain_staking: assets_data && maintaining_validators_data &&
-        denom_manager.amount(_.sumBy(maintaining_validators_data, 'tokens'), 'uaxl', assets_data),
+        assetManager.amount(_.sumBy(maintaining_validators_data, 'tokens'), 'uaxl', assets_data),
       total_staking: assets_data && active_validators_data &&
-        denom_manager.amount(_.sumBy(active_validators_data, 'tokens'), 'uaxl', assets_data),
-      denom: assets_data && denom_manager.symbol(assets_data[0]?.id, assets_data),
+        assetManager.amount(_.sumBy(active_validators_data, 'tokens'), 'uaxl', assets_data),
+      denom: assets_data && assetManager.symbol(assets_data[0]?.id, assets_data),
     }
   }).map(c => {
     const { maintain_staking, total_staking } = { ...c }
@@ -199,15 +199,15 @@ export default ({ data }) => {
                   className="min-w-max flex flex-col space-y-3 mt-3 mb-1 mr-6"
                 >
                   <div className="flex items-center space-x-2">
-                    {chain_manager.image(c?.params?.chain, evm_chains_data) && (
+                    {chainManager.image(c?.params?.chain, evm_chains_data) && (
                       <Image
-                        src={chain_manager.image(c.params.chain, evm_chains_data)}
+                        src={chainManager.image(c.params.chain, evm_chains_data)}
                         alt=""
                         className="w-6 h-6 rounded-full"
                       />
                     )}
                     <span className="text-sm font-bold">
-                      {chain_manager.name(c?.params?.chain, evm_chains_data)}
+                      {chainManager.name(c?.params?.chain, evm_chains_data)}
                     </span>
                   </div>
                   <div className="flex flex-col">

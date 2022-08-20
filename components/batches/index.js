@@ -18,7 +18,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { axelard } from '../../lib/api/cli'
 import { batches as getBatches, fieldsToObj } from '../../lib/api/index'
-import { getChain, chain_manager } from '../../lib/object/chain'
+import { getChain, chainManager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
 
 const LIMIT = 25
@@ -343,14 +343,14 @@ export default () => {
               accessor: 'chain',
               disableSortBy: true,
               Cell: props => (
-                chain_manager.image(props.value, evm_chains_data) ?
+                chainManager.image(props.value, evm_chains_data) ?
                   <Image
-                    src={chain_manager.image(props.value, evm_chains_data)}
+                    src={chainManager.image(props.value, evm_chains_data)}
                     className="w-6 h-6 rounded-full"
                   />
                   :
                   <span className="font-semibold">
-                    {chain_manager.name(props.value, evm_chains_data)}
+                    {chainManager.name(props.value, evm_chains_data)}
                   </span>
               ),
             },

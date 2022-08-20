@@ -8,7 +8,7 @@ import { BiX } from 'react-icons/bi'
 
 import Modal from '../modals'
 import { getChain } from '../../lib/object/chain'
-import { getDenom } from '../../lib/object/denom'
+import { getAsset } from '../../lib/object/asset'
 import { params_to_obj } from '../../lib/utils'
 
 export default () => {
@@ -35,7 +35,7 @@ export default () => {
         state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        asset: getDenom(asset, assets_data)?.id || asset,
+        asset: getAsset(asset, assets_data)?.id || asset,
         depositAddress,
         senderAddress,
         recipientAddress,

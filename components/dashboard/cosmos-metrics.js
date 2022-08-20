@@ -120,7 +120,7 @@ export default ({ data }) => {
             }
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-            seconds from last {number_format(process.env.NEXT_PUBLIC_NUM_AVG_BLOCK_TIME_BLOCKS, '0,0')} blocks
+            seconds from last {number_format(100, '0,0')} blocks
           </span>
         </a>
       </Link>

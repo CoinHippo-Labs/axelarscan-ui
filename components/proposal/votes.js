@@ -6,7 +6,7 @@ import { TailSpin } from 'react-loader-spinner'
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
-import { denom_manager } from '../../lib/object/denom'
+import { assetManager } from '../../lib/object/asset'
 import { number_format, ellipse, loader_color } from '../../lib/utils'
 
 export default ({ data }) => {
@@ -85,7 +85,7 @@ export default ({ data }) => {
               <div className="flex flex-col text-left sm:text-right">
                 <span className="font-semibold">
                   {props.value > 0 ?
-                    number_format(Math.floor(denom_manager.amount(props.value, assets_data?.[0]?.id, assets_data)), '0,0.00') : '-'
+                    number_format(Math.floor(assetManager.amount(props.value, assets_data?.[0]?.id, assets_data)), '0,0.00') : '-'
                   }
                 </span>
                 {props.value > 0 && validators_data && (

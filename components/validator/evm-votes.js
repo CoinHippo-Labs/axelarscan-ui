@@ -6,7 +6,7 @@ import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import Popover from '../popover'
 import Image from '../image'
 import Copy from '../copy'
-import { chain_manager } from '../../lib/object/chain'
+import { chainManager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case } from '../../lib/utils'
 
 const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
@@ -58,10 +58,10 @@ export default ({
             <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
               Chain:
             </span>
-            {chain_manager.image(sender_chain, evm_chains_data) && (
+            {chainManager.image(sender_chain, evm_chains_data) && (
               <Image
-                src={chain_manager.image(sender_chain, evm_chains_data)}
-                title={chain_manager.name(sender_chain, evm_chains_data)}
+                src={chainManager.image(sender_chain, evm_chains_data)}
+                title={chainManager.name(sender_chain, evm_chains_data)}
                 className="w-4 h-4 rounded-full"
               />
             )}

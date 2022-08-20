@@ -10,7 +10,7 @@ import ValidatorProfile from '../validator-profile'
 import EnsProfile from '../ens-profile'
 import Copy from '../copy'
 import { type } from '../../lib/object/id'
-import { denom_manager } from '../../lib/object/denom'
+import { assetManager } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 

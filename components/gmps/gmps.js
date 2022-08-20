@@ -213,7 +213,7 @@ export default ({ n }) => {
                 const { url, transaction_path, icon } = { ...explorer }
                 return (
                   <div className="flex items-center space-x-1">
-                    <Link href={`/gmp/${props.value}`}>
+                    <Link href={`/gmp/${call?.transactionHash}:${call?.logIndex}`}>
                       <a
                         target="_blank"
                         rel="noopener noreferrer"

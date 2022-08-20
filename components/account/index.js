@@ -9,7 +9,7 @@ import { all_bank_balances, all_staking_delegations, all_staking_redelegations, 
 import { deposit_addresses } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
-import { getDenom, denom_manager } from '../../lib/object/denom'
+import { getAsset, assetManager } from '../../lib/object/asset'
 import { equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -45,9 +45,9 @@ export default () => {
             const { denom, amount } = { ...b }
             return {
               ...b,
-              denom: denom_manager.symbol(denom, assets_data),
-              amount: denom_manager.amount(amount, denom, assets_data),
-              asset_data: getDenom(denom, assets_data),
+              denom: assetManager.symbol(denom, assets_data),
+              amount: assetManager.amount(amount, denom, assets_data),
+              asset_data: getAsset(denom, assets_data),
             }
           }).filter(b => b?.amount > -1).map(b => {
             const { amount, asset_data } = { ...b }
@@ -78,11 +78,11 @@ export default () => {
             return {
               ...delegation,
               validator_data: { ...validators_data.find(v => equals_ignore_case(v?.operator_address, validator_address)) },
-              shares: isNaN(shares) ? -1 : denom_manager.amount(shares, denom, assets_data),
+              shares: isNaN(shares) ? -1 : assetManager.amount(shares, denom, assets_data),
               ...balance,
-              denom: denom_manager.symbol(denom, assets_data),
-              amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
-              asset_data: getDenom(denom, assets_data),
+              denom: assetManager.symbol(denom, assets_data),
+              amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
+              asset_data: getAsset(denom, assets_data),
             }
           }).filter(d => d?.amount > -1).map(d => {
             const { amount, asset_data } = { ...d }
@@ -117,8 +117,8 @@ export default () => {
               entries: undefined,
               ...e,
               creation_height: Number(creation_height),
-              initial_balance: denom_manager.amount(Number(initial_balance), assets_data[0]?.id, assets_data),
-              shares_dst: denom_manager.amount(Number(shares_dst), assets_data[0]?.id, assets_data),
+              initial_balance: assetManager.amount(Number(initial_balance), assets_data[0]?.id, assets_data),
+              shares_dst: assetManager.amount(Number(shares_dst), assets_data[0]?.id, assets_data),
             }
           })).map(r => {
             const { initial_balance, shares_dst } = { ...r }
@@ -126,9 +126,9 @@ export default () => {
             denom = denom || staking_params?.bond_denom
             return {
               ...r,
-              denom: denom_manager.symbol(denom, assets_data),
+              denom: assetManager.symbol(denom, assets_data),
               amount: shares_dst - initial_balance,
-              asset_data: getDenom(denom, assets_data),
+              asset_data: getAsset(denom, assets_data),
             }
           }).filter(r => r?.amount > -1).map(r => {
             const { amount, asset_data } = { ...r }
@@ -162,8 +162,8 @@ export default () => {
               entries: undefined,
               ...e,
               creation_height: Number(creation_height),
-              initial_balance: denom_manager.amount(Number(initial_balance), assets_data[0]?.id, assets_data),
-              balance: denom_manager.amount(Number(balance), assets_data[0]?.id, assets_data),
+              initial_balance: assetManager.amount(Number(initial_balance), assets_data[0]?.id, assets_data),
+              balance: assetManager.amount(Number(balance), assets_data[0]?.id, assets_data),
             }
           })).map(u => {
             const { initial_balance, balance } = { ...u }
@@ -171,9 +171,9 @@ export default () => {
             denom = denom || staking_params?.bond_denom
             return {
               ...u,
-              denom: denom_manager.symbol(denom, assets_data),
+              denom: assetManager.symbol(denom, assets_data),
               amount: initial_balance - balance,
-              asset_data: getDenom(denom, assets_data),
+              asset_data: getAsset(denom, assets_data),
             }
           }).filter(u => u?.amount > -1).map(u => {
             const { amount, asset_data } = { ...u }
@@ -205,8 +205,8 @@ export default () => {
                 const { denom, amount } = { ...r }
                 return {
                   ...r,
-                  denom: denom_manager.symbol(denom, assets_data),
-                  amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
+                  denom: assetManager.symbol(denom, assets_data),
+                  amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
                 }
               }).filter(r => r?.amount > -1) || [], 'denom')
             ).map(([k, v]) => {
@@ -220,8 +220,8 @@ export default () => {
                 const { denom, amount } = { ...t }
                 return {
                   ...t,
-                  denom: denom_manager.symbol(denom, assets_data),
-                  amount: denom_manager.amount(amount, denom, assets_data),
+                  denom: assetManager.symbol(denom, assets_data),
+                  amount: assetManager.amount(amount, denom, assets_data),
                 }
               }) || [], 'denom')
             ).map(([k, v]) => {
@@ -254,8 +254,8 @@ export default () => {
               const { denom, amount } = { ...c }
               return {
                 ...c,
-                denom: denom_manager.symbol(denom, assets_data),
-                amount: isNaN(amount) ? -1 : denom_manager.amount(amount, denom, assets_data),
+                denom: assetManager.symbol(denom, assets_data),
+                amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
               }
             }).filter(c => c?.amount > -1) || [])
           }
@@ -284,7 +284,7 @@ export default () => {
             const { denom, sender_chain, recipient_chain, original_sender_chain, original_recipient_chain } = { ...d }
             return {
               ...d,
-              denom: denom_manager.symbol(denom, assets_data),
+              denom: assetManager.symbol(denom, assets_data),
               asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
               source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
                 getChain(original_sender_chain, cosmos_chains_data) || getChain(sender_chain, cosmos_chains_data),

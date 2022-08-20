@@ -17,7 +17,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
-import { getDenom } from '../../lib/object/denom'
+import { getAsset } from '../../lib/object/asset'
 import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
@@ -52,7 +52,7 @@ export default ({ n }) => {
         state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
         sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
         destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        asset: getDenom(asset, assets_data)?.id || asset,
+        asset: getAsset(asset, assets_data)?.id || asset,
         depositAddress,
         senderAddress,
         recipientAddress,
@@ -163,7 +163,7 @@ export default ({ n }) => {
         original_sender_chain,
       } = { ...link }
       const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
-      const asset_data = getDenom(denom, assets_data)
+      const asset_data = getAsset(denom, assets_data)
       const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
       const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === chain_data?.id)
       const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
@@ -341,7 +341,7 @@ export default ({ n }) => {
                 const { link } = { ...props.row.original }
                 const { original_sender_chain } = { ...link }
                 const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
-                const asset_data = getDenom(denom, assets_data)
+                const asset_data = getAsset(denom, assets_data)
                 const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
                 const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === chain_data?.id)
                 const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom

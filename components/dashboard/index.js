@@ -17,8 +17,8 @@ import AddChain from '../add-chain'
 import { consensus_state } from '../../lib/api/rpc'
 import { transfers as getTransfers, token_sents as getTokenSents } from '../../lib/api/index'
 import { search as searchGMP } from '../../lib/api/gmp'
-import { getChain, chain_manager } from '../../lib/object/chain'
-import { getDenom, denom_manager } from '../../lib/object/denom'
+import { getChain, chainManager } from '../../lib/object/chain'
+import { getAsset, assetManager } from '../../lib/object/asset'
 import { hexToBech32 } from '../../lib/object/key'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -83,7 +83,7 @@ export default () => {
         avg_block_time,
         active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)).length,
         total_validators: validators_data?.length,
-        denom: denom_manager.symbol(bond_denom, assets_data),
+        denom: assetManager.symbol(bond_denom, assets_data),
         online_voting_power: staking_pool && Math.floor(bonded_tokens),
         online_voting_power_percentage: staking_pool && amount && (Math.floor(bonded_tokens) * 100 / amount),
         total_voting_power: bank_supply && amount,
@@ -186,7 +186,7 @@ export default () => {
               ...t,
               source_chain_data: getChain(source_chain, chains_data),
               destination_chain_data: getChain(destination_chain, chains_data),
-              // asset_data: getDenom(asset, assets_data),
+              // asset_data: getAsset(asset, assets_data),
             }
           }) || [], ['num_txs'], ['desc'])
           const network_graph_data = []

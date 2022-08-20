@@ -16,7 +16,7 @@ import { validator_sets } from '../../lib/api/cosmos'
 import { axelard } from '../../lib/api/cli'
 import { evm_votes as getEvmVotes } from '../../lib/api/evm-vote'
 import { evm_polls as getEvmPolls } from '../../lib/api/index'
-import { chain_manager } from '../../lib/object/chain'
+import { chainManager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
@@ -156,7 +156,7 @@ export default () => {
                 }
                 else {
                   _response = await axelard({
-                    cmd: `axelard q nexus chain-maintainers ${chain_manager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
+                    cmd: `axelard q nexus chain-maintainers ${chainManager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
                     cache: true,
                     cache_timeout: 1,
                   })
@@ -280,14 +280,14 @@ export default () => {
               accessor: 'sender_chain',
               disableSortBy: true,
               Cell: props => (
-                chain_manager.image(props.value, evm_chains_data) ?
+                chainManager.image(props.value, evm_chains_data) ?
                   <Image
-                    src={chain_manager.image(props.value, evm_chains_data)}
+                    src={chainManager.image(props.value, evm_chains_data)}
                     className="w-6 h-6 rounded-full"
                   />
                   :
                   <span className="font-semibold">
-                    {chain_manager.name(props.value, evm_chains_data)}
+                    {chainManager.name(props.value, evm_chains_data)}
                   </span>
               ),
             },

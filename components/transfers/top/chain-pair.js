@@ -8,7 +8,7 @@ import { FiCode } from 'react-icons/fi'
 
 import Image from '../../image'
 import { getChain } from '../../../lib/object/chain'
-import { getDenom } from '../../../lib/object/denom'
+import { getAsset } from '../../../lib/object/asset'
 import { currency_symbol } from '../../../lib/object/currency'
 import { number_format, loader_color } from '../../../lib/utils'
 

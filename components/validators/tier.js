@@ -12,8 +12,8 @@ import Copy from '../copy'
 import Image from '../image'
 import { ProgressBarWithText } from '../progress-bars'
 import { uptimes as getUptimes, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
-import { chain_manager } from '../../lib/object/chain'
-import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/hb'
+import { chainManager } from '../../lib/object/chain'
+import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { number_format, name, ellipse, loader_color } from '../../lib/utils'
 
 export default () => {
@@ -582,10 +582,10 @@ export default () => {
                           className="min-w-max flex items-center justify-between space-x-2"
                         >
                           <div className="flex items-center space-x-2">
-                            {chain_manager.image(k, evm_chains_data) && (
+                            {chainManager.image(k, evm_chains_data) && (
                               <Image
-                                src={chain_manager.image(k, evm_chains_data)}
-                                title={chain_manager.name(k, evm_chains_data)}
+                                src={chainManager.image(k, evm_chains_data)}
+                                title={chainManager.name(k, evm_chains_data)}
                                 className="w-4 h-4 rounded-full"
                               />
                             )}

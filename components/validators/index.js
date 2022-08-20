@@ -11,8 +11,8 @@ import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import Image from '../image'
 import { ProgressBarWithText } from '../progress-bars'
-import { chain_manager } from '../../lib/object/chain'
-import { denom_manager } from '../../lib/object/denom'
+import { chainManager } from '../../lib/object/chain'
+import { assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse, loader_color } from '../../lib/utils'
 
 const STATUSES = ['active', 'inactive', 'deregistering']
@@ -168,7 +168,7 @@ export default () => {
                     {props.value > 0 ?
                       <>
                         <span className="text-xs lg:text-sm font-bold">
-                          {number_format(Math.floor(denom_manager.amount(props.value, assets_data[0]?.id, assets_data)), '0,0.00000000')}
+                          {number_format(Math.floor(assetManager.amount(props.value, assets_data[0]?.id, assets_data)), '0,0.00000000')}
                         </span>
                         <span className="text-slate-400 dark:text-slate-200 text-2xs lg:text-sm">
                           ({number_format(props.value * 100 / _.sumBy(filterData('active'), 'tokens'), '0,0.000000')}%)
@@ -338,10 +338,10 @@ export default () => {
                           className="min-w-max flex items-center justify-between space-x-2"
                         >
                           <div className="flex items-center space-x-2">
-                            {chain_manager.image(k, evm_chains_data) && (
+                            {chainManager.image(k, evm_chains_data) && (
                               <Image
-                                src={chain_manager.image(k, evm_chains_data)}
-                                title={chain_manager.name(k, evm_chains_data)}
+                                src={chainManager.image(k, evm_chains_data)}
+                                title={chainManager.name(k, evm_chains_data)}
                                 className="w-4 h-4 rounded-full"
                               />
                             )}
@@ -381,11 +381,11 @@ export default () => {
                 <div className="flex flex-wrap items-center mt-0.5">
                   {validators_chains_data ?
                     props.value?.length > 0 ?
-                      props.value.filter(c => chain_manager.image(c, evm_chains_data)).map((c, i) => (
+                      props.value.filter(c => chainManager.image(c, evm_chains_data)).map((c, i) => (
                         <Image
                           key={i}
-                          src={chain_manager.image(c, evm_chains_data)}
-                          title={chain_manager.name(c, evm_chains_data)}
+                          src={chainManager.image(c, evm_chains_data)}
+                          title={chainManager.name(c, evm_chains_data)}
                           className="w-5 h-5 rounded-full mb-1 mr-1"
                         />
                       ))

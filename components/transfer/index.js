@@ -12,10 +12,10 @@ import { TiArrowRight } from 'react-icons/ti'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
-import { transactions_by_events, transaction as getTransaction } from '../../lib/api/cosmos'
+import { transactions_by_events, getTransaction } from '../../lib/api/cosmos'
 import { transfers_status as getTransfersStatus, transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
-import { getDenom } from '../../lib/object/denom'
+import { getAsset } from '../../lib/object/asset'
 import { type } from '../../lib/object/id'
 import { number_format, name, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
 
@@ -118,7 +118,7 @@ export default () => {
   const axelar_chain_data = getChain('axelarnet', chains_data)
   const deposit_address = link?.deposit_address || source?.recipient_address
   const deposit_chain_data = getChain(deposit_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
-  const asset_data = getDenom(denom, assets_data)
+  const asset_data = getAsset(denom, assets_data)
   const contract_data = asset_data?.contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
   const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === source_chain_data?.id)
   const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
