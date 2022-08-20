@@ -328,13 +328,24 @@ export default () => {
   // validators
   useEffect(() => {
     const controller = new AbortController()
+
     const getData = async () => {
-      if (assets_data &&
+      if (
+        assets_data &&
         status_data &&
-        ['/address', '/transfers', '/tvl', '/sent', '/gmp', '/batch', '/assets'].findIndex(p => pathname?.startsWith(p)) < 0
+        [
+          '/address',
+          '/transfers',
+          '/tvl',
+          '/sent',
+          '/gmp',
+          '/batch',
+          '/assets',
+        ].findIndex(p => pathname?.startsWith(p)) < 0
       ) {
         if (!controller.signal.aborted) {
           let response
+
           switch (pathname) {
             case '/validators':
             case '/validators/[status]':
@@ -346,32 +357,62 @@ export default () => {
             case '/transactions':
             case '/transactions/search':
             case '/tx/[tx]':
-              const latest_block = Number(status_data.latest_block_height)
-              response = await all_validators(null, validators_data, status || (address ? null : 'active'), address, latest_block, assets_data)
+              const {
+                latest_block_height,
+              } = { ...status_data }
+
+              response = await all_validators(
+                null,
+                validators_data,
+                status ||
+                  (address ?
+                    null :
+                    'active'
+                  ),
+                address,
+                latest_block_height,
+                assets_data,
+              )
+
               if (response) {
                 if (!validators_data) {
                   dispatch({
                     type: VALIDATORS_DATA,
-                    value: response?.data || [],
+                    value: response || [],
                   })
                 }
-                if (!['/participations'].includes(pathname)) {
-                  response = await all_validators_broadcaster(response?.data, null, assets_data)
-                  if (response?.data?.length > 0) {
-                    let vs = response.data
-                    if (['/validators', '/validators/[status]', '/validator/[address]'].includes(pathname)) {
-                      const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
-                      const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
-                      const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
-                      const last = lastHeartbeatBlock(latest_block)
+
+                if (
+                  ![
+                    '/participations',
+                  ].includes(pathname)
+                ) {
+                  response = await all_validators_broadcaster(
+                    response,
+                    null,
+                    assets_data,
+                  )
+
+                  if (response?.length > 0) {
+                    let _response = response
+
+                    if (
+                      [
+                        '/validators',
+                        '/validators/[status]',
+                        '/validator/[address]',
+                      ].includes(pathname)
+                    ) {
+                      const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS),
+                        num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT),
+                        first = firstHeartbeatBlock(latest_block_height - num_heartbeat_blocks),
+                        last = lastHeartbeatBlock(latest_block_height),
+
                       response = await getHeartbeats({
                         query: {
                           bool: {
                             must: [
-                              { range: { height: {
-                                gte: first,
-                                lte: latest_block,
-                              } } },
+                              { range: { height: { gte: first, lte: latest_block_height } } },
                             ],
                           },
                         },
@@ -387,27 +428,43 @@ export default () => {
                         },
                         _source: false,
                       })
-                      for (let i = 0; i < vs.length; i++) {
-                        const v = vs[i]
-                        const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
-                        const up = response?.data?.[v?.broadcaster_address] || 0
-                        let uptime = total > 0 ? up * 100 / total : 0
-                        uptime = uptime > 100 ? 100 : uptime
+
+                      for (let i = 0; i < _response.length; i++) {
+                        const v = _response[i]
+                        const {
+                          broadcaster_address,
+                        } = { ...v }
+
+                        const total = Math.floor(
+                          (last - first) /
+                          num_blocks_per_heartbeat
+                        ) + 1
+
+                        const up = response?.data?.[broadcaster_address] ||
+                          0
+                        let uptime = total > 0 ?
+                          up * 100 / total :
+                          0
+                        uptime = uptime > 100 ?
+                          100 :
+                          uptime
+
                         v.heartbeats_uptime = uptime
-                        vs[i] = v
+                        _response[i] = v
                       }
-                      response.data = vs
+
+                      response = _response
+
                       dispatch({
                         type: VALIDATORS_DATA,
-                        value: response.data,
+                        value: response,
                       })
 
                       const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
+
                       response = await getEvmVotes({
                         query: {
-                          range: { height: {
-                            gte: latest_block - num_evm_votes_blocks,
-                          } },
+                          range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
                         },
                         aggs: {
                           voters: {
@@ -425,20 +482,32 @@ export default () => {
                           },
                         },
                       })
-                      for (let i = 0; i < vs.length; i++) {
-                        const v = vs[i]
-                        v.votes = { ...response?.data?.[v?.broadcaster_address] }
-                        v.total_votes = v.votes.total || 0
-                        const get_votes = vote => _.sum(Object.entries({ ...v.votes?.chains }).map(c => Object.entries({ ...c[1]?.votes }).find(_v => _v[0] === vote?.toString())?.[1] || 0))
+
+                      for (let i = 0; i < _response.length; i++) {
+                        const v = _response[i]
+                        const {
+                          broadcaster_address,
+                        } = { ...v }
+
+                        v.votes = {
+                          ...response?.data?.[broadcaster_address],
+                        }
+                        v.total_votes = v.votes.total ||
+                          0
+
+                        const get_votes = vote => _.sum(
+                          Object.entries({ ...v.votes?.chains })
+                            .map(c => Object.entries({ ...c[1]?.votes }).find(_v => _v[0] === vote?.toString())?.[1] || 0)
+                        )
+
                         v.total_yes_votes = get_votes(true)
                         v.total_no_votes = get_votes(false)
-                        vs[i] = v
+                        _response[i] = v
                       }
+
                       response = await getEvmPolls({
                         query: {
-                          range: { height: {
-                            gte: latest_block - num_evm_votes_blocks,
-                          } },
+                          range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
                         },
                         aggs: {
                           chains: {
@@ -447,61 +516,113 @@ export default () => {
                         },
                         track_total_hits: true,
                       })
-                      const { data, total } = { ...response }
-                      const total_polls = total || _.maxBy(vs, 'total_votes')?.total_votes || 0
-                      vs = vs.map(v => {
-                        const { votes, total_votes, total_yes_votes, total_no_votes } = { ...v }
-                        const { chains } = { ...votes }
-                        Object.entries({ ...chains }).forEach(([k, _v]) => {
-                          chains[k] = {
-                            ..._v,
-                            total_polls: data?.[k] || _v?.total,
-                          }
-                        })
+
+                      const {
+                        data,
+                        total,
+                      } = { ...response }
+
+                      const total_polls = total ||
+                        _.maxBy(
+                          _response,
+                          'total_votes',
+                        )?.total_votes ||
+                        0
+
+                      _response = _response.map(v => {
+                        const {
+                          votes,
+                          total_votes,
+                          total_yes_votes,
+                          total_no_votes,
+                        } = { ...v }
+                        const {
+                          chains,
+                        } = { ...votes }
+
+                        Object.entries({ ...chains })
+                          .forEach(([k, _v]) => {
+                            chains[k] = {
+                              ..._v,
+                              total_polls: data?.[k] ||
+                                _v?.total,
+                            }
+                          })
+
                         return {
                           ...v,
                           votes: {
                             ...votes,
                             chains,
                           },
-                          total_votes: total_votes > total_polls ? total_polls : total_votes,
-                          total_yes_votes: total_yes_votes > total_polls ? total_polls : total_yes_votes,
-                          total_no_votes: total_no_votes > total_polls ? total_polls : total_no_votes,
+                          total_votes: total_votes > total_polls ?
+                            total_polls :
+                            total_votes,
+                          total_yes_votes: total_yes_votes > total_polls ?
+                            total_polls :
+                            total_yes_votes,
+                          total_no_votes: total_no_votes > total_polls ?
+                            total_polls :
+                            total_no_votes,
                           total_polls,
                         }
                       })
                     }
-                    response.data = vs
+
+                    response = _response
+
                     dispatch({
                       type: VALIDATORS_DATA,
-                      value: response.data,
+                      value: response,
                     })
                   }
                 }
-                response = await all_validators_status(response?.data || [])
+
+                response = await all_validators_status(response)
               }
               break
             default:
-              response = await all_validators(['/validators/tier'].includes(pathname) ? {} : null, validators_data, null, null, null, assets_data)
+              response = await all_validators(
+                ['/validators/tier'].includes(pathname) ?
+                  {} :
+                  null,
+                validators_data,
+                null,
+                null,
+                null,
+                assets_data,
+              )
+
               if (['/validators/tier'].includes(pathname)) {
-                response = await all_validators_broadcaster(response?.data, null, assets_data)
+                response = await all_validators_broadcaster(
+                  response?.data,
+                  null,
+                  assets_data,
+                )
               }
               break
           }
+
           if (response) {
             dispatch({
               type: VALIDATORS_DATA,
-              value: response?.data || [],
+              value: response,
             })
           }
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
+
     return () => {
       controller?.abort()
-      clearInterval(interval)
+      clearInterval(
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
+      )
     }
   }, [assets_data, pathname, validatorsTrigger])
 

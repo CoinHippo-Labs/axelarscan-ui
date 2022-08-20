@@ -169,7 +169,7 @@ export default ({ n }) => {
               sort: [{ timestamp: 'desc' }],
               fields: ['txhash', 'height', 'types', 'tx.body.messages.sender', 'tx.body.messages.signer', 'code', 'tx.auth_info.fee.amount.*', 'timestamp'],
               _source: {
-                includes: 'logs'
+                includes: ['logs', 'tx'],
               },
               track_total_hits: true,
             }, assets_data)
@@ -184,6 +184,7 @@ export default ({ n }) => {
                 timestamp,
                 activities,
               } = { ...d }
+
               return {
                 ...d,
                 txhash: Array.isArray(txhash) ? _.last(txhash) : txhash,

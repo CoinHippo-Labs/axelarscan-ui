@@ -84,9 +84,8 @@ export default ({
                               ).map((d, j) => (
                                 <div
                                   key={j}
-                                  className="rounded-lg"
                                 >
-                                  <pre className="bg-slate-50 dark:bg-slate-900 dark:bg-opacity-90 break-all text-2xs font-medium py-1 px-2">
+                                  <pre className="bg-slate-50 dark:bg-slate-900 dark:bg-opacity-90 rounded-lg break-all text-2xs font-medium py-1 px-2">
                                     {JSON.stringify(d, null, 2)}
                                   </pre>
                                 </div>
