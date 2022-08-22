@@ -508,13 +508,13 @@ export default ({
                               .map(([k, v]) => (
                                 <div
                                   key={k}
-                                  className="flex items-start justify-between space-x-4"
+                                  className="flex items-start space-x-4"
                                 >
-                                  <span className="text-slate-400 dark:text-slate-300">
+                                  <span className="w-48 text-slate-400 dark:text-slate-300">
                                     {k}
                                   </span>
                                   <div className="flex items-start space-x-1.5">
-                                    <span className="max-w-xl break-all font-bold text-right">
+                                    <span className="max-w-xl break-all font-bold">
                                       {typeof v === 'string' ?
                                         ellipse(
                                           v,
@@ -560,13 +560,13 @@ export default ({
                           .map(([k, v]) => (
                             <div
                               key={k}
-                              className="flex items-start justify-between space-x-4"
+                              className="flex items-start space-x-4"
                             >
-                              <span className="text-slate-400 dark:text-slate-300">
+                              <span className="w-48 text-slate-400 dark:text-slate-300">
                                 {k}
                               </span>
                               <div className="flex items-start space-x-1.5">
-                                <span className="max-w-xl break-all font-bold text-right">
+                                <span className="max-w-xl break-all font-bold">
                                   {typeof v === 'string' ?
                                     ellipse(
                                       v,
@@ -707,13 +707,13 @@ export default ({
                               .map(([k, v]) => (
                                 <div
                                   key={k}
-                                  className="flex items-start justify-between space-x-4"
+                                  className="flex items-start space-x-4"
                                 >
-                                  <span className="text-slate-400 dark:text-slate-300">
+                                  <span className="w-48 text-slate-400 dark:text-slate-300">
                                     {k}
                                   </span>
                                   <div className="flex items-start space-x-1.5">
-                                    <span className="max-w-xl break-all font-bold text-right">
+                                    <span className="max-w-xl break-all font-bold">
                                       {typeof v === 'string' ?
                                         ellipse(
                                           v,
