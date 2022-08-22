@@ -7,6 +7,7 @@ import Info from './info'
 import Transactions from '../transactions'
 import { all_bank_balances, all_staking_delegations, all_staking_redelegations, all_staking_unbonding, distribution_rewards, distribution_commissions } from '../../lib/api/cosmos'
 import { deposit_addresses } from '../../lib/api/index'
+import { transfers } from '../../lib/api/transfer'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { getAsset, assetManager } from '../../lib/object/asset'
@@ -280,16 +281,34 @@ export default () => {
             size: 10,
             sort: [{ height: 'desc' }],
           })
+
+          const _response = await transfers({
+            depositAddress: address,
+          })
+
+          const transfer = _.head(_response?.data)
+
           setDepositAddresses(response?.data?.map(d => {
-            const { denom, sender_chain, recipient_chain, original_sender_chain, original_recipient_chain } = { ...d }
+            const {
+              original_sender_chain,
+              original_recipient_chain,
+              sender_chain,
+              recipient_chain,
+              denom,
+            } = { ...d }
+
             return {
               ...d,
-              denom: assetManager.symbol(denom, assets_data),
-              asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
               source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
                 getChain(original_sender_chain, cosmos_chains_data) || getChain(sender_chain, cosmos_chains_data),
               destination_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, recipient_chain)) ||
                 getChain(original_recipient_chain, cosmos_chains_data) || getChain(recipient_chain, cosmos_chains_data),
+              denom: assetManager.symbol(
+                denom,
+                assets_data,
+              ),
+              asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
+              transfer,
             }
           }) || [])
         }

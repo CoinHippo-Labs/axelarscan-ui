@@ -29,7 +29,7 @@ export default ({ data }) => {
   const reward = !is_deposit_address && rewards?.rewards?.find(r => equals_ignore_case(r?.denom, 'axl'))
   const commission = !is_deposit_address && commissions?.find(c => equals_ignore_case(c?.denom, 'axl'))
   const deposit_address = _.head(depositAddresses)
-  const { sender_chain, recipient_chain, source_chain_data, destination_chain_data, sender_address, recipient_address, denom, asset_data } = { ...deposit_address }
+  const { sender_chain, recipient_chain, source_chain_data, destination_chain_data, sender_address, recipient_address, denom, asset_data, transfer } = { ...deposit_address }
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = `w-40 lg:w-${is_deposit_address ? 64 : 56} text-sm lg:text-base font-bold`
 
@@ -111,8 +111,7 @@ export default ({ data }) => {
                 </div> :
                 <span>
                   -
-                </span>
-            :
+                </span> :
             <div className="skeleton w-40 h-6 mt-1" />
           }
         </div>
@@ -177,8 +176,7 @@ export default ({ data }) => {
                 </div> :
                 <span>
                   -
-                </span>
-            :
+                </span> :
             <div className="skeleton w-40 h-6 mt-1" />
           }
         </div>
@@ -219,8 +217,36 @@ export default ({ data }) => {
             <div className="skeleton w-40 h-6 mt-1" />
           }
         </div>
-      </div>
-      :
+        <div className={rowClassName}>
+          <span className={titleClassName}>
+            Transfer:
+          </span>
+          {depositAddresses ?
+            transfer?.source?.id ?
+              <div className="h-6 flex items-center space-x-1">
+                <a
+                  href={`/transfer/${transfer.source.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 dark:text-white font-bold"
+                >
+                  {ellipse(
+                    transfer.source.id,
+                    16,
+                  )}
+                </a>
+                <Copy
+                  value={transfer.source.id}
+                  size={18}
+                />
+              </div> :
+              <span>
+                -
+              </span> :
+            <div className="skeleton w-40 h-6 mt-1" />
+          }
+        </div>
+      </div> :
       <div className="grid sm:grid-cols-6 gap-6">
         <div className="sm:col-span-3 w-full flex flex-col space-y-4">
           <div className={rowClassName}>
