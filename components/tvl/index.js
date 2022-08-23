@@ -152,7 +152,7 @@ export default () => {
                         <span>
                           Total Locked
                         </span>
-                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                        <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
@@ -248,7 +248,7 @@ export default () => {
                         <span>
                           Total Supply
                         </span>
-                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                        <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
@@ -308,7 +308,7 @@ export default () => {
                         <span>
                           Moved to EVM
                         </span>
-                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                        <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
@@ -368,7 +368,7 @@ export default () => {
                         <span>
                           Moved to Cosmos
                         </span>
-                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                        <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
@@ -445,7 +445,7 @@ export default () => {
                             {chainName(c)}
                           </span>
                         </div>
-                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                        <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
