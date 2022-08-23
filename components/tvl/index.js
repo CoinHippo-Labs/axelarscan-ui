@@ -165,8 +165,8 @@ export default () => {
                                   supply,
                                   total,
                                 } = { ...native }
-                                const amount = supply || total || 0
-                                const value = amount * price
+                                const amount = supply || total
+                                const value = (amount * price) || 0
 
                                 return {
                                   ...d,
@@ -458,8 +458,8 @@ export default () => {
                                   supply,
                                   total,
                                 } = { ...tvl?.[id] }
-                                const amount = supply || total || 0
-                                const value = amount * price
+                                const amount = supply || total
+                                const value = (amount * price) || 0
 
                                 return {
                                   ...d,
