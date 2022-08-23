@@ -103,12 +103,8 @@ export default () => {
                   {
                     Header: 'Native Chain',
                     accessor: 'native',
-                    sortType: (a, b) => (a.original.native?.supply || a.original.native?.total || -1) * (a.original.price || 0) > (b.original.native?.supply || b.original.native?.total || -1) * (b.original.price || 0) ? 1 : -1,
+                    sortType: (a, b) => (a.original.native?.chain_data?.name || '') > (b.original.native?.chain_data?.name || '') ? 1 : -1,
                     Cell: props => {
-                      const {
-                        asset_data,
-                        price,
-                      } = { ...props.row.original }
                       const {
                         chain_data,
                         contract_data,
@@ -116,11 +112,89 @@ export default () => {
                         escrow_addresses,
                         supply,
                         total,
-                        url,
                       } = { ...props.value }
                       const {
                         image,
                       } = { ...chain_data }
+                      const {
+                        denom,
+                      } = { ...denom_data }
+                      const amount = supply || total
+                      const has_asset = amount || contract_data || (escrow_addresses?.length > 0 && denom)
+                      return (
+                        <div className="flex flex-col items-start sm:items-end space-y-0">
+                          {has_asset ?
+                            <div className="min-w-max flex items-center space-x-1.5">
+                              {image && (
+                                <Image
+                                  src={image}
+                                  className="w-5 h-5 rounded-full"
+                                />
+                              )}
+                              <span className="text-xs font-semibold">
+                                {chainName(chain_data)}
+                              </span>
+                            </div> :
+                            <span>
+                              -
+                            </span>
+                          }
+                        </div>
+                      )
+                    },
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
+                    order: 1,
+                  },
+                  {
+                    Header: (
+                      <div className="flex flex-col space-y-0.5">
+                        <span>
+                          Total Locked
+                        </span>
+                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                          ({currency_symbol}
+                          {number_format(
+                            _.sumBy(
+                              data.map(d => {
+                                const {
+                                  price,
+                                  native,
+                                } = { ...d }
+                                const {
+                                  supply,
+                                  total,
+                                } = { ...native }
+                                const amount = supply || total || 0
+                                const value = amount * price
+
+                                return {
+                                  ...d,
+                                  value,
+                                }
+                              }),
+                              'value',
+                            ),
+                            '0,0.00a',
+                          )})
+                        </div>
+                      </div>
+                    ),
+                    accessor: 'native_locked',
+                    sortType: (a, b) => (a.original.native?.supply || a.original.native?.total || -1) * (a.original.price || 0) > (b.original.native?.supply || b.original.native?.total || -1) * (b.original.price || 0) ? 1 : -1,
+                    Cell: props => {
+                      const {
+                        price,
+                        native,
+                      } = { ...props.row.original }
+                      const {
+                        contract_data,
+                        denom_data,
+                        escrow_addresses,
+                        supply,
+                        total,
+                        url,
+                      } = { ...native }
                       const {
                         denom,
                       } = { ...denom_data }
@@ -161,28 +235,31 @@ export default () => {
                               {number_format(value, value > 1000000 ? '0,0.00a' : value > 10000 ? '0,0' : '0,0.00')}
                             </span>
                           )}
-                          {has_asset && (
-                            <div className="min-w-max flex items-center space-x-1.5">
-                              {image && (
-                                <Image
-                                  src={image}
-                                  className="w-4 h-4 rounded-full"
-                                />
-                              )}
-                              <span className="text-2xs">
-                                {chainName(chain_data)}
-                              </span>
-                            </div>
-                          )}
                         </div>
                       )
                     },
-                    headerClassName: 'w-34 whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-                    className: 'bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-71.6 z-30',
                     order: 1,
                   },
                   {
-                    Header: 'Total Supply',
+                    Header: (
+                      <div className="flex flex-col space-y-0.5">
+                        <span>
+                          Total Supply
+                        </span>
+                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                          ({currency_symbol}
+                          {number_format(
+                            _.sumBy(
+                              data,
+                              'value',
+                            ),
+                            '0,0.00a',
+                          )})
+                        </div>
+                      </div>
+                    ),
                     accessor: 'value',
                     sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
                     Cell: props => {
@@ -222,11 +299,27 @@ export default () => {
                       )
                     },
                     headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-80 z-30',
+                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-99 z-30',
                     order: 2,
                   },
                   {
-                    Header: 'Moved to EVM',
+                    Header: (
+                      <div className="flex flex-col space-y-0.5">
+                        <span>
+                          Moved to EVM
+                        </span>
+                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                          ({currency_symbol}
+                          {number_format(
+                            _.sumBy(
+                              data,
+                              'value_on_evm',
+                            ),
+                            '0,0.00a',
+                          )})
+                        </div>
+                      </div>
+                    ),
                     accessor: 'value_on_evm',
                     sortType: (a, b) => a.original.value_on_evm > b.original.value_on_evm ? 1 : -1,
                     Cell: props => {
@@ -270,7 +363,23 @@ export default () => {
                     order: 3,
                   },
                   {
-                    Header: 'Moved to Cosmos',
+                    Header: (
+                      <div className="flex flex-col space-y-0.5">
+                        <span>
+                          Moved to Cosmos
+                        </span>
+                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                          ({currency_symbol}
+                          {number_format(
+                            _.sumBy(
+                              data,
+                              'value_on_cosmos',
+                            ),
+                            '0,0.00a',
+                          )})
+                        </div>
+                      </div>
+                    ),
                     accessor: 'value_on_cosmos',
                     sortType: (a, b) => a.original.value_on_cosmos > b.original.value_on_cosmos ? 1 : -1,
                     Cell: props => {
@@ -324,23 +433,50 @@ export default () => {
                   } = { ...c }
                   return {
                     Header: (
-                      <div className="min-w-max flex items-center space-x-1.5">
-                        {image && (
-                          <Image
-                            src={image}
-                            className="w-4 h-4 rounded-full"
-                          />
-                        )}
-                        <span className="text-2xs">
-                          {chainName(c)}
-                        </span>
+                      <div className="flex flex-col space-y-0.5">
+                        <div className="min-w-max flex items-center space-x-1.5">
+                          {image && (
+                            <Image
+                              src={image}
+                              className="w-4 h-4 rounded-full"
+                            />
+                          )}
+                          <span className="text-2xs">
+                            {chainName(c)}
+                          </span>
+                        </div>
+                        <div className="text-slate-800 dark:text-slate-200 text-2xs font-bold">
+                          ({currency_symbol}
+                          {number_format(
+                            _.sumBy(
+                              data.map(d => {
+                                const {
+                                  price,
+                                  tvl,
+                                } = { ...d }
+                                const {
+                                  supply,
+                                  total,
+                                } = { ...tvl?.[id] }
+                                const amount = supply || total || 0
+                                const value = amount * price
+
+                                return {
+                                  ...d,
+                                  value,
+                                }
+                              }),
+                              'value',
+                            ),
+                            '0,0.00a',
+                          )})
+                        </div>
                       </div>
                     ),
                     accessor: `tvl.${id}`,
                     sortType: (a, b) => (a.original.tvl?.[id]?.supply || a.original.tvl?.[id]?.total || -1) * (a.original.price || 0) > (b.original.tvl?.[id]?.supply || b.original.tvl?.[id]?.total || -1) * (b.original.price || 0) ? 1 : -1,
                     Cell: props => {
                       const {
-                        asset_data,
                         price,
                         tvl,
                       } = { ...props.row.original }
