@@ -75,6 +75,7 @@ export default () => {
                         symbol,
                         image,
                       } = { ...props.value }
+
                       return (
                         <div className={`min-w-max flex items-${name ? 'start' : 'center'} space-x-2`}>
                           {image && (
@@ -119,8 +120,10 @@ export default () => {
                       const {
                         denom,
                       } = { ...denom_data }
+
                       const amount = supply || total
                       const has_asset = amount || contract_data || (escrow_addresses?.length > 0 && denom)
+
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {has_asset ?
@@ -142,8 +145,8 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
+                    headerClassName: 'w-28 whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    className: 'w-28 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
                     order: 1,
                   },
                   {
@@ -151,102 +154,6 @@ export default () => {
                       <div className="flex flex-col space-y-0.5">
                         <span>
                           Total Locked
-                        </span>
-                        <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
-                          ({currency_symbol}
-                          {number_format(
-                            _.sumBy(
-                              data.map(d => {
-                                const {
-                                  price,
-                                  native,
-                                } = { ...d }
-                                const {
-                                  supply,
-                                  total,
-                                } = { ...native }
-                                const amount = supply || total
-                                const value = (amount * price) || 0
-
-                                return {
-                                  ...d,
-                                  value,
-                                }
-                              }),
-                              'value',
-                            ),
-                            '0,0.00a',
-                          )})
-                        </div>
-                      </div>
-                    ),
-                    accessor: 'native_locked',
-                    sortType: (a, b) => (a.original.native?.supply || a.original.native?.total || -1) * (a.original.price || 0) > (b.original.native?.supply || b.original.native?.total || -1) * (b.original.price || 0) ? 1 : -1,
-                    Cell: props => {
-                      const {
-                        price,
-                        native,
-                      } = { ...props.row.original }
-                      const {
-                        contract_data,
-                        denom_data,
-                        escrow_addresses,
-                        supply,
-                        total,
-                        url,
-                      } = { ...native }
-                      const {
-                        denom,
-                      } = { ...denom_data }
-                      const amount = supply || total
-                      const value = amount * price
-                      const has_asset = amount || contract_data || (escrow_addresses?.length > 0 && denom)
-                      const amount_exact_formatted = number_format(amount, '0,0.000000')
-                      const amount_formatted = number_format(amount, amount > 100000 ? '0,0.00a' : amount > 10000 ? '0,0.00' : '0,0.00000000')
-                      return (
-                        <div className="flex flex-col items-start sm:items-end space-y-0">
-                          {has_asset ?
-                            url ?
-                              <a
-                                href={url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                title={amount_exact_formatted}
-                                className="uppercase text-blue-500 dark:text-blue-400 text-xs font-bold"
-                              >
-                                {amount_formatted}
-                              </a> :
-                              <span
-                                title={amount_exact_formatted}
-                                className="uppercase text-slate-400 dark:text-slate-400 text-xs font-bold"
-                              >
-                                {amount_formatted}
-                              </span> :
-                            <span>
-                              -
-                            </span>
-                          }
-                          {has_asset && typeof price === 'number' && (
-                            <span
-                              title={number_format(value, `${currency_symbol}0,0.000`)}
-                              className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-medium"
-                            >
-                              {currency_symbol}
-                              {number_format(value, value > 1000000 ? '0,0.00a' : value > 10000 ? '0,0' : '0,0.00')}
-                            </span>
-                          )}
-                        </div>
-                      )
-                    },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-71.6 z-30',
-                    order: 1,
-                  },
-                  {
-                    Header: (
-                      <div className="flex flex-col space-y-0.5">
-                        <span>
-                          Total Supply
                         </span>
                         <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
@@ -265,23 +172,54 @@ export default () => {
                     Cell: props => {
                       const {
                         asset_data,
+                        native,
                         total,
                       } = { ...props.row.original }
                       const {
                         symbol,
                       } = { ...asset_data }
+                      const {
+                        url,
+                      } = { ...native }
+
+                      const amount_exact_formatted = number_format(
+                        total,
+                        '0,0.00000000',
+                      )
+                      const amount_formatted = number_format(
+                        total,
+                        total > 100000 ?
+                          '0,0.00a' :
+                          total > 10000 ?
+                            '0,0.00' :
+                            '0,0.00000000',
+                      )
+
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0.5">
                           {typeof total === 'number' ?
-                            <span
-                              title={number_format(total, '0,0.00000000')}
-                              className="uppercase text-slate-500 dark:text-slate-400 text-xs font-semibold"
-                            >
-                              {number_format(total, total > 100000 ? '0,0.00a' : total > 10000 ? '0,0.00' : '0,0.000000')}
-                              <span className="normal-case ml-1">
-                                {symbol}
-                              </span>
-                            </span> :
+                            url ?
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title={amount_exact_formatted}
+                                className="uppercase text-blue-500 dark:text-blue-400 text-xs font-bold"
+                              >
+                                {amount_formatted}
+                                <span className="normal-case ml-1">
+                                  {symbol}
+                                </span>
+                              </a> :
+                              <span
+                                title={amount_exact_formatted}
+                                className="uppercase text-slate-400 dark:text-slate-400 text-xs font-bold"
+                              >
+                                {amount_formatted}
+                                <span className="normal-case ml-1">
+                                  {symbol}
+                                </span>
+                              </span> :
                             <span>
                               -
                             </span>
@@ -299,7 +237,7 @@ export default () => {
                       )
                     },
                     headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
-                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-99 z-30',
+                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-74 z-30',
                     order: 2,
                   },
                   {
@@ -330,6 +268,7 @@ export default () => {
                       const {
                         symbol,
                       } = { ...asset_data }
+
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {typeof total_on_evm === 'number' ?
@@ -390,6 +329,7 @@ export default () => {
                       const {
                         symbol,
                       } = { ...asset_data }
+
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {typeof total_on_cosmos === 'number' ?
@@ -491,11 +431,23 @@ export default () => {
                       const {
                         denom,
                       } = { ...denom_data }
+
                       const amount = supply || total
                       const value = amount * price
                       const has_asset = amount || contract_data || (escrow_addresses?.length > 0 && denom)
-                      const amount_exact_formatted = number_format(amount, '0,0.000000')
-                      const amount_formatted = number_format(amount, amount > 100000 ? '0,0.00a' : amount > 10000 ? '0,0.00' : '0,0.00000000')
+                      const amount_exact_formatted = number_format(
+                        amount,
+                        '0,0.000000',
+                      )
+                      const amount_formatted = number_format(
+                        amount,
+                        amount > 100000 ?
+                          '0,0.00a' :
+                          amount > 10000 ?
+                            '0,0.00' :
+                            '0,0.00000000',
+                      )
+
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {has_asset ?
