@@ -18,7 +18,7 @@ import TimeAgo from '../time-ago'
 import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
-import { number_format, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
 
@@ -538,6 +538,10 @@ export default ({ n }) => {
                   }
                 })
                 const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
+                const time_spent = total_time_string(
+                  _.head(steps)?.data?.created_at?.ms / 1000,
+                  _.last(steps)?.data?.created_at?.ms / 1000,
+                )
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.map((s, i) => {
@@ -603,6 +607,16 @@ export default ({ n }) => {
                     {insufficient_fee && (
                       <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
                         Insufficient Fee
+                      </div>
+                    )}
+                    {time_spent && (
+                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                          Time spent:
+                        </span>
+                        <span className="whitespace-nowrap font-bold">
+                          {time_spent}
+                        </span>
                       </div>
                     )}
                   </div>

@@ -564,8 +564,14 @@ export default ({ n }) => {
                   default:
                     break
                 }
-                const forecall_time_spent = total_time_string(call?.block_timestamp, forecalled?.block_timestamp)
-                const time_spent = total_time_string(call?.block_timestamp, executed?.block_timestamp)
+                const forecall_time_spent = total_time_string(
+                  call?.block_timestamp,
+                  forecalled?.block_timestamp,
+                )
+                const time_spent = total_time_string(
+                  call?.block_timestamp,
+                  executed?.block_timestamp,
+                )
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
@@ -629,7 +635,7 @@ export default ({ n }) => {
                     {forecall_time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                          forecall time:
+                          Forecall time:
                         </span>
                         <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-medium">
                           {forecall_time_spent}
@@ -639,7 +645,7 @@ export default ({ n }) => {
                     {time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                          time spent:
+                          Time spent:
                         </span>
                         <span className="whitespace-nowrap font-bold">
                           {time_spent}

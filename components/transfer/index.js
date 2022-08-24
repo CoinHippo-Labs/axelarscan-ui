@@ -17,7 +17,7 @@ import { transfers_status as getTransfersStatus, transfers as getTransfers } fro
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { type } from '../../lib/object/id'
-import { number_format, name, ellipse, equals_ignore_case, loader_color, sleep } from '../../lib/utils'
+import { number_format, name, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
 
 export default () => {
   const { preferences, evm_chains, cosmos_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)
@@ -176,6 +176,10 @@ export default () => {
   })
   const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
   const detail_steps = _.slice(steps, 0, steps.length - (_.last(steps)?.id === 'executed' ? 1 : 0))
+  const time_spent = total_time_string(
+    _.head(steps)?.data?.created_at?.ms / 1000,
+    _.last(steps)?.data?.created_at?.ms / 1000,
+  )
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
 
@@ -429,6 +433,16 @@ export default () => {
                   {insufficient_fee && (
                     <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
                       Insufficient Fee
+                    </div>
+                  )}
+                  {time_spent && (
+                    <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                      <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                        Time spent:
+                      </span>
+                      <span className="whitespace-nowrap font-bold">
+                        {time_spent}
+                      </span>
                     </div>
                   )}
                 </div>
