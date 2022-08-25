@@ -69,7 +69,7 @@ export default () => {
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && address.length < 65 && assets_data && validators_data) {
+      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
         if (!controller.signal.aborted) {
           const response = await all_staking_delegations(address)
           setDelegations(response?.data?.map(d => {
@@ -99,12 +99,12 @@ export default () => {
     return () => {
       controller?.abort()
     }
-  }, [address, assets_data, validators_data])
+  }, [address, assets_data, validators_data, depositAddresses])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && address.length < 65 && assets_data && validators_data) {
+      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
         if (!controller.signal.aborted) {
           const { staking_params } = { ...chain_data }
           const response = await all_staking_redelegations(address)
@@ -145,12 +145,12 @@ export default () => {
     return () => {
       controller?.abort()
     }
-  }, [address, assets_data, validators_data])
+  }, [address, assets_data, validators_data, depositAddresses])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && address.length < 65 && assets_data && validators_data) {
+      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
         if (!controller.signal.aborted) {
           const { staking_params } = { ...chain_data }
           const response = await all_staking_unbonding(address)
@@ -190,12 +190,12 @@ export default () => {
     return () => {
       controller?.abort()
     }
-  }, [address, assets_data, validators_data])
+  }, [address, assets_data, validators_data, depositAddresses])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && address.length < 65 && assets_data) {
+      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data) {
         if (!controller.signal.aborted) {
           const response = await distribution_rewards(address)
           const { rewards, total } = { ...response }
@@ -239,12 +239,12 @@ export default () => {
     return () => {
       controller?.abort()
     }
-  }, [address, assets_data])
+  }, [address, assets_data, depositAddresses])
 
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
-      if (address && address.length < 65 && assets_data && validators_data) {
+      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
         if (!controller.signal.aborted) {
           const validator_data = validators_data.find(v => equals_ignore_case(v?.delegator_address, address))
           const { operator_address } = { ...validator_data }
@@ -267,7 +267,7 @@ export default () => {
     return () => {
       controller?.abort()
     }
-  }, [address, assets_data, validators_data])
+  }, [address, assets_data, validators_data, depositAddresses])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -323,7 +323,7 @@ export default () => {
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto">
       <Info
-        data={address?.length >= 65 || depositAddresses?.length > 0 ?
+        data={(address?.length >= 65 && !depositAddresses) || depositAddresses?.length > 0 ?
           { depositAddresses } :
           {
             balances,

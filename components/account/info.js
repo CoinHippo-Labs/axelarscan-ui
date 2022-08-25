@@ -24,7 +24,7 @@ export default ({ data }) => {
   const { address } = { ...query }
 
   const { balances, delegations, redelegations, unbondings, rewards, commissions, depositAddresses } = { ...data }
-  const is_deposit_address = address?.length >= 65 || depositAddresses?.length > 0
+  const is_deposit_address = address?.length >= 65 && 'depositAddresses' in data
   const validator_data = !is_deposit_address && validators_data?.find(v => equals_ignore_case(v?.delegator_address, address) || equals_ignore_case(v?.broadcaster_address, address))
   const reward = !is_deposit_address && rewards?.rewards?.find(r => equals_ignore_case(r?.denom, 'axl'))
   const commission = !is_deposit_address && commissions?.find(c => equals_ignore_case(c?.denom, 'axl'))
