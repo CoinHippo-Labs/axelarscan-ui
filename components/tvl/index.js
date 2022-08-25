@@ -23,6 +23,7 @@ export default () => {
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && assets_data && Object.keys({ ...tvl_data }).length > 5) {
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+
       setData(_.orderBy(
         Object.entries(tvl_data).map(([k, v]) => {
           const {
@@ -506,8 +507,7 @@ export default () => {
             height="32"
           />
         )}
-      </div>
-      :
+      </div> :
       <div className="h-full flex items-center justify-start">
         <TailSpin
           color={loader_color(theme)}
