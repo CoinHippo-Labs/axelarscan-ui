@@ -362,10 +362,10 @@ export default () => {
                 props.value && (
                   <Copy
                     value={props.value}
-                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 font-semibold">
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 text-xs font-semibold">
                       {ellipse(props.value, 16)}
                     </span>}
-                    size={18}
+                    size={16}
                   />
                 )
               ),
@@ -380,14 +380,17 @@ export default () => {
                   props.value?.length > 0 ?
                     <div className="flex flex-col space-y-2.5 mb-4">
                       {_.slice(props.value, 0, 10).filter(c => c).map((c, i) => {
-                        const { params, type, executed, deposit_address } = { ...c }
+                        const { id, params, type, executed, deposit_address } = { ...c }
                         const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
                         const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
                         const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
                         const _decimals = contract_data?.decimals || asset_data?.decimals || 18
                         const _symbol = contract_data?.symbol || asset_data?.symbol || symbol
                         const image = contract_data?.image || asset_data?.image
-                        const source_chain_data = sourceChain && getChain(sourceChain, evm_chains_data)
+                        const source_chain_data = sourceChain &&
+                          getChain(sourceChain, evm_chains_data)
+                        const transfer_id = parseInt(id, 16)
+
                         return (
                           <div
                             key={i}
@@ -506,6 +509,19 @@ export default () => {
                                 </span>
                               </div>
                             )}
+                            {['mintToken'].includes(type) && typeof transfer_id === 'number' && (
+                              <div className="flex items-center space-x-1 mb-1 mr-2">
+                                <Link href={`/transfer?transfer_id=${transfer_id}`}>
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-white text-xs font-semibold"
+                                  >
+                                    Transfer
+                                  </a>
+                                </Link>
+                              </div>
+                            )}
                             {name && (
                               <div className="flex flex-col mb-1 mr-2">
                                 <span className="font-semibold">
@@ -571,14 +587,38 @@ export default () => {
                               salt && (
                                 <div className="flex items-center space-x-1 mb-1 mr-2">
                                   <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                                    {deposit_address ? 'Deposit address' : 'Salt'}:
+                                    {deposit_address ?
+                                      'Deposit address' :
+                                      'Salt'
+                                    }:
                                   </span>
-                                  <Copy
-                                    value={deposit_address || salt}
-                                    title={<span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                                      {ellipse(deposit_address || salt, 8)}
-                                    </span>}
-                                  />
+                                  {deposit_address ?
+                                    <>
+                                      <a
+                                        href={`/account/${deposit_address}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-slate-400 dark:text-slate-600 text-xs font-semibold"
+                                      >
+                                        {ellipse(
+                                          deposit_address,
+                                          8,
+                                        )}
+                                      </a>
+                                      <Copy
+                                        value={deposit_address}
+                                      />
+                                    </> :
+                                    <Copy
+                                      value={salt}
+                                      title={<span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                                        {ellipse(
+                                          salt,
+                                          8,
+                                        )}
+                                      </span>}
+                                    />
+                                  }
                                 </div>
                               )
                             }
@@ -640,14 +680,14 @@ export default () => {
               disableSortBy: true,
               Cell: props => (
                 props.value && (
-                  <div className={`max-w-min ${equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 py-0.5 px-1.5`}>
+                  <div className={`max-w-min ${equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 py-1 px-1.5`}>
                     {equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
-                      <BiCheckCircle size={20} /> :
+                      <BiCheckCircle size={18} /> :
                       equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
-                        <HiOutlineClock size={20} /> :
-                        <BiXCircle size={20} />
+                        <HiOutlineClock size={18} /> :
+                        <BiXCircle size={18} />
                     }
-                    <span className="capitalize">
+                    <span className="capitalize text-xs">
                       {(props.row.original.commands && props.row.original.commands.filter(c => c?.executed).length === props.row.original.commands.length ?
                         'Executed' :
                         props.value.replace('BATCHED_COMMANDS_STATUS_', '')

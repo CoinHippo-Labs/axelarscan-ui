@@ -28,84 +28,105 @@ export default () => {
 
   const router = useRouter()
   const { query } = { ...router }
-  const { tx } = { ...query }
+  const { tx, transfer_id } = { ...query }
 
   const [transfer, setTransfer] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
       if (tx && assets_data) {
-        if (!controller.signal.aborted) {
-          const response = await getTransfers({
-            txHash: tx,
-            size: 1,
-          })
-          if (response) {
-            let data = response.data?.[0]
-            const { source, link, confirm_deposit, vote, sign_batch } = { ...data }
-            const { sender_chain, recipient_chain, recipient_address, amount, fee, value } = { ...source }
-            if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
-              let _response
-              if (recipient_address) {
-                if (type(recipient_address) === 'account') {
-                  _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
-                  _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
-                }
-                _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
-                _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
+        const response = await getTransfers({
+          txHash: tx,
+          size: 1,
+        })
+
+        if (response) {
+          let data = response.data?.[0]
+          const { source, link, confirm_deposit, vote, sign_batch } = { ...data }
+          const { sender_chain, recipient_chain, recipient_address, amount, fee, value } = { ...source }
+
+          if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
+            let _response
+            if (recipient_address) {
+              if (type(recipient_address) === 'account') {
+                _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
+                _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
               }
-              if ((!link?.recipient_address || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && confirm_deposit?.id) {
-                _response = {
-                  ..._response,
-                  data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: confirm_deposit.id }], 'txhash'))
-                }
-              }
-              if (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1 && vote?.id) {
-                _response = {
-                  ..._response,
-                  data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: vote.id }], 'txhash'))
-                }
-              }
-              if (_response?.data?.length > 0) {
-                _response.data.forEach(d => getTransaction(d?.txhash))
-                await sleep(2 * 1000)
-                _response = await getTransfers({
-                  txHash: tx,
-                  size: 1,
-                })
-                data = _response.data?.[0] || data
+              _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
+              _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
+            }
+            if ((!link?.recipient_address || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && confirm_deposit?.id) {
+              _response = {
+                ..._response,
+                data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: confirm_deposit.id }], 'txhash'))
               }
             }
-            if (!(
-              recipient_chain &&
-              typeof amount === 'number' &&
-              typeof value === 'number' &&
-              typeof fee === 'number'
-            ) || (
-              !sign_batch?.executed &&
-              evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
-            )) {
-              await getTransfersStatus({
+            if (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1 && vote?.id) {
+              _response = {
+                ..._response,
+                data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: vote.id }], 'txhash'))
+              }
+            }
+            if (_response?.data?.length > 0) {
+              _response.data.forEach(d => getTransaction(d?.txhash))
+              await sleep(2 * 1000)
+              _response = await getTransfers({
                 txHash: tx,
-                sourceChain: sender_chain,
+                size: 1,
               })
+              data = _response.data?.[0] || data
             }
-            setTransfer({
-              data,
-              tx,
+          }
+
+          if (!(
+            recipient_chain &&
+            typeof amount === 'number' &&
+            typeof value === 'number' &&
+            typeof fee === 'number'
+          ) || (
+            !sign_batch?.executed &&
+            evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
+          )) {
+            await getTransfersStatus({
+              txHash: tx,
+              sourceChain: sender_chain,
             })
           }
+
+          setTransfer({
+            data,
+            tx,
+          })
+        }
+      }
+      else if (transfer_id) {
+        const response = await getTransfers({
+          transferId: transfer_id,
+          size: 1,
+        })
+
+        const {
+          source,
+        } = { ..._.head(response?.data) }
+        const {
+          id,
+        } = { ...source }
+
+        if (id) {
+          router.push(`/transfer/${id}`)
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 0.5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
-  }, [tx, assets_data])
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(),
+        0.5 * 60 * 1000,
+      )
+    )
+  }, [tx, transfer_id, assets_data])
 
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
   const { data } = { ...transfer }
@@ -659,9 +680,14 @@ export default () => {
               </div>
             )
           })}
-        </div>
-        :
-        <TailSpin color={loader_color(theme)} width="32" height="32" />
+        </div> :
+        !tx && transfer_id ?
+          null :
+          <TailSpin
+            color={loader_color(theme)}
+            width="32"
+            height="32"
+          />
       }
     </div>
   )

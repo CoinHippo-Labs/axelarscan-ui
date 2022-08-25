@@ -226,6 +226,9 @@ export default () => {
         </div>
       )
       break
+    case '/transfer':
+      title = 'Cross-chain Transfer'
+      break
     case '/tvl':
       title = 'TVL'
       subtitle = 'Total assets on Axelar Network'
