@@ -220,8 +220,12 @@ export default () => {
                 Header: 'Type',
                 accessor: 'type',
                 disableSortBy: true,
-                Cell: props => (
-                  props.value ?
+                Cell: props => {
+                  const {
+                    transactionHash,
+                  } = { ...props.row.original }
+
+                  const typeComponent = (
                     <div
                       title={props.row.original.executed ?
                         'Executed' :
@@ -230,11 +234,26 @@ export default () => {
                       className={`w-fit max-w-min ${props.row.original.executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs`}
                     >
                       {props.value}
-                    </div> :
+                    </div>
+                  )
+
+                  return props.value ?
+                    typeComponent && (
+                      transactionHash && explorer ?
+                        <a
+                          href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white text-xs font-semibold"
+                        >
+                          {typeComponent}
+                        </a> :
+                        typeComponent
+                    ) :
                     <span className="text-slate-400 dark:text-slate-600">
                       Unknown
                     </span>
-                ),
+                },
               },
               {
                 Header: 'Params',
