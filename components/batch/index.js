@@ -35,35 +35,45 @@ export default () => {
   const [filterTypes, setFilterTypes] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async is_interval => {
       if (chain && id) {
-        if (!controller.signal.aborted) {
-          const response = await axelard({
-            cmd: `axelard q evm batched-commands ${chain} ${id} -oj`,
-            cache: true,
-            cache_timeout: 1,
-          })
-          setData({
-            data: { ...to_json(response?.stdout) },
-            chain,
-            id,
-          })
-        }
+        const response = await axelard({
+          cmd: `axelard q evm batched-commands ${chain} ${id} -oj`,
+          cache: true,
+          cache_timeout: 1,
+        })
+
+        setData({
+          data: { ...to_json(response?.stdout) },
+          chain,
+          id,
+        })
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(true), 3 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(true),
+        3 * 60 * 1000,
+      )
+    )
   }, [chain, id])
 
   useEffect(() => {
     if (id && data?.id === id) {
       const { commands } = { ...data.data }
-      setTypes(_.countBy(_.uniqBy(commands || [], 'id').map(c => c?.type).filter(t => t)))
+      setTypes(
+        _.countBy(
+          _.uniqBy(
+            commands || [],
+            'id',
+          )
+          .map(c => c?.type)
+          .filter(t => t)
+        )
+      )
     }
   }, [id, data])
 
