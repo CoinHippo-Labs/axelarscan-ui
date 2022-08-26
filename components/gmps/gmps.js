@@ -510,7 +510,7 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...props.row.original }
+                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
@@ -546,7 +546,9 @@ export default ({ n }) => {
                   chain_data: source_chain_data,
                   data: refunded,
                 }].filter(s => s)
+
                 let current_step
+
                 switch (status) {
                   case 'called':
                     current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (!is_invalid_destination_chain && !is_insufficient_minimum_amount ? 1 : 0)
@@ -564,6 +566,7 @@ export default ({ n }) => {
                   default:
                     break
                 }
+
                 const forecall_time_spent = total_time_string(
                   call?.block_timestamp,
                   forecalled?.block_timestamp,
@@ -572,6 +575,7 @@ export default ({ n }) => {
                   call?.block_timestamp,
                   executed?.block_timestamp,
                 )
+
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
@@ -632,6 +636,11 @@ export default ({ n }) => {
                         </div>
                       )
                     })}
+                    {is_insufficient_fee && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Insufficient Fee
+                      </div>
+                    )}
                     {forecall_time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">

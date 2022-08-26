@@ -414,7 +414,7 @@ export default () => {
   }
 
   const { data, execute_data, callback, origin } = { ...gmp }
-  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { commandId, sourceChain } = { ...approved?.returnValues }
@@ -978,6 +978,11 @@ export default () => {
                         </div>
                       )
                     })}
+                    {is_insufficient_fee && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Insufficient Fee
+                      </div>
+                    )}
                     {forecall_time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">

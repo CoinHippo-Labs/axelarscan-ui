@@ -486,6 +486,7 @@ export default ({ n }) => {
                 const source_chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
                 const destination_chain_data = getChain(original_recipient_chain, chains_data) || getChain(recipient_chain, chains_data)
                 const axelar_chain_data = getChain('axelarnet', chains_data)
+
                 const steps = [{
                   id: 'source',
                   title: 'Send Asset',
@@ -537,11 +538,13 @@ export default ({ n }) => {
                     finish: !!(s.id === 'executed' ? s.data?.executed : s.data),
                   }
                 })
+
                 const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
                 const time_spent = total_time_string(
                   _.head(steps)?.data?.created_at?.ms / 1000,
                   _.last(steps)?.data?.created_at?.ms / 1000,
                 )
+
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.map((s, i) => {
