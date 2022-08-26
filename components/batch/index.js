@@ -168,8 +168,11 @@ export default () => {
                 Cell: props => (
                   props.value ?
                     <div
-                      title={props.row.original.executed ? 'Executed' : ''}
-                      className={`max-w-min ${props.row.original.executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize`}
+                      title={props.row.original.executed ?
+                        'Executed' :
+                        ''
+                      }
+                      className={`w-fit max-w-min ${props.row.original.executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs`}
                     >
                       {props.value}
                     </div>

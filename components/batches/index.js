@@ -397,8 +397,11 @@ export default () => {
                             className="flex flex-wrap items-center"
                           >
                             <div
-                              title={executed ? 'Executed' : ''}
-                              className={`max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize mb-1 mr-2`}
+                              title={executed ?
+                                'Executed' :
+                                ''
+                              }
+                              className={`w-fit max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
                             >
                               {type}
                             </div>
@@ -494,10 +497,10 @@ export default () => {
                                 {image && (
                                   <Image
                                     src={image}
-                                    className="w-5 h-5 rounded-full"
+                                    className="w-4 h-4 rounded-full"
                                   />
                                 )}
-                                <span className="text-sm font-semibold">
+                                <span className="text-xs font-semibold">
                                   {amount > 0 && (
                                     <span className="mr-1">
                                       {number_format(utils.formatUnits(BigNumber.from(amount), _decimals), '0,0.000000', true)}
