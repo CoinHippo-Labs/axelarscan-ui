@@ -18,9 +18,13 @@ export default ({ data }) => {
 
   useEffect(() => {
     const getData = async () => {
-      if (data?.height && validators_data) {
-        const { height } = { ...data }
+      const {
+        height,
+      } = { ...data }
+
+      if (height && validators_data) {
         const response = await validator_sets(height)
+
         if (response) {
           setValidatorsData(response?.result?.validators?.map(v => {
             return {
@@ -31,10 +35,22 @@ export default ({ data }) => {
         }
       }
     }
+
     getData()
   }, [data, validators_data])
 
-  const { height, hash, time, num_txs, proposer_address, validator_addresses } = { ...data }
+  const {
+    block,
+    height,
+    validator_addresses,
+  } = { ...data }
+  const {
+    hash,
+    time,
+    num_txs,
+    proposer_address,
+  } = { ...data?.block?.header }
+
   const validator_data = validators_data?.find(v => equals_ignore_case(v?.consensus_address, proposer_address))
   const signed_validators_data = validatorsData?.filter(v => validator_addresses?.includes(v?.address))
   const unsigned_validators_data = validatorsData?.filter(v => !validator_addresses?.includes(v?.address))

@@ -121,7 +121,7 @@ export default () => {
         <Info
           data={
             data?.height === height &&
-            { ...data?.block?.header }
+            data
           }
         />
         <Transactions />
