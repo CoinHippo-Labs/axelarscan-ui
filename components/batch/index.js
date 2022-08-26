@@ -67,8 +67,24 @@ export default () => {
     }
   }, [id, data])
 
-  const chain_data = getChain(chain, evm_chains_data)
-  const { key_id, status, created_at, commands, signature, prev_batched_commands_id } = { ...data?.data }
+  const chain_data = getChain(
+    chain,
+    evm_chains_data,
+  )
+
+  const {
+    key_id,
+    status,
+    created_at,
+    commands,
+    signature,
+    prev_batched_commands_id,
+    proof,
+  } = { ...data?.data }
+  const {
+    signatures,
+  } = { ...proof }
+
   const commands_filtered = commands?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type))
 
   return (
@@ -188,7 +204,7 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => {
                   const { id, params, type, deposit_address } = { ...props.row.original }
-                  const { salt, newOwners, newOperators, name, decimals, cap, sourceChain, sourceTxHash, contractAddress } = { ...params }
+                  const { salt, newOwners, newOperators, newWeights, name, decimals, cap, sourceChain, sourceTxHash, contractAddress } = { ...params }
                   const source_chain_data = sourceChain &&
                     getChain(sourceChain, evm_chains_data)
                   const transfer_id = parseInt(id, 16)
@@ -236,9 +252,11 @@ export default () => {
                             <Image
                               src={chain_data.explorer.icon}
                               className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                            /> :
+                            <TiArrowRight
+                              size={16}
+                              className="transform -rotate-45"
                             />
-                            :
-                            <TiArrowRight size={16} className="transform -rotate-45" />
                           }
                         </a>
                       )}
@@ -249,8 +267,7 @@ export default () => {
                           <Image
                             src={source_chain_data.image}
                             className="w-5 h-5 rounded-full"
-                          />
-                          :
+                          /> :
                           <span className="font-semibold">
                             {source_chain_data.name}
                           </span>
@@ -277,9 +294,11 @@ export default () => {
                                   <Image
                                     src={source_chain_data.explorer.icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                  /> :
+                                  <TiArrowRight
+                                    size={16}
+                                    className="transform -rotate-45"
                                   />
-                                  :
-                                  <TiArrowRight size={16} className="transform -rotate-45" />
                                 }
                               </a>
                             )}
@@ -317,9 +336,11 @@ export default () => {
                                     <Image
                                       src={chain_data.explorer.icon}
                                       className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
                                     />
-                                    :
-                                    <TiArrowRight size={16} className="transform -rotate-45" />
                                   }
                                 </a>
                               )}
@@ -364,49 +385,78 @@ export default () => {
                           }
                         </div> :
                         newOwners || newOperators ?
-                          <div className="max-w-xl flex flex-wrap">
-                            {(newOwners || newOperators).split(';').map((o, i) => (
-                              <div
-                                key={i}
-                                className="flex items-center space-x-1 mb-1 mr-2"
-                              >
-                                <EnsProfile
-                                  address={o}
-                                  fallback={o && (
-                                    <Copy
-                                      value={o}
-                                      title={<span className="text-slate-400 dark:text-slate-200 text-sm">
-                                        <span className="xl:hidden">
-                                          {ellipse(o, 6)}
-                                        </span>
-                                        <span className="hidden xl:block">
-                                          {ellipse(o, 8)}
-                                        </span>
-                                      </span>}
-                                      size={18}
-                                    />
-                                  )}
-                                />
-                                {chain_data?.explorer?.url && (
-                                  <a
-                                    href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', o)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="min-w-max text-blue-600 dark:text-white"
-                                  >
-                                    {chain_data.explorer.icon ?
-                                      <Image
-                                        src={chain_data.explorer.icon}
-                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                      />
-                                      :
-                                      <TiArrowRight size={16} className="transform -rotate-45" />
-                                    }
-                                  </a>
-                                )}
+                          <>
+                            {newWeights && (
+                              <div className="flex items-center space-x-1 mb-1">
+                                <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                                  Weight:
+                                </span>
+                                <span className="font-semibold">
+                                  [{number_format(
+                                    _.sum(
+                                      newWeights
+                                        .split(';')
+                                        .map(w => Number(w))
+                                    ),
+                                    '0,0',
+                                  )}]
+                                </span>
                               </div>
-                            ))}
-                          </div> :
+                            )}
+                            <div className="max-w-xl flex flex-wrap">
+                              {(newOwners || newOperators).split(';').map((o, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center space-x-1 mb-1 mr-3"
+                                >
+                                  <EnsProfile
+                                    address={o}
+                                    fallback={o && (
+                                      <Copy
+                                        value={o}
+                                        title={<span className="text-slate-400 dark:text-slate-200 text-sm">
+                                          <span className="xl:hidden">
+                                            {ellipse(o, 6)}
+                                          </span>
+                                          <span className="hidden xl:block">
+                                            {ellipse(o, 8)}
+                                          </span>
+                                        </span>}
+                                        size={18}
+                                      />
+                                    )}
+                                  />
+                                  {chain_data?.explorer?.url && (
+                                    <a
+                                      href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', o)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="min-w-max text-blue-600 dark:text-white"
+                                    >
+                                      {chain_data.explorer.icon ?
+                                        <Image
+                                          src={chain_data.explorer.icon}
+                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                        /> :
+                                        <TiArrowRight
+                                          size={16}
+                                          className="transform -rotate-45"
+                                        />
+                                      }
+                                    </a>
+                                  )}
+                                  {newWeights && (
+                                    <span className="font-semibold">
+                                      [{number_format(
+                                        newWeights.split(';')[i],
+                                        '0,0',
+                                      )}]
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </> :
                           name ?
                             <div className="flex flex-col">
                               <span className="font-semibold">
@@ -496,9 +546,12 @@ export default () => {
             defaultPageSize={10}
             className="min-h-full small no-border"
           />
-        </div>
-        :
-        <TailSpin color={loader_color(theme)} width="32" height="32" />
+        </div> :
+        <TailSpin
+          color={loader_color(theme)}
+          width="32"
+          height="32"
+        />
       }
       <div className="space-y-2">
         <span className="text-base font-semibold">
@@ -517,11 +570,14 @@ export default () => {
                 />
               </div>
             </div> :
-            <span className="text-xs lg:text-base">
+            <div className="text-xs lg:text-base">
               -
-            </span>
-          :
-          <TailSpin color={loader_color(theme)} width="32" height="32" />
+            </div> :
+          <TailSpin
+            color={loader_color(theme)}
+            width="32"
+            height="32"
+          />
         }
       </div>
       <div className="space-y-2">
@@ -541,11 +597,14 @@ export default () => {
                 />
               </div>
             </div> :
-            <span className="text-xs lg:text-base">
+            <div className="text-xs lg:text-base">
               -
-            </span>
-          :
-          <TailSpin color={loader_color(theme)} width="32" height="32" />
+            </div> :
+          <TailSpin
+            color={loader_color(theme)}
+            width="32"
+            height="32"
+          />
         }
       </div>
       <div className="space-y-2">
@@ -553,9 +612,9 @@ export default () => {
           Signature
         </span>
         {equals_ignore_case(data?.id, id) ?
-          signature ?
+          signatures || signature ?
             <div className="flex flex-col space-y-1.5">
-              {signature.map((s, i) => (
+              {(signatures || signature).map((s, i) => (
                 <div
                   key={i}
                   className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg py-1 px-2"
@@ -575,11 +634,14 @@ export default () => {
                 </div>
               ))}
             </div> :
-            <span className="text-xs lg:text-base">
+            <div className="text-xs lg:text-base">
               -
-            </span>
-          :
-          <TailSpin color={loader_color(theme)} width="32" height="32" />
+            </div> :
+          <TailSpin
+            color={loader_color(theme)}
+            width="32"
+            height="32"
+          />
         }
       </div>
       {equals_ignore_case(data?.id, id) && prev_batched_commands_id && (

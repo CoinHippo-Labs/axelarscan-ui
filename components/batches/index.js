@@ -381,7 +381,7 @@ export default () => {
                     <div className="flex flex-col space-y-2.5 mb-4">
                       {_.slice(props.value, 0, 10).filter(c => c).map((c, i) => {
                         const { id, params, type, executed, deposit_address } = { ...c }
-                        const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
+                        const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newWeights, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
                         const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
                         const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
                         const _decimals = contract_data?.decimals || asset_data?.decimals || 18
@@ -638,11 +638,26 @@ export default () => {
                             {newOperators && (
                               <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
                                 <span className="font-semibold">
-                                  {number_format(newOperators.split(';').length, '0,0')}
+                                  {number_format(
+                                    newOperators.split(';').length,
+                                    '0,0',
+                                  )}
                                 </span>
                                 <span className="font-medium">
                                   New Operators
                                 </span>
+                                {newWeights && (
+                                  <span className="font-semibold">
+                                    [{number_format(
+                                      _.sum(
+                                        newWeights
+                                          .split(';')
+                                          .map(w => Number(w))
+                                      ),
+                                      '0,0',
+                                    )}]
+                                  </span>
+                                )}
                               </div>
                             )}
                             {newThreshold && (
