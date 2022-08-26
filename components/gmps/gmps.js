@@ -297,8 +297,19 @@ export default ({ n }) => {
                       </div>
                     )}
                     {fees?.base_fee > 0 && (
-                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-1.5">
-                        {number_format(fees.base_fee, '0,0.000000')} {fees.destination_native_token?.symbol}
+                      <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
+                        <span>
+                          Fees:
+                        </span>
+                        <span>
+                          {number_format(
+                            fees.base_fee,
+                            '0,0.000000',
+                          )}
+                        </span>
+                        <span>
+                          {fees.destination_native_token?.symbol}
+                        </span>
                       </div>
                     )}
                   </div>
