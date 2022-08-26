@@ -73,6 +73,10 @@ export default () => {
   )
 
   const {
+    explorer,
+  } = { ...chain_data }
+
+  const {
     key_id,
     status,
     created_at,
@@ -167,14 +171,39 @@ export default () => {
                 Header: 'Command ID',
                 accessor: 'id',
                 disableSortBy: true,
-                Cell: props => (
-                  <Copy
-                    value={props.value}
-                    title={<span className="uppercase text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                      {ellipse(props.value, 8)}
-                    </span>}
-                  />
-                ),
+                Cell: props => {
+                  const {
+                    transactionHash,
+                  } = { ...props.row.original }
+
+                  return (
+                    <div className="flex items-center space-x-1">
+                      {transactionHash && explorer ?
+                        <a
+                          href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white text-xs font-semibold"
+                        >
+                          {ellipse(
+                            props.value,
+                            8,
+                          )}
+                        </a> :
+                        <span className="uppercase text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                          {ellipse(
+                            props.value,
+                            8,
+                          )}
+                        </span>
+                      }
+                      <Copy
+                        value={props.value}
+                        size={18}
+                      />
+                    </div>
+                  )
+                },
                 headerClassName: 'whitespace-nowrap',
               },
               {
@@ -191,8 +220,7 @@ export default () => {
                       className={`w-fit max-w-min ${props.row.original.executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs`}
                     >
                       {props.value}
-                    </div>
-                    :
+                    </div> :
                     <span className="text-slate-400 dark:text-slate-600">
                       Unknown
                     </span>
@@ -512,8 +540,7 @@ export default () => {
                               {_symbol}
                             </span>
                           </span>
-                        </div>
-                        :
+                        </div> :
                         newThreshold && (
                           <div className="flex items-center space-x-1">
                             <span className="font-medium">

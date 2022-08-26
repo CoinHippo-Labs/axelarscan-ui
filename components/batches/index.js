@@ -208,15 +208,30 @@ export default () => {
     }
   }, [data])
 
-  const updateSigningBatches = async (_data = [], is_after_search) => {
-    const data = _.cloneDeep(_data)?.filter(b => ['BATCHED_COMMANDS_STATUS_SIGNING'].includes(b?.status) || (['BATCHED_COMMANDS_STATUS_SIGNED'].includes(b?.status) && b?.commands?.findIndex(c => !c?.executed) > -1))
+  const updateSigningBatches = async (
+    _data = [],
+    is_after_search,
+  ) => {
+    const data = _.cloneDeep(_data)?.filter(b =>
+      ['BATCHED_COMMANDS_STATUS_SIGNING'].includes(b?.status) ||
+      (
+        ['BATCHED_COMMANDS_STATUS_SIGNED'].includes(b?.status) &&
+        b?.commands?.findIndex(c => !c?.executed) > -1
+      )
+    )
+
     if (data?.length > 0) {
       if (is_after_search) {
         await sleep(0.5 * 1000)
       }
-      for (let i = 0; i < data.length; i++) {
-        const d = data[i]
-        const { chain, batch_id, created_at } = { ...d }
+
+      for (const d of data) {
+        const {
+          chain,
+          batch_id,
+          created_at,
+        } = { ...d }
+
         const params = {
           cmd: `axelard q evm batched-commands ${chain} ${batch_id} -oj`,
           cache: true,
@@ -225,20 +240,26 @@ export default () => {
         if (created_at?.ms) {
           params.created_at = Number(created_at.ms) / 1000
         }
+
         const response = await axelard(params)
         const batch_data = to_json(response?.stdout)
+
         if (batch_data) {
           const data_index = _data.findIndex(b => equals_ignore_case(b?.batch_id, batch_id))
+
           if (data_index > -1) {
             _data[data_index] = batch_data
           }
         }
+
         await sleep(0.5 * 1000)
       }
+
       if (!is_after_search) {
         await sleep(0.5 * 1000)
       }
     }
+
     return _data
   }
 
@@ -375,12 +396,24 @@ export default () => {
               accessor: 'commands',
               disableSortBy: true,
               Cell: props => {
-                const chain_data = getChain(props.row.original.chain, evm_chains_data)
+                const {
+                  chain,
+                } = { ...props.row.original }
+
+                const chain_data = getChain(
+                  chain,
+                  evm_chains_data,
+                )
+
+                const {
+                  explorer,
+                } = { ...chain_data }
+
                 return assets_data && (
                   props.value?.length > 0 ?
                     <div className="flex flex-col space-y-2.5 mb-4">
                       {_.slice(props.value, 0, 10).filter(c => c).map((c, i) => {
-                        const { id, params, type, executed, deposit_address } = { ...c }
+                        const { id, params, type, executed, deposit_address, transactionHash } = { ...c }
                         const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newWeights, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
                         const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
                         const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
@@ -391,20 +424,35 @@ export default () => {
                           getChain(sourceChain, evm_chains_data)
                         const transfer_id = parseInt(id, 16)
 
+                        const typeComponent = (
+                          <div
+                            title={executed ?
+                              'Executed' :
+                              ''
+                            }
+                            className={`w-fit max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
+                          >
+                            {type}
+                          </div>
+                        )
+
                         return (
                           <div
                             key={i}
                             className="flex flex-wrap items-center"
                           >
-                            <div
-                              title={executed ?
-                                'Executed' :
-                                ''
-                              }
-                              className={`w-fit max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
-                            >
-                              {type}
-                            </div>
+                            {typeComponent && (
+                              transactionHash && explorer ?
+                                <a
+                                  href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-white text-xs font-semibold"
+                                >
+                                  {typeComponent}
+                                </a> :
+                                typeComponent
+                            )}
                             {source_chain_data && (
                               <div className="flex items-center space-x-1 mb-1 mr-2">
                                 {source_chain_data.image ?
@@ -627,27 +675,27 @@ export default () => {
                             }
                             {newOwners && (
                               <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                <span className="font-semibold">
+                                <span className="text-xs font-semibold">
                                   {number_format(newOwners.split(';').length, '0,0')}
                                 </span>
-                                <span className="font-medium">
+                                <span className="text-xs font-medium">
                                   New Owners
                                 </span>
                               </div>
                             )}
                             {newOperators && (
                               <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                <span className="font-semibold">
+                                <span className="text-xs font-semibold">
                                   {number_format(
                                     newOperators.split(';').length,
                                     '0,0',
                                   )}
                                 </span>
-                                <span className="font-medium">
+                                <span className="text-xs font-medium">
                                   New Operators
                                 </span>
                                 {newWeights && (
-                                  <span className="font-semibold">
+                                  <span className="text-xs font-semibold">
                                     [{number_format(
                                       _.sum(
                                         newWeights
@@ -662,7 +710,7 @@ export default () => {
                             )}
                             {newThreshold && (
                               <div className="flex items-center space-x-1 mb-1 mr-2">
-                                <span className="font-medium">
+                                <span className="text-xs font-medium">
                                   Threshold:
                                 </span>
                                 <span className="text-slate-600 dark:text-slate-400 text-xs font-semibold">
