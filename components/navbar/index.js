@@ -282,47 +282,62 @@ export default () => {
 
   // tvl
   useEffect(() => {
-    const controller = new AbortController()
     const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+
     const getAssetData = async asset_data => {
-      if (!controller.signal.aborted) {
-        if (asset_data) {
-          const {
-            id,
-          } = { ...asset_data }
+      if (asset_data) {
+        const {
+          id,
+        } = { ...asset_data }
+
+        for (let i = 0; i < 3; i++) {
           const response = await getTVL({
             asset: id,
           })
+
           const {
             data,
             updated_at,
           } = { ...response }
-          dispatch({
-            type: TVL_DATA,
-            value: {
-              [id]: {
-                ..._.head(data),
-                updated_at,
+
+          if (data) {
+            dispatch({
+              type: TVL_DATA,
+              value: {
+                [id]: {
+                  ..._.head(data),
+                  updated_at,
+                },
               },
-            },
-          })
+            })
+
+            break
+          }
         }
       }
     }
+
     const getData = is_interval => {
       if (assets_data) {
-        if (['/tvl'].includes(pathname) && (!tvl_data || is_interval)) {
-          assets_data.filter(a => a && (!a.is_staging || staging))
+        if (
+          ['/tvl'].includes(pathname) &&
+          (!tvl_data || is_interval)
+        ) {
+          assets_data
+            .filter(a => a && (!a.is_staging || staging))
             .forEach(a => getAssetData(a))
         }
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(true), 3 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(true),
+        3 * 60 * 1000,
+      )
+    )
   }, [assets_data, pathname])
 
   // validators

@@ -36,6 +36,7 @@ export default () => {
             price,
           } = { ...v }
           price = typeof price === 'number' ? price : -1
+
           return {
             ...v,
             asset_data: getAsset(k, assets_data),
@@ -59,7 +60,7 @@ export default () => {
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   return (
-    data ?
+    data?.length >= assets_data?.filter(a => a && (!a.is_staging || staging)).length ?
       <div className="space-y-2">
         <Datatable
           columns={
@@ -372,6 +373,7 @@ export default () => {
                     id,
                     image,
                   } = { ...c }
+
                   return {
                     Header: (
                       <div className="flex flex-col space-y-0.5">
