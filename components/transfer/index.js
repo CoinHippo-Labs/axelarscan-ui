@@ -128,7 +128,10 @@ export default () => {
     )
   }, [tx, transfer_id, assets_data])
 
-  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+  const chains_data = _.concat(
+    evm_chains_data,
+    cosmos_chains_data,
+  )
   const { data } = { ...transfer }
   const { source, confirm_deposit, vote, sign_batch, ibc_send, link } = { ...data }
   const { sender_chain, recipient_chain, sender_address, amount, denom, fee, insufficient_fee } = { ...source }
@@ -185,22 +188,40 @@ export default () => {
   }, cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
     id: 'ibc_send',
     title: 'IBC Transfer',
-    chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
+    chain_data: ibc_send?.recv_txhash ?
+      destination_chain_data :
+      axelar_chain_data,
     data: ibc_send,
-    id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.recv_txhash ? 'ack_txhash' : 'id',
+    id_field: ibc_send?.recv_txhash ?
+      'recv_txhash' :
+      ibc_send?.ack_txhash ?
+        'ack_txhash' :
+        'id',
   }].filter(s => s).map((s, i) => {
     return {
       ...s,
       i,
-      finish: !!(s.id === 'executed' ? s.data?.executed : s.data),
+      finish: !!(s.id === 'executed' ?
+        s.data?.executed :
+        s.id === 'ibc_send' ?
+          s.data?.recv_txhash || s.data?.ack_txhash :
+          s.data
+      ),
     }
   })
   const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
-  const detail_steps = _.slice(steps, 0, steps.length - (_.last(steps)?.id === 'executed' ? 1 : 0))
-  const time_spent = total_time_string(
-    _.head(steps)?.data?.created_at?.ms / 1000,
-    _.last(steps)?.data?.created_at?.ms / 1000,
+  const detail_steps = _.slice(
+    steps,
+    0,
+    steps.length - (_.last(steps)?.id === 'executed' ? 1 : 0),
   )
+  const time_spent = _.last(steps)?.finish &&
+    total_time_string(
+      _.head(steps)?.data?.created_at?.ms / 1000,
+      _.last(steps)?.data?.block_timestamp ||
+      (_.last(steps)?.data?.received_at?.ms / 1000) ||
+      (_.last(steps)?.data?.created_at?.ms / 1000),
+    )
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
 
@@ -401,10 +422,13 @@ export default () => {
                     const id = data?.[id_field]
                     const { explorer } = { ...chain_data }
                     const { url, transaction_path, icon } = { ...explorer }
-                    let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
+
+                    let _path = path?.replace('{id}', id) ||
+                      transaction_path?.replace('{tx}', id)
                     Object.entries({ ...params }).forEach(([k, v]) => {
                       _path = _path?.replace(`{${k}}`, v)
                     })
+
                     return (
                       <div
                         key={i}
@@ -424,8 +448,7 @@ export default () => {
                                 {title}
                               </span>}
                               size={18}
-                            />
-                            :
+                            /> :
                             <span className={`uppercase ${text_color} text-xs font-medium`}>
                               {title}
                             </span>
@@ -441,9 +464,11 @@ export default () => {
                                 <Image
                                   src={icon}
                                   className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                /> :
+                                <TiArrowRight
+                                  size={16}
+                                  className="transform -rotate-45"
                                 />
-                                :
-                                <TiArrowRight size={16} className="transform -rotate-45" />
                               }
                             </a>
                           )}
@@ -467,8 +492,7 @@ export default () => {
                     </div>
                   )}
                 </div>
-              </div>
-              :
+              </div> :
               <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
                 Data not found
               </span>
@@ -476,17 +500,29 @@ export default () => {
           </div>
           {data && detail_steps.map((s, i) => {
             const { title, chain_data, data, id_field, path, params, finish } = { ...s }
-            const { height, type, status, executed, transfer_id, command_id, created_at } = { ...data }
-            const _id = data?.[id_field]
+            const { id, height, type, status, executed, chain, transfer_id, command_id, created_at, ack_txhash, recv_txhash, transactionHash, block_timestamp, received_at } = { ...data }
             const { explorer } = { ...chain_data }
             const { url, transaction_path, block_path, icon } = { ...explorer }
-            let _path = path?.replace('{id}', _id) || transaction_path?.replace('{tx}', _id)
-            Object.entries({ ...params }).forEach(([k, v]) => {
-              _path = _path?.replace(`{${k}}`, v)
-            })
-            const { id, ack_txhash, recv_txhash } = { ...data }
+
+            const _id = data?.[id_field]
+            let _path = path?.replace('{id}', _id) ||
+              transaction_path?.replace('{tx}', _id)
+            Object.entries({ ...params })
+              .forEach(([k, v]) => {
+                _path = _path?.replace(`{${k}}`, v)
+              })
+
+            const time = block_timestamp ?
+              block_timestamp * 1000 :
+              received_at ?
+                received_at?.ms :
+                created_at?.ms
+
+            const _chain_data = chains_data?.find(c => c?.id === chain)
+
             const rowClassName = 'flex flex-col space-y-1'
             const rowTitleClassName = `text-black dark:text-slate-300 text-sm lg:text-base font-bold`
+
             return (
               <div
                 key={i}
@@ -496,17 +532,74 @@ export default () => {
                   {title}
                 </div>
                 <div className="flex flex-col space-y-3">
+                  {transactionHash && _chain_data?.explorer && (
+                    <div className={rowClassName}>
+                      <span className={rowTitleClassName}>
+                        Transaction:
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        <a
+                          href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          <div className="font-bold">
+                            <span className="xl:hidden">
+                              {ellipse(
+                                transactionHash,
+                                12,
+                              )}
+                            </span>
+                            <span className="hidden xl:block">
+                              {ellipse(
+                                transactionHash,
+                                16,
+                              )}
+                            </span>
+                          </div>
+                        </a>
+                        <Copy
+                          value={transactionHash}
+                          size={18}
+                        />
+                        <a
+                          href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-white"
+                        >
+                          {_chain_data.explorer.icon ?
+                            <Image
+                              src={_chain_data.explorer.icon}
+                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                            /> :
+                            <TiArrowRight
+                              size={16}
+                              className="transform -rotate-45"
+                            />
+                          }
+                        </a>
+                      </div>
+                    </div>
+                  )}
                   {s.id === 'ibc_send' && _id ?
                     [id, recv_txhash, ack_txhash].filter(tx => tx).map((tx, j) => {
                       const _chain_data = tx === recv_txhash ? destination_chain_data : axelar_chain_data
                       const _explorer = _chain_data?.explorer
+
                       return (
                         <div
                           key={j}
                           className={rowClassName}
                         >
                           <span className={rowTitleClassName}>
-                            {tx === ack_txhash ? 'Acknowledge' : tx === recv_txhash ? 'Receive' : 'Send'}:
+                            {tx === ack_txhash ?
+                              'Acknowledge' :
+                              tx === recv_txhash ?
+                                'Receive' :
+                                'Send'
+                            }:
                           </span>
                           <div className="flex items-center space-x-1">
                             <a
@@ -517,10 +610,16 @@ export default () => {
                             >
                               <div className="font-bold">
                                 <span className="xl:hidden">
-                                  {ellipse(tx, 12)}
+                                  {ellipse(
+                                    tx,
+                                    12,
+                                  )}
                                 </span>
                                 <span className="hidden xl:block">
-                                  {ellipse(tx, 16)}
+                                  {ellipse(
+                                    tx,
+                                    16,
+                                  )}
                                 </span>
                               </div>
                             </a>
@@ -538,20 +637,24 @@ export default () => {
                                 <Image
                                   src={_explorer.icon}
                                   className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                /> :
+                                <TiArrowRight
+                                  size={16}
+                                  className="transform -rotate-45"
                                 />
-                                :
-                                <TiArrowRight size={16} className="transform -rotate-45" />
                               }
                             </a>
                           </div>
                         </div>
                       )
-                    })
-                    :
+                    }) :
                     _id ?
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {s.id === 'sign_batch' ? 'Batch' : 'Transaction'}:
+                          {s.id === 'sign_batch' ?
+                            'Batch' :
+                            'Transaction'
+                          }:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -562,10 +665,16 @@ export default () => {
                           >
                             <div className="font-bold">
                               <span className="xl:hidden">
-                                {ellipse(_id, 12)}
+                                {ellipse(
+                                  _id,
+                                  12,
+                                )}
                               </span>
                               <span className="hidden xl:block">
-                                {ellipse(_id, 16)}
+                                {ellipse(
+                                  _id,
+                                  16,
+                                )}
                               </span>
                             </div>
                           </a>
@@ -583,15 +692,20 @@ export default () => {
                               <Image
                                 src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              /> :
+                              <TiArrowRight
+                                size={16}
+                                className="transform -rotate-45"
                               />
-                              :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
                             }
                           </a>
                         </div>
-                      </div>
-                      :
-                      <FallingLines color={loader_color(theme)} width="32" height="32" />
+                      </div> :
+                      <FallingLines
+                        color={loader_color(theme)}
+                        width="32"
+                        height="32"
+                      />
                   }
                   {height && (
                     <div className={rowClassName}>
@@ -638,13 +752,13 @@ export default () => {
                       </div>
                     </div>
                   )}
-                  {created_at?.ms && (
+                  {time && (
                     <div className={rowClassName}>
                       <span className={rowTitleClassName}>
                         Time:
                       </span>
                       <span className="text-slate-400 dark:text-slate-600 font-medium">
-                        {moment(created_at.ms).fromNow()} ({moment(created_at.ms).format('MMM D, YYYY h:mm:ss A')})
+                        {moment(time).fromNow()} ({moment(time).format('MMM D, YYYY h:mm:ss A')})
                       </span>
                     </div>
                   )}

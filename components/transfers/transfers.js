@@ -528,22 +528,36 @@ export default ({ n }) => {
                 }, cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
                   id: 'ibc_send',
                   title: 'IBC Transfer',
-                  chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
+                  chain_data: ibc_send?.recv_txhash ?
+                    destination_chain_data :
+                    axelar_chain_data,
                   data: ibc_send,
-                  id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.recv_txhash ? 'ack_txhash' : 'id',
+                  id_field: ibc_send?.recv_txhash ?
+                    'recv_txhash' :
+                    ibc_send?.ack_txhash ?
+                      'ack_txhash' :
+                      'id',
                 }].filter(s => s).map((s, i) => {
                   return {
                     ...s,
                     i,
-                    finish: !!(s.id === 'executed' ? s.data?.executed : s.data),
+                    finish: !!(s.id === 'executed' ?
+                      s.data?.executed :
+                      s.id === 'ibc_send' ?
+                        s.data?.recv_txhash || s.data?.ack_txhash :
+                        s.data
+                    ),
                   }
                 })
 
                 const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
-                const time_spent = total_time_string(
-                  _.head(steps)?.data?.created_at?.ms / 1000,
-                  _.last(steps)?.data?.created_at?.ms / 1000,
-                )
+                const time_spent = _.last(steps)?.finish &&
+                  total_time_string(
+                    _.head(steps)?.data?.created_at?.ms / 1000,
+                    _.last(steps)?.data?.block_timestamp ||
+                    (_.last(steps)?.data?.received_at?.ms / 1000) ||
+                    (_.last(steps)?.data?.created_at?.ms / 1000),
+                  )
 
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
