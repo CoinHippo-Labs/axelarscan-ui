@@ -42,7 +42,7 @@ export default () => {
 
         if (response) {
           let data = response.data?.[0]
-          const { source, link, confirm_deposit, vote, sign_batch } = { ...data }
+          const { source, link, confirm_deposit, vote, sign_batch, ibc_send } = { ...data }
           const { sender_chain, recipient_chain, recipient_address, amount, fee, value } = { ...source }
 
           if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
@@ -86,6 +86,10 @@ export default () => {
           ) || (
             !sign_batch?.executed &&
             evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
+          ) || (
+            !ibc_send?.recv_txhash &&
+            recipient_chain !== 'axelarnet' &&
+            cosmos_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
           )) {
             await getTransfersStatus({
               txHash: tx,
