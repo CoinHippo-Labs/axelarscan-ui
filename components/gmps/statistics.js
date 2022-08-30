@@ -11,7 +11,7 @@ import Image from '../image'
 import { ProgressBar } from '../progress-bars'
 import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, capitalize, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, capitalize, ellipse, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const DEFAULT_TIMEFRAME_DAYS = 7
 const TIMEFRAME_OPTIONS = [
@@ -46,6 +46,7 @@ export default () => {
   const [statuses, setStatuses] = useState(null)
   const [methods, setMethods] = useState(null)
   const [chainPairs, setChainPairs] = useState(null)
+  const [contracts, setContracts] = useState(null)
   const [timeSpents, setTimeSpents] = useState(null)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [filters, setFilters] = useState(null)
@@ -80,15 +81,28 @@ export default () => {
 
   useEffect(() => {
     const triggering = is_interval => {
-      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+      setFetchTrigger(
+        is_interval ?
+          moment().valueOf() :
+          typeof fetchTrigger === 'number' ?
+            null :
+            0
+      )
     }
+
     if (pathname && filters) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (['/gmp/stats'].includes(pathname) ? 1 : 0.25) * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        triggering(true),
+        (['/gmp/stats'].includes(pathname) ?
+          1 :
+          0.25
+        ) * 60 * 1000
+      )
+    )
   }, [pathname, filters])
 
   useEffect(() => {
@@ -118,59 +132,74 @@ export default () => {
   }, [pathname, timeframeSelected])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = () => {
       if (filters) {
-        if (!controller.signal.aborted) {
-          if (!fetchTrigger) {
-            setStatuses(null)
-            setMethods(null)
-            setChainPairs(null)
-            setTimeSpents(null)
-          }
-
-          const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-          let event, fromTime, toTime
-          switch (method) {
-            case 'callContract':
-              event = 'ContractCall'
-              break
-            case 'callContractWithToken':
-              event = 'ContractCallWithToken'
-              break
-            default:
-              event = undefined
-              break
-          }
-          if (time?.length > 0) {
-            fromTime = time[0].unix()
-            toTime = time[1].unix() || moment().unix()
-          }
-          const params = {
-            txHash,
-            sourceChain,
-            destinationChain,
-            event,
-            status,
-            senderAddress,
-            sourceAddress,
-            contractAddress,
-            relayerAddress,
-            fromTime,
-            toTime,
-          }
-
-          getStatuses(params)
-          getMethods(params)
-          getChainPairs(params)
-          getTimeSpents(params)
+        if (!fetchTrigger) {
+          setStatuses(null)
+          setMethods(null)
+          setChainPairs(null)
+          setContracts(null)
+          setTimeSpents(null)
         }
+
+        const {
+          txHash,
+          sourceChain,
+          destinationChain,
+          method,
+          status,
+          senderAddress,
+          sourceAddress,
+          contractAddress,
+          relayerAddress,
+          time,
+        } = { ...filters }
+
+        let event,
+          fromTime,
+          toTime
+
+        switch (method) {
+          case 'callContract':
+            event = 'ContractCall'
+            break
+          case 'callContractWithToken':
+            event = 'ContractCallWithToken'
+            break
+          default:
+            event = undefined
+            break
+        }
+
+        if (time?.length > 0) {
+          fromTime = time[0].unix()
+          toTime = time[1].unix() ||
+            moment().unix()
+        }
+
+        const params = {
+          txHash,
+          sourceChain,
+          destinationChain,
+          event,
+          status,
+          senderAddress,
+          sourceAddress,
+          contractAddress,
+          relayerAddress,
+          fromTime,
+          toTime,
+        }
+
+        getStatuses(params)
+        getMethods(params)
+        getChainPairs(params)
+        getContracts(params)
+        getTimeSpents(params)
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [fetchTrigger])
 
   const getStatuses = async params => {
@@ -221,28 +250,35 @@ export default () => {
       error: response?.total,
     }
 
-    setStatuses(_.orderBy(Object.entries(data).map(([k, v]) => {
-      return {
-        key: k,
-        name: k === 'invalid' ?
-          'Invalid Data' :
-          k === 'approving' ?
-            'Wait for Approval' :
-            k === 'error' ?
-              'Error Execution' :
-                capitalize(k),
-        color: k === 'invalid' ?
-          'bg-slate-500' :
-          k === 'approving' ?
-            'bg-yellow-500' :
-            k === 'executed' ?
-              'bg-green-500' :
-              k === 'error' ?
-                'bg-red-500' :
-                  undefined,
-        value: v,
-      }
-    }), ['value'], ['desc']))
+    setStatuses(
+      _.orderBy(
+        Object.entries(data)
+          .map(([k, v]) => {
+            return {
+              key: k,
+              name: k === 'invalid' ?
+                'Invalid Data' :
+                k === 'approving' ?
+                  'Wait for Approval' :
+                  k === 'error' ?
+                    'Error Execution' :
+                      capitalize(k),
+              color: k === 'invalid' ?
+                'bg-slate-500' :
+                k === 'approving' ?
+                  'bg-yellow-500' :
+                  k === 'executed' ?
+                    'bg-green-500' :
+                    k === 'error' ?
+                      'bg-red-500' :
+                        undefined,
+              value: v,
+            }
+          }),
+        ['value'],
+        ['desc'],
+      )
+    )
   }
 
   const getMethods = async params => {
@@ -255,17 +291,30 @@ export default () => {
       },
       size: 0,
     })
-    const data = response?.aggs?.events?.buckets?.map(b => {
+
+    const {
+      buckets,
+    } = { ...response?.aggs?.events }
+
+    const data = buckets?.map(b => {
       const {
         key,
         doc_count,
       } = { ...b }
+
       return {
         key: key?.replace('ContractCall', 'callContract'),
         value: doc_count,
       }
     }) || []
-    setMethods(_.orderBy(data, ['value'], ['desc']))
+
+    setMethods(
+      _.orderBy(
+        data,
+        ['value'],
+        ['desc'],
+      )
+    )
   }
 
   const getChainPairs = async params => {
@@ -283,21 +332,119 @@ export default () => {
       },
       size: 0,
     })
+
     const data = response?.data || []
-    setChainPairs(_.orderBy(data.map(d => {
-      const {
-        id,
-        source_chain,
-        destination_chain,
-        num_txs,
-      } = { ...d }
+
+    setChainPairs(
+      _.orderBy(
+        data.map(d => {
+          const {
+            id,
+            source_chain,
+            destination_chain,
+            num_txs,
+          } = { ...d }
+
+          return {
+            key: id,
+            source_chain,
+            destination_chain,
+            value: num_txs,
+          }
+        }),
+        ['value'],
+        ['desc'],
+      )
+    )
+  }
+
+  const getContracts = async params => {
+    const response = await searchGMP({
+      ...params,
+      aggs: {
+        chains: {
+          terms: { field: 'call.returnValues.destinationChain.keyword', size: 1000 },
+          aggs: {
+            contracts: {
+              terms: { field: 'call.returnValues.destinationContractAddress.keyword', size: 1000 },
+            },
+          },
+        },
+      },
+      size: 0,
+    })
+
+    const {
+      buckets,
+    } = { ...response?.aggs?.chains }
+
+    const data = Object.entries(
+      _.groupBy(
+        buckets?.filter(b => chains_data?.findIndex(c => equals_ignore_case(c?.id, b?.key)) > -1)
+          .map(b => {
+            const {
+              key,
+              doc_count,
+              contracts,
+            } = { ...b }
+
+            return {
+              key: key?.toLowerCase(),
+              value: doc_count,
+              contracts: contracts?.buckets?.map(_b => {
+                return {
+                  key: _b?.key,
+                  value: _b?.doc_count,
+                }
+              }) || [],
+            }
+          }) || [],
+        'key',
+      )
+    ).map(([k, v]) => {
       return {
-        key: id,
-        source_chain,
-        destination_chain,
-        value: num_txs,
+        key: k,
+        value: _.sumBy(
+          v,
+          'value',
+        ),
+        contracts: _.orderBy(
+          Object.entries(
+            _.groupBy(
+              v?.flatMap(_v => _v?.contracts),
+              'key',
+            ),
+          ).map(([_k, _v]) => {
+            return {
+              key: _k,
+              value: _.sumBy(
+                _v,
+                'value',
+              ),
+            }
+          }),
+          ['value'],
+          ['desc'],
+        ),
       }
-    }), ['value'], ['desc']))
+    }).map(d => {
+      const {
+        contracts,
+      } = { ...d }
+
+      return {
+        ...d,
+        num_contracts: contracts?.length || 0,
+      }
+    })
+console.log(data)
+    setContracts(
+      _.orderBy(
+        data,
+        ['num_contracts'],
+        ['desc'],
+      )
+    )
   }
 
   const getTimeSpents = async params => {
@@ -361,6 +508,7 @@ export default () => {
         execute,
         total,
       } = { ...b }
+
       return {
         key,
         approve: approve?.values?.['50.0'],
@@ -369,13 +517,31 @@ export default () => {
         value: doc_count,
       }
     }) || []
-    setTimeSpents(_.orderBy(data, ['value'], ['desc']))
+
+    setTimeSpents(
+      _.orderBy(
+        data,
+        ['value'],
+        ['desc'],
+      )
+    )
   }
 
-  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-  const total = _.sumBy(statuses?.filter(s => !['called'].includes(s?.key)) || [], 'value')
+  const chains_data = _.concat(
+    evm_chains_data,
+    cosmos_chains_data,
+  )
+  const total = _.sumBy(
+    statuses?.filter(s => !['called'].includes(s?.key)) || [],
+    'value',
+  )
   const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg space-y-1 p-4'
-  const colors = ['bg-yellow-500', 'bg-blue-500', 'bg-green-500', 'bg-red-500']
+  const colors = [
+    'bg-yellow-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-red-500',
+  ]
 
   return (
     <>
@@ -415,6 +581,7 @@ export default () => {
               break
           }
           const qs_string = qs.toString()
+
           return (
             <Link
               key={i}
@@ -437,9 +604,15 @@ export default () => {
           </span>
           <div className="text-3xl font-bold">
             {statuses ?
-              number_format(total, '0,0')
-              :
-              <TailSpin color={loader_color(theme)} width="36" height="36" />
+              number_format(
+                total,
+                '0,0',
+              ) :
+              <TailSpin
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
           <div className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -472,13 +645,19 @@ export default () => {
                       className="h-1.5 rounded-lg"
                     />
                     <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                      {number_format(m?.value / total, '0,0.000%')}
+                      {number_format(
+                        m?.value / total,
+                        '0,0.000%',
+                      )}
                     </span>
                   </div>
                 </div>
-              ))
-              :
-              <TailSpin color={loader_color(theme)} width="36" height="36" />
+              )) :
+              <TailSpin
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
         </div>
@@ -488,37 +667,44 @@ export default () => {
           </span>
           <div className="grid sm:grid-cols-2 gap-y-1 gap-x-5">
             {statuses ?
-              statuses.filter(s => !['called'].includes(s?.key)).map((m, i) => (
-                <div
-                  key={i}
-                  className="space-y-0"
-                >
-                  <div className="flex items-center justify-between space-x-2">
-                    <span className="text-base font-bold">
-                      {m?.name}
-                    </span>
-                    <span className="font-bold">
-                      {number_format(m?.value, '0,0')}
-                    </span>
+              statuses
+                .filter(s => !['called'].includes(s?.key))
+                .map((m, i) => (
+                  <div
+                    key={i}
+                    className="space-y-0"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="text-base font-bold">
+                        {m?.name}
+                      </span>
+                      <span className="font-bold">
+                        {number_format(m?.value, '0,0')}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <ProgressBar
+                        width={m?.value * 100 / total}
+                        color={`${m?.color || colors[i % colors.length]}`}
+                        className="h-1.5 rounded-lg"
+                      />
+                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                        {number_format(m?.value / total, '0,0.000%')}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between space-x-2">
-                    <ProgressBar
-                      width={m?.value * 100 / total}
-                      color={`${m?.color || colors[i % colors.length]}`}
-                      className="h-1.5 rounded-lg"
-                    />
-                    <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                      {number_format(m?.value / total, '0,0.000%')}
-                    </span>
-                  </div>
-                </div>
-              ))
-              :
-              <TailSpin color={loader_color(theme)} width="36" height="36" />
+                )) :
+              <TailSpin
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
         </div>
-        <div className={`sm:col-span-2 ${metricClassName}`}>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
+        <div className={`${metricClassName}`}>
           <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
             Chain Pairs
           </div>
@@ -530,8 +716,16 @@ export default () => {
                   destination_chain,
                   value,
                 } = { ...p }
-                const source_chain_data = getChain(source_chain, chains_data)
-                const destination_chain_data = getChain(destination_chain, chains_data)
+
+                const source_chain_data = getChain(
+                  source_chain,
+                  chains_data,
+                )
+                const destination_chain_data = getChain(
+                  destination_chain,
+                  chains_data,
+                )
+
                 return (
                   <div
                     key={i}
@@ -548,15 +742,20 @@ export default () => {
                           <Image
                             src={destination_chain_data?.image}
                             className="w-5 h-5 rounded-full"
-                          />
-                          :
+                          /> :
                           <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                            {destination_chain}
+                            {ellipse(
+                              destination_chain,
+                              8,
+                            )}
                           </span>
                         }
                       </div>
                       <span className="font-bold">
-                        {number_format(value, '0,0')}
+                        {number_format(
+                          value,
+                          '0,0',
+                        )}
                       </span>
                     </div>
                     <div className="flex items-center justify-between space-x-2">
@@ -566,18 +765,100 @@ export default () => {
                         className="h-1.5 rounded-lg"
                       />
                       <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        {number_format(value / total, '0,0.000%')}
+                        {number_format(
+                          value / total,
+                          '0,0.000%',
+                        )}
                       </span>
                     </div>
                   </div>
                 )
-              })
-              :
-              <TailSpin color={loader_color(theme)} width="36" height="36" />
+              }) :
+              <TailSpin
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
         </div>
-        <div className={`sm:col-span-2 ${metricClassName}`}>
+        <div className={`${metricClassName}`}>
+          <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
+            Destination Contracts
+          </div>
+          <div className="space-y-3">
+            {contracts ?
+              contracts.map((c, i) => {
+                const {
+                  key,
+                  num_contracts,
+                } = { ...c }
+
+                const chain_data = getChain(
+                  key,
+                  chains_data,
+                )
+
+                const {
+                  name,
+                  image,
+                } = { ...chain_data }
+
+                const value = num_contracts
+                const total = _.sumBy(
+                  contracts,
+                  'num_contracts',
+                )
+
+                return (
+                  <div
+                    key={i}
+                    className="space-y-0"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <div className="flex items-center space-x-2">
+                        {image && (
+                          <Image
+                            src={image}
+                            className="w-6 h-6 rounded-full"
+                          />
+                        )}
+                        <span className="text-base font-bold">
+                          {name || key}
+                        </span>
+                      </div>
+                      <span className="font-bold">
+                        {number_format(
+                          value,
+                          '0,0',
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between space-x-2">
+                      <ProgressBar
+                        width={value * 100 / total}
+                        color={`${colors[i % colors.length]}`}
+                        className="h-1.5 rounded-lg"
+                      />
+                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                        {number_format(
+                          value / total,
+                          '0,0.000%',
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                )
+              }) :
+              <TailSpin
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
+            }
+          </div>
+        </div>
+        <div className={`${metricClassName}`}>
           <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
             The Median Time Spent
           </div>
@@ -589,29 +870,34 @@ export default () => {
                   approve,
                   execute,
                 } = { ...t }
-                const source_chain_data = getChain(key, chains_data)
+
+                const source_chain_data = getChain(
+                  key,
+                  chains_data,
+                )
+
                 return (
                   <div
                     key={i}
-                    className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-2 gap-2 space-y-1 sm:space-y-0 p-3"
+                    className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-3 gap-2 space-y-1 sm:space-y-0 p-3"
                   >
                     <div className="flex flex-col space-y-0.5">
                       <span className="text-slate-400 dark:text-slate-500 text-xs">
                         From chain
                       </span>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1.5">
                         {source_chain_data?.image && (
                           <Image
                             src={source_chain_data.image}
-                            className="w-8 h-8 rounded-full"
+                            className="w-5 h-5 rounded-full"
                           />
                         )}
-                        <span className="text-lg font-bold">
+                        <span className="text-sm font-bold">
                           {source_chain_data?.name || key}
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-col space-y-1.5">
+                    <div className="col-span-2 flex flex-col space-y-1.5">
                       <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
                         Time spent
                       </span>
@@ -624,11 +910,17 @@ export default () => {
                             className="h-1.5"
                           />
                         </div>
-                        <div className="font-semibold text-left">
-                          Approve ({approve ? _total_time_string(approve) : '-'})
+                        <div className="whitespace-nowrap text-xs font-semibold text-left">
+                          Approve ({approve ?
+                            _total_time_string(approve) :
+                            '-'
+                          })
                         </div>
-                        <div className="font-semibold text-right">
-                          Execute ({execute ? _total_time_string(execute) : '-'})
+                        <div className="whitespace-nowrap text-xs font-semibold text-right">
+                          Execute ({execute ?
+                            _total_time_string(execute) :
+                            '-'
+                          })
                         </div>
                         <div className="col-span-2" />
                         <div className="w-full col-span-2">
@@ -638,16 +930,22 @@ export default () => {
                             className="h-1.5"
                           />
                         </div>
-                        <div className="col-span-2 font-semibold text-right">
-                          Total ({t?.total ? _total_time_string(t.total) : '-'})
+                        <div className="col-span-2 whitespace-nowrap text-xs font-semibold text-right">
+                          Total ({t?.total ?
+                            _total_time_string(t.total) :
+                            '-'
+                          })
                         </div>
                       </div>
                     </div>
                   </div>
                 )
-              })
-              :
-              <TailSpin color={loader_color(theme)} width="36" height="36" />
+              }) :
+              <TailSpin
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
         </div>

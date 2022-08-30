@@ -50,7 +50,11 @@ export default () => {
 
   useEffect(() => {
     if (!api) {
-      setApi(new AxelarGMPRecoveryAPI({ environment: process.env.NEXT_PUBLIC_ENVIRONMENT }))
+      setApi(
+        new AxelarGMPRecoveryAPI({
+          environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
+        })
+      )
     }
   }, [])
 
@@ -59,16 +63,19 @@ export default () => {
       if (evm_chains_data && tx && api) {
         if (gmp) {
           await sleep(2 * 1000)
+
           if (gmp.tx !== tx) {
             setGmp(null)
             resetTxHashEdit()
           }
         }
+
         const response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
           method: 'searchGMP',
           txHash: tx,
         })
-        const data = response?.[0]
+
+        const data = _.head(response)
         const {
           approved,
         } = { ...data }
@@ -77,6 +84,7 @@ export default () => {
         let {
           callback,
         } = { ...data }
+
         if (callback?.transactionHash) {
           const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
             method: 'searchGMP',
@@ -95,6 +103,7 @@ export default () => {
           gas_paid_to_callback,
           is_call_from_relayer,
         } = { ...data }
+
         if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
           const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
             method: 'searchGMP',
@@ -119,7 +128,7 @@ export default () => {
           } = { ...approved.returnValues }
 
           // setup provider
-          const rpcs = getChain(destinationChain, evm_chains_data)?.provider_params?.[0]?.rpcUrls || []
+          const rpcs = _.head(getChain(destinationChain, evm_chains_data)?.provider_params)?.rpcUrls || []
           const provider = rpcs.length === 1 ?
             new providers.JsonRpcProvider(rpcs[0]) :
             new providers.FallbackProvider(rpcs.map((url, i) => {
@@ -192,11 +201,13 @@ export default () => {
       relayerAddress,
       error,
     }
+
     // request api
     await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, {
       method: 'POST',
       body: JSON.stringify(params),
     }).catch(error => { return null })
+
     resetTxHashEdit()
   }
 
@@ -208,18 +219,38 @@ export default () => {
           status: 'pending',
           message: 'Approving',
         })
-        const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+
+        const {
+          call,
+        } = { ...data }
+        const {
+          transactionHash,
+          transactionIndex,
+          logIndex,
+        } = { ...call }
+
         const response = await api.manualRelayToDestChain(transactionHash)
+
         console.log('[approve response]', response)
-        const { success, error, signCommandTx } = { ...response }
+
+        const {
+          success,
+          error,
+          signCommandTx,
+        } = { ...response }
+
         if (success) {
           await sleep(15 * 1000)
         }
+
         setApproving(false)
         setApproveResponse({
-          status: success ? 'success' : 'failed',
-          message: error?.message || error || 'Approve successful',
+          status: success ?
+            'success' :
+            'failed',
+          message: error?.message ||
+            error ||
+            'Approve successful',
           txHash: signCommandTx?.txhash,
           is_axelar_transaction: true,
         })
@@ -227,7 +258,10 @@ export default () => {
         setApproving(false)
         setApproveResponse({
           status: 'failed',
-          message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
+          message: error?.reason ||
+            error?.data?.message ||
+            error?.data?.text ||
+            error?.message,
         })
       }
     }
@@ -241,22 +275,44 @@ export default () => {
           status: 'pending',
           message: 'Executing',
         })
-        const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+
+        const {
+          call,
+        } = { ...data }
+        const {
+          transactionHash,
+          transactionIndex,
+          logIndex,
+        } = { ...call }
+
         const response = await api.execute(transactionHash)
+
         console.log('[execute response]', response)
-        const { success, error, transaction } = { ...response }
+
+        const {
+          success,
+          error,
+          transaction,
+        } = { ...response }
+
         setExecuting(false)
         setExecuteResponse({
-          status: success ? 'success' : 'failed',
-          message: error?.message || error || 'Execute successful',
+          status: success ?
+            'success' :
+            'failed',
+          message: error?.message ||
+            error ||
+            'Execute successful',
           txHash: transaction?.transactionHash,
         })
       } catch (error) {
         setExecuting(false)
         setExecuteResponse({
           status: 'failed',
-          message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
+          message: error?.reason ||
+            error?.data?.message ||
+            error?.data?.text ||
+            error?.message,
         })
       }
     }
@@ -270,27 +326,55 @@ export default () => {
           status: 'pending',
           message: 'Estimating & Paying gas',
         })
-        const { call } = { ...data }
-        const { chain, transactionHash, transactionIndex, logIndex } = { ...call }
-        const response = await api.addNativeGas(chain, transactionHash, {
-          refundAddress: address,
-        })
+
+        const {
+          call,
+        } = { ...data }
+        const {
+          chain,
+          transactionHash,
+          transactionIndex,
+          logIndex,
+        } = { ...call }
+
+        const response = await api.addNativeGas(
+          chain,
+          transactionHash,
+          {
+            refundAddress: address,
+          },
+        )
+
         console.log('[addNativeGas response]', response)
-        const { success, error, transaction } = { ...response }
+
+        const {
+          success,
+          error,
+          transaction,
+        } = { ...response }
+
         if (success) {
           await sleep(15 * 1000)
         }
+
         setGasAdding(false)
         setGasAddResponse({
-          status: success ? 'success' : 'failed',
-          message: error?.message || error || 'Pay gas successful',
+          status: success ?
+            'success' :
+            'failed',
+          message: error?.message ||
+            error ||
+            'Pay gas successful',
           txHash: transaction?.transactionHash,
         })
       } catch (error) {
         setGasAdding(false)
         setGasAddResponse({
           status: 'failed',
-          message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
+          message: error?.reason ||
+            error?.data?.message ||
+            error?.data?.text ||
+            error?.message,
         })
       }
     }
@@ -420,7 +504,10 @@ export default () => {
   const { commandId, sourceChain } = { ...approved?.returnValues }
   const { from } = { ...call?.transaction }
   const relayer = executed?.transaction?.from
-  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+  const chains_data = _.concat(
+    evm_chains_data,
+    cosmos_chains_data,
+  )
   const source_chain_data = getChain(chain, chains_data)
   const axelar_chain_data = getChain('axelarnet', chains_data)
   const destination_chain_data = getChain(destinationChain, chains_data)
