@@ -35,7 +35,9 @@ export default () => {
           let {
             price,
           } = { ...v }
-          price = typeof price === 'number' ? price : -1
+          price = typeof price === 'number' ?
+            price :
+            -1
 
           return {
             ...v,
@@ -123,8 +125,11 @@ export default () => {
                         denom,
                       } = { ...denom_data }
 
-                      const amount = supply || total
-                      const has_asset = amount || contract_data || (escrow_addresses?.length > 0 && denom)
+                      const amount = supply ||
+                        total
+                      const has_asset = amount ||
+                        contract_data ||
+                        (escrow_addresses?.length > 0 && denom)
 
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
@@ -161,7 +166,7 @@ export default () => {
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
-                              data,
+                              data.filter(d => d?.value > 0),
                               'value',
                             ),
                             '0,0.00a',
@@ -252,7 +257,7 @@ export default () => {
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
-                              data,
+                              data.filter(d => d?.value_on_evm > 0),
                               'value_on_evm',
                             ),
                             '0,0.00a',
@@ -313,7 +318,7 @@ export default () => {
                           ({currency_symbol}
                           {number_format(
                             _.sumBy(
-                              data,
+                              data.filter(d => d?.value_on_cosmos > 0),
                               'value_on_cosmos',
                             ),
                             '0,0.00a',
@@ -408,7 +413,7 @@ export default () => {
                                   ...d,
                                   value,
                                 }
-                              }),
+                              }).filter(d => d?.value > 0),
                               'value',
                             ),
                             '0,0.00a',
@@ -495,7 +500,11 @@ export default () => {
               ['asc'],
             )
           }
-          data={data}
+          data={_.orderBy(
+            data,
+            ['value'],
+            ['desc'],
+          )}
           noPagination={data.length <= 50}
           noRecordPerPage={true}
           defaultPageSize={50}

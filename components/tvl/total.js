@@ -28,7 +28,9 @@ export default () => {
           let {
             price,
           } = { ...v }
-          price = typeof price === 'number' ? price : -1
+          price = typeof price === 'number' ?
+            price :
+            -1
 
           return {
             ...v,
@@ -42,9 +44,27 @@ export default () => {
     }
   }, [evm_chains_data, cosmos_chains_data, assets_data, tvl_data])
 
-  const value_on_evm = _.sumBy(data, 'value_on_evm')
-  const value_on_cosmos = _.sumBy(data?.filter(d => !['uaxl'].includes(d?.asset)), 'value_on_cosmos')
-  const value = _.sumBy(data?.filter(d => !['uaxl'].includes(d?.asset)), 'value')
+  const value_on_evm = _.sumBy(
+    data?.filter(d =>
+      d?.value_on_evm > 0 &&
+      !['uaxl'].includes(d?.asset)
+    ),
+    'value_on_evm',
+  )
+  const value_on_cosmos = _.sumBy(
+    data?.filter(d =>
+      d?.value_on_cosmos > 0 &&
+      !['uaxl'].includes(d?.asset)
+    ),
+    'value_on_cosmos',
+  )
+  const value = _.sumBy(
+    data?.filter(d =>
+      d?.value > 0 &&
+      !['uaxl'].includes(d?.asset)
+    ),
+    'value',
+  )
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
