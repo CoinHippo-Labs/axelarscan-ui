@@ -437,7 +437,7 @@ export default () => {
         num_contracts: contracts?.length || 0,
       }
     })
-console.log(data)
+
     setContracts(
       _.orderBy(
         data,
