@@ -997,12 +997,15 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, forecalled, executed, error, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
+              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
-              const _data = ['executed'].includes(s.id) ? data || error : data
+              const _data = ['executed'].includes(s.id) ?
+                data || error :
+                data
               const { blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
               let { transactionHash } = { ..._data }
-              transactionHash = transactionHash || receipt?.transactionHash
+              transactionHash = transactionHash ||
+                receipt?.transactionHash
               const { sender } = { ...returnValues }
               const source_chain = call?.chain
               const destination_chain = call?.returnValues?.destinationChain
@@ -1012,6 +1015,7 @@ export default () => {
               const { gasUsed, effectiveGasPrice } = { ...(executed?.receipt || error?.receipt) }
               const { source_token, destination_native_token } = { ...gas_price_rate }
               let source_gas_data, destination_gas_data, source_gas_used, source_refuned_gas_used, callback_gas_used, source_forecalled_gas_used
+
               if (gasFeeAmount) {
                 source_gas_data = gasToken && gasToken !== constants.AddressZero ?
                   assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
@@ -1104,11 +1108,16 @@ export default () => {
                 - source_refuned_gas_used
               )
               const from = receipt?.from || transaction?.from
-              const to = !['forecalled', 'executed', 'refunded'].includes(s.id) ? contract_address : ['refunded'].includes(s.id) ? _data?.to || refundAddress : destinationContractAddress
+              const to = !['forecalled', 'executed', 'refunded'].includes(s.id) ?
+                contract_address :
+                ['refunded'].includes(s.id) ?
+                  _data?.to || refundAddress :
+                  destinationContractAddress
               const { explorer } = { ...chain_data }
               const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
               const rowClassName = 'flex space-x-4'
               const rowTitleClassName = `w-32 text-black dark:text-slate-300 text-sm lg:text-base font-bold`
+
               return (
                 <div
                   key={i}
@@ -1131,8 +1140,7 @@ export default () => {
                               value={txHashEdit}
                               onChange={e => setTxHashEdit(e.target.value)}
                               className="bg-slate-50 dark:bg-slate-800 rounded-lg text-base py-1 px-2"
-                            />
-                            :
+                            /> :
                             transactionHash ?
                               <>
                                 <a
@@ -1143,10 +1151,16 @@ export default () => {
                                 >
                                   <div className="text-sm lg:text-base font-bold">
                                     <span className="xl:hidden">
-                                      {ellipse(transactionHash, 12)}
+                                      {ellipse(
+                                        transactionHash,
+                                        12,
+                                      )}
                                     </span>
                                     <span className="hidden xl:block">
-                                      {ellipse(transactionHash, 16)}
+                                      {ellipse(
+                                        transactionHash,
+                                        16,
+                                      )}
                                     </span>
                                   </div>
                                 </a>
@@ -1164,15 +1178,20 @@ export default () => {
                                     <Image
                                       src={icon}
                                       className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
                                     />
-                                    :
-                                    <TiArrowRight size={16} className="transform -rotate-45" />
                                   }
                                 </a>
-                              </>
-                              :
+                              </> :
                               !(!data && is_executed) && !error && !is_invalid_destination_chain && !is_insufficient_minimum_amount && (
-                                <FallingLines color={loader_color(theme)} width="32" height="32" />
+                                <FallingLines
+                                  color={loader_color(theme)}
+                                  width="32"
+                                  height="32"
+                                />
                               )
                           }
                           {txHashEditing ?
@@ -1199,12 +1218,15 @@ export default () => {
                                 className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
                               >
                                 {txHashEditUpdating ?
-                                  <TailSpin color={loader_color(theme)} width="16" height="16" /> :
+                                  <TailSpin
+                                    color={loader_color(theme)}
+                                    width="16"
+                                    height="16"
+                                  /> :
                                   <BiSave size={20} />
                                 }
                               </button>
-                            </>
-                            :
+                            </> :
                             <button
                               onClick={() => setTxHashEditing(true)}
                               className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
@@ -1213,8 +1235,7 @@ export default () => {
                             </button>
                           }
                         </div>
-                      </div>
-                      :
+                      </div> :
                       transactionHash ?
                         <div className={rowClassName}>
                           <span className={rowTitleClassName}>
@@ -1229,10 +1250,16 @@ export default () => {
                             >
                               <div className="text-sm lg:text-base font-bold">
                                 <span className="xl:hidden">
-                                  {ellipse(transactionHash, 12)}
+                                  {ellipse(
+                                    transactionHash,
+                                    12,
+                                  )}
                                 </span>
                                 <span className="hidden xl:block">
-                                  {ellipse(transactionHash, 16)}
+                                  {ellipse(
+                                    transactionHash,
+                                    16,
+                                  )}
                                 </span>
                               </div>
                             </a>
@@ -1250,14 +1277,15 @@ export default () => {
                                 <Image
                                   src={icon}
                                   className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                /> :
+                                <TiArrowRight
+                                  size={16}
+                                  className="transform -rotate-45"
                                 />
-                                :
-                                <TiArrowRight size={16} className="transform -rotate-45" />
                               }
                             </a>
                           </div>
-                        </div>
-                        :
+                        </div> :
                         ['gas_paid'].includes(s.id) && origin?.call ?
                           <div className="space-y-1.5">
                             <Link href={`/gmp/${origin.call.transactionHash}`}>
@@ -1281,10 +1309,16 @@ export default () => {
                                 >
                                   <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                     <span className="xl:hidden">
-                                      {ellipse(origin.call.transactionHash, 8)}
+                                      {ellipse(
+                                        origin.call.transactionHash,
+                                        8,
+                                      )}
                                     </span>
                                     <span className="hidden xl:block">
-                                      {ellipse(origin.call.transactionHash, 12)}
+                                      {ellipse(
+                                        origin.call.transactionHash,
+                                        12,
+                                      )}
                                     </span>
                                   </div>
                                 </a>
@@ -1294,15 +1328,18 @@ export default () => {
                                 size={18}
                               />
                             </div>
-                          </div>
-                          :
+                          </div> :
                           ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
                             <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
                               No transaction
                             </span>
                             :
                             !is_invalid_destination_chain && !is_insufficient_minimum_amount && (
-                              <FallingLines color={loader_color(theme)} width="32" height="32" />
+                              <FallingLines
+                                color={loader_color(theme)}
+                                width="32"
+                                height="32"
+                              />
                             )
                     }
                     {blockNumber && (
@@ -1360,28 +1397,75 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Gas Paid:
                         </span>
-                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                          {source_gas_data.image && (
-                            <Image
-                              src={source_gas_data.image}
-                              className="w-5 h-5 rounded-full"
-                            />
-                          )}
-                          <span className="text-sm font-semibold">
-                            <span className="mr-1">
-                              {number_format(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data.decimals), '0,0.000000', true)}
+                        <div className="flex flex-wrap items-center">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mr-1">
+                            {source_gas_data.image && (
+                              <Image
+                                src={source_gas_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )}
+                            <span className="text-sm font-semibold">
+                              <span className="mr-1">
+                                {number_format(
+                                  utils.formatUnits(
+                                    BigNumber.from(gasFeeAmount),
+                                    source_gas_data.decimals,
+                                  ),
+                                  '0,0.000000',
+                                  true,
+                                )}
+                              </span>
+                              <span>
+                                {ellipse(source_gas_data.symbol)}
+                              </span>
                             </span>
-                            <span>
-                              {ellipse(source_gas_data.symbol)}
-                            </span>
-                          </span>
+                          </div>
+                          {gas_added_transactions?.map((g, j) => {
+                            const {
+                              transactionHash,
+                              returnValues,
+                            } = { ...g }
+                            const {
+                              gasFeeAmount,
+                            } = { ...returnValues }
+
+                            return (
+                              <a
+                                key={j}
+                                href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mr-1"
+                              >
+                                <span className="text-2xs font-semibold">
+                                  <span className="mr-1">
+                                    {number_format(
+                                      utils.formatUnits(
+                                        BigNumber.from(gasFeeAmount),
+                                        source_gas_data.decimals,
+                                      ),
+                                      '+0,0.000000',
+                                      true,
+                                    )}
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data.symbol)}
+                                  </span>
+                                </span>
+                              </a>
+                            )
+                          })}
                         </div>
                       </div>
                     )}
                     {['forecalled', 'refunded'].includes(s.id) && forecalled?.receipt?.gasUsed && forecalled.receipt.effectiveGasPrice && destination_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {['refunded'].includes(s.id) ? 'Gas Forecall' : 'Gas Used'}:
+                          {['refunded'].includes(s.id) ?
+                            'Gas Forecall' :
+                            'Gas Used'
+                          }:
                         </span>
                         <div className="flex items-center space-x-2">
                           <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
@@ -1393,12 +1477,16 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                {number_format(utils.formatUnits(
-                                  FixedNumber.fromString(BigNumber.from(forecalled.receipt.gasUsed).toString())
-                                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(forecalled.receipt.effectiveGasPrice).toString()))
-                                    .round(0).toString().replace('.0', '')
-                                  , destination_gas_data.decimals
-                                ), '0,0.000000', true)}
+                                {number_format(
+                                  utils.formatUnits(
+                                    FixedNumber.fromString(BigNumber.from(forecalled.receipt.gasUsed).toString())
+                                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(forecalled.receipt.effectiveGasPrice).toString()))
+                                      .round(0).toString().replace('.0', '')
+                                    , destination_gas_data.decimals
+                                  ),
+                                  '0,0.000000',
+                                  true,
+                                )}
                               </span>
                               <span>
                                 {ellipse(destination_gas_data.symbol)}
@@ -1419,7 +1507,11 @@ export default () => {
                                 )}
                                 <span className="text-sm font-semibold">
                                   <span className="mr-1">
-                                    {number_format(source_forecalled_gas_used, '0,0.000000', true)}
+                                    {number_format(
+                                      source_forecalled_gas_used,
+                                      '0,0.000000',
+                                      true,
+                                    )}
                                   </span>
                                   <span>
                                     {ellipse(source_gas_data?.symbol)}
@@ -1434,7 +1526,10 @@ export default () => {
                     {['executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {['refunded'].includes(s.id) ? 'Gas Execute' : 'Gas Used'}:
+                          {['refunded'].includes(s.id) ?
+                            'Gas Execute' :
+                            'Gas Used'
+                          }:
                         </span>
                         <div className="flex items-center space-x-2">
                           <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
@@ -1472,7 +1567,11 @@ export default () => {
                                 )}
                                 <span className="text-sm font-semibold">
                                   <span className="mr-1">
-                                    {number_format(source_gas_used, '0,0.000000', true)}
+                                    {number_format(
+                                      source_gas_used,
+                                      '0,0.000000',
+                                      true,
+                                    )}
                                   </span>
                                   <span>
                                     {ellipse(source_gas_data?.symbol)}
@@ -1499,7 +1598,11 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                {number_format(callback_gas_used, '0,0.000000', true)}
+                                {number_format(
+                                  callback_gas_used,
+                                  '0,0.000000',
+                                  true,
+                                )}
                               </span>
                               <span>
                                 {ellipse(source_gas_data.symbol)}
@@ -1524,7 +1627,11 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                {number_format(source_token.token_price?.usd / destination_native_token.token_price?.usd, '0,0.000000', true)}
+                                {number_format(
+                                  source_token.token_price?.usd / destination_native_token.token_price?.usd,
+                                  '0,0.000000',
+                                  true,
+                                )}
                               </span>
                               <span>
                                 {ellipse(destination_gas_data?.symbol)}
@@ -1543,7 +1650,11 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                {number_format(1, '0,0.000000', true)}
+                                {number_format(
+                                  1,
+                                  '0,0.000000',
+                                  true,
+                                )}
                               </span>
                               <span>
                                 {ellipse(source_gas_data?.symbol)}
@@ -1569,7 +1680,10 @@ export default () => {
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
                                 ~
-                                {number_format(refunded_amount, '0,0.000000', true
+                                {number_format(
+                                  refunded_amount,
+                                  '0,0.000000',
+                                  true,
                                 )}
                               </span>
                               <span>
@@ -1583,7 +1697,14 @@ export default () => {
                     {to && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {['gas_paid'].includes(s.id) ? 'Gas Service' : ['forecalled', 'executed'].includes(s.id) ? 'Destination' : ['refunded'].includes(s.id) ? 'Receiver' : 'Gateway'}:
+                          {['gas_paid'].includes(s.id) ?
+                            'Gas Service' :
+                            ['forecalled', 'executed'].includes(s.id) ?
+                              'Destination' :
+                              ['refunded'].includes(s.id) ?
+                                'Receiver' :
+                                'Gateway'
+                          }:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -1598,10 +1719,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(to, 10, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      to,
+                                      10,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(to, 12, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      to,
+                                      12,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1621,9 +1750,11 @@ export default () => {
                               <Image
                                 src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              /> :
+                              <TiArrowRight
+                                size={16}
+                                className="transform -rotate-45"
                               />
-                              :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
                             }
                           </a>
                         </div>
@@ -1632,7 +1763,14 @@ export default () => {
                     {from && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
-                          {!['forecalled', 'approved', 'executed'].includes(s.id) ? 'Sender' : ['refunded'].includes(s.id) ? 'Sender' : ['forecalled'].includes(s.id) ? 'Forecaller' : 'Relayer'}:
+                          {!['forecalled', 'approved', 'executed'].includes(s.id) ?
+                            'Sender' :
+                            ['refunded'].includes(s.id) ?
+                              'Sender' :
+                              ['forecalled'].includes(s.id) ?
+                                'Forecaller' :
+                                'Relayer'
+                          }:
                         </span>
                         <div className="flex items-center space-x-1">
                           <a
@@ -1647,10 +1785,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(from, 10, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      from,
+                                      10,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(from, 12, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      from,
+                                      12,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1670,9 +1816,11 @@ export default () => {
                               <Image
                                 src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              /> :
+                              <TiArrowRight
+                                size={16}
+                                className="transform -rotate-45"
                               />
-                              :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
                             }
                           </a>
                         </div>
@@ -1696,10 +1844,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(sender, 10, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      sender,
+                                      10,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(sender, 12, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      sender,
+                                      12,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1719,9 +1875,11 @@ export default () => {
                               <Image
                                 src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              /> :
+                              <TiArrowRight
+                                size={16}
+                                className="transform -rotate-45"
                               />
-                              :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
                             }
                           </a>
                         </div>
@@ -1745,10 +1903,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(call.transaction.from, 10, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      call.transaction.from,
+                                      10,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(call.transaction.from, 12, chain_data?.prefix_address)}
+                                    {ellipse(
+                                      call.transaction.from,
+                                      12,
+                                      chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1768,9 +1934,11 @@ export default () => {
                               <Image
                                 src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                              /> :
+                              <TiArrowRight
+                                size={16}
+                                className="transform -rotate-45"
                               />
-                              :
-                              <TiArrowRight size={16} className="transform -rotate-45" />
                             }
                           </a>
                         </div>
