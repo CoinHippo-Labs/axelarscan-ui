@@ -1364,16 +1364,16 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Status:
                         </span>
-                        <div className={`${receipt?.status || typeof receipt?.status !== 'number' || (['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash) || (['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
                           {receipt?.status ||
-                            typeof receipt?.status !== 'number' ||
+                            (typeof receipt?.status !== 'number' && transactionHash) ||
                             (['executed'].includes(s.id) && is_executed) ?
                             <BiCheckCircle size={20} /> :
                             <BiXCircle size={20} />
                           }
                           <span>
                             {receipt?.status ||
-                              typeof receipt?.status !== 'number' ||
+                              (typeof receipt?.status !== 'number' && transactionHash) ||
                               (['executed'].includes(s.id) && is_executed) ?
                               'Success' :
                               'Error'
