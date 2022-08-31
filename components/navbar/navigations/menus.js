@@ -32,12 +32,12 @@ export default [
     others_paths: ['/transactions/search', '/tx/[tx]'],
     icon: <BiFileBlank size={18} className="stroke-current" />,
   },
-  {
+  /*{
     id: 'participations',
     title: 'Keygen',
     path: '/participations',
     icon: <RiKeyLine size={18} className="stroke-current" />,
-  },
+  },*/
   process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && {
     id: 'transfers',
     title: 'Transfers',
