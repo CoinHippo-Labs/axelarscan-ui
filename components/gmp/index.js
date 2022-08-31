@@ -380,123 +380,6 @@ export default () => {
     }
   }
 
-  const getGasPrice = async (sourceChain, destinationChain, sourceTokenSymbol) => {
-    const params = {
-      method: 'getGasPrice',
-      sourceChain,
-      destinationChain,
-      sourceTokenSymbol,
-    }
-    // request api
-    const res = await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, {
-      method: 'POST',
-      body: JSON.stringify(params),
-    }).catch(error => { return null })
-    return res && await res.json()
-  }
-
-  const _addNativeGas = async data => {
-    if (api && signer && data) {
-      try {
-        const { call, approved } = { ...data }
-        const { transactionHash, transactionIndex, logIndex, event } = { ...call }
-        const { destinationChain, destinationContractAddress, payload } = { ...call?.returnValues }
-        const { commandId, sourceChain, sourceAddress, symbol, amount } = { ...approved?.returnValues }
-        setGasAdding(true)
-        setGasAddResponse({
-          status: 'pending',
-          message: `Estimating gas for execution on ${destinationChain}`,
-        })
-        let web3 = new Web3(getChain(destinationChain, evm_chains_data)?.provider_params?.[0]?.rpcUrls?.[0])
-        // abi (IAxelarExecutable) (temporary hardcoded for now)
-        const destination_contract = new web3.eth.Contract(
-          [{ "inputs": [{ "internalType": "bytes32", "name": "commandId", "type": "bytes32" }, { "internalType": "string", "name": "sourceChain", "type": "string" }, { "internalType": "string", "name": "sourceAddress", "type": "string" }, { "internalType": "bytes", "name": "payload", "type": "bytes" }], "name": "execute", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "commandId", "type": "bytes32" }, { "internalType": "string", "name": "sourceChain", "type": "string" }, { "internalType": "string", "name": "sourceAddress", "type": "string" }, { "internalType": "bytes", "name": "payload", "type": "bytes" }, { "internalType": "string", "name": "tokenSymbol", "type": "string" }, { "internalType": "uint256", "name": "amount", "type": "uint256" }], "name": "executeWithToken", "outputs": [], "stateMutability": "nonpayable", "type": "function" }],
-          destinationContractAddress
-        )
-        let value, errorEstimateGas
-        switch (event) {
-          case 'ContractCall':
-            try {
-              value = await destination_contract.methods.execute(commandId, sourceChain, sourceAddress, payload).estimateGas()
-            } catch (error) {
-              errorEstimateGas = error
-            }
-            break
-          case 'ContractCallWithToken':
-            try {
-              value = await destination_contract.methods.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount).toString()).estimateGas()
-            } catch (error) {
-              errorEstimateGas = error
-            }
-            break
-          default:
-            break
-        }
-        if (typeof value === 'number') {
-          const response = await getGasPrice(sourceChain, destinationChain, getChain(sourceChain, evm_chains_data)?.provider_params?.[0]?.nativeCurrency?.symbol)
-          const { source_token } = { ...response?.result }
-          if (source_token?.gas_price) {
-            value = FixedNumber.fromString(value.toString())
-              .mulUnsafe(FixedNumber.fromString(source_token.gas_price.toString()))
-              .mulUnsafe(FixedNumber.fromString(utils.parseUnits('1.5', source_token.decimals).toString()))
-              .round(0).toString().replace('.0', '')
-          }
-          setGasAddResponse({
-            status: 'pending',
-            message: `Paying gas${source_token ? ` (${number_format(utils.formatUnits(value.toString(), source_token.decimals), '0,0.000000')} ${source_token.symbol})` : ''}`,
-          })
-          web3 = new Web3(provider)
-          // abi (IAxelarGasService) & contract address (temporary hardcoded for now)
-          const gas_service_contract = new web3.eth.Contract(
-            [{ "inputs": [{ "internalType": "bytes32", "name": "txHash", "type": "bytes32" }, { "internalType": "uint256", "name": "txIndex", "type": "uint256" }, { "internalType": "address", "name": "gasToken", "type": "address" }, { "internalType": "uint256", "name": "gasFeeAmount", "type": "uint256" }, { "internalType": "address", "name": "refundAddress", "type": "address" }], "name": "addGas", "outputs": [], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [{ "internalType": "bytes32", "name": "txHash", "type": "bytes32" }, { "internalType": "uint256", "name": "logIndex", "type": "uint256" }, { "internalType": "address", "name": "refundAddress", "type": "address" }], "name": "addNativeGas", "outputs": [], "stateMutability": "payable", "type": "function" }],
-            data.gas_paid?.contract_address || '0xbE406F0189A0B4cf3A05C286473D23791Dd44Cc6'
-          )
-          gas_service_contract.methods.addNativeGas(transactionHash, logIndex, address).send({ from: address, value })
-            .on('transactionHash', hash => {
-              const txHash = hash
-              setGasAddResponse({
-                status: 'pending',
-                message: 'Wait for confirmation',
-                txHash,
-              })
-            })
-            .on('receipt', async receipt => {
-              const txHash = receipt?.transactionHash
-              await sleep(15 * 1000)
-              setGasAdding(false)
-              setGasAddResponse({
-                status: 'success',
-                message: 'Pay gas successful',
-                txHash,
-              })
-            })
-            .on('error', (error, receipt) => {
-              const txHash = receipt?.transactionHash
-              setGasAdding(false)
-              setGasAddResponse({
-                status: 'failed',
-                message: error?.reason || error?.data?.message || error?.message,
-                txHash,
-              })
-            })
-        }
-        else {
-          setGasAdding(false)
-          setGasAddResponse({
-            status: 'failed',
-            message: `Cannot estimate gas on ${destinationChain}${errorEstimateGas ? `: ${errorEstimateGas.message}` : ''}`,
-          })
-        }
-      } catch (error) {
-        setGasAdding(false)
-        setGasAddResponse({
-          status: 'failed',
-          message: error?.message,
-        })
-      }
-    }
-  }
-
   const { data, execute_data, callback, origin } = { ...gmp }
   const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...data }
   const { event, chain } = { ...call }
@@ -662,13 +545,15 @@ export default () => {
               innerClassNames={`${notificationResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : notificationResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
               animation="animate__animated animate__fadeInDown"
               icon={notificationResponse.status === 'failed' ?
-                <BiXCircle className="w-6 h-6 stroke-current mr-2" />
-                :
+                <BiXCircle className="w-6 h-6 stroke-current mr-2" /> :
                 notificationResponse.status === 'success' ?
-                  <BiCheckCircle className="w-6 h-6 stroke-current mr-2" />
-                  :
+                  <BiCheckCircle className="w-6 h-6 stroke-current mr-2" /> :
                   <div className="mr-2">
-                    <Watch color="white" width="20" height="20" />
+                    <Watch
+                      color="white"
+                      width="20"
+                      height="20"
+                    />
                   </div>
               }
               content={<div className="flex items-center">
@@ -1448,8 +1333,11 @@ export default () => {
                             <BiXCircle size={20} />
                           }
                           <span>
-                            {receipt?.status || (['executed'].includes(s.id) && is_executed) ?
-                              'Success' : 'Error'
+                            {receipt?.status ||
+                              typeof receipt?.status !== 'number' ||
+                              (['executed'].includes(s.id) && is_executed) ?
+                              'Success' :
+                              'Error'
                             }
                           </span>
                         </div>
