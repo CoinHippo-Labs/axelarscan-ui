@@ -53,9 +53,9 @@ export default ({
   className = '',
 }) => {
   const dispatch = useDispatch()
-  const { preferences, chains, wallet } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, wallet: state.wallet }), shallowEqual)
+  const { preferences, evm_chains, wallet } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, wallet: state.wallet }), shallowEqual)
   const { theme } = { ...preferences }
-  const { chains_data } = { ...chains }
+  const { evm_chains_data } = { ...evm_chains }
   const { wallet_data } = { ...wallet }
   const { chain_id, provider, web3_provider } = { ...wallet_data }
 
@@ -140,7 +140,7 @@ export default ({
           try {
             await provider.request({
               method: 'wallet_addEthereumChain',
-              params: chains_data?.find(c => c.chain_id === connectChainId)?.provider_params,
+              params: evm_chains_data?.find(c => c.chain_id === connectChainId)?.provider_params,
             })
           } catch (error) {}
         }

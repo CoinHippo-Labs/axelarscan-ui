@@ -443,7 +443,7 @@ export default () => {
       </div>
     </>
   )
-  const gasAddButton = executeButton && (is_not_enough_gas || !gas_paid) && (
+  const gasAddButton = (is_not_enough_gas || !gas_paid || is_insufficient_fee) && (
     <>
       <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
         Pay new gas at source chain
