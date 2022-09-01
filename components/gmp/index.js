@@ -506,10 +506,12 @@ export default () => {
     chain_data: source_chain_data,
     data: refunded,
   }].filter(s => s)
+
   let current_step
+
   switch (status) {
     case 'called':
-      current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (!is_invalid_destination_chain && !is_insufficient_minimum_amount ? 1 : 0)
+      current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (!is_invalid_destination_chain && !is_insufficient_minimum_amount && (!(gas_paid || gas_paid_to_callback) || equals_ignore_case(call?.transactionHash, gas_paid?.transactionHash)) ? 1 : 0)
       break
     case 'forecalled':
       current_step = steps.findIndex(s => s.id === 'forecalled') + 1
