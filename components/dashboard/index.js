@@ -491,7 +491,7 @@ export default () => {
               </div>
             </div>
           )}
-          {process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && (
+          {process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && ['testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
             <div className="space-y-3">
               <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Link href="/gmp">

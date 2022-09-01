@@ -913,6 +913,7 @@ export default () => {
                             'text-slate-400 dark:text-slate-600'
                       const { explorer } = { ...s.chain_data }
                       const { url, transaction_path, icon } = { ...explorer }
+
                       return (
                         <div
                           key={i}
@@ -1364,16 +1365,16 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Status:
                         </span>
-                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash) || (['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) || (['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
                           {receipt?.status ||
-                            (typeof receipt?.status !== 'number' && transactionHash) ||
+                            (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
                             (['executed'].includes(s.id) && is_executed) ?
                             <BiCheckCircle size={20} /> :
                             <BiXCircle size={20} />
                           }
                           <span>
                             {receipt?.status ||
-                              (typeof receipt?.status !== 'number' && transactionHash) ||
+                              (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
                               (['executed'].includes(s.id) && is_executed) ?
                               'Success' :
                               'Error'
@@ -1412,7 +1413,7 @@ export default () => {
                                     BigNumber.from(gasFeeAmount),
                                     source_gas_data.decimals,
                                   ),
-                                  '0,0.000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1445,7 +1446,7 @@ export default () => {
                                         BigNumber.from(gasFeeAmount),
                                         source_gas_data.decimals,
                                       ),
-                                      '+0,0.000000',
+                                      '+0,0.00000000',
                                       true,
                                     )}
                                   </span>
@@ -1484,7 +1485,7 @@ export default () => {
                                       .round(0).toString().replace('.0', '')
                                     , destination_gas_data.decimals
                                   ),
-                                  '0,0.000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1509,7 +1510,7 @@ export default () => {
                                   <span className="mr-1">
                                     {number_format(
                                       source_forecalled_gas_used,
-                                      '0,0.000000',
+                                      '0,0.00000000',
                                       true,
                                     )}
                                   </span>
@@ -1541,12 +1542,16 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                {number_format(utils.formatUnits(
-                                  FixedNumber.fromString(BigNumber.from(gasUsed).toString())
-                                    .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
-                                    .round(0).toString().replace('.0', '')
-                                  , destination_gas_data.decimals
-                                ), '0,0.000000', true)}
+                                {number_format(
+                                  utils.formatUnits(
+                                    FixedNumber.fromString(BigNumber.from(gasUsed).toString())
+                                      .mulUnsafe(FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString()))
+                                      .round(0).toString().replace('.0', '')
+                                    , destination_gas_data.decimals
+                                  ),
+                                  '0,0.00000000',
+                                  true,
+                                )}
                               </span>
                               <span>
                                 {ellipse(destination_gas_data.symbol)}
@@ -1569,7 +1574,7 @@ export default () => {
                                   <span className="mr-1">
                                     {number_format(
                                       source_gas_used,
-                                      '0,0.000000',
+                                      '0,0.00000000',
                                       true,
                                     )}
                                   </span>
@@ -1600,7 +1605,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   callback_gas_used,
-                                  '0,0.000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1629,7 +1634,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   source_token.token_price?.usd / destination_native_token.token_price?.usd,
-                                  '0,0.000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1652,7 +1657,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   1,
-                                  '0,0.000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1682,7 +1687,7 @@ export default () => {
                                 ~
                                 {number_format(
                                   refunded_amount,
-                                  '0,0.000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
