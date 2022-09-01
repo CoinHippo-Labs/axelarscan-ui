@@ -108,6 +108,8 @@ export default () => {
           const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
             method: 'searchGMP',
             txHash: call.transactionHash,
+            txIndex: call.transactionIndex,
+            txLogIndex: call.logIndex,
           })
           origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
         }
@@ -285,7 +287,10 @@ export default () => {
           logIndex,
         } = { ...call }
 
-        const response = await api.execute(transactionHash)
+        const response = await api.execute(
+          transactionHash,
+          logIndex,
+        )
 
         console.log('[execute response]', response)
 
