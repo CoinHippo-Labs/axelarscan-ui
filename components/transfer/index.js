@@ -40,45 +40,125 @@ export default () => {
           size: 1,
         })
 
-        if (response) {
-          let data = response.data?.[0]
-          const { source, link, confirm_deposit, vote, sign_batch, ibc_send } = { ...data }
-          const { sender_chain, recipient_chain, recipient_address, amount, fee, value } = { ...source }
+        let data = _.head(response?.data)
 
-          if ((!link?.recipient_address || !confirm_deposit || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && (recipient_address?.length >= 65 || type(recipient_address) === 'evm_address')) {
-            let _response
-            if (recipient_address) {
-              if (type(recipient_address) === 'account') {
-                _response = await transactions_by_events(`transfer.sender='${recipient_address}'`, _response?.data, true, assets_data)
-                _response = await transactions_by_events(`message.sender='${recipient_address}'`, _response?.data, true, assets_data)
-              }
-              _response = await transactions_by_events(`link.depositAddress='${recipient_address}'`, _response?.data, true, assets_data)
-              _response = await transactions_by_events(`transfer.recipient='${recipient_address}'`, _response?.data, true, assets_data)
+        const {
+          source,
+          link,
+          confirm_deposit,
+          vote,
+          sign_batch,
+          ibc_send,
+        } = { ...data }
+        const {
+          sender_chain,
+          recipient_chain,
+          recipient_address,
+          amount,
+          fee,
+          value,
+        } = { ...source }
+
+        let _response
+
+        if (
+          (
+            !link?.recipient_address ||
+            !confirm_deposit ||
+            (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)
+          ) &&
+          (
+            recipient_address?.length >= 65 ||
+            type(recipient_address) === 'evm_address'
+          )
+        ) {
+          if (recipient_address) {
+            if (type(recipient_address) === 'account') {
+              _response = await transactions_by_events(
+                `transfer.sender='${recipient_address}'`,
+                _response?.data,
+                true,
+                assets_data,
+              )
+
+              _response = await transactions_by_events(
+                `message.sender='${recipient_address}'`,
+                _response?.data,
+                true,
+                assets_data,
+              )
             }
-            if ((!link?.recipient_address || (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)) && confirm_deposit?.id) {
-              _response = {
-                ..._response,
-                data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: confirm_deposit.id }], 'txhash'))
-              }
-            }
-            if (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1 && vote?.id) {
-              _response = {
-                ..._response,
-                data: _.uniqBy(_.concat(_response?.data || [], [{ txhash: vote.id }], 'txhash'))
-              }
-            }
-            if (_response?.data?.length > 0) {
-              _response.data.forEach(d => getTransaction(d?.txhash))
-              await sleep(2 * 1000)
-              _response = await getTransfers({
-                txHash: tx,
-                size: 1,
-              })
-              data = _response.data?.[0] || data
+
+            _response = await transactions_by_events(
+              `link.depositAddress='${recipient_address}'`,
+              _response?.data,
+              true,
+              assets_data,
+            )
+
+            _response = await transactions_by_events(
+              `transfer.recipient='${recipient_address}'`,
+              _response?.data,
+              true,
+              assets_data,
+            )
+          }
+
+          if (
+            (
+              !link?.recipient_address ||
+              (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)
+            ) &&
+            confirm_deposit?.id
+          ) {
+            _response = {
+              ..._response,
+              data: _.uniqBy(
+                _.concat(
+                  _response?.data || [],
+                  [{ txhash: confirm_deposit.id }],
+                ),
+                'txhash',
+              )
             }
           }
 
-          if (!(
+          if (
+            !sign_batch?.executed &&
+            evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1 &&
+            vote?.id
+          ) {
+            _response = {
+              ..._response,
+              data: _.uniqBy(
+                _.concat(
+                  _response?.data || [],
+                  [{ txhash: vote.id }],
+                ),
+                'txhash',
+              )
+            }
+          }
+
+          if (_response?.data?.length > 0) {
+            _response.data.forEach(d =>
+              getTransaction(d?.txhash)
+            )
+
+            await sleep(2 * 1000)
+
+            _response = await getTransfers({
+              txHash: tx,
+              size: 1,
+            })
+
+            data = _.head(_response.data) ||
+              data
+          }
+        }
+
+        if (
+          !(
             recipient_chain &&
             typeof amount === 'number' &&
             typeof value === 'number' &&
@@ -90,13 +170,25 @@ export default () => {
             !ibc_send?.recv_txhash &&
             recipient_chain !== 'axelarnet' &&
             cosmos_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
-          )) {
-            await getTransfersStatus({
-              txHash: tx,
-              sourceChain: sender_chain,
-            })
-          }
+          )
+        ) {
+          await getTransfersStatus({
+            txHash: tx,
+            sourceChain: sender_chain,
+          })
 
+          await sleep(2 * 1000)
+
+          _response = await getTransfers({
+            txHash: tx,
+            size: 1,
+          })
+
+          data = _.head(_response.data) ||
+            data
+        }
+
+        if (response || data) {
           setTransfer({
             data,
             tx,
