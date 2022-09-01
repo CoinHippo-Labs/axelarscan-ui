@@ -1418,7 +1418,7 @@ export default () => {
                                     BigNumber.from(gasFeeAmount),
                                     source_gas_data.decimals,
                                   ),
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1490,7 +1490,7 @@ export default () => {
                                       .round(0).toString().replace('.0', '')
                                     , destination_gas_data.decimals
                                   ),
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1515,7 +1515,7 @@ export default () => {
                                   <span className="mr-1">
                                     {number_format(
                                       source_forecalled_gas_used,
-                                      '0,0.00000000',
+                                      '0,0.0000000000',
                                       true,
                                     )}
                                   </span>
@@ -1554,7 +1554,7 @@ export default () => {
                                       .round(0).toString().replace('.0', '')
                                     , destination_gas_data.decimals
                                   ),
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1579,7 +1579,7 @@ export default () => {
                                   <span className="mr-1">
                                     {number_format(
                                       source_gas_used,
-                                      '0,0.00000000',
+                                      '0,0.0000000000',
                                       true,
                                     )}
                                   </span>
@@ -1610,7 +1610,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   callback_gas_used,
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1639,7 +1639,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   source_token.token_price?.usd / destination_native_token.token_price?.usd,
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1662,7 +1662,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   1,
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1692,7 +1692,7 @@ export default () => {
                                 ~
                                 {number_format(
                                   refunded_amount,
-                                  '0,0.00000000',
+                                  '0,0.0000000000',
                                   true,
                                 )}
                               </span>
@@ -1967,7 +1967,7 @@ export default () => {
                             <div className="flex items-center space-x-1.5">
                               {_data.error?.code && (
                                 <a
-                                  href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().replace('unpredicatable_gas_limit', 'unpredictable_gas_limit').split('_').join('-')}` : 'ethereum'}`}
+                                  href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().split('_').join('-')}` : 'ethereum'}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
