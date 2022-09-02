@@ -762,19 +762,42 @@ export default () => {
                         </div>
                       )}
                       {fees?.base_fee > 0 && (
-                        <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
-                          <span>
-                            Fees:
-                          </span>
-                          <span>
-                            {number_format(
-                              fees.base_fee,
-                              '0,0.000000',
-                            )}
-                          </span>
-                          <span>
-                            {fees.destination_native_token?.symbol}
-                          </span>
+                        <div className="flex items-center space-x-2">
+                          <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
+                            <span>
+                              Fees:
+                            </span>
+                            <span>
+                              {number_format(
+                                fees.base_fee,
+                                '0,0.000000',
+                              )}
+                            </span>
+                            <span>
+                              {fees.destination_native_token?.symbol}
+                            </span>
+                          </div>
+                          {typeof gas?.gas_base_fee_amount === 'number' && (
+                            <>
+                              <span className="text-sm font-medium">
+                                =
+                              </span>
+                              <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
+                                <span className="text-xs font-semibold">
+                                  <span className="mr-1">
+                                    {number_format(
+                                      gas.gas_base_fee_amount,
+                                      '0,0.00000000',
+                                      true,
+                                    )}
+                                  </span>
+                                  <span>
+                                    {fees.source_token?.symbol || _.head(source_chain_data?.provider_params)?.nativeCurrency?.symbol}
+                                  </span>
+                                </span>
+                              </div>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
@@ -1151,7 +1174,7 @@ export default () => {
                 source_gas_data = gasToken && gasToken !== constants.AddressZero ?
                   assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
                   {
-                    ...source_chain_data?.provider_params?.[0]?.nativeCurrency,
+                    ..._.head(source_chain_data?.provider_params)?.nativeCurrency,
                     image: source_chain_data?.image,
                   }
                 if (source_gas_data?.contracts) {
@@ -1162,7 +1185,7 @@ export default () => {
                 }
               }
               destination_gas_data = {
-                ...destination_chain_data?.provider_params?.[0]?.nativeCurrency,
+                ..._.head(destination_chain_data?.provider_params)?.nativeCurrency,
                 image: destination_chain_data?.image,
               }
               try {
@@ -1543,7 +1566,7 @@ export default () => {
                                     BigNumber.from(gasFeeAmount),
                                     source_gas_data.decimals,
                                   ),
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1615,7 +1638,7 @@ export default () => {
                                       .round(0).toString().replace('.0', '')
                                     , destination_gas_data.decimals
                                   ),
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1640,7 +1663,7 @@ export default () => {
                                   <span className="mr-1">
                                     {number_format(
                                       source_forecalled_gas_used,
-                                      '0,0.0000000000',
+                                      '0,0.00000000',
                                       true,
                                     )}
                                   </span>
@@ -1679,7 +1702,7 @@ export default () => {
                                       .round(0).toString().replace('.0', '')
                                     , destination_gas_data.decimals
                                   ),
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1704,7 +1727,7 @@ export default () => {
                                   <span className="mr-1">
                                     {number_format(
                                       source_gas_used,
-                                      '0,0.0000000000',
+                                      '0,0.00000000',
                                       true,
                                     )}
                                   </span>
@@ -1735,7 +1758,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   callback_gas_used,
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1764,7 +1787,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   source_token.token_price?.usd / destination_native_token.token_price?.usd,
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1787,7 +1810,7 @@ export default () => {
                               <span className="mr-1">
                                 {number_format(
                                   1,
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>
@@ -1817,7 +1840,7 @@ export default () => {
                                 ~
                                 {number_format(
                                   refunded_amount,
-                                  '0,0.0000000000',
+                                  '0,0.00000000',
                                   true,
                                 )}
                               </span>

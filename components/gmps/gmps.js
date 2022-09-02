@@ -252,7 +252,7 @@ export default ({ n }) => {
               accessor: 'call.event',
               disableSortBy: true,
               Cell: props => {
-                const { call, fees, is_insufficient_minimum_amount } = { ...props.row.original }
+                const { call, gas, fees, is_insufficient_minimum_amount } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { symbol, amount } = { ...returnValues }
                 const chain_data = getChain(chain, chains_data)
@@ -297,19 +297,42 @@ export default ({ n }) => {
                       </div>
                     )}
                     {fees?.base_fee > 0 && (
-                      <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
-                        <span>
-                          Fees:
-                        </span>
-                        <span>
-                          {number_format(
-                            fees.base_fee,
-                            '0,0.000000',
-                          )}
-                        </span>
-                        <span>
-                          {fees.destination_native_token?.symbol}
-                        </span>
+                      <div className="flex flex-col">
+                        <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-2xs font-semibold space-x-1 py-0.5 px-1.5">
+                          <span>
+                            Fees:
+                          </span>
+                          <span>
+                            {number_format(
+                              fees.base_fee,
+                              '0,0.000000',
+                            )}
+                          </span>
+                          <span>
+                            {fees.destination_native_token?.symbol}
+                          </span>
+                        </div>
+                        {typeof gas?.gas_base_fee_amount === 'number' && (
+                          <>
+                            <span className="text-xs font-medium mx-2">
+                              =
+                            </span>
+                            <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
+                              <span className="text-2xs font-semibold">
+                                <span className="mr-1">
+                                  {number_format(
+                                    gas.gas_base_fee_amount,
+                                    '0,0.00000000',
+                                    true,
+                                  )}
+                                </span>
+                                <span>
+                                  {fees.source_token?.symbol || _.head(chain_data?.provider_params)?.nativeCurrency?.symbol}
+                                </span>
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
