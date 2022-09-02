@@ -395,7 +395,7 @@ export default () => {
               )}
             </div>
           )}
-          {status_data?.latest_block_height && !is_assets_path && (
+          {!isNaN(status_data?.latest_block_height) && !is_assets_path && (
             <Link href={`/block/${status_data.latest_block_height}`}>
               <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
                 <FiBox size={16} />

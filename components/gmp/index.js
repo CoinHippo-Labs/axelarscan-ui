@@ -44,6 +44,8 @@ export default () => {
   const [executeResponse, setExecuteResponse] = useState(null)
   const [gasAdding, setGasAdding] = useState(null)
   const [gasAddResponse, setGasAddResponse] = useState(null)
+  const [refunding, setRefunding] = useState(null)
+  const [refundResponse, setRefundResponse] = useState(null)
   const [txHashEdit, setTxHashEdit] = useState(null)
   const [txHashEditing, setTxHashEditing] = useState(false)
   const [txHashEditUpdating, setTxHashEditUpdating] = useState(false)
@@ -146,10 +148,22 @@ export default () => {
           const method = `execute${symbol ? 'WithToken' : ''}`
           switch (method) {
             case 'execute':
-              _response = await executable_contract.populateTransaction.execute(commandId, sourceChain, sourceAddress, payload)
+              _response = await executable_contract.populateTransaction.execute(
+                commandId,
+                sourceChain,
+                sourceAddress,
+                payload,
+              )
               break
             case 'executeWithToken':
-              _response = await executable_contract.populateTransaction.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, BigNumber.from(amount))
+              _response = await executable_contract.populateTransaction.executeWithToken(
+                commandId,
+                sourceChain,
+                sourceAddress,
+                payload,
+                symbol,
+                BigNumber.from(amount),
+              )
               break
             default:
               break
@@ -181,6 +195,7 @@ export default () => {
     setApproveResponse(null)
     setExecuteResponse(null)
     setGasAddResponse(null)
+    setRefundResponse(null)
     setTxHashEdit(null)
     setTxHashEditing(false)
     setTxHashEditUpdating(false)
@@ -385,8 +400,76 @@ export default () => {
     }
   }
 
+  const refund = async data => {
+    if (api && data) {
+      try {
+        setRefunding(true)
+        setRefundResponse({
+          status: 'pending',
+          message: 'Refunding',
+        })
+
+        const {
+          call,
+        } = { ...data }
+        const {
+          transactionHash,
+          transactionIndex,
+          logIndex,
+        } = { ...call }
+
+        const _response = await api.execPost(
+          process.env.NEXT_PUBLIC_GMP_API_URL,
+          '',
+          {
+            method: 'saveGMP',
+            sourceTransactionHash: transactionHash,
+            sourceTransactionIndex: transactionIndex,
+            sourceTransactionLogIndex: logIndex,
+            event: 'to_refund',
+          },
+        )
+
+        console.log('[refund response]', _response)
+
+        const {
+          response,
+        } = { ..._response }
+        const {
+          result,
+        } = { ...response }
+
+        const success = result === 'updated' ||
+          _response?.event === 'to_refund'
+
+        if (success) {
+          await sleep(15 * 1000)
+        }
+
+        setRefunding(false)
+        setRefundResponse({
+          status: success ?
+            'success' :
+            'failed',
+          message: success ?
+            'Start refund process successful' :
+            'Cannot start refund process',
+        })
+      } catch (error) {
+        setRefunding(false)
+        setRefundResponse({
+          status: 'failed',
+          message: error?.reason ||
+            error?.data?.message ||
+            error?.data?.text ||
+            error?.message,
+        })
+      }
+    }
+  }
+
   const { data, execute_data, callback, origin } = { ...gmp }
-  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, gas, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...data }
   const { event, chain } = { ...call }
   const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
   const { commandId, sourceChain } = { ...approved?.returnValues }
@@ -406,7 +489,7 @@ export default () => {
   const asset_image = source_contract_data?.image || asset_data?.image
   const wrong_source_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !gasAdding
   const wrong_destination_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
-  const approveButton = call && !approved && !executed && !is_executed && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
+  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
     <div className="flex items-center space-x-2">
       <button
         disabled={approving}
@@ -414,7 +497,11 @@ export default () => {
         className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${approving ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
       >
         {approving && (
-          <TailSpin color="white" width="16" height="16" />
+          <TailSpin
+            color="white"
+            width="16"
+            height="16"
+          />
         )}
         <span>
           Approve
@@ -474,6 +561,30 @@ export default () => {
       </div>
     </>
   )
+  const refundButton = !approveButton && !executeButton &&
+    (gas?.gas_remain_amount > 0 || gas?.gas_paid_amount < gas?.gas_base_fee_amount) &&
+    (executed || error || is_executed || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
+    (approved?.block_timestamp < moment().subtract(2, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
+    (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) && (
+      <div className="flex items-center space-x-2">
+        <button
+          disabled={refunding}
+          onClick={() => refund(data)}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${refunding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+        >
+          {refunding && (
+            <TailSpin
+              color="white"
+              width="16"
+              height="16"
+            />
+          )}
+          <span>
+            Refund
+          </span>
+        </button>
+      </div>
+    )
 
   const steps = [{
     id: 'call',
@@ -544,7 +655,7 @@ export default () => {
   )
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
-  const notificationResponse = executeResponse || gasAddResponse || approveResponse
+  const notificationResponse = executeResponse || gasAddResponse || approveResponse || refundResponse
   const explorer = notificationResponse && (
     notificationResponse.is_axelar_transaction ?
       axelar_chain_data : executeResponse ?
@@ -601,6 +712,7 @@ export default () => {
                 setApproveResponse(null)
                 setExecuteResponse(null)
                 setGasAddResponse(null)
+                setRefundResponse(null)
               }}
             />
           )}
@@ -995,6 +1107,7 @@ export default () => {
                       </div>
                     )}
                     {gasAddButton}
+                    {refundButton}
                     {approveButton || executeButton || (time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
