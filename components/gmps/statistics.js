@@ -54,23 +54,61 @@ export default () => {
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, fromTime, toTime } = { ...params }
+      const chains_data = _.concat(
+        evm_chains_data,
+        cosmos_chains_data,
+      )
+      const {
+        txHash,
+        sourceChain,
+        destinationChain,
+        method,
+        status,
+        senderAddress,
+        sourceAddress,
+        contractAddress,
+        relayerAddress,
+        fromTime,
+        toTime,
+      } = { ...params }
+
       if (!timeframeSelected) {
         setTimeframeSelected(true)
       }
       else {
         setFilters({
           txHash,
-          sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
-          destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-          method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
-          status: ['approving', 'forecalled', 'approved', 'executed', 'error'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
+          sourceChain: getChain(sourceChain, chains_data)?._id ||
+            sourceChain,
+          destinationChain: getChain(destinationChain, chains_data)?._id ||
+            destinationChain,
+          method: [
+            'callContract',
+            'callContractWithToken',
+          ].includes(method) ?
+            method :
+            undefined,
+          status: [
+            'approving',
+            'forecalled',
+            'approved',
+            'executed',
+            'error',
+            'insufficient_fee',
+          ].includes(status?.toLowerCase()) ?
+            status.toLowerCase() :
+            undefined,
           senderAddress,
           sourceAddress,
           contractAddress,
           relayerAddress,
-          time: fromTime && [moment(Number(fromTime)), toTime ? moment(Number(toTime)) : moment()],
+          time: fromTime &&
+            [
+              moment(Number(fromTime)),
+              toTime ?
+                moment(Number(toTime)) :
+                moment(),
+            ],
         })
         // if (typeof fetchTrigger === 'number') {
         //   setFetchTrigger(moment().valueOf())
