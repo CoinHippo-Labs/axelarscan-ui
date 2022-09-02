@@ -761,7 +761,7 @@ export default () => {
                           Insufficient Amount
                         </div>
                       )}
-                      {fees?.base_fee > 0 && (
+                      {(fees?.destination_base_fee || fees?.base_fee) > 0 && (
                         <div className="flex items-center space-x-2">
                           <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
                             <span>
@@ -769,7 +769,7 @@ export default () => {
                             </span>
                             <span>
                               {number_format(
-                                fees.base_fee,
+                                fees?.destination_base_fee || fees?.base_fee,
                                 '0,0.000000',
                               )}
                             </span>
