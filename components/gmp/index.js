@@ -562,7 +562,10 @@ export default () => {
     </>
   )
   const refundButton = !approveButton && !executeButton &&
-    (gas?.gas_remain_amount > 0 || gas?.gas_paid_amount < gas?.gas_base_fee_amount) &&
+    (
+      (gas?.gas_remain_amount > 0 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
+      (gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1)
+    ) &&
     (executed || error || is_executed || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(2, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) && (
@@ -1340,7 +1343,11 @@ export default () => {
                                   }
                                 </a>
                               </> :
-                              !(!data && is_executed) && !error && !is_invalid_destination_chain && !is_insufficient_minimum_amount && (
+                              !(!data && is_executed) &&
+                              !error &&
+                              !is_invalid_destination_chain &&
+                              !is_insufficient_minimum_amount &&
+                              !is_insufficient_fee && (
                                 <FallingLines
                                   color={loader_color(theme)}
                                   width="32"
@@ -1486,9 +1493,10 @@ export default () => {
                           ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
                             <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
                               No transaction
-                            </span>
-                            :
-                            !is_invalid_destination_chain && !is_insufficient_minimum_amount && (
+                            </span> :
+                            !is_invalid_destination_chain &&
+                            !is_insufficient_minimum_amount &&
+                            !is_insufficient_fee && (
                               <FallingLines
                                 color={loader_color(theme)}
                                 width="32"
