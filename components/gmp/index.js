@@ -208,6 +208,7 @@ export default () => {
     transactionHash,
     relayerAddress,
     error,
+    event,
   ) => {
     const params = {
       method: 'saveGMP',
@@ -217,6 +218,7 @@ export default () => {
       transactionHash,
       relayerAddress,
       error,
+      event,
     }
 
     // request api
@@ -1560,7 +1562,7 @@ export default () => {
                           Gas Paid:
                         </span>
                         <div className="flex flex-wrap items-center">
-                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mr-1">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-0.5 mr-1">
                             {source_gas_data.image && (
                               <Image
                                 src={source_gas_data.image}
@@ -1598,7 +1600,7 @@ export default () => {
                                 href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mr-1"
+                                className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-0.5 mr-1"
                               >
                                 <span className="text-2xs font-semibold">
                                   <span className="mr-1">
