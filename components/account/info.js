@@ -23,13 +23,37 @@ export default ({ data }) => {
   const { query } = { ...router }
   const { address } = { ...query }
 
-  const { balances, delegations, redelegations, unbondings, rewards, commissions, depositAddresses } = { ...data }
-  const is_deposit_address = address?.length >= 65 && 'depositAddresses' in data
-  const validator_data = !is_deposit_address && validators_data?.find(v => equals_ignore_case(v?.delegator_address, address) || equals_ignore_case(v?.broadcaster_address, address))
-  const reward = !is_deposit_address && rewards?.rewards?.find(r => equals_ignore_case(r?.denom, 'axl'))
-  const commission = !is_deposit_address && commissions?.find(c => equals_ignore_case(c?.denom, 'axl'))
+  const {
+    balances,
+    delegations,
+    redelegations,
+    unbondings,
+    rewards,
+    commissions,
+    depositAddresses,
+  } = { ...data }
+
+  const is_deposit_address = address?.length >= 65 &&
+    'depositAddresses' in data
+  const validator_data = !is_deposit_address &&
+    validators_data?.find(v => equals_ignore_case(v?.delegator_address, address) || equals_ignore_case(v?.broadcaster_address, address))
+  const reward = !is_deposit_address &&
+    rewards?.rewards?.find(r => equals_ignore_case(r?.denom, 'axl'))
+  const commission = !is_deposit_address &&
+    commissions?.find(c => equals_ignore_case(c?.denom, 'axl'))
   const deposit_address = _.head(depositAddresses)
-  const { sender_chain, recipient_chain, source_chain_data, destination_chain_data, sender_address, recipient_address, denom, asset_data, transfer } = { ...deposit_address }
+  const {
+    sender_chain,
+    recipient_chain,
+    source_chain_data,
+    destination_chain_data,
+    sender_address,
+    recipient_address,
+    denom,
+    asset_data,
+    transfer,
+  } = { ...deposit_address }
+
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = `w-40 lg:w-${is_deposit_address ? 64 : 56} text-sm lg:text-base font-bold`
 
@@ -337,9 +361,13 @@ export default ({ data }) => {
                   sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
                   Cell: props => (
                     <span className="font-semibold">
-                      {number_format((props.flatRows?.indexOf(props.row) > -1 ?
-                        props.flatRows.indexOf(props.row) : props.value
-                      ) + 1, '0,0')}
+                      {number_format(
+                        (props.flatRows?.indexOf(props.row) > -1 ?
+                          props.flatRows.indexOf(props.row) :
+                          props.value
+                        ) + 1,
+                        '0,0',
+                      )}
                     </span>
                   ),
                 },
@@ -361,18 +389,27 @@ export default ({ data }) => {
                           {props.row.original.denom && (
                             <div className="flex items-start space-x-1">
                               <span className="font-bold">
-                                {ellipse(props.row.original.denom, 6)}
+                                {ellipse(
+                                  props.row.original.denom,
+                                  6,
+                                )}
                               </span>
                               {props.value.price > 0 && (
                                 <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg text-xs font-bold py-0.5 px-2">
                                   {currency_symbol}
-                                  {number_format(props.value.price, '0,0.00000000')}
+                                  {number_format(
+                                    props.value.price,
+                                    '0,0.00000000',
+                                  )}
                                 </div>
                               )}
                             </div>
                           )}
                           <span className="text-xs text-slate-400 dark:text-slate-600 font-medium">
-                            {ellipse(props.value.name, 16)}
+                            {ellipse(
+                              props.value.name,
+                              16,
+                            )}
                           </span>
                         </div>
                       </div>
@@ -381,7 +418,11 @@ export default ({ data }) => {
                         <Copy
                           value={props.row.original.denom}
                           title={<span className="cursor-pointer text-black dark:text-white font-semibold">
-                            {ellipse(props.row.original.denom, 6, 'ibc/')}
+                            {ellipse(
+                              props.row.original.denom,
+                              6,
+                              'ibc/',
+                            )}
                           </span>}
                           size={18}
                         />
@@ -397,9 +438,11 @@ export default ({ data }) => {
                       <div className="flex flex-col items-start sm:items-end space-y-1.5">
                         {typeof props.value === 'number' ?
                           <span className="text-xs lg:text-sm font-semibold">
-                            {number_format(props.value, '0,0.00000000')}
-                          </span>
-                          :
+                            {number_format(
+                              props.value,
+                              '0,0.00000000',
+                            )}
+                          </span> :
                           <span>
                             -
                           </span>
@@ -419,9 +462,15 @@ export default ({ data }) => {
                         {typeof props.value === 'number' && props.row.original.asset_data?.price > 0 ?
                           <span className="uppercase text-xs lg:text-sm font-bold">
                             {currency_symbol}
-                            {number_format(props.value, props.value > 100000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.00000000')}
-                          </span>
-                          :
+                            {number_format(
+                              props.value,
+                              props.value > 100000 ?
+                                '0,0.00a' :
+                                props.value > 10000 ?
+                                  '0,0.00' :
+                                  '0,0.00000000',
+                            )}
+                          </span> :
                           <span>
                             -
                           </span>
@@ -437,11 +486,13 @@ export default ({ data }) => {
               defaultPageSize={10}
               className="no-border"
             /> :
-            <TailSpin
-              color={loader_color(theme)}
-              width="32"
-              height="32"
-            />
+            type(address) === 'account' && (
+              <TailSpin
+                color={loader_color(theme)}
+                width="32"
+                height="32"
+              />
+            )
           }
         </div>
         {type(address) === 'account' && validators_data && !equals_ignore_case(validator_data?.broadcaster_address, address) && (
@@ -459,9 +510,13 @@ export default ({ data }) => {
                       sortType: (a, b) => a.original.i > b.original.i ? 1 : -1,
                       Cell: props => (
                         <span className="font-semibold">
-                          {number_format((props.flatRows?.indexOf(props.row) > -1 ?
-                            props.flatRows.indexOf(props.row) : props.value
-                          ) + 1, '0,0')}
+                          {number_format(
+                            (props.flatRows?.indexOf(props.row) > -1 ?
+                              props.flatRows.indexOf(props.row) :
+                              props.value
+                            ) + 1,
+                            '0,0',
+                          )}
                         </span>
                       ),
                     },
@@ -470,45 +525,68 @@ export default ({ data }) => {
                       accessor: 'validator_address',
                       disableSortBy: true,
                       Cell: props => {
-                        const { validator_data } = { ...props.row.original }
-                        const { operator_address, description } = { ...validator_data }
-                        const { moniker } = { ...description }
+                        const {
+                          validator_data,
+                        } = { ...props.row.original }
+                        const {
+                          operator_address,
+                          description,
+                        } = { ...validator_data }
+                        const {
+                          moniker,
+                        } = { ...description }
+
                         return validator_data ?
                           <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
                             <Link href={`/validator/${operator_address}`}>
                               <a>
-                                <ValidatorProfile validator_description={description} />
+                                <ValidatorProfile
+                                  validator_description={description}
+                                />
                               </a>
                             </Link>
                             <div className="flex flex-col">
                               {moniker && (
                                 <Link href={`/validator/${operator_address}`}>
                                   <a className="text-blue-600 dark:text-white font-bold">
-                                    {ellipse(moniker, 10)}
+                                    {ellipse(
+                                      moniker,
+                                      10,
+                                    )}
                                   </a>
                                 </Link>
                               )}
                               <div className="flex items-center space-x-1">
                                 <Link href={`/validator/${operator_address}`}>
                                   <a className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                                    {ellipse(operator_address, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                                    {ellipse(
+                                      operator_address,
+                                      6,
+                                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                    )}
                                   </a>
                                 </Link>
-                                <Copy value={operator_address} />
+                                <Copy
+                                  value={operator_address}
+                                />
                               </div>
                             </div>
-                          </div>
-                          :
+                          </div> :
                           props.value ?
                             <div className="flex items-center space-x-1">
                               <Link href={`/validator/${props.value}`}>
                                 <a className="text-blue-600 dark:text-white text-xs font-medium">
-                                  {ellipse(props.value, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                                  {ellipse(
+                                    props.value,
+                                    6,
+                                    process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                  )}
                                 </a>
                               </Link>
-                              <Copy value={props.value} />
-                            </div>
-                            :
+                              <Copy
+                                value={props.value}
+                              />
+                            </div> :
                             <span>
                               -
                             </span>
@@ -522,10 +600,17 @@ export default ({ data }) => {
                         <div className="flex flex-col text-left sm:text-right">
                           <div className="flex flex-col items-start sm:items-end space-y-1.5">
                             {typeof props.value === 'number' ?
-                              <span className="text-xs lg:text-sm font-semibold">
-                                {number_format(props.value, '0,0.00000000')} {props.row.original.denom}
-                              </span>
-                              :
+                              <span className="text-xs lg:text-sm font-semibold space-x-2">
+                                <span>
+                                  {number_format(
+                                    props.value,
+                                    '0,0.00000000',
+                                  )}
+                                </span>
+                                <span>
+                                  {props.row.original.denom}
+                                </span>
+                              </span> :
                               <span>
                                 -
                               </span>
@@ -562,9 +647,13 @@ export default ({ data }) => {
                       sortType: (a, b) => a.original.i > b.original.i ? 1 : -1,
                       Cell: props => (
                         <span className="font-semibold">
-                          {number_format((props.flatRows?.indexOf(props.row) > -1 ?
-                            props.flatRows.indexOf(props.row) : props.value
-                          ) + 1, '0,0')}
+                          {number_format(
+                            (props.flatRows?.indexOf(props.row) > -1 ?
+                              props.flatRows.indexOf(props.row) :
+                              props.value
+                            ) + 1,
+                            '0,0',
+                          )}
                         </span>
                       ),
                     },
@@ -573,29 +662,44 @@ export default ({ data }) => {
                       accessor: 'validator_src_address',
                       disableSortBy: true,
                       Cell: props => {
-                        const { source_validator_data, destination_validator_data, validator_dst_address } = { ...props.row.original }
-                        let source_operator_address, source_description, source_moniker,
-                          destination_operator_address, destination_description, destination_moniker
+                        const {
+                          source_validator_data,
+                          destination_validator_data,
+                          validator_dst_address,
+                        } = { ...props.row.original }
+
+                        let source_operator_address,
+                          source_description,
+                          source_moniker,
+                          destination_operator_address,
+                          destination_description,
+                          destination_moniker
                         source_operator_address = source_validator_data?.operator_address
                         source_description = source_validator_data?.description
                         source_moniker = source_description?.moniker
                         destination_operator_address = destination_validator_data?.operator_address
                         destination_description = destination_validator_data?.description
                         destination_moniker = destination_description?.moniker
+
                         return (
                           <div className="flex items-center space-x-1">
                             {source_validator_data ?
                               <div className="min-w-max flex items-center space-x-2">
                                 <Link href={`/validator/${source_operator_address}`}>
                                   <a>
-                                    <ValidatorProfile validator_description={source_description} />
+                                    <ValidatorProfile
+                                      validator_description={source_description}
+                                    />
                                   </a>
                                 </Link>
                                 <div className="flex flex-col">
                                   {source_moniker && (
                                     <Link href={`/validator/${source_operator_address}`}>
                                       <a className="text-blue-600 dark:text-white font-bold">
-                                        {ellipse(source_moniker, 10)}
+                                        {ellipse(
+                                          source_moniker,
+                                          10,
+                                        )}
                                       </a>
                                     </Link>
                                   )}
@@ -606,12 +710,17 @@ export default ({ data }) => {
                                 <div className="flex items-center space-x-1">
                                   <Link href={`/validator/${props.value}`}>
                                     <a className="text-blue-600 dark:text-white text-xs font-medium">
-                                      {ellipse(props.value, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                                      {ellipse(
+                                        props.value,
+                                        6,
+                                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                      )}
                                     </a>
                                   </Link>
-                                  <Copy value={props.value} />
-                                </div>
-                                :
+                                  <Copy
+                                    value={props.value}
+                                  />
+                                </div> :
                                 <span>
                                   -
                                 </span>
@@ -620,30 +729,39 @@ export default ({ data }) => {
                               <div className="min-w-max flex items-center space-x-2">
                                 <Link href={`/validator/${destination_operator_address}`}>
                                   <a>
-                                    <ValidatorProfile validator_description={destination_description} />
+                                    <ValidatorProfile
+                                      validator_description={destination_description}
+                                    />
                                   </a>
                                 </Link>
                                 <div className="flex flex-col">
                                   {destination_moniker && (
                                     <Link href={`/validator/${destination_operator_address}`}>
                                       <a className="text-blue-600 dark:text-white font-bold">
-                                        {ellipse(destination_moniker, 10)}
+                                        {ellipse(
+                                          destination_moniker,
+                                          10,
+                                        )}
                                       </a>
                                     </Link>
                                   )}
                                 </div>
-                              </div>
-                              :
+                              </div> :
                               validator_dst_address ?
                                 <div className="flex items-center space-x-1">
                                   <Link href={`/validator/${validator_dst_address}`}>
                                     <a className="text-blue-600 dark:text-white text-xs font-medium">
-                                      {ellipse(validator_dst_address, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                                      {ellipse(
+                                        validator_dst_address,
+                                        6,
+                                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                      )}
                                     </a>
                                   </Link>
-                                  <Copy value={validator_dst_address} />
-                                </div>
-                                :
+                                  <Copy
+                                    value={validator_dst_address}
+                                  />
+                                </div> :
                                 <span>
                                   -
                                 </span>
@@ -660,10 +778,17 @@ export default ({ data }) => {
                         <div className="flex flex-col text-left sm:text-right">
                           <div className="flex flex-col items-start sm:items-end space-y-1.5">
                             {typeof props.value === 'number' ?
-                              <span className="text-xs lg:text-sm font-semibold">
-                                {number_format(props.value, '0,0.00000000')} {props.row.original.denom}
-                              </span>
-                              :
+                              <span className="text-xs lg:text-sm font-semibold space-x-2">
+                                <span>
+                                  {number_format(
+                                    props.value,
+                                    '0,0.00000000',
+                                  )}
+                                </span>
+                                <span>
+                                  {props.row.original.denom}
+                                </span>
+                              </span> :
                               <span>
                                 -
                               </span>
@@ -700,9 +825,13 @@ export default ({ data }) => {
                       sortType: (a, b) => a.original.i > b.original.i ? 1 : -1,
                       Cell: props => (
                         <span className="font-semibold">
-                          {number_format((props.flatRows?.indexOf(props.row) > -1 ?
-                            props.flatRows.indexOf(props.row) : props.value
-                          ) + 1, '0,0')}
+                          {number_format(
+                            (props.flatRows?.indexOf(props.row) > -1 ?
+                              props.flatRows.indexOf(props.row) :
+                              props.value
+                            ) + 1,
+                            '0,0',
+                          )}
                         </span>
                       ),
                     },
@@ -711,45 +840,68 @@ export default ({ data }) => {
                       accessor: 'validator_address',
                       disableSortBy: true,
                       Cell: props => {
-                        const { validator_data } = { ...props.row.original }
-                        const { operator_address, description } = { ...validator_data }
-                        const { moniker } = { ...description }
+                        const {
+                          validator_data,
+                        } = { ...props.row.original }
+                        const {
+                          operator_address,
+                          description,
+                        } = { ...validator_data }
+                        const {
+                          moniker,
+                        } = { ...description }
+
                         return validator_data ?
                           <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
                             <Link href={`/validator/${operator_address}`}>
                               <a>
-                                <ValidatorProfile validator_description={description} />
+                                <ValidatorProfile
+                                  validator_description={description}
+                                />
                               </a>
                             </Link>
                             <div className="flex flex-col">
                               {moniker && (
                                 <Link href={`/validator/${operator_address}`}>
                                   <a className="text-blue-600 dark:text-white font-bold">
-                                    {ellipse(moniker, 10)}
+                                    {ellipse(
+                                      moniker,
+                                      10,
+                                    )}
                                   </a>
                                 </Link>
                               )}
                               <div className="flex items-center space-x-1">
                                 <Link href={`/validator/${operator_address}`}>
                                   <a className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                                    {ellipse(operator_address, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                                    {ellipse(
+                                      operator_address,
+                                      6,
+                                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                    )}
                                   </a>
                                 </Link>
-                                <Copy value={operator_address} />
+                                <Copy
+                                  value={operator_address}
+                                />
                               </div>
                             </div>
-                          </div>
-                          :
+                          </div> :
                           props.value ?
                             <div className="flex items-center space-x-1">
                               <Link href={`/validator/${props.value}`}>
                                 <a className="text-blue-600 dark:text-white text-xs font-medium">
-                                  {ellipse(props.value, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                                  {ellipse(
+                                    props.value,
+                                    6,
+                                    process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                  )}
                                 </a>
                               </Link>
-                              <Copy value={props.value} />
-                            </div>
-                            :
+                              <Copy
+                                value={props.value}
+                              />
+                            </div> :
                             <span>
                               -
                             </span>
@@ -763,10 +915,17 @@ export default ({ data }) => {
                         <div className="flex flex-col text-left sm:text-right">
                           <div className="flex flex-col items-start sm:items-end space-y-1.5">
                             {typeof props.value === 'number' ?
-                              <span className="text-xs lg:text-sm font-semibold">
-                                {number_format(props.value, '0,0.00000000')} {props.row.original.denom}
-                              </span>
-                              :
+                              <span className="text-xs lg:text-sm font-semibold space-x-2">
+                                <span>
+                                  {number_format(
+                                    props.value,
+                                    '0,0.00000000',
+                                  )}
+                                </span>
+                                <span>
+                                  {props.row.original.denom}
+                                </span>
+                              </span> :
                               <span>
                                 -
                               </span>

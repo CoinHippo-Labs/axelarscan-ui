@@ -44,21 +44,55 @@ export default ({ n }) => {
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, confirmed, state, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
-      setFilters({
+      const chains_data = _.concat(
+        evm_chains_data,
+        cosmos_chains_data,
+      )
+      const {
         txHash,
-        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
-        state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
-        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        asset: getAsset(asset, assets_data)?.id || asset,
+        confirmed,
+        state,
+        sourceChain,
+        destinationChain,
+        asset,
         depositAddress,
         senderAddress,
         recipientAddress,
-        fromTime: fromTime && moment(Number(fromTime)).unix(),
-        toTime: toTime && moment(Number(toTime)).unix(),
+        fromTime,
+        toTime,
+        sortBy,
+      } = { ...params }
+
+      setFilters({
+        txHash,
+        confirmed: [
+          'confirmed',
+          'unconfirmed',
+        ].includes(confirmed?.toLowerCase()) ?
+          confirmed.toLowerCase() :
+          undefined,
+        state: [
+          'completed',
+          'pending',
+        ].includes(state?.toLowerCase()) ?
+          state.toLowerCase() :
+          undefined,
+        sourceChain: getChain(sourceChain, chains_data)?._id ||
+          sourceChain,
+        destinationChain: getChain(destinationChain, chains_data)?._id ||
+          destinationChain,
+        asset: getAsset(asset, assets_data)?.id ||
+          asset,
+        depositAddress,
+        senderAddress,
+        recipientAddress,
+        fromTime: fromTime &&
+          moment(Number(fromTime)).unix(),
+        toTime: toTime &&
+          moment(Number(toTime)).unix(),
+        sortBy,
       })
+
       // if (typeof fetchTrigger === 'number') {
       //   setFetchTrigger(moment().valueOf())
       // }
@@ -67,117 +101,196 @@ export default ({ n }) => {
 
   useEffect(() => {
     const triggering = is_interval => {
-      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+      setFetchTrigger(
+        is_interval ?
+          moment().valueOf() :
+          typeof fetchTrigger === 'number' ?
+            null :
+            0
+      )
     }
+
     if (pathname && filters) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (address || ['/transfers/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        triggering(true),
+        (address || ['/transfers/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000,
+      )
+    )
   }, [pathname, address, filters])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
       if (filters && (!pathname?.includes('/[address]') || address)) {
-        if (!controller.signal.aborted) {
-          setFetching(true)
-          if (!fetchTrigger) {
-            setTotal(null)
-            setData(null)
-            setDataForExport(null)
-            setOffet(0)
-          }
-          const _data = !fetchTrigger ? [] : (data || []),
-            size = n || LIMIT
-          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
-          const must = [], should = [], must_not = []
-          let response
-          if (address) {
-            should.push({ match: { 'source.recipient_address': address } })
-            should.push({ match: { 'source.sender_address': address } })
-            should.push({ match: { 'link.recipient_address': address } })
-            response = await getTransfers({
-              query: {
-                bool: {
-                  must,
-                  should,
-                  minimum_should_match: should.length > 0 ? 1 : 0,
-                  must_not,
-                },
-              },
-              size,
-              from,
-              sort: [{ 'source.created_at.ms': 'desc' }],
-            })
-          }
-          else if (filters) {
-            response = await getTransfers({
-              ...filters,
-              size,
-              from,
-              sort: [{ 'source.created_at.ms': 'desc' }],
-            })
-          }
-          if (response) {
-            setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              return {
-                ...d,
-              }
-            }) || [], _data), 'source.id'), ['source.created_at.ms'], ['desc'])
-            setData(response)
-            setFetching(false)
-            setDataForExport(await toCSV(response))
-          }
-          else if (!fetchTrigger) {
-            setTotal(0)
-            setData([])
-            setDataForExport([])
-          }
-          setFetching(false)
+        setFetching(true)
+
+        if (!fetchTrigger) {
+          setTotal(null)
+          setData(null)
+          setDataForExport(null)
+          setOffet(0)
         }
+
+        const _data = !fetchTrigger ?
+          [] :
+          data || []
+        const size = n || LIMIT
+        const from = fetchTrigger === true || fetchTrigger === 1 ?
+          _data.length :
+          0
+
+        const {
+          sortBy,
+        } = { ...filters }
+
+        const must = [],
+          should = [],
+          must_not = []
+
+        let response
+
+        if (address) {
+          should.push({ match: { 'source.recipient_address': address } })
+          should.push({ match: { 'source.sender_address': address } })
+          should.push({ match: { 'link.recipient_address': address } })
+          response = await getTransfers({
+            query: {
+              bool: {
+                must,
+                should,
+                minimum_should_match: should.length > 0 ? 1 : 0,
+                must_not,
+              },
+            },
+            size,
+            from,
+            sort: [{ 'source.created_at.ms': 'desc' }],
+          })
+        }
+        else if (filters) {
+          response = await getTransfers({
+            ...filters,
+            size,
+            from,
+            sort: [
+              sortBy === 'value' && { 'source.value': 'desc' },
+              { 'source.created_at.ms': 'desc' },
+            ].filter(s => s),
+          })
+        }
+        if (response) {
+          setTotal(response.total)
+
+          response = _.orderBy(
+            _.uniqBy(
+              _.concat(
+                (response.data || [])
+                  .map(d => {
+                    return {
+                      ...d,
+                    }
+                  }),
+                _data,
+              ),
+              'source.id',
+            ),
+            [
+              sortBy === 'value' && 'source.value',
+              'source.created_at.ms',
+            ].filter(s => s),
+            [
+              sortBy === 'value' && 'desc',
+              'desc',
+            ].filter(o => o),
+          )
+
+          setData(response)
+          setFetching(false)
+          setDataForExport(
+            await toCSV(response)
+          )
+        }
+        else if (!fetchTrigger) {
+          setTotal(0)
+          setData([])
+          setDataForExport([])
+        }
+
+        setFetching(false)
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [fetchTrigger])
 
   const toCSV = async data => {
-    data = data?.filter(d => d).map(d => {
-      const {
-        source,
-        link,
-      } = { ...d }
-      const {
-        sender_chain,
-        recipient_address,
-        denom,
-        created_at,
-      } = { ...source }
-      const {
-        original_sender_chain,
-      } = { ...link }
-      const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_sender_chain || sender_chain, chains_data)
-      const asset_data = getAsset(denom, assets_data)
-      const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-      const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === chain_data?.id)
-      const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
-      return {
-        ...d,
-        symbol,
-        timestamp_utc_string: moment(created_at?.ms).format('DD-MM-YYYY HH:mm:ss A'),
-      }
-    }) || []
+    data = (data || [])
+      .filter(d => d)
+      .map(d => {
+        const {
+          source,
+          link,
+        } = { ...d }
+        const {
+          sender_chain,
+          recipient_address,
+          denom,
+          created_at,
+        } = { ...source }
+        const {
+          original_sender_chain,
+        } = { ...link }
+
+        const chain_data = getChain(
+          recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ?
+            'axelarnet' :
+            original_sender_chain ||
+              sender_chain,
+          chains_data,
+        )
+        const {
+          id,
+          chain_id,
+        } = { ...chain_data }
+
+        const asset_data = getAsset(
+          denom,
+          assets_data,
+        )
+        const {
+          contracts,
+          ibc,
+        } = { ...asset_data }
+
+        const contract_data = contracts?.find(c => c?.chain_id === chain_id)
+        const ibc_data = ibc?.find(c => c?.chain_id === id)
+        const symbol = contract_data?.symbol ||
+          ibc_data?.symbol ||
+          asset_data?.symbol ||
+          denom
+
+        return {
+          ...d,
+          symbol,
+          timestamp_utc_string: moment(created_at?.ms).format('DD-MM-YYYY HH:mm:ss A'),
+        }
+      })
+
     return data
   }
 
-  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-  const data_filtered = _.slice(data, 0, n || undefined)
+  const chains_data = _.concat(
+    evm_chains_data,
+    cosmos_chains_data,
+  )
+  const data_filtered = _.slice(
+    data,
+    0,
+    n || undefined,
+  )
 
   return (
     data ?

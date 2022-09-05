@@ -27,19 +27,54 @@ export default () => {
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
       const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, confirmed, state, sourceChain, destinationChain, asset, depositAddress, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
-      setFilters({
+      const chains_data = _.concat(
+        evm_chains_data,
+        cosmos_chains_data,
+      )
+      const {
         txHash,
-        confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
-        state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
-        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
-        asset: getAsset(asset, assets_data)?.id || asset,
+        confirmed,
+        state,
+        sourceChain,
+        destinationChain,
+        asset,
         depositAddress,
         senderAddress,
         recipientAddress,
-        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+        fromTime,
+        toTime,
+        sortBy,
+      } = { ...params }
+
+      setFilters({
+        txHash,
+        confirmed: [
+          'confirmed',
+          'unconfirmed',
+        ].includes(confirmed?.toLowerCase()) ?
+          confirmed.toLowerCase() :
+          undefined,
+        state: [
+          'completed',
+          'pending',
+        ].includes(state?.toLowerCase()) ?
+          state.toLowerCase() :
+          undefined,
+        sourceChain: getChain(sourceChain, chains_data)?._id ||
+          sourceChain,
+        destinationChain: getChain(destinationChain, chains_data)?._id ||
+          destinationChain,
+        asset: getAsset(asset, assets_data)?.id ||
+          asset,
+        depositAddress,
+        senderAddress,
+        recipientAddress,
+        time: fromTime && toTime &&
+          [
+            moment(Number(fromTime)),
+            moment(Number(toTime)),
+          ],
+        sortBy,
       })
     }
   }, [evm_chains_data, cosmos_chains_data, assets_data, asPath])
@@ -171,9 +206,20 @@ export default () => {
       placeholder: 'Select transaction time',
       className: 'col-span-2',
     },
+    {
+      label: 'Sort By',
+      name: 'sortBy',
+      type: 'select',
+      placeholder: 'Select sort by',
+      options: [
+        { value: 'time', title: 'Transfer Time' },
+        { value: 'value', title: 'Transfer Value' },
+      ],
+    },
   ]
 
-  const filtered = (!!filter || filter === undefined) && Object.keys({ ...query }).length > 0
+  const filtered = (!!filter || filter === undefined) &&
+    Object.keys({ ...query }).length > 0
 
   return (
     <Modal
