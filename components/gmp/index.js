@@ -9,6 +9,7 @@ import { BigNumber, Contract, FixedNumber, constants, providers, utils } from 'e
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
+import { MdRefresh } from 'react-icons/md'
 import { HiArrowSmRight, HiArrowSmLeft } from 'react-icons/hi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -1671,6 +1672,33 @@ export default () => {
                                 />
                               }
                             </a>
+                            {
+                              ['refunded'].includes(s.id) &&
+                              !receipt?.status &&
+                              (
+                                <button
+                                  disabled={txHashEditUpdating}
+                                  onClick={async () => {
+                                    setTxHashEditUpdating(true)
+
+                                    await saveGMP(
+                                      call?.transactionHash,
+                                      call?.transactionIndex,
+                                      call?.logIndex,
+                                      transactionHash,
+                                      transaction?.from,
+                                      undefined,
+                                      'refunded',
+                                    )
+
+                                    setTxHashEditUpdating(false)
+                                  }}
+                                  className="text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white"
+                                >
+                                  <MdRefresh size={20} />
+                                </button>
+                              )
+                            }
                           </div>
                         </div> :
                         ['gas_paid'].includes(s.id) && origin?.call ?
