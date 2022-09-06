@@ -17,7 +17,7 @@ import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { axelard } from '../../lib/api/cli'
-import { batches as getBatches, fieldsToObj } from '../../lib/api/index'
+import { batches as getBatches } from '../../lib/api/batches'
 import { getChain, chainManager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
 
@@ -74,137 +74,156 @@ export default () => {
   }, [evm_chains_data, pathname, filters])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
       if (filters) {
-        if (!controller.signal.aborted) {
-          setFetching(true)
-          if (!fetchTrigger) {
-            setTotal(null)
-            setData(null)
-            setOffet(0)
-          }
-          const _data = !fetchTrigger ? [] : (data || []),
-            size = LIMIT
-          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
-          const must = [], must_not = []
-          const { chain, batchId, commandId, keyId, type, status, time } = { ...filters }
-          if (chain) {
-            must.push({ match: { chain } })
-          }
-          if (batchId) {
-            must.push({ match: { batch_id: batchId } })
-          }
-          if (commandId) {
-            must.push({ match: { command_ids: commandId } })
-          }
-          if (keyId) {
-            must.push({ match: { key_id: keyId } })
-          }
-          if (type) {
-            must.push({ match: { 'commands.type': type } })
-          }
-          if (status) {
-            switch (status) {
-              case 'executed':
-                must.push({ match: { status: 'BATCHED_COMMANDS_STATUS_SIGNED' } })
-                must.push({ match: { 'commands.executed': true } })
-                must_not.push({ match: { 'commands.executed': false } })
-                break
-              case 'unexecuted':
-                must.push({
-                  bool: {
-                    should: [
-                      { match: { status: 'BATCHED_COMMANDS_STATUS_SIGNED' } },
-                      { match: { status: 'BATCHED_COMMANDS_STATUS_SIGNING' } },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                })
-                must.push({
-                  bool: {
-                    should: [
-                      { match: { 'commands.executed': false } },
-                      {
-                        bool: {
-                          must_not: [
-                            { exists: { field: 'commands.executed' } },
-                          ],
-                        },
-                      },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                })
-                break
-              case 'signed':
-              case 'signing':
-              case 'aborted':
-                must.push({ match: { status: `BATCHED_COMMANDS_STATUS_${status}` } })
-                break
-              default:
-                break
-            }
-          }
-          if (time?.length > 1) {
-            must.push({ range: { 'created_at.ms': { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
-          }
-          let response = await getBatches({
-            query: {
-              bool: {
-                must,
-                must_not,
-              },
-            },
-            size,
-            from,
-            sort: [{ 'created_at.ms': 'desc' }],
-            // fields: ['batch_id', 'chain', 'key_id', 'commands.*', 'status', 'created_at.*'],
-            // _source: false,
-          })
-          if (response) {
-            setTotal(response.total)
-            if (['signing', 'unexecuted'].includes(status)) {
-              updateSigningBatches(response.data, true)
-            }
-            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              // d = fieldsToObj(d)
-              const { batch_id, chain, key_id, status } = { ...d }
-                return {
-                ...d,
-                batch_id: Array.isArray(batch_id) ? _.last(batch_id) : batch_id,
-                chain: Array.isArray(chain) ? _.last(chain) : chain,
-                key_id: Array.isArray(key_id) ? _.last(key_id) : key_id,
-                status: Array.isArray(status) ? _.last(status) : status,
-                created_at: {
-                  ms: d?.created_at?.ms ? d.created_at.ms : Array.isArray(d?.['created_at.ms']) ?
-                    _.last(d['created_at.ms']) : d?.['created_at.ms'],
-                  ...(Array.isArray(d?.created_at) ? _.last(d.created_at) : d?.created_at),
-                },
-              }
-            }) || [], _data), 'batch_id'), ['created_at.ms'], ['desc'])
-            if (!['signing', 'unexecuted'].includes(status)) {
-              response = await updateSigningBatches(response, true)
-            }
-            setData(response)
-          }
-          else if (!fetchTrigger) {
-            setTotal(0)
-            setData([])
-          }
-          setFetching(false)
+        setFetching(true)
+
+        if (!fetchTrigger) {
+          setTotal(null)
+          setData(null)
+          setOffet(0)
         }
+
+        const _data = !fetchTrigger ?
+          [] :
+          data || []
+        const size = LIMIT
+        const from = fetchTrigger === true || fetchTrigger === 1 ?
+          _data.length :
+          0
+
+        const {
+          chain,
+          batchId,
+          commandId,
+          keyId,
+          type,
+          status,
+          time,
+        } = { ...filters }
+
+        const response = await getBatches({
+          chain,
+          batchId,
+          commandId,
+          keyId,
+          type,
+          status,
+          fromTime: time?.[0]?.unix(),
+          toTime: time?.[1]?.unix(),
+          from,
+          size,
+        })
+
+        const {
+          total,
+        } = { ...response }
+
+        if (response) {
+          setTotal(total)
+
+          if (
+            [
+              'signing',
+              'unexecuted',
+            ].includes(status)
+          ) {
+            updateSigningBatches(
+              response.data,
+              true,
+            )
+          }
+
+          response = _.orderBy(
+            _.uniqBy(
+              _.concat(
+                (response.data || [])
+                  .map(d => {
+                    const {
+                      batch_id,
+                      chain,
+                      key_id,
+                      status,
+                      created_at,
+                    } = { ...d }
+                    const {
+                      ms,
+                    } = { ...created_at }
+
+                      return {
+                        ...d,
+                        batch_id: Array.isArray(batch_id) ?
+                          _.last(batch_id) :
+                          batch_id,
+                        chain: Array.isArray(chain) ?
+                          _.last(chain) :
+                          chain,
+                        key_id: Array.isArray(key_id) ?
+                          _.last(key_id) :
+                          key_id,
+                        status: Array.isArray(status) ?
+                          _.last(status) :
+                          status,
+                        created_at: {
+                          ms: ms ?
+                            ms :
+                            Array.isArray(d?.['created_at.ms']) ?
+                              _.last(d['created_at.ms']) :
+                              d?.['created_at.ms'],
+                          ...(
+                            Array.isArray(created_at) ?
+                              _.last(created_at) :
+                              created_at
+                          ),
+                        },
+                      }
+                    }),
+                _data,
+              ),
+              'batch_id',
+            ),
+            ['created_at.ms'],
+            ['desc'],
+          )
+
+          if (
+            ![
+              'signing',
+              'unexecuted',
+            ].includes(status)
+          ) {
+            response = await updateSigningBatches(
+              response,
+              true,
+            )
+          }
+
+          setData(response)
+        }
+        else if (!fetchTrigger) {
+          setTotal(0)
+          setData([])
+        }
+
+        setFetching(false)
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [fetchTrigger])
 
   useEffect(() => {
     if (data) {
-      setTypes(_.countBy(_.uniqBy(data, 'batch_id').flatMap(b => b?.commands?.map(c => c?.type) || []).filter(t => t)))
+      setTypes(
+        _.countBy(
+          _.uniqBy(
+            data,
+            'batch_id',
+          )
+          .flatMap(b => b?.commands?.map(c => c?.type) || [])
+          .filter(t => t)
+        )
+      )
     }
   }, [data])
 
@@ -263,7 +282,11 @@ export default () => {
     return _data
   }
 
-  const data_filtered = data?.filter(d => !(filterTypes?.length > 0) || d?.commands?.findIndex(c => filterTypes.includes(c?.type)) > -1 || (filterTypes.includes('undefined') && !(d?.commands?.length > 0)))
+  const data_filtered = data?.filter(d =>
+    !(filterTypes?.length > 0) ||
+    d?.commands?.findIndex(c => filterTypes.includes(c?.type)) > -1 ||
+    (filterTypes.includes('undefined') && !(d?.commands?.length > 0))
+  )
 
   return (
     data ?
@@ -273,7 +296,10 @@ export default () => {
             {typeof total === 'number' && (
               <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
                 <span className="text-sm font-bold">
-                  {number_format(total, '0,0')}
+                  {number_format(
+                    total,
+                    '0,0',
+                  )}
                 </span>
                 <span className="text-sm">
                   Results

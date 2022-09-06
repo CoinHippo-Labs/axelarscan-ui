@@ -70,146 +70,248 @@ export default () => {
   }, [evm_chains_data, validators_data, pathname, filters])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (filters && validators_data?.findIndex(v => v?.broadcaster_address) > -1) {
-        if (!controller.signal.aborted) {
-          setFetching(true)
-          if (!fetchTrigger) {
-            setTotal(null)
-            setData(null)
-            setOffet(0)
-          }
-          const _data = !fetchTrigger ? [] : (data || []),
-            size = LIMIT
-          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
-          const must = [], must_not = []
-          const {
-            chain,
-            txHash,
-            pollId,
-            transactionId,
-            voter,
-            vote,
-            time,
-          } = { ...filters }
-          const response = await getEvmVotes({
-            chain,
-            txHash,
-            pollId,
-            transactionId,
-            voter,
-            vote,
-            fromTime: time?.[0]?.unix(),
-            toTime: time?.[1]?.unix(),
-            from,
-            size,
-          })
+      if (
+        filters &&
+        validators_data?.findIndex(v => v?.broadcaster_address) > -1
+      ) {
+        setFetching(true)
 
-          if (response) {
-            setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              return {
-                ...d,
-              }
-            }) || [], _data), 'txhash'), ['created_at.ms'], ['desc'])
-            if (!txHash && !voter && !vote && !time) {
-              let polls = _.orderBy(Object.entries(_.groupBy(response, 'poll_id')).map(([k, v]) => {
+        if (!fetchTrigger) {
+          setTotal(null)
+          setData(null)
+          setOffet(0)
+        }
+
+        const _data = !fetchTrigger ?
+          [] :
+          data || []
+        const size = LIMIT
+        const from = fetchTrigger === true || fetchTrigger === 1 ?
+          _data.length :
+          0
+
+        const {
+          chain,
+          txHash,
+          pollId,
+          transactionId,
+          voter,
+          vote,
+          time,
+        } = { ...filters }
+
+        let response = await getEvmVotes({
+          chain,
+          txHash,
+          pollId,
+          transactionId,
+          voter,
+          vote,
+          fromTime: time?.[0]?.unix(),
+          toTime: time?.[1]?.unix(),
+          from,
+          size,
+        })
+
+        const {
+          total,
+        } = { ...response }
+
+        if (response) {
+          setTotal(total)
+
+          response = _.orderBy(
+            _.uniqBy(
+              _.concat(
+                (response.data || [])
+                  .map(d => {
+                    return {
+                      ...d,
+                    }
+                  }),
+                _data,
+              ),
+              'txhash',
+            ),
+            ['created_at.ms'],
+            ['desc'],
+          )
+
+          if (
+            !txHash &&
+            !voter &&
+            !vote &&
+            !time
+          ) {
+            let polls = _.orderBy(
+              Object.entries(
+                _.groupBy(
+                  response,
+                  'poll_id',
+                )
+              )
+              .map(([k, v]) => {
                 return {
                   id: k,
                   votes: v,
                   time: _.minBy(v, 'created_at.ms')?.created_at?.ms,
                 }
-              }), ['time'], ['desc'])
-              polls = _.slice(polls, 0, polls.length - (polls.length > 1 ? 1 : 0))
-              for (const poll of polls) {
-                const {
-                  id,
-                  votes,
-                } = { ...poll }
-                const min_height = _.minBy(votes, 'height')?.height
-                const max_height = _.maxBy(votes, 'height')?.height
-                const sender_chain = _.head(votes?.map(v => v?.sender_chain).filter(c => c) || [])
-                let _response = await getEvmPolls({
-                  query: {
-                    bool: {
-                      must: [
-                        { match: { _id: id } },
-                        { match: { sender_chain } },
-                        { exists: { field: 'participants' } },
-                      ],
-                    },
+              }),
+              ['time'],
+              ['desc'],
+            )
+
+            polls = _.slice(
+              polls,
+              0,
+              polls.length - (
+                polls.length > 1 ?
+                1 :
+                0,
+              ),
+            )
+
+            for (const poll of polls) {
+              const {
+                id,
+                votes,
+              } = { ...poll }
+
+              const min_height = _.minBy(votes, 'height')?.height
+              const max_height = _.maxBy(votes, 'height')?.height
+              const sender_chain = _.head(
+                (votes || [])
+                  .map(v => v?.sender_chain)
+                  .filter(c => c)
+              )
+
+              let _response = await getEvmPolls({
+                query: {
+                  bool: {
+                    must: [
+                      { match: { _id: id } },
+                      { match: { sender_chain } },
+                      { exists: { field: 'participants' } },
+                    ],
                   },
-                  size: 1,
-                })
-                const {
-                  participants,
-                } = { ..._response?.data?.[0] }
-                let voters_unsubmit_vote = []
-                if (participants) {
-                  voters_unsubmit_vote = participants.map(a => {
-                    const validator_data = validators_data.find(_v => equals_ignore_case(_v?.operator_address, a))
+                },
+                size: 1,
+              })
+
+              const {
+                participants,
+              } = { ..._.head(_response?.data) }
+
+              let voters_unsubmit_vote = []
+
+              if (participants) {
+                voters_unsubmit_vote = participants
+                  .map(a => {
                     const {
                       broadcaster_address,
-                    } = { ...validator_data }
+                    } = { ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, a)) }
+
                     return broadcaster_address
-                  }).filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
-                }
-                else {
-                  _response = await axelard({
-                    cmd: `axelard q nexus chain-maintainers ${chainManager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
-                    cache: true,
-                    cache_timeout: 1,
                   })
-                  const chain_maintainers = _response && Object.values({ ...to_json(_response?.stdout)?.maintainers })
-                  _response = await validator_sets(min_height)
-                  const _validators_data = _response?.result?.validators?.map(v => {
+                  .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
+              }
+              else {
+                _response = await axelard({
+                  cmd: `axelard q nexus chain-maintainers ${chainManager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
+                  cache: true,
+                  cache_timeout: 1,
+                })
+
+                const chain_maintainers = _response &&
+                  Object.values({ ...to_json(_response?.stdout)?.maintainers })
+
+                _response = await validator_sets(min_height)
+
+                const {
+                  validators,
+                } = { ..._response?.result }
+
+                const _validators_data = (validators || [])
+                  .map(v => {
+                    const {
+                      address,
+                    } = { ...v }
+
                     return {
                       ...v,
-                      ...validators_data.find(_v => equals_ignore_case(_v?.consensus_address, v?.address)),
+                      ...validators_data.find(_v => equals_ignore_case(_v?.consensus_address, address)),
                     }
-                  }) || []
-                  voters_unsubmit_vote = _validators_data.filter(v => !chain_maintainers || chain_maintainers.includes(v?.operator_address))
-                    .map(v => v?.broadcaster_address)
-                    .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
-                }
-                voters_unsubmit_vote.forEach(v => {
-                  response.push({
-                    sender_chain,
-                    poll_id: id,
-                    transaction_id: _.head(votes?.map(_v => _v?.transaction_id).filter(t => t) || []),
-                    voter: v,
-                    vote: 'unsubmitted',
-                    created_at: {
-                      ms: _.maxBy(votes, 'created_at.ms')?.created_at?.ms + 1000,
-                    },
                   })
-                })
+
+                voters_unsubmit_vote = _validators_data
+                  .filter(v => !chain_maintainers || chain_maintainers.includes(v?.operator_address))
+                  .map(v => v?.broadcaster_address)
+                  .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
               }
+
+              voters_unsubmit_vote.forEach(v => {
+                response.push({
+                  sender_chain,
+                  poll_id: id,
+                  transaction_id: _.head(
+                    (votes || [])
+                      .map(_v => _v?.transaction_id)
+                      .filter(t => t)
+                  ),
+                  voter: v,
+                  vote: 'unsubmitted',
+                  created_at: {
+                    ms: _.maxBy(votes, 'created_at.ms')?.created_at?.ms + 1000,
+                  },
+                })
+              })
             }
-            response = _.orderBy(response.map(d => {
+          }
+
+          response = _.orderBy(
+            response.map(d => {
+              const {
+                created_at,
+              } = { ...d }
+              const {
+                ms,
+              } = { ...created_at }
+
               return {
                 ...d,
                 created_at: {
-                  ...d?.created_at,
-                  s: moment(d?.created_at?.ms).startOf('seconds').valueOf(),
+                  ...created_at,
+                  s: moment(ms).startOf('seconds').valueOf(),
                 },
               }
-            }), ['created_at.s', 'late', 'confirmation', 'unconfirmed'], ['desc', 'desc', 'desc', 'asc'])
-            setData(response)
-          }
-          else if (!fetchTrigger) {
-            setTotal(0)
-            setData([])
-          }
-          setFetching(false)
+            }),
+            [
+              'created_at.s',
+              'late',
+              'confirmation',
+              'unconfirmed',
+            ],
+            [
+              'desc',
+              'desc',
+              'desc',
+              'asc',
+            ],
+          )
+
+          setData(response)
         }
+        else if (!fetchTrigger) {
+          setTotal(0)
+          setData([])
+        }
+
+        setFetching(false)
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [fetchTrigger])
 
   return (
@@ -217,7 +319,10 @@ export default () => {
       <div className="min-h-full grid gap-2">
         <div className="flex items-center space-x-2 -mt-4">
           <span className="text-lg font-bold">
-            {number_format(total, '0,0')}
+            {number_format(
+              total,
+              '0,0',
+            )}
           </span>
           <span className="text-base">
             Results
