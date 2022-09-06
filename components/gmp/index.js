@@ -472,27 +472,93 @@ export default () => {
     }
   }
 
-  const { data, execute_data, callback, origin } = { ...gmp }
-  const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, is_not_enough_gas, refunded, fees, status, gas, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...data }
-  const { event, chain } = { ...call }
-  const { sender, destinationChain, destinationContractAddress, payloadHash, payload, symbol, amount } = { ...call?.returnValues }
-  const { commandId, sourceChain } = { ...approved?.returnValues }
-  const { from } = { ...call?.transaction }
+  const {
+    data,
+    execute_data,
+    callback,
+    origin,
+  } = { ...gmp }
+  const {
+    call,
+    gas_paid,
+    gas_paid_to_callback,
+    forecalled,
+    approved,
+    executed,
+    is_executed,
+    error,
+    is_not_enough_gas,
+    refunded,
+    fees,
+    status,
+    gas,
+    is_invalid_destination_chain,
+    is_insufficient_minimum_amount,
+    is_insufficient_fee,
+  } = { ...data }
+  let {
+    no_gas_remain,
+  } = { ...data }
+  const {
+    event,
+    chain,
+  } = { ...call }
+  const {
+    sender,
+    destinationChain,
+    destinationContractAddress,
+    payloadHash,
+    payload,
+    symbol,
+    amount,
+  } = { ...call?.returnValues }
+  const {
+    commandId,
+    sourceChain,
+  } = { ...approved?.returnValues }
+  const {
+    from,
+  } = { ...call?.transaction }
   const relayer = executed?.transaction?.from
+
+  no_gas_remain = typeof no_gas_remain === 'boolean' ?
+    no_gas_remain :
+    !refunded &&
+    gas?.gas_remain_amount < 0.001
+
   const chains_data = _.concat(
     evm_chains_data,
     cosmos_chains_data,
   )
-  const source_chain_data = getChain(chain, chains_data)
-  const axelar_chain_data = getChain('axelarnet', chains_data)
-  const destination_chain_data = getChain(destinationChain, chains_data)
+  const source_chain_data = getChain(
+    chain,
+    chains_data,
+  )
+  const axelar_chain_data = getChain(
+    'axelarnet',
+    chains_data,
+  )
+  const destination_chain_data = getChain(
+    destinationChain,
+    chains_data,
+  )
   const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol))
   const source_contract_data = asset_data?.contracts?.find(c => c.chain_id === source_chain_data?.chain_id)
-  const decimals = source_contract_data?.decimals || asset_data?.decimals || 18
-  const _symbol = source_contract_data?.symbol || asset_data?.symbol || symbol
-  const asset_image = source_contract_data?.image || asset_data?.image
-  const wrong_source_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !gasAdding
-  const wrong_destination_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
+  const decimals = source_contract_data?.decimals ||
+    asset_data?.decimals ||
+    18
+  const _symbol = source_contract_data?.symbol ||
+    asset_data?.symbol ||
+    symbol
+  const asset_image = source_contract_data?.image ||
+    asset_data?.image
+  const wrong_source_chain = source_chain_data &&
+    chain_id !== source_chain_data.chain_id &&
+    !gasAdding
+  const wrong_destination_chain = destination_chain_data &&
+    chain_id !== destination_chain_data.chain_id &&
+    !executing
+
   const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
     <div className="flex items-center space-x-2">
       <button
@@ -526,7 +592,11 @@ export default () => {
             className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
           >
             {executing && (
-              <TailSpin color="white" width="16" height="16" />
+              <TailSpin
+                color="white"
+                width="16"
+                height="16"
+              />
             )}
             <span>
               Execute
@@ -534,7 +604,13 @@ export default () => {
           </button>
         )}
         <Wallet
-          connectChainId={wrong_destination_chain && (destination_chain_data.chain_id || default_chain_id)}
+          connectChainId={
+            wrong_destination_chain &&
+            (
+              destination_chain_data.chain_id ||
+              default_chain_id
+            )
+          }
         />
       </div>
     </>
@@ -552,7 +628,11 @@ export default () => {
             className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
           >
             {gasAdding && (
-              <TailSpin color="white" width="16" height="16" />
+              <TailSpin
+                color="white"
+                width="16"
+                height="16"
+              />
             )}
             <span className="whitespace-nowrap">
               Pay new gas
@@ -560,15 +640,22 @@ export default () => {
           </button>
         )}
         <Wallet
-          connectChainId={wrong_source_chain && (source_chain_data.chain_id || default_chain_id)}
+          connectChainId={
+            wrong_source_chain &&
+            (
+              source_chain_data.chain_id ||
+              default_chain_id
+            )
+          }
         />
       </div>
     </>
   )
   const refundButton = !approveButton && !executeButton &&
+    !no_gas_remain &&
     (
-      (gas?.gas_remain_amount > 0.001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
-      (gas?.gas_remain_amount > 0.001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
+      (gas?.gas_remain_amount >= 0.001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
+      (gas?.gas_remain_amount >= 0.001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
     ) &&
     (executed || error || is_executed || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(2, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
@@ -654,20 +741,34 @@ export default () => {
     default:
       break
   }
+
   const detail_steps = steps
-  const forecall_time_spent = total_time_string(call?.block_timestamp, forecalled?.block_timestamp)
+
+  const forecall_time_spent = total_time_string(
+    call?.block_timestamp,
+    forecalled?.block_timestamp,
+  )
+
   const time_spent = total_time_string(
     call?.block_timestamp,
     executed?.block_timestamp,
   )
-  const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
-  const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
-  const notificationResponse = executeResponse || gasAddResponse || approveResponse || refundResponse
+
+  const notificationResponse = executeResponse ||
+    gasAddResponse ||
+    approveResponse ||
+    refundResponse
+
   const explorer = notificationResponse && (
     notificationResponse.is_axelar_transaction ?
-      axelar_chain_data : executeResponse ?
-      destination_chain_data : source_chain_data
+      axelar_chain_data :
+      executeResponse ?
+        destination_chain_data :
+        source_chain_data
   )?.explorer
+
+  const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
+  const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
@@ -1081,10 +1182,20 @@ export default () => {
                           {(!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
                             i === current_step && !['refunded'].includes(s.id) ?
-                              <Puff color={loader_color(theme)} width="20" height="20" /> :
+                              <Puff
+                                color={loader_color(theme)}
+                                width="20"
+                                height="20"
+                              /> :
                               (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
-                                <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
-                                <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
+                                <BiXCircle
+                                  size={20}
+                                  className="text-red-500 dark:text-red-600"
+                                /> :
+                                <FiCircle
+                                  size={20}
+                                  className="text-slate-400 dark:text-slate-600"
+                                />
                           }
                           <div className="flex items-center space-x-1">
                             {s.data?.transactionHash ?
@@ -2331,6 +2442,18 @@ export default () => {
               )
             })}
             <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
+              {
+                no_gas_remain &&
+                !refunded &&
+                (
+                  executed ||
+                  error
+                ) && (
+                  <div className="w-fit bg-slate-100 dark:bg-slate-900 rounded-lg text-slate-400 dark:text-slate-200 text-base font-semibold p-3">
+                    No refund for this GMP call.
+                  </div>
+                )
+              }
               {payloadHash && (
                 <div className="sm:col-span-4 space-y-2">
                   <span className="text-base font-semibold">
@@ -2492,9 +2615,12 @@ export default () => {
               )}
             </div>
           </div>
-        </>
-        :
-        <TailSpin color={loader_color(theme)} width="32" height="32" />
+        </> :
+        <TailSpin
+          color={loader_color(theme)}
+          width="32"
+          height="32"
+        />
       }
     </div>
   )
