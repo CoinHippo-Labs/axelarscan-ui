@@ -55,6 +55,8 @@ export default () => {
       setApi(
         new AxelarGMPRecoveryAPI({
           environment: process.env.NEXT_PUBLIC_ENVIRONMENT,
+          axelarRpcUrl: process.env.NEXT_PUBLIC_RPC_URL,
+          axelarLcdUrl: process.env.NEXT_PUBLIC_LCD_URL,
         })
       )
     }
