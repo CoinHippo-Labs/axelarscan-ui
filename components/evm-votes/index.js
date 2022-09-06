@@ -105,6 +105,7 @@ export default () => {
             from,
             size,
           })
+
           if (response) {
             setTotal(response.total)
             response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {

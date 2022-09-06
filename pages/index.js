@@ -7,7 +7,9 @@ import { is_route_exist } from '../lib/routes'
 export default () => {
   const router = useRouter()
   const { pathname, asPath } = { ...router }
-  const _asPath = asPath.includes('?') ? asPath.substring(0, asPath.indexOf('?')) : asPath
+  const _asPath = asPath.includes('?') ?
+    asPath.substring(0, asPath.indexOf('?')) :
+    asPath
 
   const [ssr, setSsr] = useState(true)
 
@@ -15,9 +17,18 @@ export default () => {
     setSsr(false)
   }, [])
 
-  if (!ssr && typeof window !== 'undefined' && pathname !== _asPath && !ssr) {
-    router.push(is_route_exist(_asPath) ? asPath : '/')
+  if (
+    !ssr &&
+    typeof window !== 'undefined' &&
+    pathname !== _asPath
+  ) {
+    router.push(
+      is_route_exist(_asPath) ?
+        asPath :
+        '/'
+    )
   }
+
   return !ssr && ['/'].includes(asPath) && (
     <div className="max-w-8xl mx-auto">
       <Dashboard />

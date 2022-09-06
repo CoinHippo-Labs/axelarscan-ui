@@ -10,7 +10,12 @@ export default (
     case TVL_DATA:
       return {
         ...state,
-        [`${TVL_DATA}`]: action.value ? { ...state[`${TVL_DATA}`], ...action.value } : {},
+        [`${TVL_DATA}`]: action.value ?
+          {
+            ...state[`${TVL_DATA}`],
+            ...action.value,
+          } :
+          {},
       }
     default:
       return state

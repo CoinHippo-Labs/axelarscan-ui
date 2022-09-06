@@ -19,7 +19,10 @@ export default (
     case WALLET_DATA:
       return {
         ...state,
-        [`${WALLET_DATA}`]: { ...state[`${WALLET_DATA}`], ...action.value },
+        [`${WALLET_DATA}`]: {
+          ...state[`${WALLET_DATA}`],
+          ...action.value,
+        },
       }
     case WALLET_RESET:
       return {

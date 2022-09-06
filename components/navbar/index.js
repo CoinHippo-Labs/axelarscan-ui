@@ -15,7 +15,7 @@ import SubNavbar from './sub-navbar'
 import { chains as getChains, assets as getAssets } from '../../lib/api/config'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { tvl as getTVL } from '../../lib/api/transfer'
-import { coin } from '../../lib/api/coingecko'
+import { token } from '../../lib/api/coingecko'
 import { getStatus } from '../../lib/api/rpc'
 import { staking_params, bank_supply, staking_pool, slashing_params, distribution_params, mint_inflation, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
 import { ens as getEns } from '../../lib/api/ens'
@@ -210,7 +210,7 @@ export default () => {
           })
         }
         if (chain_data?.coingecko_id) {
-          const response = await coin(chain_data.coingecko_id)
+          const response = await token(chain_data.coingecko_id)
           chain_data.token_data = !response?.error && response
           dispatch({
             type: CHAIN_DATA,
