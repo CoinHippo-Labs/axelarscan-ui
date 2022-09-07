@@ -1673,9 +1673,18 @@ export default () => {
                               }
                             </a>
                             {
-                              ['refunded'].includes(s.id) &&
-                              !receipt?.status &&
-                              (
+                              [
+                                'executed',
+                                'refunded',
+                              ].includes(s.id) && (
+                                (
+                                  [
+                                    'refunded',
+                                  ].includes(s.id) &&
+                                  typeof receipt?.status !== 'number'
+                                ) ||
+                                !block_timestamp
+                              ) && (
                                 <button
                                   disabled={txHashEditUpdating}
                                   onClick={async () => {
@@ -1688,7 +1697,11 @@ export default () => {
                                       transactionHash,
                                       transaction?.from,
                                       undefined,
-                                      'refunded',
+                                      [
+                                        'refunded',
+                                      ].includes(s.id) ?
+                                        s.id :
+                                        undefined,
                                     )
 
                                     setTxHashEditUpdating(false)
