@@ -53,11 +53,13 @@ export default () => {
 
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
-      const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+
       const chains_data = _.concat(
         evm_chains_data,
         cosmos_chains_data,
       )
+
       const {
         txHash,
         sourceChain,
@@ -110,6 +112,7 @@ export default () => {
                 moment(),
             ],
         })
+
         // if (typeof fetchTrigger === 'number') {
         //   setFetchTrigger(moment().valueOf())
         // }
@@ -144,30 +147,45 @@ export default () => {
   }, [pathname, filters])
 
   useEffect(() => {
-    if (pathname && !timeframeSelected) {
-      if (!filters?.time) {
+    if (
+      asPath &&
+      !timeframeSelected &&
+      filters
+    ) {
+      if (!filters.time) {
         const qs = new URLSearchParams()
-        Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
-          let key, value
-          switch (k) {
-            case 'time':
-              break
-            default:
-              key = k
-              value = v
-              break
-          }
-          if (key) {
-            qs.append(key, value)
-          }
-        })
+
+        Object.entries({ ...filters })
+          .filter(([k, v]) => v)
+          .forEach(([k, v]) => {
+            let key, value
+
+            switch (k) {
+              case 'time':
+                break
+              default:
+                key = k
+                value = v
+                break
+            }
+
+            if (key) {
+              qs.append(
+                key,
+                value,
+              )
+            }
+          })
+
         qs.append('fromTime', moment().subtract(DEFAULT_TIMEFRAME_DAYS, 'days').valueOf())
         qs.append('toTime', moment().valueOf())
+
         const qs_string = qs.toString()
+
         router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
       }
     }
-  }, [pathname, timeframeSelected])
+  }, [asPath, timeframeSelected, filters])
 
   useEffect(() => {
     const getData = () => {
@@ -265,7 +283,9 @@ export default () => {
 
     data = {
       ...data,
-      invalid: data.called - data.approving,
+      invalid: data.approving < data.called ?
+        data.called - data.approving :
+        0,
     }
 
     response = await searchGMP({

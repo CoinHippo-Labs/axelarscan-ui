@@ -50,6 +50,9 @@ export default () => {
   const [txHashEdit, setTxHashEdit] = useState(null)
   const [txHashEditing, setTxHashEditing] = useState(false)
   const [txHashEditUpdating, setTxHashEditUpdating] = useState(false)
+  const [txHashRefundEdit, setTxHashRefundEdit] = useState(null)
+  const [txHashRefundEditing, setTxHashRefundEditing] = useState(false)
+  const [txHashRefundEditUpdating, setTxHashRefundEditUpdating] = useState(false)
 
   useEffect(() => {
     if (!api) {
@@ -185,14 +188,23 @@ export default () => {
         })
       }
     }
-    if (!approving && !executing && !txHashEditing) {
+
+    if (
+      !approving &&
+      !executing &&
+      !txHashEditing &&
+      !txHashRefundEditing
+    ) {
       getData()
     }
-    const interval = setInterval(() => getData(), 0.15 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
-  }, [evm_chains_data, tx, api, approving, executing, txHashEditing])
+
+    return () => clearInterval(
+      setInterval(() =>
+        getData(),
+        0.15 * 60 * 1000,
+      )
+    )
+  }, [evm_chains_data, tx, api, approving, executing, txHashEditing, txHashRefundEditing])
 
   const resetTxHashEdit = () => {
     setApproveResponse(null)
@@ -202,6 +214,9 @@ export default () => {
     setTxHashEdit(null)
     setTxHashEditing(false)
     setTxHashEditUpdating(false)
+    setTxHashRefundEdit(null)
+    setTxHashRefundEditing(false)
+    setTxHashRefundEditUpdating(false)
   }
 
   const saveGMP = async (
@@ -1624,152 +1639,270 @@ export default () => {
                           }
                         </div>
                       </div> :
-                      transactionHash ?
+                      ['refunded'].includes(s.id) && (!data || data.error) ?
                         <div className={rowClassName}>
                           <span className={rowTitleClassName}>
                             Tx Hash:
                           </span>
                           <div className="flex items-center space-x-1">
-                            <a
-                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
-                            >
-                              <div className="text-sm lg:text-base font-bold">
-                                <span className="xl:hidden">
-                                  {ellipse(
-                                    transactionHash,
-                                    12,
-                                  )}
-                                </span>
-                                <span className="hidden xl:block">
-                                  {ellipse(
-                                    transactionHash,
-                                    16,
-                                  )}
-                                </span>
-                              </div>
-                            </a>
-                            <Copy
-                              value={transactionHash}
-                              size={18}
-                            />
-                            <a
-                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
-                            >
-                              {icon ?
-                                <Image
-                                  src={icon}
-                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                /> :
-                                <TiArrowRight
-                                  size={16}
-                                  className="transform -rotate-45"
-                                />
-                              }
-                            </a>
-                            {
-                              [
-                                'executed',
-                                'refunded',
-                              ].includes(s.id) && (
-                                (
-                                  [
-                                    'refunded',
-                                  ].includes(s.id) &&
-                                  typeof receipt?.status !== 'number'
-                                ) ||
-                                !block_timestamp
-                              ) && (
+                            {txHashRefundEditing ?
+                              <input
+                                disabled={txHashRefundEditUpdating}
+                                placement="Transaction Hash"
+                                value={txHashRefundEdit}
+                                onChange={e => setTxHashRefundEdit(e.target.value)}
+                                className="bg-slate-50 dark:bg-slate-800 rounded-lg text-base py-1 px-2"
+                              /> :
+                              transactionHash ?
+                                <>
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-white"
+                                  >
+                                    <div className="text-sm lg:text-base font-bold">
+                                      <span className="xl:hidden">
+                                        {ellipse(
+                                          transactionHash,
+                                          12,
+                                        )}
+                                      </span>
+                                      <span className="hidden xl:block">
+                                        {ellipse(
+                                          transactionHash,
+                                          16,
+                                        )}
+                                      </span>
+                                    </div>
+                                  </a>
+                                  <Copy
+                                    value={transactionHash}
+                                    size={18}
+                                  />
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-white"
+                                  >
+                                    {icon ?
+                                      <Image
+                                        src={icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </> :
+                                null
+                            }
+                            {txHashRefundEditing ?
+                              <>
                                 <button
-                                  disabled={txHashEditUpdating}
+                                  disabled={txHashRefundEditUpdating}
+                                  onClick={() => resetTxHashEdit()}
+                                  className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
+                                >
+                                  <RiCloseCircleFill size={20} />
+                                </button>
+                                <button
+                                  disabled={!txHashRefundEdit || txHashRefundEditUpdating}
                                   onClick={async () => {
-                                    setTxHashEditUpdating(true)
-
+                                    setTxHashRefundEditUpdating(true)
                                     await saveGMP(
                                       call?.transactionHash,
                                       call?.transactionIndex,
                                       call?.logIndex,
-                                      transactionHash,
-                                      transaction?.from,
+                                      txHashRefundEdit,
+                                      address,
                                       undefined,
-                                      [
-                                        'refunded',
-                                      ].includes(s.id) ?
-                                        s.id :
-                                        undefined,
+                                      'refunded',
                                     )
-
-                                    setTxHashEditUpdating(false)
                                   }}
-                                  className="text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white"
+                                  className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
                                 >
-                                  <MdRefresh size={20} />
+                                  {txHashRefundEditUpdating ?
+                                    <TailSpin
+                                      color={loader_color(theme)}
+                                      width="16"
+                                      height="16"
+                                    /> :
+                                    <BiSave size={20} />
+                                  }
                                 </button>
-                              )
+                              </> :
+                              <button
+                                onClick={() => setTxHashRefundEditing(true)}
+                                className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                              >
+                                <BiEditAlt size={20} />
+                              </button>
                             }
                           </div>
                         </div> :
-                        ['gas_paid'].includes(s.id) && origin?.call ?
-                          <div className="space-y-1.5">
-                            <Link href={`/gmp/${origin.call.transactionHash}`}>
+                        transactionHash ?
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Tx Hash:
+                            </span>
+                            <div className="flex items-center space-x-1">
                               <a
+                                href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
+                                className="text-blue-600 dark:text-white"
                               >
-                                <HiArrowSmLeft size={16} />
-                                <span className="text-xs font-semibold hover:font-bold">
-                                  from 1st Call
-                                </span>
+                                <div className="text-sm lg:text-base font-bold">
+                                  <span className="xl:hidden">
+                                    {ellipse(
+                                      transactionHash,
+                                      12,
+                                    )}
+                                  </span>
+                                  <span className="hidden xl:block">
+                                    {ellipse(
+                                      transactionHash,
+                                      16,
+                                    )}
+                                  </span>
+                                </div>
                               </a>
-                            </Link>
-                            <div className="flex items-center space-x-1">
+                              <Copy
+                                value={transactionHash}
+                                size={18}
+                              />
+                              <a
+                                href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 dark:text-white"
+                              >
+                                {icon ?
+                                  <Image
+                                    src={icon}
+                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                  /> :
+                                  <TiArrowRight
+                                    size={16}
+                                    className="transform -rotate-45"
+                                  />
+                                }
+                              </a>
+                              {
+                                [
+                                  'executed',
+                                  'refunded',
+                                ].includes(s.id) && (
+                                  (
+                                    [
+                                      'refunded',
+                                    ].includes(s.id) &&
+                                    typeof receipt?.status !== 'number'
+                                  ) ||
+                                  !block_timestamp
+                                ) && (
+                                  <button
+                                    disabled={s.id === 'refunded' ?
+                                      txHashRefundEditing :
+                                      txHashEditUpdating
+                                    }
+                                    onClick={async () => {
+                                      if (s.id === 'refunded') {
+                                        setTxHashRefundEditUpdating(true)
+                                      }
+                                      else {
+                                        setTxHashEditUpdating(true)
+                                      }
+
+                                      await saveGMP(
+                                        call?.transactionHash,
+                                        call?.transactionIndex,
+                                        call?.logIndex,
+                                        transactionHash,
+                                        transaction?.from,
+                                        undefined,
+                                        [
+                                          'refunded',
+                                        ].includes(s.id) ?
+                                          s.id :
+                                          undefined,
+                                      )
+
+                                      if (s.id === 'refunded') {
+                                        setTxHashRefundEditUpdating(false)
+                                      }
+                                      else {
+                                        setTxHashEditUpdating(false)
+                                      }
+                                    }}
+                                    className="text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white"
+                                  >
+                                    <MdRefresh size={20} />
+                                  </button>
+                                )
+                              }
+                            </div>
+                          </div> :
+                          ['gas_paid'].includes(s.id) && origin?.call ?
+                            <div className="space-y-1.5">
                               <Link href={`/gmp/${origin.call.transactionHash}`}>
                                 <a
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 dark:text-white"
+                                  className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
                                 >
-                                  <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                    <span className="xl:hidden">
-                                      {ellipse(
-                                        origin.call.transactionHash,
-                                        8,
-                                      )}
-                                    </span>
-                                    <span className="hidden xl:block">
-                                      {ellipse(
-                                        origin.call.transactionHash,
-                                        12,
-                                      )}
-                                    </span>
-                                  </div>
+                                  <HiArrowSmLeft size={16} />
+                                  <span className="text-xs font-semibold hover:font-bold">
+                                    from 1st Call
+                                  </span>
                                 </a>
                               </Link>
-                              <Copy
-                                value={origin.call.transactionHash}
-                                size={18}
-                              />
-                            </div>
-                          </div> :
-                          ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
-                            <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
-                              No transaction
-                            </span> :
-                            !is_invalid_destination_chain &&
-                            !is_insufficient_minimum_amount &&
-                            !is_insufficient_fee && (
-                              <FallingLines
-                                color={loader_color(theme)}
-                                width="32"
-                                height="32"
-                              />
-                            )
+                              <div className="flex items-center space-x-1">
+                                <Link href={`/gmp/${origin.call.transactionHash}`}>
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-white"
+                                  >
+                                    <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
+                                      <span className="xl:hidden">
+                                        {ellipse(
+                                          origin.call.transactionHash,
+                                          8,
+                                        )}
+                                      </span>
+                                      <span className="hidden xl:block">
+                                        {ellipse(
+                                          origin.call.transactionHash,
+                                          12,
+                                        )}
+                                      </span>
+                                    </div>
+                                  </a>
+                                </Link>
+                                <Copy
+                                  value={origin.call.transactionHash}
+                                  size={18}
+                                />
+                              </div>
+                            </div> :
+                            ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
+                              <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
+                                No transaction
+                              </span> :
+                              !is_invalid_destination_chain &&
+                              !is_insufficient_minimum_amount &&
+                              !is_insufficient_fee && (
+                                <FallingLines
+                                  color={loader_color(theme)}
+                                  width="32"
+                                  height="32"
+                                />
+                              )
                     }
                     {typeof logIndex === 'number' && (
                       <div className={rowClassName}>
