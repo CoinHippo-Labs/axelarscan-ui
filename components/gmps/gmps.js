@@ -631,6 +631,16 @@ export default ({ n }) => {
                       ) ?
                         1 :
                         0
+                    ) - (
+                      data_filtered.filter(d =>
+                        equals_ignore_case(d?.call?.transactionHash, call?.transactionHash)
+                      ).length > 1 &&
+                      data_filtered.filter(d =>
+                        equals_ignore_case(d?.call?.transactionHash, call?.transactionHash) &&
+                        !d?.gas_paid
+                      ).length > 0 ?
+                        1 :
+                        0
                     )
                     break
                   case 'forecalled':
