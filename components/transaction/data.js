@@ -675,21 +675,20 @@ export default ({
 
                         return {
                           type,
-                          ...Object.fromEntries(
-                            attributes
-                              .filter(a => a)
-                              .map(a =>
-                                [
-                                  a.key,
-                                  a.value,
-                                ]
-                              )
-                          )
+                          attributes: attributes
+                            .filter(a => a)
+                            .map(a =>
+                              [
+                                a.key,
+                                a.value,
+                              ]
+                            )
                         }
                       })
                       .map((e, j) => {
                         const {
                           type,
+                          attributes,
                         } = { ...e }
 
                         return (
@@ -702,8 +701,7 @@ export default ({
                                 {name(type)}
                               </div>
                             )}
-                            {Object.entries({ ...e })
-                              .filter(([k, v]) => !['type'].includes(k))
+                            {attributes
                               .map(([k, v]) => (
                                 <div
                                   key={k}
