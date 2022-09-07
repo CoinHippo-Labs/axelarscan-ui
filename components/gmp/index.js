@@ -1275,7 +1275,7 @@ export default () => {
               const _data = ['executed'].includes(s.id) ?
                 data || error :
                 data
-              const { blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
+              const { logIndex, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
               let { transactionHash } = { ..._data }
               transactionHash = transactionHash ||
                 receipt?.transactionHash
@@ -1758,7 +1758,27 @@ export default () => {
                               />
                             )
                     }
-                    {blockNumber && (
+                    {typeof logIndex === 'number' && (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Log Index:
+                        </span>
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}#eventlog`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 dark:text-white text-sm lg:text-base font-bold"
+                          >
+                            {number_format(
+                              logIndex,
+                              '0,0',
+                            )}
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                    {typeof blockNumber === 'number' && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           Block:
@@ -1770,7 +1790,10 @@ export default () => {
                             rel="noopener noreferrer"
                             className="text-blue-600 dark:text-white text-sm lg:text-base font-bold"
                           >
-                            {number_format(blockNumber, '0,0')}
+                            {number_format(
+                              blockNumber,
+                              '0,0',
+                            )}
                           </a>
                         </div>
                       </div>
