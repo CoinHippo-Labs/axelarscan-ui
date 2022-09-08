@@ -369,6 +369,7 @@ export default () => {
 
         const {
           call,
+          approved,
         } = { ...data }
         const {
           chain,
@@ -407,6 +408,15 @@ export default () => {
             'Pay gas successful',
           txHash: transaction?.transactionHash,
         })
+
+        if (
+          success &&
+          !approved
+        ) {
+          await sleep(5 * 1000)
+
+          approve(data)
+        }
       } catch (error) {
         setGasAdding(false)
         setGasAddResponse({
@@ -540,7 +550,7 @@ export default () => {
   no_gas_remain = gas?.gas_remain_amount < 0.001 || (
     typeof no_gas_remain === 'boolean' ?
       no_gas_remain :
-      !(refunded && refunded.receipt?.status)
+      refunded && !refunded.receipt?.status
   )
 
   const chains_data = _.concat(
@@ -576,7 +586,7 @@ export default () => {
     chain_id !== destination_chain_data.chain_id &&
     !executing
 
-  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
+  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee || gas_remain_amount < 0.0001) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 && (
     <div className="flex items-center space-x-2">
       <button
         disabled={approving}
@@ -675,7 +685,7 @@ export default () => {
       (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
     ) &&
     (executed || error || is_executed || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
-    (approved?.block_timestamp < moment().subtract(2, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
+    (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) && (
       <div className="flex items-center space-x-2">
         <button
@@ -872,7 +882,14 @@ export default () => {
                           <span className="text-base sm:text-sm lg:text-base font-semibold">
                             {asset_data && (
                               <span className="mr-1">
-                                {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000', true)}
+                                {number_format(
+                                  utils.formatUnits(
+                                    BigNumber.from(amount),
+                                    decimals,
+                                  ),
+                                  '0,0.000',
+                                  true,
+                                )}
                               </span>
                             )}
                             <span>
@@ -949,10 +966,16 @@ export default () => {
                             >
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                 <span className="xl:hidden">
-                                  {ellipse(callback.call.transactionHash, 8)}
+                                  {ellipse(
+                                    callback.call.transactionHash,
+                                    8,
+                                  )}
                                 </span>
                                 <span className="hidden xl:block">
-                                  {ellipse(callback.call.transactionHash, 12)}
+                                  {ellipse(
+                                    callback.call.transactionHash,
+                                    12,
+                                  )}
                                 </span>
                               </div>
                             </a>
@@ -987,10 +1010,16 @@ export default () => {
                             >
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                 <span className="xl:hidden">
-                                  {ellipse(origin.call.transactionHash, 8)}
+                                  {ellipse(
+                                    origin.call.transactionHash,
+                                    8,
+                                  )}
                                 </span>
                                 <span className="hidden xl:block">
-                                  {ellipse(origin.call.transactionHash, 12)}
+                                  {ellipse(
+                                    origin.call.transactionHash,
+                                    12,
+                                  )}
                                 </span>
                               </div>
                             </a>
@@ -1036,10 +1065,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(from, 8, source_chain_data?.prefix_address)}
+                                    {ellipse(
+                                      from,
+                                      8,
+                                      source_chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(from, 12, source_chain_data?.prefix_address)}
+                                    {ellipse(
+                                      from,
+                                      12,
+                                      source_chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1070,10 +1107,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(sender, 8, source_chain_data?.prefix_address)}
+                                    {ellipse(
+                                      sender,
+                                      8,
+                                      source_chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(sender, 12, source_chain_data?.prefix_address)}
+                                    {ellipse(
+                                      sender,
+                                      12,
+                                      source_chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1125,10 +1170,18 @@ export default () => {
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                   <span className="xl:hidden">
-                                    {ellipse(destinationContractAddress, 8, destination_chain_data?.prefix_address)}
+                                    {ellipse(
+                                      destinationContractAddress,
+                                      8,
+                                      destination_chain_data?.prefix_address,
+                                    )}
                                   </span>
                                   <span className="hidden xl:block">
-                                    {ellipse(destinationContractAddress, 12, destination_chain_data?.prefix_address)}
+                                    {ellipse(
+                                      destinationContractAddress,
+                                      12,
+                                      destination_chain_data?.prefix_address,
+                                    )}
                                   </span>
                                 </div>
                               )}
@@ -1266,19 +1319,20 @@ export default () => {
                     )}
                     {gasAddButton}
                     {refundButton}
-                    {approveButton || executeButton || (time_spent && (
-                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
-                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                          Time spent:
-                        </span>
-                        <span className="whitespace-nowrap font-bold">
-                          {time_spent}
-                        </span>
-                      </div>
-                    ))}
+                    {approveButton || executeButton || (
+                      time_spent && (
+                        <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                            Time spent:
+                          </span>
+                          <span className="whitespace-nowrap font-bold">
+                            {time_spent}
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
-                </div>
-                :
+                </div> :
                 <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
                   Data not found
                 </span>
