@@ -537,10 +537,10 @@ export default () => {
   } = { ...call?.transaction }
   const relayer = executed?.transaction?.from
 
-  no_gas_remain = typeof no_gas_remain === 'boolean' ?
-    no_gas_remain :
-    !(refunded && refunded.receipt?.status) &&
-    gas?.gas_remain_amount < 0.001
+  no_gas_remain = gas?.gas_remain_amount < 0.001 ||
+    typeof no_gas_remain === 'boolean' ?
+      no_gas_remain :
+      !(refunded && refunded.receipt?.status)
 
   const chains_data = _.concat(
     evm_chains_data,
@@ -670,8 +670,8 @@ export default () => {
   const refundButton = !approveButton && !executeButton &&
     !no_gas_remain &&
     (
-      (gas?.gas_remain_amount >= 0.001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
-      (gas?.gas_remain_amount >= 0.001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
+      (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
+      (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
     ) &&
     (executed || error || is_executed || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(2, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
