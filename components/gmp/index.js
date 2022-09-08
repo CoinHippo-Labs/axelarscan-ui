@@ -66,157 +66,159 @@ export default () => {
     }
   }, [])
 
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        evm_chains_data &&
-        tx &&
-        api
-      ) {
-        if (gmp) {
-          await sleep(2 * 1000)
+  const getMessage = async () => {
+    if (
+      evm_chains_data &&
+      tx &&
+      api
+    ) {
+      if (gmp) {
+        await sleep(2 * 1000)
 
-          if (gmp.tx !== tx) {
-            setGmp(null)
-            resetTxHashEdit()
-          }
+        if (gmp.tx !== tx) {
+          setGmp(null)
+          resetTxHashEdit()
         }
+      }
 
-        const response = await api.execGet(
+      const response = await api.execGet(
+        process.env.NEXT_PUBLIC_GMP_API_URL,
+        {
+          method: 'searchGMP',
+          txHash: tx,
+        }
+      )
+
+      const data = _.head(response)
+      const {
+        approved,
+      } = { ...data }
+
+      // callback data of 2-way call (if exists)
+      let {
+        callback,
+      } = { ...data }
+
+      if (callback?.transactionHash) {
+        const _response = await api.execGet(
           process.env.NEXT_PUBLIC_GMP_API_URL,
           {
             method: 'searchGMP',
-            txHash: tx,
-          }
+            txHash: callback.transactionHash,
+            txIndex: callback.transactionIndex,
+            txLogIndex: callback.logIndex,
+          },
         )
 
-        const data = _.head(response)
-        const {
-          approved,
-        } = { ...data }
-
-        // callback data of 2-way call (if exists)
-        let {
-          callback,
-        } = { ...data }
-
-        if (callback?.transactionHash) {
-          const _response = await api.execGet(
-            process.env.NEXT_PUBLIC_GMP_API_URL,
-            {
-              method: 'searchGMP',
-              txHash: callback.transactionHash,
-              txIndex: callback.transactionIndex,
-              txLogIndex: callback.logIndex,
-            },
-          )
-
-          callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
-        }
-
-        // origin data of 2-way call (query on 2nd call only)
-        let origin
-        const {
-          call,
-          gas_paid,
-          gas_paid_to_callback,
-          is_call_from_relayer,
-        } = { ...data }
-
-        if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
-          const _response = await api.execGet(
-            process.env.NEXT_PUBLIC_GMP_API_URL,
-            {
-              method: 'searchGMP',
-              txHash: call.transactionHash,
-            },
-          )
-
-          origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
-        }
-
-        let execute_data
-
-        if (approved) {
-          const {
-            destinationChain,
-            payload,
-          } = { ...data.call?.returnValues }
-          const {
-            contractAddress,
-            commandId,
-            sourceChain,
-            sourceAddress,
-            symbol,
-            amount,
-          } = { ...approved.returnValues }
-
-          // setup provider
-          const rpcs = _.head(
-            getChain(
-              destinationChain,
-              evm_chains_data,
-            )?.provider_params
-          )?.rpcUrls || []
-
-          const provider = rpcs.length === 1 ?
-            new providers.JsonRpcProvider(rpcs[0]) :
-            new providers.FallbackProvider(
-              rpcs.map((url, i) => {
-                return {
-                  provider: new providers.JsonRpcProvider(url),
-                  priority: i + 1,
-                  stallTimeout: 1000,
-                }
-              })
-            )
-
-          const executable_contract = new Contract(
-            contractAddress,
-            IAxelarExecutable.abi,
-            provider,
-          )
-
-          let _response
-          const method = `execute${symbol ? 'WithToken' : ''}`
-
-          switch (method) {
-            case 'execute':
-              _response = await executable_contract.populateTransaction.execute(
-                commandId,
-                sourceChain,
-                sourceAddress,
-                payload,
-              )
-              break
-            case 'executeWithToken':
-              _response = await executable_contract.populateTransaction.executeWithToken(
-                commandId,
-                sourceChain,
-                sourceAddress,
-                payload,
-                symbol,
-                BigNumber.from(amount),
-              )
-              break
-            default:
-              break
-          }
-
-          if (_response?.data) {
-            execute_data = _response.data
-          }
-        }
-
-        setGmp({
-          data,
-          execute_data,
-          callback,
-          origin,
-          tx,
-        })
+        callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
       }
+
+      // origin data of 2-way call (query on 2nd call only)
+      let origin
+      const {
+        call,
+        gas_paid,
+        gas_paid_to_callback,
+        is_call_from_relayer,
+      } = { ...data }
+
+      if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
+        const _response = await api.execGet(
+          process.env.NEXT_PUBLIC_GMP_API_URL,
+          {
+            method: 'searchGMP',
+            txHash: call.transactionHash,
+          },
+        )
+
+        origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
+      }
+
+      let execute_data
+
+      if (approved) {
+        const {
+          destinationChain,
+          payload,
+        } = { ...data.call?.returnValues }
+        const {
+          contractAddress,
+          commandId,
+          sourceChain,
+          sourceAddress,
+          symbol,
+          amount,
+        } = { ...approved.returnValues }
+
+        // setup provider
+        const rpcs = _.head(
+          getChain(
+            destinationChain,
+            evm_chains_data,
+          )?.provider_params
+        )?.rpcUrls || []
+
+        const provider = rpcs.length === 1 ?
+          new providers.JsonRpcProvider(rpcs[0]) :
+          new providers.FallbackProvider(
+            rpcs.map((url, i) => {
+              return {
+                provider: new providers.JsonRpcProvider(url),
+                priority: i + 1,
+                stallTimeout: 1000,
+              }
+            })
+          )
+
+        const executable_contract = new Contract(
+          contractAddress,
+          IAxelarExecutable.abi,
+          provider,
+        )
+
+        let _response
+        const method = `execute${symbol ? 'WithToken' : ''}`
+
+        switch (method) {
+          case 'execute':
+            _response = await executable_contract.populateTransaction.execute(
+              commandId,
+              sourceChain,
+              sourceAddress,
+              payload,
+            )
+            break
+          case 'executeWithToken':
+            _response = await executable_contract.populateTransaction.executeWithToken(
+              commandId,
+              sourceChain,
+              sourceAddress,
+              payload,
+              symbol,
+              BigNumber.from(amount),
+            )
+            break
+          default:
+            break
+        }
+
+        if (_response?.data) {
+          execute_data = _response.data
+        }
+      }
+
+      setGmp({
+        data,
+        execute_data,
+        callback,
+        origin,
+        tx,
+      })
     }
+  }
+
+  useEffect(() => {
+    const getData = () => getMessage()
 
     if (
       !approving &&
@@ -269,11 +271,15 @@ export default () => {
     }
 
     // request api
-    await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, {
-      method: 'POST',
-      body: JSON.stringify(params),
-    }).catch(error => { return null })
+    await fetch(
+      process.env.NEXT_PUBLIC_GMP_API_URL,
+      {
+        method: 'POST',
+        body: JSON.stringify(params),
+      },
+    ).catch(error => { return null })
 
+    getMessage()
     resetTxHashEdit()
   }
 
@@ -1601,6 +1607,68 @@ export default () => {
                   destinationContractAddress
               const { explorer } = { ...chain_data }
               const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
+
+              const refreshButton = [
+                'executed',
+                'refunded',
+              ].includes(s.id) && (
+                (
+                  s.id === 'executed' &&
+                  !executed &&
+                  is_executed
+                ) ||
+                (
+                  [
+                    'refunded',
+                  ].includes(s.id) &&
+                  typeof receipt?.status !== 'number'
+                ) ||
+                !block_timestamp
+              ) && (
+                <button
+                  disabled={s.id === 'refunded' ?
+                    txHashRefundEditUpdating :
+                    txHashEditUpdating
+                  }
+                  onClick={async () => {
+                    if (s.id === 'refunded') {
+                      setTxHashRefundEditUpdating(true)
+                    }
+                    else {
+                      setTxHashEditUpdating(true)
+                    }
+
+                    await saveGMP(
+                      call?.transactionHash,
+                      call?.transactionIndex,
+                      call?.logIndex,
+                      transactionHash,
+                      transaction?.from,
+                      undefined,
+                      [
+                        'refunded',
+                      ].includes(s.id) ?
+                        s.id :
+                        s.id === 'executed' &&
+                        !executed &&
+                        is_executed ?
+                          'not_executed' :
+                          undefined,
+                    )
+
+                    if (s.id === 'refunded') {
+                      setTxHashRefundEditUpdating(false)
+                    }
+                    else {
+                      setTxHashEditUpdating(false)
+                    }
+                  }}
+                  className={`${(s.id === 'refunded' ? txHashRefundEditUpdating : txHashEditUpdating) ? 'hidden' : ''} cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`}
+                >
+                  <MdRefresh size={20} />
+                </button>
+              )
+
               const rowClassName = 'flex space-x-4'
               const rowTitleClassName = `w-32 text-black dark:text-slate-300 text-sm lg:text-base font-bold`
 
@@ -1725,6 +1793,7 @@ export default () => {
                             </button>
                           }
                         </div>
+                        {refreshButton}
                       </div> :
                       ['refunded'].includes(s.id) && (!data || data.error) ?
                         <div className={rowClassName}>
@@ -1879,68 +1948,7 @@ export default () => {
                                   />
                                 }
                               </a>
-                              {
-                                [
-                                  'executed',
-                                  'refunded',
-                                ].includes(s.id) && (
-                                  (
-                                    s.id === 'executed' &&
-                                    !executed &&
-                                    is_executed
-                                  ) ||
-                                  (
-                                    [
-                                      'refunded',
-                                    ].includes(s.id) &&
-                                    typeof receipt?.status !== 'number'
-                                  ) ||
-                                  !block_timestamp
-                                ) && (
-                                  <button
-                                    disabled={s.id === 'refunded' ?
-                                      txHashRefundEditUpdating :
-                                      txHashEditUpdating
-                                    }
-                                    onClick={async () => {
-                                      if (s.id === 'refunded') {
-                                        setTxHashRefundEditUpdating(true)
-                                      }
-                                      else {
-                                        setTxHashEditUpdating(true)
-                                      }
-
-                                      await saveGMP(
-                                        call?.transactionHash,
-                                        call?.transactionIndex,
-                                        call?.logIndex,
-                                        transactionHash,
-                                        transaction?.from,
-                                        undefined,
-                                        [
-                                          'refunded',
-                                        ].includes(s.id) ?
-                                          s.id :
-                                          s.id === 'executed' &&
-                                          !executed &&
-                                          is_executed ?
-                                            'not_executed' :
-                                            undefined,
-                                      )
-
-                                      if (s.id === 'refunded') {
-                                        setTxHashRefundEditUpdating(false)
-                                      }
-                                      else {
-                                        setTxHashEditUpdating(false)
-                                      }
-                                    }}
-                                    className={`${(s.id === 'refunded' ? txHashRefundEditUpdating : txHashEditUpdating) ? 'hidden' : ''} cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`}
-                                  >
-                                    <MdRefresh size={20} />
-                                  </button>
-                                )
-                              }
+                              {refreshButton}
                             </div>
                           </div> :
                           ['gas_paid'].includes(s.id) && origin?.call ?
