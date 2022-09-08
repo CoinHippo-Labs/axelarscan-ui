@@ -413,7 +413,7 @@ export default () => {
           success &&
           !approved
         ) {
-          await sleep(5 * 1000)
+          await sleep(1 * 1000)
 
           approve(data)
         }
@@ -586,7 +586,7 @@ export default () => {
     chain_id !== destination_chain_data.chain_id &&
     !executing
 
-  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee || gas_remain_amount < 0.0001) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 && (
+  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee || gas?.gas_remain_amount < 0.0001) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 && (
     <div className="flex items-center space-x-2">
       <button
         disabled={approving}
@@ -782,8 +782,8 @@ export default () => {
   )
 
   const notificationResponse = executeResponse ||
-    gasAddResponse ||
     approveResponse ||
+    gasAddResponse ||
     refundResponse
 
   const explorer = notificationResponse && (
