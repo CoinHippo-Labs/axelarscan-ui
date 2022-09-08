@@ -733,8 +733,8 @@ export default () => {
     chain_data: destination_chain_data,
     data: executed,
   }, refunded && (
-    (refunded.receipt && !refunded.receipt?.status) ||
-    !no_gas_remain
+    (refunded.receipt && refunded.receipt?.status) ||
+    no_gas_remain === false
   ) && {
     id: 'refunded',
     title: 'Gas Refunded',
