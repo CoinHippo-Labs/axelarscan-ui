@@ -57,6 +57,7 @@ export default () => {
           undefined,
         status: [
           'approving',
+          'called',
           'forecalled',
           'approved',
           'executed',
@@ -81,13 +82,20 @@ export default () => {
   useEffect(() => {
     if (filter !== undefined) {
       const qs = new URLSearchParams()
+
       Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
-        let key, value
+        let key,
+          value
+
         switch (k) {
           case 'time':
             key = 'fromTime'
             value = moment(v[0]).valueOf()
-            qs.append(key, value)
+            qs.append(
+              key,
+              value,
+            )
+
             key = 'toTime'
             value = moment(v[1]).valueOf()
             break
@@ -96,10 +104,17 @@ export default () => {
             value = v
             break
         }
-        qs.append(key, value)
+
+        qs.append(
+          key,
+          value,
+        )
       })
+
       const qs_string = qs.toString()
+
       router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
+
       setHidden(true)
     }
   }, [filter])
@@ -161,6 +176,7 @@ export default () => {
       options: [
         { value: '', title: 'Any' },
         { value: 'approving', title: 'Wait for Approval' },
+        { value: 'called', title: 'Called' },
         { value: 'forecalled', title: 'Forecalled' },
         { value: 'approved', title: 'Approved' },
         { value: 'executed', title: 'Executed' },

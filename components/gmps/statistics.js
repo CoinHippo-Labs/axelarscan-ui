@@ -92,6 +92,7 @@ export default () => {
             undefined,
           status: [
             'approving',
+            'called',
             'forecalled',
             'approved',
             'executed',
@@ -158,7 +159,8 @@ export default () => {
         Object.entries({ ...filters })
           .filter(([k, v]) => v)
           .forEach(([k, v]) => {
-            let key, value
+            let key,
+              value
 
             switch (k) {
               case 'time':
@@ -593,6 +595,7 @@ export default () => {
     statuses?.filter(s => !['called'].includes(s?.key)) || [],
     'value',
   )
+
   const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg space-y-1 p-4'
   const colors = [
     'bg-yellow-500',

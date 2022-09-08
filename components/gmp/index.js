@@ -539,7 +539,7 @@ export default () => {
 
   no_gas_remain = typeof no_gas_remain === 'boolean' ?
     no_gas_remain :
-    !refunded &&
+    !(refunded && refunded.receipt?.status) &&
     gas?.gas_remain_amount < 0.001
 
   const chains_data = _.concat(
@@ -2641,7 +2641,7 @@ export default () => {
             <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
               {
                 no_gas_remain &&
-                !refunded &&
+                !(refunded && refunded.receipt?.status) &&
                 (
                   executed ||
                   error

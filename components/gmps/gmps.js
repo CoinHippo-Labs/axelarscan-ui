@@ -76,6 +76,7 @@ export default ({ n }) => {
           undefined,
         status: [
           'approving',
+          'called',
           'forecalled',
           'approved',
           'executed',
@@ -94,6 +95,7 @@ export default ({ n }) => {
             moment(Number(toTime)),
           ],
       })
+
       // if (typeof fetchTrigger === 'number') {
       //   setFetchTrigger(moment().valueOf())
       // }
@@ -102,106 +104,175 @@ export default ({ n }) => {
 
   useEffect(() => {
     const triggering = is_interval => {
-      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+      setFetchTrigger(
+        is_interval ?
+          moment().valueOf() :
+          typeof fetchTrigger === 'number' ?
+            null :
+            0
+      )
     }
+
     if (pathname && filters) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (address || ['/gmp/search'].includes(pathname) ? 1 : 0.25) * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    return () => clearInterval(
+      setInterval(() =>
+        triggering(true),
+        (address || ['/gmp/search'].includes(pathname) ? 1 : 0.25) * 60 * 1000,
+      )
+    )
   }, [pathname, address, filters])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
       if (filters && (!pathname?.includes('/[address]') || address)) {
-        if (!controller.signal.aborted) {
-          setFetching(true)
-          if (!fetchTrigger) {
-            setTotal(null)
-            setData(null)
-            setOffet(0)
-          }
-          const _data = !fetchTrigger ? [] : (data || []),
-            size = n || LIMIT
-          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
-          let params
-          if (address) {
-            params = {
-              senderAddress: address,
-            }
-          }
-          else if (filters) {
-            const { txHash, sourceChain, destinationChain, method, status, senderAddress, sourceAddress, contractAddress, relayerAddress, time } = { ...filters }
-            let event, fromTime, toTime
-            switch (method) {
-              case 'callContract':
-                event = 'ContractCall'
-                break
-              case 'callContractWithToken':
-                event = 'ContractCallWithToken'
-                break
-              default:
-                event = undefined
-                break
-            }
-            if (time?.length > 1) {
-              fromTime = time[0].unix()
-              toTime = time[1].unix()
-            }
-            params = {
-              txHash,
-              sourceChain,
-              destinationChain,
-              event,
-              status,
-              senderAddress,
-              sourceAddress,
-              contractAddress,
-              relayerAddress,
-              fromTime,
-              toTime,
-            }
-          }
-          let response = await searchGMP({
-            ...params,
-            size,
-            from,
-          })
-          if (response) {
-            const _total = response.total
-            setTotal(_total)
-            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              return {
-                ...d,
-              }
-            }) || [], _data), 'call.id'), ['call.block_timestamp'], ['desc'])
-            setData(response)
-          }
-          else if (!fetchTrigger) {
-            setTotal(0)
-            setData([])
-          }
-          setFetching(false)
+        setFetching(true)
+
+        if (!fetchTrigger) {
+          setTotal(null)
+          setData(null)
+          setOffet(0)
         }
+
+        const _data = !fetchTrigger ?
+          [] :
+          data || []
+        const size = n ||
+          LIMIT
+        const from = fetchTrigger === true || fetchTrigger === 1 ?
+          _data.length :
+          0
+        let params
+
+        if (address) {
+          params = {
+            senderAddress: address,
+          }
+        }
+        else if (filters) {
+          const {
+            txHash,
+            sourceChain,
+            destinationChain,
+            method,
+            status,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            time,
+          } = { ...filters }
+
+          let event,
+            fromTime,
+            toTime
+
+          switch (method) {
+            case 'callContract':
+              event = 'ContractCall'
+              break
+            case 'callContractWithToken':
+              event = 'ContractCallWithToken'
+              break
+            default:
+              event = undefined
+              break
+          }
+
+          if (time?.length > 1) {
+            fromTime = time[0].unix()
+            toTime = time[1].unix()
+          }
+
+          params = {
+            txHash,
+            sourceChain,
+            destinationChain,
+            event,
+            status,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            fromTime,
+            toTime,
+          }
+        }
+
+        let response = await searchGMP({
+          ...params,
+          size,
+          from,
+        })
+
+        const {
+          total,
+        } = { ...response }
+
+        if (response) {
+          setTotal(total)
+
+          response = _.orderBy(
+            _.uniqBy(
+              _.concat(
+                (response.data || [])
+                  .map(d => {
+                    return {
+                      ...d,
+                    }
+                  }),
+                _data,
+              ),
+              'call.id',
+            ),
+            ['call.block_timestamp'],
+            ['desc'],
+          )
+
+          setData(response)
+        }
+        else if (!fetchTrigger) {
+          setTotal(0)
+          setData([])
+        }
+
+        setFetching(false)
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [fetchTrigger])
 
   useEffect(() => {
     if (data) {
-      setTypes(_.countBy(_.uniqBy(data, 'call.id').map(t => t?.call?.event).filter(t => t)))
+      setTypes(
+        _.countBy(
+          _.uniqBy(
+            data,
+            'call.id',
+          )
+          .map(t => t?.call?.event)
+          .filter(t => t)
+        )
+      )
     }
   }, [data])
 
-  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-  const data_filtered = _.slice(data?.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.call?.event) || (filterTypes.includes('undefined') && !d?.call?.event)), 0, n || undefined)
+  const chains_data = _.concat(
+    evm_chains_data,
+    cosmos_chains_data,
+  )
+  const data_filtered = _.slice(
+    data?.filter(d =>
+      !(filterTypes?.length > 0) ||
+      filterTypes.includes(d?.call?.event) ||
+      (filterTypes.includes('undefined') && !d?.call?.event)
+    ),
+    0,
+    n || undefined,
+  )
 
   return (
     data ?
@@ -209,30 +280,38 @@ export default ({ n }) => {
         <div className="flex items-center justify-between space-x-2 -mt-3">
           <div className="flex items-center space-x-2">
             <span className="text-lg font-bold">
-              {number_format(total, '0,0')}
+              {number_format(
+                total,
+                '0,0',
+              )}
             </span>
             <span className="text-base">
               Results
             </span>
           </div>
           <div className="block sm:flex sm:flex-wrap items-center justify-end overflow-x-auto space-x-1">
-            {Object.entries({ ...types }).map(([k, v]) => (
-              <div
-                key={k}
-                onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1.5 ml-1 mb-1 py-0.5 px-1.5`}
-                style={{ textTransform: 'none' }}
-              >
-                <span>
-                  {k === 'undefined' ?
-                    'Failed' : k
-                  }
-                </span>
-                <span className="text-blue-600 dark:text-blue-400">
-                  {number_format(v, '0,0')}
-                </span>
-              </div>
-            ))}
+            {Object.entries({ ...types })
+              .map(([k, v]) => (
+                <div
+                  key={k}
+                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
+                  className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1.5 ml-1 mb-1 py-0.5 px-1.5`}
+                  style={{ textTransform: 'none' }}
+                >
+                  <span>
+                    {k === 'undefined' ?
+                      'Failed' : k
+                    }
+                  </span>
+                  <span className="text-blue-600 dark:text-blue-400">
+                    {number_format(
+                      v,
+                      '0,0',
+                    )}
+                  </span>
+                </div>
+              ))
+            }
           </div>
         </div>
         <Datatable
@@ -802,14 +881,20 @@ export default ({ n }) => {
               className="max-w-min hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg whitespace-nowrap font-medium hover:font-bold mx-auto py-1.5 px-2.5"
             >
               Load more
-            </button>
-            :
+            </button> :
             <div className="flex justify-center p-1.5">
-              <ThreeDots color={loader_color(theme)} width="24" height="24" />
+              <ThreeDots
+                color={loader_color(theme)}
+                width="24"
+                height="24"
+              />
             </div>
         )}
-      </div>
-      :
-      <TailSpin color={loader_color(theme)} width="32" height="32" />
+      </div> :
+      <TailSpin
+        color={loader_color(theme)}
+        width="32"
+        height="32"
+      />
   )
 }
