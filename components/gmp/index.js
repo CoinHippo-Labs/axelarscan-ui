@@ -68,7 +68,11 @@ export default () => {
 
   useEffect(() => {
     const getData = async () => {
-      if (evm_chains_data && tx && api) {
+      if (
+        evm_chains_data &&
+        tx &&
+        api
+      ) {
         if (gmp) {
           await sleep(2 * 1000)
 
@@ -78,10 +82,13 @@ export default () => {
           }
         }
 
-        const response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
-          method: 'searchGMP',
-          txHash: tx,
-        })
+        const response = await api.execGet(
+          process.env.NEXT_PUBLIC_GMP_API_URL,
+          {
+            method: 'searchGMP',
+            txHash: tx,
+          }
+        )
 
         const data = _.head(response)
         const {
@@ -94,12 +101,16 @@ export default () => {
         } = { ...data }
 
         if (callback?.transactionHash) {
-          const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
-            method: 'searchGMP',
-            txHash: callback.transactionHash,
-            txIndex: callback.transactionIndex,
-            txLogIndex: callback.logIndex,
-          })
+          const _response = await api.execGet(
+            process.env.NEXT_PUBLIC_GMP_API_URL,
+            {
+              method: 'searchGMP',
+              txHash: callback.transactionHash,
+              txIndex: callback.transactionIndex,
+              txLogIndex: callback.logIndex,
+            },
+          )
+
           callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
         }
 
@@ -113,16 +124,19 @@ export default () => {
         } = { ...data }
 
         if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
-          const _response = await api.execGet(process.env.NEXT_PUBLIC_GMP_API_URL, {
-            method: 'searchGMP',
-            txHash: call.transactionHash,
-            // txIndex: call.transactionIndex,
-            // txLogIndex: call.logIndex,
-          })
+          const _response = await api.execGet(
+            process.env.NEXT_PUBLIC_GMP_API_URL,
+            {
+              method: 'searchGMP',
+              txHash: call.transactionHash,
+            },
+          )
+
           origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
         }
 
         let execute_data
+
         if (approved) {
           const {
             destinationChain,
@@ -138,20 +152,34 @@ export default () => {
           } = { ...approved.returnValues }
 
           // setup provider
-          const rpcs = _.head(getChain(destinationChain, evm_chains_data)?.provider_params)?.rpcUrls || []
+          const rpcs = _.head(
+            getChain(
+              destinationChain,
+              evm_chains_data,
+            )?.provider_params
+          )?.rpcUrls || []
+
           const provider = rpcs.length === 1 ?
             new providers.JsonRpcProvider(rpcs[0]) :
-            new providers.FallbackProvider(rpcs.map((url, i) => {
-              return {
-                provider: new providers.JsonRpcProvider(url),
-                priority: i + 1,
-                stallTimeout: 1000,
-              }
-            }))
-          const executable_contract = new Contract(contractAddress, IAxelarExecutable.abi, provider)
+            new providers.FallbackProvider(
+              rpcs.map((url, i) => {
+                return {
+                  provider: new providers.JsonRpcProvider(url),
+                  priority: i + 1,
+                  stallTimeout: 1000,
+                }
+              })
+            )
+
+          const executable_contract = new Contract(
+            contractAddress,
+            IAxelarExecutable.abi,
+            provider,
+          )
 
           let _response
           const method = `execute${symbol ? 'WithToken' : ''}`
+
           switch (method) {
             case 'execute':
               _response = await executable_contract.populateTransaction.execute(
@@ -174,6 +202,7 @@ export default () => {
             default:
               break
           }
+
           if (_response?.data) {
             execute_data = _response.data
           }
@@ -1856,6 +1885,11 @@ export default () => {
                                   'refunded',
                                 ].includes(s.id) && (
                                   (
+                                    s.id === 'executed' &&
+                                    !executed &&
+                                    is_executed
+                                  ) ||
+                                  (
                                     [
                                       'refunded',
                                     ].includes(s.id) &&
@@ -1865,7 +1899,7 @@ export default () => {
                                 ) && (
                                   <button
                                     disabled={s.id === 'refunded' ?
-                                      txHashRefundEditing :
+                                      txHashRefundEditUpdating :
                                       txHashEditUpdating
                                     }
                                     onClick={async () => {
@@ -1887,7 +1921,11 @@ export default () => {
                                           'refunded',
                                         ].includes(s.id) ?
                                           s.id :
-                                          undefined,
+                                          s.id === 'executed' &&
+                                          !executed &&
+                                          is_executed ?
+                                            'not_executed' :
+                                            undefined,
                                       )
 
                                       if (s.id === 'refunded') {
@@ -1897,7 +1935,7 @@ export default () => {
                                         setTxHashEditUpdating(false)
                                       }
                                     }}
-                                    className="text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white"
+                                    className={`${(s.id === 'refunded' ? txHashRefundEditUpdating : txHashEditUpdating) ? 'hidden' : ''} cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`}
                                   >
                                     <MdRefresh size={20} />
                                   </button>
@@ -2007,17 +2045,17 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Status:
                         </span>
-                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) || (['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) || (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
                           {receipt?.status ||
                             (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
-                            (['executed'].includes(s.id) && is_executed) ?
+                            (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ?
                             <BiCheckCircle size={20} /> :
                             <BiXCircle size={20} />
                           }
                           <span>
                             {receipt?.status ||
                               (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
-                              (['executed'].includes(s.id) && is_executed) ?
+                              (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ?
                               'Success' :
                               'Error'
                             }
