@@ -537,10 +537,11 @@ export default () => {
   } = { ...call?.transaction }
   const relayer = executed?.transaction?.from
 
-  no_gas_remain = gas?.gas_remain_amount < 0.001 ||
+  no_gas_remain = gas?.gas_remain_amount < 0.001 || (
     typeof no_gas_remain === 'boolean' ?
       no_gas_remain :
       !(refunded && refunded.receipt?.status)
+  )
 
   const chains_data = _.concat(
     evm_chains_data,
