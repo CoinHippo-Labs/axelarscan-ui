@@ -244,14 +244,38 @@ export default () => {
     const init = async => {
       if (evm_chains_data && ['/tvl'].includes(pathname)) {
         const _rpcs = {}
-        for (let i = 0; i < evm_chains_data.length; i++) {
-          const chain_data = evm_chains_data[i]
-          if (!chain_data?.disabled) {
-            const chain_id = chain_data?.chain_id
-            const rpc_urls = chain_data?.provider_params?.[0]?.rpcUrls?.filter(url => url) || []
-            _rpcs[chain_id] = new providers.FallbackProvider(rpc_urls.map(url => new providers.JsonRpcProvider(url)))
+        for (const chain_data of evm_chains_data) {
+          const {
+            disabled,
+            chain_id,
+            provider_params,
+          } = { ...chain_data }
+
+          if (!disabled) {
+            const {
+              rpcUrls,
+            } = { ..._.head(provider_params) }
+ 
+            const rpc_urls = (rpcUrls || [])
+              .filter(url => url)
+
+            const provider = rpc_urls.length === 1 ?
+              new providers.JsonRpcProvider(rpc_urls[0]) :
+              new providers.FallbackProvider(
+                rpc_urls.map((url, i) => {
+                  return {
+                    provider: new providers.JsonRpcProvider(url),
+                    priority: i + 1,
+                    stallTimeout: 1000,
+                  }
+                }),
+                rpc_urls.length / 3,
+              )
+
+            _rpcs[chain_id] = provider;
           }
         }
+
         if (!rpcs) {
           dispatch({
             type: RPCS,
@@ -260,6 +284,7 @@ export default () => {
         }
       }
     }
+
     init()
   }, [evm_chains_data, pathname])
 

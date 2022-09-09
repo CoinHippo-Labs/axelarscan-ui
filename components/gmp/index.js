@@ -167,7 +167,8 @@ export default () => {
                 priority: i + 1,
                 stallTimeout: 1000,
               }
-            })
+            }),
+            rpcs.length / 3,
           )
 
         const executable_contract = new Contract(
