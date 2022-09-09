@@ -659,7 +659,7 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status, is_invalid_destination_chain, is_insufficient_minimum_amount, is_insufficient_fee } = { ...props.row.original }
+                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
@@ -702,6 +702,7 @@ export default ({ n }) => {
                   case 'called':
                     current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (
                       !is_invalid_destination_chain &&
+                      !is_invalid_call &&
                       !is_insufficient_minimum_amount &&
                       !is_insufficient_fee &&
                       (
@@ -805,6 +806,11 @@ export default ({ n }) => {
                         </div>
                       )
                     })}
+                    {is_invalid_call && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Invalid Call
+                      </div>
+                    )}
                     {is_insufficient_fee && (
                       <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
                         Insufficient Fee

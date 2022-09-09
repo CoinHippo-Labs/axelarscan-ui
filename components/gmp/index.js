@@ -554,6 +554,7 @@ export default () => {
     status,
     gas,
     is_invalid_destination_chain,
+    is_invalid_call,
     is_insufficient_minimum_amount,
     is_insufficient_fee,
   } = { ...data }
@@ -621,7 +622,7 @@ export default () => {
     chain_id !== destination_chain_data.chain_id &&
     !executing
 
-  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee || gas?.gas_remain_amount < 0.0001) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 && (
+  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee || gas?.gas_remain_amount < 0.0001) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 && (
     <div className="flex items-center space-x-2">
       <button
         disabled={approving}
@@ -719,8 +720,8 @@ export default () => {
       (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
       (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
     ) &&
-    (executed || error || is_executed || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
-    (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_insufficient_minimum_amount || is_insufficient_fee) &&
+    (executed || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
+    (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) && (
       <div className="flex items-center space-x-2">
         <button
@@ -783,6 +784,7 @@ export default () => {
     case 'called':
       current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (
         !is_invalid_destination_chain &&
+        !is_invalid_call &&
         !is_insufficient_minimum_amount &&
         !is_insufficient_fee &&
         (
@@ -1340,6 +1342,11 @@ export default () => {
                         </div>
                       )
                     })}
+                    {is_invalid_call && (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Invalid Call
+                      </div>
+                    )}
                     {is_insufficient_fee && (
                       <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
                         Insufficient Fee
@@ -1378,7 +1385,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_insufficient_minimum_amount } = { ...gmp.data }
+              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ?
                 data || error :
@@ -1743,6 +1750,7 @@ export default () => {
                               !(!data && is_executed) &&
                               !error &&
                               !is_invalid_destination_chain &&
+                              !is_invalid_call &&
                               !is_insufficient_minimum_amount &&
                               !is_insufficient_fee && (
                                 <FallingLines
@@ -1999,6 +2007,7 @@ export default () => {
                                 No transaction
                               </span> :
                               !is_invalid_destination_chain &&
+                              !is_invalid_call &&
                               !is_insufficient_minimum_amount &&
                               !is_insufficient_fee && (
                                 <FallingLines
