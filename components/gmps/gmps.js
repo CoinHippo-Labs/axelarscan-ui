@@ -700,7 +700,13 @@ export default ({ n }) => {
 
                 switch (status) {
                   case 'called':
-                    current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + (
+                    current_step = steps.findIndex(s =>
+                      s.id === (
+                        gas_paid || gas_paid_to_callback ?
+                          'gas_paid' :
+                          'call'
+                      )
+                    ) + (
                       !is_invalid_destination_chain &&
                       !is_invalid_call &&
                       !is_insufficient_minimum_amount &&
@@ -727,11 +733,30 @@ export default ({ n }) => {
                     current_step = steps.findIndex(s => s.id === 'forecalled') + 1
                     break
                   case 'approved':
-                    current_step = steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? status : 'call')) + 1
+                    current_step = steps.findIndex(s =>
+                      s.id === (
+                        gas_paid || gas_paid_to_callback ?
+                          status :
+                          'call'
+                      )
+                    ) + 1
                     break
                   case 'executed':
                   case 'error':
-                    current_step = steps.findIndex(s => s.id === 'executed') + 1
+                    current_step = steps.findIndex(s => s.id === 'executed') +
+                      (
+                        executed ||
+                        (
+                          error &&
+                          (
+                            error?.block_timestamp ||
+                            approved?.block_timestamp
+                          ) &&
+                          moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 45
+                        ) ?
+                          1 :
+                          0
+                      )
                     break
                   default:
                     break
@@ -748,64 +773,107 @@ export default ({ n }) => {
 
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
-                    {steps.filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status).map((s, i) => {
-                      const text_color = (!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
-                        'text-green-500 dark:text-green-600' :
-                        i === current_step && !['refunded'].includes(s.id) ?
-                          'text-blue-500 dark:text-white' :
-                          (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
-                            'text-red-500 dark:text-red-600' :
-                            'text-slate-400 dark:text-slate-600'
-                      const { explorer } = { ...s.chain_data }
-                      const { url, transaction_path, icon } = { ...explorer }
-                      return (
-                        <div
-                          key={i}
-                          className="flex items-center space-x-1.5 pb-0.5"
-                        >
-                          {(!['refunded'].includes(s.id) && s.data) || (['gas_paid'].includes(s.id) && gas_paid_to_callback) || (['executed'].includes(s.id) && is_executed) || (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
-                            <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
+                    {steps
+                      .filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status)
+                      .map((s, i) => {
+                        const _error = error &&
+                          (
+                            error?.block_timestamp ||
+                            approved?.block_timestamp
+                          ) ?
+                            moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 45 ?
+                              error :
+                              null :
+                            error
+
+                        const text_color = (!['refunded'].includes(s.id) && s.data) ||
+                          (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
+                          (['executed'].includes(s.id) && is_executed) ||
+                          (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
+                            'text-green-500 dark:text-green-600' :
                             i === current_step && !['refunded'].includes(s.id) ?
-                              <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              (['executed'].includes(s.id) && error) || (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
-                                <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
-                                <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
-                          }
-                          <div className="flex items-center space-x-1">
-                            {s.data?.transactionHash ?
-                              <Copy
-                                value={s.data.transactionHash}
-                                title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
-                                  {s.title}
-                                </span>}
-                                size={18}
-                              />
-                              :
-                              <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                {s.title}
-                              </span>
+                              'text-blue-500 dark:text-white' :
+                              (['executed'].includes(s.id) && _error) ||
+                              (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
+                                'text-red-500 dark:text-red-600' :
+                                'text-slate-400 dark:text-slate-600'
+
+                        const {
+                          explorer,
+                        } = { ...s.chain_data }
+                        const {
+                          url,
+                          transaction_path,
+                          icon,
+                        } = { ...explorer }
+
+                        return (
+                          <div
+                            key={i}
+                            className="flex items-center space-x-1.5 pb-0.5"
+                          >
+                            {(!['refunded'].includes(s.id) && s.data) ||
+                              (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
+                              (['executed'].includes(s.id) && is_executed) ||
+                              (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
+                                <BiCheckCircle
+                                  size={20}
+                                  className="text-green-500 dark:text-green-600"
+                                /> :
+                                i === current_step && !['refunded'].includes(s.id) ?
+                                  <Puff
+                                    color={loader_color(theme)}
+                                    width="20"
+                                    height="20"
+                                  /> :
+                                  (['executed'].includes(s.id) && _error) ||
+                                  (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
+                                    <BiXCircle
+                                      size={20}
+                                      className="text-red-500 dark:text-red-600"
+                                    /> :
+                                    <FiCircle
+                                      size={20}
+                                      className="text-slate-400 dark:text-slate-600"
+                                    />
                             }
-                            {s.data?.transactionHash && url && (
-                              <a
-                                href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white"
-                              >
-                                {icon ?
-                                  <Image
-                                    src={icon}
-                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                  />
-                                  :
-                                  <TiArrowRight size={16} className="transform -rotate-45" />
-                                }
-                              </a>
-                            )}
+                            <div className="flex items-center space-x-1">
+                              {s.data?.transactionHash ?
+                                <Copy
+                                  value={s.data.transactionHash}
+                                  title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
+                                    {s.title}
+                                  </span>}
+                                  size={18}
+                                /> :
+                                <span className={`uppercase ${text_color} text-xs font-medium`}>
+                                  {s.title}
+                                </span>
+                              }
+                              {s.data?.transactionHash && url && (
+                                <a
+                                  href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-white"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
+                                    />
+                                  }
+                                </a>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      )
-                    })}
+                        )
+                      })
+                    }
                     {is_invalid_call && (
                       <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
                         Invalid Call
