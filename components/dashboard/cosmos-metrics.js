@@ -30,7 +30,8 @@ export default ({ data }) => {
     operator_address,
     validator_description,
   } = { ...latest_block }
-  const metricClassName = 'bg-white dark:bg-black border hover:border-transparent dark:border-slate-900 hover:dark:border-transparent shadow hover:shadow-lg dark:shadow-slate-600 rounded-lg space-y-0.5 py-4 px-5'
+
+  const metricClassName = 'bg-white dark:bg-black shadow hover:shadow-lg dark:shadow-slate-600 rounded-lg space-y-0.5 py-4 px-5'
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -40,18 +41,25 @@ export default ({ data }) => {
             <div className="flex items-center space-x-1.5">
               <span className="whitespace-nowrap text-slate-500 dark:text-slate-300 text-base font-semibold">
                 {pre_votes > 0 ?
-                  'Pre Votes' : 'Consensus State'
+                  'Pre Votes' :
+                  'Consensus State'
                 }
               </span>
               {pre_votes > 0 && (
                 <div className={`${pre_votes > 2 / 3 ? 'bg-green-100 dark:bg-green-900 border border-green-500 dark:border-green-600 text-green-500 dark:text-green-600' : 'bg-red-100 dark:bg-red-900 border border-red-500 dark:border-red-600 text-red-500 dark:text-red-600'} rounded-lg text-xs font-semibold py-0.5 px-1.5`}>
-                  {number_format(pre_votes, '0,0.00%')}
+                  {number_format(
+                    pre_votes,
+                    '0,0.00%',
+                  )}
                 </div>
               )}
             </div>
             {height && (
               <span className="text-slate-400 dark:text-slate-600 font-semibold">
-                {number_format(height, '0,0')}
+                {number_format(
+                  height,
+                  '0,0',
+                )}
               </span>
             )}
           </div>
@@ -65,12 +73,20 @@ export default ({ data }) => {
                   />
                   <span className="text-blue-600 dark:text-white text-base font-bold">
                     {validator_description?.moniker ?
-                      ellipse(validator_description.moniker) : ellipse(operator_address, 6)
+                      ellipse(validator_description.moniker) :
+                      ellipse(
+                        operator_address,
+                        6,
+                      )
                     }
                   </span>
                 </a>
               </Link> :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              <FallingLines
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
           <div className="flex items-center justify-between space-x-2">
@@ -84,7 +100,10 @@ export default ({ data }) => {
                 </span>
                 <Link href={`/validator/${operator_address}`}>
                   <a className="text-slate-400 dark:text-slate-600 font-bold">
-                    {number_format(voting_power, '0,0')}
+                    {number_format(
+                      voting_power,
+                      '0,0',
+                    )}
                   </a>
                 </Link>
               </div>
@@ -99,8 +118,15 @@ export default ({ data }) => {
           </span>
           <div className="text-3xl font-bold">
             {!isNaN(block_height) ?
-              number_format(block_height, '0,0') :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              number_format(
+              block_height,
+              '0,0',
+            ) :
+              <FallingLines
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -115,12 +141,22 @@ export default ({ data }) => {
           </span>
           <div className="text-3xl font-bold">
             {!isNaN(avg_block_time) ?
-              number_format(avg_block_time, '0,0.00') :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              number_format(
+                avg_block_time,
+                '0,0.00',
+              ) :
+              <FallingLines
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-            seconds from last {number_format(100, '0,0')} blocks
+            seconds from last {number_format(
+              100,
+              '0,0',
+            )} blocks
           </span>
         </a>
       </Link>
@@ -131,12 +167,22 @@ export default ({ data }) => {
           </span>
           <div className="text-3xl font-bold">
             {!isNaN(active_validators) ?
-              number_format(active_validators, '0,0') :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              number_format(
+                active_validators,
+                '0,0',
+              ) :
+              <FallingLines
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-            out of {total_validators && number_format(total_validators, '0,0')} validators
+            out of {total_validators && number_format(
+              total_validators,
+              '0,0',
+            )} validators
           </span>
         </a>
       </Link>
@@ -147,12 +193,25 @@ export default ({ data }) => {
           </span>
           <div className="uppercase text-3xl font-bold">
             {!isNaN(online_voting_power) ?
-              number_format(online_voting_power, '0,0.00a') :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              number_format(
+                online_voting_power,
+                '0,0.00a',
+              ) :
+              <FallingLines
+                color={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
           <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
-            {online_voting_power_percentage && number_format(online_voting_power_percentage, '0,0.000')}% from {total_voting_power && number_format(total_voting_power, '0,0.0a').toUpperCase()} {denom}
+            {online_voting_power_percentage && number_format(
+              online_voting_power_percentage,
+              '0,0.000',
+            )}% from {total_voting_power && number_format(
+              total_voting_power,
+              '0,0.0a',
+            ).toUpperCase()} {denom}
           </span>
         </a>
       </Link>

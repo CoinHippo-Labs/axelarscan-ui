@@ -41,7 +41,7 @@ export default ({ n }) => {
 
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
-      const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
       const { txHash, sourceChain, destinationChain, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
       setFilters({

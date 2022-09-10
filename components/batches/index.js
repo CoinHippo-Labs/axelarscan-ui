@@ -43,7 +43,7 @@ export default () => {
 
   useEffect(() => {
     if (asPath) {
-      const params = params_to_obj(asPath?.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
       const { batchId, commandId, chain, keyId, type, status, fromTime, toTime } = { ...params }
       setFilters({
         batchId,

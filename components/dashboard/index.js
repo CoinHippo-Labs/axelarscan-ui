@@ -337,7 +337,7 @@ export default () => {
     }
   }, [evm_chains_data, cosmos_chains_data])
 
-  const metricClassName = 'bg-white dark:bg-black border hover:border-transparent dark:border-slate-900 hover:dark:border-transparent shadow hover:shadow-lg dark:shadow-slate-600 rounded-lg py-4 px-5'
+  const metricClassName = 'bg-white dark:bg-black shadow hover:shadow-lg dark:shadow-slate-600 rounded-lg py-4 px-5'
 
   return (
     <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">
@@ -356,7 +356,7 @@ export default () => {
                   </a>
                 </Link>
                 {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
-                  <div className="bg-red-100 dark:bg-yellow-700 border border-red-500 dark:border-yellow-400 rounded-lg whitespace-nowrap text-red-500 dark:text-yellow-400 text-xs sm:text-sm py-0.5 px-2">
+                  <div className="bg-red-100 dark:bg-red-900 rounded whitespace-nowrap text-red-500 dark:text-red-300 text-xs py-0.5 px-2">
                     The transfer volume is missing. It will be updated soon.
                   </div>
                 )}
@@ -367,7 +367,24 @@ export default () => {
                         Volume:
                       </span>
                       <span className="uppercase text-base font-bold">
-                        {currency_symbol}{number_format(_.sumBy(transfers.data, 'volume'), _.sumBy(transfers.data, 'volume') > 50000000 ? '0,0.00a' : _.sumBy(transfers.data, 'volume') > 10000000 ? '0,0' : '0,0.00')}
+                        {currency_symbol}
+                        {number_format(
+                          _.sumBy(
+                            transfers.data,
+                            'volume',
+                          ),
+                          _.sumBy(
+                            transfers.data,
+                            'volume',
+                          ) > 500000000 ?
+                            '0,0.00a' :
+                            _.sumBy(
+                              transfers.data,
+                              'volume',
+                            ) > 100000000 ?
+                              '0,0' :
+                              '0,0.00'
+                          )}
                       </span>
                     </div>
                     <div className="bg-blue-50 dark:bg-black border-2 border-blue-400 dark:border-slate-200 rounded-lg flex items-center justify-between text-blue-400 dark:text-slate-200 space-x-2 py-0.5 px-3">
@@ -375,7 +392,13 @@ export default () => {
                         Total:
                       </span>
                       <span className="text-base font-bold">
-                        {number_format(_.sumBy(transfers.data, 'num_txs'), '0,0')}
+                        {number_format(
+                          _.sumBy(
+                            transfers.data,
+                            'num_txs',
+                          ),
+                          '0,0',
+                        )}
                       </span>
                     </div>
                   </div>
@@ -390,8 +413,18 @@ export default () => {
                       </span>
                       <div className="h-9 text-3xl font-bold my-0.5">
                         {transfers?.data ?
-                          number_format(_.sumBy(transfers.data, 'num_txs'), '0,0') :
-                          <FallingLines color={loader_color(theme)} width="36" height="36" />
+                          number_format(
+                            _.sumBy(
+                              transfers.data,
+                              'num_txs',
+                            ),
+                            '0,0',
+                          ) :
+                          <FallingLines
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         }
                       </div>
                       <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -408,9 +441,29 @@ export default () => {
                         {transfers?.data ?
                           <>
                             {currency_symbol}
-                            {number_format(_.sumBy(transfers.data, 'volume'), _.sumBy(transfers.data, 'volume') > 1000000000 ? '0,0.00a' : _.sumBy(transfers.data, 'volume') > 10000000 ? '0,0' : '0,0.00')}
+                            {number_format(
+                              _.sumBy(
+                                transfers.data,
+                                'volume',
+                              ),
+                              _.sumBy(
+                                transfers.data,
+                                'volume',
+                              ) > 1000000000 ?
+                                '0,0.00a' :
+                                _.sumBy(
+                                  transfers.data,
+                                  'volume',
+                                ) > 10000000 ?
+                                  '0,0' :
+                                  '0,0.00'
+                            )}
                           </> :
-                          <FallingLines color={loader_color(theme)} width="36" height="36" />
+                          <FallingLines
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         }
                       </div>
                       <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -425,8 +478,15 @@ export default () => {
                       </span>
                       <div className="h-9 text-3xl font-bold my-0.5">
                         {evm_chains_data && cosmos_chains_data ?
-                          number_format(evm_chains_data.length + cosmos_chains_data.length, '0,0') :
-                          <FallingLines color={loader_color(theme)} width="36" height="36" />
+                          number_format(
+                            evm_chains_data.length + cosmos_chains_data.length,
+                            '0,0',
+                          ) :
+                          <FallingLines
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         }
                       </div>
                       <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -435,7 +495,7 @@ export default () => {
                     </a>
                   </Link>
                 </div>
-                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -mt-3 -ml-0 lg:ml-8">
+                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -mt-3 -ml-20 sm:-ml-18">
                   <NetworkGraph
                     id="transfers"
                     data={transfers?.network_graph_data}
@@ -450,14 +510,29 @@ export default () => {
                     <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
                       Supported Chains
                     </span>
-                    <div className="min-w-max h-84 overflow-auto flex flex-col">
+                    <div className="min-w-max h-120 overflow-auto flex flex-col">
                       {evm_chains_data && cosmos_chains_data ?
-                        _.orderBy(_.concat(evm_chains_data, cosmos_chains_data).map(c => {
-                          return {
-                            ...c,
-                            is_axelar: c?.id === 'axelarnet',
-                          }
-                        }), ['is_axelar', 'name'], ['desc', 'asc']).map((d, i) => (
+                        _.orderBy(
+                          _.concat(
+                            evm_chains_data,
+                            cosmos_chains_data,
+                          )
+                          .map(c => {
+                            return {
+                              ...c,
+                              is_axelar: c?.id === 'axelarnet',
+                            }
+                          }),
+                          [
+                            'is_axelar',
+                            'name',
+                          ],
+                          [
+                            'desc',
+                            'asc',
+                          ],
+                        )
+                        .map((d, i) => (
                           <div
                             key={i}
                             className="flex items-center justify-between space-x-5 py-2"
@@ -476,13 +551,18 @@ export default () => {
                               </span>
                             </a>
                             {evm_chains_data.findIndex(c => c?.id === d?.id) > -1 && (
-                              <AddChain chain_data={d} />
+                              <AddChain
+                                chain_data={d}
+                              />
                             )}
                           </div>
-                        ))
-                        :
+                        )) :
                         <div className="mt-2">
-                          <TailSpin color={loader_color(theme)} width="36" height="36" />
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         </div>
                       }
                     </div>
@@ -491,7 +571,7 @@ export default () => {
               </div>
             </div>
           )}
-          {process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && ['testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
+          {process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && ['testnet'].includes(process.env.ENVIRONMENT) && (
             <div className="space-y-3">
               <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Link href="/gmp">
@@ -509,7 +589,13 @@ export default () => {
                         Total:
                       </span>
                       <span className="text-base font-bold">
-                        {number_format(_.sumBy(gmps.data, 'num_txs'), '0,0')}
+                        {number_format(
+                          _.sumBy(
+                            gmps.data,
+                            'num_txs',
+                          ),
+                          '0,0',
+                        )}
                       </span>
                     </div>
                   </div>
@@ -524,8 +610,18 @@ export default () => {
                       </span>
                       <div className="h-9 text-3xl font-bold my-0.5">
                         {gmps?.data ?
-                          number_format(_.sumBy(gmps.data, 'num_txs'), '0,0') :
-                          <FallingLines color={loader_color(theme)} width="36" height="36" />
+                          number_format(
+                            _.sumBy(
+                              gmps.data,
+                              'num_txs',
+                            ),
+                            '0,0',
+                          ) :
+                          <FallingLines
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         }
                       </div>
                       <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -540,8 +636,15 @@ export default () => {
                       </span>
                       <div className="h-9 text-3xl font-bold my-0.5">
                         {evm_chains_data && cosmos_chains_data ?
-                          number_format(evm_chains_data.length/* + cosmos_chains_data.length*/, '0,0') :
-                          <FallingLines color={loader_color(theme)} width="36" height="36" />
+                          number_format(
+                            evm_chains_data.length/* + cosmos_chains_data.length*/,
+                            '0,0',
+                          ) :
+                          <FallingLines
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         }
                       </div>
                       <span className="text-slate-400 dark:text-slate-600 text-sm font-medium">
@@ -550,7 +653,7 @@ export default () => {
                     </a>
                   </Link>
                 </div>
-                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -mt-3 -ml-0 lg:ml-8">
+                <div className="order-3 lg:order-1 sm:col-span-2 overflow-x-auto flex justify-between space-x-2 -mt-3 -ml-20 sm:-ml-18">
                   <NetworkGraph
                     id="gmp"
                     data={gmps?.network_graph_data}
@@ -565,14 +668,29 @@ export default () => {
                     <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
                       Supported Chains
                     </span>
-                    <div className="min-w-max h-84 overflow-auto flex flex-col">
+                    <div className="min-w-max h-120 overflow-auto flex flex-col">
                       {evm_chains_data && cosmos_chains_data ?
-                        _.orderBy(_.concat(evm_chains_data/*, cosmos_chains_data*/).map(c => {
-                          return {
-                            ...c,
-                            is_axelar: c?.id === 'axelarnet',
-                          }
-                        }), ['is_axelar', 'name'], ['desc', 'asc']).map((d, i) => (
+                        _.orderBy(
+                          _.concat(
+                            evm_chains_data,
+                            // cosmos_chains_data,
+                          )
+                          .map(c => {
+                            return {
+                              ...c,
+                              is_axelar: c?.id === 'axelarnet',
+                            }
+                          }),
+                          [
+                            'is_axelar',
+                            'name',
+                          ],
+                          [
+                            'desc',
+                            'asc',
+                          ],
+                        )
+                        .map((d, i) => (
                           <div
                             key={i}
                             className="flex items-center justify-between space-x-5 py-2"
@@ -591,13 +709,18 @@ export default () => {
                               </span>
                             </a>
                             {evm_chains_data.findIndex(c => c?.id === d?.id) > -1 && (
-                              <AddChain chain_data={d} />
+                              <AddChain
+                                chain_data={d}
+                              />
                             )}
                           </div>
-                        ))
-                        :
+                        )) :
                         <div className="mt-2">
-                          <TailSpin color={loader_color(theme)} width="36" height="36" />
+                          <TailSpin
+                            color={loader_color(theme)}
+                            width="36"
+                            height="36"
+                          />
                         </div>
                       }
                     </div>
@@ -618,7 +741,9 @@ export default () => {
               </span>
             </a>
           </Link>
-          <Blocks n={10} />
+          <Blocks
+            n={10}
+          />
         </div>
         <div className="space-y-3">
           <Link href="/transactions">
@@ -629,7 +754,9 @@ export default () => {
               </span>
             </a>
           </Link>
-          <Transactions n={10} />
+          <Transactions
+            n={10}
+          />
         </div>
       </div>
     </div>

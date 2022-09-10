@@ -21,35 +21,42 @@ export default ({
 
   useEffect(() => {
     if (rendered && !graph) {
-      setGraph(new G6.Graph({
-        container: id,
-        width: 564,
-        height: 423,
-        fitView: true,
-        fitViewPadding: [10, 10, 10, 10],
-        fitCenter: true,
-        layout: {
-          type: 'radial',
-          preventOverlap: true,
-          linkDistance: 180,
-          nodeSpacing: 16,
-        },
-        defaultNode: {
-          size: 32,
-        },
-        defaultEdge: {
-          labelCfg: {
-            autoRotate: true,
-          },
-        },
-        modes: {
-          default: [
-            'drag-canvas',
-            'drag-node',
+      setGraph(
+        new G6.Graph({
+          container: id,
+          width: 775.5,
+          height: 581.625,
+          fitView: true,
+          fitViewPadding: [
+            10,
+            10,
+            10,
+            10,
           ],
-        },
-        plugins: [],
-      }))
+          fitCenter: true,
+          layout: {
+            type: 'radial',
+            preventOverlap: true,
+            linkDistance: 180,
+            nodeSpacing: 16,
+          },
+          defaultNode: {
+            size: 32,
+          },
+          defaultEdge: {
+            labelCfg: {
+              autoRotate: true,
+            },
+          },
+          modes: {
+            default: [
+              'drag-canvas',
+              'drag-node',
+            ],
+          },
+          plugins: [],
+        })
+      )
     }
     else {
       setRendered(true)
@@ -58,7 +65,11 @@ export default ({
 
   useEffect(() => {
     if (data && graph) {
-      const axelar_chain_data = getChain('axelarnet', cosmos_chains_data)
+      const axelar_chain_data = getChain(
+        'axelarnet',
+        cosmos_chains_data,
+      )
+
       const fontFamily = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
       const nodes = []
       let edges = []
@@ -66,35 +77,69 @@ export default ({
         style: {
           fontFamily,
           fontWeight: 600,
-          fill: theme === 'dark' ? '#fff' : '#000',
+          fill: theme === 'dark' ?
+            '#fff' :
+            '#000',
         },
       }
-      _.orderBy(data, ['destination_chain'], ['asc']).forEach(d => {
-        const x = ['source', 'destination']
+
+      _.orderBy(
+        data,
+        ['destination_chain'],
+        ['asc'],
+      )
+      .forEach(d => {
+        const x = [
+          'source',
+          'destination',
+        ]
+
         x.forEach(_x => {
-          const id = d?.[`${_x}_chain`], _d = d?.[`${_x}_chain_data`]
-          if (id && nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0) {
+          const id = d?.[`${_x}_chain`],
+            _d = d?.[`${_x}_chain_data`]
+
+          if (
+            id &&
+            nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0
+          ) {
             nodes.push({
               id,
-              size: equals_ignore_case(id, axelar_chain_data?.id) ? 40 : 32,
+              size: equals_ignore_case(id, axelar_chain_data?.id) ?
+                40 :
+                32,
               type: 'image',
               img: _d?.image,
               label: chainName(_d),
               labelCfg,
               style: {
-                fill: theme === 'dark' ? '#000' : '#fff',
+                fill: theme === 'dark' ?
+                  '#000' :
+                  '#fff',
               },
             })
           }
         })
-        const { id, source_chain, destination_chain, num_txs } = { ...d }
+
+        const {
+          id,
+          source_chain,
+          destination_chain,
+          num_txs,
+        } = { ...d }
+
         edges.push({
           d,
           id,
           source: source_chain,
           target: destination_chain,
           type: 'circle-running',
-          label: `${number_format(num_txs, num_txs >= 100000 ? '0,0.00a' : '0,0')} txs`,
+          label: `${number_format(
+            num_txs,
+            num_txs >= 100000 ?
+              '0,0.00a' :
+              '0,0',
+            )
+          } txs`,
           labelCfg: {
             style: {
               ...labelCfg?.style,
@@ -106,41 +151,69 @@ export default ({
           },
           curveOffset: 28,
           style: {
-            stroke: theme === 'dark' ? '#333' : '#ddd',
+            stroke: theme === 'dark' ?
+              '#333' :
+              '#ddd',
           },
         })
       })
-      G6.registerEdge('circle-running', {
-        afterDraw(cfg, group) {
-          const shape = group.get('children')[0]
-          const startPoint = shape.getPoint(0)
-          const circle = group.addShape('circle', {
-            attrs: {
-              x: startPoint.x,
-              y: startPoint.y,
-              fill: cfg?.d?.source_chain_data?.color || '#3b82f6',
-              r: 3.5,
-            },
-            name: 'circle-shape',
-          })
-          circle.animate(
-            (ratio) => {
-              const tmpPoint = shape.getPoint(ratio)
-              return {
-                x: tmpPoint.x,
-                y: tmpPoint.y,
-              }
-            }, {
-              repeat: true,
-              duration: 3000,
-            },
-          )
+
+      G6.registerEdge(
+        'circle-running',
+        {
+          afterDraw(
+            cfg,
+            group,
+          ) {
+            const shape = _.head(group.get('children'))
+            const start_point = shape.getPoint(0)
+            const {
+              x,
+              y,
+            } = { ...start_point }
+
+            const circle = group.addShape(
+              'circle',
+              {
+                attrs: {
+                  x,
+                  y,
+                  fill: cfg?.d?.source_chain_data?.color ||
+                    '#3b82f6',
+                  r: 3.5,
+                },
+                name: 'circle-shape',
+              },
+            )
+
+            circle.animate(ratio =>
+              {
+                const tmp_point = shape.getPoint(ratio)
+                const {
+                  x,
+                  y,
+                } = { ...tmp_point }
+
+                return {
+                  x,
+                  y,
+                }
+              },
+              {
+                repeat: true,
+                duration: 3000,
+              },
+            )
+          },
         },
-      }, 'quadratic')
+        'quadratic',
+      )
+
       graph.data({
         nodes,
         edges,
       })
+
       graph.render()
     }
   }, [theme, data, graph])
@@ -152,8 +225,12 @@ export default ({
         className={`${data?.length > 0 ? 'flex' : 'hidden'} items-center justify-start`}
       />
       {!data && (
-        <div className="w-4/4 h-88 flex items-center justify-center">
-          <BallTriangle color={loader_color(theme)} width="36" height="36" />
+        <div className="w-4/4 h-120 flex items-center justify-center sm:pl-20">
+          <BallTriangle
+            color={loader_color(theme)}
+            width="36"
+            height="36"
+          />
         </div>
       )}
     </div>

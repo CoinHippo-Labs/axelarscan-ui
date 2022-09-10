@@ -9,7 +9,7 @@ import { HiArrowSmRight } from 'react-icons/hi'
 
 import Image from '../image'
 import { ProgressBar } from '../progress-bars'
-import { search as searchGMP } from '../../lib/api/gmp'
+import { search as searchGMP, stats } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, ellipse, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
@@ -43,8 +43,8 @@ export default () => {
   const { pathname, asPath } = { ...router }
 
   const [timeframeSelected, setTimeframeSelected] = useState(false)
-  const [statuses, setStatuses] = useState(null)
   const [methods, setMethods] = useState(null)
+  const [statuses, setStatuses] = useState(null)
   const [chainPairs, setChainPairs] = useState(null)
   const [contracts, setContracts] = useState(null)
   const [timeSpents, setTimeSpents] = useState(null)
@@ -193,11 +193,11 @@ export default () => {
   }, [asPath, timeframeSelected, filters])
 
   useEffect(() => {
-    const getData = () => {
+    const getData = async () => {
       if (filters) {
         if (!fetchTrigger) {
-          setStatuses(null)
           setMethods(null)
+          setStatuses(null)
           setChainPairs(null)
           setContracts(null)
           setTimeSpents(null)
@@ -238,365 +238,199 @@ export default () => {
             moment().unix()
         }
 
-        const params = {
-          txHash,
-          sourceChain,
-          destinationChain,
-          event,
-          status,
-          senderAddress,
-          sourceAddress,
-          contractAddress,
-          relayerAddress,
-          fromTime,
-          toTime,
-        }
+        const response = await stats(
+          {
+            txHash,
+            sourceChain,
+            destinationChain,
+            event,
+            status,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            fromTime,
+            toTime,
+          },
+        )
 
-        getStatuses(params)
-        getMethods(params)
-        getChainPairs(params)
-        getContracts(params)
-        getTimeSpents(params)
+        const {
+          messages,
+          statuses,
+          time_spents,
+        } = { ...response }
+
+        setMethods(
+          (messages || [])
+            .map(m => {
+              const {
+                key,
+                num_txs,
+              } = { ...m }
+
+              return {
+                key: key?.replace(
+                  'ContractCall',
+                  'callContract',
+                ),
+                num_txs,
+              }
+            })
+        )
+        setStatuses(
+          _.orderBy(
+            Object.entries({ ...statuses })
+              .map(([k, v]) => {
+                return {
+                  key: k,
+                  name: k === 'invalid' ?
+                    'Invalid Data' :
+                    k === 'approving' ?
+                      'Wait for Approval' :
+                      k === 'error' ?
+                        'Error Execution' :
+                          capitalize(k),
+                  color: k === 'invalid' ?
+                    'bg-slate-500' :
+                    k === 'approving' ?
+                      'bg-yellow-500' :
+                      k === 'executed' ?
+                        'bg-green-500' :
+                        k === 'error' ?
+                          'bg-red-500' :
+                            undefined,
+                  num_txs: v,
+                }
+              }),
+            ['num_txs'],
+            ['desc'],
+          )
+        )
+        setChainPairs(
+          _.orderBy(
+            Object.entries(
+              _.groupBy(
+                (messages || [])
+                  .flatMap(m => {
+                    const {
+                      source_chains,
+                    } = { ...m }
+
+                    return (source_chains || [])
+                      .flatMap(s => {
+                        const {
+                          destination_chains,
+                        } = { ...s }
+
+                        return (destination_chains || [])
+                          .map(d => {
+                            const {
+                              num_txs,
+                            } = { ...d }
+
+                            return {
+                              key: `${s.key}_${d.key}`,
+                              source_chain: s.key,
+                              destination_chain: d.key,
+                              num_txs,
+                            }
+                          })
+                      })
+                  }),
+                'key',
+              ),
+            )
+            .map(([k, v]) => {
+              return {
+                key: k,
+                ..._.head(v),
+                num_txs: _.sumBy(
+                  v,
+                  'num_txs',
+                ),
+              }
+            }),
+            ['num_txs'],
+            ['desc'],
+          )
+        )
+        setContracts(
+          _.orderBy(
+            Object.entries(
+              _.groupBy(
+                (messages || [])
+                  .flatMap(m => {
+                    const {
+                      source_chains,
+                    } = { ...m }
+
+                    return (source_chains || [])
+                      .flatMap(s => {
+                        const {
+                          destination_chains,
+                        } = { ...s }
+
+                        return (destination_chains || [])
+                          .flatMap(d => {
+                            const {
+                              contracts,
+                            } = { ...d }
+
+                            return (contracts || [])
+                              .map(c => {
+                                const {
+                                  key,
+                                  num_txs,
+                                } = { ...c }
+
+                                return {
+                                  key: d.key,
+                                  contract: key,
+                                  num_txs,
+                                }
+                              })
+                          })
+                      })
+                  }),
+                'key',
+              ),
+            )
+            .map(([k, v]) => {
+              return {
+                key: k,
+                num_contracts: _.uniqBy(
+                  v,
+                  'contract',
+                ).length,
+                num_txs: _.sumBy(
+                  v,
+                  'num_txs',
+                ),
+              }
+            }),
+            ['num_contracts'],
+            ['desc'],
+          )
+        )
+        setTimeSpents(
+          time_spents || []
+        )
       }
     }
 
     getData()
   }, [fetchTrigger])
 
-  const getStatuses = async params => {
-    let data, response
-
-    response = await searchGMP({
-      ...params,
-      status: 'called',
-      size: 0,
-    })
-    data = {
-      ...data,
-      called: response?.total || 0,
-    }
-
-    response = await searchGMP({
-      ...params,
-      status: 'approving',
-      size: 0,
-    })
-    data = {
-      ...data,
-      approving: response?.total || 0,
-    }
-
-    data = {
-      ...data,
-      invalid: data.approving < data.called ?
-        data.called - data.approving :
-        0,
-    }
-
-    response = await searchGMP({
-      ...params,
-      status: 'executed',
-      size: 0,
-    })
-    data = {
-      ...data,
-      executed: response?.total,
-    }
-
-    response = await searchGMP({
-      ...params,
-      status: 'error',
-      size: 0,
-    })
-    data = {
-      ...data,
-      error: response?.total,
-    }
-
-    setStatuses(
-      _.orderBy(
-        Object.entries(data)
-          .map(([k, v]) => {
-            return {
-              key: k,
-              name: k === 'invalid' ?
-                'Invalid Data' :
-                k === 'approving' ?
-                  'Wait for Approval' :
-                  k === 'error' ?
-                    'Error Execution' :
-                      capitalize(k),
-              color: k === 'invalid' ?
-                'bg-slate-500' :
-                k === 'approving' ?
-                  'bg-yellow-500' :
-                  k === 'executed' ?
-                    'bg-green-500' :
-                    k === 'error' ?
-                      'bg-red-500' :
-                        undefined,
-              value: v,
-            }
-          }),
-        ['value'],
-        ['desc'],
-      )
-    )
-  }
-
-  const getMethods = async params => {
-    const response = await searchGMP({
-      ...params,
-      aggs: {
-        events: {
-          terms: { field: 'call.event.keyword' },
-        },
-      },
-      size: 0,
-    })
-
-    const {
-      buckets,
-    } = { ...response?.aggs?.events }
-
-    const data = buckets?.map(b => {
-      const {
-        key,
-        doc_count,
-      } = { ...b }
-
-      return {
-        key: key?.replace('ContractCall', 'callContract'),
-        value: doc_count,
-      }
-    }) || []
-
-    setMethods(
-      _.orderBy(
-        data,
-        ['value'],
-        ['desc'],
-      )
-    )
-  }
-
-  const getChainPairs = async params => {
-    const response = await searchGMP({
-      ...params,
-      aggs: {
-        source_chains: {
-          terms: { field: 'call.chain.keyword', size: 1000 },
-          aggs: {
-            destination_chains: {
-              terms: { field: 'call.returnValues.destinationChain.keyword', size: 1000 },
-            },
-          },
-        },
-      },
-      size: 0,
-    })
-
-    const data = response?.data || []
-
-    setChainPairs(
-      _.orderBy(
-        data.map(d => {
-          const {
-            id,
-            source_chain,
-            destination_chain,
-            num_txs,
-          } = { ...d }
-
-          return {
-            key: id,
-            source_chain,
-            destination_chain,
-            value: num_txs,
-          }
-        }),
-        ['value'],
-        ['desc'],
-      )
-    )
-  }
-
-  const getContracts = async params => {
-    const response = await searchGMP({
-      ...params,
-      aggs: {
-        chains: {
-          terms: { field: 'call.returnValues.destinationChain.keyword', size: 1000 },
-          aggs: {
-            contracts: {
-              terms: { field: 'call.returnValues.destinationContractAddress.keyword', size: 1000 },
-            },
-          },
-        },
-      },
-      size: 0,
-    })
-
-    const {
-      buckets,
-    } = { ...response?.aggs?.chains }
-
-    const data = Object.entries(
-      _.groupBy(
-        buckets?.filter(b => chains_data?.findIndex(c => equals_ignore_case(c?.id, b?.key)) > -1)
-          .map(b => {
-            const {
-              key,
-              doc_count,
-              contracts,
-            } = { ...b }
-
-            return {
-              key: key?.toLowerCase(),
-              value: doc_count,
-              contracts: contracts?.buckets?.map(_b => {
-                return {
-                  key: _b?.key,
-                  value: _b?.doc_count,
-                }
-              }) || [],
-            }
-          }) || [],
-        'key',
-      )
-    ).map(([k, v]) => {
-      return {
-        key: k,
-        value: _.sumBy(
-          v,
-          'value',
-        ),
-        contracts: _.orderBy(
-          Object.entries(
-            _.groupBy(
-              v?.flatMap(_v => _v?.contracts),
-              'key',
-            ),
-          ).map(([_k, _v]) => {
-            return {
-              key: _k,
-              value: _.sumBy(
-                _v,
-                'value',
-              ),
-            }
-          }),
-          ['value'],
-          ['desc'],
-        ),
-      }
-    }).map(d => {
-      const {
-        contracts,
-      } = { ...d }
-
-      return {
-        ...d,
-        num_contracts: contracts?.length || 0,
-      }
-    })
-
-    setContracts(
-      _.orderBy(
-        data,
-        ['num_contracts'],
-        ['desc'],
-      )
-    )
-  }
-
-  const getTimeSpents = async params => {
-    const n_refine = 1
-    let response
-
-    for (let i = -1; i < n_refine; i++) {
-      response = await searchGMP({
-        ...params,
-        // filter less than percentile 95
-        query: i >= 0 ?
-          {
-            bool: {
-              should: response?.aggs?.chains?.buckets?.map(b => {
-                const {
-                  key,
-                  total,
-                } = { ...b }
-                if (total?.values?.['95.0'] && (!params?.sourceChain || equals_ignore_case(key, params.sourceChain))) {
-                  return {
-                    bool: {
-                      must: [
-                        { match: { 'call.chain': key } },
-                        { range: { 'time_spent.total': { lt: total.values['95.0'] } } },
-                      ],
-                    },
-                  }
-                }
-                else {
-                  return null
-                }
-              }).filter(s => s) || [],
-              minimum_should_match: 1,
-            },
-          } : undefined,
-        aggs: {
-          chains: {
-            terms: { field: 'call.chain.keyword', size: 1000 },
-            aggs: {
-              approve: {
-                percentiles: { field: 'time_spent.call_approved' },
-              },
-              execute: {
-                percentiles: { field: 'time_spent.approved_executed' },
-              },
-              total: {
-                percentiles: { field: 'time_spent.total' },
-              },
-            },
-          },
-        },
-        size: 0,
-      })
-    }
-
-    const data = response?.aggs?.chains?.buckets?.map(b => {
-      const {
-        key,
-        doc_count,
-        approve,
-        execute,
-        total,
-      } = { ...b }
-
-      return {
-        key,
-        approve: approve?.values?.['50.0'],
-        execute: execute?.values?.['50.0'],
-        total: total?.values?.['50.0'],
-        value: doc_count,
-      }
-    }) || []
-
-    setTimeSpents(
-      _.orderBy(
-        data,
-        ['value'],
-        ['desc'],
-      )
-    )
-  }
-
   const chains_data = _.concat(
     evm_chains_data,
     cosmos_chains_data,
   )
   const total = _.sumBy(
-    statuses?.filter(s => !['called'].includes(s?.key)) || [],
-    'value',
+    (statuses || [])
+      .filter(s =>
+        !['called'].includes(s?.key)
+      ),
+    'num_txs',
   )
 
   const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg space-y-1 p-4'
@@ -621,29 +455,47 @@ export default () => {
               Math.abs(filters.time[0].diff(moment().subtract(n_day, 'days'), 'minutes')) < 30 &&
               Math.abs((filters.time[1] || moment()).diff(moment(), 'minutes')) < 30
             )
+
           const qs = new URLSearchParams()
-          Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
-            let key, value
-            switch (k) {
-              case 'time':
-                break
-              default:
-                key = k
-                value = v
-                break
-            }
-            if (key) {
-              qs.append(key, value)
-            }
-          })
+
+          Object.entries({ ...filters })
+            .filter(([k, v]) => v)
+            .forEach(([k, v]) => {
+              let key,
+                value
+
+              switch (k) {
+                case 'time':
+                  break
+                default:
+                  key = k
+                  value = v
+                  break
+              }
+
+              if (key) {
+                qs.append(
+                  key,
+                  value,
+                )
+              }
+            })
+
           switch (n_day) {
             case null:
               break
             default:
-              qs.append('fromTime', moment().subtract(n_day, 'days').valueOf())
-              qs.append('toTime', moment().valueOf())
+              qs.append(
+                'fromTime',
+                moment().subtract(n_day, 'days').valueOf(),
+              )
+              qs.append(
+                'toTime',
+                moment().valueOf(),
+              )
               break
           }
+
           const qs_string = qs.toString()
 
           return (
@@ -699,18 +551,21 @@ export default () => {
                       {m?.key}
                     </span>
                     <span className="font-bold">
-                      {number_format(m?.value, '0,0')}
+                      {number_format(
+                        m?.num_txs,
+                        '0,0',
+                      )}
                     </span>
                   </div>
                   <div className="flex items-center justify-between space-x-2">
                     <ProgressBar
-                      width={m?.value * 100 / total}
+                      width={m?.num_txs * 100 / total}
                       color={`${colors[i % colors.length]}`}
                       className="h-1.5 rounded-lg"
                     />
                     <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                       {number_format(
-                        m?.value / total,
+                        m?.num_txs / total,
                         '0,0.000%',
                       )}
                     </span>
@@ -743,17 +598,23 @@ export default () => {
                         {m?.name}
                       </span>
                       <span className="font-bold">
-                        {number_format(m?.value, '0,0')}
+                        {number_format(
+                          m?.num_txs,
+                          '0,0',
+                        )}
                       </span>
                     </div>
                     <div className="flex items-center justify-between space-x-2">
                       <ProgressBar
-                        width={m?.value * 100 / total}
+                        width={m?.num_txs * 100 / total}
                         color={`${m?.color || colors[i % colors.length]}`}
                         className="h-1.5 rounded-lg"
                       />
                       <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        {number_format(m?.value / total, '0,0.000%')}
+                        {number_format(
+                          m?.num_txs / total,
+                          '0,0.000%',
+                        )}
                       </span>
                     </div>
                   </div>
@@ -778,7 +639,7 @@ export default () => {
                 const {
                   source_chain,
                   destination_chain,
-                  value,
+                  num_txs,
                 } = { ...p }
 
                 const source_chain_data = getChain(
@@ -817,20 +678,20 @@ export default () => {
                       </div>
                       <span className="font-bold">
                         {number_format(
-                          value,
+                          num_txs,
                           '0,0',
                         )}
                       </span>
                     </div>
                     <div className="flex items-center justify-between space-x-2">
                       <ProgressBar
-                        width={value * 100 / total}
+                        width={num_txs * 100 / total}
                         color={`${colors[i % colors.length]}`}
                         className="h-1.5 rounded-lg"
                       />
                       <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                         {number_format(
-                          value / total,
+                          num_txs / total,
                           '0,0.000%',
                         )}
                       </span>
@@ -868,7 +729,6 @@ export default () => {
                   image,
                 } = { ...chain_data }
 
-                const value = num_contracts
                 const total = _.sumBy(
                   contracts,
                   'num_contracts',
@@ -893,20 +753,20 @@ export default () => {
                       </div>
                       <span className="font-bold">
                         {number_format(
-                          value,
+                          num_contracts,
                           '0,0',
                         )}
                       </span>
                     </div>
                     <div className="flex items-center justify-between space-x-2">
                       <ProgressBar
-                        width={value * 100 / total}
+                        width={num_contracts * 100 / total}
                         color={`${colors[i % colors.length]}`}
                         className="h-1.5 rounded-lg"
                       />
                       <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                         {number_format(
-                          value / total,
+                          num_contracts / total,
                           '0,0.000%',
                         )}
                       </span>
