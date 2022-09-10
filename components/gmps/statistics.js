@@ -132,7 +132,10 @@ export default () => {
       )
     }
 
-    if (pathname && filters) {
+    if (
+      pathname &&
+      filters
+    ) {
       triggering()
     }
 
