@@ -623,99 +623,129 @@ export default () => {
     chain_id !== destination_chain_data.chain_id &&
     !executing
 
-  const approveButton = call && !approved && !executed && !is_executed && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee || gas?.gas_remain_amount < 0.0001) && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 && (
-    <div className="flex items-center space-x-2">
-      <button
-        disabled={approving}
-        onClick={() => approve(data)}
-        className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${approving ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
-      >
-        {approving && (
-          <TailSpin
-            color="white"
-            width="16"
-            height="16"
-          />
-        )}
-        <span>
-          Approve
+  const approveButton =
+    call &&
+    !approved &&
+    !executed &&
+    !is_executed &&
+    !(
+      is_invalid_destination_chain ||
+      is_invalid_call ||
+      is_insufficient_minimum_amount ||
+      is_insufficient_fee ||
+      gas?.gas_remain_amount < 0.00005
+    ) &&
+    moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 &&
+    (
+      <div className="flex items-center space-x-2">
+        <button
+          disabled={approving}
+          onClick={() => approve(data)}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${approving ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+        >
+          {approving && (
+            <TailSpin
+              color="white"
+              width="16"
+              height="16"
+            />
+          )}
+          <span>
+            Approve
+          </span>
+        </button>
+      </div>
+    )
+  const executeButton =
+    payload &&
+    approved &&
+    !executed &&
+    !is_executed &&
+    (
+      error ||
+      moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2
+    ) &&
+    (
+      <>
+        <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs pt-1">
+          Execute at destination chain
         </span>
-      </button>
-    </div>
-  )
-  const executeButton = payload && approved && !executed && !is_executed && (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
-    <>
-      <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs pt-1">
-        Execute at destination chain
-      </span>
-      <div className="flex items-center space-x-2">
-        {web3_provider && !wrong_destination_chain && (
-          <button
-            disabled={executing}
-            onClick={() => execute(data)}
-            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
-          >
-            {executing && (
-              <TailSpin
-                color="white"
-                width="16"
-                height="16"
-              />
-            )}
-            <span>
-              Execute
-            </span>
-          </button>
-        )}
-        <Wallet
-          connectChainId={
-            wrong_destination_chain &&
-            (
-              destination_chain_data.chain_id ||
-              default_chain_id
-            )
-          }
-        />
-      </div>
-    </>
-  )
-  const gasAddButton = (is_not_enough_gas || !gas_paid || is_insufficient_fee) && (
-    <>
-      <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
-        Pay new gas at source chain
-      </span>
-      <div className="flex items-center space-x-2">
-        {web3_provider && !wrong_source_chain && (
-          <button
-            disabled={gasAdding}
-            onClick={() => addNativeGas(data)}
-            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
-          >
-            {gasAdding && (
-              <TailSpin
-                color="white"
-                width="16"
-                height="16"
-              />
-            )}
-            <span className="whitespace-nowrap">
-              Pay new gas
-            </span>
-          </button>
-        )}
-        <Wallet
-          connectChainId={
-            wrong_source_chain &&
-            (
-              source_chain_data.chain_id ||
-              default_chain_id
-            )
-          }
-        />
-      </div>
-    </>
-  )
-  const refundButton = !approveButton && !executeButton &&
+        <div className="flex items-center space-x-2">
+          {web3_provider && !wrong_destination_chain && (
+            <button
+              disabled={executing}
+              onClick={() => execute(data)}
+              className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+            >
+              {executing && (
+                <TailSpin
+                  color="white"
+                  width="16"
+                  height="16"
+                />
+              )}
+              <span>
+                Execute
+              </span>
+            </button>
+          )}
+          <Wallet
+            connectChainId={
+              wrong_destination_chain &&
+              (
+                destination_chain_data.chain_id ||
+                default_chain_id
+              )
+            }
+          />
+        </div>
+      </>
+    )
+  const gasAddButton =
+    (
+      is_not_enough_gas ||
+      !gas_paid ||
+      is_insufficient_fee
+    ) &&
+    (
+      <>
+        <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
+          Pay new gas at source chain
+        </span>
+        <div className="flex items-center space-x-2">
+          {web3_provider && !wrong_source_chain && (
+            <button
+              disabled={gasAdding}
+              onClick={() => addNativeGas(data)}
+              className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+            >
+              {gasAdding && (
+                <TailSpin
+                  color="white"
+                  width="16"
+                  height="16"
+                />
+              )}
+              <span className="whitespace-nowrap">
+                Pay new gas
+              </span>
+            </button>
+          )}
+          <Wallet
+            connectChainId={
+              wrong_source_chain &&
+              (
+                source_chain_data.chain_id ||
+                default_chain_id
+              )
+            }
+          />
+        </div>
+      </>
+    )
+  const refundButton =
+    !approveButton &&
+    !executeButton &&
     !no_gas_remain &&
     (
       (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
@@ -723,7 +753,8 @@ export default () => {
     ) &&
     (executed || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
-    (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) && (
+    (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) &&
+    (
       <div className="flex items-center space-x-2">
         <button
           disabled={refunding}
