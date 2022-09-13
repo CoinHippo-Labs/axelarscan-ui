@@ -55,7 +55,7 @@
     "react-image": "^4.0.3",
     "react-json-view": "^1.21.3",
     "react-linkify": "^1.0.0-alpha",
-    "react-loader-spinner": "^6.0.0-0",
+    "react-loader-spinner": "^5.3.4",
     "react-popper": "^2.3.0",
     "react-redux": "^8.0.2",
     "react-reveal": "^1.2.2",

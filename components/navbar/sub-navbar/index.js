@@ -96,7 +96,6 @@ export default () => {
       title = 'Validator'
       subtitle = (
         <Copy
-          size={18}
           value={address}
           title={<div className="text-slate-400 dark:text-slate-600 text-sm">
             <span className="xl:hidden">
@@ -121,7 +120,6 @@ export default () => {
       title = 'Account'
       subtitle = (
         <Copy
-          size={18}
           value={address}
           title={<div className="text-slate-400 dark:text-slate-600 text-sm">
             <span className="xl:hidden">
@@ -249,7 +247,6 @@ export default () => {
             </span>
           </div>
           <Copy
-            size={18}
             value={tx}
           />
         </div>
@@ -269,7 +266,6 @@ export default () => {
       )
       subtitle = (
         <Copy
-          size={18}
           value={address}
           title={<div className="text-slate-400 dark:text-slate-600 text-sm">
             <span className="xl:hidden">
@@ -366,7 +362,6 @@ export default () => {
             </span>
           </div>
           <Copy
-            size={18}
             value={tx}
           />
         </div>
@@ -401,7 +396,6 @@ export default () => {
             </span>
           </div>
           <Copy
-            size={18}
             value={tx}
           />
         </div>
@@ -482,7 +476,6 @@ export default () => {
             </span>
           </div>
           <Copy
-            size={18}
             value={tx}
           />
         </div>
@@ -513,7 +506,6 @@ export default () => {
             </span>
           </div>
           <Copy
-            size={18}
             value={tx}
           />
         </div>

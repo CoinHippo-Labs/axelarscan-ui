@@ -140,7 +140,7 @@ export default ({ n }) => {
 
   return (
     data ?
-      <div className="min-h-full grid gap-2">
+      <div className="min-h-full grid gap-2 mt-2">
         <div className="flex items-center justify-between space-x-2 -mt-3">
           <div className="flex items-center space-x-2">
             <span className="text-lg font-bold">

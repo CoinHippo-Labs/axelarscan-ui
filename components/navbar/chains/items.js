@@ -27,7 +27,7 @@ export default ({
 
         const item = (
           <div
-            className={`${i === 0 ? 'rounded-tl-lg rounded-tr-lg' : i === _menus.length - 1 ? 'rounded-bl-lg rounded-br-lg' : ''} ${selected ? 'font-bold' : 'font-normal'} w-full flex items-center whitespace-nowrap space-x-1 py-2.5 px-3`}
+            className={`${i === 0 ? 'rounded-t-lg' : i === _menus.length - 1 ? 'rounded-b-lg' : ''} ${selected ? 'font-bold' : 'font-normal'} w-full flex items-center whitespace-nowrap space-x-1 py-2.5 px-3`}
           >
             <span>
               {title}

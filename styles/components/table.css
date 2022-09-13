@@ -78,7 +78,7 @@
 
 [data-background="dark"] {
   .table {
-    @apply shadow-slate-400;
+    @apply shadow-slate-700;
     thead tr th {
       background: color(theme('colors.black') tint(5%));
       border-color: color(theme('colors.black') tint(5%));

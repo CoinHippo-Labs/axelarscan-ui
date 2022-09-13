@@ -641,7 +641,7 @@ export default () => {
         <button
           disabled={approving}
           onClick={() => approve(data)}
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${approving ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+          className={`bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 ${approving ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
         >
           {approving && (
             <TailSpin
@@ -675,7 +675,7 @@ export default () => {
             <button
               disabled={executing}
               onClick={() => execute(data)}
-              className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+              className={`bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
             >
               {executing && (
                 <TailSpin
@@ -717,7 +717,7 @@ export default () => {
             <button
               disabled={gasAdding}
               onClick={() => addNativeGas(data)}
-              className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+              className={`bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 ${gasAdding ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
             >
               {gasAdding && (
                 <TailSpin
@@ -759,7 +759,7 @@ export default () => {
         <button
           disabled={refunding}
           onClick={() => refund(data)}
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${refunding ? 'pointer-events-none' : ''} rounded-lg flex items-center text-white bold space-x-1.5 py-1 px-2`}
+          className={`bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 ${refunding ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
         >
           {refunding && (
             <TailSpin
