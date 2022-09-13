@@ -317,7 +317,7 @@ export default () => {
             >
               {t?.endsWith('_failed') ?
                 <BiXCircle size={16} className={`${t === table ? 'text-white' : 'text-red-500 dark:text-red-600'}`} /> :
-                <BiCheckCircle size={16} className={`${t === table ? 'text-white' : 'text-green-500 dark:text-green-600'}`} />
+                <BiCheckCircle size={16} className={`${t === table ? 'text-white' : 'text-green-400 dark:text-green-300'}`} />
               }
               <span className="whitespace-nowrap">
                 {_.head(t.split('_'))}

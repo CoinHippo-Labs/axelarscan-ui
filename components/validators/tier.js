@@ -589,7 +589,7 @@ export default () => {
                                 className="w-4 h-4 rounded-full"
                               />
                             )}
-                            <span className={`${v?.votes?.true ? 'text-green-500 dark:text-green-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'} -mt-0.5`}>
+                            <span className={`${v?.votes?.true ? 'text-green-400 dark:text-green-300 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'} -mt-0.5`}>
                               {number_format(v?.votes?.true || 0, '0,0')} Y
                             </span>
                             <span className={`${v?.votes?.false ? 'text-red-500 dark:text-red-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'} -mt-0.5`}>

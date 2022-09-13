@@ -795,7 +795,7 @@ export default ({ n }) => {
                           (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
                           (['executed'].includes(s.id) && is_executed) ||
                           (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
-                            'text-green-500 dark:text-green-600' :
+                            'text-green-400 dark:text-green-300' :
                             i === current_step && !['refunded'].includes(s.id) ?
                               'text-blue-500 dark:text-white' :
                               (['executed'].includes(s.id) && _error) ||
@@ -823,7 +823,7 @@ export default ({ n }) => {
                               (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                                 <BiCheckCircle
                                   size={20}
-                                  className="text-green-500 dark:text-green-600"
+                                  className="text-green-400 dark:text-green-300"
                                 /> :
                                 i === current_step && !['refunded'].includes(s.id) ?
                                   <Puff

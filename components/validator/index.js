@@ -644,7 +644,7 @@ export default () => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Broadcaster
           </span>
-          <div className={`h-9 flex items-center ${broadcaster_funded ? broadcaster_funded.amount >= min_broadcaster_fund ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600' : ''} text-3xl font-bold space-x-1.5`}>
+          <div className={`h-9 flex items-center ${broadcaster_funded ? broadcaster_funded.amount >= min_broadcaster_fund ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600' : ''} text-3xl font-bold space-x-1.5`}>
             {broadcaster_funded ?
               <>
                 <span className={`${number_format(broadcaster_funded.amount, '0,0.00').length > 6 ? 'lg:text-xl' : ''}`}>
@@ -711,7 +711,7 @@ export default () => {
                           className="w-4 h-4 rounded-full"
                         />
                       )}
-                      <span className={`${v?.votes?.true ? 'text-green-500 dark:text-green-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>
+                      <span className={`${v?.votes?.true ? 'text-green-400 dark:text-green-300 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>
                         {number_format(v?.votes?.true || 0, '0,0')} Y
                       </span>
                       <span className={`${v?.votes?.false ? 'text-red-500 dark:text-red-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>

@@ -2,47 +2,74 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import _ from 'lodash'
 import HeadShake from 'react-reveal/HeadShake'
-import { RiDashboardLine } from 'react-icons/ri'
 import { FaHandPointLeft } from 'react-icons/fa'
-import { TiArrowRight } from 'react-icons/ti'
 
 import menus from '../menus'
 
-export default ({ onClick }) => {
+export default ({
+  onClick,
+}) => {
   const router = useRouter()
-  const { pathname } = { ...router }
+  const {
+    pathname,
+  } = { ...router }
 
-  const _menus = _.concat(menus[0]?.path !== '/' ?
-    {
-      id: 'dashboard',
-      title: 'Dashboard',
-      path: '/',
-      icon: <RiDashboardLine size={16} className="stroke-current" />,
-    } : [],
-    menus
+  const _menus = _.concat(
+    _.head(menus)?.path !== '/' ?
+      {
+        id: 'dashboard',
+        title: 'Dashboard',
+        path: '/',
+      } :
+      [],
+    menus,
   )
 
   return (
-    <div className="flex flex-wrap">
-      {menus.filter(m => m?.path).map((m, i) => {
+    <div
+      className="w-40 shadow dark:shadow-slate-700 rounded-lg flex flex-col py-1"
+      style={{ backdropFilter: 'blur(16px)' }}
+    >
+      {_menus.map((m, i) => {
+        const {
+          id,
+          disabled,
+          emphasize,
+          title,
+          path,
+          others_paths,
+          external,
+        } = { ...m }
+
+        const selected = !external &&
+          (
+            pathname === path ||
+            others_paths?.includes(pathname)
+          )
+
         const item = (
-          <>
-            {m.icon}
-            <span className="text-xs">
-              {m.title}
-            </span>
-          </>
+          <span className="whitespace-nowrap tracking-wider">
+            {title}
+          </span>
         )
-        const right_icon = m.emphasize ?
-          <HeadShake duration={1500} forever>
-            <FaHandPointLeft size={20} />
-          </HeadShake> : m.external ?
-          <TiArrowRight size={20} className="transform -rotate-45" /> : null
-        const className = `dropdown-item w-full bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 ${m.disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase text-black dark:text-white ${!m.external && (pathname === m.path || m.others_paths?.includes(pathname)) ? 'font-extrabold' : 'font-medium hover:font-bold'} space-x-1.5 p-3`
-        return m.external ?
+
+        const right_icon = emphasize ?
+          <HeadShake
+            duration={1500}
+            forever
+          >
+            <FaHandPointLeft
+              size={20}
+            />
+          </HeadShake> :
+          undefined
+
+        const className = `w-full ${i === 0 ? 'rounded-tl-lg rounded-tr-lg' : i === _menus.length - 1 ? 'rounded-bl-lg rounded-br-lg' : ''} ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-400 dark:text-blue-600 text-sm font-bold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-normal hover:font-semibold'} space-x-1.5 py-2 px-3`
+
+        return external ?
           <a
-            key={i}
-            href={m.path}
+            key={id}
+            href={path}
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClick}
@@ -50,9 +77,11 @@ export default ({ onClick }) => {
           >
             {item}
             {right_icon}
-          </a>
-          :
-          <Link key={i} href={m.path}>
+          </a> :
+          <Link
+            key={id}
+            href={path}
+          >
             <a
               onClick={onClick}
               className={className}

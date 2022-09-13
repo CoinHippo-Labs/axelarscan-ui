@@ -145,7 +145,9 @@ export default () => {
               accessor: 'id',
               disableSortBy: true,
               Cell: props => (
-                <AddToken token_data={{ ...props.row.original }} />
+                <AddToken
+                  token_data={{ ...props.row.original }}
+                />
               ),
             }
           ]}

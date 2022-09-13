@@ -474,10 +474,10 @@ export default ({
               <div className="flex flex-col text-left sm:text-right">
                 <div className="flex items-center justify-start sm:justify-end space-x-0.5">
                   {props.value ?
-                    <BiCheckCircle size={16} className="text-green-500 dark:text-green-600" /> :
+                    <BiCheckCircle size={16} className="text-green-400 dark:text-green-300" /> :
                     <BiXCircle size={16} className="text-red-500 dark:text-red-600" />
                   }
-                  <span className={`uppercase ${props.value ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} text-xs font-semibold`}>
+                  <span className={`uppercase ${props.value ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} text-xs font-semibold`}>
                     {props.value ?
                       'success' : 'failed'
                     }
@@ -494,7 +494,7 @@ export default ({
             Cell: props => (
               <div className="flex flex-col text-left sm:text-right">
                 <div className="flex items-center justify-start sm:justify-end space-x-0.5">
-                  <span className={`uppercase ${props.value ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} text-xs font-semibold`}>
+                  <span className={`uppercase ${props.value ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} text-xs font-semibold`}>
                     {props.value ?
                       'yes' : 'no'
                     }

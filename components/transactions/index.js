@@ -699,7 +699,7 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => (
                 props.value && (
-                  <div className={`${props.value === 'success' ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm font-bold space-x-1`}>
+                  <div className={`${props.value === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm font-bold space-x-1`}>
                     {props.value === 'success' ?
                       <BiCheckCircle size={20} /> :
                       <BiXCircle size={20} />
@@ -826,7 +826,7 @@ export default ({ n }) => {
                         props.row.original.activities.filter(a => a?.amount && a.amount !== props.row.original.fee).map((a, i) => (
                           <div
                             key={i}
-                            className={`h-5 flex items-center ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-500 dark:text-green-600 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold space-x-1`}
+                            className={`h-5 flex items-center ${(address || filters?.account) ? equals_ignore_case(a?.recipient, address || filters?.account) ? 'text-green-400 dark:text-green-300 font-bold' : equals_ignore_case(a?.sender, address || filters?.account) ? 'text-red-500 dark:text-red-600 font-bold' : '' : ''} text-xs lg:text-sm font-semibold space-x-1`}
                           >
                             <span className="uppercase">
                               {number_format(
@@ -861,7 +861,7 @@ export default ({ n }) => {
                   {props.value === 'in' ?
                     <BiLeftArrowCircle
                       size={18}
-                      className="text-green-500 dark:text-green-600"
+                      className="text-green-400 dark:text-green-300"
                     /> :
                     props.value === 'out' ?
                       <BiRightArrowCircle
@@ -870,7 +870,7 @@ export default ({ n }) => {
                       /> :
                       null
                   }
-                  <span className={`uppercase ${props.value === 'in' ? 'text-green-500 dark:text-green-600' : props.value === 'out' ? 'text-red-500 dark:text-red-600' : ''} font-semibold`}>
+                  <span className={`uppercase ${props.value === 'in' ? 'text-green-400 dark:text-green-300' : props.value === 'out' ? 'text-red-500 dark:text-red-600' : ''} font-semibold`}>
                     {props.value}
                   </span>
                 </div>

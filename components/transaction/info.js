@@ -98,7 +98,7 @@ export default ({
         </span>
         {data ?
           status && (
-            <div className={`${status === 'success' ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} flex items-center space-x-1`}>
+            <div className={`${status === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} flex items-center space-x-1`}>
               {status === 'success' ?
                 <BiCheckCircle size={20} /> :
                 <BiXCircle size={20} />

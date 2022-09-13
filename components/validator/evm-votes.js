@@ -114,7 +114,7 @@ export default ({
               <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
                 Vote:
               </span>
-              <div className={`flex items-center ${vote ? 'text-green-500 dark:text-green-600' : v ? 'text-red-500 dark:text-red-600' : 'text-slate-400 dark:text-slate-600'} space-x-0.5`}>
+              <div className={`flex items-center ${vote ? 'text-green-400 dark:text-green-300' : v ? 'text-red-500 dark:text-red-600' : 'text-slate-400 dark:text-slate-600'} space-x-0.5`}>
                 {vote ?
                   <BiCheckCircle size={18} /> :
                   <BiXCircle size={18} />

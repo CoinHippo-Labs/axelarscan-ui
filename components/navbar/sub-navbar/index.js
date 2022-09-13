@@ -2,9 +2,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
-import { FiBox } from 'react-icons/fi'
-import { BiServer } from 'react-icons/bi'
-import { HiOutlineExternalLink } from 'react-icons/hi'
+import { IoMdCube } from 'react-icons/io'
+import { FaServer } from 'react-icons/fa'
+import { RiFilePaperFill } from 'react-icons/ri'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
 import EVMVoteFilters from '../../evm-votes/filters'
@@ -12,28 +12,80 @@ import TransactionFilters from '../../transactions/filters'
 import TransferFilters from '../../transfers/filters'
 import SentFilters from '../../sents/filters'
 import GMPFilters from '../../gmps/filters'
-import BatchFilters from '../../batches/filters'
 import TotalTVL from '../../tvl/total'
+import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
 import Image from '../../image'
-import { currency, currency_symbol } from '../../../lib/object/currency'
 import { number_format, ellipse } from '../../../lib/utils'
 
 export default () => {
-  const { _status, _chain } = useSelector(state => ({ _status: state.status, _chain: state.chain }), shallowEqual)
-  const { status_data } = { ..._status }
-  const { chain_data } = { ..._chain }
+  const {
+    _status,
+    _chain,
+  } = useSelector(state =>
+    (
+      {
+        _status: state.status,
+        _chain: state.chain,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    status_data,
+  } = { ..._status }
+  const {
+    chain_data,
+  } = { ..._chain }
 
   const router = useRouter()
-  const { pathname, query } = { ...router }
-  const { status, height, address, tx, id } = { ...query }
+  const {
+    pathname,
+    query,
+  } = { ...router }
+  const {
+    status,
+    height,
+    address,
+    tx,
+    id,
+  } = { ...query }
 
-  const { token_data } = { ...chain_data }
-  let title, subtitle, right
+  const {
+    latest_block_height,
+  } = { ...status_data }
+  const {
+    staking_params,
+    slashing_params,
+  } = { ...chain_data }
+  const {
+    max_validators,
+    unbonding_time,
+  } = { ...staking_params }
+  const {
+    signed_blocks_window,
+    min_signed_per_window,
+    downtime_jail_duration,
+  } = { ...slashing_params }
+
+  let title,
+    subtitle,
+    right
+
   switch (pathname) {
     case '/':
-      title = 'Overview'
+      title = 'Axelar Network Status'
+      right = (
+        <a
+          href={process.env.NEXT_PUBLIC_WEBSITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 font-light"
+        >
+          Learn more about Axelar
+        </a>
+      )
       break
     case '/validators':
     case '/validators/[status]':
@@ -44,18 +96,24 @@ export default () => {
       title = 'Validator'
       subtitle = (
         <Copy
-          value={address}
-          title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
-            <div>
-              <span className="xl:hidden">
-                {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
-              </span>
-              <span className="hidden xl:block">
-                {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
-              </span>
-            </div>
-          </span>}
           size={18}
+          value={address}
+          title={<div className="text-slate-400 dark:text-slate-600 text-sm">
+            <span className="xl:hidden">
+              {ellipse(
+                address,
+                12,
+                process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+              )}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(
+                address,
+                16,
+                process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+              )}
+            </span>
+          </div>}
         />
       )
       break
@@ -63,18 +121,24 @@ export default () => {
       title = 'Account'
       subtitle = (
         <Copy
-          value={address}
-          title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
-            <div>
-              <span className="xl:hidden">
-                {ellipse(address, 12, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
-              </span>
-              <span className="hidden xl:block">
-                {ellipse(address, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
-              </span>
-            </div>
-          </span>}
           size={18}
+          value={address}
+          title={<div className="text-slate-400 dark:text-slate-600 text-sm">
+            <span className="xl:hidden">
+              {ellipse(
+                address,
+                12,
+                process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+              )}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(
+                address,
+                16,
+                process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+              )}
+            </span>
+          </div>}
         />
       )
       break
@@ -84,24 +148,42 @@ export default () => {
         <EVMVoteFilters />
       )
       break
-    case '/participations':
-      title = 'Participations'
-      break
     case '/blocks':
       title = 'Latest Blocks'
       break
     case '/block/[height]':
-      title = `Block: ${number_format(height, '0,0')}`
+      const _height = Number(height)
+
+      title = `Block: ${number_format(
+        _height,
+        '0,0',
+      )}`
       subtitle = (
-        <div className="flex items-center space-x-2">
-          <Link href={`/block/${Number(height) - 1}`}>
-            <a className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg p-1.5">
-              <MdNavigateBefore size={20} />
+        <div className="flex items-center space-x-2.5">
+          <Link href={`/block/${_height - 1}`}>
+            <a
+              title={number_format(
+                _height - 1,
+                '0,0',
+              )}
+              className="bg-slate-100 hover:bg-zinc-100 dark:bg-slate-900 dark:hover:bg-zinc-900 shadow rounded py-1.5 px-2"
+            >
+              <MdNavigateBefore
+                size={20}
+              />
             </a>
           </Link>
-          <Link href={`/block/${Number(height) + 1}`}>
-            <a className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 rounded-lg p-1.5">
-              <MdNavigateNext size={20} />
+          <Link href={`/block/${_height + 1}`}>
+            <a
+              title={number_format(
+                _height + 1,
+                '0,0',
+              )}
+              className="bg-slate-100 hover:bg-zinc-100 dark:bg-slate-900 dark:hover:bg-zinc-900 shadow dark:shadow-slate-700 rounded py-1.5 px-2"
+            >
+              <MdNavigateNext
+                size={20}
+              />
             </a>
           </Link>
         </div>
@@ -111,21 +193,37 @@ export default () => {
     case '/transactions/search':
       title = 'Transactions'
       subtitle = (
-        <div className="flex items-center space-x-1">
+        <div className="flex flex-wrap items-center">
           {[
-            { title: 'Latest', path: '/transactions' },
-            { title: 'Search', path: '/transactions/search' },
-          ].map((r, i) => (
-            <div
-              key={i}
-              onClick={() => router.push(r.path)}
-              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
-            >
-              <span className="font-semibold">
-                {r.title}
-              </span>
-            </div>
-          ))}
+            {
+              title: 'Latest',
+              path: '/transactions',
+            },
+            {
+              title: 'Search',
+              path: '/transactions/search',
+            },
+          ]
+          .map((r, i) => {
+            const {
+              title,
+              path,
+            } = { ...r }
+
+            const selected = path === pathname
+
+            return (
+              <div
+                key={i}
+                onClick={() => router.push(path)}
+                className={`${selected ? 'bg-blue-400 dark:bg-blue-600 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-50 dark:hover:bg-opacity-50 text-slate-400 hover:text-blue-400 dark:text-slate-700 dark:hover:text-blue-600 hover:font-semibold'} shadow rounded-lg cursor-pointer mb-1 sm:mb-0 mr-1.5 py-1 px-2`}
+              >
+                <span className="whitespace-nowrap">
+                  {title}
+                </span>
+              </div>
+            )
+          })}
         </div>
       )
       right = pathname.endsWith('/search') && (
@@ -135,43 +233,58 @@ export default () => {
     case '/tx/[tx]':
       title = 'Transaction'
       subtitle = (
-        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+        <div className="flex items-center text-sm space-x-2">
           <div>
             <span className="xl:hidden">
-              {ellipse(tx, 16)}
+              {ellipse(
+                tx,
+                16,
+              )}
             </span>
             <span className="hidden xl:block">
-              {ellipse(tx, 24)}
+              {ellipse(
+                tx,
+                24,
+              )}
             </span>
           </div>
           <Copy
-            value={tx}
             size={18}
+            value={tx}
           />
         </div>
       )
+      break
+    case '/participations':
+      title = 'Participations'
       break
     case '/address/[address]':
       title = (
         <EnsProfile
           address={address}
-          fallback={<span>Address</span>}
+          fallback={<span>
+            Address
+          </span>}
         />
       )
       subtitle = (
         <Copy
-          value={address}
-          title={<span className="text-slate-400 dark:text-slate-200 text-sm xl:text-base">
-            <div>
-              <span className="xl:hidden">
-                {ellipse(address, 12)}
-              </span>
-              <span className="hidden xl:block">
-                {ellipse(address, 16)}
-              </span>
-            </div>
-          </span>}
           size={18}
+          value={address}
+          title={<div className="text-slate-400 dark:text-slate-600 text-sm">
+            <span className="xl:hidden">
+              {ellipse(
+                address,
+                12,
+              )}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(
+                address,
+                16,
+              )}
+            </span>
+          </div>}
         />
       )
       break
@@ -186,42 +299,75 @@ export default () => {
       subtitle = (
         <div className="flex flex-wrap items-center">
           {[
-            { title: 'Overview', path: '/transfers' },
-            { title: pathname.endsWith('/search') ? 'via Deposit Address' : 'Search', path: '/transfers/search' },
-            process.env.NEXT_PUBLIC_SUPPORT_TOKEN_SENT === 'true' && pathname.endsWith('/search') &&
-              { title: 'via sendToken', path: '/sent/search' },
-          ].filter(r => r).map((r, i) => (
-            <div
-              key={i}
-              onClick={() => router.push(r.path)}
-              className={`${r.path === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg mb-1 sm:mb-0 mr-1 py-1 px-2.5`}
-            >
-              <span className="whitespace-nowrap font-semibold">
-                {r.title}
-              </span>
-            </div>
-          ))}
+            {
+              title: 'Overview',
+              path: '/transfers',
+            },
+            {
+              title: pathname.endsWith('/search') ?
+                'via Deposit Address' :
+                'Search',
+              path: '/transfers/search',
+            },
+            process.env.NEXT_PUBLIC_SUPPORT_TOKEN_SENT === 'true' &&
+            pathname.endsWith('/search') && (
+              {
+                title: 'via sendToken',
+                path: '/sent/search',
+              }
+            ),
+          ]
+          .filter(r => r)
+          .map((r, i) => {
+            const {
+              title,
+              path,
+            } = { ...r }
+
+            const selected = path === pathname
+
+            return (
+              <div
+                key={i}
+                onClick={() => router.push(path)}
+                className={`${selected ? 'bg-blue-400 dark:bg-blue-600 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-50 dark:hover:bg-opacity-50 text-slate-400 hover:text-blue-400 dark:text-slate-700 dark:hover:text-blue-600 hover:font-semibold'} shadow rounded-lg cursor-pointer mb-1 sm:mb-0 mr-1.5 py-1 px-2`}
+              >
+                <span className="whitespace-nowrap">
+                  {title}
+                </span>
+              </div>
+            )
+          })}
         </div>
       )
-      right = right || (pathname.endsWith('/search') && (
-        <TransferFilters />
-      ))
+      right = right ||
+        (
+          pathname.endsWith('/search') && (
+            <TransferFilters />
+          )
+        )
       break
     case '/transfer/[tx]':
       title = 'Cross-chain Transfer'
       subtitle = (
-        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+        <div className="flex items-center text-sm space-x-2">
           <div>
             <span className="xl:hidden">
-              {ellipse(tx, 16)}
+              {ellipse(
+                tx,
+                16,
+              )}
             </span>
             <span className="hidden xl:block">
-              {ellipse(tx, 24)}
+              {ellipse(
+                tx,
+                24,
+              )}
             </span>
           </div>
           <Copy
-            value={tx}
             size={18}
+            value={tx}
           />
         </div>
       )
@@ -239,18 +385,24 @@ export default () => {
     case '/sent/[tx]':
       title = 'Send Token'
       subtitle = (
-        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+        <div className="flex items-center text-sm space-x-2">
           <div>
             <span className="xl:hidden">
-              {ellipse(tx, 16)}
+              {ellipse(
+                tx,
+                16,
+              )}
             </span>
             <span className="hidden xl:block">
-              {ellipse(tx, 24)}
+              {ellipse(
+                tx,
+                24,
+              )}
             </span>
           </div>
           <Copy
-            value={tx}
             size={18}
+            value={tx}
           />
         </div>
       )
@@ -260,43 +412,78 @@ export default () => {
     case '/gmp/stats':
       title = 'General Message Passing'
       subtitle = (
-        <div className="flex items-center space-x-1">
+        <div className="flex flex-wrap items-center">
           {[
-            // { title: 'Overview', path: '/gmp' },
-            { title: 'Search', path: '/gmp/search' },
-            { title: 'Statistics', path: `/gmp/stats?fromTime=${moment().subtract(7, 'days').valueOf()}` },
-          ].map((r, i) => (
-            <div
-              key={i}
-              onClick={() => router.push(r.path)}
-              className={`${(r?.path.includes('?') ? r.path.substring(0, r.path.indexOf('?')) : r?.path) === pathname ? 'bg-blue-600 text-white' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800'} cursor-pointer rounded-lg py-1 px-2.5`}
-            >
-              <span className="font-semibold">
-                {r.title}
-              </span>
-            </div>
-          ))}
+            /*{
+              title: 'Overview',
+              path: '/gmp',
+            },*/
+            {
+              title: 'Search',
+              path: '/gmp/search',
+            },
+            {
+              title: 'Statistics',
+              path: `/gmp/stats?fromTime=${moment().subtract(7, 'days').valueOf()}`,
+            },
+          ]
+          .map((r, i) => {
+            const {
+              title,
+              path,
+            } = { ...r }
+
+            const selected = (
+              path.includes('?') ?
+                path.substring(
+                  0,
+                  path.indexOf('?'),
+                ) :
+                path
+            ) === pathname
+
+            return (
+              <div
+                key={i}
+                onClick={() => router.push(path)}
+                className={`${selected ? 'bg-blue-400 dark:bg-blue-600 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-50 dark:hover:bg-opacity-50 text-slate-400 hover:text-blue-400 dark:text-slate-700 dark:hover:text-blue-600 hover:font-semibold'} shadow rounded-lg cursor-pointer mb-1 sm:mb-0 mr-1.5 py-1 px-2`}
+              >
+                <span className="whitespace-nowrap">
+                  {title}
+                </span>
+              </div>
+            )
+          })}
         </div>
       )
-      right = ['/gmp/search', '/gmp/stats'].includes(pathname) && (
+      right = [
+        '/gmp/search',
+        '/gmp/stats',
+      ].includes(pathname) && (
         <GMPFilters />
       )
       break
     case '/gmp/[tx]':
       title = 'General Message Passing'
       subtitle = (
-        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+        <div className="flex items-center text-sm space-x-2">
           <div>
             <span className="xl:hidden">
-              {ellipse(tx, 16)}
+              {ellipse(
+                tx,
+                16,
+              )}
             </span>
             <span className="hidden xl:block">
-              {ellipse(tx, 24)}
+              {ellipse(
+                tx,
+                24,
+              )}
             </span>
           </div>
           <Copy
-            value={tx}
             size={18}
+            value={tx}
           />
         </div>
       )
@@ -310,18 +497,24 @@ export default () => {
     case '/batch/[chain]/[id]':
       title = 'Batch'
       subtitle = (
-        <div className="flex items-center text-sm xl:text-base space-x-2 xl:space-x-1">
+        <div className="flex items-center text-sm space-x-2">
           <div>
             <span className="xl:hidden">
-              {ellipse(id, 16)}
+              {ellipse(
+                tx,
+                16,
+              )}
             </span>
             <span className="hidden xl:block">
-              {ellipse(id, 24)}
+              {ellipse(
+                tx,
+                24,
+              )}
             </span>
           </div>
           <Copy
-            value={id}
             size={18}
+            value={tx}
           />
         </div>
       )
@@ -333,28 +526,41 @@ export default () => {
       title = 'Proposals'
       break
     case '/proposal/[id]':
-      title = `Proposal: ${number_format(id, '0,0')}`
+      title = `Proposal: ${number_format(
+        id,
+        '0,0',
+      )}`
       break
     default:
       break
   }
 
-  const is_validator_path = ['/validator', '/participations', '/proposals'].findIndex(p => pathname?.includes(p)) > -1
-  const is_block_path = ['/block'].findIndex(p => pathname?.includes(p)) > -1
-  const is_assets_path = ['/transfers', '/tvl', '/assets'].findIndex(p => pathname?.includes(p)) > -1
+  const is_validator_path = [
+    '/validator',
+    '/participations',
+    '/proposals',
+  ].findIndex(p => pathname?.startsWith(p)) > -1
+  const is_block_path = [
+    '/block',
+  ].findIndex(p => pathname?.startsWith(p)) > -1
+  const is_assets_path = [
+    '/transfers',
+    '/tvl',
+    '/assets',
+  ].findIndex(p => pathname?.startsWith(p)) > -1
 
   return (
-    <div className="w-full overflow-x-auto flex items-center py-2 sm:py-3 px-2 sm:px-4">
+    <div className="w-full overflow-x-auto flex items-center py-2 sm:pt-4 px-2 sm:px-4">
       <div className="flex flex-col space-y-1">
         {title && (
-          <div className="text-base font-bold">
+          <h1 className="uppercase tracking-widest text-black dark:text-white text-base font-medium">
             {title}
-          </div>
+          </h1>
         )}
         {subtitle && (
-          <div className="text-slate-400 dark:text-slate-500 text-sm">
+          <h2 className="text-slate-400 dark:text-slate-600 text-sm">
             {subtitle}
-          </div>
+          </h2>
         )}
       </div>
       <span className="sm:ml-auto" />
@@ -362,186 +568,117 @@ export default () => {
         <>
           <span className="ml-auto" />
           {right}
-        </>
-        :
+        </> :
         <>
-          {false && token_data && (
-            <div className="bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center space-x-1.5 ml-4 py-2 px-3">
-              {token_data.image?.small && (
-                <Image
-                  src={token_data.image.small}
-                  className="w-6 h-6 rounded-full"
-                />
-              )}
-              <div className="min-w-max flex items-center space-x-1.5">
-                <span className="uppercase font-bold">
-                  {token_data.symbol}
-                </span>
-              </div>
-              {typeof token_data.market_data?.current_price?.[currency] === 'number' ?
-                <span className="text-base font-semibold">
-                  {currency_symbol}
-                  {number_format(token_data.market_data.current_price[currency], '0,0.000')}
-                </span>
-                :
-                <span>
-                  -
-                </span>
-              }
-              {typeof token_data.market_data?.price_change_percentage_24h_in_currency?.[currency] === 'number' && token_data.market_data.price_change_percentage_24h_in_currency[currency] !== 0 && (
-                <span className={`text-${token_data.market_data.price_change_percentage_24h_in_currency[currency] < 0 ? 'red' : 'green'}-500 font-medium`}>
-                  {number_format(token_data.market_data.price_change_percentage_24h_in_currency[currency], '+0,0.000000')}%
-                </span>
-              )}
-            </div>
-          )}
-          {!isNaN(status_data?.latest_block_height) && !is_assets_path && (
-            <Link href={`/block/${status_data.latest_block_height}`}>
-              <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
-                <FiBox size={16} />
-                <span className="font-bold">
-                  {number_format(status_data.latest_block_height, '0,0')}
-                </span>
-              </a>
-            </Link>
-          )}
-          {is_validator_path && (
-            <>
-              {chain_data?.staking_params && (
-                <>
-                  {chain_data.staking_params.max_validators && (
-                    <Link href="/validators">
-                      <a className="flex items-center text-blue-600 dark:text-white space-x-1.5 ml-4">
-                        <div className="flex items-center space-x-1">
-                          <span className="font-semibold">
-                            Max
+          {
+            !isNaN(latest_block_height) &&
+            !is_assets_path &&
+            (
+              <Link href={`/block/${latest_block_height}`}>
+                <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-4">
+                  <IoMdCube
+                    size={18}
+                  />
+                  <span className="font-normal">
+                    {number_format(
+                      latest_block_height,
+                      '0,0',
+                    )}
+                  </span>
+                </a>
+              </Link>
+            )
+          }
+          {
+            is_validator_path &&
+            (
+              <>
+                {staking_params && (
+                  <>
+                    {!isNaN(max_validators) && (
+                      <Link href="/validators">
+                        <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-2 ml-4">
+                          <div className="flex items-center space-x-1.5">
+                            <span className="font-normal">
+                              Max
+                            </span>
+                            <FaServer
+                              size={16}
+                            />
+                          </div>
+                          <span className="font-normal">
+                            {number_format(
+                              max_validators,
+                              '0,0',
+                            )}
                           </span>
-                          <BiServer size={14} />
-                          :
-                        </div>
-                        <span className="font-bold">
-                          {number_format(chain_data.staking_params.max_validators, '0,0')}
+                        </a>
+                      </Link>
+                    )}
+                    {unbonding_time && (
+                      <div className="flex items-center space-x-1.5 ml-4">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
+                          Unbond
                         </span>
-                      </a>
-                    </Link>
-                  )}
-                  <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                      Unbonding:
-                    </span>
-                    {chain_data.staking_params.unbonding_time ?
-                      <span className="font-bold">
-                        {chain_data.staking_params.unbonding_time}
-                      </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
-                  </div>
-                </>
-              )}
-              {chain_data?.slashing_params && (
-                <>
-                  <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                      Max Missed:
-                    </span>
-                    {chain_data.slashing_params.signed_blocks_window && chain_data.slashing_params.min_signed_per_window ?
-                      <span className="font-bold">
-                        {number_format(Number(chain_data.slashing_params.signed_blocks_window) - (Number(chain_data.slashing_params.min_signed_per_window) * Number(chain_data.slashing_params.signed_blocks_window)), '0,0')}
-                      </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
-                  </div>
-                  <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                      Jail:
-                    </span>
-                    {chain_data.slashing_params.downtime_jail_duration ?
-                      <span className="font-bold">
-                        {chain_data.slashing_params.downtime_jail_duration}
-                      </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
-                  </div>
-                  <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                      x2 Sign:
-                    </span>
-                    {chain_data.slashing_params.slash_fraction_double_sign ?
-                      <span className="font-bold">
-                        {number_format(chain_data.slashing_params.slash_fraction_double_sign, '0,0.00000000')}
-                      </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
-                  </div>
-                </>
-              )}
-            </>
-          )}
-          {(is_validator_path || is_block_path) && (
-            <>
-              {!['/validator/[address]'].includes(pathname) && chain_data?.distribution_params && (
-                <>
-                  <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                      Proposer Reward:
-                    </span>
-                    {chain_data.distribution_params.base_proposer_reward ?
-                      <div className="whitespace-nowrap space-x-1">
-                        <span className="font-bold">
-                          {number_format(Number(chain_data.distribution_params.base_proposer_reward) * 100, '0,0.00')}%
+                        <span className="font-normal">
+                          {unbonding_time}
                         </span>
-                        {!isNaN(chain_data.distribution_params.bonus_proposer_reward) && (
-                          <span className="font-medium">
-                            (+{number_format(Number(chain_data.distribution_params.bonus_proposer_reward) * 100, '0,0.00')}%)
-                          </span>
-                        )}
                       </div>
-                      :
-                      <span>
-                        -
-                      </span>
+                    )}
+                  </>
+                )}
+                {slashing_params && (
+                  <>
+                    {
+                      !isNaN(signed_blocks_window) &&
+                      !isNaN(min_signed_per_window) &&
+                      (
+                        <div className="flex items-center space-x-1.5 ml-4">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
+                            Max Missed
+                          </span>
+                          <span className="font-normal">
+                            {number_format(
+                              Number(signed_blocks_window) * (1 - Number(min_signed_per_window)),
+                              '0,0',
+                            )}
+                          </span>
+                        </div>
+                      )
                     }
-                  </div>
-                  <div className="flex items-center space-x-1.5 ml-4">
-                    <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                      Community Tax:
-                    </span>
-                    {chain_data.distribution_params.community_tax ?
-                      <span className="font-bold">
-                        {number_format(Number(chain_data.distribution_params.community_tax) * 100, '0,0.00')}%
-                      </span>
-                      :
-                      <span>
-                        -
-                      </span>
-                    }
-                  </div>
-                </>
-              )}
-              <div className="flex items-center space-x-1.5 ml-4">
-                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-semibold">
-                  Proposals:
-                </span>
-                <Link href="/proposals">
-                  <a className="text-blue-600 dark:text-white">
-                    <HiOutlineExternalLink size={16} />
-                  </a>
-                </Link>
-              </div>
-            </>
-          )}
+                    {downtime_jail_duration && (
+                      <div className="flex items-center space-x-1.5 ml-4">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
+                          Jail
+                        </span>
+                        <span className="font-normal">
+                          {downtime_jail_duration}
+                        </span>
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            )
+          }
+          {
+            (
+              is_validator_path ||
+              is_block_path
+            ) &&
+            (
+              <Link href="/proposals">
+                <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-4">
+                  <RiFilePaperFill
+                    size={18}
+                  />
+                  <span className="font-normal">
+                    Proposals
+                  </span>
+                </a>
+              </Link>
+            )
+          }
         </>
       }
     </div>

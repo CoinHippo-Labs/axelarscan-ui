@@ -710,7 +710,7 @@ export default () => {
     (
       <>
         <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
-          Pay new gas at source chain
+          Add gas at source chain
         </span>
         <div className="flex items-center space-x-2">
           {web3_provider && !wrong_source_chain && (
@@ -727,7 +727,7 @@ export default () => {
                 />
               )}
               <span className="whitespace-nowrap">
-                Pay new gas
+                Add gas
               </span>
             </button>
           )}
@@ -1347,7 +1347,7 @@ export default () => {
                           (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
                           (['executed'].includes(s.id) && is_executed) ||
                           (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
-                            'text-green-500 dark:text-green-600' :
+                            'text-green-400 dark:text-green-300' :
                             i === current_step && !['refunded'].includes(s.id) ?
                               'text-blue-500 dark:text-white' :
                               (['executed'].includes(s.id) && _error) ||
@@ -1375,7 +1375,7 @@ export default () => {
                               (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                                 <BiCheckCircle
                                   size={20}
-                                  className="text-green-500 dark:text-green-600"
+                                  className="text-green-400 dark:text-green-300"
                                 /> :
                                 i === current_step && !['refunded'].includes(s.id) ?
                                   <Puff
@@ -2165,7 +2165,7 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Status:
                         </span>
-                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) || (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                        <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) || (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
                           {receipt?.status ||
                             (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
                             (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ?

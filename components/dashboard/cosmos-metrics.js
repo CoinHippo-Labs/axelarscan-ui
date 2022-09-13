@@ -46,7 +46,7 @@ export default ({ data }) => {
                 }
               </span>
               {pre_votes > 0 && (
-                <div className={`${pre_votes > 2 / 3 ? 'bg-green-100 dark:bg-green-900 border border-green-500 dark:border-green-600 text-green-500 dark:text-green-600' : 'bg-red-100 dark:bg-red-900 border border-red-500 dark:border-red-600 text-red-500 dark:text-red-600'} rounded-lg text-xs font-semibold py-0.5 px-1.5`}>
+                <div className={`${pre_votes > 2 / 3 ? 'bg-green-100 dark:bg-green-900 border border-green-500 dark:border-green-600 text-green-400 dark:text-green-300' : 'bg-red-100 dark:bg-red-900 border border-red-500 dark:border-red-600 text-red-500 dark:text-red-600'} rounded-lg text-xs font-semibold py-0.5 px-1.5`}>
                   {number_format(
                     pre_votes,
                     '0,0.00%',

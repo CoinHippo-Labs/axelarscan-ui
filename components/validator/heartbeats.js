@@ -28,7 +28,7 @@ export default ({ data }) => {
                 </Link>
               )}
             </div>}
-            content={<div className={`flex items-center ${b?.up ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} space-x-1.5`}>
+            content={<div className={`flex items-center ${b?.up ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} space-x-1.5`}>
               {b?.up ?
                 <RiArrowUpCircleFill size={24} /> :
                 <RiArrowDownCircleFill size={24} />

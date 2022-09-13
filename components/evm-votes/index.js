@@ -517,7 +517,7 @@ export default () => {
               disableSortBy: true,
               Cell: props => (
                 <div className="flex flex-col space-y-1">
-                  <div className={`flex items-center ${props.value ? props.value === 'unsubmitted' ? 'text-slate-400 dark:text-slate-600' : 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} space-x-1`}>
+                  <div className={`flex items-center ${props.value ? props.value === 'unsubmitted' ? 'text-slate-400 dark:text-slate-600' : 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} space-x-1`}>
                     {props.value ?
                       props.value === 'unsubmitted' ?
                         <BiMinusCircle size={20} /> :

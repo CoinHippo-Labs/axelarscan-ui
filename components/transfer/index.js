@@ -510,7 +510,7 @@ export default () => {
                   </div>
                   {steps.map((s, i) => {
                     const text_color = s.finish ?
-                      'text-green-500 dark:text-green-600' :
+                      'text-green-400 dark:text-green-300' :
                       i === current_step ?
                         'text-blue-500 dark:text-white' :
                         'text-slate-400 dark:text-slate-600'
@@ -531,7 +531,7 @@ export default () => {
                         className="flex items-center space-x-1.5 pb-0.5"
                       >
                         {finish ?
-                          <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
+                          <BiCheckCircle size={20} className="text-green-400 dark:text-green-300" /> :
                           i === current_step ?
                             <Puff color={loader_color(theme)} width="20" height="20" /> :
                             <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
@@ -835,7 +835,7 @@ export default () => {
                       <span className={rowTitleClassName}>
                         Status:
                       </span>
-                      <div className={`${status === 'success' || executed ? 'text-green-500 dark:text-green-600' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                      <div className={`${status === 'success' || executed ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
                         {status === 'success' || executed ?
                           <BiCheckCircle size={20} /> :
                           <BiXCircle size={20} />

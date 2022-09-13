@@ -681,7 +681,7 @@ export default ({ n }) => {
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.map((s, i) => {
                       const text_color = s.finish ?
-                        'text-green-500 dark:text-green-600' :
+                        'text-green-400 dark:text-green-300' :
                         i === current_step ?
                           'text-blue-500 dark:text-white' :
                           'text-slate-400 dark:text-slate-600'
@@ -699,7 +699,7 @@ export default ({ n }) => {
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
                           {finish ?
-                            <BiCheckCircle size={20} className="text-green-500 dark:text-green-600" /> :
+                            <BiCheckCircle size={20} className="text-green-400 dark:text-green-300" /> :
                             i === current_step ?
                               <Puff color={loader_color(theme)} width="20" height="20" /> :
                               <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />

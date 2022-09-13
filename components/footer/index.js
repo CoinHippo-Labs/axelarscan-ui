@@ -1,72 +1,86 @@
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
-import { FaHeart } from 'react-icons/fa'
 
 import Image from '../image'
 import _package from '../../package.json'
 
 export default () => {
-  const { preferences, chain } = useSelector(state => ({ preferences: state.preferences, chain: state.chain }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { chain_data } = { ...chain }
+  const {
+    preferences,
+    chain,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        chain: state.chain,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    chain_data,
+  } = { ...chain }
+
+  const {
+    dependencies,
+  } = { ..._package }
 
   return (
-    <div className={`footer flex flex-col md:flex-row items-center text-xs space-y-2 sm:space-y-0 p-3 ${theme}`}>
-      <div className="w-full md:w-1/2 lg:w-1/4 min-w-max flex items-center justify-center md:justify-start font-medium space-x-1.5">
+    <div className={`${theme} footer flex flex-col md:flex-row items-center space-y-2.5 sm:space-y-0 p-3`}>
+      <div className="w-full md:w-1/2 lg:w-1/4 min-w-max flex items-center justify-center md:justify-start space-x-2">
         <a
-          title="axelar core"
           href={`${process.env.NEXT_PUBLIC_DOC_URL}/resources/${process.env.NEXT_PUBLIC_ENVIRONMENT}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center space-x-1.5"
+          className="flex items-center text-blue-500 text-xs font-bold"
         >
-          <div className="min-w-max">
-            <div className="flex dark:hidden items-center">
+          <div className="mr-2">
+            <div className="block dark:hidden">
               <Image
                 src="/logos/logo.png"
                 alt=""
-                className="w-4 h-4"
+                className="w-5 h-5"
               />
             </div>
-            <div className="hidden dark:flex items-center">
+            <div className="hidden dark:block">
               <Image
                 src="/logos/logo_white.png"
                 alt=""
-                className="w-4 h-4"
+                className="w-5 h-5"
               />
             </div>
           </div>
-          <span className="font-semibold">
-            Axelar Core
-          </span>
+          Core {chain_data?.['axelar-core_version']}
         </a>
-        {chain_data?.['axelar-core_version'] && (
-          <span className="text-slate-400 dark:text-white font-semibold">
-            ({chain_data['axelar-core_version']})
-          </span>
-        )}
-        {_package?.dependencies?.['@axelar-network/axelarjs-sdk'] && (
-          <span className="text-slate-400 dark:text-white font-semibold">
-            (SDK v{_package.dependencies['@axelar-network/axelarjs-sdk'].replace('^', '')})
-          </span>
-        )}
-      </div>
-      <div className="hidden lg:flex w-full lg:w-2/4 flex-wrap items-center justify-center">
-      </div>
-      <div className="w-full md:w-1/2 lg:w-1/4 min-w-max flex items-center justify-center md:justify-end text-slate-400 dark:text-white space-x-1">
-        <span>© {moment().format('YYYY')} made with</span>
-        <FaHeart className="text-red-400 text-xl pr-0.5" />
-        <span>
-          {"by "}
+        {dependencies?.['@axelar-network/axelarjs-sdk'] && (
           <a
-            href={process.env.NEXT_PUBLIC_TEAM_URL}
+            href={`${process.env.NEXT_PUBLIC_DOC_URL}/dev/axelarjs-sdk/intro`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 dark:text-white font-semibold"
+            className="text-blue-500 text-xs font-bold"
           >
-            {process.env.NEXT_PUBLIC_TEAM_NAME}
+            SDK v{dependencies['@axelar-network/axelarjs-sdk'].replace('^', '')}
           </a>
-          {" team."}
+        )}
+      </div>
+      <div className="hidden lg:flex w-full lg:w-2/4 flex-wrap items-center justify-center" />
+      <div className="w-full md:w-1/2 lg:w-1/4 min-w-max flex items-center justify-center md:justify-end space-x-1.5">
+        <span className="text-slate-500 dark:text-white font-semibold">
+          © {moment().format('YYYY')}
+        </span>
+        <a
+          href={process.env.NEXT_PUBLIC_WEBSITE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 font-bold"
+        >
+          {process.env.NEXT_PUBLIC_PROJECT_NAME}.
+        </a>
+        <span className="text-slate-500 dark:text-white font-semibold">
+          All rights reserved
         </span>
       </div>
     </div>

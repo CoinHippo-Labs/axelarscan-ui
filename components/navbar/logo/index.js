@@ -1,44 +1,59 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 
+import Chains from '../chains'
 import Image from '../../image'
 
 export default () => {
-  const { status } = useSelector(state => ({ status: state.status }), shallowEqual)
-  const { status_data } = { ...status }
+  const {
+    status,
+  } = useSelector(state =>
+    (
+      {
+        status: state.status,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    status_data,
+  } = { ...status }
+  const {
+    chain_id,
+  } = { ...status_data }
 
   return (
-    <div className="logo ml-3 mr-1 sm:mr-3">
-      <Link href="/">
-        <a className="w-full flex items-start">
-          <div className="min-w-max sm:mr-3">
-            <div className="flex dark:hidden items-center">
+    <div className="logo ml-3 mr-0.5 sm:mr-3">
+      <div className="w-full flex items-start">
+        <Link href="/">
+          <a className="min-w-max sm:mr-3">
+            <div className="block dark:hidden">
               <Image
                 src="/logos/logo.png"
                 alt=""
-                className="w-8 h-8"
+                className="w-6 sm:w-8 h-6 sm:h-8"
               />
             </div>
-            <div className="hidden dark:flex items-center">
+            <div className="hidden dark:block">
               <Image
                 src="/logos/logo_white.png"
                 alt=""
-                className="w-8 h-8"
+                className="w-6 sm:w-8 h-6 sm:h-8"
               />
             </div>
-          </div>
-          <div className="hidden sm:block">
-            <div className="normal-case text-base font-semibold">
+          </a>
+        </Link>
+        <div className="hidden sm:block">
+          <Link href="/">
+            <a className="uppercase text-base font-extrabold">
               {process.env.NEXT_PUBLIC_APP_NAME}
-            </div>
-            {status_data?.chain_id && (
-              <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded whitespace-nowrap text-2xs font-medium pb-0.5 px-1.5 mt-0.5">
-                {status_data.chain_id}
-              </div>
-            )}
-          </div>
-        </a>
-      </Link>
+            </a>
+          </Link>
+          {chain_id && (
+            <Chains />
+          )}
+        </div>
+      </div>
     </div>
   )
 }
