@@ -3,18 +3,14 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { FallingLines, TailSpin } from 'react-loader-spinner'
-import { FiBox, FiCode } from 'react-icons/fi'
-import { BiFileBlank, BiMessageDots } from 'react-icons/bi'
+import { ProgressBar } from 'react-loader-spinner'
 
 import CosmosMetrics from './cosmos-metrics'
 import NetworkGraph from './network-graph'
-import CrossChainQuantity from './cross-chain-quantity'
 import Blocks from '../blocks'
 import Transactions from '../transactions'
 import Image from '../image'
 import AddChain from '../add-chain'
-import { consensus_state } from '../../lib/api/rpc'
 import { transfers as getTransfers, token_sents as getTokenSents } from '../../lib/api/index'
 import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain, chainManager } from '../../lib/object/chain'
@@ -24,72 +20,104 @@ import { currency_symbol } from '../../lib/object/currency'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default () => {
-  const { preferences, evm_chains, cosmos_chains, assets, status, chain, validators } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, status: state.status, chain: state.chain, validators: state.validators }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
-  const { assets_data } = { ...assets }
-  const { status_data } = { ...status }
-  const { chain_data } = { ...chain }
-  const { validators_data } = { ...validators }
+  const {
+    preferences,
+    evm_chains,
+    cosmos_chains,
+    assets,
+    status,
+    chain,
+    validators,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
+        assets: state.assets,
+        status: state.status,
+        chain: state.chain,
+        validators: state.validators,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
+  const {
+    assets_data,
+  } = { ...assets }
+  const {
+    status_data,
+  } = { ...status }
+  const {
+    chain_data,
+  } = { ...chain }
+  const {
+    validators_data,
+  } = { ...validators }
 
-  const [consensusState, setConsensusState] = useState(null)
   const [cosmosMetrics, setCosmosMetrics] = useState(null)
   const [transfers, setTransfers] = useState(null)
   const [gmps, setGmps] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
-    const getData = async () => {
-      if (!controller.signal.aborted) {
-        const response = await consensus_state()
-        setConsensusState(response)
-      }
-    }
-    getData()
-    const interval = setInterval(() => getData(), 0.075 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (assets_data && status_data && chain_data && consensusState?.validators?.proposer?.address) {
-      const { validators, votes } = { ...consensusState }
-      const { proposer } = { ...validators }
-      const validator_data = validators_data?.find(v => equals_ignore_case(v.consensus_address, hexToBech32(proposer.address, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS)))
-      const { operator_address, description } = { ...validator_data }
-      const { staking_pool, voting_power, staking_params, bank_supply } = { ...chain_data }
-      const { bonded_tokens } = { ...staking_pool }
-      const { bond_denom } = { ...staking_params }
-      const { amount } = { ...bank_supply }
+    if (
+      assets_data &&
+      status_data &&
+      chain_data
+    ) {
+      const {
+        staking_pool,
+        voting_power,
+        staking_params,
+        bank_supply,
+      } = { ...chain_data }
+      const {
+        bonded_tokens,
+      } = { ...staking_pool }
+      const {
+        bond_denom,
+      } = { ...staking_params }
+      const {
+        amount,
+      } = { ...bank_supply }
       const {
         latest_block_height,
         latest_block_time,
         avg_block_time,
       } = { ...status_data }
+
       setCosmosMetrics({
-        latest_block: {
-          ...consensusState,
-          operator_address,
-          validator_description: description,
-          voting_power: proposer.voting_power,
-          voting_power_percentage: bonded_tokens && (voting_power * 100 / Math.floor(bonded_tokens)),
-          // pre_votes: _.max((votes || []).map(v => Number(_.last(v?.prevotes_bit_array?.split(' = ') || [])))),
-        },
-        block_height: Number(latest_block_height),
-        block_time: moment(latest_block_time).valueOf(),
+        latest_block_height,
+        latest_block_time: moment(latest_block_time).valueOf(),
         avg_block_time,
         active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)).length,
         total_validators: validators_data?.length,
-        denom: assetManager.symbol(bond_denom, assets_data),
-        online_voting_power: staking_pool && Math.floor(bonded_tokens),
-        online_voting_power_percentage: staking_pool && amount && (Math.floor(bonded_tokens) * 100 / amount),
-        total_voting_power: bank_supply && amount,
+        denom: assetManager.symbol(
+          bond_denom,
+          assets_data,
+        ),
+        online_voting_power: staking_pool &&
+          Math.floor(bonded_tokens),
+        online_voting_power_percentage: staking_pool &&
+          amount &&
+          (
+            Math.floor(bonded_tokens) * 100 /
+            amount
+          ),
+        total_voting_power: bank_supply &&
+          amount,
       })
     }
-  }, [assets_data, status_data, chain_data, validators_data, consensusState])
+  }, [assets_data, status_data, chain_data, validators_data])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -340,19 +368,20 @@ export default () => {
   const metricClassName = 'bg-white dark:bg-black shadow hover:shadow-lg dark:shadow-slate-600 rounded-lg py-4 px-5'
 
   return (
-    <div className="space-y-8 mt-2 mb-6 mx-auto pb-10">
-      <CosmosMetrics data={cosmosMetrics} />
+    <div className="space-y-8 mb-2 mx-auto pb-12">
+      <CosmosMetrics
+        data={cosmosMetrics}
+      />
       {(process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' || process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true') && (
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-5">
           {process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && (
             <div className="space-y-3">
               <div className="sm:flex items-center justify-start space-y-1.5 sm:space-y-0 sm:space-x-3">
                 <Link href="/transfers">
-                  <a className="flex items-center space-x-2">
-                    <FiCode size={20} />
-                    <span className="uppercase text-base font-bold">
-                      Cross-chain transfers
-                    </span>
+                  <a>
+                    <h2 className="uppercase tracking-wider text-base font-medium">
+                      Axelar Cross-Chain Activities
+                    </h2>
                   </a>
                 </Link>
                 {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
@@ -376,12 +405,12 @@ export default () => {
                           _.sumBy(
                             transfers.data,
                             'volume',
-                          ) > 500000000 ?
+                          ) > 5000000000 ?
                             '0,0.00a' :
                             _.sumBy(
                               transfers.data,
                               'volume',
-                            ) > 100000000 ?
+                            ) > 10000000 ?
                               '0,0' :
                               '0,0.00'
                           )}
@@ -420,7 +449,7 @@ export default () => {
                             ),
                             '0,0',
                           ) :
-                          <FallingLines
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -449,7 +478,7 @@ export default () => {
                               _.sumBy(
                                 transfers.data,
                                 'volume',
-                              ) > 1000000000 ?
+                              ) > 5000000000 ?
                                 '0,0.00a' :
                                 _.sumBy(
                                   transfers.data,
@@ -459,7 +488,7 @@ export default () => {
                                   '0,0.00'
                             )}
                           </> :
-                          <FallingLines
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -482,7 +511,7 @@ export default () => {
                             evm_chains_data.length + cosmos_chains_data.length,
                             '0,0',
                           ) :
-                          <FallingLines
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -500,10 +529,6 @@ export default () => {
                     id="transfers"
                     data={transfers?.network_graph_data}
                   />
-                  {/*<CrossChainQuantity
-                    data={transfers?.data}
-                    pathname="/transfers/search"
-                  />*/}
                 </div>
                 <div className="order-2 lg:order-3">
                   <div className={`${metricClassName}`}>
@@ -558,7 +583,7 @@ export default () => {
                           </div>
                         )) :
                         <div className="mt-2">
-                          <TailSpin
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -575,11 +600,10 @@ export default () => {
             <div className="space-y-3">
               <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-2">
                 <Link href="/gmp">
-                  <a className="flex items-center space-x-2">
-                    <BiMessageDots size={20} />
-                    <span className="uppercase text-base font-bold">
+                  <a>
+                    <h2 className="uppercase tracking-wider text-base font-medium">
                       General Message Passing
-                    </span>
+                    </h2>
                   </a>
                 </Link>
                 {/*gmps?.data && (
@@ -617,7 +641,7 @@ export default () => {
                             ),
                             '0,0',
                           ) :
-                          <FallingLines
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -640,7 +664,7 @@ export default () => {
                             evm_chains_data.length/* + cosmos_chains_data.length*/,
                             '0,0',
                           ) :
-                          <FallingLines
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -658,10 +682,6 @@ export default () => {
                     id="gmp"
                     data={gmps?.network_graph_data}
                   />
-                  {/*<CrossChainQuantity
-                    data={gmps?.data}
-                    pathname="/gmp/search"
-                  />*/}
                 </div>
                 <div className="order-2 lg:order-3">
                   <div className={`${metricClassName}`}>
@@ -716,7 +736,7 @@ export default () => {
                           </div>
                         )) :
                         <div className="mt-2">
-                          <TailSpin
+                          <ProgressBar
                             color={loader_color(theme)}
                             width="36"
                             height="36"
@@ -731,27 +751,25 @@ export default () => {
           )}
         </div>
       )}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="space-y-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="space-y-2">
           <Link href="/blocks">
-            <a className="flex items-center space-x-2">
-              <FiBox size={20} />
-              <span className="uppercase text-base font-bold">
+            <a>
+              <h2 className="uppercase tracking-wider text-base font-medium">
                 Latest blocks
-              </span>
+              </h2>
             </a>
           </Link>
           <Blocks
             n={10}
           />
         </div>
-        <div className="space-y-3">
+        <div className="space-y-2">
           <Link href="/transactions">
-            <a className="flex items-center space-x-2">
-              <BiFileBlank size={20} />
-              <span className="uppercase text-base font-bold">
+            <a>
+              <h2 className="uppercase tracking-wider text-base font-medium">
                 Latest transactions
-              </span>
+              </h2>
             </a>
           </Link>
           <Transactions

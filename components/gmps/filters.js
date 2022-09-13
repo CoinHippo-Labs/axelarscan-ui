@@ -19,7 +19,7 @@ export default () => {
   const { pathname, query, asPath } = { ...router }
 
   const [filters, setFilters] = useState(null)
-  const [filter, setFilter] = useState(undefined)
+  const [filterTrigger, setFilterTrigger] = useState(undefined)
   const [hidden, setHidden] = useState(true)
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default () => {
   }, [evm_chains_data, cosmos_chains_data, asPath])
 
   useEffect(() => {
-    if (filter !== undefined) {
+    if (filterTrigger !== undefined) {
       const qs = new URLSearchParams()
 
       Object.entries({ ...filters }).filter(([k, v]) => v).forEach(([k, v]) => {
@@ -119,7 +119,7 @@ export default () => {
 
       setHidden(true)
     }
-  }, [filter])
+  }, [filterTrigger])
 
   const fields = [
     {
@@ -219,7 +219,7 @@ export default () => {
     },
   ]
 
-  const filtered = (!!filter || filter === undefined) && Object.keys({ ...query }).length > 0
+  const filtered = (!!filterTrigger || filterTrigger === undefined) && Object.keys({ ...query }).length > 0
 
   return (
     <Modal
@@ -227,7 +227,7 @@ export default () => {
       disabled={!evm_chains_data}
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
-      buttonClassName={`${filtered ? 'border-2 border-blue-600 dark:border-white text-blue-600 dark:text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 font-semibold'} rounded-lg text-sm sm:text-base py-1 px-2.5`}
+      buttonClassName={`${filtered ? 'border-2 border-blue-400 dark:border-blue-600 text-blue-400 dark:text-blue-600 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-75 dark:hover:bg-opacity-75 font-normal'} rounded tracking-wider text-sm sm:text-base py-1 px-2.5`}
       title={<div className="flex items-center justify-between">
         <span>
           Filter GMPs
@@ -293,10 +293,10 @@ export default () => {
       noCancelOnClickOutside={true}
       onCancel={() => {
         setFilters(null)
-        setFilter(typeof filter === 'boolean' ? null : false)
+        setFilterTrigger(typeof filter === 'boolean' ? null : false)
       }}
       cancelButtonTitle="Reset"
-      onConfirm={() => setFilter(moment().valueOf())}
+      onConfirm={() => setFilterTrigger(moment().valueOf())}
       confirmButtonTitle="Search"
     />
   )

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FiX } from 'react-icons/fi'
+import { BiX } from 'react-icons/bi'
 
 import Portal from '../portal'
 
@@ -55,7 +55,7 @@ export default ({
                   onClick={hide}
                   className="flex items-center justify-center ml-auto"
                 >
-                  <FiX
+                  <BiX
                     className="w-4 h-4 stroke-current ml-2"
                   />
                 </button>

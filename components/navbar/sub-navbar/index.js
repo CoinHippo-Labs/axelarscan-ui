@@ -542,10 +542,10 @@ export default () => {
   ].findIndex(p => pathname?.startsWith(p)) > -1
 
   return (
-    <div className="w-full overflow-x-auto flex items-center py-2 sm:pt-4 px-2 sm:px-4">
+    <div className="w-full overflow-x-auto flex flex-col sm:flex-row sm:items-center py-2 sm:pt-4 px-2 sm:px-4">
       <div className="flex flex-col space-y-1">
         {title && (
-          <h1 className="uppercase tracking-widest text-black dark:text-white text-base font-medium">
+          <h1 className="uppercase tracking-widest text-black dark:text-white text-sm sm:text-base font-medium">
             {title}
           </h1>
         )}
@@ -558,7 +558,7 @@ export default () => {
       <span className="sm:ml-auto" />
       {right ?
         <>
-          <span className="ml-auto" />
+          <span className="mt-0.5 sm:mt-0 ml-auto" />
           {right}
         </> :
         <>

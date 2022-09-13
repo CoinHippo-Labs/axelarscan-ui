@@ -35,7 +35,7 @@ export default () => {
           href={`${process.env.NEXT_PUBLIC_DOC_URL}/resources/${process.env.NEXT_PUBLIC_ENVIRONMENT}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center text-blue-500 text-xs font-bold"
+          className="flex items-center text-blue-500 text-xs font-medium"
         >
           <div className="mr-2">
             <div className="block dark:hidden">
@@ -60,7 +60,7 @@ export default () => {
             href={`${process.env.NEXT_PUBLIC_DOC_URL}/dev/axelarjs-sdk/intro`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 text-xs font-bold"
+            className="text-blue-500 text-xs font-medium"
           >
             SDK v{dependencies['@axelar-network/axelarjs-sdk'].replace('^', '')}
           </a>
@@ -68,18 +68,18 @@ export default () => {
       </div>
       <div className="hidden lg:flex w-full lg:w-2/4 flex-wrap items-center justify-center" />
       <div className="w-full md:w-1/2 lg:w-1/4 min-w-max flex items-center justify-center md:justify-end space-x-1.5">
-        <span className="text-slate-500 dark:text-white font-semibold">
+        <span className="text-slate-500 dark:text-white font-medium">
           © {moment().format('YYYY')}
         </span>
         <a
           href={process.env.NEXT_PUBLIC_WEBSITE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-500 font-bold"
+          className="text-blue-500 font-medium"
         >
           {process.env.NEXT_PUBLIC_PROJECT_NAME}.
         </a>
-        <span className="text-slate-500 dark:text-white font-semibold">
+        <span className="text-slate-500 dark:text-white font-medium">
           All rights reserved
         </span>
       </div>
