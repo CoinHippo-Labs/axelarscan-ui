@@ -35,7 +35,7 @@ export default () => {
 
   const router = useRouter()
   const { query } = { ...router }
-  const { tx } = { ...query }
+  const { tx, edit } = { ...query }
 
   const [api, setApi] = useState(null)
   const [gmp, setGmp] = useState(null)
@@ -622,6 +622,13 @@ export default () => {
   const wrong_destination_chain = destination_chain_data &&
     chain_id !== destination_chain_data.chain_id &&
     !executing
+
+  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+  const editable = !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) &&
+    (
+      staging ||
+      edit === 'true'
+    )
 
   const approveButton =
     call &&
@@ -1718,66 +1725,69 @@ export default () => {
               const { explorer } = { ...chain_data }
               const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
 
-              const refreshButton = [
-                'executed',
-                'refunded',
-              ].includes(s.id) && (
+              const refreshButton = editable &&
+                [
+                  'executed',
+                  'refunded',
+                ].includes(s.id) &&
                 (
-                  s.id === 'executed' &&
-                  !executed &&
-                  is_executed
-                ) ||
+                  (
+                    s.id === 'executed' &&
+                    !executed &&
+                    is_executed
+                  ) ||
+                  (
+                    [
+                      'refunded',
+                    ].includes(s.id) &&
+                    typeof receipt?.status !== 'number'
+                  ) ||
+                  !block_timestamp
+                ) &&
                 (
-                  [
-                    'refunded',
-                  ].includes(s.id) &&
-                  typeof receipt?.status !== 'number'
-                ) ||
-                !block_timestamp
-              ) && (
-                <button
-                  disabled={s.id === 'refunded' ?
-                    txHashRefundEditUpdating :
-                    txHashEditUpdating
-                  }
-                  onClick={async () => {
-                    if (s.id === 'refunded') {
-                      setTxHashRefundEditUpdating(true)
+                  <button
+                    disabled={s.id === 'refunded' ?
+                      txHashRefundEditUpdating :
+                      txHashEditUpdating
                     }
-                    else {
-                      setTxHashEditUpdating(true)
-                    }
+                    onClick={async () => {
+                      if (s.id === 'refunded') {
+                        setTxHashRefundEditUpdating(true)
+                      }
+                      else {
+                        setTxHashEditUpdating(true)
+                      }
 
-                    await saveGMP(
-                      call?.transactionHash,
-                      call?.transactionIndex,
-                      call?.logIndex,
-                      transactionHash,
-                      transaction?.from,
-                      undefined,
-                      [
-                        'refunded',
-                      ].includes(s.id) ?
-                        s.id :
-                        s.id === 'executed' &&
-                        !executed &&
-                        is_executed ?
-                          'not_executed' :
-                          undefined,
-                    )
+                      await saveGMP(
+                        call?.transactionHash,
+                        call?.transactionIndex,
+                        call?.logIndex,
+                        transactionHash,
+                        transaction?.from,
+                        undefined,
+                        [
+                          'refunded',
+                        ].includes(s.id) ?
+                          s.id :
+                          s.id === 'executed' &&
+                          !executed &&
+                          is_executed ?
+                            'not_executed' :
+                            undefined,
+                      )
 
-                    if (s.id === 'refunded') {
-                      setTxHashRefundEditUpdating(false)
-                    }
-                    else {
-                      setTxHashEditUpdating(false)
-                    }
-                  }}
-                  className={`${(s.id === 'refunded' ? txHashRefundEditUpdating : txHashEditUpdating) ? 'hidden' : ''} cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`}
-                >
-                  <MdRefresh size={20} />
-                </button>
-              )
+                      if (s.id === 'refunded') {
+                        setTxHashRefundEditUpdating(false)
+                      }
+                      else {
+                        setTxHashEditUpdating(false)
+                      }
+                    }}
+                    className={`${(s.id === 'refunded' ? txHashRefundEditUpdating : txHashEditUpdating) ? 'hidden' : ''} cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`}
+                  >
+                    <MdRefresh size={20} />
+                  </button>
+                )
 
               const rowClassName = 'flex space-x-4'
               const rowTitleClassName = `w-32 text-black dark:text-slate-300 text-sm lg:text-base font-bold`
@@ -1896,12 +1906,14 @@ export default () => {
                                 }
                               </button>
                             </> :
-                            <button
-                              onClick={() => setTxHashEditing(true)}
-                              className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
-                            >
-                              <BiEditAlt size={20} />
-                            </button>
+                            editable && (
+                              <button
+                                onClick={() => setTxHashEditing(true)}
+                                className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                              >
+                                <BiEditAlt size={20} />
+                              </button>
+                            )
                           }
                         </div>
                         {refreshButton}
@@ -2002,12 +2014,14 @@ export default () => {
                                   }
                                 </button>
                               </> :
-                              <button
-                                onClick={() => setTxHashRefundEditing(true)}
-                                className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
-                              >
-                                <BiEditAlt size={20} />
-                              </button>
+                              editable && (
+                                <button
+                                  onClick={() => setTxHashRefundEditing(true)}
+                                  className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                                >
+                                  <BiEditAlt size={20} />
+                                </button>
+                              )
                             }
                           </div>
                         </div> :

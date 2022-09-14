@@ -174,7 +174,7 @@ export default ({
               textBaseline: 'bottom',
             },
           },
-          curveOffset: 32,
+          curveOffset: 36,
           style: {
             stroke: theme === 'dark' ?
               '#333' :

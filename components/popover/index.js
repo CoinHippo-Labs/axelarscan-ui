@@ -30,7 +30,15 @@ export default ({
           name: 'offset',
           enabled: true,
           options: {
-            offset: [0, 0],
+            offset: [
+              [
+                'top',
+                'bottom',
+              ].includes(placement) ?
+                -50 :
+                0,
+              0,
+            ],
           },
         },
       ],
@@ -150,9 +158,11 @@ export default ({
           className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded shadow z-10 no-underline break-words text-sm font-normal`}
           style={styles.offset}
         >
-          <div className={`bg-zinc-50 dark:bg-zinc-900 rounded-t border-b border-solid border-zinc-100 dark:border-zinc-800 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
-            {title}
-          </div>
+          {title && (
+            <div className={`bg-zinc-50 dark:bg-zinc-900 rounded-t border-b border-solid border-zinc-100 dark:border-zinc-800 uppercase font-semibold mb-0 p-2 ${titleClassName}`}>
+              {title}
+            </div>
+          )}
           <div className={`p-2 ${contentClassName}`}>
             {content}
           </div>

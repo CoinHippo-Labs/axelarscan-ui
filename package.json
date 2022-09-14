@@ -39,6 +39,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "next": "^12.2.5",
+    "next-secure-headers": "^2.2.0",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
     "postcss-flexbugs-fixes": "^5.0.2",

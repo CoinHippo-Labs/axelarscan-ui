@@ -25,8 +25,8 @@ export default ({
   } = { ...preferences }
 
   const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
-  const titleClassName = 'text-2xl lg:text-xl xl:text-2xl font-semibold space-x-1'
-  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-sm font-normal'
+  const titleClassName = 'text-3xl lg:text-xl xl:text-3xl font-semibold space-x-1'
+  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-sm font-normal ml-1 lg:ml-0.5 xl:ml-1'
 
   const {
     num_chains,
@@ -56,9 +56,9 @@ export default ({
     undefined
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-12 gap-4">
       <Link href="/transfers">
-        <a className={`order-1 sm:order-2 md:order-1 ${metricClassName}`}>
+        <a className={`order-1 sm:order-2 md:order-1 xl:col-span-3 ${metricClassName}`}>
           <div className={titleClassName}>
             {!isNaN(volume) ?
               <span>
@@ -84,7 +84,7 @@ export default ({
           </span>
         </a>
       </Link>
-      <div className={`order-2 sm:order-1 md:order-2 sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3 ${metricClassName}`}>
+      <div className={`order-2 sm:order-1 md:order-2 sm:col-span-2 xl:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-3 ${metricClassName}`}>
         <div className="sm:border-r border-zinc-200 dark:border-zinc-700">
           <div className={titleClassName}>
             {!isNaN(num_txs) ?
@@ -145,7 +145,7 @@ export default ({
         </Link>
       </div>
       <Link href="/transfers">
-        <a className={`order-3 ${metricClassName}`}>
+        <a className={`order-3 xl:col-span-2 ${metricClassName}`}>
           <div className={titleClassName}>
             {!isNaN(num_chains) ?
               number_format(
@@ -160,12 +160,12 @@ export default ({
             }
           </div>
           <span className={subtitleClassName}>
-            # connected chains
+            # of connected chains
           </span>
         </a>
       </Link>
       <Link href="/gmp/stats">
-        <a className={`order-4 ${metricClassName}`}>
+        <a className={`order-4 xl:col-span-2 ${metricClassName}`}>
           <div className={titleClassName}>
             {!isNaN(num_contracts) ?
               number_format(
@@ -180,7 +180,7 @@ export default ({
             }
           </div>
           <span className={subtitleClassName}>
-            # of deployed contract
+            # of deployed contracts
           </span>
         </a>
       </Link>

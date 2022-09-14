@@ -494,19 +494,19 @@ export default () => {
           <div>
             <span className="xl:hidden">
               {ellipse(
-                tx,
+                id,
                 16,
               )}
             </span>
             <span className="hidden xl:block">
               {ellipse(
-                tx,
+                id,
                 24,
               )}
             </span>
           </div>
           <Copy
-            value={tx}
+            value={id}
           />
         </div>
       )
