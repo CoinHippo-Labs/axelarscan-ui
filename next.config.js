@@ -7,6 +7,6 @@ module.exports = {
         source: '/(.*)',
         headers: createSecureHeaders(),
       },
-    ];
-  },  
+    ]
+  },
 }

@@ -24,9 +24,9 @@ export default ({
     theme,
   } = { ...preferences }
 
-  const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
+  const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-6 px-5'
   const titleClassName = 'text-3xl lg:text-xl xl:text-3xl font-semibold space-x-1'
-  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-sm font-normal ml-1 lg:ml-0.5 xl:ml-1'
+  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-base font-normal ml-1 lg:ml-0.5 xl:ml-1'
 
   const {
     num_chains,
@@ -56,9 +56,69 @@ export default ({
     undefined
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-12 gap-4">
+    <div className="flex flex-col space-y-4">
+      <div className={`space-y-1 ${metricClassName}`}>
+        <div className={titleClassName}>
+          {!isNaN(num_txs) ?
+            number_format(
+              num_txs,
+              '0,0',
+            ) :
+            <ProgressBar
+              color={loader_color(theme)}
+              width="32"
+              height="32"
+            />
+          }
+        </div>
+        <span className={subtitleClassName}>
+          total transfers
+        </span>
+      </div>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${metricClassName}`}>
+        <Link href="/transfers">
+          <a className="sm:border-r border-zinc-200 dark:border-zinc-700 space-y-1">
+            <div className={titleClassName}>
+              {!isNaN(transfers?.num_txs) ?
+                number_format(
+                  transfers.num_txs,
+                  '0,0',
+                ) :
+                <ProgressBar
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              }
+            </div>
+            <span className={subtitleClassName}>
+              asset transfers
+            </span>
+          </a>
+        </Link>
+        <Link href="/gmp">
+          <a className="space-y-1">
+            <div className={titleClassName}>
+              {!isNaN(gmps?.num_txs) ?
+                number_format(
+                  gmps.num_txs,
+                  '0,0',
+                ) :
+                <ProgressBar
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              }
+            </div>
+            <span className={subtitleClassName}>
+              GMP calls
+            </span>
+          </a>
+        </Link>
+      </div>
       <Link href="/transfers">
-        <a className={`order-1 sm:order-2 md:order-1 xl:col-span-3 ${metricClassName}`}>
+        <a className={`space-y-1 ${metricClassName}`}>
           <div className={titleClassName}>
             {!isNaN(volume) ?
               <span>
@@ -84,68 +144,8 @@ export default ({
           </span>
         </a>
       </Link>
-      <div className={`order-2 sm:order-1 md:order-2 sm:col-span-2 xl:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-3 ${metricClassName}`}>
-        <div className="sm:border-r border-zinc-200 dark:border-zinc-700">
-          <div className={titleClassName}>
-            {!isNaN(num_txs) ?
-              number_format(
-                num_txs,
-                '0,0',
-              ) :
-              <ProgressBar
-                color={loader_color(theme)}
-                width="32"
-                height="32"
-              />
-            }
-          </div>
-          <span className={subtitleClassName}>
-            total transfers
-          </span>
-        </div>
-        <Link href="/transfers">
-          <a>
-            <div className={titleClassName}>
-              {!isNaN(transfers?.num_txs) ?
-                number_format(
-                  transfers.num_txs,
-                  '0,0',
-                ) :
-                <ProgressBar
-                  color={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              }
-            </div>
-            <span className={subtitleClassName}>
-              asset transfers
-            </span>
-          </a>
-        </Link>
-        <Link href="/gmp">
-          <a>
-            <div className={titleClassName}>
-              {!isNaN(gmps?.num_txs) ?
-                number_format(
-                  gmps.num_txs,
-                  '0,0',
-                ) :
-                <ProgressBar
-                  color={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              }
-            </div>
-            <span className={subtitleClassName}>
-              GMP calls
-            </span>
-          </a>
-        </Link>
-      </div>
       <Link href="/transfers">
-        <a className={`order-3 xl:col-span-2 ${metricClassName}`}>
+        <a className={`space-y-1 ${metricClassName}`}>
           <div className={titleClassName}>
             {!isNaN(num_chains) ?
               number_format(
@@ -165,7 +165,7 @@ export default ({
         </a>
       </Link>
       <Link href="/gmp/stats">
-        <a className={`order-4 xl:col-span-2 ${metricClassName}`}>
+        <a className={`space-y-1 ${metricClassName}`}>
           <div className={titleClassName}>
             {!isNaN(num_contracts) ?
               number_format(

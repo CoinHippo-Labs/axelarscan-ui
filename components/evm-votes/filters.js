@@ -206,7 +206,7 @@ export default () => {
       disabled={!evm_chains_data}
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
-      buttonClassName={`${filtered ? 'border-2 border-blue-400 dark:border-blue-600 text-blue-400 dark:text-blue-600 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-75 dark:hover:bg-opacity-75 font-normal'} rounded tracking-wider text-sm sm:text-base py-1 px-2.5`}
+      buttonClassName={`max-w-min ${filtered ? 'border-2 border-blue-400 dark:border-blue-600 text-blue-400 dark:text-blue-600 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-75 dark:hover:bg-opacity-75 font-normal'} rounded tracking-wider text-sm sm:text-base py-1 px-2.5`}
       title={<div className="flex items-center justify-between">
         <span>
           Filter Votes

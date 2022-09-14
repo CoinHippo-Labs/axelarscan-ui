@@ -624,10 +624,13 @@ export default () => {
     !executing
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-  const editable = !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) &&
+  const editable =
     (
-      staging ||
-      edit === 'true'
+      edit === 'true' &&
+      (
+        staging ||
+        !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
+      )
     )
 
   const approveButton =

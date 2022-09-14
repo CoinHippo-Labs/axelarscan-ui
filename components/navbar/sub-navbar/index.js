@@ -542,7 +542,7 @@ export default () => {
   ].findIndex(p => pathname?.startsWith(p)) > -1
 
   return (
-    <div className="w-full overflow-x-auto flex flex-col sm:flex-row sm:items-center py-2 sm:pt-4 px-2 sm:px-4">
+    <div className="w-full flex flex-col sm:flex-row sm:items-center py-2 sm:pt-4 px-2 sm:px-4">
       <div className="flex flex-col space-y-1">
         {title && (
           <h1 className="uppercase tracking-widest text-black dark:text-white text-sm sm:text-base font-medium">
@@ -561,13 +561,13 @@ export default () => {
           <span className="mt-0.5 sm:mt-0 ml-auto" />
           {right}
         </> :
-        <>
+        <div className="overflow-x-auto flex items-center">
           {
             !isNaN(latest_block_height) &&
             !is_assets_path &&
             (
               <Link href={`/block/${latest_block_height}`}>
-                <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-4">
+                <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                   <IoMdCube
                     size={18}
                   />
@@ -589,7 +589,7 @@ export default () => {
                   <>
                     {!isNaN(max_validators) && (
                       <Link href="/validators">
-                        <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-2 ml-4">
+                        <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-2 ml-0 sm:ml-4 mr-4 sm:mr-0">
                           <div className="flex items-center space-x-1.5">
                             <span className="font-normal">
                               Max
@@ -608,7 +608,7 @@ export default () => {
                       </Link>
                     )}
                     {unbonding_time && (
-                      <div className="flex items-center space-x-1.5 ml-4">
+                      <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
                           Unbond
                         </span>
@@ -625,7 +625,7 @@ export default () => {
                       !isNaN(signed_blocks_window) &&
                       !isNaN(min_signed_per_window) &&
                       (
-                        <div className="flex items-center space-x-1.5 ml-4">
+                        <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                           <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
                             Max Missed
                           </span>
@@ -639,7 +639,7 @@ export default () => {
                       )
                     }
                     {downtime_jail_duration && (
-                      <div className="flex items-center space-x-1.5 ml-4">
+                      <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
                           Jail
                         </span>
@@ -660,7 +660,7 @@ export default () => {
             ) &&
             (
               <Link href="/proposals">
-                <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-4">
+                <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                   <RiFilePaperFill
                     size={18}
                   />
@@ -671,7 +671,7 @@ export default () => {
               </Link>
             )
           }
-        </>
+        </div>
       }
     </div>
   )

@@ -48,7 +48,7 @@ export default ({
           fitView: true,
           fitViewPadding: [
             0,
-            66,
+            33,
             0,
             0,
           ],

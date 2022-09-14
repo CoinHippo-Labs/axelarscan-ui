@@ -11,8 +11,7 @@ export default ({
 
   return (
     <div
-      className="w-56 shadow dark:shadow-slate-700 rounded-lg flex flex-col"
-      style={{ backdropFilter: 'blur(8px)' }}
+      className="backdrop-blue-16 w-56 shadow dark:shadow-slate-700 rounded-lg flex flex-col"
     >
       {_menus.map((m, i) => {
         const {

@@ -351,33 +351,35 @@ export default () => {
         data={cosmosMetrics}
       />
       {support_cross_chain && (
-        <>
-          <div className="space-y-3">
-            <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-3">
-              <Link href="/transfers">
-                <a>
-                  <h2 className="uppercase tracking-wider text-base font-medium">
-                    Axelar Cross-Chain Activities
-                  </h2>
-                </a>
-              </Link>
-              {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
-                <div className="max-w-min bg-red-100 dark:bg-red-800 rounded whitespace-nowrap text-red-500 dark:text-red-400 text-xs py-0.5 px-2">
-                  The transfer volume is missing. It will be updated soon.
-                </div>
-              )}
-            </div>
-            <NetworkGraph
-              id="cross-chain"
-              transfers={transfers?.network_graph_data}
-              gmps={gmps?.network_graph_data}
-            />
+        <div className="space-y-3">
+          <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-3">
+            <Link href="/transfers">
+              <a>
+                <h2 className="uppercase tracking-wider text-base font-medium">
+                  Axelar Cross-Chain Activities
+                </h2>
+              </a>
+            </Link>
+            {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
+              <div className="max-w-min bg-red-100 dark:bg-red-800 rounded whitespace-nowrap text-red-500 dark:text-red-400 text-xs py-0.5 px-2">
+                The transfer volume is missing. It will be updated soon.
+              </div>
+            )}
           </div>
-          <CrossChainMetrics
-            transfers={transfers}
-            gmps={gmps}
-          />
-        </>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <CrossChainMetrics
+              transfers={transfers}
+              gmps={gmps}
+            />
+            <div className="lg:col-span-2 xl:col-span-3">
+              <NetworkGraph
+                id="cross-chain"
+                transfers={transfers?.network_graph_data}
+                gmps={gmps?.network_graph_data}
+              />
+            </div>
+          </div>
+        </div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="space-y-2">
