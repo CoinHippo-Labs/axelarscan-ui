@@ -119,7 +119,7 @@ export default ({
               }
             </div>
             <span className={subtitleClassName}>
-              token send
+              asset transfers
             </span>
           </a>
         </Link>

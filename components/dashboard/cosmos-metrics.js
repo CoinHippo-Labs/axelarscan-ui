@@ -210,7 +210,7 @@ export default ({
             {!isNaN(inflation) ?
               <span>
                 {number_format(
-                  inflation,
+                  inflation * 100,
                   '0,0.000000',
                 )}
                 %
