@@ -207,12 +207,12 @@ export default ({ n }) => {
           })
         }
 
-        const {
-          data,
-          total,
-        } = { ...response }
-
         if (response) {
+          const {
+            data,
+            total,
+          } = { ...response }
+
           setTotal(total)
 
           response = _.orderBy(
@@ -824,7 +824,7 @@ export default ({ n }) => {
               >
                 Load more
               </button> :
-              <div className="flex justify-center p-1.5">
+              <div className="flex justify-center">
                 <ColorRing
                   color={loader_color(theme)}
                   width="32"

@@ -155,11 +155,11 @@ export default () => {
           },
         )
 
-        const {
-          total,
-        } = { ...response }
-
         if (response) {
+          const {
+            total,
+          } = { ...response }
+
           setTotal(total)
 
           if (
@@ -871,7 +871,7 @@ export default () => {
               >
                 Load more
               </button> :
-              <div className="flex justify-center p-1.5">
+              <div className="flex justify-center">
                 <ColorRing
                   color={loader_color(theme)}
                   width="32"
