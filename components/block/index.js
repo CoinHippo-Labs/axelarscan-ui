@@ -107,12 +107,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [height, status_data])
 
   return (

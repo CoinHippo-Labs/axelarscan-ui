@@ -234,12 +234,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(true),
-        6 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(true),
+      6 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [status_data])
 
   // chain
@@ -533,12 +533,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(true),
-        3 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(true),
+      3 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [assets_data, pathname])
 
   // validators
@@ -836,12 +836,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [assets_data, pathname, validatorsTrigger])
 
   // chain maintainner
@@ -886,12 +886,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [evm_chains_data, pathname])
 
   return (

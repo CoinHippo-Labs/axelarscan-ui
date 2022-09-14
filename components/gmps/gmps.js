@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
-import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
+import { ProgressBar, ColorRing, Puff } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -43,7 +43,10 @@ export default ({ n }) => {
 
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
-      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const params = params_to_obj(
+        asPath.indexOf('?') > -1 &&
+        asPath.substring(asPath.indexOf('?') + 1)
+      )
 
       const chains_data = _.concat(
         evm_chains_data,
@@ -66,9 +69,15 @@ export default ({ n }) => {
 
       setFilters({
         txHash,
-        sourceChain: getChain(sourceChain, chains_data)?._id ||
+        sourceChain: getChain(
           sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?._id ||
+          chains_data,
+        )?._id ||
+          sourceChain,
+        destinationChain: getChain(
+          destinationChain,
+          chains_data,
+        )?._id ||
           destinationChain,
         method: [
           'callContract',
@@ -91,16 +100,13 @@ export default ({ n }) => {
         sourceAddress,
         contractAddress,
         relayerAddress,
-        time: fromTime && toTime &&
+        time: fromTime &&
+          toTime &&
           [
             moment(Number(fromTime)),
             moment(Number(toTime)),
           ],
       })
-
-      // if (typeof fetchTrigger === 'number') {
-      //   setFetchTrigger(moment().valueOf())
-      // }
     }
   }, [evm_chains_data, cosmos_chains_data, asPath])
 
@@ -122,17 +128,23 @@ export default ({ n }) => {
       triggering()
     }
 
-    return () => clearInterval(
-      setInterval(() =>
-        triggering(true),
-        (address || ['/gmp/search'].includes(pathname) ? 1 : 0.25) * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      triggering(true),
+      (address || ['/gmp/search'].includes(pathname) ? 1 : 0.25) * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [pathname, address, filters])
 
   useEffect(() => {
     const getData = async () => {
-      if (filters && (!pathname?.includes('/[address]') || address)) {
+      if (
+        filters &&
+        (
+          !pathname?.includes('/[address]') ||
+          address
+        )
+      ) {
         setFetching(true)
 
         if (!fetchTrigger) {
@@ -206,13 +218,16 @@ export default ({ n }) => {
           }
         }
 
-        let response = await searchGMP({
-          ...params,
-          size,
-          from,
-        })
+        let response = await searchGMP(
+          {
+            ...params,
+            size,
+            from,
+          },
+        )
 
         const {
+          data,
           total,
         } = { ...response }
 
@@ -222,7 +237,7 @@ export default ({ n }) => {
           response = _.orderBy(
             _.uniqBy(
               _.concat(
-                (response.data || [])
+                (data || [])
                   .map(d => {
                     return {
                       ...d,
@@ -950,30 +965,41 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />
-        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
-          !fetching ?
-            <button
-              onClick={() => {
-                setOffet(data.length)
-                setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
-              }}
-              className="max-w-min hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg whitespace-nowrap font-medium hover:font-bold mx-auto py-1.5 px-2.5"
-            >
-              Load more
-            </button> :
-            <div className="flex justify-center p-1.5">
-              <ThreeDots
-                color={loader_color(theme)}
-                width="24"
-                height="24"
-              />
-            </div>
-        )}
+        {
+          data.length > 0 &&
+          (
+            typeof total !== 'number' ||
+            data.length < total
+          ) &&
+          (
+            !fetching ?
+              <button
+                onClick={() => {
+                  setOffet(data.length)
+                  setFetchTrigger(
+                    typeof fetchTrigger === 'number' ?
+                      true :
+                      1
+                  )
+                }}
+                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+              >
+                Load more
+              </button> :
+              <div className="flex justify-center p-1.5">
+                <ColorRing
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              </div>
+          )
+        }
       </div> :
-      <TailSpin
+      <ProgressBar
         color={loader_color(theme)}
-        width="32"
-        height="32"
+        width="36"
+        height="36"
       />
   )
 }

@@ -1,61 +1,111 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { TailSpin, ThreeDots } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
 import Image from '../image'
 import { chainName, getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, loader_color } from '../../lib/utils'
 
 export default () => {
-  const { preferences, evm_chains, cosmos_chains, assets, tvl } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, tvl: state.tvl }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
-  const { assets_data } = { ...assets }
-  const { tvl_data } = { ...tvl }
+  const {
+    preferences,
+    evm_chains,
+    cosmos_chains,
+    assets,
+    tvl,
+  } = useSelector(state =>
+    (
+      { preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
+        assets: state.assets,
+        tvl: state.tvl,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
+  const {
+    assets_data,
+  } = { ...assets }
+  const {
+    tvl_data,
+  } = { ...tvl }
 
   const [data, setData] = useState(null)
 
   useEffect(() => {
-    if (evm_chains_data && cosmos_chains_data && assets_data && Object.keys({ ...tvl_data }).length > 5) {
-      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+    if (
+      evm_chains_data &&
+      cosmos_chains_data &&
+      assets_data &&
+      Object.keys({ ...tvl_data }).length > 5
+    ) {
+      const chains_data = _.concat(
+        evm_chains_data,
+        cosmos_chains_data,
+      )
 
-      setData(_.orderBy(
-        Object.entries(tvl_data).map(([k, v]) => {
-          const {
-            total_on_evm,
-            total_on_cosmos,
-            total,
-            tvl,
-          } = { ...v }
-          let {
-            price,
-          } = { ...v }
-          price = typeof price === 'number' ?
-            price :
-            -1
+      setData(
+        _.orderBy(
+          Object.entries(tvl_data)
+              .map(([k, v]) => {
+              const {
+                total_on_evm,
+                total_on_cosmos,
+                total,
+                tvl,
+              } = { ...v }
+              let {
+                price,
+              } = { ...v }
 
-          return {
-            ...v,
-            asset_data: getAsset(k, assets_data),
-            value_on_evm: price * (total_on_evm || 0),
-            value_on_cosmos: price * (total_on_cosmos || 0),
-            value: price * (total || 0),
-            native: Object.entries({ ...tvl }).map(([k, v]) => {
+              price = typeof price === 'number' ?
+                price :
+                -1
+
               return {
-                chain: k,
-                chain_data: getChain(k, chains_data),
                 ...v,
+                asset_data: getAsset(
+                  k,
+                  assets_data,
+                ),
+                value_on_evm: price * (total_on_evm || 0),
+                value_on_cosmos: price * (total_on_cosmos || 0),
+                value: price * (total || 0),
+                native: Object.entries({ ...tvl })
+                  .map(([k, v]) => {
+                    return {
+                      chain: k,
+                      chain_data: getChain(
+                        k,
+                        chains_data,
+                      ),
+                      ...v,
+                    }
+                  })
+                  .find(c =>
+                    c?.contract_data?.is_native ||
+                    c?.denom_data?.is_native
+                  ),
               }
-            }).find(c => c?.contract_data?.is_native || c?.denom_data?.is_native),
-          }
-        }),
-        ['value'], ['desc']
-      ))
+            }),
+          ['value'],
+          ['desc'],
+        )
+      )
     }
   }, [evm_chains_data, cosmos_chains_data, assets_data, tvl_data])
 
@@ -92,11 +142,15 @@ export default () => {
                             <div className="text-xs font-bold">
                               {name || symbol}
                             </div>
-                            {name && symbol && (
-                              <div className="text-slate-400 dark:text-slate-500 text-xs font-semibold">
-                                {symbol}
-                              </div>
-                            )}
+                            {
+                              name &&
+                              symbol &&
+                              (
+                                <div className="text-slate-400 dark:text-slate-500 text-xs font-semibold">
+                                  {symbol}
+                                </div>
+                              )
+                            }
                           </div>
                         </div>
                       )
@@ -231,15 +285,29 @@ export default () => {
                               -
                             </span>
                           }
-                          {typeof total === 'number' && props.value > -1 && (
-                            <span
-                              title={number_format(props.value, `${currency_symbol}0,0.000`)}
-                              className="uppercase text-sm font-bold"
-                            >
-                              {currency_symbol}
-                              {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
-                            </span>
-                          )}
+                          {
+                            typeof total === 'number' &&
+                            props.value > -1 &&
+                            (
+                              <span
+                                title={number_format(
+                                  props.value,
+                                  `${currency_symbol}0,0.000`,
+                                )}
+                                className="uppercase text-sm font-bold"
+                              >
+                                {currency_symbol}
+                                {number_format(
+                                  props.value,
+                                  props.value > 1000000 ?
+                                    '0,0.00a' :
+                                    props.value > 10000 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                )}
+                              </span>
+                            )
+                          }
                         </div>
                       )
                     },
@@ -280,10 +348,20 @@ export default () => {
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {typeof total_on_evm === 'number' ?
                             <span
-                              title={number_format(total_on_evm, '0,0.00000000')}
+                              title={number_format(
+                                total_on_evm,
+                                '0,0.00000000',
+                              )}
                               className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
                             >
-                              {number_format(total_on_evm, total_on_evm > 100000 ? '0,0.00a' : total_on_evm > 10000 ? '0,0.00' : '0,0.000000')}
+                              {number_format(
+                                total_on_evm,
+                                total_on_evm > 100000 ?
+                                  '0,0.00a' :
+                                  total_on_evm > 10000 ?
+                                    '0,0.00' :
+                                    '0,0.000000',
+                              )}
                               <span className="normal-case ml-1">
                                 {symbol}
                               </span>
@@ -292,15 +370,28 @@ export default () => {
                               -
                             </span>
                           }
-                          {typeof total_on_evm === 'number' && props.value > -1  && (
-                            <span
-                              title={number_format(props.value, `${currency_symbol}0,0.000`)}
-                              className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
-                            >
-                              {currency_symbol}
-                              {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
-                            </span>
-                          )}
+                          {
+                            typeof total_on_evm === 'number' &&
+                            props.value > -1  &&
+                            (
+                              <span
+                                title={number_format(
+                                  props.value,
+                                  `${currency_symbol}0,0.000`,
+                                )}
+                                className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
+                              >
+                                {currency_symbol}
+                                {number_format(
+                                  props.value,
+                                  props.value > 1000000 ?
+                                    '0,0.00a' :
+                                    props.value > 10000 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                )}
+                              </span>
+                            )}
                         </div>
                       )
                     },
@@ -341,10 +432,20 @@ export default () => {
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {typeof total_on_cosmos === 'number' ?
                             <span
-                              title={number_format(total_on_cosmos, '0,0.00000000')}
+                              title={number_format(
+                                total_on_cosmos,
+                                '0,0.00000000',
+                              )}
                               className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
                             >
-                              {number_format(total_on_cosmos, total_on_cosmos > 100000 ? '0,0.00a' : total_on_cosmos > 10000 ? '0,0.00' : '0,0.000000')}
+                              {number_format(
+                                total_on_cosmos,
+                                total_on_cosmos > 100000 ?
+                                  '0,0.00a' :
+                                  total_on_cosmos > 10000 ?
+                                    '0,0.00' :
+                                    '0,0.000000',
+                              )}
                               <span className="normal-case ml-1">
                                 {symbol}
                               </span>
@@ -353,15 +454,25 @@ export default () => {
                               -
                             </span>
                           }
-                          {typeof total_on_cosmos === 'number' && props.value > -1 && (
-                            <span
-                              title={number_format(props.value, `${currency_symbol}0,0.000`)}
-                              className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
-                            >
-                              {currency_symbol}
-                              {number_format(props.value, props.value > 1000000 ? '0,0.00a' : props.value > 10000 ? '0,0.00' : '0,0.000000')}
-                            </span>
-                          )}
+                          {
+                            typeof total_on_cosmos === 'number' &&
+                            props.value > -1 &&
+                            (
+                              <span
+                                title={number_format(props.value, `${currency_symbol}0,0.000`)}
+                                className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
+                              >
+                                {currency_symbol}
+                                {number_format(
+                                  props.value,
+                                  props.value > 1000000 ?
+                                    '0,0.00a' :
+                                    props.value > 10000 ?
+                                      '0,0.00' :
+                                      '0,0.000000',
+                                )}
+                              </span>
+                            )}
                         </div>
                       )
                     },
@@ -406,6 +517,7 @@ export default () => {
                                   supply,
                                   total,
                                 } = { ...tvl?.[id] }
+
                                 const amount = supply || total
                                 const value = (amount * price) || 0
 
@@ -440,9 +552,12 @@ export default () => {
                         denom,
                       } = { ...denom_data }
 
-                      const amount = supply || total
+                      const amount = supply ||
+                        total
                       const value = amount * price
-                      const has_asset = amount || contract_data || (escrow_addresses?.length > 0 && denom)
+                      const has_asset = amount ||
+                        contract_data ||
+                        (escrow_addresses?.length > 0 && denom)
                       const amount_exact_formatted = number_format(
                         amount,
                         '0,0.000000',
@@ -479,22 +594,39 @@ export default () => {
                               -
                             </span>
                           }
-                          {has_asset && typeof price === 'number' && (
-                            <span
-                              title={number_format(value, `${currency_symbol}0,0.000`)}
-                              className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-medium"
-                            >
-                              {currency_symbol}
-                              {number_format(value, value > 1000000 ? '0,0.00a' : value > 10000 ? '0,0' : '0,0.00')}
-                            </span>
-                          )}
+                          {
+                            has_asset &&
+                            typeof price === 'number' &&
+                            (
+                              <span
+                                title={number_format(
+                                  value,
+                                  `${currency_symbol}0,0.000`,
+                                )}
+                                className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-medium"
+                              >
+                                {currency_symbol}
+                                {number_format(
+                                  value,
+                                  value > 1000000 ?
+                                    '0,0.00a' :
+                                    value > 10000 ?
+                                      '0,0' :
+                                      '0,0.00',
+                                )}
+                              </span>
+                            )}
                         </div>
                       )
                     },
                     headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
-                    order: 5 + i + (cosmos_chains_data.findIndex(_c => _c?.id === id) > -1 ? 1 : 0),
+                    order: 5 + i + (
+                      cosmos_chains_data.findIndex(_c => _c?.id === id) > -1 ?
+                        1 :
+                        0
+                    ),
                   }
-                })
+                }),
               ),
               ['order'],
               ['asc'],
@@ -511,20 +643,23 @@ export default () => {
           pageSizes={[50]}
           className="no-border block-table"
         />
-        {data && data.length < assets_data?.filter(a => !a?.is_staging || staging).length && (
-          <ThreeDots
-            color={loader_color(theme)}
-            width="32"
-            height="32"
-          />
-        )}
+        {
+          data.length < assets_data?.filter(a => !a?.is_staging || staging).length &&
+          (
+            <div className="flex justify-center p-1.5">
+              <ColorRing
+                color={loader_color(theme)}
+                width="32"
+                height="32"
+              />
+            </div>
+          )
+        }
       </div> :
-      <div className="h-full flex items-center justify-start">
-        <TailSpin
-          color={loader_color(theme)}
-          width="40"
-          height="40"
-        />
-      </div>
+      <ProgressBar
+        color={loader_color(theme)}
+        width="36"
+        height="36"
+      />
   )
 }

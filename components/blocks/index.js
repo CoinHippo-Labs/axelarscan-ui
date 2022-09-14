@@ -54,12 +54,12 @@ export default ({
 
     triggering()
 
-    return () => clearInterval(
-      setInterval(() =>
-        triggering(true),
-        0.1 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      triggering(true),
+      0.1 * 60 * 1000,
     )
+
+    return () => clearInterval()
   }, [])
 
   useEffect(() => {

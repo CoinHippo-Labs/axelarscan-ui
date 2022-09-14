@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { TailSpin, ThreeDots } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiMinusCircle, BiXCircle } from 'react-icons/bi'
 
 import Datatable from '../datatable'
@@ -39,34 +39,69 @@ export default () => {
 
   useEffect(() => {
     if (asPath) {
-      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { chain, txHash, pollId, transactionId, voter, vote, fromTime, toTime } = { ...params }
+      const params = params_to_obj(
+        asPath.indexOf('?') > -1 &&
+        asPath.substring(asPath.indexOf('?') + 1)
+      )
+
+      const {
+        chain,
+        txHash,
+        pollId,
+        transactionId,
+        voter,
+        vote,
+        fromTime,
+        toTime,
+      } = { ...params }
+
       setFilters({
         chain,
         txHash,
         pollId,
         transactionId,
         voter,
-        vote: ['yes', 'no'].includes(vote?.toLowerCase()) ? vote.toLowerCase() : undefined,
-        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+        vote: [
+          'yes',
+          'no',
+        ].includes(vote?.toLowerCase()) ?
+          vote.toLowerCase() :
+          undefined,
+        time: fromTime &&
+          toTime &&
+          [
+            moment(Number(fromTime)),
+            moment(Number(toTime)),
+          ],
       })
-      // if (typeof fetchTrigger === 'number') {
-      //   setFetchTrigger(moment().valueOf())
-      // }
     }
   }, [asPath])
 
   useEffect(() => {
     const triggering = is_interval => {
-      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+      setFetchTrigger(
+        is_interval ?
+          moment().valueOf() :
+          typeof fetchTrigger === 'number' ?
+            null :
+            0
+      )
     }
-    if (evm_chains_data && pathname && filters) {
+
+    if (
+      evm_chains_data &&
+      pathname &&
+      filters
+    ) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), 5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      triggering(true),
+      5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [evm_chains_data, validators_data, pathname, filters])
 
   useEffect(() => {
@@ -101,18 +136,20 @@ export default () => {
           time,
         } = { ...filters }
 
-        let response = await getEvmVotes({
-          chain,
-          txHash,
-          pollId,
-          transactionId,
-          voter,
-          vote,
-          fromTime: time?.[0]?.unix(),
-          toTime: time?.[1]?.unix(),
-          from,
-          size,
-        })
+        let response = await getEvmVotes(
+          {
+            chain,
+            txHash,
+            pollId,
+            transactionId,
+            voter,
+            vote,
+            fromTime: time?.[0]?.unix(),
+            toTime: time?.[1]?.unix(),
+            from,
+            size,
+          },
+        )
 
         const {
           total,
@@ -561,24 +598,41 @@ export default () => {
           defaultPageSize={50}
           className="no-border"
         />
-        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
-          !fetching ?
-            <button
-              onClick={() => {
-                setOffet(data.length)
-                setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
-              }}
-              className="max-w-min hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg whitespace-nowrap font-medium hover:font-bold mx-auto py-1.5 px-2.5"
-            >
-              Load more
-            </button>
-            :
-            <div className="flex justify-center p-1.5">
-              <ThreeDots color={loader_color(theme)} width="24" height="24" />
-            </div>
-        )}
-      </div>
-      :
-      <TailSpin color={loader_color(theme)} width="32" height="32" />
+        {
+          data.length > 0 &&
+          (
+            typeof total !== 'number' ||
+            data.length < total
+          ) &&
+          (
+            !fetching ?
+              <button
+                onClick={() => {
+                  setOffet(data.length)
+                  setFetchTrigger(
+                    typeof fetchTrigger === 'number' ?
+                      true :
+                      1
+                  )
+                }}
+                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+              >
+                Load more
+              </button> :
+              <div className="flex justify-center p-1.5">
+                <ColorRing
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              </div>
+          )
+        }
+      </div> :
+      <ProgressBar
+        color={loader_color(theme)}
+        width="36"
+        height="36"
+      />
   )
 }

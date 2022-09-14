@@ -230,12 +230,12 @@ export default () => {
       getData()
     }
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(),
-        0.15 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(),
+      0.15 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [evm_chains_data, tx, api, approving, executing, txHashEditing, txHashRefundEditing])
 
   const resetTxHashEdit = () => {

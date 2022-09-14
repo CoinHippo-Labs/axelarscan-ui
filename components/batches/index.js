@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
-import { TailSpin, ThreeDots } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiRightArrowCircle, BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { HiOutlineClock } from 'react-icons/hi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -43,34 +43,72 @@ export default () => {
 
   useEffect(() => {
     if (asPath) {
-      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const { batchId, commandId, chain, keyId, type, status, fromTime, toTime } = { ...params }
+      const params = params_to_obj(
+        asPath.indexOf('?') > -1 &&
+        asPath.substring(asPath.indexOf('?') + 1)
+      )
+
+      const {
+        batchId,
+        commandId,
+        chain,
+        keyId,
+        type,
+        status,
+        fromTime,
+        toTime,
+      } = { ...params }
+
       setFilters({
         batchId,
         commandId,
         chain,
         keyId,
         type,
-        status: ['executed', 'unexecuted', 'signed', 'signing', 'aborted'].includes(status?.toLowerCase()) ? status.toLowerCase() : undefined,
-        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+        status: [
+          'executed',
+          'unexecuted',
+          'signed',
+          'signing',
+          'aborted',
+        ].includes(status?.toLowerCase()) ?
+          status.toLowerCase() :
+          undefined,
+        time: fromTime &&
+          toTime &&
+          [
+            moment(Number(fromTime)),
+            moment(Number(toTime)),
+          ],
       })
-      // if (typeof fetchTrigger === 'number') {
-      //   setFetchTrigger(moment().valueOf())
-      // }
     }
   }, [asPath])
 
   useEffect(() => {
     const triggering = is_interval => {
-      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+      setFetchTrigger(
+        is_interval ?
+          moment().valueOf() :
+          typeof fetchTrigger === 'number' ?
+            null :
+            0
+      )
     }
-    if (evm_chains_data && pathname && filters) {
+
+    if (
+      evm_chains_data &&
+      pathname &&
+      filters
+    ) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), 5 * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      triggering(true),
+      5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [evm_chains_data, pathname, filters])
 
   useEffect(() => {
@@ -102,18 +140,20 @@ export default () => {
           time,
         } = { ...filters }
 
-        const response = await getBatches({
-          chain,
-          batchId,
-          commandId,
-          keyId,
-          type,
-          status,
-          fromTime: time?.[0]?.unix(),
-          toTime: time?.[1]?.unix(),
-          from,
-          size,
-        })
+        const response = await getBatches(
+          {
+            chain,
+            batchId,
+            commandId,
+            keyId,
+            type,
+            status,
+            fromTime: time?.[0]?.unix(),
+            toTime: time?.[1]?.unix(),
+            from,
+            size,
+          },
+        )
 
         const {
           total,
@@ -220,7 +260,10 @@ export default () => {
             data,
             'batch_id',
           )
-          .flatMap(b => b?.commands?.map(c => c?.type) || [])
+          .flatMap(b =>
+            (b?.commands || [])
+              .map(c => c?.type)
+          )
           .filter(t => t)
         )
       )
@@ -807,24 +850,41 @@ export default () => {
           defaultPageSize={25}
           className="min-h-full no-border"
         />
-        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
-          !fetching ?
-            <button
-              onClick={() => {
-                setOffet(data.length)
-                setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
-              }}
-              className="max-w-min hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg whitespace-nowrap font-medium hover:font-bold mx-auto py-1.5 px-2.5"
-            >
-              Load more
-            </button>
-            :
-            <div className="flex justify-center p-1.5">
-              <ThreeDots color={loader_color(theme)} width="24" height="24" />
-            </div>
-        )}
-      </div>
-      :
-      <TailSpin color={loader_color(theme)} width="32" height="32" />
+        {
+          data.length > 0 &&
+          (
+            typeof total !== 'number' ||
+            data.length < total
+          ) &&
+          (
+            !fetching ?
+              <button
+                onClick={() => {
+                  setOffet(data.length)
+                  setFetchTrigger(
+                    typeof fetchTrigger === 'number' ?
+                      true :
+                      1
+                  )
+                }}
+                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+              >
+                Load more
+              </button> :
+              <div className="flex justify-center p-1.5">
+                <ColorRing
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              </div>
+          )
+        }
+      </div> :
+      <ProgressBar
+        color={loader_color(theme)}
+        width="36"
+        height="36"
+      />
   )
 }

@@ -53,7 +53,10 @@ export default () => {
 
   useEffect(() => {
     if (evm_chains_data && cosmos_chains_data && asPath) {
-      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
+      const params = params_to_obj(
+        asPath.indexOf('?') > -1 &&
+        asPath.substring(asPath.indexOf('?') + 1)
+      )
 
       const chains_data = _.concat(
         evm_chains_data,
@@ -80,9 +83,15 @@ export default () => {
       else {
         setFilters({
           txHash,
-          sourceChain: getChain(sourceChain, chains_data)?._id ||
+          sourceChain: getChain(
             sourceChain,
-          destinationChain: getChain(destinationChain, chains_data)?._id ||
+            chains_data,
+          )?._id ||
+            sourceChain,
+          destinationChain: getChain(
+            destinationChain,
+            chains_data,
+          )?._id ||
             destinationChain,
           method: [
             'callContract',
@@ -113,10 +122,6 @@ export default () => {
                 moment(),
             ],
         })
-
-        // if (typeof fetchTrigger === 'number') {
-        //   setFetchTrigger(moment().valueOf())
-        // }
       }
     }
   }, [evm_chains_data, cosmos_chains_data, asPath, timeframeSelected])
@@ -139,15 +144,15 @@ export default () => {
       triggering()
     }
 
-    return () => clearInterval(
-      setInterval(() =>
-        triggering(true),
-        (['/gmp/stats'].includes(pathname) ?
-          1 :
-          0.25
-        ) * 60 * 1000
-      )
+    const interval = setInterval(() =>
+      triggering(true),
+      (['/gmp/stats'].includes(pathname) ?
+        1 :
+        0.25
+      ) * 60 * 1000
     )
+
+    return () => clearInterval(interval)
   }, [pathname, filters])
 
   useEffect(() => {
@@ -182,8 +187,14 @@ export default () => {
             }
           })
 
-        qs.append('fromTime', moment().subtract(DEFAULT_TIMEFRAME_DAYS, 'days').valueOf())
-        qs.append('toTime', moment().valueOf())
+        qs.append(
+          'fromTime',
+          moment().subtract(DEFAULT_TIMEFRAME_DAYS, 'days').valueOf(),
+        )
+        qs.append(
+          'toTime',
+          moment().valueOf(),
+        )
 
         const qs_string = qs.toString()
 
@@ -433,7 +444,7 @@ export default () => {
     'num_txs',
   )
 
-  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg space-y-1 p-4'
+  const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
   const colors = [
     'bg-yellow-500',
     'bg-blue-500',

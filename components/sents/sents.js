@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
-import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
+import { ProgressBar, ColorRing, Puff } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -40,103 +40,191 @@ export default ({ n }) => {
   const [filters, setFilters] = useState(null)
 
   useEffect(() => {
-    if (evm_chains_data && cosmos_chains_data && asPath) {
-      const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-      const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-      const { txHash, sourceChain, destinationChain, senderAddress, recipientAddress, fromTime, toTime } = { ...params }
-      setFilters({
+    if (
+      evm_chains_data &&
+      cosmos_chains_data &&
+      asPath
+    ) {
+      const params = params_to_obj(
+        asPath.indexOf('?') > -1 &&
+        asPath.substring(asPath.indexOf('?') + 1)
+      )
+
+      const chains_data = _.concat(
+        evm_chains_data,
+        cosmos_chains_data,
+      )
+
+      const {
         txHash,
-        sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
-        destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
+        sourceChain,
+        destinationChain,
         senderAddress,
         recipientAddress,
-        time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
+        fromTime,
+        toTime,
+      } = { ...params }
+
+      setFilters({
+        txHash,
+        sourceChain: getChain(
+          sourceChain,
+          chains_data,
+        )?._id ||
+          sourceChain,
+        destinationChain: getChain(
+          destinationChain,
+          chains_data,
+        )?._id ||
+          destinationChain,
+        senderAddress,
+        recipientAddress,
+        time: fromTime &&
+          toTime &&
+          [
+            moment(Number(fromTime)),
+            moment(Number(toTime)),
+          ],
       })
-      // if (typeof fetchTrigger === 'number') {
-      //   setFetchTrigger(moment().valueOf())
-      // }
     }
   }, [evm_chains_data, cosmos_chains_data, asPath])
 
   useEffect(() => {
     const triggering = is_interval => {
-      setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+      setFetchTrigger(
+        is_interval ?
+          moment().valueOf() :
+          typeof fetchTrigger === 'number' ?
+            null :
+            0
+      )
     }
-    if (pathname && filters) {
+
+    if (
+      pathname &&
+      filters
+    ) {
       triggering()
     }
-    const interval = setInterval(() => triggering(true), (address || ['/sent/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
-    return () => {
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      triggering(true),
+      (address || ['/sent/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [pathname, address, filters])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (filters && (!pathname?.includes('/[address]') || address)) {
-        if (!controller.signal.aborted) {
-          setFetching(true)
-          if (!fetchTrigger) {
-            setTotal(null)
-            setData(null)
-            setOffet(0)
+      if (
+        filters &&
+        (
+          !pathname?.includes('/[address]') ||
+          address
+        )
+      ) {
+        setFetching(true)
+
+        if (!fetchTrigger) {
+          setTotal(null)
+          setData(null)
+          setOffet(0)
+        }
+        const _data = !fetchTrigger ?
+          [] :
+          data || []
+        const size = n ||
+          LIMIT
+        const from = fetchTrigger === true || fetchTrigger === 1 ?
+          _data.length :
+          0
+        let params
+
+        if (address) {
+          params = {
+            senderAddress: address,
           }
-          const _data = !fetchTrigger ? [] : (data || []),
-            size = n || LIMIT
-          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
-          let params
-          if (address) {
-            params = {
-              senderAddress: address,
-            }
+        }
+        else if (filters) {
+          const {
+            txHash,
+            sourceChain,
+            destinationChain,
+            senderAddress,
+            recipientAddress,
+            time,
+          } = { ...filters }
+
+          let fromTime,
+            toTime
+
+          if (time?.length > 1) {
+            fromTime = time[0].unix()
+            toTime = time[1].unix()
           }
-          else if (filters) {
-            const { txHash, sourceChain, destinationChain, senderAddress, recipientAddress, time } = { ...filters }
-            let fromTime, toTime
-            if (time?.length > 1) {
-              fromTime = time[0].unix()
-              toTime = time[1].unix()
-            }
-            params = {
-              txHash,
-              sourceChain,
-              destinationChain,
-              senderAddress,
-              recipientAddress,
-              fromTime,
-              toTime,
-            }
+
+          params = {
+            txHash,
+            sourceChain,
+            destinationChain,
+            senderAddress,
+            recipientAddress,
+            fromTime,
+            toTime,
           }
-          const response = await token_sent({
+        }
+        const response = await token_sent(
+          {
             ...params,
             size,
             from,
-          })
-          if (response) {
-            setTotal(response.total)
-            response = _.orderBy(_.uniqBy(_.concat(response.data?.map(d => {
-              return {
-                ...d,
-              }
-            }) || [], _data), 'event.transactionHash'), ['event.block_timestamp'], ['desc'])
-            setData(response)
-          }
-          else if (!fetchTrigger) {
-            setTotal(0)
-            setData([])
-          }
-          setFetching(false)
+          },
+        )
+
+        const {
+          data,
+          total,
+        } = { ...response }
+
+        if (response) {
+          setTotal(total)
+
+          response = _.orderBy(
+            _.uniqBy(
+              _.concat(
+                (data || [])
+                  .map(d => {
+                    return {
+                      ...d,
+                    }
+                  }),
+                _data,
+              ),
+              'event.transactionHash',
+            ),
+            ['event.block_timestamp'],
+            ['desc'],
+          )
+
+          setData(response)
         }
+        else if (!fetchTrigger) {
+          setTotal(0)
+          setData([])
+        }
+
+        setFetching(false)
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [fetchTrigger])
 
-  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+  const chains_data = _.concat(
+    evm_chains_data,
+    cosmos_chains_data,
+  )
 
   return (
     data ?
@@ -482,24 +570,41 @@ export default ({ n }) => {
           defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />
-        {data.length > 0 && (typeof total !== 'number' || data.length < total) && (
-          !fetching ?
-            <button
-              onClick={() => {
-                setOffet(data.length)
-                setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
-              }}
-              className="max-w-min hover:bg-slate-100 dark:hover:bg-slate-900 rounded-lg whitespace-nowrap font-medium hover:font-bold mx-auto py-1.5 px-2.5"
-            >
-              Load more
-            </button>
-            :
-            <div className="flex justify-center p-1.5">
-              <ThreeDots color={loader_color(theme)} width="24" height="24" />
-            </div>
-        )}
-      </div>
-      :
-      <TailSpin color={loader_color(theme)} width="32" height="32" />
+        {
+          data.length > 0 &&
+          (
+            typeof total !== 'number' ||
+            data.length < total
+          ) &&
+          (
+            !fetching ?
+              <button
+                onClick={() => {
+                  setOffet(data.length)
+                  setFetchTrigger(
+                    typeof fetchTrigger === 'number' ?
+                      true :
+                      1
+                  )
+                }}
+                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+              >
+                Load more
+              </button> :
+              <div className="flex justify-center p-1.5">
+                <ColorRing
+                  color={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              </div>
+          )
+        }
+      </div> :
+      <ProgressBar
+        color={loader_color(theme)}
+        width="36"
+        height="36"
+      />
   )
 }

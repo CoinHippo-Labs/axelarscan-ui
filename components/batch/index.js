@@ -53,12 +53,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(true),
-        3 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(true),
+      3 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [chain, id])
 
   useEffect(() => {

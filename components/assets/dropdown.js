@@ -16,14 +16,22 @@ export default ({
   const [selectedKey, setSelectedKey] = useState(null)
 
   useEffect(() => {
-    setOptions(data.filter(d => d))
+    setOptions(
+      data.filter(d => d)
+    )
   }, [data])
 
   useEffect(() => {
     setSelectedKey(defaultSelectedKey)
   }, [defaultSelectedKey])
 
-  const selectedData = options?.find(o => o?.id === selectedKey) || selectedKey
+  const selectedData = options?.find(o => o?.id === selectedKey) ||
+    selectedKey
+
+  const {
+    name,
+    image,
+  } = { ...selectedData }
 
   return (
     <Menu
@@ -33,30 +41,36 @@ export default ({
       {({ open }) => (
         <>
           <div>
-            <Menu.Button className="w-full bg-white dark:bg-black hover:bg-slate-50 dark:hover:bg-slate-900 rounded-lg border border-slate-300 dark:border-slate-700 shadow focus:outline-none inline-flex justify-center text-sm font-semibold py-2 px-3">
+            <Menu.Button
+              className="w-full bg-white dark:bg-black hover:bg-slate-50 dark:hover:bg-slate-900 rounded shadow focus:outline-none inline-flex justify-center text-sm font-semibold py-2 px-3"
+            >
               {selectedData ?
                 <div className="flex items-center space-x-2">
-                  {selectedData.image && (
+                  {image && (
                     <Image
-                      src={selectedData.image}
+                      src={image}
                       className="w-5 h-5 rounded-full"
                     />
                   )}
                   <span className="font-bold">
-                    {selectedData.name}
+                    {name}
                   </span>
-                </div>
-                :
+                </div> :
                 selectedData === '' ?
                   <span className="font-bold">
                     {allOptionsName}
-                  </span>
-                  :
+                  </span> :
                   placeholder
               }
               {open ?
-                <BiChevronUp size={20} className="text-slate-800 dark:text-slate-200 ml-1 -mr-1" /> :
-                <BiChevronDown size={20} className="text-slate-slate dark:text-slate-200 ml-1 -mr-1" />
+                <BiChevronUp
+                  size={20}
+                  className="text-slate-800 dark:text-slate-200 ml-1 -mr-1"
+                /> :
+                <BiChevronDown
+                  size={20}
+                  className="text-slate-slate dark:text-slate-200 ml-1 -mr-1"
+                />
               }
             </Menu.Button>
           </div>
@@ -69,14 +83,19 @@ export default ({
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className="w-48 min-w-max bg-white dark:bg-black absolute z-10 rounded-lg shadow ring-1 ring-black ring-opacity-5 focus:outline-none origin-top-left left-0 mt-2">
+            <Menu.Items
+              className="w-48 min-w-max bg-white dark:bg-black absolute z-10 rounded shadow ring-1 ring-black ring-opacity-5 focus:outline-none origin-top-left left-0 mt-2"
+            >
               <div className="py-1">
                 {hasAllOptions && (
-                  <Menu.Item key={-1}>
+                  <Menu.Item
+                    key={-1}
+                  >
                     {({ active }) => (
                       <div
                         onClick={() => {
                           setSelectedKey('')
+
                           if (onSelect) {
                             onSelect('')
                           }
@@ -91,13 +110,16 @@ export default ({
                   </Menu.Item>
                 )}
                 {options?.map((o, k) => (
-                  <Menu.Item key={k}>
+                  <Menu.Item
+                    key={k}
+                  >
                     {({ active }) => (
                       <div
                         onClick={() => {
                           setSelectedKey(o.id)
+
                           if (onSelect) {
-                            onSelect(options?.find(_o => _o?.id === o.id))
+                            onSelect(options.find(_o => _o?.id === o.id))
                           }
                         }}
                         className={`${active ? 'bg-slate-100 dark:bg-slate-900' : 'text-slate-800 dark:text-slate-200'} ${selectedKey === o.id ? 'font-bold' : active ? 'font-semibold' : 'font-medium'} cursor-pointer flex items-center text-sm space-x-2 py-2 px-3`}

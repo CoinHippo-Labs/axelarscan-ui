@@ -125,12 +125,12 @@ export default ({
       triggering()
     }
 
-    return () => clearInterval(
-      setInterval(() =>
-        triggering(true),
-        (height || address || ['/transactions/search'].includes(pathname) ? 3 : 0.1) * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      triggering(true),
+      (height || address || ['/transactions/search'].includes(pathname) ? 3 : 0.1) * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [assets_data, pathname, height, address, filters])
 
   useEffect(() => {

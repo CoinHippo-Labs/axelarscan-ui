@@ -216,12 +216,12 @@ export default () => {
 
     getData()
 
-    return () => clearInterval(
-      setInterval(() =>
-        getData(),
-        0.5 * 60 * 1000,
-      )
+    const interval = setInterval(() =>
+      getData(),
+      0.5 * 60 * 1000,
     )
+
+    return () => clearInterval(interval)
   }, [tx, transfer_id, assets_data])
 
   const chains_data = _.concat(

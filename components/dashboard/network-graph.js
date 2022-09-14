@@ -2,46 +2,64 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BallTriangle } from 'react-loader-spinner'
 import G6 from '@antv/g6'
+import { ColorRing } from 'react-loader-spinner'
 
-import { chainName, getChain } from '../../lib/object/chain'
+import { getChain } from '../../lib/object/chain'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({
   id = `network-graph_${moment().valueOf()}`,
-  data,
+  transfers,
+  gmps,
 }) => {
-  const { preferences, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, cosmos_chains: state.cosmos_chains }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { cosmos_chains_data } = { ...cosmos_chains }
+  const {
+    preferences,
+    cosmos_chains,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        cosmos_chains: state.cosmos_chains,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
 
   const [rendered, setRendered] = useState(null)
   const [graph, setGraph] = useState(null)
 
   useEffect(() => {
-    if (rendered && !graph) {
+    if (
+      rendered &&
+      !graph
+    ) {
       setGraph(
         new G6.Graph({
           container: id,
-          width: 775.5,
-          height: 581.625,
+          width: 800,
+          height: 600,
           fitView: true,
           fitViewPadding: [
-            10,
-            10,
-            10,
-            10,
+            0,
+            66,
+            0,
+            0,
           ],
           fitCenter: true,
           layout: {
-            type: 'radial',
+            type: 'concentric',
             preventOverlap: true,
-            linkDistance: 180,
-            nodeSpacing: 16,
+            clockwise: false,
           },
           defaultNode: {
-            size: 32,
+            size: 64,
           },
           defaultEdge: {
             labelCfg: {
@@ -64,53 +82,62 @@ export default ({
   }, [rendered])
 
   useEffect(() => {
-    if (data && graph) {
-      const axelar_chain_data = getChain(
-        'axelarnet',
-        cosmos_chains_data,
-      )
-
-      const fontFamily = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
+    if (
+      transfers &&
+      gmps &&
+      graph
+    ) {
       const nodes = []
       let edges = []
+
       const labelCfg = {
         style: {
-          fontFamily,
-          fontWeight: 600,
+          fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+          fontSize: 16,
+          fontWeight: 500,
           fill: theme === 'dark' ?
             '#fff' :
             '#000',
         },
       }
 
-      _.orderBy(
-        data,
-        ['destination_chain'],
-        ['asc'],
-      )
-      .forEach(d => {
-        const x = [
+      data.forEach(d => {
+        const xs = [
           'source',
           'destination',
         ]
 
-        x.forEach(_x => {
-          const id = d?.[`${_x}_chain`],
-            _d = d?.[`${_x}_chain_data`]
+        xs.forEach(x => {
+          const id = d[`${x}_chain`],
+            chain_data = d[`${x}_chain_data`]
 
           if (
             id &&
             nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0
           ) {
+            const {
+              name,
+              image,
+            } = { ...chain_data }
+
+            const is_axelarnet = equals_ignore_case(id, axelarnet.id)
+
             nodes.push({
               id,
-              size: equals_ignore_case(id, axelar_chain_data?.id) ?
-                40 :
-                32,
+              size: is_axelarnet ?
+                80 :
+                64,
               type: 'image',
-              img: _d?.image,
-              label: chainName(_d),
+              img: image,
+              label: name,
               labelCfg,
+              clipCfg: {
+                show: true,
+                type: 'circle',
+                r: is_axelarnet ?
+                  40 :
+                  32,
+              },
               style: {
                 fill: theme === 'dark' ?
                   '#000' :
@@ -135,21 +162,19 @@ export default ({
           type: 'circle-running',
           label: `${number_format(
             num_txs,
-            num_txs >= 100000 ?
+            num_txs > 1000000 ?
               '0,0.00a' :
               '0,0',
             )
-          } txs`,
+          }`,
           labelCfg: {
             style: {
-              ...labelCfg?.style,
-              fontFamily,
-              fontWeight: 600,
-              fontSize: 10,
+              ...labelCfg.style,
+              fontSize: 12,
               textBaseline: 'bottom',
             },
           },
-          curveOffset: 28,
+          curveOffset: 32,
           style: {
             stroke: theme === 'dark' ?
               '#333' :
@@ -172,13 +197,17 @@ export default ({
               y,
             } = { ...start_point }
 
+            const {
+              color,
+            } = { ...cfg?.d?.source_chain_data }
+
             const circle = group.addShape(
               'circle',
               {
                 attrs: {
                   x,
                   y,
-                  fill: cfg?.d?.source_chain_data?.color ||
+                  fill: color ||
                     '#3b82f6',
                   r: 3.5,
                 },
@@ -216,20 +245,83 @@ export default ({
 
       graph.render()
     }
-  }, [theme, data, graph])
+  }, [theme, transfers, gmps, graph])
+
+  const axelarnet = getChain(
+    'axelarnet',
+    cosmos_chains_data,
+  )
+
+  const data = transfers && gmps ?
+    Object.entries(
+      _.groupBy(
+        _.concat(
+          transfers,
+          gmps,
+        )
+        .flatMap(d => {
+          const {
+            source_chain,
+            destination_chain,
+          } = { ...d }
+
+          if (
+            axelarnet?.id &&
+            ![
+              source_chain,
+              destination_chain,
+            ].includes(axelarnet.id)
+          ) {
+            return [
+              {
+                ...d,
+                id: `${axelarnet.id}_${destination_chain}`,
+                source_chain: axelarnet.id,
+                source_chain_data: axelarnet,
+              },
+              {
+                ...d,
+                id: `${source_chain}_${axelarnet.id}`,
+                destination_chain: axelarnet.id,
+                destination_chain_data: axelarnet,
+              },
+            ]
+          }
+          else {
+            return d
+          }
+        }),
+        'id',
+      ),
+    )
+    .map(([k, v]) => {
+      return {
+        id: k,
+        ..._.head(v),
+        num_txs: _.sumBy(
+          v,
+          'num_txs',
+        ),
+        volume: _.sumBy(
+          v,
+          'volume',
+        ),
+      }
+    }) :
+    undefined
 
   return (
     <div className="w-full min-h-full">
       <div
         id={id}
-        className={`${data?.length > 0 ? 'flex' : 'hidden'} items-center justify-start`}
+        className={`${data?.length > 0 ? 'flex' : 'hidden'} items-center justify-center`}
       />
       {!data && (
-        <div className="w-4/4 h-120 flex items-center justify-center sm:pl-20">
-          <BallTriangle
+        <div className="h-120 flex items-center justify-center">
+          <ColorRing
             color={loader_color(theme)}
-            width="36"
-            height="36"
+            width="60"
+            height="60"
           />
         </div>
       )}
