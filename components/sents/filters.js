@@ -37,6 +37,10 @@ export default () => {
     asPath,
   } = { ...router }
 
+  const [filters, setFilters] = useState(null)
+  const [filterTrigger, setFilterTrigger] = useState(undefined)
+  const [hidden, setHidden] = useState(true)
+
   useEffect(() => {
     if (
       evm_chains_data &&
