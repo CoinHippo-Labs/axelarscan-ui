@@ -109,7 +109,7 @@ export default () => {
 
   return (
     data?.length >= assets_data?.filter(a => a && (!a.is_staging || staging)).length ?
-      <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto ml-2 py-0.5">
+      <div className="overflow-x-auto flex items-center space-x-2 sm:space-x-4 sm:ml-2 py-0.5">
         <div className="bg-zinc-100 dark:bg-zinc-900 rounded-xl shadow dark:shadow-zinc-600 text-center p-2 sm:pt-3.5 sm:pb-2.5 sm:px-4">
           <div
             title={number_format(
@@ -177,7 +177,7 @@ export default () => {
           </div>
         </div>
       </div> :
-      <div className="h-full flex items-center justify-end">
+      <div className="sm:h-full flex items-center sm:justify-end">
         <ColorRing
           color={loader_color(theme)}
           width="32"

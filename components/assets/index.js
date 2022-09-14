@@ -217,7 +217,7 @@ export default () => {
                     />
                   </div>
                 ),
-                headerClassName: 'justify-end text-right',
+                headerClassName: 'whitespace-nowrap justify-end text-right',
               }
             ]}
             data={data_filtered}
