@@ -366,14 +366,14 @@ export default () => {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4">
             <div className="xl:col-span-2">
               <CrossChainMetrics
                 transfers={transfers}
                 gmps={gmps}
               />
             </div>
-            <div className="lg:col-span-2 xl:col-span-5">
+            <div className="lg:col-span-2 xl:col-span-6">
               <NetworkGraph
                 id="cross-chain"
                 transfers={transfers?.network_graph_data}
@@ -383,7 +383,7 @@ export default () => {
           </div>
         </div>
       )}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4">
         <div className="space-y-2">
           <Link href="/blocks">
             <a>
