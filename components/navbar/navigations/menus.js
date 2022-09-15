@@ -48,9 +48,9 @@ export default [
   process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && {
     id: 'gmp',
     title: 'GMP',
-    path: '/gmp',
+    path: '/gmp/search',
     others_paths: [
-      '/gmp/search',
+      '/gmp',
       '/gmp/stats',
       '/gmp/[tx]',
     ],

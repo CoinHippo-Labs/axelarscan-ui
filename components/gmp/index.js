@@ -2790,6 +2790,44 @@ export default () => {
                           Error:
                         </span>
                         <div className="flex flex-col space-y-1.5">
+                          <div className="flex flex-col space-y-1.5">
+                            {
+                              [
+                                {
+                                  id: 'message',
+                                  value: _data.error?.data?.message || _data.error?.message,
+                                },
+                              ]
+                              .filter(e => e?.value)
+                              .map((e, j) => (
+                                <div
+                                  key={j}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                                >
+                                  {ellipse(e.value, 256)}
+                                </div>
+                              ))
+                            }
+                          </div>
+                          <div className="flex flex-col space-y-1.5">
+                            {
+                              [
+                                {
+                                  id: 'reason',
+                                  value: _data.error?.reason && `Reason: ${_data.error.reason}`,
+                                },
+                              ]
+                              .filter(e => e?.value)
+                              .map((e, j) => (
+                                <div
+                                  key={j}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                                >
+                                  {ellipse(e.value, 256)}
+                                </div>
+                              ))
+                            }
+                          </div>
                           {(_data.error?.code || is_not_enough_gas) && (
                             <div className="flex items-center space-x-1.5">
                               {_data.error?.code && (
@@ -2810,23 +2848,23 @@ export default () => {
                             </div>
                           )}
                           <div className="flex flex-col space-y-1.5">
-                            {[{
-                              id: 'reason',
-                              value: _data.error?.reason && `Reason: ${_data.error.reason}`,
-                            }, {
-                              id: 'message',
-                              value: _data.error?.data?.message || _data.error?.message,
-                            }, {
-                              id: 'body',
-                              value: _data.error?.body?.replaceAll('"""', ''),
-                            }].filter(e => e?.value).map((e, j) => (
-                              <div
-                                key={j}
-                                className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
-                              >
-                                {ellipse(e.value, 256)}
-                              </div>
-                            ))}
+                            {
+                              [
+                                {
+                                  id: 'body',
+                                  value: _data.error?.body?.replaceAll('"""', ''),
+                                }
+                              ]
+                              .filter(e => e?.value)
+                              .map((e, j) => (
+                                <div
+                                  key={j}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                                >
+                                  {ellipse(e.value, 256)}
+                                </div>
+                              ))
+                            }
                           </div>
                         </div>
                       </div>
