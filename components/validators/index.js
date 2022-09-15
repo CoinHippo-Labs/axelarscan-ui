@@ -130,6 +130,11 @@ export default () => {
   )
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+  const show_cumulative = staging ||
+    [
+      'testnet',
+      'testnet-2',
+    ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
 
   return (
     <div className="space-y-4 mb-4 mx-auto">
@@ -173,7 +178,7 @@ export default () => {
         }
       </div>
       {data_filtered ?
-        <div className="max-w-fit overflow-x-auto space-y-4 mx-auto px-0.5">
+        <div className="max-w-fit overflow-x-auto space-y-4 mx-auto p-0.5">
           <Datatable
             columns={[
               {
@@ -251,7 +256,7 @@ export default () => {
                               <a
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-slate-400 dark:text-slate-600"
+                                className="text-slate-400 dark:text-slate-600 text-xs"
                               >
                                 {ellipse(
                                   operator_address,
@@ -261,6 +266,7 @@ export default () => {
                               </a>
                             </Link>
                             <Copy
+                              size={16}
                               value={operator_address}
                             />
                           </div>
@@ -298,7 +304,7 @@ export default () => {
                       Voting Power
                     </span>
                     <div className="flex items-center justify-between space-x-3 sm:space-x-8">
-                      <span className="text-3xs">
+                      <span className="text-3xs -mr-4">
                         Consensus
                       </span>
                       <span className="text-3xs">
@@ -489,10 +495,10 @@ export default () => {
               {
                 Header: (
                   <div className="flex flex-col items-center space-y-1">
-                    <span>
-                      Cumulative Share %
+                    <span className="-mr-3">
+                      Cumulative
                     </span>
-                    <span className="text-3xs">
+                    <span className="text-3xs mr-3">
                       Consensus
                     </span>
                   </div>
@@ -544,16 +550,14 @@ export default () => {
 
                   return (
                     <div className="flex items-start space-x-1.5 mt-0.5">
-                      <div className="w-24">
+                      <div className="w-24 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
                         <div style={{ width: `${total_share}%` }}>
-                          <div className="mt-0.5">
-                            <ProgressBar
-                              width={(total_share - tokens_share) * 100 / total_share}
-                              color="bg-blue-200 dark:bg-blue-500"
-                              backgroundClassName="h-7 bg-blue-500 dark:bg-blue-200"
-                              className="h-7"
-                            />
-                          </div>
+                          <ProgressBar
+                            width={(total_share - tokens_share) * 100 / total_share}
+                            color="bg-blue-200 dark:bg-blue-500"
+                            backgroundClassName="h-7 bg-blue-500 dark:bg-blue-200"
+                            className="h-7"
+                          />
                         </div>
                       </div>
                       <span className="text-slate-600 dark:text-slate-200 text-2xs font-medium">
@@ -566,13 +570,13 @@ export default () => {
                     </div>
                   )
                 },
-                headerClassName: 'whitespace-nowrap',
+                headerClassName: 'whitespace-nowrap justify-end',
               },
               {
                 Header: (
                   <div className="flex flex-col items-center space-y-1">
-                    <span>
-                      Cumulative Share %
+                    <span className="-ml-2.5">
+                      Share %
                     </span>
                     <span className="text-3xs">
                       Quadratic
@@ -626,19 +630,17 @@ export default () => {
 
                   return (
                     <div className="flex items-start space-x-1.5 mt-0.5">
-                      <div className="w-24">
+                      <div className="w-24 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
                         <div style={{ width: `${total_share}%` }}>
-                          <div className="mt-0.5">
-                            <ProgressBar
-                              width={(total_share - quadratic_voting_power_share) * 100 / total_share}
-                              color="bg-orange-200 dark:bg-orange-500"
-                              backgroundClassName="h-7 bg-orange-500 dark:bg-orange-200"
-                              className="h-7"
-                            />
-                          </div>
+                          <ProgressBar
+                            width={(total_share - quadratic_voting_power_share) * 100 / total_share}
+                            color="bg-orange-200 dark:bg-orange-500"
+                            backgroundClassName="h-7 bg-orange-500 dark:bg-orange-200"
+                            className="h-7"
+                          />
                         </div>
                       </div>
-                      <span className="text-slate-600 dark:text-slate-200 text-2xs font-medium">
+                      <span className="text-slate-600 dark:text-slate-200 text-2xs font-bold">
                         {number_format(
                           total_share,
                           '0,0.00',
@@ -1091,8 +1093,8 @@ export default () => {
                   ![
                     'tokens',
                     'quadratic_voting_power',
-                    !staging && 'cumulative_share',
-                    !staging && 'quadratic_cumulative_share',
+                    !show_cumulative && 'cumulative_share',
+                    !show_cumulative && 'quadratic_cumulative_share',
                     'status',
                   ].includes(c.accessor)
             )}
