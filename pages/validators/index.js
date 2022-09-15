@@ -2,7 +2,7 @@ import Validators from '../../components/validators'
 
 export default () => {
   return (
-    <div className="max-w-8xl mx-auto">
+    <div className="mx-auto">
       <Validators />
     </div>
   )
