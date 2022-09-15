@@ -630,7 +630,7 @@ export default () => {
         }
       </div> :
       <ProgressBar
-        color={loader_color(theme)}
+        borderColor={loader_color(theme)}
         width="36"
         height="36"
       />

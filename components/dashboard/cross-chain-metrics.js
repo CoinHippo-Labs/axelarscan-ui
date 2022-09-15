@@ -65,7 +65,7 @@ export default ({
               '0,0',
             ) :
             <ProgressBar
-              color={loader_color(theme)}
+              borderColor={loader_color(theme)}
               width="32"
               height="32"
             />
@@ -85,7 +85,7 @@ export default ({
                   '0,0',
                 ) :
                 <ProgressBar
-                  color={loader_color(theme)}
+                  borderColor={loader_color(theme)}
                   width="32"
                   height="32"
                 />
@@ -105,7 +105,7 @@ export default ({
                   '0,0',
                 ) :
                 <ProgressBar
-                  color={loader_color(theme)}
+                  borderColor={loader_color(theme)}
                   width="32"
                   height="32"
                 />
@@ -153,7 +153,7 @@ export default ({
                 '0,0',
               ) :
               <ProgressBar
-                color={loader_color(theme)}
+                borderColor={loader_color(theme)}
                 width="32"
                 height="32"
               />
@@ -173,14 +173,14 @@ export default ({
                 '0,0',
               ) :
               <ProgressBar
-                color={loader_color(theme)}
+                borderColor={loader_color(theme)}
                 width="32"
                 height="32"
               />
             }
           </div>
           <span className={subtitleClassName}>
-            # of deployed contracts
+            # of cross-chain contracts
           </span>
         </a>
       </Link>

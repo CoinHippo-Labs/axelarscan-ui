@@ -220,7 +220,7 @@ export default () => {
           {canSearch && (
             <button
               onClick={() => onSubmit()}
-              className="bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 absolute rounded text-white right-0 p-1.5 mt-1.5 mr-2"
+              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 absolute rounded text-white right-0 p-1.5 mt-1.5 mr-2"
             >
               <FiSearch
                 size={16}

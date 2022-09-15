@@ -131,7 +131,7 @@ export default ({
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tracking-wider text-blue-400 hover:text-blue-500 dark:text-blue-600 dark:hover:text-blue-500 font-medium"
+                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
                   >
                     {number_format(
                       props.value,
@@ -198,7 +198,7 @@ export default ({
                             <a
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="tracking-wider text-blue-400 hover:text-blue-500 dark:text-blue-600 dark:hover:text-blue-500 font-medium"
+                              className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                             >
                               {ellipse(
                                 moniker,
@@ -339,7 +339,7 @@ export default ({
         }
       </div> :
       <ProgressBar
-        color={loader_color(theme)}
+        borderColor={loader_color(theme)}
         width="36"
         height="36"
       />

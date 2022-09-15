@@ -62,7 +62,7 @@ export default ({
                   '0,0',
                 ) :
                 <ProgressBar
-                  color={loader_color(theme)}
+                  borderColor={loader_color(theme)}
                   width="32"
                   height="32"
                 />
@@ -103,7 +103,7 @@ export default ({
                   </span>
                 </> :
                 <ProgressBar
-                  color={loader_color(theme)}
+                  borderColor={loader_color(theme)}
                   width="32"
                   height="32"
                 />
@@ -142,7 +142,7 @@ export default ({
                   '0,0',
                 ) :
                 <ProgressBar
-                  color={loader_color(theme)}
+                  borderColor={loader_color(theme)}
                   width="32"
                   height="32"
                 />
@@ -185,7 +185,7 @@ export default ({
                     '0,0.00',
                 ) :
                 <ProgressBar
-                  color={loader_color(theme)}
+                  borderColor={loader_color(theme)}
                   width="32"
                   height="32"
                 />
@@ -216,7 +216,7 @@ export default ({
                 %
               </span> :
               <ProgressBar
-                color={loader_color(theme)}
+                borderColor={loader_color(theme)}
                 width="32"
                 height="32"
               />

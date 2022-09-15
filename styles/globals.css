@@ -254,12 +254,12 @@ input[type=number] {
   @apply text-blue-600 dark:text-white font-semibold;
 }
 
-.backdrop-blue-8 {
+.backdrop-blur-8 {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-.backdrop-blue-16 {
+.backdrop-blur-16 {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }

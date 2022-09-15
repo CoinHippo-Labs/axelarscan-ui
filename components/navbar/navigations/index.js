@@ -47,7 +47,7 @@ export default () => {
           </HeadShake> :
           undefined
 
-        const className = `rounded-lg ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-400 dark:text-blue-600 text-sm font-bold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-normal hover:font-semibold'} space-x-1`
+        const className = `rounded-lg ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-500 dark:text-blue-500 text-sm font-bold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-normal hover:font-semibold'} space-x-1`
 
         return external ?
           <a

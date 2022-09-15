@@ -27,7 +27,7 @@ export default ({
 
   return (
     <div
-      className="backdrop-blue-16 w-40 shadow dark:shadow-slate-700 rounded-lg flex flex-col py-1"
+      className="backdrop-blur-16 w-40 shadow dark:shadow-slate-700 rounded-lg flex flex-col py-1"
     >
       {_menus.map((m, i) => {
         const {
@@ -63,7 +63,7 @@ export default ({
           </HeadShake> :
           undefined
 
-        const className = `w-full ${i === 0 ? 'rounded-t-lg' : i === _menus.length - 1 ? 'rounded-b-lg' : ''} ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-400 dark:text-blue-600 text-sm font-bold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-normal hover:font-semibold'} space-x-1.5 py-2 px-3`
+        const className = `w-full ${i === 0 ? 'rounded-t-lg' : i === _menus.length - 1 ? 'rounded-b-lg' : ''} ${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-500 dark:text-blue-500 text-sm font-bold' : 'text-slate-600 hover:text-slate-700 dark:text-slate-300 dark:hover:text-slate-200 text-sm font-normal hover:font-semibold'} space-x-1.5 py-2 px-3`
 
         return external ?
           <a

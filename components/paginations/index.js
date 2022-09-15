@@ -4,7 +4,7 @@ export const PageWithText = ({
   disabled = false,
   active,
   onClick,
-  activeClassNames = 'btn btn-default bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 shadow rounded text-white',
+  activeClassNames = 'btn btn-default bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 shadow rounded text-white',
   inactiveClassNames = 'btn btn-default bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
   children,
 }) => (
@@ -24,7 +24,7 @@ export const Page = ({
   disabled = false,
   active,
   onClick,
-  activeClassNames = 'btn btn-circle bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 text-white',
+  activeClassNames = 'btn btn-circle bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white',
   inactiveClassNames = 'btn btn-circle bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:text-slate-600 dark:hover:text-slate-200',
   children,
 }) => (

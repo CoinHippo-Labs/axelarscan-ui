@@ -110,7 +110,7 @@ export default ({
         type="button"
         disabled={disabled}
         onClick={show}
-        className={buttonClassName || 'btn btn-default btn-rounded bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 text-white'}
+        className={buttonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'}
       >
         {buttonTitle}
       </button>
@@ -172,7 +172,7 @@ export default ({
                           hide()
                         }
                       }}
-                      className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 text-white'}
+                      className={confirmButtonClassName || 'btn btn-default btn-rounded bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 text-white'}
                     >
                       {
                         confirmButtonTitle ||

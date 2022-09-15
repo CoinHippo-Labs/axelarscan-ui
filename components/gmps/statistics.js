@@ -516,7 +516,7 @@ export default () => {
             >
               <a
                 onClick={() => setTimeframeSelected(true)}
-                className={`${selected ? 'bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold' : 'bg-slate-100 dark:bg-slate-900 text-blue-400 hover:text-blue-500 dark:text-blue-600 dark:hover:text-blue-500 font-medium'} rounded-lg whitespace-nowrap mr-1.5 py-0.5 px-1.5`}
+                className={`${selected ? 'bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold' : 'bg-slate-100 dark:bg-slate-900 text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium'} rounded-lg whitespace-nowrap mr-1.5 py-0.5 px-1.5`}
               >
                 {title}
               </a>

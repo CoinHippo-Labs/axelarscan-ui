@@ -179,7 +179,7 @@ export default () => {
                         href={`${url}${contract_path?.replace('{address}', props.value)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-500 dark:text-blue-600 dark:hover:text-blue-500 font-medium"
+                        className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                       >
                         <span className="xl:hidden">
                           {ellipse(
@@ -226,7 +226,7 @@ export default () => {
             className="min-h-full no-border"
           /> :
           <ProgressBar
-            color={loader_color(theme)}
+            borderColor={loader_color(theme)}
             width="36"
             height="36"
           />

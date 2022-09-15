@@ -15,11 +15,13 @@ export default ({
 }) => {
   const {
     preferences,
+    evm_chains,
     cosmos_chains,
   } = useSelector(state =>
     (
       {
         preferences: state.preferences,
+        evm_chains: state.evm_chains,
         cosmos_chains: state.cosmos_chains,
       }
     ),
@@ -28,6 +30,9 @@ export default ({
   const {
     theme,
   } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
   const {
     cosmos_chains_data,
   } = { ...cosmos_chains }
@@ -247,12 +252,17 @@ export default ({
     }
   }, [theme, transfers, gmps, graph])
 
-  const axelarnet = getChain(
-    'axelarnet',
+  const chains_data = _.concat(
+    evm_chains_data,
     cosmos_chains_data,
   )
 
-  const data = transfers && gmps ?
+  const axelarnet = getChain(
+    'axelarnet',
+    chains_data,
+  )
+
+  let data = transfers && gmps ?
     Object.entries(
       _.groupBy(
         _.concat(
@@ -309,6 +319,52 @@ export default ({
       }
     }) :
     undefined
+
+  if (
+    data &&
+    axelarnet
+  ) {
+    chains_data
+      .filter(c => c && !(equals_ignore_case(c.id, axelarnet.id)))
+      .forEach(c => {
+        const {
+          id,
+        } = { ...c }
+
+        const ids = [
+          `${id}_${axelarnet.id}`,
+          `${axelarnet.id}_${id}`,
+        ]
+
+        ids.forEach((_id, i) => {
+          if (data.findIndex(_d => equals_ignore_case(_d?.id, _id)) < 0) {
+            const source_chain = i === 0 ?
+              id :
+              axelarnet.id
+            const destination_chain = i === 0 ?
+              axelarnet.id :
+              id
+
+            data.push(
+              {
+                id: _id,
+                source_chain,
+                source_chain_data: getChain(
+                  source_chain,
+                  chains_data,
+                ),
+                destination_chain,
+                destination_chain_data: getChain(
+                  destination_chain,
+                  chains_data,
+                ),
+                num_txs: 0,
+              }
+            )
+          }
+        })
+      })
+  }
 
   return (
     <div className="w-full min-h-full">

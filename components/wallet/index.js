@@ -336,7 +336,7 @@ export default ({
           {
             children ||
             (
-              <div className="bg-blue-400 hover:bg-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500 rounded whitespace-nowrap text-white py-1 px-2">
+              <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 rounded whitespace-nowrap text-white py-1 px-2">
                 Connect
               </div>
             )
