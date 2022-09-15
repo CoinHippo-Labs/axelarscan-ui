@@ -371,7 +371,7 @@ export default () => {
       title = 'Cross-chain Transfer'
       break
     case '/tvl':
-      title = 'TVL'
+      title = 'Total Value Locked'
       subtitle = 'Total assets on Axelar Network'
       right = (
         <TotalTVL />
@@ -542,7 +542,7 @@ export default () => {
   ].findIndex(p => pathname?.startsWith(p)) > -1
 
   return (
-    <div className={`w-full flex flex-col sm:flex-row sm:items-center mx-auto py-2 sm:pt-4 px-2 sm:px-4 ${!['/validators', '/tvl'].includes(pathname) ? 'max-w-8xl xl:px-0' : ''}`}>
+    <div className={`w-full flex flex-col sm:flex-row sm:items-center mx-auto py-2 px-2 sm:px-4 ${!['/tvl'].includes(pathname) ? 'sm:pt-4' : ''} ${!['/validators', '/tvl'].includes(pathname) ? 'max-w-8xl xl:px-0' : ''}`}>
       <div className="flex flex-col space-y-1">
         {title && (
           <h1 className="uppercase tracking-widest text-black dark:text-white text-sm sm:text-base font-medium">

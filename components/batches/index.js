@@ -334,8 +334,8 @@ export default () => {
   return (
     data ?
       <div className="min-h-full grid gap-2">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-2 mb-2">
-          <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-2 -mt-1.5">
+          <div className="space-y-1.5">
             {typeof total === 'number' && (
               <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
                 <span className="text-sm font-bold">

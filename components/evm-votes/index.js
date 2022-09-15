@@ -354,7 +354,7 @@ export default () => {
   return (
     data ?
       <div className="min-h-full grid gap-2">
-        <div className="flex items-center space-x-2 -mt-4">
+        <div className="flex items-center space-x-2 -mt-2">
           <span className="text-lg font-bold">
             {number_format(
               total,

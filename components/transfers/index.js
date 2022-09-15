@@ -356,7 +356,7 @@ export default () => {
   }, [evm_chains_data, cosmos_chains_data])
 
   return (
-    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 pb-8">
+    <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2 pb-4">
       <div className="lg:col-span-2">
         <LineChart
           id="cumulative_volume"
