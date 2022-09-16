@@ -298,18 +298,22 @@ export default () => {
                     'Invalid Data' :
                     k === 'approving' ?
                       'Wait for Approval' :
-                      k === 'error' ?
-                        'Error Execution' :
+                      k === 'approved' ?
+                        'Wait for Execute' :
+                        k === 'error' ?
+                          'Error Execution' :
                           capitalize(k),
                   color: k === 'invalid' ?
                     'bg-slate-500' :
                     k === 'approving' ?
                       'bg-yellow-500' :
-                      k === 'executed' ?
-                        'bg-green-500' :
-                        k === 'error' ?
-                          'bg-red-500' :
-                            undefined,
+                      k === 'approved' ?
+                        'bg-blue-500' :
+                        k === 'executed' ?
+                          'bg-green-500' :
+                          k === 'error' ?
+                            'bg-red-500' :
+                              undefined,
                   num_txs: v,
                 }
               }),
