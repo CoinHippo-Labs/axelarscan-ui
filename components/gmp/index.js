@@ -712,6 +712,8 @@ export default () => {
       </>
     )
   const gasAddButton =
+    !executed &&
+    !is_executed &&
     (
       is_not_enough_gas ||
       !gas_paid ||

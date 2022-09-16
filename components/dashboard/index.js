@@ -360,11 +360,6 @@ export default () => {
                 </h2>
               </a>
             </Link>
-            {['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT) && (
-              <div className="max-w-min bg-red-100 dark:bg-red-800 rounded whitespace-nowrap text-red-500 dark:text-red-400 text-xs py-0.5 px-2">
-                The transfer volume is missing. It will be updated soon.
-              </div>
-            )}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8 gap-4">
             <div className="xl:col-span-2">
