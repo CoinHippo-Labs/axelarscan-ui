@@ -243,73 +243,105 @@ export default () => {
   const ibc_data = asset_data?.ibc?.find(c => c?.chain_id === source_chain_data?.id)
   const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
   const asset_image = contract_data?.image || ibc_data?.image || asset_data?.image
-  const steps = [{
-    id: 'source',
-    title: 'Send Asset',
-    chain_data: source_chain_data,
-    data: source,
-    id_field: 'id',
-  }, {
-    id: 'confirm_deposit',
-    title: 'Confirm Deposit',
-    chain_data: axelar_chain_data,
-    data: confirm_deposit,
-    id_field: 'id',
-  }, evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 && {
-    id: 'vote',
-    title: 'Vote Confirm',
-    chain_data: axelar_chain_data,
-    data: vote,
-    id_field: 'id',
-  }, evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
-    id: 'sign_batch',
-    title: 'Sign Batch',
-    chain_data: axelar_chain_data,
-    data: sign_batch,
-    id_field: 'batch_id',
-    path: '/batch/{chain}/{id}',
-    params: {
-      chain: destination_chain_data?.id,
+  const steps = [
+    {
+      id: 'source',
+      title: 'Send Asset',
+      chain_data: source_chain_data,
+      data: source,
+      id_field: 'id',
     },
-  }, evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
-    id: 'executed',
-    title: 'Executed',
-    chain_data: axelar_chain_data,
-    data: sign_batch,
-    id_field: 'batch_id',
-    path: '/batch/{chain}/{id}',
-    params: {
-      chain: destination_chain_data?.id,
+    {
+      id: 'confirm_deposit',
+      title: 'Confirm Deposit',
+      chain_data: axelar_chain_data,
+      data: confirm_deposit,
+      id_field: 'id',
     },
-  }, cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
-    id: 'ibc_send',
-    title: 'IBC Transfer',
-    chain_data: ibc_send?.recv_txhash ?
-      destination_chain_data :
-      axelar_chain_data,
-    data: ibc_send,
-    id_field: ibc_send?.recv_txhash ?
-      'recv_txhash' :
-      ibc_send?.ack_txhash ?
-        'ack_txhash' :
-        'id',
-  }].filter(s => s).map((s, i) => {
+    evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 && {
+      id: 'vote',
+      title: 'Vote Confirm',
+      chain_data: axelar_chain_data,
+      data: vote,
+      id_field: 'id',
+    },
+    evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
+      id: 'sign_batch',
+      title: 'Sign Batch',
+      chain_data: axelar_chain_data,
+      data: sign_batch,
+      id_field: 'batch_id',
+      path: '/batch/{chain}/{id}',
+      params: {
+        chain: destination_chain_data?.id,
+      },
+    },
+    evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
+      id: 'executed',
+      title: 'Executed',
+      chain_data: axelar_chain_data,
+      data: sign_batch,
+      id_field: 'batch_id',
+      path: '/batch/{chain}/{id}',
+      params: {
+        chain: destination_chain_data?.id,
+      },
+    },
+    cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
+      id: 'ibc_send',
+      title: 'IBC Transfer',
+      chain_data: ibc_send?.recv_txhash ?
+        destination_chain_data :
+        axelar_chain_data,
+      data: ibc_send,
+      id_field: ibc_send?.recv_txhash ?
+        'recv_txhash' :
+        ibc_send?.ack_txhash ?
+          'ack_txhash' :
+          'id',
+    },
+  ]
+  .filter(s => s)
+  .map((s, i) => {
     return {
       ...s,
       i,
-      finish: !!(s.id === 'executed' ?
-        s.data?.executed :
-        s.id === 'ibc_send' ?
-          s.data?.recv_txhash || s.data?.ack_txhash :
-          s.data
+      finish: !!(
+        s.id === 'executed' ?
+          s.data?.executed :
+          s.id === 'ibc_send' ?
+            s.data?.recv_txhash ||
+              s.data?.ack_txhash :
+            s.id === 'source' ?
+              s.data?.status === 'success' :
+              s.data
       ),
     }
   })
-  const current_step = (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) + 1
+  const current_step = steps.findIndex(s => s.finish) < 0 ?
+    -1 :
+    (
+      _.maxBy(
+          steps.filter(s => s.finish),
+          'i',
+        )?.i ||
+          0
+    ) +
+    (
+      !insufficient_fee && amount > fee ?
+        1 :
+        0
+    )
   const detail_steps = _.slice(
     steps,
     0,
-    steps.length - (_.last(steps)?.id === 'executed' ? 1 : 0),
+    current_step > -1 ?
+      steps.length - (
+        _.last(steps)?.id === 'executed' ?
+          1 :
+          0
+      ) :
+      1,
   )
   const time_spent = _.last(steps)?.finish &&
     total_time_string(
