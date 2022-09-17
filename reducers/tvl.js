@@ -4,7 +4,7 @@ export default (
   state = {
     [`${TVL_DATA}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case TVL_DATA:

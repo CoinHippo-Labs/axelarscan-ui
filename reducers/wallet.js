@@ -13,7 +13,7 @@ export default (
   state = {
     [`${WALLET_DATA}`]: initial_wallet_data,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case WALLET_DATA:

@@ -4,7 +4,7 @@ export default (
   state = {
     [`${EVM_CHAINS_DATA}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case EVM_CHAINS_DATA:

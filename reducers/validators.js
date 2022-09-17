@@ -4,7 +4,7 @@ export default (
   state = {
     [`${VALIDATORS_DATA}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case VALIDATORS_DATA:

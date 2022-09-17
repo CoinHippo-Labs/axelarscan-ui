@@ -4,7 +4,7 @@ export default (
   state = {
     [`${COSMOS_CHAINS_DATA}`]: null,
   },
-  action
+  action,
 ) => {
   switch (action.type) {
     case COSMOS_CHAINS_DATA:

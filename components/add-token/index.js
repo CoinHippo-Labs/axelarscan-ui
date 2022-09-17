@@ -117,23 +117,25 @@ export default ({
             image,
           } = { ...contract_data }
 
-          const response = await web3.currentProvider.request({
-            method: 'wallet_watchAsset',
-            params: {
-              type: 'ERC20',
-              options: {
-                address: contract_address,
-                symbol,
-                decimals,
-                image: image ?
-                  `${image.startsWith('/') ?
-                    process.env.NEXT_PUBLIC_SITE_URL :
-                    ''
-                  }${mage}` :
-                  undefined,
+          const response = await web3.currentProvider.request(
+            {
+              method: 'wallet_watchAsset',
+              params: {
+                type: 'ERC20',
+                options: {
+                  address: contract_address,
+                  symbol,
+                  decimals,
+                  image: image ?
+                    `${image.startsWith('/') ?
+                      process.env.NEXT_PUBLIC_SITE_URL :
+                      ''
+                    }${image}` :
+                    undefined,
+                },
               },
             },
-          })
+          )
         } catch (error) {}
 
         setData(null)
