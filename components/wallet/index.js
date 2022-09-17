@@ -326,8 +326,7 @@ export default ({
                 </div>
               )
             }
-          </button>
-        :
+          </button> :
         <button
           disabled={disabled}
           onClick={connect}

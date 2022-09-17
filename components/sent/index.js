@@ -91,7 +91,7 @@ export default () => {
                     <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-xs lg:text-sm font-semibold py-0.5 px-1.5">
                       {event?.event === 'TokenSent' ?
                         'sendToken' :
-                        evemt?.event || '-'
+                        event?.event || '-'
                       }
                     </div>
                     {amount && _symbol && (
@@ -292,8 +292,8 @@ export default () => {
             const _data = data
             const { transactionHash, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
             const { sender, destinationAddress } = { ...returnValues }
-            const source_chain = event?.chain
-            const destination_chain = event?.returnValues?.destinationChain
+            const source_chain = data?.chain || chain
+            const destination_chain = data?.returnValues?.destinationChain
             const source_chain_data = getChain(source_chain, evm_chains_data)
             const destination_chain_data = getChain(destination_chain, evm_chains_data)
             const from = sender || receipt?.from || transaction?.from

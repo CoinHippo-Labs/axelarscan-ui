@@ -33,8 +33,12 @@ export default () => {
     >
       <div className="w-6 h-6 flex items-center justify-center">
         {theme === 'light' ?
-          <RiMoonFill size={18} /> :
-          <RiSunLine size={18} />
+          <RiMoonFill
+            size={18}
+          /> :
+          <RiSunLine
+            size={18}
+          />
         }
       </div>
     </button>

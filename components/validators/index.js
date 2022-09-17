@@ -132,6 +132,7 @@ export default () => {
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
   const show_cumulative = staging ||
     [
+      'mainnet',
       'testnet',
       'testnet-2',
     ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
