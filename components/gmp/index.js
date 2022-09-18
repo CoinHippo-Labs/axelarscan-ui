@@ -1738,8 +1738,15 @@ export default () => {
                 (
                   (
                     s.id === 'executed' &&
-                    !executed &&
-                    is_executed
+                    (
+                      (
+                        !executed &&
+                        is_executed
+                      ) ||
+                      (
+                        executed
+                      )
+                    )
                   ) ||
                   (
                     [
@@ -1778,7 +1785,9 @@ export default () => {
                           !executed &&
                           is_executed ?
                             'not_executed' :
-                            undefined,
+                            executed ?
+                              're_execute' :
+                              undefined,
                       )
 
                       if (s.id === 'refunded') {
