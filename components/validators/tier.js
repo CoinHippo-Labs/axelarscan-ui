@@ -172,7 +172,7 @@ export default () => {
                   percent < 0 ?
                     0 :
                     percent :
-                undefined,
+                undefined
 
               return {
                 ...v,
@@ -233,7 +233,7 @@ export default () => {
                   percent < 0 ?
                     0 :
                     percent :
-                undefined,
+                undefined
 
               return {
                 ...v,
@@ -698,63 +698,98 @@ export default () => {
             {
               Header: 'Validator',
               accessor: 'operator_address',
-              sortType: (a, b) => (a.original.description?.moniker || a.original.operator_address) > (b.original.description?.moniker || b.original.operator_address) ? 1 : -1,
-              Cell: props => (
-                props.row.original.description ?
-                  <div className={`min-w-max flex items-${props.row.original.description.moniker ? 'start' : 'center'} space-x-2`}>
-                    <Link href={`/validator/${props.value}`}>
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ValidatorProfile validator_description={props.row.original.description} />
-                      </a>
-                    </Link>
-                    <div className="flex flex-col">
-                      {props.row.original.description.moniker && (
-                        <Link href={`/validator/${props.value}`}>
-                          <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white font-bold"
-                          >
-                            {ellipse(props.row.original.description.moniker, 12)}
-                          </a>
-                        </Link>
-                      )}
+              sortType: (a, b) =>
+                (
+                  a.original.description?.moniker ||
+                  a.original.operator_address
+                ) >
+                (
+                  b.original.description?.moniker ||
+                  b.original.operator_address
+                ) ?
+                  1 :
+                  -1,
+              Cell: props => {
+                const {
+                  description,
+                } = { ...props.row.original }
+                const {
+                  moniker,
+                } = { ...description }
+
+                return (
+                  description ?
+                    <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                      <Link href={`/validator/${props.value}`}>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ValidatorProfile
+                            validator_description={description}
+                          />
+                        </a>
+                      </Link>
+                      <div className="flex flex-col">
+                        {moniker && (
+                          <Link href={`/validator/${props.value}`}>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                            >
+                              {ellipse(
+                                moniker,
+                                10,
+                              )}
+                            </a>
+                          </Link>
+                        )}
+                        <div className="flex items-center space-x-1">
+                          <Link href={`/validator/${props.value}`}>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-slate-400 dark:text-slate-600 text-xs"
+                            >
+                              {ellipse(
+                                props.value,
+                                6,
+                                process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                              )}
+                            </a>
+                          </Link>
+                          <Copy
+                            size={16}
+                            value={props.value}
+                          />
+                        </div>
+                      </div>
+                    </div> :
+                    props.value ?
                       <div className="flex items-center space-x-1">
                         <Link href={`/validator/${props.value}`}>
                           <a
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-slate-400 dark:text-slate-600 font-medium"
+                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                           >
-                            {ellipse(props.value, 6, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
+                            {ellipse(
+                              props.value,
+                              6,
+                              process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                            )}
                           </a>
                         </Link>
-                        <Copy value={props.value} />
-                      </div>
-                    </div>
-                  </div>
-                  :
-                  props.value ?
-                    <div className="flex items-center space-x-1">
-                      <Link href={`/validator/${props.value}`}>
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white font-medium"
-                        >
-                          {ellipse(props.value, 8, process.env.NEXT_PUBLIC_PREFIX_VALIDATOR)}
-                        </a>
-                      </Link>
-                      <Copy value={props.value} />
-                    </div>
-                    :
-                    <span>
-                      -
-                    </span>
-              ),
+                        <Copy
+                          value={props.value}
+                        />
+                      </div> :
+                      <span>
+                        -
+                      </span>
+                )
+              },
             },
             {
               Header: 'Uptime [0.1]',
@@ -823,6 +858,7 @@ export default () => {
                         </Link>
                       </div>
                     )}
+                  </div>
                 )
               },
               headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
@@ -857,7 +893,7 @@ export default () => {
                             </div>}
                             color="bg-green-400 dark:bg-green-500 rounded-lg"
                             backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 hover:bg-opacity-50 rounded-lg"
-                            className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}end'}`}
+                            className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}
                           />
                         </div> :
                         <span className="h-4 text-slate-300 dark:text-slate-600 mt-0.5">
@@ -1016,7 +1052,7 @@ export default () => {
                             </div>}
                             color="bg-green-400 dark:bg-green-500 rounded-lg"
                             backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 hover:bg-opacity-50 rounded-lg"
-                            className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}end'}`}
+                            className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}
                           />
                         </div> :
                         <span className="h-4 text-slate-300 dark:text-slate-600 mt-0.5">
@@ -1062,7 +1098,7 @@ export default () => {
                             </div>}
                             color="bg-green-400 dark:bg-green-500 rounded-lg"
                             backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 hover:bg-opacity-50 rounded-lg"
-                            className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}end'}`}
+                            className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}
                           />
                         </div> :
                         <span className="h-4 text-slate-300 dark:text-slate-600 mt-0.5">
