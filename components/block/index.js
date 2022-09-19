@@ -10,12 +10,27 @@ import { getBlock } from '../../lib/api/cosmos'
 import { base64ToBech32 } from '../../lib/object/key'
 
 export default () => {
-  const { status } = useSelector(state => ({ status: state.status }), shallowEqual)
-  const { status_data } = { ...status }
+  const {
+    status,
+  } = useSelector(state =>
+    (
+      {
+        status: state.status,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    status_data,
+  } = { ...status }
 
   const router = useRouter()
-  const { query } = { ...router }
-  const { height } = { ...query }
+  const {
+    query,
+  } = { ...router }
+  const {
+    height,
+  } = { ...query }
 
   const [data, setData] = useState(null)
 
@@ -68,39 +83,50 @@ export default () => {
                   response[field],
                   'type',
                 )
-              ).map(([k, v]) => {
+              )
+              .map(([k, v]) => {
                 return {
-                  type: _.last(k?.split('.')),
-                  data: v?.map(e => {
-                    const {
-                      attributes,
-                    } = { ...e }
+                  type: _.last(
+                    (k || '')
+                      .split('.')
+                  ),
+                  data: (v || [])
+                    .map(e => {
+                      const {
+                        attributes,
+                      } = { ...e }
 
-                    return Object.fromEntries(
-                      attributes?.map(a => {
-                        const {
-                          key,
-                          value,
-                        } = { ...a }
+                      return Object.fromEntries(
+                        (attributes || [])
+                          .map(a => {
+                            const {
+                              key,
+                              value,
+                            } = { ...a }
 
-                        return [
-                          key,
-                          value,
-                        ]
-                      }) || []
-                    )
-                  })
+                            return [
+                              key,
+                              value,
+                            ]
+                          })
+                      )
+                    })
                 }
               })
-              .filter(e => e.type && e.data)
+              .filter(e =>
+                e.type &&
+                e.data
+              )
             }
           }
 
-          setData({
-            ...response,
-            validator_addresses,
-            height,
-          })
+          setData(
+            {
+              ...response,
+              validator_addresses,
+              height,
+            }
+          )
         }
       }
     }
@@ -115,12 +141,14 @@ export default () => {
     return () => clearInterval(interval)
   }, [height, status_data])
 
+  const matched = data?.height === height
+
   return (
     <div className="space-y-8 mt-2 mb-6 mx-auto">
       <div className="space-y-3">
         <Info
           data={
-            data?.height === height &&
+            matched &&
             data
           }
         />
@@ -128,7 +156,7 @@ export default () => {
       </div>
       <Events
         data={
-          data?.height === height &&
+          matched &&
           data
         }
       />
