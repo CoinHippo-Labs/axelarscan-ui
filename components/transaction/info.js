@@ -2,17 +2,34 @@ import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import Linkify from 'react-linkify'
+import { ProgressBar } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
 import Copy from '../copy'
 import ValidatorProfile from '../validator-profile'
-import { number_format, name, ellipse, equals_ignore_case } from '../../lib/utils'
+import { number_format, name, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({
   data,
 }) => {
-  const { validators } = useSelector(state => ({ validators: state.validators }), shallowEqual)
-  const { validators_data } = { ...validators }
+  const {
+    preferences,
+    validators,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        validators: state.validators,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    validators_data,
+  } = { ...validators }
 
   const {
     txhash,
@@ -40,25 +57,30 @@ export default ({
   } = { ...description }
 
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
-  const titleClassName = 'w-40 lg:w-64 text-sm lg:text-base font-bold'
+  const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
 
   return (
-    <div className="w-full flex flex-col space-y-4">
+    <div className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-75 w-fit flex flex-col rounded-lg space-y-4 py-6 px-5">
       <div className={rowClassName}>
         <span className={titleClassName}>
           Tx Hash:
         </span>
         {data ?
-          txhash && (
+          txhash &&
+          (
             <Copy
+              size={20}
               value={txhash}
-              title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-semibold">
+              title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
                 {txhash}
               </span>}
-              size={20}
             />
           ) :
-          <div className="skeleton w-40 h-6 mt-1" />
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
       <div className={rowClassName}>
@@ -66,9 +88,10 @@ export default ({
           Block:
         </span>
         {data ?
-          height && (
+          height &&
+          (
             <Link href={`/block/${height}`}>
-              <a className="text-blue-600 dark:text-white text-sm lg:text-base font-bold">
+              <a className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 text-sm lg:text-base font-medium">
                 {number_format(
                   height,
                   '0,0',
@@ -76,39 +99,62 @@ export default ({
               </a>
             </Link>
           ) :
-          <div className="skeleton w-40 h-6 mt-1" />
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
-      {(!data || type) && (
-        <div className={rowClassName}>
-          <span className={titleClassName}>
-            Type:
-          </span>
-          {data ?
-            <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
-              {name(type)}
-            </div> :
-            <div className="skeleton w-40 h-6 mt-1" />
-          }
-        </div>
-      )}
+      {
+        (
+          !data ||
+          type
+        ) &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Type:
+            </span>
+            {data ?
+              <div className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium py-1 px-2">
+                {name(type)}
+              </div> :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="24"
+                height="24"
+              />
+            }
+          </div>
+        )
+      }
       <div className={rowClassName}>
         <span className={titleClassName}>
           Status:
         </span>
         {data ?
-          status && (
+          status &&
+          (
             <div className={`${status === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} flex items-center space-x-1`}>
               {status === 'success' ?
-                <BiCheckCircle size={20} /> :
-                <BiXCircle size={20} />
+                <BiCheckCircle
+                  size={20}
+                /> :
+                <BiXCircle
+                  size={20}
+                />
               }
-              <span className="uppercase text-sm lg:text-base font-bold">
+              <span className="uppercase text-sm lg:text-base font-semibold">
                 {status}
               </span>
             </div>
           ) :
-          <div className="skeleton w-40 h-6 mt-1" />
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
       <div className={rowClassName}>
@@ -116,12 +162,17 @@ export default ({
           Time:
         </span>
         {data ?
-          timestamp && (
-            <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
+          timestamp &&
+          (
+            <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
               {moment(timestamp).fromNow()} ({moment(timestamp).format('MMM D, YYYY h:mm:ss A')})
             </span>
           ) :
-          <div className="skeleton w-40 h-6 mt-1" />
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
       <div className={rowClassName}>
@@ -130,9 +181,12 @@ export default ({
         </span>
         {data ?
           validator_data ?
-            <div className="min-w-max flex items-start space-x-2">
+            <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
               <Link href={`/validator/${operator_address}`}>
-                <a>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <ValidatorProfile
                     validator_description={description}
                   />
@@ -141,18 +195,29 @@ export default ({
               <div className="flex flex-col">
                 {moniker && (
                   <Link href={`/validator/${operator_address}`}>
-                    <a className="text-blue-600 dark:text-white font-bold">
-                      {ellipse(moniker, 16)}
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                    >
+                      {ellipse(
+                        moniker,
+                        16,
+                      )}
                     </a>
                   </Link>
                 )}
                 <div className="flex items-center space-x-1">
                   <Link href={`/validator/${operator_address}`}>
-                    <a className="text-slate-400 dark:text-slate-600 font-medium">
+                    <a
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-400 dark:text-slate-600"
+                    >
                       {ellipse(
                         operator_address,
-                        12,
-                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR
+                        10,
+                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                       )}
                     </a>
                   </Link>
@@ -165,23 +230,30 @@ export default ({
             sender ?
               <div className="flex items-center space-x-1">
                 <Link href={`/account/${sender}`}>
-                  <a className="text-blue-600 dark:text-white text-sm lg:text-base font-semibold">
+                  <a
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                  >
                     {ellipse(
                       sender,
-                      12,
+                      10,
                       process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
                     )}
                   </a>
                 </Link>
                 <Copy
                   value={sender}
-                  size={18}
                 />
               </div> :
               <span>
                 -
               </span> :
-          <div className="skeleton w-40 h-6 mt-1" />
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
       <div className={rowClassName}>
@@ -189,16 +261,28 @@ export default ({
           Transaction Fee:
         </span>
         {data ?
-          <span className="text-sm lg:text-base font-semibold">
+          <span className="uppercase text-sm lg:text-base font-medium space-x-1">
             {fee > 0 ?
-              `${number_format(
-                fee,
-                '0,0.00000000',
-              )} ${symbol?.toUpperCase() || ''}` :
+              <>
+                <span>
+                  {number_format(
+                    fee,
+                    '0,0.00000000',
+                    true,
+                  )}
+                </span>
+                <span>
+                  {symbol}
+                </span>
+              </> :
               'No Fee'
             }
           </span> :
-          <div className="skeleton w-40 h-6 mt-1" />
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
       <div className={rowClassName}>
@@ -206,13 +290,21 @@ export default ({
           Gas Used:
         </span>
         {data ?
-          <span className="text-sm lg:text-base font-semibold">
-            {number_format(
-              gas_used,
-              '0,0',
-            ) || '-'}
-          </span> :
-          <div className="skeleton w-40 h-6 mt-1" />
+          gas_used &&
+          (
+            <span className="text-sm lg:text-base font-medium">
+              {number_format(
+                gas_used,
+                '0,0',
+                true,
+              )}
+            </span>
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
       <div className={rowClassName}>
@@ -220,27 +312,37 @@ export default ({
           Gas Limit:
         </span>
         {data ?
-          <span className="text-sm lg:text-base font-semibold">
-            {number_format(
-              gas_limit,
-              '0,0',
-            ) || '-'}
-          </span> :
-          <div className="skeleton w-40 h-6 mt-1" />
+          gas_limit && (
+            <span className="text-sm lg:text-base font-medium">
+              {number_format(
+                gas_limit,
+                '0,0',
+                true,
+              )}
+            </span>
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
         }
       </div>
-      {memo && (
-        <div className={rowClassName}>
-          <span className={titleClassName}>
-            Memo:
-          </span>
-          <span className="linkify break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
-            <Linkify>
-              {memo}
-            </Linkify>
-          </span>
-        </div>
-      )}
+      {
+        memo &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Memo:
+            </span>
+            <span className="linkify break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
+              <Linkify>
+                {memo}
+              </Linkify>
+            </span>
+          </div>
+        )
+      }
     </div>
   )
 }
