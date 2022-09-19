@@ -14,16 +14,48 @@ import { getAsset, assetManager } from '../../lib/object/asset'
 import { equals_ignore_case } from '../../lib/utils'
 
 export default () => {
-  const { evm_chains, cosmos_chains, assets, chain, validators } = useSelector(state => ({ evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets, chain: state.chain, validators: state.validators }), shallowEqual)
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
-  const { assets_data } = { ...assets }
-  const { chain_data } = { ...chain }
-  const { validators_data } = { ...validators }
+  const {
+    evm_chains,
+    cosmos_chains,
+    assets,
+    chain,
+    validators,
+  } = useSelector(state =>
+    (
+      {
+        evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
+        assets: state.assets,
+        chain: state.chain,
+        validators: state.validators,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
+  const {
+    assets_data,
+  } = { ...assets }
+  const {
+    chain_data,
+  } = { ...chain }
+  const {
+    validators_data,
+  } = { ...validators }
 
   const router = useRouter()
-  const { pathname, query } = { ...router }
-  const { address } = { ...query }
+  const {
+    pathname,
+    query,
+  } = { ...router }
+  const {
+    address,
+  } = { ...query }
 
   const [balances, setBalances] = useState(null)
   const [delegations, setDelegations] = useState(null)
@@ -34,305 +66,669 @@ export default () => {
   const [depositAddresses, setDepositAddresses] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address?.startsWith('"') || address?.endsWith('"')) {
-        router.push(`${pathname.replace('[address]', address.split('"').join(''))}`)
+      if (
+        address?.startsWith('"') ||
+        address?.endsWith('"')
+      ) {
+        router.push(
+          `${pathname.replace(
+            '[address]',
+            address
+              .split('"')
+              .join('')
+          )}`
+        )
       }
-      else if (address && assets_data) {
-        if (!controller.signal.aborted) {
-          const response = await all_bank_balances(address)
-          setBalances(response?.data?.map(b => {
-            const { denom, amount } = { ...b }
-            return {
-              ...b,
-              denom: assetManager.symbol(denom, assets_data),
-              amount: assetManager.amount(amount, denom, assets_data),
-              asset_data: getAsset(denom, assets_data),
-            }
-          }).filter(b => b?.amount > -1).map(b => {
-            const { amount, asset_data } = { ...b }
-            return {
-              ...b,
-              value: amount * (asset_data?.price || 0),
-            }
-          }) || [])
-        }
+      else if (
+        address &&
+        assets_data
+      ) {
+        const response = await all_bank_balances(
+          address,
+        )
+        const {
+          data,
+        } = { ...response }
+
+        setBalances(
+          Array.isArray(data) ?
+            data
+              .map(b => {
+                const {
+                  denom,
+                  amount,
+                } = { ...b }
+
+                return {
+                  ...b,
+                  denom: assetManager.symbol(
+                    denom,
+                    assets_data,
+                  ),
+                  amount: assetManager.amount(
+                    amount,
+                    denom,
+                    assets_data,
+                  ),
+                  asset_data: getAsset(
+                    denom,
+                    assets_data,
+                  ),
+                }
+              })
+              .filter(b => b.amount > -1)
+              .map(b => {
+                const {
+                  amount,
+                  asset_data,
+                } = { ...b }
+                const {
+                  price,
+                } = { ...asset_data }
+
+                return {
+                  ...b,
+                  value: amount *
+                    (price || 0),
+                }
+              }) :
+            []
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, assets_data])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
-        if (!controller.signal.aborted) {
-          const response = await all_staking_delegations(address)
-          setDelegations(response?.data?.map(d => {
-            const { delegation, balance } = { ...d }
-            const { validator_address, shares } = { ...delegation }
-            const { denom, amount } = { ...balance }
-            return {
-              ...delegation,
-              validator_data: { ...validators_data.find(v => equals_ignore_case(v?.operator_address, validator_address)) },
-              shares: isNaN(shares) ? -1 : assetManager.amount(shares, denom, assets_data),
-              ...balance,
-              denom: assetManager.symbol(denom, assets_data),
-              amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
-              asset_data: getAsset(denom, assets_data),
-            }
-          }).filter(d => d?.amount > -1).map(d => {
-            const { amount, asset_data } = { ...d }
-            return {
-              ...d,
-              value: amount * (asset_data?.price || 0),
-            }
-          }) || [])
-        }
+      if (
+        address &&
+        (
+          address.length < 65 ||
+          (
+            depositAddresses &&
+            depositAddresses.length < 1
+          )
+        ) &&
+        assets_data &&
+        validators_data
+      ) {
+        const response = await all_staking_delegations(
+          address,
+        )
+        const {
+          data,
+        } = { ...response }
+
+        setDelegations(
+          Array.isArray(data) ?
+            data
+              .map(d => {
+                const {
+                  delegation,
+                  balance,
+                } = { ...d }
+                const {
+                  validator_address,
+                  shares,
+                } = { ...delegation }
+                const {
+                  denom,
+                  amount,
+                } = { ...balance }
+
+                return {
+                  ...delegation,
+                  validator_data: {
+                    ...validators_data.find(v => equals_ignore_case(v?.operator_address, validator_address)),
+                  },
+                  shares: isNaN(shares) ?
+                    -1 :
+                    assetManager.amount(
+                      shares,
+                      denom,
+                      assets_data,
+                    ),
+                  ...balance,
+                  denom: assetManager.symbol(
+                    denom,
+                    assets_data,
+                  ),
+                  amount: isNaN(amount) ?
+                    -1 :
+                    assetManager.amount(
+                      amount,
+                      denom,
+                      assets_data,
+                    ),
+                  asset_data: getAsset(
+                    denom,
+                    assets_data,
+                  ),
+                }
+              })
+              .filter(d => d.amount > -1)
+              .map(d => {
+                const {
+                  amount,
+                  asset_data,
+                } = { ...d }
+                const {
+                  price,
+                } = { ...asset_data }
+
+                return {
+                  ...d,
+                  value: amount *
+                    (price || 0),
+                }
+              }) :
+            []
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, assets_data, validators_data, depositAddresses])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
-        if (!controller.signal.aborted) {
-          const { staking_params } = { ...chain_data }
-          const response = await all_staking_redelegations(address)
-          setRedelegations(response?.data?.flatMap(r => !r?.redelegation?.entries ? [] : r.redelegation.entries.map(e => {
-            const { validator_src_address, validator_dst_address } = { ...r.redelegation }
-            const { creation_height, initial_balance, shares_dst } = { ...e }
-            return {
-              ...r.redelegation,
-              source_validator_data: { ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_src_address)) },
-              destination_validator_data: { ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_dst_address)) },
-              entries: undefined,
-              ...e,
-              creation_height: Number(creation_height),
-              initial_balance: assetManager.amount(Number(initial_balance), assets_data[0]?.id, assets_data),
-              shares_dst: assetManager.amount(Number(shares_dst), assets_data[0]?.id, assets_data),
-            }
-          })).map(r => {
-            const { initial_balance, shares_dst } = { ...r }
-            let { denom } = { ...r }
-            denom = denom || staking_params?.bond_denom
-            return {
-              ...r,
-              denom: assetManager.symbol(denom, assets_data),
-              amount: shares_dst - initial_balance,
-              asset_data: getAsset(denom, assets_data),
-            }
-          }).filter(r => r?.amount > -1).map(r => {
-            const { amount, asset_data } = { ...r }
-            return {
-              ...r,
-              value: amount * (asset_data?.price || 0),
-            }
-          }) || [])
-        }
-      }
-    }
-    getData()
-    return () => {
-      controller?.abort()
-    }
-  }, [address, assets_data, validators_data, depositAddresses])
+      if (
+        address &&
+        (
+          address.length < 65 ||
+          (
+            depositAddresses &&
+            depositAddresses.length < 1
+          )
+        ) &&
+        assets_data &&
+        validators_data
+      ) {
+        const {
+          staking_params,
+        } = { ...chain_data }
 
-  useEffect(() => {
-    const controller = new AbortController()
-    const getData = async () => {
-      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
-        if (!controller.signal.aborted) {
-          const { staking_params } = { ...chain_data }
-          const response = await all_staking_unbonding(address)
-          setunbondings(response?.data?.flatMap(u => !u?.entries ? [] : u.entries.map(e => {
-            const { validator_address } = { ...u }
-            const { creation_height, initial_balance, balance } = { ...e }
-            return {
-              ...u,
-              validator_data: { ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_address)) },
-              entries: undefined,
-              ...e,
-              creation_height: Number(creation_height),
-              initial_balance: assetManager.amount(Number(initial_balance), assets_data[0]?.id, assets_data),
-              balance: assetManager.amount(Number(balance), assets_data[0]?.id, assets_data),
-            }
-          })).map(u => {
-            const { initial_balance, balance } = { ...u }
-            let { denom } = { ...u }
-            denom = denom || staking_params?.bond_denom
-            return {
-              ...u,
-              denom: assetManager.symbol(denom, assets_data),
-              amount: initial_balance - balance,
-              asset_data: getAsset(denom, assets_data),
-            }
-          }).filter(u => u?.amount > -1).map(u => {
-            const { amount, asset_data } = { ...u }
-            return {
-              ...u,
-              value: amount * (asset_data?.price || 0),
-            }
-          }) || [])
-        }
-      }
-    }
-    getData()
-    return () => {
-      controller?.abort()
-    }
-  }, [address, assets_data, validators_data, depositAddresses])
+        const response = await all_staking_redelegations(
+          address,
+        )
+        const {
+          data,
+        } = { ...response }
 
-  useEffect(() => {
-    const controller = new AbortController()
-    const getData = async () => {
-      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data) {
-        if (!controller.signal.aborted) {
-          const response = await distribution_rewards(address)
-          const { rewards, total } = { ...response }
-          setRewards({
-            ...response,
-            rewards: Object.entries(
-              _.groupBy(rewards?.flatMap(r => r?.reward).map(r => {
-                const { denom, amount } = { ...r }
+        setRedelegations(
+          Array.isArray(data) ?
+            data
+              .flatMap(r =>
+                !r?.redelegation?.entries ?
+                  [] :
+                  r.redelegation.entries
+                    .map(e => {
+                      const {
+                        validator_src_address,
+                        validator_dst_address,
+                      } = { ...r.redelegation }
+                      const {
+                        creation_height,
+                        initial_balance,
+                        shares_dst,
+                      } = { ...e }
+
+                      return {
+                        ...r.redelegation,
+                        source_validator_data: {
+                          ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_src_address)),
+                        },
+                        destination_validator_data: {
+                          ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_dst_address)),
+                        },
+                        entries: undefined,
+                        ...e,
+                        creation_height: Number(creation_height),
+                        initial_balance: assetManager.amount(
+                          Number(initial_balance),
+                          _.head(assets_data)?.id,
+                          assets_data,
+                        ),
+                        shares_dst: assetManager.amount(
+                          Number(shares_dst),
+                          _.head(assets_data)?.id,
+                          assets_data,
+                        ),
+                      }
+                    })
+              )
+              .map(r => {
+                const {
+                  initial_balance,
+                  shares_dst,
+                } = { ...r }
+                let {
+                  denom,
+                } = { ...r }
+
+                denom = denom ||
+                  staking_params?.bond_denom
+
                 return {
                   ...r,
-                  denom: assetManager.symbol(denom, assets_data),
-                  amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
+                  denom: assetManager.symbol(
+                    denom,
+                    assets_data,
+                  ),
+                  amount: shares_dst - initial_balance,
+                  asset_data: getAsset(
+                    denom,
+                    assets_data,
+                  ),
                 }
-              }).filter(r => r?.amount > -1) || [], 'denom')
-            ).map(([k, v]) => {
-              return {
-                denom: k,
-                amount: _.sumBy(v, 'amount'),
-              }
-            }) || [],
-            total: Object.entries(
-              _.groupBy(total?.map(t => {
-                const { denom, amount } = { ...t }
+              })
+              .filter(r => r.amount > -1)
+              .map(r => {
+                const {
+                  amount,
+                  asset_data,
+                } = { ...r }
+                const {
+                  price,
+                } = { ...asset_data }
+
                 return {
-                  ...t,
-                  denom: assetManager.symbol(denom, assets_data),
-                  amount: assetManager.amount(amount, denom, assets_data),
+                  ...r,
+                  value: amount *
+                    (price || 0),
                 }
-              }) || [], 'denom')
-            ).map(([k, v]) => {
-              return {
-                denom: k,
-                amount: _.sumBy(v, 'amount'),
-              }
-            }).filter(t => t?.amount > -1) || [],
-          })
-        }
+              }) :
+            []
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
+  }, [address, assets_data, validators_data, depositAddresses])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (
+        address &&
+        (
+          address.length < 65 ||
+          (
+            depositAddresses &&
+            depositAddresses.length < 1
+          )
+        ) &&
+        assets_data &&
+        validators_data
+      ) {
+        const {
+          staking_params,
+        } = { ...chain_data }
+
+        const response = await all_staking_unbonding(
+          address,
+        )
+        const {
+          data,
+        } = { ...response }
+
+        setunbondings(
+          Array.isArray(data) ?
+            data
+              .flatMap(u => !u?.entries ?
+                [] :
+                u.entries
+                  .map(e => {
+                    const {
+                      validator_address,
+                    } = { ...u }
+                    const {
+                      creation_height,
+                      initial_balance,
+                      balance,
+                    } = { ...e }
+
+                    return {
+                      ...u,
+                      validator_data: {
+                        ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_address)),
+                      },
+                      entries: undefined,
+                      ...e,
+                      creation_height: Number(creation_height),
+                      initial_balance: assetManager.amount(
+                        Number(initial_balance),
+                        _.head(assets_data)?.id,
+                        assets_data,
+                      ),
+                      balance: assetManager.amount(
+                        Number(balance),
+                        _.head(assets_data)?.id,
+                        assets_data,
+                      ),
+                    }
+                  })
+              )
+              .map(u => {
+                const {
+                  initial_balance,
+                  balance,
+                } = { ...u }
+                let {
+                  denom,
+                } = { ...u }
+
+                denom = denom ||
+                  staking_params?.bond_denom
+
+                return {
+                  ...u,
+                  denom: assetManager.symbol(
+                    denom,
+                    assets_data,
+                  ),
+                  amount: initial_balance - balance,
+                  asset_data: getAsset(
+                    denom,
+                    assets_data,
+                  ),
+                }
+              })
+              .filter(u => u.amount > -1)
+              .map(u => {
+                const {
+                  amount,
+                  asset_data,
+                } = { ...u }
+                const {
+                  price,
+                } = { ...asset_data }
+
+                return {
+                  ...u,
+                  value: amount *
+                    (price || 0),
+                }
+              }) :
+            []
+        )
+      }
     }
+
+    getData()
+  }, [address, assets_data, validators_data, depositAddresses])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (
+        address &&
+        (
+          address.length < 65 ||
+          (
+            depositAddresses &&
+            depositAddresses.length < 1
+          )
+        ) &&
+        assets_data
+      ) {
+        const response = await distribution_rewards(
+          address,
+        )
+        const {
+          rewards,
+          total,
+        } = { ...response }
+
+        setRewards(
+          {
+            ...response,
+            rewards:
+              Object.entries(
+                _.groupBy(
+                  (rewards || [])
+                    .flatMap(r => r?.reward)
+                    .map(r => {
+                      const {
+                        denom,
+                        amount,
+                      } = { ...r }
+
+                      return {
+                        ...r,
+                        denom: assetManager.symbol(
+                          denom,
+                          assets_data,
+                        ),
+                        amount: isNaN(amount) ?
+                          -1 :
+                          assetManager.amount(
+                            amount,
+                            denom,
+                            assets_data,
+                          ),
+                      }
+                    })
+                    .filter(r => r.amount > -1),
+                  'denom',
+                )
+              )
+              .map(([k, v]) => {
+                return {
+                  denom: k,
+                  amount: _.sumBy(
+                    v,
+                    'amount',
+                  ),
+                }
+              }),
+            total:
+              Object.entries(
+                _.groupBy(
+                  (total || [])
+                    .map(t => {
+                      const {
+                        denom,
+                        amount,
+                      } = { ...t }
+
+                      return {
+                        ...t,
+                        denom: assetManager.symbol(
+                          denom,
+                          assets_data,
+                        ),
+                        amount: assetManager.amount(
+                          amount,
+                          denom,
+                          assets_data,
+                        ),
+                      }
+                    }),
+                  'denom',
+                )
+              )
+              .map(([k, v]) => {
+                return {
+                  denom: k,
+                  amount: _.sumBy(
+                    v,
+                    'amount',
+                  ),
+                }
+              })
+              .filter(t => t.amount > -1),
+          }
+        )
+      }
+    }
+
+    getData()
   }, [address, assets_data, depositAddresses])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && (address.length < 65 || (depositAddresses && depositAddresses.length < 1)) && assets_data && validators_data) {
-        if (!controller.signal.aborted) {
-          const validator_data = validators_data.find(v => equals_ignore_case(v?.delegator_address, address))
-          const { operator_address } = { ...validator_data }
-          if (operator_address) {
-            const response = await distribution_commissions(operator_address)
-            const { commission } = { ...response }
-            setCommissions(commission?.commission?.map(c => {
-              const { denom, amount } = { ...c }
-              return {
-                ...c,
-                denom: assetManager.symbol(denom, assets_data),
-                amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
-              }
-            }).filter(c => c?.amount > -1) || [])
-          }
+      if (
+        address &&
+        (
+          address.length < 65 ||
+          (
+            depositAddresses &&
+            depositAddresses.length < 1
+          )
+        ) &&
+        assets_data &&
+        validators_data
+      ) {
+        const validator_data = validators_data.find(v => equals_ignore_case(v?.delegator_address, address))
+        const {
+          operator_address,
+        } = { ...validator_data }
+
+        if (operator_address) {
+          const response = await distribution_commissions(
+            operator_address,
+          )
+          const {
+            commission,
+          } = { ...response }
+
+          setCommissions(
+            Array.isArray(commission?.commission) ?
+              commission.commission
+                .map(c => {
+                  const {
+                    denom,
+                    amount,
+                  } = { ...c }
+
+                  return {
+                    ...c,
+                    denom: assetManager.symbol(
+                      denom,
+                      assets_data,
+                    ),
+                    amount: isNaN(amount) ?
+                      -1 :
+                      assetManager.amount(
+                        amount,
+                        denom,
+                        assets_data,
+                      ),
+                  }
+                })
+                .filter(c => c.amount > -1) :
+              []
+          )
         }
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, assets_data, validators_data, depositAddresses])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && (address.length >= 65 || type(address) === 'evm_address') && evm_chains_data && cosmos_chains_data && assets_data) {
-        if (!controller.signal.aborted) {
-          const response = await deposit_addresses({
+      if (
+        address &&
+        (
+          address.length >= 65 ||
+          type(address) === 'evm_address'
+        ) &&
+        evm_chains_data &&
+        cosmos_chains_data &&
+        assets_data
+      ) {
+        const response = await deposit_addresses(
+          {
             query: {
               match: { deposit_address: address },
             },
             size: 10,
             sort: [{ height: 'desc' }],
-          })
+          },
+        )
+        const {
+          data,
+        } = { ...response }
 
-          const _response = await transfers({
+        const _response = await transfers(
+          {
             depositAddress: address,
-          })
+          },
+        )
 
-          const transfer = _.head(_response?.data)
+        const transfer_data = _.head(_response?.data)
 
-          setDepositAddresses(response?.data?.map(d => {
-            const {
-              original_sender_chain,
-              original_recipient_chain,
-              sender_chain,
-              recipient_chain,
-              denom,
-            } = { ...d }
+        setDepositAddresses(
+          Array.isArray(data) ?
+            data
+              .map(d => {
+                const {
+                  original_sender_chain,
+                  original_recipient_chain,
+                  sender_chain,
+                  recipient_chain,
+                  denom,
+                } = { ...d }
 
-            return {
-              ...d,
-              source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
-                getChain(original_sender_chain, cosmos_chains_data) || getChain(sender_chain, cosmos_chains_data),
-              destination_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, recipient_chain)) ||
-                getChain(original_recipient_chain, cosmos_chains_data) || getChain(recipient_chain, cosmos_chains_data),
-              denom: assetManager.symbol(
-                denom,
-                assets_data,
-              ),
-              asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
-              transfer,
-            }
-          }) || [])
-        }
+                return {
+                  ...d,
+                  source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
+                    getChain(
+                      original_sender_chain,
+                      cosmos_chains_data,
+                    ) ||
+                    getChain(
+                      sender_chain,
+                      cosmos_chains_data,
+                    ),
+                  destination_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, recipient_chain)) ||
+                    getChain(
+                      original_recipient_chain,
+                      cosmos_chains_data,
+                    ) ||
+                    getChain(
+                      recipient_chain,
+                      cosmos_chains_data,
+                    ),
+                  denom: assetManager.symbol(
+                    denom,
+                    assets_data,
+                  ),
+                  asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
+                  transfer_data,
+                }
+              }) :
+            []
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, evm_chains_data, cosmos_chains_data, assets_data])
 
   return (
-    <div className="space-y-6 mt-2 mb-6 mx-auto">
+    <div className="space-y-8 mt-2 mb-6 mx-auto">
       <Info
-        data={(address?.length >= 65 && !depositAddresses) || depositAddresses?.length > 0 ?
-          { depositAddresses } :
-          {
-            balances,
-            delegations,
-            redelegations,
-            unbondings,
-            rewards,
-            commissions,
-          }
+        data={
+          (
+            address?.length >= 65 &&
+            !depositAddresses
+          ) ||
+          depositAddresses?.length > 0 ?
+            {
+              depositAddresses,
+            } :
+            {
+              balances,
+              delegations,
+              redelegations,
+              unbondings,
+              rewards,
+              commissions,
+            }
         }
       />
       <Transactions />

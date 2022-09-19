@@ -7,7 +7,7 @@ import Popover from '../popover'
 import Image from '../image'
 import Copy from '../copy'
 import { chainManager } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, to_hex } from '../../lib/utils'
 
 const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
 
@@ -51,6 +51,9 @@ export default ({
           _.head(
             id?.split('_') || []
           )
+        transaction_id = Array.isArray(transaction_id) ?
+          to_hex(transaction_id) :
+          transaction_id
 
         return (
           <Popover

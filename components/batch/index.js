@@ -442,6 +442,7 @@ export default () => {
                             />
                           )
                         }
+                        className="tracking-wider text-black dark:text-white text-sm font-medium"
                       />
                       {explorer?.url &&
                         (
@@ -546,6 +547,7 @@ export default () => {
                                       />
                                     )
                                   }
+                                  className="tracking-wider text-black dark:text-white text-sm font-medium"
                                 />
                                 {explorer?.url &&
                                   (
@@ -670,6 +672,7 @@ export default () => {
                                           />
                                         )
                                       }
+                                      className="tracking-wider text-black dark:text-white text-sm font-medium"
                                     />
                                     {explorer?.url &&
                                       (

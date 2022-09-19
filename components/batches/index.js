@@ -759,6 +759,7 @@ export default () => {
                                                   />
                                                 )
                                               }
+                                              className="tracking-wider text-black dark:text-white text-sm font-medium"
                                             />
                                             {explorer?.url &&
                                               (
@@ -914,6 +915,7 @@ export default () => {
                                           />
                                         )
                                       }
+                                      className="tracking-wider text-black dark:text-white text-sm font-medium"
                                     />
                                     {explorer?.url &&
                                       (
@@ -1155,19 +1157,21 @@ export default () => {
           ) &&
           (
             !fetching ?
-              <button
-                onClick={() => {
-                  setOffet(data.length)
-                  setFetchTrigger(
-                    typeof fetchTrigger === 'number' ?
-                      true :
-                      1
-                  )
-                }}
-                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
-              >
-                Load more
-              </button> :
+              <div className="flex justify-center">
+                <button
+                  onClick={() => {
+                    setOffet(data.length)
+                    setFetchTrigger(
+                      typeof fetchTrigger === 'number' ?
+                        true :
+                        1
+                    )
+                  }}
+                  className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+                >
+                  Load more
+                </button>
+              </div> :
               <div className="flex justify-center">
                 <ColorRing
                   color={loader_color(theme)}
