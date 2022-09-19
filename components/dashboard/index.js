@@ -192,12 +192,10 @@ export default () => {
                 source_chain_data: getChain(
                   source_chain,
                   chains_data,
-                  true,
                 ),
                 destination_chain_data: getChain(
                   destination_chain,
                   chains_data,
-                  true,
                 ),
               }
             })
@@ -309,12 +307,10 @@ export default () => {
                           source_chain_data: getChain(
                             s.key,
                             chains_data,
-                            true,
                           ),
                           destination_chain_data: getChain(
                             key,
                             chains_data,
-                            true,
                           ),
                         }
                       })
