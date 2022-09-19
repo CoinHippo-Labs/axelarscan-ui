@@ -217,7 +217,6 @@ export default () => {
                     -1,
                 Cell: props => {
                   const {
-                    operator_address,
                     description,
                   } = { ...props.row.original }
                   const {
@@ -260,7 +259,7 @@ export default () => {
                                 className="text-slate-400 dark:text-slate-600 text-xs"
                               >
                                 {ellipse(
-                                  operator_address,
+                                  props.value,
                                   6,
                                   process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                                 )}
@@ -268,7 +267,7 @@ export default () => {
                             </Link>
                             <Copy
                               size={16}
-                              value={operator_address}
+                              value={props.value}
                             />
                           </div>
                         </div>

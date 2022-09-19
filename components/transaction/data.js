@@ -8,7 +8,7 @@ import { BiRightArrowAlt } from 'react-icons/bi'
 import Copy from '../copy'
 import Image from '../image'
 import { getChain } from '../../lib/object/chain'
-import { number_format, name, ellipse, to_json, decode_base64 } from '../../lib/utils'
+import { number_format, name, ellipse, to_json, decode_base64, json_theme } from '../../lib/utils'
 
 const FORMATS = [
   { id: 'formatted', name: 'Formatted' },
@@ -64,7 +64,9 @@ export default ({
   }, [data])
 
   const ReactJson = typeof window !== 'undefined' &&
-    dynamic(import('react-json-view'))
+    dynamic(
+      import('react-json-view')
+    )
 
   const chains_data = _.concat(
     evm_chains_data,
@@ -601,18 +603,29 @@ export default ({
               )
             })}
           </div> :
-          tx && (
-            <div className="text-sm lg:text-base font-semibold">
-              {to_json(messages || tx) ?
+          tx &&
+          (
+            <div className="text-sm lg:text-base font-medium">
+              {to_json(
+                messages ||
+                tx
+              ) ?
                 <ReactJson
-                  src={to_json(messages || tx)}
-                  theme={theme === 'dark' ?
-                    'harmonic' :
-                    'rjv-default'
-                  }
+                  src={to_json(
+                    messages ||
+                    tx
+                  )}
+                  theme={json_theme(theme)}
+                  style={{
+                    borderRadius: '.75rem',
+                    padding: '.8rem .75rem',
+                  }}
                 /> :
                 <span>
-                  {messages || tx}
+                  {
+                    messages ||
+                    tx
+                  }
                 </span>
               }
             </div>
@@ -748,15 +761,17 @@ export default ({
               )
             })}
           </div> :
-          raw_log && (
-            <div className="text-sm lg:text-base font-semibold">
+          raw_log &&
+          (
+            <div className="text-sm lg:text-base font-medium">
               {to_json(raw_log) ?
                 <ReactJson
                   src={to_json(raw_log)}
-                  theme={theme === 'dark' ?
-                    'harmonic' :
-                    'rjv-default'
-                  }
+                  theme={json_theme(theme)}
+                  style={{
+                    borderRadius: '.75rem',
+                    padding: '.8rem .75rem',
+                  }}
                 /> :
                 <span>
                   {raw_log}

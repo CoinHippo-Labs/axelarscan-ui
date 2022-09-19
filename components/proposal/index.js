@@ -7,88 +7,230 @@ import moment from 'moment'
 import Info from './info'
 import Votes from './votes'
 import { proposal as getProposal, all_proposal_votes } from '../../lib/api/cosmos'
+import { assetManager } from '../../lib/object/asset'
 import { number_format, name, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
-  const { assets, validators } = useSelector(state => ({ assets: state.assets, validators: state.validators }), shallowEqual)
-  const { assets_data } = { ...assets }
-  const { validators_data } = { ...validators }
+  const {
+    assets,
+    validators,
+  } = useSelector(state =>
+    (
+      {
+        assets: state.assets,
+        validators: state.validators,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    assets_data,
+  } = { ...assets }
+  const {
+    validators_data,
+  } = { ...validators }
 
   const router = useRouter()
-  const { query } = { ...router }
-  const { id } = { ...query }
+  const {
+    query,
+  } = { ...router }
+  const {
+    id,
+  } = { ...query }
 
   const [proposal, setProposal] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (id && assets_data && validators_data) {
-        if (!controller.signal.aborted) {
-          let response = await getProposal(id, null, assets_data)
-          const data = { ...response }
-          response = await all_proposal_votes(id)
-          const votes = _.orderBy((response?.data || []).map(v => {
-            return {
-              ...v,
-              validator_data: validators_data?.find(_v => equals_ignore_case(_v?.delegator_address, v?.voter)),
-            }
-          }), ['validator_data.tokens', 'validator_data.description.moniker'], ['desc', 'asc'])
-          data.votes = votes
-          setProposal({ data, id })
-        }
+      if (
+        id &&
+        assets_data &&
+        validators_data
+      ) {
+        const response = await getProposal(
+          id,
+          null,
+          assets_data,
+        )
+
+        const _response = await all_proposal_votes(id)
+        const {
+          data,
+        } = { ..._response }
+
+        setProposal(
+          {
+            data: {
+              ...response,
+              votes: _.orderBy(
+                (data || [])
+                  .map(v => {
+                    const {
+                      voter,
+                    } = { ...v }
+
+                    const validator_data = validators_data.find(_v => equals_ignore_case(_v?.delegator_address, voter))
+                    const {
+                      tokens,
+                    } = { ...validator_data }
+
+                    const _tokens = assetManager.amount(
+                      tokens,
+                      _.head(assets_data)?.id,
+                      assets_data,
+                    )
+
+                    return {
+                      ...v,
+                      validator_data: {
+                        ...validator_data,
+                        tokens: _tokens,
+                        quadratic_voting_power: _tokens > 0 &&
+                          Math.floor(
+                            Math.sqrt(
+                              _tokens,
+                            )
+                          ),
+                      },
+                    }
+                  }),
+                [
+                  'validator_data.quadratic_voting_power',
+                  'validator_data.tokens',
+                  'validator_data.description.moniker',
+                ],
+                [
+                  'desc',
+                  'asc',
+                ],
+              ),
+            },
+            id,
+          }
+        )
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 3 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(),
+      3 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [id, assets_data, validators_data])
 
-  const votes = (proposal?.id === id && Object.entries(
-    _.groupBy(proposal?.data?.votes || [], 'option')
-  ).map(([k, v]) => {
-    return {
-      option: k,
-      value: v?.length || 0,
-    }
-  }).filter(v => v.value)) || []
-  const end = proposal?.data?.voting_end_time && proposal.data.voting_end_time < moment().valueOf()
+  const {
+    data,
+  } = { ...proposal }
+  const {
+    voting_end_time,
+    final_tally_result,
+  } = { ...data }
+  let {
+    votes,
+  } = { ...data }
+
+  const matched = proposal?.id === id
+
+  votes = matched ?
+    Object.entries(
+      _.groupBy(
+        votes || [],
+        'option',
+      )
+    )
+    .map(([k, v]) => {
+      return {
+        option: k,
+        value: (v || [])
+          .length,
+      }
+    })
+    .filter(v => v.value) :
+    []
+
+  const end = voting_end_time &&
+    voting_end_time < moment().valueOf()
 
   return (
-    <div className="space-y-4 mt-2 mb-6 mx-auto">
-      <Info data={proposal?.id === id && proposal?.data} />
-      <div className="space-y-2">
+    <div className="space-y-5 mt-2 mb-6 mx-auto">
+      <Info
+        data={
+          matched &&
+          data
+        }
+      />
+      <div className="space-y-2 px-5">
         <div className="flex items-center space-x-2">
-          <span className="capitalize text-lg font-bold">
-            {end ? 'final tally' : 'votes'}
+          <span className="capitalize tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium">
+            {end ?
+              'final tally' :
+              'votes'
+            }
           </span>
           <div className="flex items-center space-x-1">
-            {end ?
-              proposal?.id === id && Object.entries({ ...proposal?.data?.final_tally_result }).filter(([k, v]) => v).map(([k, v]) => (
-                <div
-                  key={k}
-                  className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg uppercase whitespace-nowrap font-semibold py-1 px-2">
-                  {name(k)}: {number_format(v, '0,0.00a')}
-                </div>
-              ))
-              :
-              votes.map((v, i) => (
-                <div
-                  key={i}
-                  className={`${['YES'].includes(v?.option) ? 'bg-green-500 dark:bg-green-600 text-white' : ['NO'].includes(v?.option) ? 'bg-red-500 dark:bg-red-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase whitespace-nowrap font-semibold py-1 px-2`}
-                >
-                  {number_format(v.value, '0,0')} {v?.option?.replace('_', ' ')}
-                </div>
-              ))
+            {matched && end ?
+              Object.entries({ ...final_tally_result })
+                .filter(([k, v]) => v)
+                .map(([k, v]) => (
+                  <div
+                    key={k}
+                    className="max-w-min bg-slate-200 dark:bg-slate-800 rounded uppercase whitespace-nowrap text-xs font-medium space-x-1 py-1 px-1.5"
+                  >
+                    <span>
+                      {name(k)}:
+                    </span>
+                    <span>
+                      {number_format(
+                        v,
+                        '0,0.00a',
+                      )}
+                    </span>
+                  </div>
+                )) :
+              votes
+                .map((v, i) => {
+                  const {
+                    option,
+                    value,
+                  } = { ...v }
+
+                  return (
+                    <div
+                      key={i}
+                      className={`${['YES'].includes(option) ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : ['NO'].includes(option) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-xl whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-2`}
+                    >
+                      <span>
+                        {number_format(
+                          value,
+                          '0,0',
+                        )}
+                      </span>
+                      <span>
+                        {option?.replace(
+                          '_',
+                          ' ',
+                        )}
+                      </span>
+                    </div>
+                  )
+                })
             }
           </div>
         </div>
-        {!end && (
-          <Votes data={proposal?.id === id && proposal?.data?.votes} />
-        )}
+        {
+          !end &&
+          (
+            <Votes
+              data={
+                matched &&
+                votes
+              }
+            />
+          )
+        }
       </div>
     </div>
   )
