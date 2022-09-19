@@ -327,15 +327,20 @@ export default ({ n }) => {
     data ?
       <div className="min-h-full grid gap-2 mt-2">
         {!n && (
-          <div className="flex items-center justify-between space-x-2 -mt-3">
-            <div className="flex items-center space-x-2">
-              <span className="text-lg font-bold">
-                {number_format(total, '0,0')}
-              </span>
-              <span className="text-base">
-                Results
-              </span>
-            </div>
+          <div className="flex items-center justify-between space-x-2 -mt-2">
+            {typeof total === 'number' && (
+              <div className="flex items-center space-x-1.5 ml-2 sm:mb-1 sm:ml-0">
+                <span className="tracking-wider text-sm font-semibold">
+                  {number_format(
+                    total,
+                    '0,0',
+                  )}
+                </span>
+                <span className="tracking-wider text-sm">
+                  Results
+                </span>
+              </div>
+            )}
             {dataForExport?.length > 0 && (
               <CSVLink
                 headers={[

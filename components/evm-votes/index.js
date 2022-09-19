@@ -354,17 +354,19 @@ export default () => {
   return (
     data ?
       <div className="min-h-full grid gap-2">
-        <div className="flex items-center space-x-2 -mt-2">
-          <span className="text-lg font-bold">
-            {number_format(
-              total,
-              '0,0',
-            )}
-          </span>
-          <span className="text-base">
-            Results
-          </span>
-        </div>
+        {typeof total === 'number' && (
+          <div className="flex items-center space-x-1.5 sm:mb-1 ml-2 sm:ml-0">
+            <span className="tracking-wider text-sm font-semibold">
+              {number_format(
+                total,
+                '0,0',
+              )}
+            </span>
+            <span className="tracking-wider text-sm">
+              Results
+            </span>
+          </div>
+        )}
         <Datatable
           columns={[
             {

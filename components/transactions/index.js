@@ -626,7 +626,7 @@ export default ({
                   </span>
                 </div>
               )}
-              <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start space-x-2.5">
+              <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5">
                 {Object.entries({ ...types })
                   .map(([k, v]) => (
                     <div

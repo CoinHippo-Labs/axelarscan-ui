@@ -7,7 +7,7 @@ import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
 import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiRightArrowCircle, BiCheckCircle, BiXCircle } from 'react-icons/bi'
-import { HiOutlineClock } from 'react-icons/hi'
+import { MdOutlineWatchLater } from 'react-icons/md'
 import { TiArrowRight } from 'react-icons/ti'
 
 import PendingCommands from './pending-commands'
@@ -24,13 +24,35 @@ import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loa
 const LIMIT = 25
 
 export default () => {
-  const { preferences, evm_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { assets_data } = { ...assets }
+  const {
+    preferences,
+    evm_chains,
+    assets,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        assets: state.assets,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    assets_data,
+  } = { ...assets }
 
   const router = useRouter()
-  const { pathname, asPath } = { ...router }
+  const {
+    pathname,
+    asPath,
+  } = { ...router }
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
@@ -333,51 +355,73 @@ export default () => {
 
   return (
     data ?
-      <div className="min-h-full grid gap-2">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-2 -mt-1.5">
+      <div className="space-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-0 sm:space-x-2 -mt-0.5">
           <div className="space-y-1.5">
             {typeof total === 'number' && (
-              <div className="flex space-x-1 ml-2 sm:ml-0 sm:mb-1">
-                <span className="text-sm font-bold">
+              <div className="flex items-center space-x-1.5 sm:mb-1 ml-2 sm:ml-0">
+                <span className="tracking-wider text-sm font-semibold">
                   {number_format(
                     total,
                     '0,0',
                   )}
                 </span>
-                <span className="text-sm">
+                <span className="tracking-wider text-sm">
                   Results
                 </span>
               </div>
             )}
             <div className="flex flex-wrap items-center">
-              {evm_chains_data?.map((c, i) => (
-                <div
-                  key={i}
-                  className="mb-1 mr-1.5"
-                >
-                  <PendingCommands chain_data={c} />
-                </div>
-              ))}
+              {(evm_chains_data || [])
+                .map((c, i) => (
+                  <div
+                    key={i}
+                    className="mb-1 mr-1.5"
+                  >
+                    <PendingCommands
+                      chain_data={c}
+                    />
+                  </div>
+                ))
+              }
             </div>
           </div>
-          <div className="block sm:flex sm:flex-wrap items-center justify-start sm:justify-end overflow-x-auto space-x-1">
-            {Object.entries({ ...types }).map(([k, v]) => (
-              <div
-                key={k}
-                onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
-                className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1.5 ml-1 mb-1 py-0.5 px-1.5`}
-                style={{ textTransform: 'none' }}
-              >
-                <span>
-                  {k === 'undefined' ?
-                    'Unknown' : k
+          <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:justify-end sm:space-x-2.5">
+            {Object.entries({ ...types })
+              .map(([k, v]) => (
+                <div
+                  key={k}
+                  onClick={() =>
+                    setFilterTypes(
+                      _.uniq(
+                        filterTypes?.includes(k) ?
+                          filterTypes
+                            .filter(t => !equals_ignore_case(t, k)) :
+                        _.concat(
+                          filterTypes || [],
+                          k,
+                        )
+                      )
+                    )
                   }
-                </span>
-                <span className="text-blue-600 dark:text-blue-400">
-                  {number_format(v, '0,0')}
-                </span>
-              </div>
-            ))}
+                  className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mb-1`}
+                  style={{ textTransform: 'none' }}
+                >
+                  <span>
+                    {k === 'undefined' ?
+                      'Unknown' :
+                      k
+                    }
+                  </span>
+                  <span className="text-blue-500 dark:text-white">
+                    {number_format(
+                      v,
+                      '0,0',
+                    )}
+                  </span>
+                </div>
+              ))
+            }
           </div>
         </div>
         <Datatable
@@ -387,62 +431,101 @@ export default () => {
               accessor: 'batch_id',
               disableSortBy: true,
               Cell: props => {
-                const { commands } = { ...props.row.original }
-                const _types = _.countBy(_.uniqBy(commands || [], 'id').map(c => c?.type).filter(t => t))
+                const {
+                  value,
+                } = { ...props }
+                const {
+                  chain,
+                  commands,
+                } = { ...props.row.original }
+
+                const _types = _.countBy(
+                  _.uniqBy(
+                    commands || [],
+                    'id',
+                  )
+                  .map(c => c?.type)
+                  .filter(t => t)
+                )
+
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="flex items-center space-x-1">
-                      <Link href={`/batch/${props.row.original.chain}/${props.value}`}>
+                      <Link href={`/batch/${chain}/${value}`}>
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="uppercase text-blue-600 dark:text-white font-bold"
+                          className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                         >
-                          {ellipse(props.value)}
+                          {ellipse(
+                            value,
+                            10,
+                          )}
                         </a>
                       </Link>
                       <Copy
-                        value={props.value}
-                        size={18}
+                        value={value}
                       />
                     </div>
-                    <div className="block sm:flex sm:flex-wrap items-center justify-start overflow-x-auto">
-                      {Object.entries({ ..._types }).map(([k, v]) => (
-                        <div
-                          key={k}
-                          className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-2.5 mb-1.5"
-                          style={{ textTransform: 'none' }}
-                        >
-                          <span>
-                            {k === 'undefined' ?
-                              'Unknown' : k
-                            }
-                          </span>
-                          <span className="text-blue-600 dark:text-blue-400">
-                            {number_format(v, '0,0')}
-                          </span>
-                        </div>
-                      ))}
+                    <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5">
+                      {Object.entries({ ..._types })
+                        .map(([k, v]) => (
+                          <div
+                            key={k}
+                            className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-1 mb-1"
+                            style={{ textTransform: 'none' }}
+                          >
+                            <span>
+                              {k === 'undefined' ?
+                                'Unknown' :
+                                k
+                              }
+                            </span>
+                            <span className="text-blue-500 dark:text-white">
+                              {number_format(
+                                v,
+                                '0,0',
+                              )}
+                            </span>
+                          </div>
+                        ))
+                      }
                     </div>
                   </div>
                 )
               },
+              headerClassName: 'whitespace-nowrap',
             },
             {
               Header: 'Chain',
               accessor: 'chain',
               disableSortBy: true,
-              Cell: props => (
-                chainManager.image(props.value, evm_chains_data) ?
-                  <Image
-                    src={chainManager.image(props.value, evm_chains_data)}
-                    className="w-6 h-6 rounded-full"
-                  />
-                  :
-                  <span className="font-semibold">
-                    {chainManager.name(props.value, evm_chains_data)}
-                  </span>
-              ),
+              Cell: props => {
+                const {
+                  value,
+                } = { ...props }
+
+                const name = chainManager.name(
+                  value,
+                  evm_chains_data,
+                )
+                const image = chainManager.image(
+                  value,
+                  evm_chains_data,
+                )
+
+                return (
+                  image ?
+                    <Image
+                      title={name}
+                      src={image}
+                      className="w-6 h-6 rounded-full"
+                    /> :
+                    <span className="font-medium">
+                      {name}
+                    </span>
+                )
+              },
             },
             {
               Header: 'Key ID',
@@ -451,14 +534,18 @@ export default () => {
               Cell: props => (
                 props.value && (
                   <Copy
-                    value={props.value}
-                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                      {ellipse(props.value, 16)}
-                    </span>}
                     size={16}
+                    value={props.value}
+                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-600 text-xs font-medium">
+                      {ellipse(
+                        props.value,
+                        16,
+                      )}
+                    </span>}
                   />
                 )
               ),
+              headerClassName: 'whitespace-nowrap',
             },
             {
               Header: 'Commands',
@@ -466,6 +553,10 @@ export default () => {
               disableSortBy: true,
               Cell: props => {
                 const {
+                  value,
+                } = { ...props }
+                const {
+                  batch_id,
                   chain,
                 } = { ...props.row.original }
 
@@ -473,334 +564,518 @@ export default () => {
                   chain,
                   evm_chains_data,
                 )
-
                 const {
+                  chain_id,
                   explorer,
                 } = { ...chain_data }
 
                 return assets_data && (
-                  props.value?.length > 0 ?
+                  value?.length > 0 ?
                     <div className="flex flex-col space-y-2.5 mb-4">
-                      {_.slice(props.value, 0, 10).filter(c => c).map((c, i) => {
-                        const { id, params, type, executed, deposit_address, transactionHash } = { ...c }
-                        const { symbol, amount, name, decimals, cap, account, salt, newOwners, newOperators, newWeights, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...params }
-                        const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(_c => _c?.chain_id === chain_data?.chain_id && equals_ignore_case(_c.symbol, symbol)) > -1)
-                        const contract_data = asset_data?.contracts?.find(_c => _c.chain_id === chain_data?.chain_id)
-                        const _decimals = contract_data?.decimals || asset_data?.decimals || 18
-                        const _symbol = contract_data?.symbol || asset_data?.symbol || symbol
-                        const image = contract_data?.image || asset_data?.image
-                        const source_chain_data = sourceChain &&
-                          getChain(sourceChain, evm_chains_data)
-                        const transfer_id = parseInt(id, 16)
-
-                        const typeComponent = (
-                          <div
-                            title={executed ?
-                              'Executed' :
-                              ''
-                            }
-                            className={`w-fit max-w-min ${executed ? 'bg-slate-50 dark:bg-black border-2 border-green-400 shadow dark:border-green-400 text-green-400 dark:text-green-400 font-bold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-semibold py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
-                          >
-                            {type}
-                          </div>
+                      {
+                        _.slice(
+                          value,
+                          0,
+                          10,
                         )
+                        .filter(c => c)
+                        .map((c, i) => {
+                          const {
+                            id,
+                            params,
+                            type,
+                            deposit_address,
+                            executed,
+                            transactionHash,
+                          } = { ...c }
+                          const {
+                            amount,
+                            name,
+                            cap,
+                            account,
+                            salt,
+                            newOwners,
+                            newOperators,
+                            newWeights,
+                            newThreshold,
+                            sourceChain,
+                            sourceTxHash,
+                            contractAddress,
+                          } = { ...params }
+                          let {
+                            symbol,
+                            decimals,
+                          } = { ...params }
 
-                        return (
-                          <div
-                            key={i}
-                            className="flex flex-wrap items-center"
-                          >
-                            {typeComponent && (
-                              transactionHash && explorer ?
-                                <a
-                                  href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 dark:text-white text-xs font-semibold"
-                                >
-                                  {typeComponent}
-                                </a> :
-                                typeComponent
-                            )}
-                            {source_chain_data && (
-                              <div className="flex items-center space-x-1 mb-1 mr-2">
-                                {source_chain_data.image ?
-                                  <Image
-                                    src={source_chain_data.image}
-                                    className="w-5 h-5 rounded-full"
-                                  />
-                                  :
-                                  <span className="font-semibold">
-                                    {source_chain_data.name}
-                                  </span>
-                                }
-                                {sourceTxHash && (
-                                  <div className="flex items-center space-x-1">
-                                    <Link href={`/gmp/${sourceTxHash}`}>
-                                      <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 dark:text-white font-semibold"
-                                      >
-                                        GMP
-                                      </a>
-                                    </Link>
-                                    {source_chain_data.explorer?.url && (
-                                      <a
-                                        href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', sourceTxHash)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="min-w-max text-blue-600 dark:text-white"
-                                      >
-                                        {source_chain_data.explorer.icon ?
-                                          <Image
-                                            src={source_chain_data.explorer.icon}
-                                            className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                          />
-                                          :
-                                          <TiArrowRight size={16} className="transform -rotate-45" />
-                                        }
-                                      </a>
-                                    )}
-                                  </div>
-                                )}
-                                {contractAddress && (
-                                  <>
-                                    <BiRightArrowCircle size={20} className="min-w-max" />
-                                    <div className="flex items-center space-x-1">
-                                      <EnsProfile
-                                        address={contractAddress}
-                                        no_image={true}
-                                        fallback={contractAddress && (
-                                          <Copy
-                                            value={contractAddress}
-                                            title={<span className="text-slate-400 dark:text-slate-200 text-xs">
-                                              <span className="xl:hidden">
-                                                {ellipse(contractAddress, 6)}
-                                              </span>
-                                              <span className="hidden xl:block">
-                                                {ellipse(contractAddress, 8)}
-                                              </span>
-                                            </span>}
-                                            size={16}
-                                          />
-                                        )}
-                                        className="normal-case text-black dark:text-white text-xs font-semibold"
-                                      />
-                                      {chain_data?.explorer?.url && (
-                                        <a
-                                          href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', contractAddress)}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="min-w-max text-blue-600 dark:text-white"
-                                        >
-                                          {chain_data.explorer.icon ?
-                                            <Image
-                                              src={chain_data.explorer.icon}
-                                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                            />
-                                            :
-                                            <TiArrowRight size={16} className="transform -rotate-45" />
-                                          }
-                                        </a>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            )}
-                            {symbol && (
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-1 mr-2">
-                                {image && (
-                                  <Image
-                                    src={image}
-                                    className="w-4 h-4 rounded-full"
-                                  />
-                                )}
-                                <span className="text-xs font-semibold">
-                                  {amount > 0 && (
-                                    <span className="mr-1">
-                                      {number_format(utils.formatUnits(BigNumber.from(amount), _decimals), '0,0.000000', true)}
-                                    </span>
-                                  )}
-                                  <span>
-                                    {_symbol}
-                                  </span>
-                                </span>
-                              </div>
-                            )}
-                            {['mintToken'].includes(type) && typeof transfer_id === 'number' && (
-                              <div className="flex items-center space-x-1 mb-1 mr-2">
-                                <Link href={`/transfer?transfer_id=${transfer_id}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 dark:text-white text-xs font-semibold"
-                                  >
-                                    Transfer
-                                  </a>
-                                </Link>
-                              </div>
-                            )}
-                            {name && (
-                              <div className="flex flex-col mb-1 mr-2">
-                                <span className="font-semibold">
-                                  {name}
-                                </span>
-                                <div className="flex items-center space-x-1.5">
-                                  {decimals && (
-                                    <span className="text-slate-400 dark:text-slate-600 text-xs">
-                                      decimals: {number_format(decimals, '0,0')}
-                                    </span>
-                                  )}
-                                  {cap && (
-                                    <span className="text-slate-400 dark:text-slate-600 text-xs">
-                                      cap: {number_format(cap, '0,0')}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                            {account ?
-                              <div className="flex items-center space-x-1 mb-1 mr-2">
-                                <BiRightArrowCircle size={20} />
-                                <div className="flex items-center space-x-1">
-                                  <EnsProfile
-                                    address={account}
-                                    no_image={true}
-                                    fallback={account && (
-                                      <Copy
-                                        value={account}
-                                        title={<span className="text-slate-400 dark:text-slate-200 text-xs">
-                                          <span className="xl:hidden">
-                                            {ellipse(account, 6)}
-                                          </span>
-                                          <span className="hidden xl:block">
-                                            {ellipse(account, 8)}
-                                          </span>
-                                        </span>}
-                                        size={16}
-                                      />
-                                    )}
-                                    className="normal-case text-black dark:text-white text-xs font-semibold"
-                                  />
-                                  {chain_data?.explorer?.url && (
+                          const asset_data = assets_data?.find(a =>
+                            equals_ignore_case(a?.symbol, symbol) ||
+                            a?.contracts?.findIndex(_c =>
+                              _c?.chain_id === chain_id &&
+                              equals_ignore_case(_c.symbol, symbol)
+                            ) > -1
+                          )
+                          const {
+                            contracts,
+                          } = { ...asset_data }
+
+                          const contract_data = contracts?.find(_c => _c.chain_id === chain_id)
+                          let {
+                            image,
+                          } = { ...contract_data }
+
+                          decimals = contract_data?.decimals ||
+                            asset_data?.decimals ||
+                            decimals ||
+                            18
+                          symbol = contract_data?.symbol ||
+                            asset_data?.symbol ||
+                            symbol
+                          image = image ||
+                            asset_data?.image
+
+                          const source_chain_data =
+                            getChain(
+                              sourceChain,
+                              evm_chains_data,
+                            )
+
+                          const transfer_id = parseInt(
+                            id,
+                            16,
+                          )
+
+                          const typeComponent = (
+                            <div
+                              title={executed ?
+                                'Executed' :
+                                ''
+                              }
+                              className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
+                            >
+                              {type}
+                            </div>
+                          )
+
+                          return (
+                            <div
+                              key={i}
+                              className="flex flex-wrap items-center"
+                            >
+                              {typeComponent &&
+                                (
+                                  transactionHash &&
+                                  explorer ?
                                     <a
-                                      href={`${chain_data.explorer.url}${chain_data.explorer.address_path?.replace('{address}', account)}`}
+                                      href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="min-w-max text-blue-600 dark:text-white"
+                                      className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                                     >
-                                      {chain_data.explorer.icon ?
-                                        <Image
-                                          src={chain_data.explorer.icon}
-                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                        />
-                                        :
-                                        <TiArrowRight size={16} className="transform -rotate-45" />
+                                      {typeComponent}
+                                    </a> :
+                                    typeComponent
+                                )
+                              }
+                              {
+                                source_chain_data &&
+                                (
+                                  <div className="flex items-center space-x-1 mb-1 mr-2">
+                                    {source_chain_data.image ?
+                                      <Image
+                                        src={source_chain_data.image}
+                                        className="w-5 h-5 rounded-full"
+                                      /> :
+                                      <span className="font-medium">
+                                        {source_chain_data.name}
+                                      </span>
+                                    }
+                                    {
+                                      sourceTxHash &&
+                                      (
+                                        <div className="flex items-center space-x-1">
+                                          <Link href={`/gmp/${sourceTxHash}`}>
+                                            <a
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                            >
+                                              GMP
+                                            </a>
+                                          </Link>
+                                          {
+                                            source_chain_data.explorer?.url &&
+                                            (
+                                              <a
+                                                href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', sourceTxHash)}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
+                                              >
+                                                {source_chain_data.explorer.icon ?
+                                                  <Image
+                                                    src={source_chain_data.explorer.icon}
+                                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                                  /> :
+                                                  <TiArrowRight
+                                                    size={16}
+                                                    className="transform -rotate-45"
+                                                  />
+                                                }
+                                              </a>
+                                            )
+                                          }
+                                        </div>
+                                      )
+                                    }
+                                    {
+                                      contractAddress &&
+                                      (
+                                        <>
+                                          <BiRightArrowCircle
+                                            size={18}
+                                          />
+                                          <div className="flex items-center space-x-1">
+                                            <EnsProfile
+                                              address={contractAddress}
+                                              fallback={
+                                                contractAddress &&
+                                                (
+                                                  <Copy
+                                                    value={contractAddress}
+                                                    title={<span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
+                                                      <span className="xl:hidden">
+                                                        {ellipse(
+                                                          contractAddress,
+                                                          6,
+                                                        )}
+                                                      </span>
+                                                      <span className="hidden xl:block">
+                                                        {ellipse(
+                                                          contractAddress,
+                                                          8,
+                                                        )}
+                                                      </span>
+                                                    </span>}
+                                                  />
+                                                )
+                                              }
+                                            />
+                                            {explorer?.url &&
+                                              (
+                                                <a
+                                                  href={`${explorer.url}${explorer.address_path?.replace('{address}', contractAddress)}`}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
+                                                >
+                                                  {explorer.icon ?
+                                                    <Image
+                                                      src={explorer.icon}
+                                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                                    /> :
+                                                    <TiArrowRight
+                                                      size={16}
+                                                      className="transform -rotate-45"
+                                                    />
+                                                  }
+                                                </a>
+                                              )
+                                            }
+                                          </div>
+                                        </>
+                                      )
+                                    }
+                                  </div>
+                                )
+                              }
+                              {
+                                symbol &&
+                                (
+                                  <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2">
+                                    {image && (
+                                      <Image
+                                        src={image}
+                                        className="w-5 h-5 rounded-full"
+                                      />
+                                    )}
+                                    <span className="text-sm font-medium">
+                                      {
+                                        amount > 0 &&
+                                        (
+                                          <span className="mr-1">
+                                            {number_format(
+                                              utils.formatUnits(
+                                                BigNumber.from(amount),
+                                                decimals,
+                                              ),
+                                              '0,0.000000',
+                                              true,
+                                            )}
+                                          </span>
+                                        )
                                       }
-                                    </a>
-                                  )}
-                                </div>
-                              </div>
-                              :
-                              salt && (
-                                <div className="flex items-center space-x-1 mb-1 mr-2">
-                                  <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                                    {deposit_address ?
-                                      'Deposit address' :
-                                      'Salt'
-                                    }:
-                                  </span>
-                                  {deposit_address ?
-                                    <>
+                                      <span>
+                                        {symbol}
+                                      </span>
+                                    </span>
+                                  </div>
+                                )
+                              }
+                              {
+                                [
+                                  'mintToken',
+                                ].includes(type) &&
+                                typeof transfer_id === 'number' &&
+                                (
+                                  <div className="flex items-center space-x-1 mb-1 mr-2">
+                                    <Link href={`/transfer?transfer_id=${transfer_id}`}>
                                       <a
-                                        href={`/account/${deposit_address}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-slate-400 dark:text-slate-600 text-xs font-semibold"
+                                        className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                                       >
-                                        {ellipse(
-                                          deposit_address,
-                                          8,
-                                        )}
+                                        Transfer
                                       </a>
-                                      <Copy
-                                        value={deposit_address}
-                                      />
-                                    </> :
-                                    <Copy
-                                      value={salt}
-                                      title={<span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                                        {ellipse(
-                                          salt,
-                                          8,
-                                        )}
-                                      </span>}
+                                    </Link>
+                                  </div>
+                                )
+                              }
+                              {
+                                name &&
+                                (
+                                  <div className="flex flex-col mb-1 mr-2">
+                                    <span className="font-medium">
+                                      {name}
+                                    </span>
+                                    <div className="flex items-center space-x-1.5">
+                                      {
+                                        decimals &&
+                                        (
+                                          <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
+                                            <span className="font-medium">
+                                              decimals:
+                                            </span>
+                                            <span>
+                                              {number_format(
+                                                decimals,
+                                                '0,0',
+                                              )}
+                                            </span>
+                                          </span>
+                                        )
+                                      }
+                                      {
+                                        cap &&
+                                        (
+                                          <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
+                                            <span className="font-medium">
+                                              cap:
+                                            </span>
+                                            <span>
+                                              {number_format(
+                                                cap,
+                                                '0,0',
+                                              )}
+                                            </span>
+                                          </span>
+                                        )
+                                      }
+                                    </div>
+                                  </div>
+                                )
+                              }
+                              {account ?
+                                <div className="flex items-center space-x-1 mb-1 mr-2">
+                                  <BiRightArrowCircle
+                                    size={18}
+                                  />
+                                  <div className="flex items-center space-x-1">
+                                    <EnsProfile
+                                      address={account}
+                                      fallback={
+                                        account &&
+                                        (
+                                          <Copy
+                                            value={account}
+                                            title={<span className="cursor-pointer text-slate-400 dark:text-slate-200 text-xs">
+                                              <span className="xl:hidden">
+                                                {ellipse(
+                                                  account,
+                                                  6,
+                                                )}
+                                              </span>
+                                              <span className="hidden xl:block">
+                                                {ellipse(
+                                                  account,
+                                                  8,
+                                                )}
+                                              </span>
+                                            </span>}
+                                          />
+                                        )
+                                      }
                                     />
-                                  }
+                                    {explorer?.url &&
+                                      (
+                                        <a
+                                          href={`${explorer.url}${explorer.address_path?.replace('{address}', account)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
+                                        >
+                                          {explorer.icon ?
+                                            <Image
+                                              src={explorer.icon}
+                                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                            /> :
+                                            <TiArrowRight
+                                              size={16}
+                                              className="transform -rotate-45"
+                                            />
+                                          }
+                                        </a>
+                                      )
+                                    }
+                                  </div>
                                 </div>
-                              )
-                            }
-                            {newOwners && (
-                              <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                <span className="text-xs font-semibold">
-                                  {number_format(newOwners.split(';').length, '0,0')}
-                                </span>
-                                <span className="text-xs font-medium">
-                                  New Owners
-                                </span>
-                              </div>
-                            )}
-                            {newOperators && (
-                              <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                <span className="text-xs font-semibold">
-                                  {number_format(
-                                    newOperators.split(';').length,
-                                    '0,0',
-                                  )}
-                                </span>
-                                <span className="text-xs font-medium">
-                                  New Operators
-                                </span>
-                                {newWeights && (
-                                  <span className="text-xs font-semibold">
-                                    [{number_format(
-                                      _.sum(
-                                        newWeights
+                                :
+                                salt &&
+                                (
+                                  <div className="flex items-center space-x-1 mb-1 mr-2">
+                                    <span className="text-slate-400 dark:text-slate-600 font-medium">
+                                      {deposit_address ?
+                                        'Deposit address' :
+                                        'Salt'
+                                      }:
+                                    </span>
+                                    {deposit_address ?
+                                      <>
+                                        <a
+                                          href={`/account/${deposit_address}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-slate-400 dark:text-slate-600 text-xs font-medium"
+                                        >
+                                          {ellipse(
+                                            deposit_address,
+                                            8,
+                                          )}
+                                        </a>
+                                        <Copy
+                                          value={deposit_address}
+                                        />
+                                      </> :
+                                      <Copy
+                                        value={salt}
+                                        title={<span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+                                          {ellipse(
+                                            salt,
+                                            8,
+                                          )}
+                                        </span>}
+                                      />
+                                    }
+                                  </div>
+                                )
+                              }
+                              {
+                                newOwners &&
+                                (
+                                  <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
+                                    <span className="text-xs font-medium">
+                                      {number_format(
+                                        newOwners
                                           .split(';')
-                                          .map(w => Number(w))
-                                      ),
-                                      '0,0',
-                                    )}]
-                                  </span>
+                                          .length,
+                                        '0,0',
+                                      )}
+                                    </span>
+                                    <span className="text-xs font-medium">
+                                      New Owners
+                                    </span>
+                                  </div>
+                                )
+                              }
+                              {
+                                newOperators &&
+                                (
+                                  <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
+                                    <span className="text-xs font-medium">
+                                      {number_format(
+                                        newOperators
+                                          .split(';')
+                                          .length,
+                                        '0,0',
+                                      )}
+                                    </span>
+                                    <span className="text-xs font-medium">
+                                      New Operators
+                                    </span>
+                                    {
+                                      newWeights &&
+                                      (
+                                        <span className="text-xs font-medium">
+                                          [
+                                          {number_format(
+                                            _.sum(
+                                              newWeights
+                                                .split(';')
+                                                .map(w => Number(w))
+                                            ),
+                                            '0,0',
+                                          )}
+                                          ]
+                                        </span>
+                                      )
+                                    }
+                                  </div>
+                                )
+                              }
+                              {
+                                newThreshold &&
+                                (
+                                  <div className="flex items-center space-x-1 mb-1 mr-2">
+                                    <span className="text-xs font-medium">
+                                      Threshold:
+                                    </span>
+                                    <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">
+                                      {number_format(
+                                        newThreshold,
+                                        '0,0',
+                                      )}
+                                    </span>
+                                  </div>
+                                )
+                              }
+                            </div>
+                          )
+                        })
+                      }
+                      {
+                        value.length > 10 &&
+                        (
+                          <Link href={`/batch/${chain}/${batch_id}`}>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="whitespace-nowrap text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium space-x-1 ml-1"
+                            >
+                              <span>
+                                and
+                              </span>
+                              <span>
+                                {number_format(
+                                  value.length - 10,
+                                  '0,0',
                                 )}
-                              </div>
-                            )}
-                            {newThreshold && (
-                              <div className="flex items-center space-x-1 mb-1 mr-2">
-                                <span className="text-xs font-medium">
-                                  Threshold:
-                                </span>
-                                <span className="text-slate-600 dark:text-slate-400 text-xs font-semibold">
-                                  {number_format(newThreshold, '0,0')}
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                              </span>
+                              <span>
+                                more
+                              </span>
+                            </a>
+                          </Link>
                         )
-                      })}
-                      {props.value.length > 10 && (
-                        <Link href={`/batch/${props.row.original.chain}/${props.row.original.batch_id}`}>
-                          <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white ml-1"
-                          >
-                            and {number_format(props.value.length - 10, '0,0')} more
-                          </a>
-                        </Link>
-                      )}
+                      }
                     </div>
                     :
                     <span>
@@ -813,24 +1088,46 @@ export default () => {
               Header: 'Status',
               accessor: 'status',
               disableSortBy: true,
-              Cell: props => (
-                props.value && (
-                  <div className={`max-w-min ${equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-500 dark:bg-green-600 text-white' : 'bg-slate-100 dark:bg-slate-900'} rounded-lg uppercase flex items-center text-xs lg:text-sm font-semibold space-x-1 py-1 px-1.5`}>
-                    {equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
-                      <BiCheckCircle size={18} /> :
-                      equals_ignore_case(props.value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
-                        <HiOutlineClock size={18} /> :
-                        <BiXCircle size={18} />
-                    }
-                    <span className="capitalize text-xs">
-                      {(props.row.original.commands && props.row.original.commands.filter(c => c?.executed).length === props.row.original.commands.length ?
-                        'Executed' :
-                        props.value.replace('BATCHED_COMMANDS_STATUS_', '')
-                      ).toLowerCase()}
-                    </span>
-                  </div>
-                )
-              ),
+              Cell: props => {
+                const {
+                  value,
+                } = { ...props }
+                const {
+                  commands,
+                } = { ...props.row.original }
+
+                return value &&
+                  (
+                    <div className={`max-w-min ${equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
+                      {equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
+                        <BiCheckCircle
+                          size={18}
+                        /> :
+                        equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
+                          <MdOutlineWatchLater
+                            size={18}
+                          /> :
+                          <BiXCircle
+                            size={18}
+                          />
+                      }
+                      <span className="capitalize text-xs font-semibold">
+                        {
+                          (
+                            commands &&
+                            commands.length === commands.filter(c => c?.executed).length ?
+                              'Executed' :
+                              value.replace(
+                                'BATCHED_COMMANDS_STATUS_',
+                                '',
+                              )
+                          )
+                          .toLowerCase()
+                        }
+                      </span>
+                    </div>
+                  )
+              },
             },
             {
               Header: 'Time',

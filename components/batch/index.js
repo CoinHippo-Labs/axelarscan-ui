@@ -15,9 +15,9 @@ import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
-import { axelard } from '../../lib/api/cli'
+import { batched_commands } from '../../lib/api/cosmos'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, to_json, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default () => {
   const {
@@ -64,19 +64,22 @@ export default () => {
         chain &&
         id
       ) {
-        const response = await axelard(
-          {
-            cmd: `axelard q evm batched-commands ${chain} ${id} -oj`,
-            cache: true,
-            cache_timeout: 1,
-          },
-        )
-
-        setData({
-          data: { ...to_json(response?.stdout) },
+        const response = await batched_commands(
           chain,
           id,
-        })
+        )
+
+        const data = {
+          ...response,
+        }
+
+        setData(
+          {
+            data,
+            chain,
+            id,
+          }
+        )
       }
     }
 
@@ -229,7 +232,7 @@ export default () => {
       </div>
       {commands_filtered ?
         <div className="space-y-2">
-          <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start space-x-2.5 mx-2.5">
+          <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5 mx-2.5">
             {Object.entries({ ...types })
               .map(([k, v]) => (
                 <div

@@ -1120,7 +1120,7 @@ export default () => {
             defaultPageSize={50}
             className="no-border"
           />
-        </div >:
+        </div> :
         <ProgressBarSpinner
           borderColor={loader_color(theme)}
           width="36"
