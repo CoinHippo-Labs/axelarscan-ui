@@ -1,7 +1,5 @@
 import Link from 'next/link'
-import { FiCode } from 'react-icons/fi'
-import { RiCoinsLine } from 'react-icons/ri'
-import { BiMessageDots } from 'react-icons/bi'
+import { BiCode, BiTransfer, BiMessageDots } from 'react-icons/bi'
 
 import Transfers from '../transfers/transfers'
 import Sents from '../sents/sents'
@@ -9,13 +7,15 @@ import Gmps from '../gmps/gmps'
 
 export default () => {
   return (
-    <div className="space-y-8 mb-6 mx-auto pb-10">
-      <div className="space-y-6">
+    <div className="mb-6 mx-auto">
+      <div className="space-y-8">
         <div className="space-y-3">
           <Link href="/transfers/search">
             <a className="flex items-center space-x-2">
-              <FiCode size={20} />
-              <span className="uppercase text-base font-bold">
+              <BiCode
+                size={20}
+              />
+              <span className="uppercase tracking-wider text-base font-semibold">
                 Cross-chain transfers
               </span>
             </a>
@@ -25,8 +25,10 @@ export default () => {
         <div className="space-y-3">
           <Link href="/sent/search">
             <a className="flex items-center space-x-2">
-              <RiCoinsLine size={20} />
-              <span className="uppercase text-base font-bold">
+              <BiTransfer
+                size={20}
+              />
+              <span className="uppercase tracking-wider text-base font-semibold">
                 Token sent
               </span>
             </a>
@@ -36,8 +38,10 @@ export default () => {
         <div className="space-y-3">
           <Link href="/gmp/search">
             <a className="flex items-center space-x-2">
-              <BiMessageDots size={20} />
-              <span className="uppercase text-base font-bold">
+              <BiMessageDots
+                size={20}
+              />
+              <span className="uppercase tracking-wider text-base font-semibold">
                 General Message Passing
               </span>
             </a>

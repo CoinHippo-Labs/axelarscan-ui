@@ -716,7 +716,10 @@ export default () => {
     !is_executed &&
     (
       is_not_enough_gas ||
-      !gas_paid ||
+      !(
+        gas_paid ||
+        gas_paid_to_callback
+      )
       is_insufficient_fee
     ) &&
     (
@@ -838,7 +841,8 @@ export default () => {
         !is_insufficient_minimum_amount &&
         !is_insufficient_fee &&
         (
-          !(gas_paid || gas_paid_to_callback) ||
+          gas_paid ||
+          gas_paid_to_callback ||
           equals_ignore_case(call?.transactionHash, gas_paid?.transactionHash)
         ) ?
           1 :

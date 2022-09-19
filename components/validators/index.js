@@ -902,6 +902,11 @@ export default () => {
                               k,
                               evm_chains_data,
                             )
+                            const {
+                              votes,
+                              total_polls,
+                              total,
+                            } = { ...v }
 
                             return (
                               <div
@@ -919,22 +924,24 @@ export default () => {
                                       className="w-5 h-5 rounded-full"
                                     />
                                   )}
-                                  <span className={`${v?.votes?.true ? 'text-green-400 dark:text-green-300 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} -mt-0.5`}>
+                                  <span className={`${votes?.true ? 'text-green-400 dark:text-green-300 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} -mt-0.5`}>
                                     {number_format(
-                                      v?.votes?.true || 0,
+                                      votes?.true ||
+                                        0,
                                       '0,0',
                                     )} Y
                                   </span>
-                                  <span className={`${v?.votes?.false ? 'text-red-500 dark:text-red-600 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} -mt-0.5`}>
+                                  <span className={`${votes?.false ? 'text-red-500 dark:text-red-600 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} -mt-0.5`}>
                                     {number_format(
-                                      v?.votes?.false || 0,
+                                      votes?.false ||
+                                        0,
                                       '0,0',
                                     )} N
                                   </span>
-                                  {v?.total_polls - v?.total > 0 && (
+                                  {total_polls - total > 0 && (
                                     <span className="text-slate-400 dark:text-slate-500 font-semibold -mt-0.5">
                                       {number_format(
-                                        v.total_polls - v.total,
+                                        total_polls - total,
                                         '0,0',
                                       )} UN
                                     </span>
@@ -950,7 +957,7 @@ export default () => {
                                 </span>
                               </div>
                             )
-                          }):
+                          }) :
                         <span className="text-slate-300 dark:text-slate-600">
                           No Votes
                         </span> :
