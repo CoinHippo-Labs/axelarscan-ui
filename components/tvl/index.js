@@ -492,45 +492,67 @@ export default () => {
                   },
                 ],
                 _.orderBy(
-                  _.concat(
-                    evm_chains_data || [],
-                    cosmos_chains_data || [],
-                  )
-                  .map(c => {
-                    const {
-                      id,
-                    } = { ...c }
+                  _.uniqBy(
+                    _.concat(
+                      evm_chains_data || [],
+                      cosmos_chains_data || [],
+                    )
+                    .flatMap(c => {
+                      const {
+                        overrides,
+                      } = { ...c }
 
-                    return {
-                      ...c,
-                      total_value:
-                        _.sumBy(
-                          data
-                            .map(d => {
-                              const {
-                                price,
-                                tvl,
-                              } = { ...d }
-                              const {
-                                supply,
-                                total,
-                              } = { ...tvl?.[id] }
-
-                              const amount = supply ||
-                                total
-                              const value = (amount * price) ||
-                                0
-
+                      return (
+                        _.concat(
+                          Object.entries({ ...overrides })
+                            .filter(([k, v]) => v?.tvl)
+                            .map(([k, v]) => {
                               return {
-                                ...d,
-                                value,
+                                ...c,
+                                ...v,
                               }
-                            })
-                            .filter(d => d.value > 0),
-                          'value',
-                        ),
-                    }
-                  }),
+                            }),
+                          c,
+                        )
+                        .map(c => {
+                          const {
+                            id,
+                          } = { ...c }
+
+                          return {
+                            ...c,
+                            total_value:
+                              _.sumBy(
+                                data
+                                  .map(d => {
+                                    const {
+                                      price,
+                                      tvl,
+                                    } = { ...d }
+                                    const {
+                                      supply,
+                                      total,
+                                    } = { ...tvl?.[id] }
+
+                                    const amount = supply ||
+                                      total
+                                    const value = (amount * price) ||
+                                      0
+
+                                    return {
+                                      ...d,
+                                      value,
+                                    }
+                                  })
+                                  .filter(d => d.value > 0),
+                                'value',
+                              ),
+                          }
+                        })
+                      )
+                    }),
+                    'id',
+                  ),
                   ['total_value'],
                   ['desc'],
                 )
