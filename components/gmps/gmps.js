@@ -130,7 +130,7 @@ export default ({ n }) => {
 
     const interval = setInterval(() =>
       triggering(true),
-      (address || ['/gmp/search'].includes(pathname) ? 1 : 0.25) * 60 * 1000,
+      (address || ['/gmp/search'].includes(pathname) ? 0.33 : 0.25) * 60 * 1000,
     )
 
     return () => clearInterval(interval)
@@ -775,7 +775,7 @@ export default ({ n }) => {
                             error?.block_timestamp ||
                             approved?.block_timestamp
                           ) &&
-                          moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 45
+                          moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 120
                         ) ?
                           1 :
                           0

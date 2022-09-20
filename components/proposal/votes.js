@@ -185,13 +185,17 @@ export default ({
                 value,
               } = { ...props }
 
-              const total_voting_power = _.sumBy(
-                (validators_data || [])
-                  .filter(v =>
-                    !v.jailed &&
-                    ['BOND_STATUS_BONDED'].includes(v.status)
-                  ),
-                'tokens',
+              const total_voting_power = assetManager.amount(
+                _.sumBy(
+                  (validators_data || [])
+                    .filter(v =>
+                      !v.jailed &&
+                      ['BOND_STATUS_BONDED'].includes(v.status)
+                    ),
+                  'tokens',
+                ),
+                _.head(assets_data)?.id,
+                assets_data,
               )
 
               return (

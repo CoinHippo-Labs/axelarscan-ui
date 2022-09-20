@@ -872,7 +872,7 @@ export default () => {
               error?.block_timestamp ||
               approved?.block_timestamp
             ) &&
-            moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 45
+            moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 120
           ) ?
             1 :
             0

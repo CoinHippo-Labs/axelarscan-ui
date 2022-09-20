@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
@@ -7,8 +8,9 @@ import { BiRightArrowAlt } from 'react-icons/bi'
 
 import Copy from '../copy'
 import Image from '../image'
+import ValidatorProfile from '../validator-profile'
 import { getChain } from '../../lib/object/chain'
-import { number_format, name, ellipse, to_json, decode_base64, json_theme } from '../../lib/utils'
+import { number_format, name, ellipse, equals_ignore_case, to_json, decode_base64, json_theme } from '../../lib/utils'
 
 const FORMATS = [
   {
@@ -34,6 +36,8 @@ const FORMATTABLE_TYPES = [
   'RouteIBCTransfers',
   'MsgUpdateClient',
   'MsgAcknowledgement',
+  'MsgDelegate',
+  'MsgUndelegate',
 ]
 
 export default ({
@@ -44,6 +48,7 @@ export default ({
     evm_chains,
     cosmos_chains,
     assets,
+    validators,
   } = useSelector(state =>
     (
       {
@@ -51,6 +56,7 @@ export default ({
         evm_chains: state.evm_chains,
         cosmos_chains: state.cosmos_chains,
         assets: state.assets,
+        validators: state.validators,
       }
     ),
     shallowEqual,
@@ -67,6 +73,9 @@ export default ({
   const {
     assets_data,
   } = { ...assets }
+  const {
+    validators_data,
+  } = { ...validators }
 
   const [txFormat, setTxFormat] = useState('formatted')
   const [logsFormat, setLogsFormat] = useState('formatted')
@@ -217,6 +226,26 @@ export default ({
                     chains_data,
                   )
 
+                  const sender_validator_data =
+                    [
+                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                      process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+                    ].findIndex(p => sender?.startsWith(p)) > -1 &&
+                      validators_data?.find(v =>
+                        equals_ignore_case(v?.operator_address, sender) ||
+                        equals_ignore_case(v?.broadcaster_address, sender)
+                      )
+
+                  const recipient_validator_data =
+                    [
+                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                      process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+                    ].findIndex(p => recipient?.startsWith(p)) > -1 &&
+                      validators_data?.find(v =>
+                        equals_ignore_case(v?.operator_address, recipient) ||
+                        equals_ignore_case(v?.broadcaster_address, recipient)
+                      )
+
                   symbol = contracts?.find(c => c?.chain_id === chain_data?.chain_id)?.symbol ||
                     ibc?.find(i => i?.chain_id === chain_data?.id)?.symbol ||
                     symbol
@@ -235,38 +264,88 @@ export default ({
                           sender &&
                           (
                             <div className="space-y-1 my-2 mr-4 sm:mr-6">
-                              <div className="flex items-center">
-                                <div className="mr-1.5">
-                                  {sender_chain_data ?
+                              {sender_validator_data ?
+                                <div className={`min-w-max flex items-${sender_validator_data.description?.moniker ? 'start' : 'center'} space-x-2`}>
+                                  <Link href={`/validator/${sender_validator_data.operator_address}`}>
                                     <a
-                                      href={`${sender_chain_data.explorer?.url}${sender_chain_data.explorer?.address_path?.replace('{address}', sender)}`}
                                       target="_blank"
-                                      rel="noopenner noreferrer"
-                                      className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      rel="noopener noreferrer"
                                     >
-                                      {ellipse(
-                                        sender,
-                                        16,
-                                        sender_chain_data.prefix_address,
-                                      )}
-                                    </a> :
-                                    <span className="font-medium">
-                                      {ellipse(
-                                        sender,
-                                        16,
-                                      )}
-                                    </span>
-                                  }
+                                      <ValidatorProfile
+                                        validator_description={sender_validator_data.description}
+                                      />
+                                    </a>
+                                  </Link>
+                                  <div className="flex flex-col">
+                                    {sender_validator_data.description?.moniker && (
+                                      <Link href={`/validator/${sender_validator_data.operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                        >
+                                          {ellipse(
+                                            sender_validator_data.description.moniker,
+                                            16,
+                                          )}
+                                        </a>
+                                      </Link>
+                                    )}
+                                    <div className="flex items-center space-x-1">
+                                      <Link href={`/validator/${sender_validator_data.operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-slate-400 dark:text-slate-600"
+                                        >
+                                          {ellipse(
+                                            sender_validator_data.operator_address,
+                                            10,
+                                            process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                          )}
+                                        </a>
+                                      </Link>
+                                      <Copy
+                                        value={sender_validator_data.operator_address}
+                                      />
+                                    </div>
+                                  </div>
+                                </div> :
+                                <div className="flex items-center">
+                                  <div className="mr-1.5">
+                                    {sender_chain_data ?
+                                      <a
+                                        href={`${sender_chain_data.explorer?.url}${sender_chain_data.explorer?.address_path?.replace('{address}', sender)}`}
+                                        target="_blank"
+                                        rel="noopenner noreferrer"
+                                        className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      >
+                                        {ellipse(
+                                          sender,
+                                          16,
+                                          sender_chain_data.prefix_address,
+                                        )}
+                                      </a> :
+                                      <span className="font-medium">
+                                        {ellipse(
+                                          sender,
+                                          16,
+                                        )}
+                                      </span>
+                                    }
+                                  </div>
+                                  <Copy
+                                    size={20}
+                                    value={sender}
+                                  />
                                 </div>
-                                <Copy
-                                  size={20}
-                                  value={sender}
-                                />
-                              </div>
+                              }
                               <div className="dark:text-slate-200 font-semibold">
                                 {signer ?
                                   'Signer' :
-                                  'Sender'
+                                  sender_validator_data ?
+                                    'Validator' :
+                                    'Sender'
                                 }
                               </div>
                             </div>
@@ -346,36 +425,87 @@ export default ({
                           recipient &&
                           (
                             <div className="space-y-1 my-2 mr-4 sm:mr-6">
-                              <div className="flex items-center">
-                                <div className="mr-1.5">
-                                  {recipient_chain_data ?
+                              {recipient_validator_data ?
+                                <div className={`min-w-max flex items-${recipient_validator_data.description?.moniker ? 'start' : 'center'} space-x-2`}>
+                                  <Link href={`/validator/${recipient_validator_data.operator_address}`}>
                                     <a
-                                      href={`${recipient_chain_data.explorer?.url}${recipient_chain_data.explorer?.address_path?.replace('{address}', recipient)}`}
                                       target="_blank"
-                                      rel="noopenner noreferrer"
-                                      className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      rel="noopener noreferrer"
                                     >
-                                      {ellipse(
-                                        recipient,
-                                        16,
-                                        recipient_chain_data.prefix_address,
-                                      )}
-                                    </a> :
-                                    <span className="font-medium">
-                                      {ellipse(
-                                        recipient,
-                                        16,
-                                      )}
-                                    </span>
-                                  }
+                                      <ValidatorProfile
+                                        validator_description={recipient_validator_data.description}
+                                      />
+                                    </a>
+                                  </Link>
+                                  <div className="flex flex-col">
+                                    {recipient_validator_data.description?.moniker && (
+                                      <Link href={`/validator/${recipient_validator_data.operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                        >
+                                          {ellipse(
+                                            recipient_validator_data.description.moniker,
+                                            16,
+                                          )}
+                                        </a>
+                                      </Link>
+                                    )}
+                                    <div className="flex items-center space-x-1">
+                                      <Link href={`/validator/${recipient_validator_data.operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-slate-400 dark:text-slate-600"
+                                        >
+                                          {ellipse(
+                                            recipient_validator_data.operator_address,
+                                            10,
+                                            process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                          )}
+                                        </a>
+                                      </Link>
+                                      <Copy
+                                        value={recipient_validator_data.operator_address}
+                                      />
+                                    </div>
+                                  </div>
+                                </div> :
+                                <div className="flex items-center">
+                                  <div className="mr-1.5">
+                                    {recipient_chain_data ?
+                                      <a
+                                        href={`${recipient_chain_data.explorer?.url}${recipient_chain_data.explorer?.address_path?.replace('{address}', recipient)}`}
+                                        target="_blank"
+                                        rel="noopenner noreferrer"
+                                        className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      >
+                                        {ellipse(
+                                          recipient,
+                                          16,
+                                          recipient_chain_data.prefix_address,
+                                        )}
+                                      </a> :
+                                      <span className="font-medium">
+                                        {ellipse(
+                                          recipient,
+                                          16,
+                                        )}
+                                      </span>
+                                    }
+                                  </div>
+                                  <Copy
+                                    size={20}
+                                    value={recipient}
+                                  />
                                 </div>
-                                <Copy
-                                  size={20}
-                                  value={recipient}
-                                />
-                              </div>
+                              }
                               <div className="dark:text-slate-200 font-semibold">
-                                Recipient
+                                {recipient_validator_data ?
+                                  'Validator' :
+                                  'Recipient'
+                                }
                               </div>
                             </div>
                           )

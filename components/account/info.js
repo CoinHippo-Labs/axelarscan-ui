@@ -197,8 +197,8 @@ export default ({
                 </span> :
             <ProgressBar
               borderColor={loader_color(theme)}
-              width="24"
-              height="24"
+              width="28"
+              height="28"
             />
           }
         </div>
@@ -280,8 +280,8 @@ export default ({
                 </span> :
             <ProgressBar
               borderColor={loader_color(theme)}
-              width="24"
-              height="24"
+              width="28"
+              height="28"
             />
           }
         </div>
@@ -354,8 +354,8 @@ export default ({
               </span> :
             <ProgressBar
               borderColor={loader_color(theme)}
-              width="24"
-              height="24"
+              width="28"
+              height="28"
             />
           }
         </div>
@@ -417,11 +417,11 @@ export default ({
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-slate-400 dark:text-slate-600"
+                          className="text-slate-400 dark:text-slate-600 text-xs"
                         >
                           {ellipse(
                             operator_address,
-                            10,
+                            8,
                             process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                           )}
                         </a>
@@ -461,8 +461,8 @@ export default ({
                   </span> :
                   <ProgressBar
                     borderColor={loader_color(theme)}
-                    width="24"
-                    height="24"
+                    width="28"
+                    height="28"
                   />
                 }
               </div>
@@ -492,8 +492,8 @@ export default ({
                 </span> :
                 <ProgressBar
                   borderColor={loader_color(theme)}
-                  width="24"
-                  height="24"
+                  width="28"
+                  height="28"
                 />
               }
             </div>
@@ -554,7 +554,7 @@ export default ({
                           {
                             denom &&
                             (
-                              <div className="flex items-start space-x-1">
+                              <div className="flex items-center space-x-2">
                                 <span className="font-semibold">
                                   {ellipse(
                                     denom,
@@ -762,11 +762,11 @@ export default ({
                                   <a
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-slate-400 dark:text-slate-600"
+                                    className="text-slate-400 dark:text-slate-600 text-xs"
                                   >
                                     {ellipse(
                                       operator_address,
-                                      10,
+                                      8,
                                       process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                                     )}
                                   </a>
@@ -818,7 +818,7 @@ export default ({
                         return (
                           <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
                             {typeof value === 'number' ?
-                              <span className="text-xs lg:text-sm font-semibold space-x-2">
+                              <span className="text-xs font-semibold space-x-2">
                                 <span>
                                   {number_format(
                                     value,
@@ -1064,7 +1064,7 @@ export default ({
                         return (
                           <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
                             {typeof value === 'number' ?
-                              <span className="text-xs lg:text-sm font-semibold space-x-2">
+                              <span className="text-xs font-semibold space-x-2">
                                 <span>
                                   {number_format(
                                     value,
@@ -1176,11 +1176,11 @@ export default ({
                                   <a
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-slate-400 dark:text-slate-600"
+                                    className="text-slate-400 dark:text-slate-600 text-xs"
                                   >
                                     {ellipse(
                                       operator_address,
-                                      10,
+                                      8,
                                       process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                                     )}
                                   </a>
@@ -1232,7 +1232,7 @@ export default ({
                         return (
                           <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
                             {typeof value === 'number' ?
-                              <span className="text-xs lg:text-sm font-semibold space-x-2">
+                              <span className="text-xs font-semibold space-x-2">
                                 <span>
                                   {number_format(
                                     value,

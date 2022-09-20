@@ -319,6 +319,8 @@ export default ({
                   'code',
                   'tx.body.messages.sender',
                   'tx.body.messages.signer',
+                  'tx.body.messages.delegator_address',
+                  'tx.body.messages.validator_address',
                   'tx.auth_info.fee.amount.*',
                   'timestamp',
                 ],
@@ -678,15 +680,15 @@ export default ({
                       { label: 'Block', key: 'height' },
                       { label: 'Type', key: 'type' },
                       { label: 'Status', key: 'status' },
-                      need_price && { label: 'Sender', key: 'sender' },
-                      need_price && { label: 'Recipient', key: 'recipient' },
+                      { label: 'Sender', key: 'sender' },
+                      { label: 'Recipient', key: 'recipient' },
                       { label: 'Amount', key: 'amount' },
                       need_price && { label: 'Symbol', key: 'symbol' },
                       need_price && { label: 'Price', key: 'price' },
                       need_price && { label: 'Value', key: 'value' },
                       { label: 'Fee', key: 'fee' },
                       { label: 'Time (ms)', key: 'timestamp' },
-                      need_price && { label: 'Time (DD-MM-YYYY HH:mm:ss A)', key: 'timestamp_utc_string' },
+                      { label: 'Time (DD-MM-YYYY HH:mm:ss A)', key: 'timestamp_utc_string' },
                     ].filter(h => h)}
                     data={dataForExport}
                     filename={`transactions${
@@ -752,11 +754,11 @@ export default ({
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
+                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-normal hover:font-medium"
                     >
                       {ellipse(
                         props.value,
-                        8,
+                        6,
                       )}
                     </a>
                   </Link>
@@ -776,7 +778,7 @@ export default ({
                   <a
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
+                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-normal hover:font-medium"
                   >
                     {number_format(
                       props.value,
@@ -791,7 +793,7 @@ export default ({
               accessor: 'type',
               disableSortBy: true,
               Cell: props => (
-                <div className="max-w-min bg-zinc-100 dark:bg-zinc-900 rounded capitalize text-xs lg:text-sm font-medium lg:-mt-0.5 py-0.5 px-2">
+                <div className="max-w-min bg-zinc-100 dark:bg-zinc-900 rounded capitalize text-xs font-medium py-0.5 px-2">
                   {name(
                     props.value?.replace(
                       'Request',
@@ -809,7 +811,7 @@ export default ({
               disableSortBy: true,
               Cell: props => (
                 props.value && (
-                  <div className={`${props.value === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-400'} uppercase flex items-center text-sm font-bold space-x-1`}>
+                  <div className={`${props.value === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-400'} uppercase flex items-center text-xs font-semibold space-x-1`}>
                     {props.value === 'success' ?
                       <BiCheckCircle
                         size={20}
@@ -830,9 +832,13 @@ export default ({
               accessor: 'sender',
               disableSortBy: true,
               Cell: props => {
+                const {
+                  value,
+                } = { ...props }
+
                 const validator_data = validators_data?.find(v =>
-                  equals_ignore_case(v?.broadcaster_address, props.value) ||
-                  equals_ignore_case(v?.operator_address, props.value)
+                  equals_ignore_case(v?.broadcaster_address, value) ||
+                  equals_ignore_case(v?.operator_address, value)
                 )
                 const {
                   operator_address,
@@ -844,7 +850,7 @@ export default ({
 
                 return (
                   operator_address ?
-                    <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                    <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-1.5`}>
                       <Link href={`/validator/${operator_address}`}>
                         <a
                           target="_blank"
@@ -852,6 +858,7 @@ export default ({
                         >
                           <ValidatorProfile
                             validator_description={description}
+                            className="w-5 h-5"
                           />
                         </a>
                       </Link>
@@ -875,11 +882,11 @@ export default ({
                             <a
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-slate-400 dark:text-slate-600"
+                              className="text-slate-400 dark:text-slate-600 text-xs"
                             >
                               {ellipse(
                                 operator_address,
-                                8,
+                                6,
                                 process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                               )}
                             </a>
@@ -890,28 +897,137 @@ export default ({
                         </div>
                       </div>
                     </div> :
-                    props.value ?
+                    value ?
                       <div className="flex items-center space-x-1">
-                        <Link href={`/account/${props.value}`}>
+                        <Link href={`/account/${value}`}>
                           <a
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                           >
                             {ellipse(
-                              props.value,
-                              10,
+                              value,
+                              6,
                               process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
                             )}
                           </a>
                         </Link>
                         <Copy
-                          value={props.value}
+                          value={value}
                         />
                       </div> :
                       <span>
                         -
                       </span>
+                )
+              },
+            },
+            {
+              Header: 'Recipient',
+              accessor: 'recipient',
+              disableSortBy: true,
+              Cell: props => {
+                const values = props.value
+
+                return (
+                  <div className="flex flex-col space-y-0.5">
+                    {(Array.isArray(values) ?
+                      values :
+                      [values]
+                    )
+                    .map((value, i) => {
+                      const validator_data = validators_data?.find(v =>
+                        equals_ignore_case(v?.broadcaster_address, value) ||
+                        equals_ignore_case(v?.operator_address, value)
+                      )
+                      const {
+                        operator_address,
+                        description,
+                      } = { ...validator_data }
+                      const {
+                        moniker,
+                      } = { ...description }
+
+                      return (
+                        operator_address ?
+                          <div
+                            key={i}
+                            className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-1.5`}
+                          >
+                            <Link href={`/validator/${operator_address}`}>
+                              <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ValidatorProfile
+                                  validator_description={description}
+                                  className="w-5 h-5"
+                                />
+                              </a>
+                            </Link>
+                            <div className="flex flex-col">
+                              {moniker && (
+                                <Link href={`/validator/${operator_address}`}>
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                  >
+                                    {ellipse(
+                                      moniker,
+                                      12,
+                                    )}
+                                  </a>
+                                </Link>
+                              )}
+                              <div className="flex items-center space-x-1">
+                                <Link href={`/validator/${operator_address}`}>
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-slate-400 dark:text-slate-600 text-xs"
+                                  >
+                                    {ellipse(
+                                      operator_address,
+                                      6,
+                                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                    )}
+                                  </a>
+                                </Link>
+                                <Copy
+                                  value={operator_address}
+                                />
+                              </div>
+                            </div>
+                          </div> :
+                          value ?
+                            <div
+                              key={i}
+                              className="flex items-center space-x-1"
+                            >
+                              <Link href={`/account/${value}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                >
+                                  {ellipse(
+                                    value,
+                                    6,
+                                    process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+                                  )}
+                                </a>
+                              </Link>
+                              <Copy
+                                value={value}
+                              />
+                            </div> :
+                            <span key={i}>
+                              -
+                            </span>
+                      )
+                    })}
+                  </div>
                 )
               },
             },
@@ -929,7 +1045,7 @@ export default ({
                 return (
                   <div className="flex flex-col items-start sm:items-end justify-center text-left sm:text-right space-y-1.5">
                     {typeof props.value === 'number' ?
-                      <div className="h-5 flex items-center text-xs lg:text-sm font-medium space-x-1">
+                      <div className="h-5 flex items-center text-xs font-medium space-x-1">
                         <span className="uppercase">
                           {number_format(
                             props.value,
@@ -959,7 +1075,7 @@ export default ({
                             return (
                               <div
                                 key={i}
-                                className={`h-5 flex items-center ${address || account ? equals_ignore_case(recipient, address || account) ? 'text-green-400 dark:text-green-300' : equals_ignore_case(sender, address || account) ? 'text-red-500 dark:text-red-400' : '' : ''} text-xs lg:text-sm font-medium space-x-1`}
+                                className={`h-5 flex items-center ${address || account ? equals_ignore_case(recipient, address || account) ? 'text-green-400 dark:text-green-300' : equals_ignore_case(sender, address || account) ? 'text-red-500 dark:text-red-400' : '' : ''} text-xs font-medium space-x-1`}
                               >
                                 <span className="uppercase">
                                   {number_format(
@@ -991,20 +1107,20 @@ export default ({
               accessor: 'transfer',
               disableSortBy: true,
               Cell: props => (
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-1 mt-0.5">
                   {props.value === 'in' ?
                     <BiLeftArrowCircle
-                      size={18}
+                      size={16}
                       className="text-green-400 dark:text-green-300"
                     /> :
                     props.value === 'out' ?
                       <BiRightArrowCircle
-                        size={18}
+                        size={16}
                         className="text-red-500 dark:text-red-400"
                       /> :
                       null
                   }
-                  <span className={`uppercase ${props.value === 'in' ? 'text-green-400 dark:text-green-300' : props.value === 'out' ? 'text-red-500 dark:text-red-400' : ''} font-medium`}>
+                  <span className={`uppercase ${props.value === 'in' ? 'text-green-400 dark:text-green-300' : props.value === 'out' ? 'text-red-500 dark:text-red-400' : ''} text-xs font-medium`}>
                     {props.value}
                   </span>
                 </div>
@@ -1020,7 +1136,7 @@ export default ({
                 } = { ...props.row.original }
 
                 return (
-                  <div className="text-xs lg:text-sm font-medium text-left sm:text-right">
+                  <div className="text-xs font-medium text-left sm:text-right mt-0.5">
                     {props.value > 0 ?
                       `${number_format(
                         props.value,
@@ -1040,7 +1156,7 @@ export default ({
               Cell: props => (
                 <TimeAgo
                   time={props.value}
-                  className="ml-auto"
+                  className="text-xs ml-auto"
                 />
               ),
               headerClassName: 'justify-end text-right',
@@ -1058,7 +1174,7 @@ export default ({
               ].includes(pathname) ?
                 ![
                   'height',
-                  'sender',
+                  'recipient',
                   'amount',
                   'transfer',
                   'fee',
@@ -1068,6 +1184,7 @@ export default ({
                 ].includes(pathname) ?
                   ![
                     'sender',
+                   'recipient',
                     'amount',
                     'transfer',
                     'fee',
