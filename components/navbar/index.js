@@ -378,12 +378,13 @@ export default () => {
                 [
                   _.head(response)
                     .split('|')
-                    .map(s => (s || '')
-                      .trim()
-                      .split('`')
-                      .join('')
-                      .split(' ')
-                      .join('_')
+                    .map(s =>
+                      (s || '')
+                        .trim()
+                        .split('`')
+                        .join('')
+                        .split(' ')
+                        .join('_')
                     )
                     .filter(s => s),
                 ]

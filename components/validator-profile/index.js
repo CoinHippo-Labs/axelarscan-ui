@@ -45,6 +45,7 @@ export default ({
         const key = identity ||
           (moniker || '')
             .split(' ')
+            .filter(s => s)
             .join('_')
 
         let _image
@@ -97,6 +98,7 @@ export default ({
   const key = identity ||
     (moniker || '')
       .split(' ')
+      .filter(s => s)
       .join('_')
 
   const _image = validators_profile_data?.[key] ||

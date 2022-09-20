@@ -89,6 +89,7 @@ export default () => {
                   type: _.last(
                     (k || '')
                       .split('.')
+                      .filter(s => s)
                   ),
                   data: (v || [])
                     .map(e => {

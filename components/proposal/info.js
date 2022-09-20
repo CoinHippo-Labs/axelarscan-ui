@@ -73,7 +73,7 @@ export default ({
           Description:
         </span>
         {data ?
-          <span className="break-all text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
+          <span className="break-words whitespace-pre-wrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
             {description}
           </span> :
           <ProgressBar
@@ -189,13 +189,13 @@ export default ({
               className={rowClassName}
             >
               <span className={titleClassName}>
-                {name(key)}:
+                {name(subspace)}:
               </span>
               <div className="text-sm lg:text-base font-medium">
                 {typeof to_json(value) === 'object' ?
                   <div className="space-y-2">
                     <span className="bg-slate-200 dark:bg-slate-800 rounded capitalize py-0.5 px-2">
-                      {name(subspace)}
+                      {name(key)}
                     </span>
                     <div className="max-w-lg max-h-96 overflow-y-auto rounded-xl text-xs">
                       <ReactJson
@@ -206,7 +206,7 @@ export default ({
                     </div>
                   </div> :
                   <span className="bg-slate-200 dark:bg-slate-800 rounded capitalize whitespace-nowrap py-0.5 px-2">
-                    {name(subspace)} = {value}
+                    {name(key)} = {value}
                   </span>
                 }
               </div>

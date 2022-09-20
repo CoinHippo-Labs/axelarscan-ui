@@ -61,7 +61,7 @@ export default () => {
       setData(
         _.orderBy(
           Object.entries(tvl_data)
-              .map(([k, v]) => {
+            .map(([k, v]) => {
               const {
                 total_on_evm,
                 total_on_cosmos,
@@ -122,7 +122,9 @@ export default () => {
                   {
                     Header: 'Asset',
                     accessor: 'asset_data',
-                    sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
+                    sortType: (a, b) => a.original.value > b.original.value ?
+                      1 :
+                      -1,
                     Cell: props => {
                       const {
                         name,
@@ -162,7 +164,9 @@ export default () => {
                   {
                     Header: 'Native Chain',
                     accessor: 'native',
-                    sortType: (a, b) => (a.original.native?.chain_data?.name || '') > (b.original.native?.chain_data?.name || '') ? 1 : -1,
+                    sortType: (a, b) => (a.original.native?.chain_data?.name || '') > (b.original.native?.chain_data?.name || '') ?
+                      1 :
+                      -1,
                     Cell: props => {
                       const {
                         chain_data,
@@ -206,7 +210,7 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'w-28 whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    headerClassName: 'w-28 whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
                     className: 'w-28 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
                     order: 1,
                   },
@@ -229,7 +233,9 @@ export default () => {
                       </div>
                     ),
                     accessor: 'value',
-                    sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
+                    sortType: (a, b) => a.original.value > b.original.value ?
+                      1 :
+                      -1,
                     Cell: props => {
                       const {
                         asset_data,
@@ -311,7 +317,7 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
                     className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-74 z-30',
                     order: 2,
                   },
@@ -334,7 +340,9 @@ export default () => {
                       </div>
                     ),
                     accessor: 'value_on_evm',
-                    sortType: (a, b) => a.original.value_on_evm > b.original.value_on_evm ? 1 : -1,
+                    sortType: (a, b) => a.original.value_on_evm > b.original.value_on_evm ?
+                      1 :
+                      -1,
                     Cell: props => {
                       const {
                         asset_data,
@@ -395,7 +403,7 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
                     className: 'bg-zinc-100 dark:bg-zinc-900 sticky z-20',
                     order: 3,
                   },
@@ -418,7 +426,9 @@ export default () => {
                       </div>
                     ),
                     accessor: 'value_on_cosmos',
-                    sortType: (a, b) => a.original.value_on_cosmos > b.original.value_on_cosmos ? 1 : -1,
+                    sortType: (a, b) => a.original.value_on_cosmos > b.original.value_on_cosmos ?
+                      1 :
+                      -1,
                     Cell: props => {
                       const {
                         asset_data,
@@ -476,18 +486,59 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-extrabold text-left sm:text-right',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
                     className: 'bg-zinc-100 dark:bg-zinc-900 sticky z-20',
                     order: 4,
                   },
                 ],
-                _.concat(
-                  evm_chains_data || [],
-                  cosmos_chains_data || [],
-                ).map((c, i) => {
+                _.orderBy(
+                  _.concat(
+                    evm_chains_data || [],
+                    cosmos_chains_data || [],
+                  )
+                  .map(c => {
+                    const {
+                      id,
+                    } = { ...c }
+
+                    return {
+                      ...c,
+                      total_value:
+                        _.sumBy(
+                          data
+                            .map(d => {
+                              const {
+                                price,
+                                tvl,
+                              } = { ...d }
+                              const {
+                                supply,
+                                total,
+                              } = { ...tvl?.[id] }
+
+                              const amount = supply ||
+                                total
+                              const value = (amount * price) ||
+                                0
+
+                              return {
+                                ...d,
+                                value,
+                              }
+                            })
+                            .filter(d => d.value > 0),
+                          'value',
+                        ),
+                    }
+                  }),
+                  ['total_value'],
+                  ['desc'],
+                )
+                .map((c, i) => {
                   const {
                     id,
                     image,
+                    total_value,
                   } = { ...c }
 
                   return {
@@ -507,34 +558,20 @@ export default () => {
                         <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
                           ({currency_symbol}
                           {number_format(
-                            _.sumBy(
-                              data.map(d => {
-                                const {
-                                  price,
-                                  tvl,
-                                } = { ...d }
-                                const {
-                                  supply,
-                                  total,
-                                } = { ...tvl?.[id] }
-
-                                const amount = supply || total
-                                const value = (amount * price) || 0
-
-                                return {
-                                  ...d,
-                                  value,
-                                }
-                              }).filter(d => d?.value > 0),
-                              'value',
-                            ),
+                            total_value,
                             '0,0.00a',
                           )})
                         </div>
                       </div>
                     ),
                     accessor: `tvl.${id}`,
-                    sortType: (a, b) => (a.original.tvl?.[id]?.supply || a.original.tvl?.[id]?.total || -1) * (a.original.price || 0) > (b.original.tvl?.[id]?.supply || b.original.tvl?.[id]?.total || -1) * (b.original.price || 0) ? 1 : -1,
+                    sortType: (a, b) =>
+                      (a.original.tvl?.[id]?.supply || a.original.tvl?.[id]?.total || -1) *
+                      (a.original.price || 0) >
+                      (b.original.tvl?.[id]?.supply || b.original.tvl?.[id]?.total || -1) *
+                      (b.original.price || 0) ?
+                        1 :
+                        -1,
                     Cell: props => {
                       const {
                         price,

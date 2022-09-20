@@ -719,7 +719,7 @@ export default () => {
       !(
         gas_paid ||
         gas_paid_to_callback
-      ) &&
+      ) ||
       is_insufficient_fee
     ) &&
     (
