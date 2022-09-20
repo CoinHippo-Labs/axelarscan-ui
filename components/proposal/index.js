@@ -97,7 +97,7 @@ export default () => {
                     }
                   }),
                 [
-                  'validator_data.quadratic_voting_power',
+                  // 'validator_data.quadratic_voting_power',
                   'validator_data.tokens',
                   'validator_data.description.moniker',
                 ],

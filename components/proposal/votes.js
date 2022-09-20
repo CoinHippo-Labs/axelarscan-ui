@@ -175,27 +175,23 @@ export default ({
             },
           },
           {
-            Header: 'Quadratic Voting Power',
-            accessor: 'validator_data.quadratic_voting_power',
-            sortType: (a, b) => a.original.validator_data?.quadratic_voting_power > b.original.validator_data?.quadratic_voting_power ?
+            Header: 'Voting Power',
+            accessor: 'validator_data.tokens',
+            sortType: (a, b) => a.original.validator_data?.tokens > b.original.validator_data?.tokens ?
               1 :
-              a.original.validator_data?.quadratic_voting_power < b.original.validator_data?.quadratic_voting_power ?
-                -1 :
-                a.original.validator_data?.tokens > b.original.validator_data?.tokens ?
-                  1 :
-                  -1,
+              -1,
             Cell: props => {
               const {
                 value,
               } = { ...props }
 
-              const total_quadratic_voting_power = _.sumBy(
+              const total_voting_power = _.sumBy(
                 (validators_data || [])
                   .filter(v =>
                     !v.jailed &&
                     ['BOND_STATUS_BONDED'].includes(v.status)
                   ),
-                'quadratic_voting_power',
+                'tokens',
               )
 
               return (
@@ -214,11 +210,11 @@ export default ({
                   </span>
                   {
                     value > 0 &&
-                    total_quadratic_voting_power > 0 &&
+                    total_voting_power > 0 &&
                     (
                       <span className="text-slate-400 dark:text-slate-600 text-xs lg:text-sm">
                         {number_format(
-                          quadratic_voting_power * 100 / total_quadratic_voting_power,
+                          value * 100 / total_voting_power,
                           '0,0.000000',
                         )}
                         %
