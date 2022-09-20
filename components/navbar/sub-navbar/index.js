@@ -530,7 +530,7 @@ export default () => {
   const is_validator_path = [
     '/validator',
     '/participations',
-    '/proposals',
+    '/proposal',
   ].findIndex(p => pathname?.startsWith(p)) > -1
   const is_block_path = [
     '/block',

@@ -548,7 +548,7 @@ export default () => {
             }
           })
 
-        setValidatorsData(data)
+        setValidatorsData(_data)
         setFetching(false)
       }
     }
