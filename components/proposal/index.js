@@ -53,7 +53,9 @@ export default () => {
           assets_data,
         )
 
-        const _response = await all_proposal_votes(id)
+        const _response = await all_proposal_votes(
+          id,
+        )
         const {
           data,
         } = { ..._response }
@@ -128,13 +130,13 @@ export default () => {
     voting_end_time,
     final_tally_result,
   } = { ...data }
-  let {
+  const {
     votes,
   } = { ...data }
 
   const matched = proposal?.id === id
 
-  votes = matched ?
+  const vote_options = matched ?
     Object.entries(
       _.groupBy(
         votes || [],
@@ -190,7 +192,7 @@ export default () => {
                     </span>
                   </div>
                 )) :
-              votes
+              vote_options
                 .map((v, i) => {
                   const {
                     option,

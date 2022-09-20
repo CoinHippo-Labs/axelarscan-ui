@@ -88,9 +88,12 @@ export default ({
           },
           {
             Header: 'Validator',
-            accessor: 'validator_data.description.validator_data.operator_address',
+            accessor: 'validator_data.operator_address',
             disableSortBy: true,
             Cell: props => {
+              const {
+                value,
+              } = { ...props }
               const {
                 description,
               } = { ...props.row.original.validator_data }
@@ -101,7 +104,7 @@ export default ({
               return (
                 description ?
                   <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
-                    <Link href={`/validator/${props.value}`}>
+                    <Link href={`/validator/${value}`}>
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
@@ -113,7 +116,7 @@ export default ({
                     </Link>
                     <div className="flex flex-col">
                       {moniker && (
-                        <Link href={`/validator/${props.value}`}>
+                        <Link href={`/validator/${value}`}>
                           <a
                             target="_blank"
                             rel="noopener noreferrer"
@@ -127,42 +130,42 @@ export default ({
                         </Link>
                       )}
                       <div className="flex items-center space-x-1">
-                        <Link href={`/validator/${props.value}`}>
+                        <Link href={`/validator/${value}`}>
                           <a
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-slate-400 dark:text-slate-600"
                           >
                             {ellipse(
-                              props.value,
+                              value,
                               10,
                               process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                             )}
                           </a>
                         </Link>
                         <Copy
-                          value={props.value}
+                          value={value}
                         />
                       </div>
                     </div>
                   </div> :
-                  props.value ?
+                  value ?
                     <div className="flex items-center space-x-1">
-                      <Link href={`/validator/${props.value}`}>
+                      <Link href={`/validator/${value}`}>
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                         >
                           {ellipse(
-                            props.value,
+                            value,
                             10,
                             process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                           )}
                         </a>
                       </Link>
                       <Copy
-                        value={props.value}
+                        value={value}
                       />
                     </div> :
                     <span>
