@@ -10,6 +10,7 @@ import Copy from '../copy'
 import Image from '../image'
 import ValidatorProfile from '../validator-profile'
 import { getChain } from '../../lib/object/chain'
+import { assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse, equals_ignore_case, to_json, decode_base64, json_theme } from '../../lib/utils'
 
 const FORMATS = [
@@ -38,6 +39,8 @@ const FORMATTABLE_TYPES = [
   'MsgAcknowledgement',
   'MsgDelegate',
   'MsgUndelegate',
+  'CreatePendingTransfers',
+  'ExecutePendingTransfers',
 ]
 
 export default ({
@@ -167,7 +170,6 @@ export default ({
                   const {
                     chain,
                     sender,
-                    recipient,
                     signer,
                     deposit_address,
                     burner_address,
@@ -184,6 +186,7 @@ export default ({
                     timeout_timestamp,
                   } = { ...a }
                   let {
+                    recipient,
                     sender_chain,
                     recipient_chain,
                     deposit_address_chain,
@@ -196,6 +199,10 @@ export default ({
                   let {
                     image,
                   } = { ...asset_data }
+
+                  recipient = Array.isArray(recipient) ?
+                    _.head(recipient) : 
+                    recipient
 
                   sender_chain = sender_chain ||
                     chains_data?.find(c => sender?.startsWith(c?.prefix_address))?.id
@@ -253,6 +260,23 @@ export default ({
                   image = contracts?.find(c => c?.chain_id === chain_data?.chain_id)?.image ||
                     ibc?.find(i => i?.chain_id === chain_data?.id)?.image ||
                     image
+
+                  if (to_json(symbol)) {
+                    const {
+                      denom,
+                    } = { ...to_json(symbol) }
+
+                    symbol = assetManager.symbol(
+                      denom,
+                      assets_data,
+                    )
+
+                    image = image ||
+                      assetManager.image(
+                        denom,
+                        assets_data,
+                      )
+                  }
 
                   return (
                     <div

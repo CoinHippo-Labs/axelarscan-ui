@@ -791,40 +791,49 @@ export default () => {
       </div>
     )
 
-  const steps = [{
-    id: 'call',
-    title: 'Contract Call',
-    chain_data: source_chain_data,
-    data: call,
-  }, {
-    id: 'gas_paid',
-    title: 'Gas Paid',
-    chain_data: source_chain_data,
-    data: gas_paid,
-  }, forecalled && {
-    id: 'forecalled',
-    title: 'Forecalled',
-    chain_data: destination_chain_data,
-    data: forecalled,
-  }, {
-    id: 'approved',
-    title: 'Call Approved',
-    chain_data: destination_chain_data,
-    data: approved,
-  }, {
-    id: 'executed',
-    title: 'Executed',
-    chain_data: destination_chain_data,
-    data: executed,
-  }, refunded && (
-    (refunded.receipt && refunded.receipt?.status) ||
-    no_gas_remain === false
-  ) && {
-    id: 'refunded',
-    title: 'Gas Refunded',
-    chain_data: source_chain_data,
-    data: refunded,
-  }].filter(s => s)
+  const steps = [
+    {
+      id: 'call',
+      title: 'Contract Call',
+      chain_data: source_chain_data,
+      data: call,
+    },
+    {
+      id: 'gas_paid',
+      title: 'Gas Paid',
+      chain_data: source_chain_data,
+      data: gas_paid,
+    },
+    forecalled && {
+      id: 'forecalled',
+      title: 'Forecalled',
+      chain_data: destination_chain_data,
+      data: forecalled,
+    },
+    {
+      id: 'approved',
+      title: 'Call Approved',
+      chain_data: destination_chain_data,
+      data: approved,
+    },
+    {
+      id: 'executed',
+      title: 'Executed',
+      chain_data: destination_chain_data,
+      data: executed,
+    },
+    refunded && (
+      (refunded.receipt && refunded.receipt?.status) ||
+      no_gas_remain === false
+    ) &&
+    {
+      id: 'refunded',
+      title: 'Gas Refunded',
+      chain_data: source_chain_data,
+      data: refunded,
+    },
+  ]
+  .filter(s => s)
 
   let current_step
 
@@ -854,6 +863,7 @@ export default () => {
       current_step = steps.findIndex(s => s.id === 'forecalled') + 1
       break
     case 'approved':
+    case 'executing':
       current_step = steps.findIndex(s =>
         s.id === (
           gas_paid || gas_paid_to_callback ?
@@ -873,7 +883,7 @@ export default () => {
               error?.block_timestamp ||
               approved?.block_timestamp
             ) &&
-            moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 120
+            moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 240
           ) ?
             1 :
             0
@@ -1746,7 +1756,7 @@ export default () => {
                     (
                       (
                         !executed &&
-                        is_executed
+                        (is_executed || error)
                       ) ||
                       (
                         executed
@@ -1788,7 +1798,7 @@ export default () => {
                           s.id :
                           s.id === 'executed' &&
                           !executed &&
-                          is_executed || error ?
+                          (is_executed || error) ?
                             'not_executed' :
                             executed ?
                               're_execute' :

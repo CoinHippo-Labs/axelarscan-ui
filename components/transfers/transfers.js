@@ -687,11 +687,13 @@ export default ({ n }) => {
                       destination_chain_data :
                       axelar_chain_data,
                     data: ibc_send,
-                    id_field: ibc_send?.recv_txhash ?
-                      'recv_txhash' :
-                      ibc_send?.ack_txhash ?
-                        'ack_txhash' :
-                        'id',
+                    id_field: ibc_send?.ack_txhash ?
+                      'ack_txhash' :
+                      ibc_send?.failed_txhash ?
+                        'failed_txhash' :
+                        ibc_send?.recv_txhash ?
+                          'recv_txhash' :
+                          'id',
                   },
                 ]
                 .filter(s => s)
@@ -703,8 +705,11 @@ export default ({ n }) => {
                     s.id === 'executed' ?
                         s.data?.executed :
                         s.id === 'ibc_send' ?
-                          s.data?.recv_txhash ||
-                            s.data?.ack_txhash :
+                          s.data?.ack_txhash ||
+                          (
+                            s.data?.recv_txhash &&
+                            !s.data.failed_txhash
+                          ) :
                           s.id === 'source' ?
                             s.data?.status === 'success' :
                             s.data
@@ -722,7 +727,12 @@ export default ({ n }) => {
                         0
                   ) +
                   (
-                    !insufficient_fee && amount > fee ?
+                    !insufficient_fee &&
+                    amount > fee &&
+                    (
+                      ibc_send?.ack_txhash ||
+                      !ibc_send?.failed_txhash
+                    ) ?
                       1 :
                       0
                   )
@@ -801,6 +811,15 @@ export default ({ n }) => {
                         Insufficient Fee
                       </div>
                     )}
+                    {
+                      ibc_send?.failed_txhash &&
+                      !ibc_send.ack_txhash
+                      (
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                          Timeout
+                        </div>
+                      )
+                    }
                     {time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">

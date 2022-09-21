@@ -176,10 +176,12 @@ export default () => {
             typeof amount === 'number' &&
             typeof value === 'number' &&
             typeof fee === 'number'
-          ) || (
+          ) ||
+          (
             !sign_batch?.executed &&
             evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
-          ) || (
+          ) ||
+          (
             !ibc_send?.recv_txhash &&
             recipient_chain !== 'axelarnet' &&
             cosmos_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
@@ -307,11 +309,13 @@ export default () => {
         destination_chain_data :
         axelar_chain_data,
       data: ibc_send,
-      id_field: ibc_send?.recv_txhash ?
-        'recv_txhash' :
-        ibc_send?.ack_txhash ?
-          'ack_txhash' :
-          'id',
+      id_field: ibc_send?.ack_txhash ?
+        'ack_txhash' :
+        ibc_send?.failed_txhash ?
+          'failed_txhash' :
+          ibc_send?.recv_txhash ?
+            'recv_txhash' :
+            'id',
     },
   ]
   .filter(s => s)
@@ -323,8 +327,11 @@ export default () => {
         s.id === 'executed' ?
           s.data?.executed :
           s.id === 'ibc_send' ?
-            s.data?.recv_txhash ||
-              s.data?.ack_txhash :
+            s.data?.ack_txhash ||
+            (
+              s.data?.recv_txhash &&
+              !s.data.failed_txhash
+            ) :
             s.id === 'source' ?
               s.data?.status === 'success' :
               s.data
@@ -341,7 +348,12 @@ export default () => {
           0
     ) +
     (
-      !insufficient_fee && amount > fee ?
+      !insufficient_fee &&
+      amount > fee &&
+      (
+        ibc_send?.ack_txhash ||
+        !ibc_send?.failed_txhash
+      ) ?
         1 :
         0
     )
@@ -622,6 +634,15 @@ export default () => {
                       Insufficient Fee
                     </div>
                   )}
+                  {
+                    ibc_send?.failed_txhash &&
+                    !ibc_send.ack_txhash
+                    (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Timeout
+                      </div>
+                    )
+                  }
                   {time_spent && (
                     <div className="flex items-center space-x-1 mx-1 pt-0.5">
                       <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
@@ -641,7 +662,7 @@ export default () => {
           </div>
           {data && detail_steps.map((s, i) => {
             const { title, chain_data, data, id_field, path, params, finish } = { ...s }
-            const { id, height, type, status, executed, chain, transfer_id, command_id, created_at, ack_txhash, recv_txhash, transactionHash, block_timestamp, received_at } = { ...data }
+            const { id, height, type, status, executed, chain, transfer_id, command_id, created_at, ack_txhash, recv_txhash, failed_txhash, transactionHash, block_timestamp, received_at } = { ...data }
             const { explorer } = { ...chain_data }
             const { url, transaction_path, block_path, icon } = { ...explorer }
 
@@ -725,8 +746,17 @@ export default () => {
                     </div>
                   )}
                   {s.id === 'ibc_send' && _id ?
-                    [id, recv_txhash, ack_txhash].filter(tx => tx).map((tx, j) => {
-                      const _chain_data = tx === recv_txhash ? destination_chain_data : axelar_chain_data
+                    [
+                      id,
+                      recv_txhash,
+                      ack_txhash ||
+                      failed_txhash,
+                    ]
+                    .filter(tx => tx)
+                    .map((tx, j) => {
+                      const _chain_data = tx === recv_txhash ?
+                        destination_chain_data :
+                        axelar_chain_data
                       const _explorer = _chain_data?.explorer
 
                       return (
@@ -737,9 +767,11 @@ export default () => {
                           <span className={rowTitleClassName}>
                             {tx === ack_txhash ?
                               'Acknowledge' :
-                              tx === recv_txhash ?
-                                'Receive' :
-                                'Send'
+                              tx === failed_txhash ?
+                                'Timeout' :
+                                tx === recv_txhash ?
+                                  'Receive' :
+                                  'Send'
                             }:
                           </span>
                           <div className="flex items-center space-x-1">
