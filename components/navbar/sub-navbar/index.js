@@ -561,7 +561,7 @@ export default () => {
           <span className="mt-0.5 sm:mt-0 ml-auto" />
           {right}
         </> :
-        <div className="overflow-x-auto flex items-center">
+        <div className="overflow-x-auto flex items-center mt-1 sm:mt-0">
           {
             !isNaN(latest_block_height) &&
             !is_assets_path &&

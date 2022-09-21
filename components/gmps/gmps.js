@@ -681,7 +681,7 @@ export default ({ n }) => {
               accessor: 'status',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...props.row.original }
+                const { call, gas_paid, gas_paid_to_callback, forecalled, approved, executed, is_executed, error, refunded, status, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee, is_call_from_relayer } = { ...props.row.original }
                 const { chain, returnValues } = { ...call }
                 const { destinationChain } = { ...returnValues }
                 const source_chain_data = getChain(chain, chains_data)
@@ -810,7 +810,7 @@ export default ({ n }) => {
                             error
 
                         const text_color = (!['refunded'].includes(s.id) && s.data) ||
-                          (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
+                          (['gas_paid'].includes(s.id) && (gas_paid_to_callback || (is_call_from_relayer && approved))) ||
                           (['executed'].includes(s.id) && is_executed) ||
                           (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             'text-green-400 dark:text-green-300' :
@@ -836,7 +836,7 @@ export default ({ n }) => {
                             className="flex items-center space-x-1.5 pb-0.5"
                           >
                             {(!['refunded'].includes(s.id) && s.data) ||
-                              (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
+                              (['gas_paid'].includes(s.id) && (gas_paid_to_callback || (is_call_from_relayer && approved))) ||
                               (['executed'].includes(s.id) && is_executed) ||
                               (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                                 <BiCheckCircle

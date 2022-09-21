@@ -558,6 +558,7 @@ export default () => {
     is_invalid_call,
     is_insufficient_minimum_amount,
     is_insufficient_fee,
+    is_call_from_relayer,
   } = { ...data }
   let {
     no_gas_remain,
@@ -1360,7 +1361,7 @@ export default () => {
                             error
 
                         const text_color = (!['refunded'].includes(s.id) && s.data) ||
-                          (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
+                          (['gas_paid'].includes(s.id) && (gas_paid_to_callback || (is_call_from_relayer && approved))) ||
                           (['executed'].includes(s.id) && is_executed) ||
                           (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             'text-green-400 dark:text-green-300' :
@@ -1386,7 +1387,7 @@ export default () => {
                             className="flex items-center space-x-1.5 pb-0.5"
                           >
                             {(!['refunded'].includes(s.id) && s.data) ||
-                              (['gas_paid'].includes(s.id) && gas_paid_to_callback) ||
+                              (['gas_paid'].includes(s.id) && (gas_paid_to_callback || (is_call_from_relayer && approved))) ||
                               (['executed'].includes(s.id) && is_executed) ||
                               (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                                 <BiCheckCircle
@@ -1787,7 +1788,7 @@ export default () => {
                           s.id :
                           s.id === 'executed' &&
                           !executed &&
-                          is_executed ?
+                          is_executed || error ?
                             'not_executed' :
                             executed ?
                               're_execute' :
@@ -2810,16 +2811,27 @@ export default () => {
                               [
                                 {
                                   id: 'message',
-                                  value: _data.error?.data?.message || _data.error?.message,
+                                  value: _data.error?.data?.message ||
+                                    _data.error?.message,
                                 },
                               ]
                               .filter(e => e?.value)
                               .map((e, j) => (
                                 <div
                                   key={j}
-                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
-                                >
-                                  {ellipse(e.value, 256)}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500'} font-semibold`}>
+                                  {ellipse(
+                                    e.value,
+                                    256,
+                                  )}
+                                  <a
+                                    href="https://docs.axelar.dev/dev/monitor-recover/recovery"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-400 dark:text-blue-500 text-xs font-normal ml-1"
+                                  >
+                                    Transaction recovery guidelines
+                                  </a>
                                 </div>
                               ))
                             }
@@ -2829,54 +2841,70 @@ export default () => {
                               [
                                 {
                                   id: 'reason',
-                                  value: _data.error?.reason && `Reason: ${_data.error.reason}`,
+                                  value: _data.error?.reason &&
+                                    `Reason: ${_data.error.reason}`,
                                 },
                               ]
                               .filter(e => e?.value)
                               .map((e, j) => (
                                 <div
                                   key={j}
-                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-400'} font-normal`}
                                 >
-                                  {ellipse(e.value, 256)}
+                                  {ellipse(
+                                    e.value,
+                                    256,
+                                  )}
                                 </div>
                               ))
                             }
                           </div>
-                          {(_data.error?.code || is_not_enough_gas) && (
-                            <div className="flex items-center space-x-1.5">
-                              {_data.error?.code && (
-                                <a
-                                  href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().split('_').join('-')}` : 'ethereum'}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2"
-                                >
-                                  {_data.error.code}
-                                </a>
-                              )}
-                              {is_not_enough_gas && (
-                                <div className="max-w-min bg-yellow-100 dark:bg-yellow-500 border border-yellow-500 dark:border-yellow-600 rounded-lg whitespace-nowrap uppercase font-semibold py-0.5 px-2">
-                                  {`${_data.error?.reason === 'transaction failed' ? 'Can be n' : 'N'}ot enough gas`}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          {
+                            (
+                              _data.error?.code ||
+                              is_not_enough_gas
+                            ) &&
+                            (
+                              <div className="flex items-center space-x-1.5">
+                                {_data.error?.code && (
+                                  <a
+                                    href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().split('_').join('-')}` : 'ethereum'}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="max-w-min bg-slate-50 dark:bg-slate-800 rounded text-slate-400 dark:text-slate-300 text-2xs font-medium py-1 px-2"
+                                  >
+                                    {_data.error.code}
+                                  </a>
+                                )}
+                                {is_not_enough_gas && (
+                                  <div className="max-w-min bg-yellow-100 dark:bg-yellow-300 rounded whitespace-nowrap uppercase text-slate-400 dark:text-yellow-600 text-2xs font-medium py-1 px-2">
+                                    {`${_data.error?.reason === 'transaction failed' ? 'Can be n' : 'N'}ot enough gas`}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }
                           <div className="flex flex-col space-y-1.5">
                             {
                               [
                                 {
                                   id: 'body',
-                                  value: _data.error?.body?.replaceAll('"""', ''),
+                                  value: _data.error?.body?.replaceAll(
+                                    '"""',
+                                    '',
+                                  ),
                                 }
                               ]
                               .filter(e => e?.value)
                               .map((e, j) => (
                                 <div
                                   key={j}
-                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-400'} font-normal`}
                                 >
-                                  {ellipse(e.value, 256)}
+                                  {ellipse(
+                                    e.value,
+                                    256,
+                                  )}
                                 </div>
                               ))
                             }
