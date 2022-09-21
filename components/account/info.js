@@ -55,7 +55,10 @@ export default ({
   } = { ...data }
 
   const is_deposit_address =
-    address?.length >= 65 &&
+    (
+      address?.length >= 65 ||
+      type(address) === 'evm_address'
+    ) &&
     'depositAddresses' in data
 
   const validator_data =
@@ -322,9 +325,12 @@ export default ({
                 </div> :
                 <span>
                   -
-                </span>
-            :
-            <div className="skeleton w-40 h-6 mt-1" />
+                </span> :
+            <ProgressBar
+              borderColor={loader_color(theme)}
+              width="28"
+              height="28"
+            />
           }
         </div>
         <div className={rowClassName}>

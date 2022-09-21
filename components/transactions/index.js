@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { utils } from 'ethers'
 import { CSVLink } from 'react-csv'
 import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiLeftArrowCircle, BiRightArrowCircle } from 'react-icons/bi'
@@ -182,7 +183,18 @@ export default ({
               data,
             } = { ..._response }
 
-            if (data?.length > 0) {
+            if (
+              _response?.data?.length > 0 ||
+              type(address) === 'evm_address'
+            ) {
+              const {
+                deposit_address,
+              } = { ..._.head(_response.data) }
+
+              if (equals_ignore_case(address, deposit_address)) {
+                address = deposit_address
+              }
+
               if (type(address) === 'account') {
                 response = await transactions_by_events(
                   `transfer.sender='${address}'`,
@@ -199,6 +211,10 @@ export default ({
                   assets_data,
                   10,
                 )
+              }
+
+              if (type(address) === 'evm_address') {
+                address = utils.getAddress(address)
               }
 
               response = await transactions_by_events(

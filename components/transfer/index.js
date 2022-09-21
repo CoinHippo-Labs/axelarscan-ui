@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
+import { utils } from 'ethers'
 import { TailSpin, Puff, FallingLines } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
@@ -53,11 +54,16 @@ export default () => {
         const {
           sender_chain,
           recipient_chain,
-          recipient_address,
           amount,
           fee,
           value,
         } = { ...source }
+        let {
+          recipient_address,
+        } = { ...source }
+
+        recipient_address = link?.deposit_address ||
+          recipient_address
 
         let _response
 
@@ -65,7 +71,10 @@ export default () => {
           (
             !link?.recipient_address ||
             !confirm_deposit ||
-            (!sign_batch?.executed && evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1)
+            (
+              !sign_batch?.executed &&
+              evm_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
+            )
           ) &&
           (
             recipient_address?.length >= 65 ||
@@ -87,6 +96,10 @@ export default () => {
                 true,
                 assets_data,
               )
+            }
+
+            if (type(recipient_address) === 'evm_address') {
+              recipient_address = utils.getAddress(recipient_address)
             }
 
             _response = await transactions_by_events(

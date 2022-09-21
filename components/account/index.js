@@ -714,7 +714,10 @@ export default () => {
       <Info
         data={
           (
-            address?.length >= 65 &&
+            (
+              address?.length >= 65 ||
+              type(address) === 'evm_address'
+            ) &&
             !depositAddresses
           ) ||
           depositAddresses?.length > 0 ?
