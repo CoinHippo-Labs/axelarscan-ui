@@ -104,6 +104,7 @@ export default () => {
             'called',
             'forecalled',
             'approved',
+            'executing',
             'executed',
             'error',
             'insufficient_fee',
@@ -298,7 +299,10 @@ export default () => {
                     'Invalid Data' :
                     k === 'approving' ?
                       'Wait for Approval' :
-                      k === 'approved' ?
+                      [
+                        'approved',
+                        'executing',
+                      ].includes(k) ?
                         'Wait for Execute' :
                         k === 'error' ?
                           'Error Execution' :
@@ -307,7 +311,10 @@ export default () => {
                     'bg-slate-500' :
                     k === 'approving' ?
                       'bg-yellow-500' :
-                      k === 'approved' ?
+                      [
+                        'approved',
+                        'executing',
+                      ].includes(k) ?
                         'bg-blue-500' :
                         k === 'executed' ?
                           'bg-green-500' :

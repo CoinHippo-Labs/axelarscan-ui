@@ -94,6 +94,7 @@ export default () => {
           'called',
           'forecalled',
           'approved',
+          'executing',
           'executed',
           'error',
           'insufficient_fee',
@@ -257,6 +258,10 @@ export default () => {
         {
           value: 'approved',
           title: 'Approved',
+        },
+        {
+          value: 'executing',
+          title: 'Executing',
         },
         {
           value: 'executed',

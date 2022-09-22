@@ -867,7 +867,7 @@ export default () => {
       current_step = steps.findIndex(s =>
         s.id === (
           gas_paid || gas_paid_to_callback ?
-            status :
+            'approved' :
             'call'
         )
       ) + 1

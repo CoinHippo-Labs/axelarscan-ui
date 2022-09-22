@@ -90,6 +90,7 @@ export default ({ n }) => {
           'called',
           'forecalled',
           'approved',
+          'executing',
           'executed',
           'error',
           'insufficient_fee',
@@ -768,7 +769,7 @@ export default ({ n }) => {
                     current_step = steps.findIndex(s =>
                       s.id === (
                         gas_paid || gas_paid_to_callback ?
-                          status :
+                          'approved' :
                           'call'
                       )
                     ) + 1
