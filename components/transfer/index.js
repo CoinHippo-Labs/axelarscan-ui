@@ -50,6 +50,7 @@ export default () => {
           vote,
           sign_batch,
           ibc_send,
+          axelar_transfer,
         } = { ...data }
         const {
           sender_chain,
@@ -185,6 +186,10 @@ export default () => {
             !ibc_send?.recv_txhash &&
             recipient_chain !== 'axelarnet' &&
             cosmos_chains_data?.findIndex(c => equals_ignore_case(c?.id, recipient_chain)) > -1
+          ) ||
+          (
+            recipient_chain === 'axelarnet' &&
+            !axelar_transfer
           )
         ) {
           await getTransfersStatus({
@@ -244,7 +249,7 @@ export default () => {
     cosmos_chains_data,
   )
   const { data } = { ...transfer }
-  const { source, confirm_deposit, vote, sign_batch, ibc_send, link } = { ...data }
+  const { source, confirm_deposit, vote, sign_batch, ibc_send, axelar_transfer, link } = { ...data }
   const { sender_chain, recipient_chain, sender_address, amount, denom, fee, insufficient_fee } = { ...source }
   const { original_sender_chain, original_recipient_chain } = { ...link }
   const { recipient_address } = { ...link }
@@ -273,50 +278,62 @@ export default () => {
       data: confirm_deposit,
       id_field: 'id',
     },
-    evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 && {
-      id: 'vote',
-      title: 'Vote Confirm',
-      chain_data: axelar_chain_data,
-      data: vote,
-      id_field: 'id',
-    },
-    evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
-      id: 'sign_batch',
-      title: 'Sign Batch',
-      chain_data: axelar_chain_data,
-      data: sign_batch,
-      id_field: 'batch_id',
-      path: '/batch/{chain}/{id}',
-      params: {
-        chain: destination_chain_data?.id,
+    evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 &&
+      {
+        id: 'vote',
+        title: 'Vote Confirm',
+        chain_data: axelar_chain_data,
+        data: vote,
+        id_field: 'id',
       },
-    },
-    evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 && {
-      id: 'executed',
-      title: 'Executed',
-      chain_data: axelar_chain_data,
-      data: sign_batch,
-      id_field: 'batch_id',
-      path: '/batch/{chain}/{id}',
-      params: {
-        chain: destination_chain_data?.id,
+    evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
+      {
+        id: 'sign_batch',
+        title: 'Sign Batch',
+        chain_data: axelar_chain_data,
+        data: sign_batch,
+        id_field: 'batch_id',
+        path: '/batch/{chain}/{id}',
+        params: {
+          chain: destination_chain_data?.id,
+        },
       },
-    },
-    cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 && {
-      id: 'ibc_send',
-      title: 'IBC Transfer',
-      chain_data: ibc_send?.recv_txhash ?
-        destination_chain_data :
-        axelar_chain_data,
-      data: ibc_send,
-      id_field: ibc_send?.ack_txhash ?
-        'ack_txhash' :
-        ibc_send?.failed_txhash ?
-          'failed_txhash' :
-          ibc_send?.recv_txhash ?
-            'recv_txhash' :
-            'id',
-    },
+    evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
+      {
+        id: 'executed',
+        title: 'Executed',
+        chain_data: axelar_chain_data,
+        data: sign_batch,
+        id_field: 'batch_id',
+        path: '/batch/{chain}/{id}',
+        params: {
+          chain: destination_chain_data?.id,
+        },
+      },
+    cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
+      {
+        id: 'ibc_send',
+        title: 'IBC Transfer',
+        chain_data: ibc_send?.recv_txhash ?
+          destination_chain_data :
+          axelar_chain_data,
+        data: ibc_send,
+        id_field: ibc_send?.ack_txhash ?
+          'ack_txhash' :
+          ibc_send?.failed_txhash ?
+            'failed_txhash' :
+            ibc_send?.recv_txhash ?
+              'recv_txhash' :
+              'id',
+      },
+    [axelar_chain_data].findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
+      {
+        id: 'axelar_transfer',
+        title: 'Axelar Transfer',
+        chain_data: axelar_chain_data,
+        data: axelar_transfer,
+        id_field: 'id',
+      },
   ]
   .filter(s => s)
   .map((s, i) => {
