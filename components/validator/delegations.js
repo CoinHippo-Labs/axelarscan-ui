@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
-import { TailSpin } from 'react-loader-spinner'
+import { ProgressBar } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
 import Copy from '../copy'
@@ -74,10 +74,10 @@ export default ({ data }) => {
         className="no-border"
         style={{ minHeight: 'calc(100% - 48px)' }}
       /> :
-      <TailSpin
-        color={loader_color(theme)}
-        width="32"
-        height="32"
+      <ProgressBar
+        borderColor={loader_color(theme)}
+        width="36"
+        height="36"
       />
   )
 }

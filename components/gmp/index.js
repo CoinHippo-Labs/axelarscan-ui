@@ -7,7 +7,7 @@ import moment from 'moment'
 import Web3 from 'web3'
 import { BigNumber, Contract, FixedNumber, constants, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
-import { TailSpin, Watch, Puff, FallingLines } from 'react-loader-spinner'
+import { ProgressBar, TailSpin, Watch, Puff, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
 import { MdRefresh } from 'react-icons/md'
 import { HiArrowSmRight, HiArrowSmLeft } from 'react-icons/hi'
@@ -1895,7 +1895,7 @@ export default () => {
                               !is_invalid_call &&
                               !is_insufficient_minimum_amount &&
                               !is_insufficient_fee && (
-                                <FallingLines
+                                <ColorRing
                                   color={loader_color(theme)}
                                   width="32"
                                   height="32"
@@ -2156,7 +2156,7 @@ export default () => {
                               !is_invalid_call &&
                               !is_insufficient_minimum_amount &&
                               !is_insufficient_fee && (
-                                <FallingLines
+                                <ColorRing
                                   color={loader_color(theme)}
                                   width="32"
                                   height="32"
@@ -3137,10 +3137,10 @@ export default () => {
             </div>
           </div>
         </> :
-        <TailSpin
-          color={loader_color(theme)}
-          width="32"
-          height="32"
+        <ProgressBar
+          borderColor={loader_color(theme)}
+          width="36"
+          height="36"
         />
       }
     </div>

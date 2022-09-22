@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { TailSpin } from 'react-loader-spinner'
+import { ProgressBar as ProgressBarSpinner } from 'react-loader-spinner'
 import { HiArrowSmRight } from 'react-icons/hi'
 
 import Image from '../image'
@@ -546,8 +546,8 @@ export default () => {
                 total,
                 '0,0',
               ) :
-              <TailSpin
-                color={loader_color(theme)}
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
                 width="36"
                 height="36"
               />
@@ -594,8 +594,8 @@ export default () => {
                   </div>
                 </div>
               )) :
-              <TailSpin
-                color={loader_color(theme)}
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
                 width="36"
                 height="36"
               />
@@ -641,8 +641,8 @@ export default () => {
                     </div>
                   </div>
                 )) :
-              <TailSpin
-                color={loader_color(theme)}
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
                 width="36"
                 height="36"
               />
@@ -721,8 +721,8 @@ export default () => {
                   </div>
                 )
               }) :
-              <TailSpin
-                color={loader_color(theme)}
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
                 width="36"
                 height="36"
               />
@@ -796,8 +796,8 @@ export default () => {
                   </div>
                 )
               }) :
-              <TailSpin
-                color={loader_color(theme)}
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
                 width="36"
                 height="36"
               />
@@ -887,8 +887,8 @@ export default () => {
                   </div>
                 )
               }) :
-              <TailSpin
-                color={loader_color(theme)}
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
                 width="36"
                 height="36"
               />

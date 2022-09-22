@@ -4,7 +4,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, providers, utils } from 'ethers'
-import { TailSpin, Puff, FallingLines } from 'react-loader-spinner'
+import { ProgressBar, Puff, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -352,9 +352,12 @@ export default () => {
                           }
                         </a>
                       </div>
-                    </div>
-                    :
-                    <FallingLines color={loader_color(theme)} width="32" height="32" />
+                    </div> :
+                    <ColorRing
+                      color={loader_color(theme)}
+                      width="32"
+                      height="32"
+                    />
                   }
                   {blockNumber && (
                     <div className={rowClassName}>
@@ -554,9 +557,12 @@ export default () => {
               </div>
             )
           })}
-        </div>
-        :
-        <TailSpin color={loader_color(theme)} width="32" height="32" />
+        </div> :
+        <ProgressBar
+          borderColor={loader_color(theme)}
+          width="36"
+          height="36"
+        />
       }
     </div>
   )

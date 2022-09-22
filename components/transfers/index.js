@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { TailSpin, ThreeDots, Puff } from 'react-loader-spinner'
 import { FiCode } from 'react-icons/fi'
 
 import LineChart from './charts/line'

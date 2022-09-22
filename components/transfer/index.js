@@ -4,7 +4,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { utils } from 'ethers'
-import { TailSpin, Puff, FallingLines } from 'react-loader-spinner'
+import { ProgressBar, Puff, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { MdChevronRight } from 'react-icons/md'
@@ -366,7 +366,10 @@ export default () => {
     ) +
     (
       !insufficient_fee &&
-      amount > fee &&
+      (
+        amount > fee ||
+        !fee
+      ) &&
       (
         ibc_send?.ack_txhash ||
         !ibc_send?.failed_txhash
@@ -891,7 +894,7 @@ export default () => {
                           </a>
                         </div>
                       </div> :
-                      <FallingLines
+                      <ColorRing
                         color={loader_color(theme)}
                         width="32"
                         height="32"
@@ -987,10 +990,10 @@ export default () => {
         </div> :
         !tx && transfer_id ?
           null :
-          <TailSpin
-            color={loader_color(theme)}
-            width="32"
-            height="32"
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="36"
+            height="36"
           />
       }
     </div>

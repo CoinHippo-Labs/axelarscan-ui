@@ -10,7 +10,7 @@ import {
   XAxis,
   Area,
 } from 'recharts'
-import { TailSpin } from 'react-loader-spinner'
+import { ProgressBar } from 'react-loader-spinner'
 
 import { currency_symbol } from '../../../lib/object/currency'
 import { number_format, loader_color, chart_color } from '../../../lib/utils'
@@ -64,7 +64,14 @@ export default ({
           <div className="flex flex-col items-end space-y-0.5">
             <span className="uppercase font-bold">
               {currency_symbol}
-              {number_format(focus_value, focus_value > 50000000 ? '0,0.00a' : focus_value > 10000000 ? '0,0' : '0,0.00')}
+              {number_format(
+                focus_value,
+                focus_value > 5000000000 ?
+                  '0,0.00a' :
+                  focus_value > 1000000000 ?
+                    '0,0' :
+                    '0,0.00'
+              )}
             </span>
             <span className="text-slate-400 dark:text-slate-200 text-xs font-medium">
               {focus_time_string}
@@ -129,10 +136,13 @@ export default ({
                 fill={`url(#gradient-${id})`}
               />
             </AreaChart>
-          </ResponsiveContainer>
-          :
+          </ResponsiveContainer> :
           <div className="w-full h-4/5 flex items-center justify-center">
-            <TailSpin color={loader_color(theme)} width="32" height="32" />
+            <ProgressBar
+              borderColor={loader_color(theme)}
+              width="36"
+              height="36"
+            />
           </div>
         }
       </div>

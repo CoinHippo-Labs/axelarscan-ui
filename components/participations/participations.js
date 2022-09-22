@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { TailSpin } from 'react-loader-spinner'
+import { ProgressBar } from 'react-loader-spinner'
 import { BiErrorCircle, BiCheckCircle, BiXCircle, BiEdit } from 'react-icons/bi'
 import { IoCaretUpCircle, IoCaretDownCircle } from 'react-icons/io5'
 
@@ -532,10 +532,10 @@ export default ({
         defaultPageSize={['/participations'].includes(pathname) ? 25 : 10}
         className={`no-border ${className}`}
       /> :
-      <TailSpin
-        color={loader_color(theme)}
-        width="32"
-        height="32"
+      <ProgressBar
+        borderColor={loader_color(theme)}
+        width="36"
+        height="36"
       />
   )
 }

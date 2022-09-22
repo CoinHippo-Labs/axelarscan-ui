@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { TailSpin } from 'react-loader-spinner'
+import { ProgressBar } from 'react-loader-spinner'
 import { FiCode } from 'react-icons/fi'
 
 import Image from '../../image'
@@ -91,10 +91,13 @@ export default ({
                 </a>
               </Link>
             ))}
-          </div>
-          :
+          </div> :
           <div className="w-full h-4/5 flex items-center justify-center">
-            <TailSpin color={loader_color(theme)} width="32" height="32" />
+            <ProgressBar
+              borderColor={loader_color(theme)}
+              width="36"
+              height="36"
+            />
           </div>
         }
       </div>
