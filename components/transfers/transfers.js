@@ -499,7 +499,7 @@ export default ({ n }) => {
                 const { url, address_path } = { ...explorer }
                 return (
                   <div className="flex flex-col space-y-1 mb-3">
-                    {amount && asset_data && (
+                    {typeof amount === 'number' && asset_data && (
                       <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
                         {_image && (
                           <Image
@@ -740,7 +740,10 @@ export default ({ n }) => {
                   ) +
                   (
                     !insufficient_fee &&
-                    amount > fee &&
+                    (
+                      amount > fee ||
+                      !fee
+                    ) &&
                     (
                       ibc_send?.ack_txhash ||
                       !ibc_send?.failed_txhash
