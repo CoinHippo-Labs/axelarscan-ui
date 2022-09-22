@@ -1504,7 +1504,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
+              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, refunded, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ?
                 data ||
@@ -1550,7 +1550,6 @@ export default () => {
               let source_gas_data,
                 destination_gas_data,
                 source_gas_used,
-                source_refuned_gas_used,
                 callback_gas_used,
                 source_forecalled_gas_used
 
@@ -1583,6 +1582,9 @@ export default () => {
                   source_gas_used = 0
                 }
                 else {
+                  const decimals = forecall_gas_price_rate?.destination_native_token?.decimals ||
+                    destination_native_token.decimals || 18
+
                   source_gas_used = Number(
                     utils.formatUnits(
                       FixedNumber.fromString(
@@ -1598,49 +1600,20 @@ export default () => {
                           (
                             destination_native_token.token_price.usd /
                             source_token.token_price.usd
-                          ).toString()
+                          )
+                          .toFixed(decimals)
+                          .toString()
                         )
                       )
-                      .round(0).toString().replace('.0', ''),
-                      forecall_gas_price_rate?.destination_native_token?.decimals ||
-                        destination_native_token.decimals,
+                      .round(0)
+                      .toString()
+                      .replace('.0', ''),
+                      decimals,
                     )
                   )
                 }
               } catch (error) {
                 source_gas_used = 0
-              }
-
-              try {
-                source_refuned_gas_used = Number(
-                  utils.formatUnits(
-                    FixedNumber.fromString(
-                      BigNumber.from(receipt?.gasUsed || '0').toString()
-                    )
-                    .mulUnsafe(
-                      FixedNumber.fromString(
-                        BigNumber.from(
-                          receipt?.effectiveGasPrice ||
-                          transaction?.gasPrice ||
-                          '0'
-                        ).toString()
-                      )
-                    )
-                    .mulUnsafe(
-                      FixedNumber.fromString(
-                        (
-                          destination_native_token.token_price.usd /
-                          source_token.token_price.usd
-                        ).toString()
-                      )
-                    )
-                    .round(0).toString().replace('.0', ''),
-                    forecall_gas_price_rate?.destination_native_token?.decimals ||
-                      destination_native_token.decimals,
-                  )
-                )
-              } catch (error) {
-                source_refuned_gas_used = 0
               }
 
               if (callback) {
@@ -1727,15 +1700,9 @@ export default () => {
                 source_forecalled_gas_used = 0
               }
 
-              const refunded_amount = gasFeeAmount && (
-                (
-                  typeof gas?.gas_remain_amount === 'number' ?
-                    gas.gas_remain_amount :
-                    Number(utils.formatUnits(BigNumber.from(gasFeeAmount), source_gas_data?.decimals)) -
-                    source_gas_used - source_forecalled_gas_used - (callback_gas_used || 0)
-                )
-                - source_refuned_gas_used
-              )
+              const refunded_amount = gasFeeAmount &&
+                refunded?.amount
+
               const from = receipt?.from || transaction?.from
               const to = !['forecalled', 'executed', 'refunded'].includes(s.id) ?
                 contract_address :
@@ -2491,7 +2458,8 @@ export default () => {
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
                                 {number_format(
-                                  source_token.token_price?.usd / destination_native_token.token_price?.usd,
+                                  source_token.token_price?.usd /
+                                  destination_native_token.token_price?.usd,
                                   '0,0.00000000',
                                   true,
                                 )}
@@ -2542,7 +2510,6 @@ export default () => {
                             )}
                             <span className="text-sm font-semibold">
                               <span className="mr-1">
-                                ~
                                 {number_format(
                                   refunded_amount,
                                   '0,0.00000000',

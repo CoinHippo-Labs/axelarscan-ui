@@ -467,12 +467,12 @@ export default () => {
                         value={value}
                       />
                     </div>
-                    <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5">
+                    <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start">
                       {Object.entries({ ..._types })
                         .map(([k, v]) => (
                           <div
                             key={k}
-                            className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-1 mb-1"
+                            className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-3 mb-1"
                             style={{ textTransform: 'none' }}
                           >
                             <span>
