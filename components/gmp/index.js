@@ -763,13 +763,18 @@ export default () => {
     !approveButton &&
     !executeButton &&
     !no_gas_remain &&
-    (
-      (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
-      (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
-    ) &&
     (executed || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
-    (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp) &&
+    (
+      editable ||
+      (
+        (
+          (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
+          (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
+        ) &&
+        (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp)
+      )
+    ) &&
     (
       <div className="flex items-center space-x-2">
         <button
@@ -1504,7 +1509,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, refunded, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
+              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, refunded, refunded_more_transactions, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ?
                 data ||
@@ -2500,8 +2505,8 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Refunded:
                         </span>
-                        <div className="flex items-center space-x-2">
-                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                        <div className="flex flex-wrap items-center">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2.5">
                             {source_gas_data?.image && (
                               <Image
                                 src={source_gas_data.image}
@@ -2521,6 +2526,38 @@ export default () => {
                               </span>
                             </span>
                           </div>
+                          {(refunded_more_transactions || [])
+                            .filter(r => r?.amount > 0)
+                            .map((r, j) => {
+                              const {
+                                transactionHash,
+                                amount,
+                              } = { ...r }
+
+                              return (
+                                <a
+                                  key={j}
+                                  href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-0.5 mr-1"
+                                >
+                                  <span className="text-2xs font-semibold">
+                                    <span className="mr-1">
+                                      {number_format(
+                                        amount,
+                                        '+0,0.00000000',
+                                        true,
+                                      )}
+                                    </span>
+                                    <span>
+                                      {ellipse(source_gas_data.symbol)}
+                                    </span>
+                                  </span>
+                                </a>
+                              )
+                            })
+                          }
                         </div>
                       </div>
                     )}
