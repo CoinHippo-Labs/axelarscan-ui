@@ -69,7 +69,7 @@ export default ({
 
         if (!_image) {
           if (moniker?.toLowerCase().startsWith('axelar-core-')) {
-            _image = '/logos/chains/axelar.png'
+            _image = '/logos/chains/axelarnet.svg'
           }
           else if (!identity) {
             _image = rand_image()
