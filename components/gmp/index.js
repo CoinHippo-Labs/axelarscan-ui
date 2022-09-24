@@ -373,12 +373,16 @@ export default () => {
 
         setExecuting(false)
         setExecuteResponse({
-          status: success ?
+          status: success && transaction ?
             'success' :
             'failed',
           message: error?.message ||
             error ||
-            'Execute successful',
+            (
+              transaction ?
+                'Execute successful' :
+                'Error Execution. Please see the error on console.'
+            ),
           txHash: transaction?.transactionHash,
         })
       } catch (error) {
@@ -644,7 +648,7 @@ export default () => {
       is_invalid_call ||
       is_insufficient_minimum_amount ||
       is_insufficient_fee ||
-      gas?.gas_remain_amount < 0.00005
+      gas?.gas_remain_amount < 0.00001
     ) &&
     moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 &&
     (
@@ -721,7 +725,8 @@ export default () => {
         gas_paid ||
         gas_paid_to_callback
       ) ||
-      is_insufficient_fee
+      is_insufficient_fee ||
+      gas?.gas_remain_amount < 0.00001
     ) &&
     (
       <>
