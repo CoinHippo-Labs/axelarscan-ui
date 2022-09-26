@@ -20,7 +20,7 @@ import { ens as getEns } from '../../lib/api/ens'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
-import { assetManager } from '../../lib/object/asset'
+import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { equals_ignore_case } from '../../lib/utils'
 import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
@@ -127,7 +127,7 @@ export default () => {
         // price
         let updated_ids = assets_data
           .filter(a =>
-            a?.id === 'uaxl' ||
+            a?.id === native_asset_id ||
             typeof a?.price === 'number'
           )
           .map(a => a.id)
@@ -176,9 +176,12 @@ export default () => {
                     id,
                   } = { ...asset_data }
 
-                  asset_data.price = id === 'uaxl' ?
-                    null :
-                    (price || asset_data.price || 0)
+                  asset_data.price =
+                    (
+                      price ||
+                      asset_data.price ||
+                      0
+                    )
 
                   assets_data[asset_index] = asset_data
                   updated_ids = _.uniq(
@@ -333,7 +336,7 @@ export default () => {
                       k,
                       assetManager.amount(
                         v,
-                        _.head(assets_data)?.id,
+                        native_asset_id,
                         assets_data,
                       ),
                     ]
@@ -566,6 +569,8 @@ export default () => {
           case '/validator/[address]':
           case '/account/[address]':
           case '/evm-votes':
+          case '/evm-polls':
+          case '/evm-poll/[id]':
           case '/participations':
           case '/block/[height]':
           case '/transactions':

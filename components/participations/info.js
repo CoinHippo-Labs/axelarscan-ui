@@ -4,7 +4,7 @@ import { ThreeDots } from 'react-loader-spinner'
 
 import Image from '../image'
 import { chainManager } from '../../lib/object/chain'
-import { assetManager } from '../../lib/object/asset'
+import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({ data }) => {
@@ -47,9 +47,9 @@ export default ({ data }) => {
       ...c,
       num_maintaining_validators: maintaining_validators_data?.length,
       maintain_staking: assets_data && maintaining_validators_data &&
-        assetManager.amount(_.sumBy(maintaining_validators_data, 'tokens'), 'uaxl', assets_data),
+        assetManager.amount(_.sumBy(maintaining_validators_data, 'tokens'), native_asset_id, assets_data),
       total_staking: assets_data && active_validators_data &&
-        assetManager.amount(_.sumBy(active_validators_data, 'tokens'), 'uaxl', assets_data),
+        assetManager.amount(_.sumBy(active_validators_data, 'tokens'), native_asset_id, assets_data),
       denom: assets_data && assetManager.symbol(assets_data[0]?.id, assets_data),
     }
   }).map(c => {

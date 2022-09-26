@@ -6,7 +6,7 @@ import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import Datatable from '../datatable'
 import Image from '../image'
 import { chainName, getChain } from '../../lib/object/chain'
-import { getAsset } from '../../lib/object/asset'
+import { native_asset_id, getAsset } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, loader_color } from '../../lib/utils'
 
@@ -691,11 +691,29 @@ export default () => {
               ['asc'],
             )
           }
-          data={_.orderBy(
-            data,
-            ['value'],
-            ['desc'],
-          )}
+          data={
+            _.orderBy(
+              _.orderBy(
+                data,
+                ['value'],
+                ['desc'],
+              )
+              .map((d, i) => {
+                const {
+                  asset,
+                } = { ...d }
+
+                return {
+                  ...d,
+                  i: asset === native_asset_id ?
+                    0.5 :
+                    i,
+                }
+              }),
+              ['i'],
+              ['asc'],
+            )
+          }
           noPagination={data.length <= 50}
           noRecordPerPage={true}
           defaultPageSize={50}

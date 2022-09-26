@@ -7,7 +7,7 @@ import moment from 'moment'
 import Info from './info'
 import Votes from './votes'
 import { proposal as getProposal, all_proposal_votes } from '../../lib/api/cosmos'
-import { assetManager } from '../../lib/object/asset'
+import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { number_format, name, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -78,7 +78,7 @@ export default () => {
 
                     const _tokens = assetManager.amount(
                       tokens,
-                      _.head(assets_data)?.id,
+                      native_asset_id,
                       assets_data,
                     )
 
@@ -102,6 +102,7 @@ export default () => {
                   'validator_data.description.moniker',
                 ],
                 [
+                  // 'desc',
                   'desc',
                   'asc',
                 ],
@@ -129,8 +130,6 @@ export default () => {
   const {
     voting_end_time,
     final_tally_result,
-  } = { ...data }
-  const {
     votes,
   } = { ...data }
 
@@ -164,7 +163,7 @@ export default () => {
           data
         }
       />
-      <div className="space-y-2 px-5">
+      <div className="space-y-2">
         <div className="flex items-center space-x-2">
           <span className="capitalize tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium">
             {end ?
@@ -173,52 +172,54 @@ export default () => {
             }
           </span>
           <div className="flex items-center space-x-1">
-            {matched && end ?
-              Object.entries({ ...final_tally_result })
-                .filter(([k, v]) => v)
-                .map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="max-w-min bg-slate-200 dark:bg-slate-800 rounded uppercase whitespace-nowrap text-xs font-medium space-x-1 py-1 px-1.5"
-                  >
-                    <span>
-                      {name(k)}:
-                    </span>
-                    <span>
-                      {number_format(
-                        v,
-                        '0,0.00a',
-                      )}
-                    </span>
-                  </div>
-                )) :
-              vote_options
-                .map((v, i) => {
-                  const {
-                    option,
-                    value,
-                  } = { ...v }
-
-                  return (
+            {
+              matched &&
+              end ?
+                Object.entries({ ...final_tally_result })
+                  .filter(([k, v]) => v)
+                  .map(([k, v]) => (
                     <div
-                      key={i}
-                      className={`${['YES'].includes(option) ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : ['NO'].includes(option) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-xl whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-2`}
+                      key={k}
+                      className="max-w-min bg-slate-200 dark:bg-slate-800 rounded uppercase whitespace-nowrap text-xs font-medium space-x-1 py-1 px-1.5"
                     >
                       <span>
-                        {number_format(
-                          value,
-                          '0,0',
-                        )}
+                        {name(k)}:
                       </span>
                       <span>
-                        {option?.replace(
-                          '_',
-                          ' ',
+                        {number_format(
+                          v,
+                          '0,0.00a',
                         )}
                       </span>
                     </div>
-                  )
-                })
+                  )) :
+                vote_options
+                  .map((v, i) => {
+                    const {
+                      option,
+                      value,
+                    } = { ...v }
+
+                    return (
+                      <div
+                        key={i}
+                        className={`${['YES'].includes(option) ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : ['NO'].includes(option) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-xl whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-2`}
+                      >
+                        <span>
+                          {number_format(
+                            value,
+                            '0,0',
+                          )}
+                        </span>
+                        <span>
+                          {option?.replace(
+                            '_',
+                            ' ',
+                          )}
+                        </span>
+                      </div>
+                    )
+                  })
             }
           </div>
         </div>

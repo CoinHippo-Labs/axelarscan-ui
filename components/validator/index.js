@@ -17,7 +17,7 @@ import { keygens_by_validator } from '../../lib/api/cli'
 import { heartbeats as searchHeartbeats } from '../../lib/api/heartbeat'
 import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chainManager } from '../../lib/object/chain'
-import { getAsset, assetManager } from '../../lib/object/asset'
+import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
 import { base64ToBech32 } from '../../lib/object/key'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
@@ -84,7 +84,7 @@ export default () => {
               if (broadcaster_address) {
                 const response = await all_bank_balances(broadcaster_address)
                 if (response?.data) {
-                  _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === 'uaxl').map(b => {
+                  _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === native_asset_id).map(b => {
                     const { denom, amount } = { ...b }
                     return {
                       denom: assetManager.symbol(denom, assets_data),

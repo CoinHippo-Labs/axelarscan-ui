@@ -155,7 +155,7 @@ export default ({
         style={styles.popper}
       >
         <div
-          className={`${hidden ? 'hidden' : 'block'} w-auto bg-white dark:bg-black rounded shadow z-10 no-underline break-words text-sm font-normal`}
+          className={`${hidden ? 'hidden' : 'block static'} w-auto bg-white dark:bg-black rounded shadow z-50 no-underline break-words text-sm font-normal`}
           style={styles.offset}
         >
           {title && (

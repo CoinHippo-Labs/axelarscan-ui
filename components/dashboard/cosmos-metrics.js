@@ -40,11 +40,11 @@ export default ({
   } = { ...inflation_data }
 
   const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
-  const titleClassName = 'text-2xl font-semibold space-x-1'
-  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-sm font-normal ml-0.5'
+  const titleClassName = 'text-xl font-semibold space-x-1'
+  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-xs font-normal ml-0.5'
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       <Link href={`/block${!isNaN(latest_block_height) ? `/${latest_block_height}` : 's'}`}>
         <a className={`${metricClassName}`}>
           <Popover
@@ -165,7 +165,7 @@ export default ({
                   online_voting_power_percentage,
                   '0,0.000',
                 )
-              }% bonded tokens from {!isNaN(total_voting_power) &&
+              }% staked tokens from {!isNaN(total_voting_power) &&
                 number_format(
                   total_voting_power,
                   total_voting_power > 250000000 ?
@@ -176,14 +176,32 @@ export default ({
             </div>}
             className="text-left"
           >
-            <div className={`uppercase ${titleClassName}`}>
+            <div className={`uppercase ${titleClassName} space-x-1`}>
               {!isNaN(online_voting_power) ?
-                number_format(
-                  online_voting_power,
-                  online_voting_power > 250000000 ?
-                    '0,0.00a' :
-                    '0,0.00',
-                ) :
+                <>
+                  <span>
+                    {number_format(
+                      online_voting_power,
+                      online_voting_power > 10000000 ?
+                        '0,0.00a' :
+                        '0,0.00',
+                    )}
+                  </span>
+                  <span>
+                    /
+                  </span>
+                  <span>
+                    {number_format(
+                      total_voting_power,
+                      total_voting_power > 250000000 ?
+                        '0,0.0a' :
+                        '0,0.00',
+                    )}
+                  </span>
+                  <span>
+                    {denom}
+                  </span>
+                </> :
                 <ProgressBar
                   borderColor={loader_color(theme)}
                   width="32"
@@ -192,11 +210,57 @@ export default ({
               }
             </div>
             <span className={subtitleClassName}>
-              bonded tokens
+              staked tokens
             </span>
           </Popover>
         </a>
       </Link>
+      <a
+        href="https://wallet.keplr.app/chains/axelar"
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${metricClassName}`}
+      >
+        <Popover
+          placement="bottom"
+          title={null}
+          content={<div className="w-68 text-black dark:text-white text-xs font-normal">
+            <div>
+              Annual Percentage Rate (APR):
+            </div>
+            the inflation rate / (staked tokens / total supply)
+          </div>}
+          className="text-left"
+        >
+          <div className={`uppercase ${titleClassName} space-x-0.5`}>
+            {
+              !isNaN(inflation) &&
+              !isNaN(online_voting_power) &&
+              !isNaN(total_voting_power) ?
+              <>
+                <span>
+                  {number_format(
+                    (inflation * 100) /
+                    (online_voting_power / total_voting_power),
+                    '0,0.00',
+                  )}
+                </span>
+                <span>
+                  %
+                </span>
+              </> :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="32"
+                height="32"
+              />
+            }
+          </div>
+          <span className={subtitleClassName}>
+            staking APR
+          </span>
+        </Popover>
+      </a>
       <div className={`${metricClassName}`}>
         <Popover
           placement="bottom"

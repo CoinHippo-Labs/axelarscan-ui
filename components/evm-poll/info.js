@@ -1,0 +1,302 @@
+import { useSelector, shallowEqual } from 'react-redux'
+import moment from 'moment'
+import { ProgressBar } from 'react-loader-spinner'
+import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
+import { HiOutlineClock } from 'react-icons/hi'
+
+import Image from '../image'
+import Copy from '../copy'
+import { getChain, chainName } from '../../lib/object/chain'
+import { number_format, name, ellipse, loader_color } from '../../lib/utils'
+
+export default ({
+  data,
+}) => {
+  const {
+    preferences,
+    evm_chains,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+
+  const {
+    id,
+    created_at,
+    sender_chain,
+    transaction_id,
+    transfer_id,
+    deposit_address,
+    confirmation,
+    failed,
+    success,
+    participants,
+    votes,
+  } = { ...data }
+  const {
+    ms,
+  } = { ...created_at }
+
+  const chain_data = getChain(
+    sender_chain,
+    evm_chains_data,
+  )
+  const {
+    image,
+    explorer,
+  } = { ...chain_data }
+  const {
+    url,
+    transaction_path,
+  } = { ...explorer }
+
+  const status = success ?
+    'completed' :
+    failed ?
+      'failed' :
+      confirmation ||
+      votes?.findIndex(v => v?.confirmed) > -1 ?
+        'confirmed' :
+        'pending'
+
+  const rowClassName = 'flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
+  const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
+
+  return (
+    <div className="bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-75 w-fit flex flex-col rounded-lg space-y-4 py-6 px-5">
+      <div className={rowClassName}>
+        <span className={titleClassName}>
+          Poll ID:
+        </span>
+        {data ?
+          id &&
+          (
+            <Copy
+              size={20}
+              value={id}
+              title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
+                {id}
+              </span>}
+            />
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
+        }
+      </div>
+      <div className={rowClassName}>
+        <span className={titleClassName}>
+          Chain:
+        </span>
+        {data ?
+          sender_chain &&
+          (
+            <div className="h-6 flex items-center space-x-2">
+              {chain_data ?
+                <>
+                  {image && (
+                    <Image
+                      src={image}
+                      alt=""
+                      className="w-6 h-6 rounded-full"
+                    />
+                  )}
+                  <span className="text-base font-semibold">
+                    {chainName(chain_data)}
+                  </span>
+                </> :
+                <span className="font-medium">
+                  {name(sender_chain)}
+                </span>
+              }
+            </div>
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
+        }
+      </div>
+      <div className={rowClassName}>
+        <span className={titleClassName}>
+          Status:
+        </span>
+        {data ?
+          status &&
+          (
+            <div className={`${['completed', 'confirmed'].includes(status) ? 'text-green-400 dark:text-green-300' : status === 'failed' ? 'text-red-500 dark:text-red-600' : 'text-blue-400 dark:text-blue-500'} flex items-center space-x-1`}>
+              {[
+                'completed',
+                'confirmed',
+              ].includes(status) ?
+                <BiCheckCircle
+                  size={20}
+                /> :
+                status === 'failed' ?
+                  <BiXCircle
+                    size={20}
+                  /> :
+                  <HiOutlineClock
+                    size={20}
+                  />
+              }
+              <span className="uppercase text-sm lg:text-base font-semibold">
+                {status}
+              </span>
+            </div>
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
+        }
+      </div>
+      <div className={rowClassName}>
+        <span className={titleClassName}>
+          EVM Transaction ID:
+        </span>
+        {data ?
+          transaction_id &&
+          (
+            <div className="h-6 flex items-center space-x-1">
+              {url ?
+                <>
+                  <a
+                    href={`${url}/${transaction_path?.replace('{tx}', transaction_id)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                  >
+                    {ellipse(
+                      transaction_id,
+                      16,
+                    )}
+                  </a>
+                  <Copy
+                    size={20}
+                    value={transaction_id}
+                  />
+                </> :
+                <Copy
+                  size={20}
+                  value={transaction_id}
+                  title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
+                    {ellipse(
+                      transaction_id,
+                      16,
+                    )}
+                  </span>}
+                />
+              }
+            </div>
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
+        }
+      </div>
+      {
+        transfer_id &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Transfer ID:
+            </span>
+            <div className="flex items-center space-x-1">
+              <a
+                href={`/transfer/${transaction_id || `?transfer_id=${transfer_id}`}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+              >
+                {transfer_id}
+              </a>
+              <Copy
+                size={20}
+                value={transfer_id}
+              />
+            </div>
+          </div>
+        )
+      }
+      {
+        deposit_address &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Deposit Address:
+            </span>
+            <div className="flex items-center space-x-1">
+              <a
+                href={`/account/${deposit_address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+              >
+                {ellipse(
+                  deposit_address,
+                  12,
+                )}
+              </a>
+              <Copy
+                size={20}
+                value={deposit_address}
+              />
+            </div>
+          </div>
+        )
+      }
+      <div className={rowClassName}>
+        <span className={titleClassName}>
+          Updated:
+        </span>
+        {data ?
+          ms &&
+          (
+            <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
+              {moment(ms).fromNow()} ({moment(ms).format('MMM D, YYYY h:mm:ss A')})
+            </span>
+          ) :
+          <ProgressBar
+            borderColor={loader_color(theme)}
+            width="24"
+            height="24"
+          />
+        }
+      </div>
+      {
+        participants &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Participants:
+            </span>
+            <div className="h-6 flex items-center text-base font-medium">
+              {number_format(
+                participants.length,
+                '0,0',
+              )}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  )
+}

@@ -6,7 +6,7 @@ import { ProgressBar } from 'react-loader-spinner'
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
-import { assetManager } from '../../lib/object/asset'
+import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { number_format, ellipse, loader_color } from '../../lib/utils'
 
 export default ({
@@ -194,7 +194,7 @@ export default ({
                     ),
                   'tokens',
                 ),
-                _.head(assets_data)?.id,
+                native_asset_id,
                 assets_data,
               )
 
@@ -244,7 +244,7 @@ export default ({
               return (
                 <div className="flex flex-col items-end text-right">
                   {value ?
-                    <div className={`max-w-min ${['YES'].includes(value) ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : ['NO'].includes(props.value) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-xl text-xs font-semibold py-0.5 px-2`}>
+                    <div className={`max-w-min ${['YES'].includes(value) ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : ['NO'].includes(value) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-xl text-xs font-semibold py-0.5 px-2`}>
                       {value.replace(
                         '_',
                         ' ',

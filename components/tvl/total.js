@@ -3,6 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { ColorRing } from 'react-loader-spinner'
 
+import { native_asset_id } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, loader_color } from '../../lib/utils'
 
@@ -84,7 +85,7 @@ export default () => {
     (data || [])
       .filter(d =>
         d?.value_on_evm > 0 &&
-        !['uaxl'].includes(d?.asset)
+        ![].includes(d?.asset)
       ),
     'value_on_evm',
   )
@@ -92,7 +93,7 @@ export default () => {
     (data || [])
       .filter(d =>
         d?.value_on_cosmos > 0 &&
-        !['uaxl'].includes(d?.asset)
+        ![].includes(d?.asset)
       ),
     'value_on_cosmos',
   )
@@ -100,7 +101,7 @@ export default () => {
     (data || [])
       .filter(d =>
         d?.value > 0 &&
-        !['uaxl'].includes(d?.asset)
+        ![].includes(d?.asset)
       ),
     'value',
   )

@@ -3,11 +3,11 @@ import { useRouter } from 'next/router'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { IoMdCube } from 'react-icons/io'
-import { FaServer } from 'react-icons/fa'
 import { RiFilePaperFill } from 'react-icons/ri'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
 import EVMVoteFilters from '../../evm-votes/filters'
+import EVMPollFilters from '../../evm-polls/filters'
 import TransactionFilters from '../../transactions/filters'
 import TransferFilters from '../../transfers/filters'
 import SentFilters from '../../sents/filters'
@@ -66,9 +66,9 @@ export default () => {
   const {
     signed_blocks_window,
     min_signed_per_window,
+    slash_fraction_downtime,
     downtime_jail_duration,
   } = { ...slashing_params }
-
   let title,
     subtitle,
     right
@@ -144,6 +144,36 @@ export default () => {
       title = 'EVM votes'
       right = (
         <EVMVoteFilters />
+      )
+      break
+    case '/evm-polls':
+      title = 'EVM polls'
+      right = (
+        <EVMPollFilters />
+      )
+      break
+    case '/evm-poll/[id]':
+      title = 'EVM poll'
+      subtitle = (
+        <div className="flex items-center text-sm space-x-2">
+          <div>
+            <span className="xl:hidden">
+              {ellipse(
+                id,
+                16,
+              )}
+            </span>
+            <span className="hidden xl:block">
+              {ellipse(
+                id,
+                24,
+              )}
+            </span>
+          </div>
+          <Copy
+            value={id}
+          />
+        </div>
       )
       break
     case '/blocks':
@@ -224,9 +254,10 @@ export default () => {
           })}
         </div>
       )
-      right = pathname.endsWith('/search') && (
-        <TransactionFilters />
-      )
+      right = pathname.endsWith('/search') &&
+        (
+          <TransactionFilters />
+        )
       break
     case '/tx/[tx]':
       title = 'Transaction'
@@ -286,9 +317,10 @@ export default () => {
       break
     case '/sent':
     case '/sent/search':
-      right = pathname.endsWith('/search') && (
-        <SentFilters />
-      )
+      right = pathname.endsWith('/search') &&
+        (
+          <SentFilters />
+        )
     case '/transfers':
     case '/transfers/search':
       title = 'Cross-chain Transfers'
@@ -338,9 +370,10 @@ export default () => {
       )
       right = right ||
         (
-          pathname.endsWith('/search') && (
-            <TransferFilters />
-          )
+          pathname.endsWith('/search') &&
+            (
+              <TransferFilters />
+            )
         )
       break
     case '/transfer/[tx]':
@@ -404,6 +437,7 @@ export default () => {
     case '/gmp':
     case '/gmp/search':
     case '/gmp/stats':
+    case '/gmp/contracts':
       title = 'General Message Passing'
       subtitle = (
         <div className="flex flex-wrap items-center">
@@ -419,6 +453,10 @@ export default () => {
             {
               title: 'Statistics',
               path: `/gmp/stats?fromTime=${moment().subtract(7, 'days').valueOf()}`,
+            },
+            {
+              title: 'Contracts',
+              path: '/gmp/contracts',
             },
           ]
           .map((r, i) => {
@@ -453,9 +491,10 @@ export default () => {
       right = [
         '/gmp/search',
         '/gmp/stats',
-      ].includes(pathname) && (
-        <GMPFilters />
-      )
+      ].includes(pathname) &&
+        (
+          <GMPFilters />
+        )
       break
     case '/gmp/[tx]':
       title = 'General Message Passing'
@@ -589,15 +628,10 @@ export default () => {
                   <>
                     {!isNaN(max_validators) && (
                       <Link href="/validators">
-                        <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-2 ml-0 sm:ml-4 mr-4 sm:mr-0">
-                          <div className="flex items-center space-x-1.5">
-                            <span className="font-normal">
-                              Max
-                            </span>
-                            <FaServer
-                              size={16}
-                            />
-                          </div>
+                        <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
+                          <span className="font-normal">
+                            Max Validators
+                          </span>
                           <span className="font-normal">
                             {number_format(
                               max_validators,
@@ -610,10 +644,18 @@ export default () => {
                     {unbonding_time && (
                       <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
-                          Unbond
+                          Undelegate Period
                         </span>
                         <span className="font-normal">
-                          {unbonding_time}
+                          {Math.floor(
+                            Number(
+                              unbonding_time
+                                .replace(
+                                  's',
+                                  '',
+                                )
+                            ) / 86400
+                          )} Days
                         </span>
                       </div>
                     )}
@@ -621,7 +663,7 @@ export default () => {
                 )}
                 {slashing_params && (
                   <>
-                    {
+                    {/*
                       !isNaN(signed_blocks_window) &&
                       !isNaN(min_signed_per_window) &&
                       (
@@ -637,14 +679,35 @@ export default () => {
                           </span>
                         </div>
                       )
-                    }
+                    */}
+                    {slash_fraction_downtime && (
+                      <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
+                          Jail Penalty
+                        </span>
+                        <span className="font-normal">
+                          {number_format(
+                            slash_fraction_downtime,
+                            '0,0.00%',
+                          )}
+                        </span>
+                      </div>
+                    )}
                     {downtime_jail_duration && (
                       <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
-                          Jail
+                          Jail Duration
                         </span>
                         <span className="font-normal">
-                          {downtime_jail_duration}
+                          {Math.floor(
+                            Number(
+                              downtime_jail_duration
+                                .replace(
+                                  's',
+                                  '',
+                                )
+                            ) / 3600
+                          )} hrs
                         </span>
                       </div>
                     )}

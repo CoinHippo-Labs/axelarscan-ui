@@ -10,7 +10,7 @@ import { deposit_addresses } from '../../lib/api/index'
 import { transfers } from '../../lib/api/transfer'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
-import { getAsset, assetManager } from '../../lib/object/asset'
+import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
 import { equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -289,12 +289,12 @@ export default () => {
                         creation_height: Number(creation_height),
                         initial_balance: assetManager.amount(
                           Number(initial_balance),
-                          _.head(assets_data)?.id,
+                          native_asset_id,
                           assets_data,
                         ),
                         shares_dst: assetManager.amount(
                           Number(shares_dst),
-                          _.head(assets_data)?.id,
+                          native_asset_id,
                           assets_data,
                         ),
                       }
@@ -400,12 +400,12 @@ export default () => {
                       creation_height: Number(creation_height),
                       initial_balance: assetManager.amount(
                         Number(initial_balance),
-                        _.head(assets_data)?.id,
+                        native_asset_id,
                         assets_data,
                       ),
                       balance: assetManager.amount(
                         Number(balance),
-                        _.head(assets_data)?.id,
+                        native_asset_id,
                         assets_data,
                       ),
                     }

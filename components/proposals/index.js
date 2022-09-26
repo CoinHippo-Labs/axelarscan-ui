@@ -7,6 +7,7 @@ import { ProgressBar } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
 import { all_proposals } from '../../lib/api/cosmos'
+import { native_asset_id } from '../../lib/object/asset'
 import { number_format, name, loader_color } from '../../lib/utils'
 
 export default () => {
@@ -195,12 +196,12 @@ export default () => {
               sortType: (a, b) =>
                 _.sumBy(
                   (a.original.total_deposit || [])
-                    .filter(d => d?.denom === 'uaxl'),
+                    .filter(d => d?.denom === native_asset_id),
                   'amount',
                 ) >
                 _.sumBy(
                   (b.original.total_deposit || [])
-                    .filter(d => d?.denom === 'uaxl'),
+                    .filter(d => d?.denom === native_asset_id),
                   'amount',
                 ) ?
                   1 :

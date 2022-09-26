@@ -779,7 +779,6 @@ export default ({
                     </a>
                   </Link>
                   <Copy
-                    size={18}
                     value={props.value}
                   />
                 </div>
