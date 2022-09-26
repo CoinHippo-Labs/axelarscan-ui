@@ -154,11 +154,25 @@ export default ({ n }) => {
           setOffet(0)
         }
 
-        const _data = !fetchTrigger ?
-          [] :
-          data || []
+        const {
+          status,
+        } = { ...filters }
+
         const size = n ||
           LIMIT
+        const _data = !fetchTrigger ||
+          (
+            [
+              'executing',
+            ].includes(status) &&
+            fetchTrigger > 1 &&
+            (
+              !data ||
+              data.length < size
+            )
+          ) ?
+            [] :
+            data || []
         const from = fetchTrigger === true || fetchTrigger === 1 ?
           _data.length :
           0
