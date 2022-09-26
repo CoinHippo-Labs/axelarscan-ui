@@ -370,6 +370,7 @@ export default () => {
                           </span>
                     )
                   },
+                  headerClassName: 'justify-center',
                 },
                 {
                   Header: (
@@ -741,20 +742,20 @@ export default () => {
                   Cell: props => (
                     <div className="text-left sm:text-right">
                       {!isNaN(props.value) ?
-                        <span className="font-medium">
+                        <div className="font-medium mt-0.5">
                           {number_format(
                             props.value * 100,
                             '0,0.00',
                           )}
                           %
-                        </span> :
+                        </div> :
                         <span>
                           -
                         </span>
                       }
                     </div>
                   ),
-                  headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: 'sm:w-8 justify-start sm:justify-end text-2xs text-left sm:text-right',
                 },
                 {
                   Header: 'Staking APR',
@@ -774,13 +775,13 @@ export default () => {
                       <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                         {!isNaN(value) ?
                           <>
-                            <span className="font-medium">
+                            <div className="font-medium mt-0.5">
                               {number_format(
                                 value,
                                 '0,0.00',
                               )}
                               %
-                            </span>
+                            </div>
                             {
                               typeof inflation === 'number' &&
                               (
@@ -1249,7 +1250,9 @@ export default () => {
               )
               .filter(c =>
                 staging ||
-                ![].includes(c.accessor)
+                ![
+                  'apr',
+                ].includes(c.accessor)
               )
             }
             data={_.orderBy(

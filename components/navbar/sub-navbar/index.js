@@ -629,7 +629,7 @@ export default () => {
                     {!isNaN(max_validators) && (
                       <Link href="/validators">
                         <a className="flex items-center text-blue-400 dark:text-blue-500 space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
-                          <span className="font-normal">
+                          <span className="whitespace-nowrap font-normal">
                             Max Validators
                           </span>
                           <span className="font-normal">
@@ -646,7 +646,7 @@ export default () => {
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
                           Undelegate Period
                         </span>
-                        <span className="font-normal">
+                        <span className="whitespace-nowrap font-normal">
                           {Math.floor(
                             Number(
                               unbonding_time
@@ -698,7 +698,7 @@ export default () => {
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-normal">
                           Jail Duration
                         </span>
-                        <span className="font-normal">
+                        <span className="whitespace-nowrap font-normal">
                           {Math.floor(
                             Number(
                               downtime_jail_duration
