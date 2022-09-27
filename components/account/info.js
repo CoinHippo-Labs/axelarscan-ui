@@ -462,7 +462,9 @@ export default ({
                           {reward?.denom}
                         </span>
                       </> :
-                      'No Rewards'
+                      <span className="text-slate-400 dark:text-slate-600">
+                        No Rewards
+                      </span>
                     }
                   </span> :
                   <ProgressBar
@@ -474,36 +476,146 @@ export default ({
               </div>
             )
           }
-          {equals_ignore_case(validator_data?.delegator_address, address) && (
-            <div className={rowClassName}>
-              <span className={titleClassName}>
-                Commissions:
-              </span>
-              {commissions ?
-                <span className="whitespace-nowrap text-sm lg:text-base font-medium space-x-1">
-                  {commission?.amount > -1 ?
-                    <>
-                      <span>
-                        {number_format(
-                          commission.amount,
-                          '0,0.00000000',
-                        )}
+          {equals_ignore_case(validator_data?.delegator_address, address) &&
+            (
+              <div className={rowClassName}>
+                <span className={titleClassName}>
+                  Commissions:
+                </span>
+                {commissions ?
+                  <span className="whitespace-nowrap text-sm lg:text-base font-medium space-x-1">
+                    {commission?.amount > -1 ?
+                      <>
+                        <span>
+                          {number_format(
+                            commission.amount,
+                            '0,0.00000000',
+                          )}
+                        </span>
+                        <span>
+                          {commission?.denom}
+                        </span>
+                      </> :
+                      <span className="text-slate-400 dark:text-slate-600">
+                        No Commissions
                       </span>
-                      <span>
-                        {commission?.denom}
-                      </span>
-                    </> :
-                    'No Commissions'
+                    }
+                  </span> :
+                  <ProgressBar
+                    borderColor={loader_color(theme)}
+                    width="28"
+                    height="28"
+                  />
+                }
+              </div>
+            )
+          }
+          {
+            type(address) === 'account' &&
+            (
+              <>
+                <div className={rowClassName}>
+                  <span className={titleClassName}>
+                    Delegations:
+                  </span>
+                  {delegations ?
+                    <span className="whitespace-nowrap text-sm lg:text-base font-medium space-x-1">
+                      {delegations.findIndex(d => d?.amount) > -1 ?
+                        <>
+                          <span>
+                            {number_format(
+                              _.sumBy(
+                                delegations,
+                                'amount',
+                              ),
+                              '0,0.00000000',
+                            )}
+                          </span>
+                          <span>
+                            {_.head(delegations)?.denom}
+                          </span>
+                        </> :
+                        <span className="text-slate-400 dark:text-slate-600">
+                          No Delegations
+                        </span>
+                      }
+                    </span> :
+                    <ProgressBar
+                      borderColor={loader_color(theme)}
+                      width="28"
+                      height="28"
+                    />
                   }
-                </span> :
-                <ProgressBar
-                  borderColor={loader_color(theme)}
-                  width="28"
-                  height="28"
-                />
-              }
-            </div>
-          )}
+                </div>
+                <div className={rowClassName}>
+                  <span className={titleClassName}>
+                    Redelegations:
+                  </span>
+                  {redelegations ?
+                    <span className="whitespace-nowrap text-sm lg:text-base font-medium space-x-1">
+                      {redelegations.findIndex(d => d?.amount) > -1 ?
+                        <>
+                          <span>
+                            {number_format(
+                              _.sumBy(
+                                redelegations,
+                                'amount',
+                              ),
+                              '0,0.00000000',
+                            )}
+                          </span>
+                          <span>
+                            {_.head(redelegations)?.denom}
+                          </span>
+                        </> :
+                        <span className="text-slate-400 dark:text-slate-600">
+                          No Redelegations
+                        </span>
+                      }
+                    </span> :
+                    <ProgressBar
+                      borderColor={loader_color(theme)}
+                      width="28"
+                      height="28"
+                    />
+                  }
+                </div>
+                <div className={rowClassName}>
+                  <span className={titleClassName}>
+                    Unstakings:
+                  </span>
+                  {unbondings ?
+                    <span className="whitespace-nowrap text-sm lg:text-base font-medium space-x-1">
+                      {unbondings.findIndex(d => d?.amount) > -1 ?
+                        <>
+                          <span>
+                            {number_format(
+                              _.sumBy(
+                                unbondings,
+                                'amount',
+                              ),
+                              '0,0.00000000',
+                            )}
+                          </span>
+                          <span>
+                            {_.head(unbondings)?.denom}
+                          </span>
+                        </> :
+                        <span className="text-slate-400 dark:text-slate-600">
+                          No Unstakings
+                        </span>
+                      }
+                    </span> :
+                    <ProgressBar
+                      borderColor={loader_color(theme)}
+                      width="28"
+                      height="28"
+                    />
+                  }
+                </div>
+              </>
+            )
+          }
         </div>
         <div className="sm:col-span-3 space-y-2">
           {balances ?
@@ -689,592 +801,597 @@ export default ({
             )
           }
         </div>
-        {type(address) === 'account' && validators_data && !equals_ignore_case(validator_data?.broadcaster_address, address) && (
-          <>
-            <div className="sm:col-span-3 lg:col-span-2 space-y-2">
-              <div className="tracking-wider text-sm lg:text-base font-semibold">
-                Delegations
-              </div>
-              {delegations ?
-                <Datatable
-                  columns={[
-                    {
-                      Header: '#',
-                      accessor: 'i',
-                      sortType: (a, b) => a.original.i > b.original.i ?
-                        1 :
-                        -1,
-                      Cell: props => (
-                        <span className="font-medium">
-                          {number_format(
-                            (
-                              props.flatRows?.indexOf(props.row) > -1 ?
-                                props.flatRows.indexOf(props.row) :
-                                props.value
-                            ) + 1,
-                            '0,0',
-                          )}
-                        </span>
-                      ),
-                    },
-                    {
-                      Header: 'Validator',
-                      accessor: 'validator_address',
-                      disableSortBy: true,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          validator_data,
-                        } = { ...props.row.original }
-                        const {
-                          operator_address,
-                          description,
-                        } = { ...validator_data }
-                        const {
-                          moniker,
-                        } = { ...description }
+        {
+          type(address) === 'account' &&
+          validators_data &&
+          !equals_ignore_case(validator_data?.broadcaster_address, address) &&
+          (
+            <>
+              <div className="sm:col-span-3 lg:col-span-2 space-y-2">
+                <div className="tracking-wider text-sm lg:text-base font-semibold">
+                  Delegations
+                </div>
+                {delegations ?
+                  <Datatable
+                    columns={[
+                      {
+                        Header: '#',
+                        accessor: 'i',
+                        sortType: (a, b) => a.original.i > b.original.i ?
+                          1 :
+                          -1,
+                        Cell: props => (
+                          <span className="font-medium">
+                            {number_format(
+                              (
+                                props.flatRows?.indexOf(props.row) > -1 ?
+                                  props.flatRows.indexOf(props.row) :
+                                  props.value
+                              ) + 1,
+                              '0,0',
+                            )}
+                          </span>
+                        ),
+                      },
+                      {
+                        Header: 'Validator',
+                        accessor: 'validator_address',
+                        disableSortBy: true,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            validator_data,
+                          } = { ...props.row.original }
+                          const {
+                            operator_address,
+                            description,
+                          } = { ...validator_data }
+                          const {
+                            moniker,
+                          } = { ...description }
 
-                        return validator_data ?
-                          <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
-                            <Link href={`/validator/${operator_address}`}>
-                              <a
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ValidatorProfile
-                                  validator_description={description}
-                                />
-                              </a>
-                            </Link>
-                            <div className="flex flex-col">
-                              {moniker && (
-                                <Link href={`/validator/${operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                  >
-                                    {ellipse(
-                                      moniker,
-                                      16,
-                                    )}
-                                  </a>
-                                </Link>
-                              )}
-                              <div className="flex items-center space-x-1">
-                                <Link href={`/validator/${operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-slate-400 dark:text-slate-600 text-xs"
-                                  >
-                                    {ellipse(
-                                      operator_address,
-                                      8,
-                                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                    )}
-                                  </a>
-                                </Link>
-                                <Copy
-                                  value={operator_address}
-                                />
-                              </div>
-                            </div>
-                          </div> :
-                          value ?
-                            <div className="flex items-center space-x-1">
-                              <Link href={`/validator/${value}`}>
+                          return validator_data ?
+                            <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                              <Link href={`/validator/${operator_address}`}>
                                 <a
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                                 >
-                                  {ellipse(
-                                    value,
-                                    6,
-                                    process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                  )}
+                                  <ValidatorProfile
+                                    validator_description={description}
+                                  />
                                 </a>
                               </Link>
-                              <Copy
-                                value={value}
-                              />
-                            </div> :
-                            <span>
-                              -
-                            </span>
-                      },
-                    },
-                    {
-                      Header: 'Amount',
-                      accessor: 'amount',
-                      sortType: (a, b) => a.original.amount > b.original.amount ?
-                        1 :
-                        -1,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          denom,
-                        } = { ...props.row.original }
-
-                        return (
-                          <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
-                            {typeof value === 'number' ?
-                              <span className="text-xs font-semibold space-x-2">
-                                <span>
-                                  {number_format(
-                                    value,
-                                    '0,0.00000000',
-                                    true,
-                                  )}
-                                </span>
-                                <span>
-                                  {denom}
-                                </span>
-                              </span> :
-                              <span>
-                                -
-                              </span>
-                            }
-                          </div>
-                        )
-                      },
-                      headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-                    },
-                  ]}
-                  data={delegations}
-                  noPagination={delegations.length <= 10}
-                  noRecordPerPage={true}
-                  defaultPageSize={10}
-                  className="no-border"
-                /> :
-                <ProgressBar
-                  borderColor={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              }
-            </div>
-            <div className="sm:col-span-3 lg:col-span-2 space-y-2">
-              <div className="tracking-wider text-sm lg:text-base font-semibold">
-                Redelegations
-              </div>
-              {redelegations ?
-                <Datatable
-                  columns={[
-                    {
-                      Header: '#',
-                      accessor: 'i',
-                      sortType: (a, b) => a.original.i > b.original.i ?
-                        1 :
-                        -1,
-                      Cell: props => (
-                        <span className="font-medium">
-                          {number_format(
-                            (
-                              props.flatRows?.indexOf(props.row) > -1 ?
-                                props.flatRows.indexOf(props.row) :
-                                props.value
-                            ) + 1,
-                            '0,0',
-                          )}
-                        </span>
-                      ),
-                    },
-                    {
-                      Header: 'Validator',
-                      accessor: 'validator_src_address',
-                      disableSortBy: true,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          source_validator_data,
-                          destination_validator_data,
-                          validator_dst_address,
-                        } = { ...props.row.original }
-
-                        const source_operator_address = source_validator_data?.operator_address
-                        const source_description = source_validator_data?.description
-                        const source_moniker = source_description?.moniker
-
-                        const destination_operator_address = destination_validator_data?.operator_address
-                        const destination_description = destination_validator_data?.description
-                        const destination_moniker = destination_description?.moniker
-
-                        return (
-                          <div className="flex items-center space-x-1">
-                            {source_validator_data ?
-                              <div className={`min-w-max flex items-${source_moniker ? 'start' : 'center'} space-x-2`}>
-                                <Link href={`/validator/${source_operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <ValidatorProfile
-                                      validator_description={source_description}
-                                    />
-                                  </a>
-                                </Link>
-                                <div className="flex flex-col">
-                                  {source_moniker && (
-                                    <Link href={`/validator/${source_operator_address}`}>
-                                      <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                      >
-                                        {ellipse(
-                                          source_moniker,
-                                          16,
-                                        )}
-                                      </a>
-                                    </Link>
-                                  )}
-                                  <div className="flex items-center space-x-1">
-                                    <Link href={`/validator/${source_operator_address}`}>
-                                      <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-slate-400 dark:text-slate-600"
-                                      >
-                                        {ellipse(
-                                          source_operator_address,
-                                          10,
-                                          process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                        )}
-                                      </a>
-                                    </Link>
-                                    <Copy
-                                      value={source_operator_address}
-                                    />
-                                  </div>
-                                </div>
-                              </div> :
-                              value ?
-                                <div className="flex items-center space-x-1">
-                                  <Link href={`/validator/${value}`}>
+                              <div className="flex flex-col">
+                                {moniker && (
+                                  <Link href={`/validator/${operator_address}`}>
                                     <a
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                                     >
                                       {ellipse(
-                                        value,
-                                        6,
+                                        moniker,
+                                        16,
+                                      )}
+                                    </a>
+                                  </Link>
+                                )}
+                                <div className="flex items-center space-x-1">
+                                  <Link href={`/validator/${operator_address}`}>
+                                    <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-slate-400 dark:text-slate-600 text-xs"
+                                    >
+                                      {ellipse(
+                                        operator_address,
+                                        8,
                                         process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                                       )}
                                     </a>
                                   </Link>
                                   <Copy
-                                    value={value}
+                                    value={operator_address}
                                   />
-                                </div> :
-                                <span>
-                                  -
-                                </span>
-                            }
-                            {destination_validator_data ?
-                              <div className={`min-w-max flex items-${destination_moniker ? 'start' : 'center'} space-x-2`}>
-                                <Link href={`/validator/${destination_operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <ValidatorProfile
-                                      validator_description={destination_description}
-                                    />
-                                  </a>
-                                </Link>
-                                <div className="flex flex-col">
-                                  {destination_moniker && (
-                                    <Link href={`/validator/${destination_operator_address}`}>
-                                      <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                      >
-                                        {ellipse(
-                                          destination_moniker,
-                                          16,
-                                        )}
-                                      </a>
-                                    </Link>
-                                  )}
-                                  <div className="flex items-center space-x-1">
-                                    <Link href={`/validator/${destination_operator_address}`}>
-                                      <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-slate-400 dark:text-slate-600"
-                                      >
-                                        {ellipse(
-                                          destination_operator_address,
-                                          10,
-                                          process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                        )}
-                                      </a>
-                                    </Link>
-                                    <Copy
-                                      value={destination_operator_address}
-                                    />
-                                  </div>
                                 </div>
-                              </div> :
-                              validator_dst_address ?
-                                <div className="flex items-center space-x-1">
-                                  <Link href={`/validator/${validator_dst_address}`}>
-                                    <a
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                    >
-                                      {ellipse(
-                                        validator_dst_address,
-                                        6,
-                                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                      )}
-                                    </a>
-                                  </Link>
-                                  <Copy
-                                    value={validator_dst_address}
-                                  />
-                                </div> :
-                                <span>
-                                  -
-                                </span>
-                            }
-                          </div>
-                        )
-                      },
-                    },
-                    {
-                      Header: 'Amount',
-                      accessor: 'amount',
-                      sortType: (a, b) => a.original.amount > b.original.amount ?
-                        1 :
-                        -1,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          denom,
-                        } = { ...props.row.original }
-
-                        return (
-                          <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
-                            {typeof value === 'number' ?
-                              <span className="text-xs font-semibold space-x-2">
-                                <span>
-                                  {number_format(
-                                    value,
-                                    '0,0.00000000',
-                                    true,
-                                  )}
-                                </span>
-                                <span>
-                                  {denom}
-                                </span>
-                              </span> :
-                              <span>
-                                -
-                              </span>
-                            }
-                          </div>
-                        )
-                      },
-                      headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-                    },
-                  ]}
-                  data={redelegations}
-                  noPagination={redelegations.length <= 10}
-                  noRecordPerPage={true}
-                  defaultPageSize={10}
-                  className="no-border"
-                /> :
-                <ProgressBar
-                  borderColor={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              }
-            </div>
-            <div className="sm:col-span-3 lg:col-span-2 space-y-2">
-              <div className="tracking-wider text-sm lg:text-base font-semibold">
-                Unbondings
-              </div>
-              {unbondings ?
-                <Datatable
-                  columns={[
-                    {
-                      Header: '#',
-                      accessor: 'i',
-                      sortType: (a, b) => a.original.i > b.original.i ?
-                        1 :
-                        -1,
-                      Cell: props => (
-                        <span className="font-medium">
-                          {number_format(
-                            (
-                              props.flatRows?.indexOf(props.row) > -1 ?
-                                props.flatRows.indexOf(props.row) :
-                                props.value
-                            ) + 1,
-                            '0,0',
-                          )}
-                        </span>
-                      ),
-                    },
-                    {
-                      Header: 'Validator',
-                      accessor: 'validator_address',
-                      disableSortBy: true,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          validator_data,
-                        } = { ...props.row.original }
-                        const {
-                          operator_address,
-                          description,
-                        } = { ...validator_data }
-                        const {
-                          moniker,
-                        } = { ...description }
-
-                        return validator_data ?
-                          <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
-                            <Link href={`/validator/${operator_address}`}>
-                              <a
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ValidatorProfile
-                                  validator_description={description}
-                                />
-                              </a>
-                            </Link>
-                            <div className="flex flex-col">
-                              {moniker && (
-                                <Link href={`/validator/${operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                  >
-                                    {ellipse(
-                                      moniker,
-                                      16,
-                                    )}
-                                  </a>
-                                </Link>
-                              )}
+                              </div>
+                            </div> :
+                            value ?
                               <div className="flex items-center space-x-1">
-                                <Link href={`/validator/${operator_address}`}>
+                                <Link href={`/validator/${value}`}>
                                   <a
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-slate-400 dark:text-slate-600 text-xs"
+                                    className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                                   >
                                     {ellipse(
-                                      operator_address,
-                                      8,
+                                      value,
+                                      6,
                                       process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
                                     )}
                                   </a>
                                 </Link>
                                 <Copy
-                                  value={operator_address}
+                                  value={value}
                                 />
-                              </div>
-                            </div>
-                          </div> :
-                          value ?
-                            <div className="flex items-center space-x-1">
-                              <Link href={`/validator/${value}`}>
-                                <a
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                >
-                                  {ellipse(
-                                    value,
-                                    6,
-                                    process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                  )}
-                                </a>
-                              </Link>
-                              <Copy
-                                value={value}
-                              />
-                            </div> :
-                            <span>
-                              -
-                            </span>
-                      },
-                    },
-                    {
-                      Header: 'Amount',
-                      accessor: 'amount',
-                      sortType: (a, b) => a.original.amount > b.original.amount ?
-                        1 :
-                        -1,
-                      Cell: props => {
-                        const {
-                          value,
-                        } = { ...props }
-                        const {
-                          denom,
-                        } = { ...props.row.original }
-
-                        return (
-                          <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
-                            {typeof value === 'number' ?
-                              <span className="text-xs font-semibold space-x-2">
-                                <span>
-                                  {number_format(
-                                    value,
-                                    '0,0.00000000',
-                                    true,
-                                  )}
-                                </span>
-                                <span>
-                                  {denom}
-                                </span>
-                              </span> :
+                              </div> :
                               <span>
                                 -
                               </span>
-                            }
-                          </div>
-                        )
+                        },
                       },
-                      headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-                    },
-                  ]}
-                  data={unbondings}
-                  noPagination={unbondings.length <= 10}
-                  noRecordPerPage={true}
-                  defaultPageSize={10}
-                  className="no-border"
-                /> :
-                <ProgressBar
-                  borderColor={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              }
-            </div>
-          </>
-        )}
+                      {
+                        Header: 'Amount',
+                        accessor: 'amount',
+                        sortType: (a, b) => a.original.amount > b.original.amount ?
+                          1 :
+                          -1,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            denom,
+                          } = { ...props.row.original }
+
+                          return (
+                            <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
+                              {typeof value === 'number' ?
+                                <span className="text-xs font-semibold space-x-2">
+                                  <span>
+                                    {number_format(
+                                      value,
+                                      '0,0.00000000',
+                                      true,
+                                    )}
+                                  </span>
+                                  <span>
+                                    {denom}
+                                  </span>
+                                </span> :
+                                <span>
+                                  -
+                                </span>
+                              }
+                            </div>
+                          )
+                        },
+                        headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+                      },
+                    ]}
+                    data={delegations}
+                    noPagination={delegations.length <= 10}
+                    noRecordPerPage={true}
+                    defaultPageSize={10}
+                    className="no-border"
+                  /> :
+                  <ProgressBar
+                    borderColor={loader_color(theme)}
+                    width="32"
+                    height="32"
+                  />
+                }
+              </div>
+              <div className="sm:col-span-3 lg:col-span-2 space-y-2">
+                <div className="tracking-wider text-sm lg:text-base font-semibold">
+                  Redelegations
+                </div>
+                {redelegations ?
+                  <Datatable
+                    columns={[
+                      {
+                        Header: '#',
+                        accessor: 'i',
+                        sortType: (a, b) => a.original.i > b.original.i ?
+                          1 :
+                          -1,
+                        Cell: props => (
+                          <span className="font-medium">
+                            {number_format(
+                              (
+                                props.flatRows?.indexOf(props.row) > -1 ?
+                                  props.flatRows.indexOf(props.row) :
+                                  props.value
+                              ) + 1,
+                              '0,0',
+                            )}
+                          </span>
+                        ),
+                      },
+                      {
+                        Header: 'Validator',
+                        accessor: 'validator_src_address',
+                        disableSortBy: true,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            source_validator_data,
+                            destination_validator_data,
+                            validator_dst_address,
+                          } = { ...props.row.original }
+
+                          const source_operator_address = source_validator_data?.operator_address
+                          const source_description = source_validator_data?.description
+                          const source_moniker = source_description?.moniker
+
+                          const destination_operator_address = destination_validator_data?.operator_address
+                          const destination_description = destination_validator_data?.description
+                          const destination_moniker = destination_description?.moniker
+
+                          return (
+                            <div className="flex items-center space-x-1">
+                              {source_validator_data ?
+                                <div className={`min-w-max flex items-${source_moniker ? 'start' : 'center'} space-x-2`}>
+                                  <Link href={`/validator/${source_operator_address}`}>
+                                    <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <ValidatorProfile
+                                        validator_description={source_description}
+                                      />
+                                    </a>
+                                  </Link>
+                                  <div className="flex flex-col">
+                                    {source_moniker && (
+                                      <Link href={`/validator/${source_operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                        >
+                                          {ellipse(
+                                            source_moniker,
+                                            16,
+                                          )}
+                                        </a>
+                                      </Link>
+                                    )}
+                                    <div className="flex items-center space-x-1">
+                                      <Link href={`/validator/${source_operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-slate-400 dark:text-slate-600"
+                                        >
+                                          {ellipse(
+                                            source_operator_address,
+                                            10,
+                                            process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                          )}
+                                        </a>
+                                      </Link>
+                                      <Copy
+                                        value={source_operator_address}
+                                      />
+                                    </div>
+                                  </div>
+                                </div> :
+                                value ?
+                                  <div className="flex items-center space-x-1">
+                                    <Link href={`/validator/${value}`}>
+                                      <a
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      >
+                                        {ellipse(
+                                          value,
+                                          6,
+                                          process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                        )}
+                                      </a>
+                                    </Link>
+                                    <Copy
+                                      value={value}
+                                    />
+                                  </div> :
+                                  <span>
+                                    -
+                                  </span>
+                              }
+                              {destination_validator_data ?
+                                <div className={`min-w-max flex items-${destination_moniker ? 'start' : 'center'} space-x-2`}>
+                                  <Link href={`/validator/${destination_operator_address}`}>
+                                    <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <ValidatorProfile
+                                        validator_description={destination_description}
+                                      />
+                                    </a>
+                                  </Link>
+                                  <div className="flex flex-col">
+                                    {destination_moniker && (
+                                      <Link href={`/validator/${destination_operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                        >
+                                          {ellipse(
+                                            destination_moniker,
+                                            16,
+                                          )}
+                                        </a>
+                                      </Link>
+                                    )}
+                                    <div className="flex items-center space-x-1">
+                                      <Link href={`/validator/${destination_operator_address}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-slate-400 dark:text-slate-600"
+                                        >
+                                          {ellipse(
+                                            destination_operator_address,
+                                            10,
+                                            process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                          )}
+                                        </a>
+                                      </Link>
+                                      <Copy
+                                        value={destination_operator_address}
+                                      />
+                                    </div>
+                                  </div>
+                                </div> :
+                                validator_dst_address ?
+                                  <div className="flex items-center space-x-1">
+                                    <Link href={`/validator/${validator_dst_address}`}>
+                                      <a
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      >
+                                        {ellipse(
+                                          validator_dst_address,
+                                          6,
+                                          process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                        )}
+                                      </a>
+                                    </Link>
+                                    <Copy
+                                      value={validator_dst_address}
+                                    />
+                                  </div> :
+                                  <span>
+                                    -
+                                  </span>
+                              }
+                            </div>
+                          )
+                        },
+                      },
+                      {
+                        Header: 'Amount',
+                        accessor: 'amount',
+                        sortType: (a, b) => a.original.amount > b.original.amount ?
+                          1 :
+                          -1,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            denom,
+                          } = { ...props.row.original }
+
+                          return (
+                            <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
+                              {typeof value === 'number' ?
+                                <span className="text-xs font-semibold space-x-2">
+                                  <span>
+                                    {number_format(
+                                      value,
+                                      '0,0.00000000',
+                                      true,
+                                    )}
+                                  </span>
+                                  <span>
+                                    {denom}
+                                  </span>
+                                </span> :
+                                <span>
+                                  -
+                                </span>
+                              }
+                            </div>
+                          )
+                        },
+                        headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+                      },
+                    ]}
+                    data={redelegations}
+                    noPagination={redelegations.length <= 10}
+                    noRecordPerPage={true}
+                    defaultPageSize={10}
+                    className="no-border"
+                  /> :
+                  <ProgressBar
+                    borderColor={loader_color(theme)}
+                    width="32"
+                    height="32"
+                  />
+                }
+              </div>
+              <div className="sm:col-span-3 lg:col-span-2 space-y-2">
+                <div className="tracking-wider text-sm lg:text-base font-semibold">
+                  Unstakings
+                </div>
+                {unbondings ?
+                  <Datatable
+                    columns={[
+                      {
+                        Header: '#',
+                        accessor: 'i',
+                        sortType: (a, b) => a.original.i > b.original.i ?
+                          1 :
+                          -1,
+                        Cell: props => (
+                          <span className="font-medium">
+                            {number_format(
+                              (
+                                props.flatRows?.indexOf(props.row) > -1 ?
+                                  props.flatRows.indexOf(props.row) :
+                                  props.value
+                              ) + 1,
+                              '0,0',
+                            )}
+                          </span>
+                        ),
+                      },
+                      {
+                        Header: 'Validator',
+                        accessor: 'validator_address',
+                        disableSortBy: true,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            validator_data,
+                          } = { ...props.row.original }
+                          const {
+                            operator_address,
+                            description,
+                          } = { ...validator_data }
+                          const {
+                            moniker,
+                          } = { ...description }
+
+                          return validator_data ?
+                            <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                              <Link href={`/validator/${operator_address}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ValidatorProfile
+                                    validator_description={description}
+                                  />
+                                </a>
+                              </Link>
+                              <div className="flex flex-col">
+                                {moniker && (
+                                  <Link href={`/validator/${operator_address}`}>
+                                    <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                    >
+                                      {ellipse(
+                                        moniker,
+                                        16,
+                                      )}
+                                    </a>
+                                  </Link>
+                                )}
+                                <div className="flex items-center space-x-1">
+                                  <Link href={`/validator/${operator_address}`}>
+                                    <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-slate-400 dark:text-slate-600 text-xs"
+                                    >
+                                      {ellipse(
+                                        operator_address,
+                                        8,
+                                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                      )}
+                                    </a>
+                                  </Link>
+                                  <Copy
+                                    value={operator_address}
+                                  />
+                                </div>
+                              </div>
+                            </div> :
+                            value ?
+                              <div className="flex items-center space-x-1">
+                                <Link href={`/validator/${value}`}>
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                  >
+                                    {ellipse(
+                                      value,
+                                      6,
+                                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                    )}
+                                  </a>
+                                </Link>
+                                <Copy
+                                  value={value}
+                                />
+                              </div> :
+                              <span>
+                                -
+                              </span>
+                        },
+                      },
+                      {
+                        Header: 'Amount',
+                        accessor: 'amount',
+                        sortType: (a, b) => a.original.amount > b.original.amount ?
+                          1 :
+                          -1,
+                        Cell: props => {
+                          const {
+                            value,
+                          } = { ...props }
+                          const {
+                            denom,
+                          } = { ...props.row.original }
+
+                          return (
+                            <div className="flex flex-col items-start sm:items-end text-left sm:text-right space-y-1.5">
+                              {typeof value === 'number' ?
+                                <span className="text-xs font-semibold space-x-2">
+                                  <span>
+                                    {number_format(
+                                      value,
+                                      '0,0.00000000',
+                                      true,
+                                    )}
+                                  </span>
+                                  <span>
+                                    {denom}
+                                  </span>
+                                </span> :
+                                <span>
+                                  -
+                                </span>
+                              }
+                            </div>
+                          )
+                        },
+                        headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+                      },
+                    ]}
+                    data={unbondings}
+                    noPagination={unbondings.length <= 10}
+                    noRecordPerPage={true}
+                    defaultPageSize={10}
+                    className="no-border"
+                  /> :
+                  <ProgressBar
+                    borderColor={loader_color(theme)}
+                    width="32"
+                    height="32"
+                  />
+                }
+              </div>
+            </>
+          )
+        }
       </div>
   )
 }
