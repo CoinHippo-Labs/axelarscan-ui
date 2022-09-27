@@ -5,6 +5,7 @@ import _ from 'lodash'
 import Info from './info'
 import Votes from './votes'
 import { evm_polls } from '../../lib/api/evm-poll'
+import { number_format, capitalize } from '../../lib/utils'
 
 export default () => {
   const router = useRouter()
@@ -82,10 +83,82 @@ export default () => {
     data,
   } = { ...poll }
   const {
+    participants,
     votes,
   } = { ...data }
 
   const matched = poll?.id === id
+
+  let vote_options = matched ?
+    Object.entries(
+      _.groupBy(
+        (votes || [])
+          .map(v => {
+            const {
+              vote,
+            } = { ...v }
+
+            return {
+              ...v,
+              option: vote ?
+                'yes' :
+                typeof vote === 'boolean' ?
+                  'no' :
+                  'unsubmitted',
+            }
+          }),
+        'option',
+      )
+    )
+    .map(([k, v]) => {
+      return {
+        option: k,
+        value: (v || [])
+          .length,
+      }
+    })
+    .filter(v => v.value) :
+    []
+
+  if (
+    matched &&
+    participants?.length > 0 &&
+    vote_options.findIndex(v => v?.option === 'unsubmitted') < 0 &&
+    _.sumBy(
+      vote_options,
+      'value',
+    ) < participants.length
+  ) {
+    vote_options.push(
+      {
+        option: 'unsubmitted',
+        value: participants.length -
+          _.sumBy(
+            vote_options,
+            'value',
+          ),
+      }
+    )
+  }
+
+  vote_options = _.orderBy(
+    vote_options
+      .map(v => {
+        const {
+          option,
+        } = { ...v }
+
+        return {
+          ...v,
+          i: option === 'yes' ?
+            0 :
+            option === 'no' ?
+              1 :
+              2
+        }
+      }),
+    'i',
+  )
 
   return (
     <div className="space-y-5 mt-2 mb-6 mx-auto">
@@ -98,8 +171,35 @@ export default () => {
       <div className="space-y-2">
         <div className="flex items-center space-x-2">
           <span className="capitalize tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium">
-            Votes
+            votes
           </span>
+          <div className="flex items-center space-x-1">
+            {vote_options
+              .map((v, i) => {
+                const {
+                  option,
+                  value,
+                } = { ...v }
+
+                return (
+                  <div
+                    key={i}
+                    className={`${['yes'].includes(option) ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : ['no'].includes(option) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-slate-100 dark:bg-slate-800 border-2 border-slate-400 dark:border-slate-600'} rounded-xl whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-2`}
+                  >
+                    <span>
+                      {number_format(
+                        value,
+                        '0,0',
+                      )}
+                    </span>
+                    <span>
+                      {capitalize(option)}
+                    </span>
+                  </div>
+                )
+              })
+            }
+          </div>
         </div>
         <Votes
           data={

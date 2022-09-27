@@ -98,7 +98,7 @@ export default ({
           }
         })
 
-      const unsubmited_votes = (participants || [])
+      const unsubmitted_votes = (participants || [])
         .filter(p =>
           _votes.findIndex(v => v?.validator_data) > -1 &&
           _votes.findIndex(v => equals_ignore_case(v?.validator_data?.operator_address, p)) < 0
@@ -119,7 +119,7 @@ export default ({
       setVotes(
         _.concat(
           _votes,
-          unsubmited_votes,
+          unsubmitted_votes,
         )
       )
     }
@@ -361,9 +361,13 @@ export default ({
           {
             Header: 'Vote',
             accessor: 'vote',
-            sortType: (a, b) => a.original.vote > b.original.vote ?
-              1 :
-              -1,
+            sortType: (a, b) => typeof a.original.vote !== 'boolean' ?
+              -1 :
+              typeof b.original.vote !== 'boolean' ?
+                1 :
+                a.original.vote > b.original.vote ?
+                  1 :
+                  -1,
             Cell: props => {
               let {
                 value,
@@ -373,7 +377,7 @@ export default ({
                 'yes' :
                 typeof value === 'boolean' ?
                   'no' :
-                  'unsubmited'
+                  'unsubmitted'
 
               return (
                 <div className="flex flex-col items-end text-right">

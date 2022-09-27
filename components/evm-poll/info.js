@@ -41,6 +41,7 @@ export default ({
     confirmation,
     failed,
     success,
+    event,
     participants,
     votes,
   } = { ...data }
@@ -69,6 +70,8 @@ export default ({
       votes?.findIndex(v => v?.confirmed) > -1 ?
         'confirmed' :
         'pending'
+
+  const _url = `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
 
   const rowClassName = 'flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
@@ -131,6 +134,37 @@ export default ({
           />
         }
       </div>
+      {
+        (
+          !data ||
+          event
+        ) &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Event:
+            </span>
+            {data ?
+              <a
+                href={_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium py-1 px-2"
+              >
+                {name(event)
+                  .split(' ')
+                  .join('')
+                }
+              </a> :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="24"
+                height="24"
+              />
+            }
+          </div>
+        )
+      }
       <div className={rowClassName}>
         <span className={titleClassName}>
           Status:
@@ -221,7 +255,7 @@ export default ({
             </span>
             <div className="flex items-center space-x-1">
               <a
-                href={`/transfer/${transaction_id || `?transfer_id=${transfer_id}`}`}
+                href={_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
