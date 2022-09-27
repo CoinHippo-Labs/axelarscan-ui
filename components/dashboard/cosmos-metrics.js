@@ -169,7 +169,7 @@ export default ({
                 number_format(
                   total_voting_power,
                   total_voting_power > 250000000 ?
-                    '0,0.0a' :
+                    '0,0a' :
                     '0,0.00',
                 ).toUpperCase()
               } {denom}
@@ -182,8 +182,8 @@ export default ({
                   <span>
                     {number_format(
                       online_voting_power,
-                      online_voting_power > 10000000 ?
-                        '0,0.00a' :
+                      online_voting_power > 1000000 ?
+                        '0,0a' :
                         '0,0.00',
                     )}
                   </span>
@@ -194,12 +194,9 @@ export default ({
                     {number_format(
                       total_voting_power,
                       total_voting_power > 250000000 ?
-                        '0,0.0a' :
+                        '0,0a' :
                         '0,0.00',
                     )}
-                  </span>
-                  <span>
-                    {denom}
                   </span>
                 </> :
                 <ProgressBar
@@ -261,36 +258,38 @@ export default ({
           </span>
         </Popover>
       </a>
-      <div className={`${metricClassName}`}>
-        <Popover
-          placement="bottom"
-          title={null}
-          content={<div className="w-60 text-black dark:text-white text-xs font-normal">
-            base inflation on the network + (inflation for EVM chains * # of EVM chains)
-          </div>}
-          className="text-left"
-        >
-          <div className={`uppercase ${titleClassName}`}>
-            {!isNaN(inflation) ?
-              <span>
-                {number_format(
-                  inflation * 100,
-                  '0,0.000000',
-                )}
-                %
-              </span> :
-              <ProgressBar
-                borderColor={loader_color(theme)}
-                width="32"
-                height="32"
-              />
-            }
-          </div>
-          <span className={subtitleClassName}>
-            inflation rate
-          </span>
-        </Popover>
-      </div>
+      <Link href="/validators">
+        <a className={`${metricClassName}`}>
+          <Popover
+            placement="bottom"
+            title={null}
+            content={<div className="w-60 text-black dark:text-white text-xs font-normal">
+              base inflation on the network + (inflation for EVM chains * # of EVM chains)
+            </div>}
+            className="text-left"
+          >
+            <div className={`uppercase ${titleClassName}`}>
+              {!isNaN(inflation) ?
+                <span>
+                  {number_format(
+                    inflation * 100,
+                    '0,0.000000',
+                  )}
+                  %
+                </span> :
+                <ProgressBar
+                  borderColor={loader_color(theme)}
+                  width="32"
+                  height="32"
+                />
+              }
+            </div>
+            <span className={subtitleClassName}>
+              inflation rate
+            </span>
+          </Popover>
+        </a>
+      </Link>
     </div>
   )
 }

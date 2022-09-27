@@ -1250,9 +1250,7 @@ export default () => {
               )
               .filter(c =>
                 staging ||
-                ![
-                  'apr',
-                ].includes(c.accessor)
+                ![].includes(c.accessor)
               )
             }
             data={_.orderBy(
