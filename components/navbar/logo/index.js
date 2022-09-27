@@ -23,7 +23,7 @@ export default () => {
   } = { ...status_data }
 
   return (
-    <div className="logo ml-3 mr-0.5 sm:mr-3">
+    <div className="logo ml-3 mr-1 sm:mr-3">
       <div className="w-full flex items-start">
         <Link href="/">
           <a className="min-w-max sm:mr-3">

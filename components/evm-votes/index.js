@@ -494,6 +494,7 @@ export default () => {
                 const validator_data = validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, props.value))
                 const { operator_address, description } = { ...validator_data }
                 const { moniker } = { ...description }
+
                 return validator_data ?
                   <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
                     <Link href={`/validator/${operator_address}`}>

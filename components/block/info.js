@@ -259,7 +259,10 @@ export default ({
                         } = { ...description }
 
                         return moniker ?
-                          <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                          <div
+                            key={i}
+                            className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}
+                          >
                             <Link href={`/validator/${operator_address}`}>
                               <a
                                 target="_blank"
@@ -306,7 +309,10 @@ export default ({
                             </div>
                           </div> :
                           operator_address ?
-                            <div className="flex items-center space-x-1">
+                            <div
+                              key={i}
+                              className="flex items-center space-x-1"
+                            >
                               <Link href={`/validator/${operator_address}`}>
                                 <a
                                   target="_blank"
@@ -324,7 +330,9 @@ export default ({
                                 value={operator_address}
                               />
                             </div> :
-                            <span>
+                            <span
+                              key={i}
+                            >
                               -
                             </span>
                       }) :
@@ -379,7 +387,10 @@ export default ({
                         } = { ...description }
 
                         return moniker ?
-                          <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                          <div
+                            key={i}
+                            className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}
+                          >
                             <Link href={`/validator/${operator_address}`}>
                               <a
                                 target="_blank"
@@ -426,7 +437,10 @@ export default ({
                             </div>
                           </div> :
                           operator_address ?
-                            <div className="flex items-center space-x-1">
+                            <div
+                              key={i}
+                              className="flex items-center space-x-1"
+                            >
                               <Link href={`/validator/${operator_address}`}>
                                 <a
                                   target="_blank"
@@ -444,7 +458,9 @@ export default ({
                                 value={operator_address}
                               />
                             </div> :
-                            <span>
+                            <span
+                              key={i}
+                            >
                               -
                             </span>
                       }) :

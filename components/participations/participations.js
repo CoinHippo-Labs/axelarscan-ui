@@ -218,6 +218,7 @@ export default ({
                       const {
                         moniker,
                       } = { ...description }
+
                       return (
                         <div
                           key={i}
@@ -361,6 +362,7 @@ export default ({
                       const {
                         moniker,
                       } = { ...description }
+
                       return (
                         <div
                           key={i}
