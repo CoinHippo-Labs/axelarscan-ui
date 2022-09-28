@@ -118,8 +118,9 @@ export default () => {
           .map(v => {
             const {
               tokens,
+              uptime,
+              heartbeats_uptime,
               votes,
-              stale_heartbeats,
             } = { ...v }
             let {
               supported_chains,
@@ -140,19 +141,17 @@ export default () => {
                 (
                   tendermintInflationRate *
                   (
-                    1 +
-                    (!stale_heartbeats ?
-                      keyMgmtRelativeInflationRate :
-                      0
+                    (uptime / 100) +
+                    (
+                      (heartbeats_uptime / 100) *
+                      keyMgmtRelativeInflationRate
                     )
                   )
                 ) +
                 (
+                  (heartbeats_uptime / 100) *
                   externalChainVotingInflationRate *
-                  (!stale_heartbeats ?
-                    supported_chains.length :
-                    0
-                  )
+                  supported_chains.length
                 )
               )
               .toFixed(6)
@@ -755,10 +754,16 @@ export default () => {
                       }
                     </div>
                   ),
-                  headerClassName: 'sm:w-8 justify-start sm:justify-end text-2xs text-left sm:text-right',
+                  headerClassName: `${!status ? 'sm:w-8 text-2xs' : ''} justify-start sm:justify-end text-left sm:text-right`,
                 },
                 {
-                  Header: 'Staking APR',
+                  Header: (
+                    <span
+                      title="Approximate staking APR per validator"
+                    >
+                      Staking APR
+                    </span>
+                  ),
                   accessor: 'apr',
                   sortType: (a, b) => a.original.apr > b.original.apr ?
                     1 :
@@ -769,6 +774,7 @@ export default () => {
                     } = { ...props }
                     const {
                       inflation,
+                      uptime,
                     } = { ...props.row.original }
 
                     return (
@@ -800,9 +806,17 @@ export default () => {
                               )
                             }
                           </> :
-                          <span>
-                            -
-                          </span>
+                          typeof heartbeats_uptime === 'number' ?
+                            <span>
+                              -
+                            </span> :
+                            <div className="w-full flex items-center justify-start sm:justify-end mt-0.5">
+                              <ColorRing
+                                color={loader_color(theme)}
+                                width="24"
+                                height="24"
+                              />
+                            </div>
                         }
                       </div>
                     )

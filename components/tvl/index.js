@@ -177,17 +177,26 @@ export default () => {
                         total,
                       } = { ...props.value }
                       const {
+                        id,
                         image,
                       } = { ...chain_data }
                       const {
                         denom,
+                        is_native,
                       } = { ...denom_data }
 
                       const amount = supply ||
                         total
-                      const has_asset = amount ||
+                      const has_asset = typeof amount === 'number' ||
                         contract_data ||
-                        (escrow_addresses?.length > 0 && denom)
+                        (
+                          escrow_addresses?.length > 0 &&
+                          denom
+                        ) ||
+                        (
+                          is_native &&
+                          id?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)
+                        )
 
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
