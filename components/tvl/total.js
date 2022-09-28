@@ -123,10 +123,10 @@ export default () => {
             {number_format(
               value_on_evm,
               value_on_evm > 1000000 ?
-                '0,0.00a' :
+                '0,0.0a' :
                 value_on_evm > 100000 ?
-                  '0,0.00' :
-                  '0,0.000000',
+                  '0,0.0' :
+                  '0,0.00',
             )}
           </div>
           <div className="text-slate-400 dark:text-slate-500 text-2xs font-medium">
@@ -145,10 +145,10 @@ export default () => {
             {number_format(
               value_on_cosmos,
               value_on_cosmos > 1000000 ?
-                '0,0.00a' :
+                '0,0.0a' :
                 value_on_cosmos > 100000 ?
-                  '0,0.00' :
-                  '0,0.000000',
+                  '0,0.0' :
+                  '0,0.00',
             )}
           </div>
           <div className="text-slate-400 dark:text-slate-500 text-2xs font-medium">
@@ -167,10 +167,10 @@ export default () => {
             {number_format(
               value,
               value > 1000000 ?
-                '0,0.00a' :
+                '0,0.0a' :
                 value > 100000 ?
-                  '0,0.00' :
-                  '0,0.000000',
+                  '0,0.0' :
+                  '0,0.00',
             )}
           </div>
           <div className="text-green-600 dark:text-green-400 text-xs font-semibold">

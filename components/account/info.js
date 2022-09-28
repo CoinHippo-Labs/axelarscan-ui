@@ -366,8 +366,8 @@ export default ({
           }
         </div>
       </div> :
-      <div className="grid sm:grid-cols-6 gap-4 sm:gap-8">
-        <div className="sm:col-span-3 w-full flex flex-col space-y-4">
+      <div className="grid sm:grid-cols-6 gap-4 sm:gap-4">
+        <div className="sm:col-span-3 bg-slate-100 dark:bg-slate-900 bg-opacity-75 dark:bg-opacity-75 w-full rounded-lg flex flex-col space-y-4 py-6 px-5">
           <div className={rowClassName}>
             <span className={titleClassName}>
               Address:
@@ -423,7 +423,7 @@ export default ({
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-slate-400 dark:text-slate-600 text-xs"
+                          className="text-slate-400 dark:text-slate-600"
                         >
                           {ellipse(
                             operator_address,
@@ -462,7 +462,7 @@ export default ({
                           {reward?.denom}
                         </span>
                       </> :
-                      <span className="text-slate-400 dark:text-slate-600">
+                      <span className="text-slate-400 dark:text-slate-600 font-normal">
                         No Rewards
                       </span>
                     }
@@ -496,7 +496,7 @@ export default ({
                           {commission?.denom}
                         </span>
                       </> :
-                      <span className="text-slate-400 dark:text-slate-600">
+                      <span className="text-slate-400 dark:text-slate-600 font-normal">
                         No Commissions
                       </span>
                     }
@@ -535,7 +535,7 @@ export default ({
                             {_.head(delegations)?.denom}
                           </span>
                         </> :
-                        <span className="text-slate-400 dark:text-slate-600">
+                        <span className="text-slate-400 dark:text-slate-600 font-normal">
                           No Delegations
                         </span>
                       }
@@ -568,7 +568,7 @@ export default ({
                             {_.head(redelegations)?.denom}
                           </span>
                         </> :
-                        <span className="text-slate-400 dark:text-slate-600">
+                        <span className="text-slate-400 dark:text-slate-600 font-normal">
                           No Redelegations
                         </span>
                       }
@@ -601,7 +601,7 @@ export default ({
                             {_.head(unbondings)?.denom}
                           </span>
                         </> :
-                        <span className="text-slate-400 dark:text-slate-600">
+                        <span className="text-slate-400 dark:text-slate-600 font-normal">
                           No Unstakings
                         </span>
                       }
@@ -682,11 +682,11 @@ export default ({
                                 {
                                   price > 0 &&
                                   (
-                                    <div className="max-w-min text-xs font-medium">
+                                    <div className="max-w-min text-slate-400 dark:text-slate-200 text-xs font-medium">
                                       {currency_symbol}
                                       {number_format(
                                         price,
-                                        '0,0.00000000',
+                                        '0,0.00',
                                         true,
                                       )}
                                     </div>

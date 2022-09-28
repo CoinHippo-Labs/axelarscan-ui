@@ -17,6 +17,7 @@ import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
 import Image from '../../image'
+import { currency, currency_symbol } from '../../../lib/object/currency'
 import { number_format, ellipse } from '../../../lib/utils'
 
 export default () => {
@@ -58,6 +59,7 @@ export default () => {
   const {
     staking_params,
     slashing_params,
+    token_data,
   } = { ...chain_data }
   const {
     max_validators,
@@ -69,6 +71,65 @@ export default () => {
     slash_fraction_downtime,
     downtime_jail_duration,
   } = { ...slashing_params }
+  const {
+    market_data,
+  } = { ...token_data }
+  const {
+    current_price,
+    price_change_percentage_24h,
+  } = { ...market_data }
+
+  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+  const show_token_data = staging ||
+    [
+      'mainnet',
+      'testnet',
+      'testnet-2',
+    ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
+
+  const token_component =
+    token_data &&
+    show_token_data &&
+    (
+      <div className="flex items-center space-x-1 ml-0 sm:ml-4 mr-4 sm:mr-0">
+        <div>
+          <div className="block dark:hidden">
+            <Image
+              src="/logos/logo.png"
+              alt=""
+              className="w-4 h-4"
+            />
+          </div>
+          <div className="hidden dark:block">
+            <Image
+              src="/logos/logo_white.png"
+              alt=""
+              className="w-4 h-4"
+            />
+          </div>
+        </div>
+        <span className="font-semibold">
+          {currency_symbol}
+          {number_format(
+            current_price?.[currency],
+            '0,0.00',
+          )}
+        </span>
+        {
+          price_change_percentage_24h !== 0 &&
+          (
+            <span className={`${price_change_percentage_24h > 0 ? 'text-green-400 dark:text-green-500' : 'text-red-400 dark:text-red-500'}`}>
+              {number_format(
+                price_change_percentage_24h,
+                '+0,0.00',
+              )}
+              %
+            </span>
+          )
+        }
+      </div>
+    )
+
   let title,
     subtitle,
     right
@@ -77,14 +138,17 @@ export default () => {
     case '/':
       title = 'Axelar Network Status'
       right = (
-        <a
-          href={process.env.NEXT_PUBLIC_WEBSITE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-500 font-light"
-        >
-          Learn more about Axelar
-        </a>
+        <div className="flex item-center justify-between sm:justify-end space-x-3 ml-0 sm:ml-4">
+          {token_component}
+          <a
+            href={process.env.NEXT_PUBLIC_WEBSITE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 font-light"
+          >
+            Learn more about Axelar
+          </a>
+        </div>
       )
       break
     case '/validators':
@@ -601,6 +665,7 @@ export default () => {
           {right}
         </> :
         <div className="overflow-x-auto flex items-center mt-1 sm:mt-0">
+          {token_component}
           {
             !isNaN(latest_block_height) &&
             !is_assets_path &&

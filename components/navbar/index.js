@@ -16,6 +16,7 @@ import { assets as getAssetsPrice } from '../../lib/api/assets'
 import { tvl as getTVL } from '../../lib/api/transfer'
 import { getStatus } from '../../lib/api/rpc'
 import { staking_params, bank_supply, staking_pool, slashing_params, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/cosmos'
+import { token } from '../../lib/api/coingecko'
 import { ens as getEns } from '../../lib/api/ens'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
@@ -127,7 +128,7 @@ export default () => {
         // price
         let updated_ids = assets_data
           .filter(a =>
-            a?.id === native_asset_id ||
+            // a?.id === native_asset_id ||
             typeof a?.price === 'number'
           )
           .map(a => a.id)
@@ -247,7 +248,7 @@ export default () => {
 
   // chain
   useEffect(() => {
-    const getData = async () => {
+    const getData = async is_interval => {
       if (
         cosmos_chains_data &&
         assets_data
@@ -256,6 +257,9 @@ export default () => {
           'axelarnet',
           cosmos_chains_data,
         )
+        const {
+          coingecko_id,
+        } = { ...chain_data }
 
         dispatch({
           type: CHAIN_DATA,
@@ -346,21 +350,75 @@ export default () => {
           })
         }
 
-        response = await slashing_params()
+        if (!is_interval) {
+          response = await slashing_params()
 
-        if (response) {
-          const {
-            params,
-          } = { ...response }
+          if (response) {
+            const {
+              params,
+            } = { ...response }
 
-          dispatch({
-            type: CHAIN_DATA,
-            value: {
-              slashing_params: {
-                ...params,
+            dispatch({
+              type: CHAIN_DATA,
+              value: {
+                slashing_params: {
+                  ...params,
+                },
               },
-            },
-          })
+            })
+          }
+
+          if (response?.includes('`axelar-core` version')) {
+            response = response
+              .split('\n')
+              .filter(l => l?.includes('`axelar-core` version'))
+
+            dispatch({
+              type: CHAIN_DATA,
+              value: {
+                ...Object.fromEntries(
+                  [
+                    _.head(response)
+                      .split('|')
+                      .map(s =>
+                        (s || '')
+                          .trim()
+                          .split('`')
+                          .join('')
+                          .split(' ')
+                          .join('_')
+                      )
+                      .filter(s => s),
+                  ]
+                ),
+              },
+            })
+          }
+          else {
+            dispatch({
+              type: CHAIN_DATA,
+              value: {
+                'axelar-core_version': '-',
+              },
+            })
+          }
+        }
+
+        if (coingecko_id) {
+          response = await token(
+            coingecko_id,
+          )
+
+          if (response) {
+            dispatch({
+              type: CHAIN_DATA,
+              value: {
+                token_data: {
+                  ...response,
+                },
+              },
+            })
+          }
         }
 
         response = await (
@@ -368,45 +426,17 @@ export default () => {
             process.env.NEXT_PUBLIC_RELEASES_URL,
           )
         ).text()
-
-        if (response?.includes('`axelar-core` version')) {
-          response = response
-            .split('\n')
-            .filter(l => l?.includes('`axelar-core` version'))
-
-          dispatch({
-            type: CHAIN_DATA,
-            value: {
-              ...Object.fromEntries(
-                [
-                  _.head(response)
-                    .split('|')
-                    .map(s =>
-                      (s || '')
-                        .trim()
-                        .split('`')
-                        .join('')
-                        .split(' ')
-                        .join('_')
-                    )
-                    .filter(s => s),
-                ]
-              ),
-            },
-          })
-        }
-        else {
-          dispatch({
-            type: CHAIN_DATA,
-            value: {
-              'axelar-core_version': '-',
-            },
-          })
-        }
       }
     }
 
     getData()
+
+    const interval = setInterval(() =>
+      getData(true),
+      0.5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [cosmos_chains_data, assets_data])
 
   // rpcs

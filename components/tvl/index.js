@@ -157,7 +157,7 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'w-34',
+                    headerClassName: 'w-34 justify-center',
                     className: 'bg-violet-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-0 z-40',
                     order: 0,
                   },
@@ -219,8 +219,8 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'w-28 whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
-                    className: 'w-28 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
+                    headerClassName: 'w-24 whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
                     order: 1,
                   },
                   {
@@ -236,7 +236,7 @@ export default () => {
                               data.filter(d => d?.value > 0),
                               'value',
                             ),
-                            '0,0.00a',
+                            '0,0.0a',
                           )})
                         </div>
                       </div>
@@ -264,11 +264,11 @@ export default () => {
                       )
                       const amount_formatted = number_format(
                         total,
-                        total > 100000 ?
-                          '0,0.00a' :
-                          total > 10000 ?
-                            '0,0.00' :
-                            '0,0.00000000',
+                        total > 1000 ?
+                          '0,0.0a' :
+                          total > 100 ?
+                            '0,0.0' :
+                            '0,0.00',
                       )
 
                       return (
@@ -314,11 +314,11 @@ export default () => {
                                 {currency_symbol}
                                 {number_format(
                                   props.value,
-                                  props.value > 1000000 ?
-                                    '0,0.00a' :
-                                    props.value > 10000 ?
-                                      '0,0.00' :
-                                      '0,0.000000',
+                                  props.value > 1000 ?
+                                    '0,0.0a' :
+                                    props.value > 100 ?
+                                      '0,0.0' :
+                                      '0,0.00',
                                 )}
                               </span>
                             )
@@ -326,8 +326,8 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
-                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-74 z-30',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-2xs text-left sm:text-right',
+                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-71.6 z-30',
                     order: 2,
                   },
                   {
@@ -343,7 +343,7 @@ export default () => {
                               data.filter(d => d?.value_on_evm > 0),
                               'value_on_evm',
                             ),
-                            '0,0.00a',
+                            '0,0.0a',
                           )})
                         </div>
                       </div>
@@ -373,11 +373,11 @@ export default () => {
                             >
                               {number_format(
                                 total_on_evm,
-                                total_on_evm > 100000 ?
-                                  '0,0.00a' :
-                                  total_on_evm > 10000 ?
-                                    '0,0.00' :
-                                    '0,0.000000',
+                                total_on_evm > 1000 ?
+                                  '0,0.0a' :
+                                  total_on_evm > 100 ?
+                                    '0,0.0' :
+                                    '0,0.00',
                               )}
                               <span className="normal-case ml-1">
                                 {symbol}
@@ -401,18 +401,19 @@ export default () => {
                                 {currency_symbol}
                                 {number_format(
                                   props.value,
-                                  props.value > 1000000 ?
-                                    '0,0.00a' :
-                                    props.value > 10000 ?
-                                      '0,0.00' :
-                                      '0,0.000000',
+                                  props.value > 1000 ?
+                                    '0,0.0a' :
+                                    props.value > 100 ?
+                                      '0,0.0' :
+                                      '0,0.00',
                                 )}
                               </span>
-                            )}
+                            )
+                          }
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-2xs text-left sm:text-right',
                     className: 'bg-zinc-100 dark:bg-zinc-900 sticky z-20',
                     order: 3,
                   },
@@ -429,7 +430,7 @@ export default () => {
                               data.filter(d => d?.value_on_cosmos > 0),
                               'value_on_cosmos',
                             ),
-                            '0,0.00a',
+                            '0,0.0a',
                           )})
                         </div>
                       </div>
@@ -459,11 +460,11 @@ export default () => {
                             >
                               {number_format(
                                 total_on_cosmos,
-                                total_on_cosmos > 100000 ?
-                                  '0,0.00a' :
-                                  total_on_cosmos > 10000 ?
-                                    '0,0.00' :
-                                    '0,0.000000',
+                                total_on_cosmos > 1000 ?
+                                  '0,0.0a' :
+                                  total_on_cosmos > 100 ?
+                                    '0,0.0' :
+                                    '0,0.00',
                               )}
                               <span className="normal-case ml-1">
                                 {symbol}
@@ -484,18 +485,19 @@ export default () => {
                                 {currency_symbol}
                                 {number_format(
                                   props.value,
-                                  props.value > 1000000 ?
-                                    '0,0.00a' :
-                                    props.value > 10000 ?
-                                      '0,0.00' :
-                                      '0,0.000000',
+                                  props.value > 1000 ?
+                                    '0,0.0a' :
+                                    props.value > 100 ?
+                                      '0,0.0' :
+                                      '0,0.00',
                                 )}
                               </span>
-                            )}
+                            )
+                          }
                         </div>
                       )
                     },
-                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-black dark:text-white font-bold text-left sm:text-right',
+                    headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-2xs text-left sm:text-right',
                     className: 'bg-zinc-100 dark:bg-zinc-900 sticky z-20',
                     order: 4,
                   },
@@ -590,7 +592,7 @@ export default () => {
                           ({currency_symbol}
                           {number_format(
                             total_value,
-                            '0,0.00a',
+                            '0,0.0a',
                           )})
                         </div>
                       </div>
@@ -618,25 +620,34 @@ export default () => {
                       } = { ...tvl?.[id] }
                       const {
                         denom,
+                        is_native,
                       } = { ...denom_data }
 
                       const amount = supply ||
                         total
                       const value = amount * price
-                      const has_asset = amount ||
+                      const has_asset = typeof amount === 'number' ||
                         contract_data ||
-                        (escrow_addresses?.length > 0 && denom)
+                        (
+                          escrow_addresses?.length > 0 &&
+                          denom
+                        ) ||
+                        (
+                          is_native &&
+                          id?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)
+                        )
+
                       const amount_exact_formatted = number_format(
                         amount,
                         '0,0.000000',
                       )
                       const amount_formatted = number_format(
                         amount,
-                        amount > 100000 ?
-                          '0,0.00a' :
-                          amount > 10000 ?
-                            '0,0.00' :
-                            '0,0.00000000',
+                        amount > 10-0 ?
+                          '0,0.0a' :
+                          amount > 100 ?
+                            '0,0.0' :
+                            '0,0.00',
                       )
 
                       return (
@@ -676,10 +687,10 @@ export default () => {
                                 {currency_symbol}
                                 {number_format(
                                   value,
-                                  value > 1000000 ?
-                                    '0,0.00a' :
-                                    value > 10000 ?
-                                      '0,0' :
+                                  value > 1000 ?
+                                    '0,0.0a' :
+                                    value > 100 ?
+                                      '0,0.0' :
                                       '0,0.00',
                                 )}
                               </span>
