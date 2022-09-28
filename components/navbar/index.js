@@ -160,7 +160,11 @@ export default () => {
             })
 
           if (denoms.length > 0) {
-            const response = await getAssetsPrice({ denoms })
+            const response = await getAssetsPrice(
+              {
+                denoms,
+              },
+            )
 
             if (Array.isArray(response)) {
               response.forEach(a => {
@@ -368,6 +372,12 @@ export default () => {
             })
           }
 
+          response = await (
+            await fetch(
+              process.env.NEXT_PUBLIC_RELEASES_URL,
+            )
+          ).text()
+
           if (response?.includes('`axelar-core` version')) {
             response = response
               .split('\n')
@@ -420,12 +430,6 @@ export default () => {
             })
           }
         }
-
-        response = await (
-          await fetch(
-            process.env.NEXT_PUBLIC_RELEASES_URL,
-          )
-        ).text()
       }
     }
 
