@@ -44,7 +44,7 @@ export default ({
   const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-xs font-normal ml-0.5'
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
       <Link href={`/block${!isNaN(latest_block_height) ? `/${latest_block_height}` : 's'}`}>
         <a className={`${metricClassName}`}>
           <Popover

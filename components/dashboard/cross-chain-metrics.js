@@ -75,7 +75,7 @@ export default ({
           total transfers
         </span>
       </div>
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 ${metricClassName}`}>
+      <div className={`grid grid-cols-2 sm:grid-cols-2 gap-3 ${metricClassName}`}>
         <Link href="/transfers">
           <a className="sm:border-r border-zinc-200 dark:border-zinc-700 space-y-1">
             <div className={titleClassName}>

@@ -263,3 +263,9 @@ input[type=number] {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+
+#cross-chain canvas {
+  @apply max-w-md lg:max-w-none mt-8 sm:mt-0;
+
+  height: auto !important;
+}
