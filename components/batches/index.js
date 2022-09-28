@@ -162,7 +162,7 @@ export default () => {
           time,
         } = { ...filters }
 
-        const response = await getBatches(
+        let response = await getBatches(
           {
             chain,
             batchId,
@@ -349,8 +349,13 @@ export default () => {
 
   const data_filtered = data?.filter(d =>
     !(filterTypes?.length > 0) ||
-    d?.commands?.findIndex(c => filterTypes.includes(c?.type)) > -1 ||
-    (filterTypes.includes('undefined') && !(d?.commands?.length > 0))
+    d?.commands?.findIndex(c =>
+      filterTypes.includes(c?.type)
+    ) > -1 ||
+    (
+      filterTypes.includes('undefined') &&
+      !(d?.commands?.length > 0)
+    )
   )
 
   return (

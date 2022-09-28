@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import { ProgressBar, ColorRing } from 'react-loader-spinner'
+import { BsFillCheckCircleFill } from 'react-icons/bs'
 
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
@@ -309,25 +310,44 @@ export default ({
               const {
                 value,
               } = { ...props }
+              const {
+                confirmed,
+              } = { ...props.row.original }
 
               return value &&
                 (
-                  <div className="flex items-center space-x-0.5 mb-3">
-                    <Link href={`/tx/${value}`}>
-                      <a
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
-                      >
-                        {ellipse(
-                          value,
-                          10,
-                        )}
-                      </a>
-                    </Link>
-                    <Copy
-                      value={value}
-                    />
+                  <div className="flex flex-col mb-3">
+                    <div className="flex items-center space-x-0.5">
+                      <Link href={`/tx/${value}`}>
+                        <a
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
+                        >
+                          {ellipse(
+                            value,
+                            10,
+                          )}
+                        </a>
+                      </Link>
+                      <Copy
+                        value={value}
+                      />
+                    </div>
+                    {
+                      confirmed &&
+                      (
+                        <div className="flex items-center space-x-1">
+                          <BsFillCheckCircleFill
+                            size={16}
+                            className="text-green-400 dark:text-green-500"
+                          />
+                          <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                            Confirmation
+                          </span>
+                        </div>
+                      )
+                    }
                   </div>
                 )
             },

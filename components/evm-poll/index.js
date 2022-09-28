@@ -157,7 +157,8 @@ export default () => {
               2
         }
       }),
-    'i',
+    ['i'],
+    ['asc'],
   )
 
   return (

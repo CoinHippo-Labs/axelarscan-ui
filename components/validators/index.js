@@ -424,13 +424,13 @@ export default () => {
                               >
                                 {number_format(
                                   tokens,
-                                  '0,0.00a',
+                                  '0,0.0a',
                                 )}
                               </span>
                               <span className="text-slate-400 dark:text-slate-600 text-2xs lg:text-xs">
                                 {number_format(
                                   tokens * 100 / total_voting_power,
-                                  '0,0.000000',
+                                  '0,0.00',
                                 )}
                                 %
                               </span>
@@ -445,13 +445,13 @@ export default () => {
                               >
                                 {number_format(
                                   quadratic_voting_power,
-                                  '0,0.00a',
+                                  '0,0.0a',
                                 )}
                               </span>
                               <span className="text-slate-400 dark:text-slate-600 text-2xs lg:text-xs">
                                 {number_format(
                                   quadratic_voting_power * 100 / total_quadratic_voting_power,
-                                  '0,0.000000',
+                                  '0,0.00',
                                 )}
                                 %
                               </span>
@@ -497,13 +497,13 @@ export default () => {
                             >
                               {number_format(
                                 value,
-                                '0,0.00a',
+                                '0,0.0a',
                               )}
                             </span>
                             <span className="text-slate-400 dark:text-slate-600 text-2xs lg:text-xs">
                               {number_format(
                                 value * 100 / total,
-                                '0,0.000000',
+                                '0,0.00',
                               )}
                               %
                             </span>
@@ -515,7 +515,7 @@ export default () => {
                       </div>
                     )
                   },
-                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-2xs text-left sm:text-right',
                 },
                 {
                   Header: 'Quadratic Voting Power',
@@ -546,13 +546,13 @@ export default () => {
                             >
                               {number_format(
                                 value,
-                                '0,0.00a',
+                                '0,0.0a',
                               )}
                             </span>
                             <span className="text-slate-400 dark:text-slate-600 text-2xs lg:text-xs">
                               {number_format(
                                 value * 100 / total,
-                                '0,0.000000',
+                                '0,0.00',
                               )}
                               %
                             </span>
@@ -564,12 +564,12 @@ export default () => {
                       </div>
                     )
                   },
-                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-2xs text-left sm:text-right',
                 },
                 {
                   Header: (
                     <div className="flex flex-col items-center space-y-1">
-                      <span className="-mr-3">
+                      <span className="-mr-4">
                         Cumulative
                       </span>
                       <span className="text-3xs mr-3">
@@ -624,7 +624,7 @@ export default () => {
 
                     return (
                       <div className="flex items-start space-x-1.5 mt-0.5">
-                        <div className="w-24 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
+                        <div className="w-20 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
                           <div style={{ width: `${total_share}%` }}>
                             <ProgressBar
                               width={(total_share - tokens_share) * 100 / total_share}
@@ -637,7 +637,7 @@ export default () => {
                         <span className="text-slate-600 dark:text-slate-200 text-2xs font-medium">
                           {number_format(
                             total_share,
-                            '0,0.00',
+                            '0,0.0',
                           )}
                           %
                         </span>
@@ -704,7 +704,7 @@ export default () => {
 
                     return (
                       <div className="flex items-start space-x-1.5 mt-0.5">
-                        <div className="w-24 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
+                        <div className="w-20 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
                           <div style={{ width: `${total_share}%` }}>
                             <ProgressBar
                               width={(total_share - quadratic_voting_power_share) * 100 / total_share}
@@ -717,7 +717,7 @@ export default () => {
                         <span className="text-slate-600 dark:text-slate-200 text-2xs font-bold">
                           {number_format(
                             total_share,
-                            '0,0.00',
+                            '0,0.0',
                           )}
                           %
                         </span>
@@ -744,7 +744,7 @@ export default () => {
                         <div className="font-medium mt-0.5">
                           {number_format(
                             props.value * 100,
-                            '0,0.00',
+                            '0,0.0',
                           )}
                           %
                         </div> :
@@ -754,7 +754,7 @@ export default () => {
                       }
                     </div>
                   ),
-                  headerClassName: `${!status ? 'sm:w-8 text-2xs' : ''} justify-start sm:justify-end text-left sm:text-right`,
+                  headerClassName: `${!status ? 'sm:w-8' : ''} justify-start sm:justify-end text-2xs text-left sm:text-right`,
                 },
                 {
                   Header: (
@@ -784,7 +784,7 @@ export default () => {
                             <div className="font-medium mt-0.5">
                               {number_format(
                                 value,
-                                '0,0.00',
+                                '0,0.0',
                               )}
                               %
                             </div>
@@ -795,10 +795,10 @@ export default () => {
                                   <span className="text-2xs text-slate-400 dark:text-slate-600 font-medium">
                                     Inflation:
                                   </span>
-                                  <span className="text-2xs lg:text-xs">
+                                  <span className="text-2xs lg:text-2xs">
                                     {number_format(
                                       inflation * 100,
-                                      '0,0.00',
+                                      '0,0.0',
                                     )}
                                     %
                                   </span>
@@ -821,7 +821,7 @@ export default () => {
                       </div>
                     )
                   },
-                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-2xs text-left sm:text-right',
                 },
                 {
                   Header: (
@@ -860,7 +860,7 @@ export default () => {
                     } = { ...props.row.original }
 
                     return (
-                      <div className="w-32 flex flex-col items-start sm:items-end text-left sm:text-right space-y-0.5 sm:ml-auto">
+                      <div className="w-28 flex flex-col items-start sm:items-end text-left sm:text-right space-y-0.5 sm:ml-auto">
                         {typeof value === 'number' ?
                           value > 0 ?
                             <div className="w-full mt-1">
@@ -869,7 +869,7 @@ export default () => {
                                 text={<div className="text-white text-2xs font-semibold mx-1.5">
                                   {number_format(
                                     value,
-                                    '0,0.00',
+                                    '0,0.0',
                                   )}
                                   %
                                 </div>}
@@ -916,7 +916,7 @@ export default () => {
                       </div>
                     )
                   },
-                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: `${!status ? 'text-2xs' : ''} whitespace-nowrap justify-start sm:justify-end text-left sm:text-right`,
                 },
                 {
                   Header: (
@@ -956,7 +956,7 @@ export default () => {
                     } = { ...props.row.original }
 
                     return (
-                      <div className="w-32 flex flex-col items-start sm:items-end text-left sm:text-right space-y-0.5 sm:ml-auto">
+                      <div className="w-28 flex flex-col items-start sm:items-end text-left sm:text-right space-y-0.5 sm:ml-auto">
                         {typeof value === 'number' ?
                           value > 0 ?
                             <div className="w-full mt-1">
@@ -965,7 +965,7 @@ export default () => {
                                 text={<div className="text-white text-2xs font-semibold mx-1.5">
                                   {number_format(
                                     value,
-                                    '0,0.00',
+                                    '0,0.0',
                                   )}
                                   %
                                 </div>}
@@ -989,7 +989,7 @@ export default () => {
                           <div className="text-2xs space-x-1">
                             <span className="text-slate-400 dark:text-slate-200 font-medium space-x-0.5">
                               <span>
-                                Registered
+                                Started
                               </span>
                               <span>
                                 @
@@ -1017,7 +1017,7 @@ export default () => {
                       </div>
                     )
                   },
-                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-2xs text-left sm:text-right',
                 },
                 {
                   Header: (
@@ -1080,14 +1080,14 @@ export default () => {
                                         className="w-5 h-5 rounded-full"
                                       />
                                     )}
-                                    <span className={`${votes?.true ? 'text-green-400 dark:text-green-300 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} -mt-0.5`}>
+                                    <span className={`${votes?.true ? 'text-green-400 dark:text-green-300 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} text-xs -mt-0.5`}>
                                       {number_format(
                                         votes?.true ||
                                           0,
                                         '0,0',
                                       )} Y
                                     </span>
-                                    <span className={`${votes?.false ? 'text-red-500 dark:text-red-600 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} -mt-0.5`}>
+                                    <span className={`${votes?.false ? 'text-red-500 dark:text-red-600 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} text-xs -mt-0.5`}>
                                       {number_format(
                                         votes?.false ||
                                           0,
@@ -1095,7 +1095,7 @@ export default () => {
                                       )} N
                                     </span>
                                     {total_polls - total > 0 && (
-                                      <span className="text-slate-400 dark:text-slate-500 font-semibold -mt-0.5">
+                                      <span className="text-slate-400 dark:text-slate-500 text-xs font-semibold -mt-0.5">
                                         {number_format(
                                           total_polls - total,
                                           '0,0',
@@ -1103,7 +1103,7 @@ export default () => {
                                       </span>
                                     )}
                                   </div>
-                                  <span className="text-blue-400 dark:text-blue-200 font-medium -mt-0.5">
+                                  <span className="text-blue-400 dark:text-blue-200 text-xs font-medium -mt-0.5">
                                     [
                                     {number_format(
                                       v?.total_polls || 0,
@@ -1125,7 +1125,7 @@ export default () => {
                       }
                     </div>
                   ),
-                  headerClassName: 'whitespace-nowrap mx-3',
+                  headerClassName: 'whitespace-nowrap text-2xs mx-3',
                 },
                 {
                   Header: 'EVM Chains Supported',
@@ -1169,7 +1169,7 @@ export default () => {
                       }
                     </div>
                   ),
-                  headerClassName: 'whitespace-nowrap',
+                  headerClassName: 'whitespace-nowrap text-2xs',
                 },
                 {
                   Header: 'Status',
@@ -1229,7 +1229,7 @@ export default () => {
                       </div>
                     )
                   },
-                  headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+                  headerClassName: 'justify-start sm:justify-end text-2xs text-left sm:text-right',
                 },
               ]
               .filter(c =>
@@ -1241,7 +1241,7 @@ export default () => {
                     'quadratic_voting_power',
                     'cumulative_share',
                     'quadratic_cumulative_share',
-                    'supported_chains',
+                    // 'supported_chains',
                   ].includes(c.accessor) :
                   [
                     'deregistering',

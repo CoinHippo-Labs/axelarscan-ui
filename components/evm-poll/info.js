@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { ProgressBar } from 'react-loader-spinner'
@@ -145,17 +146,18 @@ export default ({
               Event:
             </span>
             {data ?
-              <a
-                href={_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium py-1 px-2"
-              >
-                {name(event)
-                  .split(' ')
-                  .join('')
-                }
-              </a> :
+              <Link href={_url}>
+                <a
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium py-1 px-2"
+                >
+                  {name(event)
+                    .split(' ')
+                    .join('')
+                  }
+                </a>
+              </Link> :
               <ProgressBar
                 borderColor={loader_color(theme)}
                 width="24"

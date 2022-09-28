@@ -172,16 +172,16 @@ export default () => {
           title: 'Any',
         },
         {
-          value: 'yes',
-          title: 'Yes',
+          value: 'completed',
+          title: 'Completed',
         },
         {
-          value: 'no',
-          title: 'No',
+          value: 'failed',
+          title: 'Failed',
         },
         {
-          value: 'unsubmitted',
-          title: 'Unsubmitted',
+          value: 'comfirmed',
+          title: 'Comfirmed',
         },
       ],
     },
@@ -280,7 +280,19 @@ export default () => {
               className,
             } = { ...f }
 
-            return (
+            const hidden = !(
+              ![
+                'vote',
+              ].includes(name) ||
+              (
+                [
+                  'vote',
+                ].includes(name) &&
+                filters?.voter?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)
+              )
+            )
+
+            return !hidden && (
               <div
                 key={i}
                 className={`form-element ${className || ''}`}
@@ -291,48 +303,36 @@ export default () => {
                   </div>
                 )}
                 {type === 'select' ?
-                  (
-                    ![
-                      'vote',
-                    ].includes(name) ||
-                    (
-                      [
-                        'vote',
-                      ].includes(name) &&
-                      filters?.voter
-                    )
-                  ) && (
-                    <select
-                      placeholder={placeholder}
-                      value={filters?.[name]}
-                      onChange={e =>
-                        setFilters({
-                          ...filters,
-                          [`${name}`]: e.target.value,
-                        })
-                      }
-                      className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
-                    >
-                      {(options || [])
-                        .map((o, i) => {
-                          const {
-                            title,
-                            value,
-                          } = { ...o }
+                  <select
+                    placeholder={placeholder}
+                    value={filters?.[name]}
+                    onChange={e =>
+                      setFilters({
+                        ...filters,
+                        [`${name}`]: e.target.value,
+                      })
+                    }
+                    className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
+                  >
+                    {(options || [])
+                      .map((o, i) => {
+                        const {
+                          title,
+                          value,
+                        } = { ...o }
 
-                          return (
-                            <option
-                              key={i}
-                              title={title}
-                              value={value}
-                            >
-                              {title}
-                            </option>
-                          )
-                        })
-                      }
-                    </select>
-                  ) :
+                        return (
+                          <option
+                            key={i}
+                            title={title}
+                            value={value}
+                          >
+                            {title}
+                          </option>
+                        )
+                      })
+                    }
+                  </select> :
                   type === 'datetime-range' ?
                     <DatePicker.RangePicker
                       showTime
