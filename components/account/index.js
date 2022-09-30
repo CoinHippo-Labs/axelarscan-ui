@@ -11,7 +11,7 @@ import { transfers } from '../../lib/api/transfer'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
-import { equals_ignore_case } from '../../lib/utils'
+import { remove_chars, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
   const {
@@ -53,9 +53,11 @@ export default () => {
     pathname,
     query,
   } = { ...router }
-  const {
+  let {
     address,
   } = { ...query }
+
+  address = remove_chars(address)
 
   const [balances, setBalances] = useState(null)
   const [delegations, setDelegations] = useState(null)

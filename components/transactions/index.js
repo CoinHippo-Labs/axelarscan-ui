@@ -18,7 +18,7 @@ import { transactions_by_events, getTransaction } from '../../lib/api/cosmos'
 import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, name, ellipse, equals_ignore_case, sleep, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, name, remove_chars, ellipse, equals_ignore_case, sleep, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
 
@@ -57,8 +57,12 @@ export default ({
   } = { ...router }
   const {
     height,
+  } = { ...query }
+  let {
     address,
   } = { ...query }
+
+  address = remove_chars(address)
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)

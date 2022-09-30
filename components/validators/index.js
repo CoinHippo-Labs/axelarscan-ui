@@ -151,7 +151,22 @@ export default () => {
                 (
                   (heartbeats_uptime / 100) *
                   externalChainVotingInflationRate *
-                  supported_chains.length
+                  _.sum(
+                    supported_chains
+                      .map(c => {
+                        const _votes = votes?.chains?.[c]
+                        const {
+                          total,
+                          total_polls,
+                        } = { ..._votes }
+
+                        return 1 -
+                          (total_polls ?
+                            (total_polls - total) / total_polls :
+                            0
+                          )
+                      })
+                  )
                 )
               )
               .toFixed(6)
@@ -791,7 +806,13 @@ export default () => {
                             {
                               typeof inflation === 'number' &&
                               (
-                                <div className="space-x-0.5">
+                                <div
+                                  title={`${number_format(
+                                    inflation * 100,
+                                    '0,0.000',
+                                  )}%`}
+                                  className="space-x-0.5"
+                                >
                                   <span className="text-2xs text-slate-400 dark:text-slate-600 font-medium">
                                     Inflation:
                                   </span>

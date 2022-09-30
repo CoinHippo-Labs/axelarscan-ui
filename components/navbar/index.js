@@ -414,7 +414,7 @@ export default () => {
           }
         }
 
-        if (coingecko_id) {
+        /*if (coingecko_id) {
           response = await token(
             coingecko_id,
           )
@@ -429,7 +429,7 @@ export default () => {
               },
             })
           }
-        }
+        }*/
       }
     }
 

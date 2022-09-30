@@ -12,7 +12,7 @@ import Copy from '../copy'
 import { type } from '../../lib/object/id'
 import { assetManager } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, remove_chars, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({
   data,
@@ -40,9 +40,11 @@ export default ({
   const {
     query,
   } = { ...router }
-  const {
+  let {
     address,
   } = { ...query }
+
+  address = remove_chars(address)
 
   const {
     balances,
