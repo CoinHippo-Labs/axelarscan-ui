@@ -5,6 +5,7 @@ import _ from 'lodash'
 import Info from './info'
 import Votes from './votes'
 import { evm_polls } from '../../lib/api/evm-poll'
+import { getBlock, transactions_by_events, getTransaction } from '../../lib/api/cosmos'
 import { number_format, capitalize } from '../../lib/utils'
 
 export default () => {
@@ -65,6 +66,40 @@ export default () => {
               id,
             }
           )
+
+          const {
+            height,
+            event,
+          } = { ..._data }
+
+          const confirmation_vote = votes.find(v => v?.confirmed)
+
+          if (
+            height &&
+            !confirmation_vote
+          ) {
+            for (let i = -3; i <= 5; i++) {
+              const _height = height + i
+
+              getBlock(_height)
+
+              await transactions_by_events(
+                `tx.height=${_height}`,
+              )
+            }
+          }
+          if (
+            !event &&
+            confirmation_vote
+          ) {
+            const {
+              id,
+            } = { ...confirmation_vote }
+
+            if (id) {
+              getTransaction(id)
+            }
+          }
         }
       }
     }

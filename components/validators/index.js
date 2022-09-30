@@ -796,7 +796,13 @@ export default () => {
                       <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                         {!isNaN(value) ?
                           <>
-                            <div className="font-medium mt-0.5">
+                            <div
+                              title={`${number_format(
+                                value,
+                                '0,0.00',
+                              )}%`}
+                              className="font-medium mt-0.5"
+                            >
                               {number_format(
                                 value,
                                 '0,0.0',

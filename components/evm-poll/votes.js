@@ -337,15 +337,21 @@ export default ({
                     {
                       confirmed &&
                       (
-                        <div className="flex items-center space-x-1">
-                          <BsFillCheckCircleFill
-                            size={16}
-                            className="text-green-400 dark:text-green-500"
-                          />
-                          <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
-                            Confirmation
-                          </span>
-                        </div>
+                        <Link href={`/tx/${value}`}>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-1"
+                          >
+                            <BsFillCheckCircleFill
+                              size={16}
+                              className="text-green-400 dark:text-green-500"
+                            />
+                            <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                              Confirmation
+                            </span>
+                          </a>
+                        </Link>
                       )
                     }
                   </div>
