@@ -707,7 +707,7 @@ export default ({
                           )
                         }
                         {
-                          timeout_timestamp &&
+                          timeout_timestamp > 0 &&
                           (
                             <div className="space-y-0.5 my-2 mr-4 sm:mr-6">
                               <div className="text-slate-400 dark:text-slate-200">
