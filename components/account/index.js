@@ -5,7 +5,7 @@ import _ from 'lodash'
 
 import Info from './info'
 import Transactions from '../transactions'
-import { all_bank_balances, all_staking_delegations, all_staking_redelegations, all_staking_unbonding, distribution_rewards, distribution_commissions } from '../../lib/api/cosmos'
+import { all_bank_balances, all_staking_delegations, all_staking_redelegations, all_staking_unbonding, distribution_rewards, distribution_commissions } from '../../lib/api/lcd'
 import { deposit_addresses } from '../../lib/api/index'
 import { transfers } from '../../lib/api/transfer'
 import { type } from '../../lib/object/id'

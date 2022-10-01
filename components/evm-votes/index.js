@@ -12,8 +12,8 @@ import ValidatorProfile from '../validator-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { validator_sets } from '../../lib/api/cosmos'
-import { axelard } from '../../lib/api/cli'
+import { validator_sets } from '../../lib/api/lcd'
+import { chain_maintainers as getChainMaintainers } from '../../lib/api/chain-maintainers'
 import { evm_votes as getEvmVotes } from '../../lib/api/evm-vote'
 import { evm_polls as getEvmPolls } from '../../lib/api/index'
 import { chainManager } from '../../lib/object/chain'
@@ -254,16 +254,23 @@ export default () => {
                   .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
               }
               else {
-                _response = await axelard(
+                _response = await getChainMaintainers(
                   {
-                    cmd: `axelard q nexus chain-maintainers ${chainManager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
-                    cache: true,
-                    cache_timeout: 30,
+                    chain: chainManager.maintainer_id(
+                      sender_chain,
+                      evm_chains_data,
+                    ),
+                    height: min_height,
                   },
                 )
 
-                const chain_maintainers = _response &&
-                  Object.values({ ...to_json(_response?.stdout)?.maintainers })
+                const {
+                  maintainers,
+                } = { ..._response }
+
+                const chain_maintainers = Array.isArray(maintainers) ?
+                  maintainers :
+                  []
 
                 _response = await validator_sets(min_height)
 

@@ -6,7 +6,7 @@ import moment from 'moment'
 
 import Info from './info'
 import Votes from './votes'
-import { proposal as getProposal, all_proposal_votes } from '../../lib/api/cosmos'
+import { proposal as getProposal, all_proposal_votes } from '../../lib/api/lcd'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { number_format, name, equals_ignore_case } from '../../lib/utils'
 

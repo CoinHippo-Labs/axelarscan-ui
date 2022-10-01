@@ -9,7 +9,7 @@ import NetworkGraph from './network-graph'
 import CrossChainMetrics from './cross-chain-metrics'
 import Blocks from '../blocks'
 import Transactions from '../transactions'
-import { inflation } from '../../lib/api/inflation'
+import { inflation as getInflation } from '../../lib/api/inflation'
 import { transfers_stats } from '../../lib/api/transfer'
 import { stats as GMPStats } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
@@ -60,10 +60,21 @@ export default () => {
     validators_data,
   } = { ...validators }
 
+  const [inflationData, setInflationData] = useState(null)
   const [cosmosMetrics, setCosmosMetrics] = useState(null)
   const [crossChainMetrics, setCrossChainMetrics] = useState(null)
   const [transfers, setTransfers] = useState(null)
   const [gmps, setGmps] = useState(null)
+
+  useEffect(() => {
+    const getData = async () => {
+      setInflationData(
+        await getInflation()
+      )
+    }
+
+    getData()
+  }, [])
 
   useEffect(() => {
     const getData = async () => {
@@ -93,33 +104,35 @@ export default () => {
           avg_block_time,
         } = { ...status_data }
 
-        setCosmosMetrics({
-          latest_block_height,
-          latest_block_time: moment(latest_block_time).valueOf(),
-          avg_block_time,
-          active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)).length,
-          total_validators: validators_data?.length,
-          denom: assetManager.symbol(
-            bond_denom,
-            assets_data,
-          ),
-          online_voting_power: staking_pool &&
-            Math.floor(bonded_tokens),
-          online_voting_power_percentage: staking_pool &&
-            amount &&
-            (
-              Math.floor(bonded_tokens) * 100 /
-              amount
+        setCosmosMetrics(
+          {
+            latest_block_height,
+            latest_block_time: moment(latest_block_time).valueOf(),
+            avg_block_time,
+            active_validators: validators_data?.filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)).length,
+            total_validators: validators_data?.length,
+            denom: assetManager.symbol(
+              bond_denom,
+              assets_data,
             ),
-          total_voting_power: bank_supply &&
-            amount,
-          inflation_data: await inflation(),
-        })
+            online_voting_power: staking_pool &&
+              Math.floor(bonded_tokens),
+            online_voting_power_percentage: staking_pool &&
+              amount &&
+              (
+                Math.floor(bonded_tokens) * 100 /
+                amount
+              ),
+            total_voting_power: bank_supply &&
+              amount,
+            inflation_data: inflationData,
+          }
+        )
       }
     }
 
     getData()
-  }, [assets_data, status_data, chain_data, validators_data])
+  }, [assets_data, status_data, chain_data, validators_data, inflationData])
 
   useEffect(() => {
     const getData = async () => {

@@ -6,7 +6,7 @@ import moment from 'moment'
 import { ProgressBar } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
-import { all_proposals } from '../../lib/api/cosmos'
+import { all_proposals } from '../../lib/api/lcd'
 import { native_asset_id } from '../../lib/object/asset'
 import { number_format, name, loader_color } from '../../lib/utils'
 

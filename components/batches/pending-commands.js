@@ -13,7 +13,7 @@ import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
-import { pending_commands } from '../../lib/api/cosmos'
+import { pending_commands } from '../../lib/api/lcd'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 

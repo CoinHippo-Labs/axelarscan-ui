@@ -12,8 +12,7 @@ import Heartbeats from './heartbeats'
 import EVMVotes from './evm-votes'
 import Participations from '../participations/participations'
 import Image from '../image'
-import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/cosmos'
-import { keygens_by_validator } from '../../lib/api/cli'
+import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/lcd'
 import { heartbeats as searchHeartbeats } from '../../lib/api/heartbeat'
 import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chainManager } from '../../lib/object/chain'
@@ -53,7 +52,6 @@ export default () => {
   const [heartbeats, setHeartbeats] = useState(null)
   const [evmVotes, setEvmVotes] = useState(null)
   const [evmPolls, setEvmPolls] = useState(null)
-  const [keyshares, setKeyshares] = useState(null)
   const [keygens, setKeygens] = useState(null)
   const [signs, setSigns] = useState(null)
   const [supportedChains, setSupportedChains] = useState(null)
@@ -65,7 +63,7 @@ export default () => {
       if (address && assets_data && status_data && validators_data) {
         if (!controller.signal.aborted) {
           const validator_data = validators_data.find(v => equals_ignore_case(v?.operator_address, address))
-          if (validator_data?.start_proxy_height || validator_data?.start_height || validator_data?.deregistering) {
+          if (validator_data?.start_proxy_height || validator_data?.start_height) {
             const {
               start_height,
               start_proxy_height,
@@ -458,20 +456,11 @@ export default () => {
     }
   }, [address, validator, supportedChains])
 
-  // keyshares & keygens & signs
+  // keygens & signs
   useEffect(() => {
     const controller = new AbortController()
     const getData = async () => {
       if (address) {
-        if (!controller.signal.aborted) {
-          const response = await keygens_by_validator(address)
-          if (response) {
-            setKeyshares({
-              data: _.orderBy(response, ['snapshot_block_number'], ['desc']),
-              address,
-            })
-          }
-        }
         if (!controller.signal.aborted) {
           let data, total = 0, total_participations = 0
           const results = [true, false]
@@ -790,19 +779,7 @@ export default () => {
           />
         </div>
       </div>
-      <div className="sm:grid sm:grid-cols-2 xl:grid-cols-3 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-sm sm:text-lg font-bold">
-              Key Shares
-            </span>
-          </div>
-          <Participations
-            table="keyshares"
-            _data={keyshares?.address === address && keyshares}
-            className="min-h-full"
-          />
-        </div>
+      <div className="sm:grid sm:grid-cols-2 xl:grid-cols-2 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm sm:text-lg font-bold">

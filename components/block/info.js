@@ -8,7 +8,7 @@ import { ProgressBar } from 'react-loader-spinner'
 import Copy from '../copy'
 import ValidatorProfile from '../validator-profile'
 import Popover from '../popover'
-import { validator_sets } from '../../lib/api/cosmos'
+import { validator_sets } from '../../lib/api/lcd'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({

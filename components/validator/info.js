@@ -17,7 +17,6 @@ export default ({
   const { chain_data } = { ...chain }
 
   const {
-    deregistering,
     tombstoned,
     jailed,
     status,
@@ -57,11 +56,6 @@ export default ({
           }
         </div>
         <div className="flex flex-wrap items-center space-x-1.5">
-          {deregistering && (
-            <div className="bg-slate-100 dark:bg-slate-900 rounded capitalize text-xs sm:text-sm font-bold py-1 px-1.5">
-              Deregistering
-            </div>
-          )}
           {tombstoned && (
             <div className="bg-slate-400 dark:bg-slate-500 rounded capitalize text-white text-xs sm:text-sm font-bold py-1 px-1.5">
               Tombstoned

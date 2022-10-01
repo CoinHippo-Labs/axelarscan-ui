@@ -4,7 +4,7 @@ import _ from 'lodash'
 import { ColorRing } from 'react-loader-spinner'
 
 import Image from '../image'
-import { validator_profile } from '../../lib/api/cosmos'
+import { validator_profile } from '../../lib/api/lcd'
 import { loader_color, rand_image } from '../../lib/utils'
 import { VALIDATORS_PROFILE_DATA } from '../../reducers/types'
 

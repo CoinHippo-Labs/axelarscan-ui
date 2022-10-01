@@ -19,7 +19,6 @@ import { number_format, name, ellipse, loader_color } from '../../lib/utils'
 const STATUSES = [
   'active',
   'inactive',
-  // 'deregistering',
 ]
 
 export default () => {
@@ -203,10 +202,8 @@ export default () => {
     validatorsData?.filter(v =>
       status === 'inactive' ?
         !['BOND_STATUS_BONDED'].includes(v.status) :
-        status === 'deregistering' ?
-          v.deregistering :
-          !v.jailed &&
-          ['BOND_STATUS_BONDED'].includes(v.status)
+        !v.jailed &&
+        ['BOND_STATUS_BONDED'].includes(v.status)
     )
 
   const data_filtered = filterByStatus(
@@ -1216,7 +1213,6 @@ export default () => {
                               -1,
                   Cell: props => {
                     const {
-                      deregistering,
                       tombstoned,
                       jailed,
                     } = { ...props.row.original }
@@ -1233,11 +1229,6 @@ export default () => {
                                 '',
                               )}
                             </div>
-                            {deregistering && (
-                              <div className="bg-slate-100 dark:bg-slate-800 rounded-xl capitalize text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
-                                Deregistering
-                              </div>
-                            )}
                             {tombstoned && (
                               <div className="bg-slate-100 dark:bg-slate-800 rounded-xl capitalize text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
                                 Tombstoned
@@ -1270,24 +1261,15 @@ export default () => {
                     'quadratic_cumulative_share',
                     // 'supported_chains',
                   ].includes(c.accessor) :
-                  [
-                    'deregistering',
-                  ].includes(status) ?
-                    ![
-                      'voting_power',
-                      'quadratic_voting_power',
+                  ![
+                    'tokens',
+                    'quadratic_voting_power',
+                    !show_cumulative &&
                       'cumulative_share',
+                    !show_cumulative &&
                       'quadratic_cumulative_share',
-                      'votes',
-                      'supported_chains',
-                    ].includes(c.accessor) :
-                    ![
-                      'tokens',
-                      'quadratic_voting_power',
-                      !show_cumulative && 'cumulative_share',
-                      !show_cumulative && 'quadratic_cumulative_share',
-                      'status',
-                    ].includes(c.accessor)
+                    'status',
+                  ].includes(c.accessor)
               )
               .filter(c =>
                 staging ||

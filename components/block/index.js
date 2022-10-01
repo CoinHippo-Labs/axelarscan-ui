@@ -6,7 +6,7 @@ import _ from 'lodash'
 import Info from './info'
 import Events from './events'
 import Transactions from '../transactions'
-import { getBlock } from '../../lib/api/cosmos'
+import { getBlock } from '../../lib/api/lcd'
 import { base64ToBech32 } from '../../lib/object/key'
 
 export default () => {

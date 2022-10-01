@@ -4,7 +4,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import Info from './info'
 import Data from './data'
-import { getTransaction } from '../../lib/api/cosmos'
+import { getTransaction } from '../../lib/api/lcd'
 
 export default () => {
   const {

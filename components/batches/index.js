@@ -16,7 +16,7 @@ import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { axelard } from '../../lib/api/cli'
+import { batched_commands } from '../../lib/api/lcd'
 import { batches as getBatches } from '../../lib/api/batches'
 import { getChain, chainManager } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
@@ -315,18 +315,23 @@ export default () => {
           batch_id,
           created_at,
         } = { ...d }
+        const {
+          ms,
+        } = { ...created_at }
 
-        const params = {
-          cmd: `axelard q evm batched-commands ${chain} ${batch_id} -oj`,
-          cache: true,
-          cache_timeout: 30,
-        }
-        if (created_at?.ms) {
-          params.created_at = Number(created_at.ms) / 1000
-        }
+        const response = await batched_commands(
+          chain,
+          batch_id,
+          {
+            created_at: ms ?
+              Number(ms) / 1000 :
+              undefined,
+          },
+        )
 
-        const response = await axelard(params)
-        const batch_data = to_json(response?.stdout)
+        const batch_data = {
+          ...response,
+        }
 
         if (batch_data) {
           const data_index = _data.findIndex(b => equals_ignore_case(b?.batch_id, batch_id))
