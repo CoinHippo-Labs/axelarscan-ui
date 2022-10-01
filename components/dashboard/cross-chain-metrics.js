@@ -133,7 +133,7 @@ export default ({
                 )}
               </span> :
               <ProgressBar
-                color={loader_color(theme)}
+                borderColor={loader_color(theme)}
                 width="32"
                 height="32"
               />
