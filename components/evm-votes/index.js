@@ -254,11 +254,13 @@ export default () => {
                   .filter(a => a && votes?.findIndex(v => equals_ignore_case(v?.voter, a)) < 0)
               }
               else {
-                _response = await axelard({
-                  cmd: `axelard q nexus chain-maintainers ${chainManager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
-                  cache: true,
-                  cache_timeout: 1,
-                })
+                _response = await axelard(
+                  {
+                    cmd: `axelard q nexus chain-maintainers ${chainManager.maintainer_id(sender_chain, evm_chains_data)} --height ${min_height} -oj`,
+                    cache: true,
+                    cache_timeout: 30,
+                  },
+                )
 
                 const chain_maintainers = _response &&
                   Object.values({ ...to_json(_response?.stdout)?.maintainers })

@@ -319,7 +319,7 @@ export default () => {
         const params = {
           cmd: `axelard q evm batched-commands ${chain} ${batch_id} -oj`,
           cache: true,
-          cache_timeout: 1,
+          cache_timeout: 30,
         }
         if (created_at?.ms) {
           params.created_at = Number(created_at.ms) / 1000
