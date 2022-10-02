@@ -91,8 +91,8 @@ export default () => {
     token_data &&
     show_token_data &&
     (
-      <div className="flex items-center space-x-1 ml-0 sm:ml-4 mr-4 sm:mr-0">
-        <div>
+      <div className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0">
+        <div className="min-w-fit">
           <div className="block dark:hidden">
             <Image
               src="/logos/logo.png"
@@ -138,13 +138,44 @@ export default () => {
     case '/':
       title = 'Axelar Network Status'
       right = (
-        <div className="flex item-center justify-between sm:justify-end space-x-3 ml-0 sm:ml-4">
+        <div className="flex item-center justify-between sm:justify-end overflow-x-auto space-x-3 ml-0 sm:ml-4">
           {token_component}
+          {
+            process.env.NEXT_PUBLIC_TOKEN_INFO_URL &&
+            (
+              <a
+                href={process.env.NEXT_PUBLIC_TOKEN_INFO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-1.5 ml-0 sm:ml-4 mr-4 sm:mr-0"
+              >
+                <div className="min-w-fit">
+                  <div className="block dark:hidden">
+                    <Image
+                      src="/logos/logo.png"
+                      alt=""
+                      className="w-4 h-4"
+                    />
+                  </div>
+                  <div className="hidden dark:block">
+                    <Image
+                      src="/logos/logo_white.png"
+                      alt=""
+                      className="w-4 h-4"
+                    />
+                  </div>
+                </div>
+                <span className="whitespace-nowrap text-blue-500 font-light">
+                  AXL token info guides
+                </span>
+              </a>
+            )
+          }
           <a
             href={process.env.NEXT_PUBLIC_WEBSITE_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-500 font-light"
+            className="whitespace-nowrap text-blue-500 font-light pl-4 sm:pl-0"
           >
             Learn more about Axelar
           </a>
