@@ -90,7 +90,10 @@ export default ({
               size={20}
               value={id}
               title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
-                {id}
+                {ellipse(
+                  id,
+                  16,
+                )}
               </span>}
             />
           ) :
