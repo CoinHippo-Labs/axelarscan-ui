@@ -18,10 +18,29 @@ import { number_format, ellipse, equals_ignore_case, loader_color } from '../../
 const NUM_STATS_DAYS = 30
 
 export default () => {
-  const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
+  const {
+    preferences,
+    evm_chains,
+    cosmos_chains,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
 
   const [cumulativeStats, setCumulativeStats] = useState(null)
   const [dailyStats, setDailyStats] = useState(null)
@@ -29,11 +48,11 @@ export default () => {
   const [topChainPairs, setTopChainPairs] = useState(null)
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        let response,
-        _response = await getTransfers({
+      let response
+
+      let _response = await getTransfers(
+        {
           aggs: {
             cumulative_volume: {
               date_histogram: {
@@ -54,12 +73,15 @@ export default () => {
               },
             },
           },
-        })
-        response = {
-          ..._response,
-        }
+        },
+      )
 
-        _response = await getTokenSents({
+      response = {
+        ..._response,
+      }
+
+      _response = await getTokenSents(
+        {
           aggs: {
             cumulative_volume: {
               date_histogram: {
@@ -80,40 +102,60 @@ export default () => {
               },
             },
           },
-        })
-        response = {
-          ...response,
-          data: Object.entries(_.groupBy(
-            _.concat(response.data || [], _response?.data || []),
-            'timestamp'
-          )).map(([k, v]) => {
+        },
+      )
+
+      response = {
+        ...response,
+        data:
+          Object.entries(
+            _.groupBy(
+              _.concat(
+                response.data || [],
+                _response?.data || [],
+              ),
+              'timestamp',
+            )
+          )
+          .map(([k, v]) => {
             return {
               ..._.head(v),
-              volume: _.sumBy(v, 'volume'),
-              cumulative_volume: _.sumBy(v, 'cumulative_volume'),
-              num_txs: _.sumBy(v, 'num_txs'),
+              volume: _.sumBy(
+                v,
+                'volume',
+              ),
+              cumulative_volume: _.sumBy(
+                v,
+                'cumulative_volume',
+              ),
+              num_txs: _.sumBy(
+                v,
+                'num_txs',
+              ),
             }
           }),
-          total: (response.total || 0) + _response?.total,
-        }
-
-        setCumulativeStats(response)
+        total: (response.total || 0) + _response?.total,
       }
+
+      setCumulativeStats(response)
     }
+
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted) {
-        let response,
-        _response = await getTransfers({
+      let response
+
+      let _response = await getTransfers(
+        {
           query: {
             range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } },
           },
@@ -129,12 +171,15 @@ export default () => {
               },
             },
           },
-        })
-        response = {
-          ..._response,
         }
+      )
 
-        _response = await getTokenSents({
+      response = {
+        ..._response,
+      }
+
+      _response = await getTokenSents(
+        {
           query: {
             range: { 'event.block_timestamp': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').unix() } },
           },
@@ -150,52 +195,85 @@ export default () => {
               },
             },
           },
-        })
-        response = {
-          ...response,
-          data: Object.entries(_.groupBy(
-            _.concat(response.data || [], _response?.data || []),
-            'timestamp'
-          )).map(([k, v]) => {
-            return {
-              ..._.head(v),
-              volume: _.sumBy(v, 'volume'),
-              num_txs: _.sumBy(v, 'num_txs'),
-            }
-          }),
-          total: (response.total || 0) + _response?.total,
         }
+      )
 
-        setDailyStats(response)
+      response = {
+        ...response,
+        data:
+        Object.entries(
+          _.groupBy(
+            _.concat(
+              response.data || [],
+              _response?.data || [],
+            ),
+            'timestamp',
+          )
+        )
+        .map(([k, v]) => {
+          return {
+            ..._.head(v),
+            volume: _.sumBy(
+              v,
+              'volume',
+            ),
+            num_txs: _.sumBy(
+              v,
+              'num_txs',
+            ),
+          }
+        }),
+        total: (response.total || 0) + _response?.total,
       }
+
+      setDailyStats(response)
     }
+
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted && evm_chains_data && cosmos_chains_data) {
-        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-        let response,
-        _response = await getTransfers({
-          aggs: {
-            source_chains: {
-              terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
-              aggs: {
-                destination_chains: {
-                  terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
-                  aggs: {
-                    assets: {
-                      terms: { field: 'source.denom.keyword', size: 1000 },
-                      aggs: {
-                        volume: {
-                          sum: { field: 'source.value' },
+      if (
+        evm_chains_data &&
+        cosmos_chains_data
+      ) {
+        const chains_data = _.concat(
+          evm_chains_data,
+          cosmos_chains_data,
+        )
+
+        let response
+
+        let _response = await getTransfers(
+          {
+            query: {
+              bool: {
+                must: [
+                  { range: { 'source.created_at.ms': { gt: moment().subtract(30, 'days').valueOf() } } },
+                ],
+              },
+            },
+            aggs: {
+              source_chains: {
+                terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
+                aggs: {
+                  destination_chains: {
+                    terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
+                    aggs: {
+                      assets: {
+                        terms: { field: 'source.denom.keyword', size: 1000 },
+                        aggs: {
+                          volume: {
+                            sum: { field: 'source.value' },
+                          },
                         },
                       },
                     },
@@ -204,24 +282,34 @@ export default () => {
               },
             },
           },
-        })
+        )
+
         response = {
           ..._response,
         }
 
-        _response = await getTokenSents({
-          aggs: {
-            source_chains: {
-              terms: { field: 'event.chain.keyword', size: 1000 },
-              aggs: {
-                destination_chains: {
-                  terms: { field: 'event.returnValues.destinationChain.keyword', size: 1000 },
-                  aggs: {
-                    assets: {
-                      terms: { field: 'event.denom.keyword', size: 1000 },
-                      aggs: {
-                        volume: {
-                          sum: { field: 'event.value' },
+        _response = await getTokenSents(
+          {
+            query: {
+              bool: {
+                must: [
+                  { range: { 'event.block_timestamp': { gt: moment().subtract(30, 'days').unix() } } },
+                ],
+              },
+            },
+            aggs: {
+              source_chains: {
+                terms: { field: 'event.chain.keyword', size: 1000 },
+                aggs: {
+                  destination_chains: {
+                    terms: { field: 'event.returnValues.destinationChain.keyword', size: 1000 },
+                    aggs: {
+                      assets: {
+                        terms: { field: 'event.denom.keyword', size: 1000 },
+                        aggs: {
+                          volume: {
+                            sum: { field: 'event.value' },
+                          },
                         },
                       },
                     },
@@ -230,128 +318,214 @@ export default () => {
               },
             },
           },
-        })
+        )
+
         response = {
           ...response,
-          data: Object.entries(_.groupBy(
-            _.concat(response.data || [], _response?.data || []).map(d => {
-              const {
-                source_chain,
-                asset,
-              } = { ...d }
-              let {
-                destination_chain,
-              } = { ...d }
-              destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
+          data:
+            Object.entries(
+              _.groupBy(
+                _.concat(
+                  response.data || [],
+                  _response?.data || [],
+                )
+                .map(d => {
+                  const {
+                    asset,
+                  } = { ...d }
+                  let {
+                    source_chain,
+                    destination_chain,
+                  } = { ...d }
+
+                  source_chain = getChain(
+                    source_chain,
+                    chains_data,
+                  )?.id ||
+                    source_chain
+
+                  destination_chain = getChain(
+                    destination_chain,
+                    chains_data,
+                  )?.id ||
+                    destination_chain
+
+                  return {
+                    ...d,
+                    source_chain,
+                    destination_chain,
+                    id: `${source_chain}_${destination_chain}_${asset}`,
+                  }
+                }),
+                'id',
+              )
+            )
+            .map(([k, v]) => {
               return {
-                ...d,
-                destination_chain,
-                id: `${source_chain}_${destination_chain}_${asset}`,
+                ..._.head(v),
+                volume: _.sumBy(
+                  v,
+                  'volume',
+                ),
+                num_txs: _.sumBy(
+                  v,
+                  'num_txs',
+                ),
               }
             }),
-            'id'
-          )).map(([k, v]) => {
-            return {
-              ..._.head(v),
-              volume: _.sumBy(v, 'volume'),
-              num_txs: _.sumBy(v, 'num_txs'),
-            }
-          }),
           total: (response.total || 0) + _response?.total,
         }
 
         setTopPaths(response)
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [evm_chains_data, cosmos_chains_data])
 
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (!controller.signal.aborted && evm_chains_data && cosmos_chains_data) {
-        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
-        let response,
-        _response = await getTransfers({
-          aggs: {
-            source_chains: {
-              terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
-              aggs: {
-                destination_chains: {
-                  terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
-                  aggs: {
-                    volume: {
-                      sum: { field: 'source.value' },
+      if (
+        evm_chains_data &&
+        cosmos_chains_data
+      ) {
+        const chains_data = _.concat(
+          evm_chains_data,
+          cosmos_chains_data,
+        )
+
+        let response
+
+        let _response = await getTransfers(
+          {
+            query: {
+              bool: {
+                must: [
+                  { range: { 'source.created_at.ms': { gt: moment().subtract(30, 'days').valueOf() } } },
+                ],
+              },
+            },
+            aggs: {
+              source_chains: {
+                terms: { field: 'source.original_sender_chain.keyword', size: 1000 },
+                aggs: {
+                  destination_chains: {
+                    terms: { field: 'source.original_recipient_chain.keyword', size: 1000 },
+                    aggs: {
+                      volume: {
+                        sum: { field: 'source.value' },
+                      },
                     },
                   },
                 },
               },
             },
-          },
-        })
+          }
+        )
+
         response = {
           ..._response,
         }
 
-         _response = await getTokenSents({
-          aggs: {
-            source_chains: {
-              terms: { field: 'event.chain.keyword', size: 1000 },
-              aggs: {
-                destination_chains: {
-                  terms: { field: 'event.returnValues.destinationChain.keyword', size: 1000 },
-                  aggs: {
-                    volume: {
-                      sum: { field: 'event.value' },
+         _response = await getTokenSents(
+          {
+            query: {
+              bool: {
+                must: [
+                  { range: { 'event.block_timestamp': { gt: moment().subtract(30, 'days').unix() } } },
+                ],
+              },
+            },
+            aggs: {
+              source_chains: {
+                terms: { field: 'event.chain.keyword', size: 1000 },
+                aggs: {
+                  destination_chains: {
+                    terms: { field: 'event.returnValues.destinationChain.keyword', size: 1000 },
+                    aggs: {
+                      volume: {
+                        sum: { field: 'event.value' },
+                      },
                     },
                   },
                 },
               },
             },
-          },
-        })
+          }
+        )
+
         response = {
           ...response,
-          data: Object.entries(_.groupBy(
-            _.concat(response.data || [], _response?.data || []).map(d => {
-              const {
-                source_chain,
-              } = { ...d }
-              let {
-                destination_chain,
-              } = { ...d }
-              destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
+          data:
+            Object.entries(
+              _.groupBy(
+                _.concat(
+                  response.data || [],
+                  _response?.data || [],
+                )
+                .map(d => {
+                  let {
+                    source_chain,
+                    destination_chain,
+                  } = { ...d }
+
+                  source_chain = getChain(
+                    source_chain,
+                    chains_data,
+                  )?.id ||
+                    source_chain
+
+                  destination_chain = getChain(
+                    destination_chain,
+                    chains_data,
+                  )?.id ||
+                    destination_chain
+
+                  return {
+                    ...d,
+                    source_chain,
+                    destination_chain,
+                    id: `${source_chain}_${destination_chain}`,
+                  }
+                }),
+                'id',
+              )
+            )
+            .map(([k, v]) => {
               return {
-                ...d,
-                destination_chain,
-                id: `${source_chain}_${destination_chain}`,
+                ..._.head(v),
+                volume: _.sumBy(
+                  v,
+                  'volume',
+                ),
+                num_txs: _.sumBy(
+                  v,
+                  'num_txs',
+                ),
               }
             }),
-            'id'
-          )).map(([k, v]) => {
-            return {
-              ..._.head(v),
-              volume: _.sumBy(v, 'volume'),
-              num_txs: _.sumBy(v, 'num_txs'),
-            }
-          }),
           total: (response.total || 0) + _response?.total,
         }
 
         setTopChainPairs(response)
       }
     }
+
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => {
-      controller?.abort()
-      clearInterval(interval)
-    }
+
+    const interval = setInterval(() =>
+      getData(),
+      5 * 60 * 1000,
+    )
+
+    return () => clearInterval(interval)
   }, [evm_chains_data, cosmos_chains_data])
 
   return (
@@ -395,25 +569,25 @@ export default () => {
         />
       </div>
       <TopPath
-        title="Top Paths"
+        title="30-Day Top Paths"
         description="Top transfers paths by volume"
         topData={topPaths}
         by="volume"
       />
       <TopChainPair
-        title="Top Chain Pairs"
+        title="30-Day Top Chain Pairs"
         description="Top transfers chain pairs by volume"
         topData={topChainPairs}
         by="volume"
       />
       <TopPath
-        title="Top Paths"
+        title="30-Day Top Paths"
         description="Top transfers paths by number of transfers"
         topData={topPaths}
         by="num_txs"
       />
       <TopChainPair
-        title="Top Chain Pairs"
+        title="30-Day Top Chain Pairs"
         description="Top transfers chain pairs by number of transfers"
         topData={topChainPairs}
         by="num_txs"
