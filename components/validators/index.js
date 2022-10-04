@@ -109,7 +109,7 @@ export default () => {
         tendermintInflationRate,
         keyMgmtRelativeInflationRate,
         externalChainVotingInflationRate,
-        inflation,
+        communityTax,
       } = { ...inflationData }
 
       setValidatorsData(
@@ -117,6 +117,7 @@ export default () => {
           .map(v => {
             const {
               tokens,
+              commission,
               uptime,
               heartbeats_uptime,
               votes,
@@ -124,6 +125,9 @@ export default () => {
             let {
               supported_chains,
             } = { ...v }
+            const {
+              rate,
+            } = { ...commission?.commission_rates }
 
             supported_chains = Object.entries({ ...validators_chains_data })
               .filter(([k, _v]) => _v?.includes(v?.operator_address))
@@ -138,18 +142,17 @@ export default () => {
             const _inflation = parseFloat(
               (
                 (
-                  tendermintInflationRate *
-                  (
-                    (uptime / 100) +
-                    (
-                      (heartbeats_uptime / 100) *
-                      keyMgmtRelativeInflationRate
-                    )
-                  )
+                  (uptime / 100) *
+                  (tendermintInflationRate || 0) *
+                  (1 - (communityTax || 0))
                 ) +
                 (
                   (heartbeats_uptime / 100) *
-                  externalChainVotingInflationRate *
+                  (keyMgmtRelativeInflationRate || 0) *
+                  (tendermintInflationRate || 0)
+                ) +
+                (
+                  (externalChainVotingInflationRate || 0) *
                   _.sum(
                     supported_chains
                       .map(c => {
@@ -181,8 +184,10 @@ export default () => {
                   )
                 ),
               inflation: _inflation,
-              apr: (_inflation * 100) /
-                (bonded_tokens / total_supply),
+              apr: (_inflation * 100) *
+                total_supply *
+                (1 - (rate || 0)) /
+                bonded_tokens,
               supported_chains,
               votes: votes &&
                 {

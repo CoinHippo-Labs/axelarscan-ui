@@ -221,11 +221,11 @@ export default ({
         <Popover
           placement="bottom"
           title={null}
-          content={<div className="w-68 text-black dark:text-white text-xs font-normal">
+          content={<div className="w-52 text-black dark:text-white text-xs font-normal">
             <div>
               Annual Percentage Rate (APR):
             </div>
-            the inflation rate / (staked tokens / total supply)
+            the inflation rate * total supply * (1 - commission rate) / staked tokens
           </div>}
           className="text-left"
         >
@@ -237,8 +237,10 @@ export default ({
               <>
                 <span>
                   {number_format(
-                    (inflation * 100) /
-                    (online_voting_power / total_voting_power),
+                    (inflation * 100) *
+                    total_voting_power *
+                    (1 - 0.05) /
+                    online_voting_power,
                     '0,0.00',
                   )}
                 </span>
