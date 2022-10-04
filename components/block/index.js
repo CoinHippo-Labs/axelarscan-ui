@@ -47,6 +47,7 @@ export default () => {
             latest_block_height,
           } = { ...status_data }
           let {
+            round,
             validator_addresses,
           } = { ...response }
 
@@ -56,8 +57,15 @@ export default () => {
             const _response = await getBlock(_latest_block_height)
 
             const {
+              last_commit,
+            } = { ..._response?.block }
+            const {
               signatures,
-            } = { ..._response?.block?.last_commit }
+            } = { ...last_commit }
+
+            if (typeof last_commit?.round === 'number') {
+              round = last_commit.round
+            }
 
             if (signatures) {
               validator_addresses = signatures
@@ -124,6 +132,7 @@ export default () => {
           setData(
             {
               ...response,
+              round,
               validator_addresses,
               height,
             }

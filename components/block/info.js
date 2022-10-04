@@ -74,6 +74,7 @@ export default ({
   const {
     block,
     height,
+    round,
     validator_addresses,
   } = { ...data }
   const {
@@ -234,6 +235,22 @@ export default ({
           />
         }
       </div>
+      {
+        typeof round === 'number' &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Round:
+            </span>
+            <span className="text-sm lg:text-base font-medium">
+              {number_format(
+                round,
+                '0,0',
+              )}
+            </span>
+          </div>
+        )
+      }
       {
         validator_addresses &&
         validatorsData &&
