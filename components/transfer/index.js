@@ -596,11 +596,6 @@ export default () => {
                     Status
                   </div>
                   {steps.map((s, i) => {
-                    const text_color = s.finish ?
-                      'text-green-400 dark:text-green-300' :
-                      i === current_step ?
-                        'text-blue-500 dark:text-white' :
-                        'text-slate-400 dark:text-slate-600'
                     const { title, chain_data, data, id_field, path, params, finish } = { ...s }
                     const id = data?.[id_field]
                     const { explorer } = { ...chain_data }
@@ -611,6 +606,14 @@ export default () => {
                     Object.entries({ ...params }).forEach(([k, v]) => {
                       _path = _path?.replace(`{${k}}`, v)
                     })
+
+                    const text_color = finish ?
+                      'text-green-400 dark:text-green-300' :
+                      i === current_step ?
+                        'text-blue-500 dark:text-white' :
+                        data?.status === 'failed' ?
+                          'text-red-500 dark:text-red-600' :
+                          'text-slate-400 dark:text-slate-600'
 
                     return (
                       <div
@@ -628,10 +631,15 @@ export default () => {
                               width="20"
                               height="20"
                             /> :
-                            <FiCircle
-                              size={20}
-                              className="text-slate-400 dark:text-slate-600"
-                            />
+                            data?.status === 'failed' ?
+                              <BiXCircle
+                                size={20}
+                                className="text-red-500 dark:text-red-600"
+                              /> :
+                              <FiCircle
+                                size={20}
+                                className="text-slate-400 dark:text-slate-600"
+                              />
                         }
                         <div className="flex items-center space-x-1">
                           {id ?

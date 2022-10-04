@@ -6,7 +6,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { CSVLink } from 'react-csv'
 import { ProgressBar, ColorRing, Puff } from 'react-loader-spinner'
-import { BiCheckCircle } from 'react-icons/bi'
+import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
 
@@ -772,29 +772,49 @@ export default ({ n }) => {
                 return (
                   <div className="min-w-max flex flex-col space-y-1 mb-4">
                     {steps.map((s, i) => {
-                      const text_color = s.finish ?
-                        'text-green-400 dark:text-green-300' :
-                        i === current_step ?
-                          'text-blue-500 dark:text-white' :
-                          'text-slate-400 dark:text-slate-600'
                       const { title, chain_data, data, id_field, path, params, finish } = { ...s }
                       const id = data?.[id_field]
                       const { explorer } = { ...chain_data }
                       const { url, transaction_path, icon } = { ...explorer }
+
                       let _path = path?.replace('{id}', id) || transaction_path?.replace('{tx}', id)
                       Object.entries({ ...params }).forEach(([k, v]) => {
                         _path = _path?.replace(`{${k}}`, v)
                       })
+
+                      const text_color = finish ?
+                        'text-green-400 dark:text-green-300' :
+                        i === current_step ?
+                          'text-blue-500 dark:text-white' :
+                          data?.status === 'failed' ?
+                            'text-red-500 dark:text-red-600' :
+                            'text-slate-400 dark:text-slate-600'
+
                       return (
                         <div
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
                           {finish ?
-                            <BiCheckCircle size={20} className="text-green-400 dark:text-green-300" /> :
+                            <BiCheckCircle
+                              size={20}
+                              className="text-green-400 dark:text-green-300"
+                            /> :
                             i === current_step ?
-                              <Puff color={loader_color(theme)} width="20" height="20" /> :
-                              <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
+                              <Puff
+                                color={loader_color(theme)}
+                                width="20"
+                                height="20"
+                              /> :
+                              data?.status === 'failed' ?
+                                <BiXCircle
+                                  size={20}
+                                  className="text-red-500 dark:text-red-600"
+                                /> :
+                                <FiCircle
+                                  size={20}
+                                  className="text-slate-400 dark:text-slate-600"
+                                />
                           }
                           <div className="flex items-center space-x-1">
                             {id ?
@@ -804,8 +824,7 @@ export default ({ n }) => {
                                   {title}
                                 </span>}
                                 size={18}
-                              />
-                              :
+                              /> :
                               <span className={`uppercase ${text_color} text-xs font-medium`}>
                                 {title}
                               </span>
