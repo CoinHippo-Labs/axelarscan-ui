@@ -53,6 +53,13 @@ export default () => {
 
       let _response = await getTransfers(
         {
+          query: {
+            bool: {
+              must_not: [
+                { match: { 'source.status': 'failed' } },
+              ],
+            },
+          },
           aggs: {
             cumulative_volume: {
               date_histogram: {
@@ -157,7 +164,14 @@ export default () => {
       let _response = await getTransfers(
         {
           query: {
-            range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } },
+            bool: {
+              must: [
+                { range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } } },
+              ],
+              must_not: [
+                { match: { 'source.status': 'failed' } },
+              ],
+            },
           },
           aggs: {
             stats: {
@@ -257,7 +271,10 @@ export default () => {
             query: {
               bool: {
                 must: [
-                  { range: { 'source.created_at.ms': { gt: moment().subtract(30, 'days').valueOf() } } },
+                  { range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } } },
+                ],
+                must_not: [
+                  { match: { 'source.status': 'failed' } },
                 ],
               },
             },
@@ -293,7 +310,7 @@ export default () => {
             query: {
               bool: {
                 must: [
-                  { range: { 'event.block_timestamp': { gt: moment().subtract(30, 'days').unix() } } },
+                  { range: { 'event.block_timestamp': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').unix() } } },
                 ],
               },
             },
@@ -408,7 +425,10 @@ export default () => {
             query: {
               bool: {
                 must: [
-                  { range: { 'source.created_at.ms': { gt: moment().subtract(30, 'days').valueOf() } } },
+                  { range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } } },
+                ],
+                must_not: [
+                  { match: { 'source.status': 'failed' } },
                 ],
               },
             },
@@ -439,7 +459,7 @@ export default () => {
             query: {
               bool: {
                 must: [
-                  { range: { 'event.block_timestamp': { gt: moment().subtract(30, 'days').unix() } } },
+                  { range: { 'event.block_timestamp': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').unix() } } },
                 ],
               },
             },
@@ -569,25 +589,25 @@ export default () => {
         />
       </div>
       <TopPath
-        title="30-Day Top Paths"
+        title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Paths`}
         description="Top transfers paths by volume"
         topData={topPaths}
         by="volume"
       />
       <TopChainPair
-        title="30-Day Top Chain Pairs"
+        title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Chain Pairs`}
         description="Top transfers chain pairs by volume"
         topData={topChainPairs}
         by="volume"
       />
       <TopPath
-        title="30-Day Top Paths"
+        title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Paths`}
         description="Top transfers paths by number of transfers"
         topData={topPaths}
         by="num_txs"
       />
       <TopChainPair
-        title="30-Day Top Chain Pairs"
+        title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Chain Pairs`}
         description="Top transfers chain pairs by number of transfers"
         topData={topChainPairs}
         by="num_txs"

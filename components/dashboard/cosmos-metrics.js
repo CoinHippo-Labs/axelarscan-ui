@@ -36,6 +36,7 @@ export default ({
     inflation_data,
   } = { ...data }
   const {
+    communityTax,
     inflation,
   } = { ...inflation_data }
 
@@ -221,11 +222,11 @@ export default ({
         <Popover
           placement="bottom"
           title={null}
-          content={<div className="w-52 text-black dark:text-white text-xs font-normal">
+          content={<div className="w-56 text-black dark:text-white text-xs font-normal">
             <div>
               Annual Percentage Rate (APR):
             </div>
-            the inflation rate * total supply * (1 - commission rate) / staked tokens
+            the inflation rate * total supply * (1 - community tax) * (1 - commission rate) / staked tokens
           </div>}
           className="text-left"
         >
@@ -239,6 +240,7 @@ export default ({
                   {number_format(
                     (inflation * 100) *
                     total_voting_power *
+                    (1 - (communityTax || 0)) *
                     (1 - 0.05) /
                     online_voting_power,
                     '0,0.00',

@@ -143,8 +143,7 @@ export default () => {
               (
                 (
                   (uptime / 100) *
-                  (tendermintInflationRate || 0) *
-                  (1 - (communityTax || 0))
+                  (tendermintInflationRate || 0)
                 ) +
                 (
                   (heartbeats_uptime / 100) *
@@ -186,6 +185,7 @@ export default () => {
               inflation: _inflation,
               apr: (_inflation * 100) *
                 total_supply *
+                (1 - (communityTax || 0)) *
                 (1 - (rate || 0)) /
                 bonded_tokens,
               supported_chains,
