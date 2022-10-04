@@ -55,8 +55,8 @@ export default () => {
         {
           query: {
             bool: {
-              must_not: [
-                { match: { 'source.status': 'failed' } },
+              must: [
+                { exists: { field: 'confirm_deposit' } },
               ],
             },
           },
@@ -167,9 +167,7 @@ export default () => {
             bool: {
               must: [
                 { range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } } },
-              ],
-              must_not: [
-                { match: { 'source.status': 'failed' } },
+                { exists: { field: 'confirm_deposit' } },
               ],
             },
           },
@@ -272,9 +270,7 @@ export default () => {
               bool: {
                 must: [
                   { range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } } },
-                ],
-                must_not: [
-                  { match: { 'source.status': 'failed' } },
+                  { exists: { field: 'confirm_deposit' } },
                 ],
               },
             },
@@ -426,9 +422,7 @@ export default () => {
               bool: {
                 must: [
                   { range: { 'source.created_at.ms': { gte: moment().subtract(NUM_STATS_DAYS, 'days').startOf('day').valueOf() } } },
-                ],
-                must_not: [
-                  { match: { 'source.status': 'failed' } },
+                  { exists: { field: 'confirm_deposit' } },
                 ],
               },
             },
