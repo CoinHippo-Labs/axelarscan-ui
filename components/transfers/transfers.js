@@ -676,13 +676,22 @@ export default ({ n }) => {
                     {
                       id: 'executed',
                       title: 'Executed',
-                      chain_data: axelar_chain_data,
+                      ...(
+                        sign_batch?.transactionHash ?
+                          {
+                            chain_data: destination_chain_data,
+                            id_field: 'transactionHash',
+                          } :
+                          {
+                            chain_data: axelar_chain_data,
+                            id_field: 'batch_id',
+                            path: '/batch/{chain}/{id}',
+                            params: {
+                              chain: destination_chain_data?.id,
+                            },
+                          },
+                      ),
                       data: sign_batch,
-                      id_field: 'batch_id',
-                      path: '/batch/{chain}/{id}',
-                      params: {
-                        chain: destination_chain_data?.id,
-                      },
                     },
                   cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
                     {
