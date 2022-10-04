@@ -14,6 +14,7 @@ import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
+import Popover from '../popover'
 import TimeAgo from '../time-ago'
 import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
@@ -811,9 +812,11 @@ export default ({ n }) => {
                                   <Image
                                     src={icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                  /> :
+                                  <TiArrowRight
+                                    size={16}
+                                    className="transform -rotate-45"
                                   />
-                                  :
-                                  <TiArrowRight size={16} className="transform -rotate-45" />
                                 }
                               </a>
                             )}
@@ -822,9 +825,17 @@ export default ({ n }) => {
                       )
                     })}
                     {insufficient_fee && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
-                        Insufficient Fee
-                      </div>
+                      <Popover
+                        placement="bottom"
+                        title={null}
+                        content={<div className="w-40 whitespace-pre-wrap text-black dark:text-white text-xs font-normal">
+                          Send more {ellipse(symbol)} to the same recipient to cover the min fee
+                        </div>}
+                      >
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                          Insufficient Fee
+                        </div>
+                      </Popover>
                     )}
                     {
                       ibc_send?.failed_txhash &&
