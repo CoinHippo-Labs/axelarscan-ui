@@ -96,12 +96,12 @@ export default () => {
         sourceChain: getChain(
           sourceChain,
           chains_data,
-        )?._id ||
+        )?.id ||
           sourceChain,
         destinationChain: getChain(
           destinationChain,
           chains_data,
-        )?._id ||
+        )?.id ||
           destinationChain,
         asset: getAsset(
           asset,
@@ -229,16 +229,32 @@ export default () => {
           title: 'Any',
         },
         chains_data
-          .map(c => {
+          .flatMap(c => {
             const {
               id,
               name,
+              overrides,
             } = { ...c }
 
-            return {
-              value: id,
-              title: name,
-            }
+            return _.uniqBy(
+              _.concat(
+                Object.values({ ...overrides })
+                  .filter(v => Object.keys(v).length > 0),
+                c,
+              ),
+              'id',
+            )
+            .map(c => {
+              const {
+                id,
+                name,
+              } = { ...c }
+
+              return {
+                value: id,
+                title: name,
+              }
+            })
           }),
       ),
     },

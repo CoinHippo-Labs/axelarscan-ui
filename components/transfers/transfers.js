@@ -91,12 +91,12 @@ export default ({ n }) => {
         sourceChain: getChain(
           sourceChain,
           chains_data,
-        )?._id ||
+        )?.id ||
           sourceChain,
         destinationChain: getChain(
           destinationChain,
           chains_data,
-        )?._id ||
+        )?.id ||
           destinationChain,
         asset: getAsset(
           asset,
@@ -197,15 +197,17 @@ export default ({ n }) => {
           })
         }
         else if (filters) {
-          response = await getTransfers({
-            ...filters,
-            size,
-            from,
-            sort: [
-              sortBy === 'value' && { 'source.value': 'desc' },
-              { 'source.created_at.ms': 'desc' },
-            ].filter(s => s),
-          })
+          response = await getTransfers(
+            {
+              ...filters,
+              size,
+              from,
+              sort: [
+                sortBy === 'value' && { 'source.value': 'desc' },
+                { 'source.created_at.ms': 'desc' },
+              ].filter(s => s),
+            },
+          )
         }
 
         if (response) {
@@ -500,6 +502,7 @@ export default ({ n }) => {
                 const _image = contract_data?.image || ibc_data?.image || asset_data?.image
                 const { name, image, explorer, prefix_address } = { ...chain_data }
                 const { url, address_path } = { ...explorer }
+
                 return (
                   <div className="flex flex-col space-y-1 mb-3">
                     {typeof amount === 'number' && asset_data && (
@@ -576,6 +579,7 @@ export default ({ n }) => {
                 const chain_data = getChain(original_recipient_chain, chains_data) || getChain(props.value, chains_data)
                 const { name, image, explorer, prefix_address } = { ...chain_data }
                 const { url, address_path } = { ...explorer }
+
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="flex items-center space-x-1.5">
@@ -633,11 +637,49 @@ export default ({ n }) => {
               disableSortBy: true,
               Cell: props => {
                 const { source, confirm_deposit, vote, sign_batch, ibc_send, axelar_transfer, link } = { ...props.row.original }
-                const { sender_chain, recipient_chain, amount, fee, insufficient_fee } = { ...source }
+                const { sender_chain, recipient_chain, amount, denom, fee, insufficient_fee } = { ...source }
                 const { original_sender_chain, original_recipient_chain } = { ...link }
-                const source_chain_data = getChain(original_sender_chain, chains_data) || getChain(sender_chain, chains_data)
-                const destination_chain_data = getChain(original_recipient_chain, chains_data) || getChain(recipient_chain, chains_data)
-                const axelar_chain_data = getChain('axelarnet', chains_data)
+
+                const source_chain_data =
+                  getChain(
+                    original_sender_chain,
+                    chains_data,
+                  ) ||
+                  getChain(
+                    sender_chain,
+                    chains_data,
+                  )
+                const destination_chain_data =
+                  getChain(
+                    original_recipient_chain,
+                    chains_data,
+                  ) ||
+                  getChain(
+                    recipient_chain,
+                    chains_data,
+                  )
+                const axelar_chain_data =
+                  getChain(
+                    'axelarnet',
+                    chains_data,
+                  )
+
+                const asset_data =
+                  getAsset(
+                    denom,
+                    assets_data,
+                  )
+                const {
+                  contracts,
+                  ibc,
+                } = { ...asset_data }
+
+                const contract_data = contracts?.find(c => c?.chain_id === source_chain_data?.chain_id)
+                const ibc_data = ibc?.find(c => c?.chain_id === source_chain_data?.id)
+                const symbol = contract_data?.symbol ||
+                  ibc_data?.symbol ||
+                  asset_data?.symbol ||
+                  denom
 
                 const steps = [
                   {

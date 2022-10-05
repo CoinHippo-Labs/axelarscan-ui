@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
-import { ProgressBar } from 'react-loader-spinner'
+import { ProgressBar, TailSpin, Watch } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiKey, BiRightArrowCircle } from 'react-icons/bi'
 import { MdOutlineWatchLater } from 'react-icons/md'
 import { TiArrowRight } from 'react-icons/ti'
@@ -15,21 +15,26 @@ import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
 import Image from '../image'
 import Copy from '../copy'
+import Notification from '../notifications'
+import Wallet from '../wallet'
 import { batched_commands } from '../../lib/api/lcd'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import IAxelarGateway from '../../data/contracts/interfaces/IAxelarGateway.json'
 
 export default () => {
   const {
     preferences,
     evm_chains,
     assets,
+    wallet,
   } = useSelector(state =>
     (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
         assets: state.assets,
+        wallet: state.wallet,
       }
     ),
     shallowEqual,
@@ -43,6 +48,16 @@ export default () => {
   const {
     assets_data,
   } = { ...assets }
+  const {
+    wallet_data,
+  } = { ...wallet }
+  const {
+    default_chain_id,
+    web3_provider,
+    signer,
+  } = { ...wallet_data }
+
+  const wallet_chain_id = wallet_data?.chain_id
 
   const router = useRouter()
   const {
@@ -57,6 +72,8 @@ export default () => {
   const [data, setData] = useState(null)
   const [types, setTypes] = useState(null)
   const [filterTypes, setFilterTypes] = useState(null)
+  const [executing, setExecuting] = useState(null)
+  const [executeResponse, setExecuteResponse] = useState(null)
 
   useEffect(() => {
     const getData = async is_interval => {
@@ -115,6 +132,56 @@ export default () => {
     }
   }, [id, data])
 
+  const execute = async () => {
+    const {
+      execute_data,
+    } = { ...data?.data }
+
+    if (
+      signer &&
+      execute_data
+    ) {
+      try {
+        setExecuting(true)
+        setExecuteResponse(
+          {
+            status: 'pending',
+            message: 'Executing',
+          }
+        )
+
+        const response = await signer.sendTransaction(
+          {
+            to: gateway_address,
+            data: `0x${execute_data}`,
+          },
+        )
+
+        console.log(response)
+
+        setExecuting(false)
+        setExecuteResponse(
+          {
+            status: 'success',
+            message: 'Execute successful',
+            // txHash: transactionHash,
+          }
+        )
+      } catch (error) {
+        setExecuting(false)
+        setExecuteResponse(
+          {
+            status: 'failed',
+            message: error?.reason ||
+              error?.data?.message ||
+              error?.data?.text ||
+              error?.message,
+          }
+        )
+      }
+    }
+  }
+
   const chain_data = getChain(
     chain,
     evm_chains_data,
@@ -124,7 +191,14 @@ export default () => {
     name,
     image,
     explorer,
+    gateway_address,
   } = { ...chain_data }
+  const {
+    url,
+    transaction_path,
+    address_path,
+    icon,
+  } = { ...explorer }
 
   const {
     key_id,
@@ -146,8 +220,118 @@ export default () => {
 
   const matched = equals_ignore_case(data?.id, id)
 
+  const notificationResponse = executeResponse
+
+  const wrong_chain = chain_data &&
+    wallet_chain_id !== chain_id &&
+    !executing
+
+  const executeButton = false &&
+    matched &&
+    equals_ignore_case(status, 'BATCHED_COMMANDS_STATUS_SIGNED') &&
+    commands?.filter(c => c?.executed).length < commands?.length &&
+    moment().diff(moment(created_at?.ms), 'minutes') >= 10 &&
+    (
+      <div className="flex items-center space-x-2">
+        {
+          web3_provider &&
+          !wrong_chain &&
+          (
+            <button
+              disabled={executing}
+              onClick={() => execute()}
+              className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${executing ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
+            >
+              {
+                executing &&
+                (
+                  <TailSpin
+                    color="white"
+                    width="16"
+                    height="16"
+                  />
+                )
+              }
+              <span>
+                Execute
+              </span>
+            </button>
+          )
+        }
+        <Wallet
+          connectChainId={
+            wrong_chain &&
+            (
+              chain_id ||
+              default_chain_id
+            )
+          }
+        />
+      </div>
+    )
+
   return (
     <div className="space-y-6 mt-2 mb-6">
+      {
+        notificationResponse &&
+        (
+          <Notification
+            hideButton={true}
+            outerClassNames="w-full h-auto z-50 transform fixed top-0 left-0 p-0"
+            innerClassNames={`${notificationResponse.status === 'failed' ? 'bg-red-500 dark:bg-red-600' : notificationResponse.status === 'success' ? 'bg-green-500 dark:bg-green-600' : 'bg-blue-600 dark:bg-blue-700'} text-white`}
+            animation="animate__animated animate__fadeInDown"
+            icon={notificationResponse.status === 'failed' ?
+              <BiXCircle
+                className="w-6 h-6 stroke-current mr-2"
+              /> :
+              notificationResponse.status === 'success' ?
+                <BiCheckCircle
+                  className="w-6 h-6 stroke-current mr-2"
+                /> :
+                <div className="mr-2">
+                  <Watch
+                    color="white"
+                    width="20"
+                    height="20"
+                  />
+                </div>
+            }
+            content={<div className="flex items-center">
+              <span className="break-all mr-2">
+                {notificationResponse.message}
+              </span>
+              {
+                url &&
+                notificationResponse.txHash &&
+                (
+                  <a
+                    href={`${url}${transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mr-2"
+                  >
+                    <span className="font-semibold">
+                      View on {explorer.name}
+                    </span>
+                  </a>
+                )
+              }
+              {
+                notificationResponse.status === 'failed' &&
+                notificationResponse.message &&
+                (
+                  <Copy
+                    value={notificationResponse.message}
+                    size={20}
+                    className="cursor-pointer text-slate-200 hover:text-white"
+                  />
+                )
+              }
+            </div>}
+            onClose={() => setExecuteResponse(null)}
+          />
+        )
+      }
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
@@ -287,9 +471,9 @@ export default () => {
                     <div className="flex items-center space-x-1">
                       {
                         transactionHash &&
-                        explorer ?
+                        url ?
                           <a
-                            href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
@@ -343,9 +527,9 @@ export default () => {
                     typeComponent &&
                     (
                       transactionHash &&
-                      explorer ?
+                      url ?
                         <a
-                          href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                          href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
@@ -444,17 +628,17 @@ export default () => {
                         }
                         className="tracking-wider text-black dark:text-white text-sm font-medium"
                       />
-                      {explorer?.url &&
+                      {url &&
                         (
                           <a
-                            href={`${explorer.url}${explorer.address_path?.replace('{address}', value)}`}
+                            href={`${url}${address_path?.replace('{address}', value)}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
                           >
-                            {explorer.icon ?
+                            {icon ?
                               <Image
-                                src={explorer.icon}
+                                src={icon}
                                 className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                               /> :
                               <TiArrowRight
@@ -549,17 +733,17 @@ export default () => {
                                   }
                                   className="tracking-wider text-black dark:text-white text-sm font-medium"
                                 />
-                                {explorer?.url &&
+                                {url &&
                                   (
                                     <a
-                                      href={`${explorer.url}${explorer.address_path?.replace('{address}', contractAddress)}`}
+                                      href={`${url}${address_path?.replace('{address}', contractAddress)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
                                     >
-                                      {explorer.icon ?
+                                      {icon ?
                                         <Image
-                                          src={explorer.icon}
+                                          src={icon}
                                           className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                         /> :
                                         <TiArrowRight
@@ -674,17 +858,17 @@ export default () => {
                                       }
                                       className="tracking-wider text-black dark:text-white text-sm font-medium"
                                     />
-                                    {explorer?.url &&
+                                    {url &&
                                       (
                                         <a
-                                          href={`${explorer.url}${explorer.address_path?.replace('{address}', o)}`}
+                                          href={`${url}${address_path?.replace('{address}', o)}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
                                         >
-                                          {explorer.icon ?
+                                          {icon ?
                                             <Image
-                                              src={explorer.icon}
+                                              src={icon}
                                               className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                             /> :
                                             <TiArrowRight
@@ -877,9 +1061,12 @@ export default () => {
         />
       }
       <div className="space-y-2">
-        <span className="tracking_wider text-base font-medium">
-          Signed Commands
-        </span>
+        <div className="flex items-center space-x-2">
+          <span className="tracking-wider text-base font-medium">
+            Signed Commands
+          </span>
+          {executeButton}
+        </div>
         {matched ?
           data?.data?.execute_data ?
             <div className="flex items-start">
@@ -904,7 +1091,7 @@ export default () => {
         }
       </div>
       <div className="space-y-2">
-        <span className="tracking_wider text-base font-medium">
+        <span className="tracking-wider text-base font-medium">
           Commands
         </span>
         {matched ?
@@ -931,7 +1118,7 @@ export default () => {
         }
       </div>
       <div className="space-y-2">
-        <span className="tracking_wider text-base font-medium">
+        <span className="tracking-wider text-base font-medium">
           Signature
         </span>
         {matched ?

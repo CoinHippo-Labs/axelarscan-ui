@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
+import moment from 'moment'
 import { ProgressBar } from 'react-loader-spinner'
 import { FiCode } from 'react-icons/fi'
 
@@ -18,6 +19,7 @@ export default ({
   topData,
   n = 5,
   by = 'num_txs',
+  num_days = 30,
 }) => {
   const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
   const { theme } = { ...preferences }
@@ -66,7 +68,7 @@ export default ({
             {_data.map((d, i) => (
               <Link
                 key={i}
-                href={`${pathname}/search?sourceChain=${d?.source_chain}&destinationChain=${d?.destination_chain}`}
+                href={`${pathname}/search?sourceChain=${d?.source_chain}&destinationChain=${d?.destination_chain}&fromTime=${moment().subtract(num_days, 'days').valueOf()}&toTime=${moment().add(1, 'days').valueOf()}&sortBy=value`}
               >
                 <a className="hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-base font-bold hover:font-extrabold space-x-5 py-2 px-4">
                   <div className="flex items-center space-x-3">

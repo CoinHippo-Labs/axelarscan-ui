@@ -448,7 +448,7 @@ export default () => {
           ..._response,
         }
 
-         _response = await getTokenSents(
+        _response = await getTokenSents(
           {
             query: {
               bool: {
@@ -587,24 +587,28 @@ export default () => {
         description="Top transfers paths by volume"
         topData={topPaths}
         by="volume"
+        num_days={NUM_STATS_DAYS}
       />
       <TopChainPair
         title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Chain Pairs`}
         description="Top transfers chain pairs by volume"
         topData={topChainPairs}
         by="volume"
+        num_days={NUM_STATS_DAYS}
       />
       <TopPath
         title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Paths`}
         description="Top transfers paths by number of transfers"
         topData={topPaths}
         by="num_txs"
+        num_days={NUM_STATS_DAYS}
       />
       <TopChainPair
         title={`${number_format(NUM_STATS_DAYS, '0,0')}-Day Top Chain Pairs`}
         description="Top transfers chain pairs by number of transfers"
         topData={topChainPairs}
         by="num_txs"
+        num_days={NUM_STATS_DAYS}
       />
       <div className="sm:col-span-2 lg:col-span-4 space-y-2 pt-1">
         <Link href="/transfers/search">
