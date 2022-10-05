@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
 import { ProgressBar } from 'react-loader-spinner'
@@ -8,6 +7,7 @@ import { HiOutlineClock } from 'react-icons/hi'
 import Image from '../image'
 import Copy from '../copy'
 import { getChain, chainName } from '../../lib/object/chain'
+import { getAsset, assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse, loader_color } from '../../lib/utils'
 
 export default ({
@@ -16,11 +16,13 @@ export default ({
   const {
     preferences,
     evm_chains,
+    assets,
   } = useSelector(state =>
     (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
+        assets: state.assets,
       }
     ),
     shallowEqual,
@@ -31,6 +33,9 @@ export default ({
   const {
     evm_chains_data,
   } = { ...evm_chains }
+  const {
+    assets_data,
+  } = { ...assets }
 
   const {
     id,
@@ -44,6 +49,7 @@ export default ({
     success,
     event,
     participants,
+    confirmation_events,
     votes,
   } = { ...data }
   const {
@@ -55,6 +61,7 @@ export default ({
     evm_chains_data,
   )
   const {
+    chain_id,
     image,
     explorer,
   } = { ...chain_data }
@@ -72,7 +79,11 @@ export default ({
         'confirmed' :
         'pending'
 
-  const _url = `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
+  const _url = [
+    'operator',
+  ].findIndex(s => event?.toLowerCase().includes(s)) > -1 ?
+    `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
+    `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
 
   const rowClassName = 'flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
@@ -141,6 +152,7 @@ export default ({
       {
         (
           !data ||
+          confirmation_events?.length > 0 ||
           event
         ) &&
         (
@@ -149,18 +161,130 @@ export default ({
               Event:
             </span>
             {data ?
-              <Link href={_url}>
+              confirmation_events?.length > 0 ?
+                <div className="flex flex-col space-y-1">
+                  {confirmation_events
+                    .map((e, i) => {
+                      const {
+                        type,
+                        txID,
+                        asset,
+                        amount,
+                      } = { ...e }
+                      let {
+                        symbol,
+                      } = { ...e }
+
+                      const __url = txID ?
+                        `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
+                        _url
+
+                      let _type
+
+                      switch (type) {
+                        case 'depositConfirmation':
+                          _type = 'Transfer'
+                          break
+                        case 'ContractCallApproved':
+                          _type = 'ContractCall'
+                          break
+                        case 'ContractCallApprovedWithMint':
+                          _type = 'ContractCallWithToken'
+                          break
+                        default:
+                          _type = type ||
+                            value
+                          break
+                      }
+
+                      const asset_data = getAsset(
+                        asset ||
+                          symbol,
+                        assets_data,
+                      )
+                      const {
+                        id,
+                        contracts,
+                      } = { ...asset_data }
+                      let {
+                        image,
+                      } = { ...asset_data }
+
+                      const contract_data = contracts?.find(c => c?.chain_id === chain_id)
+
+                      symbol = contract_data?.symbol ||
+                        asset_data?.symbol ||
+                        symbol
+
+                      image = contract_data?.image ||
+                        image
+
+                      return (
+                        <a
+                          key={i}
+                          href={__url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="min-w-fit bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
+                        >
+                          <span className="capitalize text-sm lg:text-base font-medium">
+                            {name(_type)
+                              .split(' ')
+                              .join('')
+                            }
+                          </span>
+                          {
+                            symbol &&
+                            (
+                              <div className="flex items-center space-x-1">
+                                {
+                                  image &&
+                                  (
+                                    <Image
+                                      src={image}
+                                      alt=""
+                                      className="w-4 h-4 rounded-full"
+                                    />
+                                  )
+                                }
+                                {
+                                  amount &&
+                                  (
+                                    <span className="text-xs">
+                                      {number_format(
+                                        assetManager.amount(
+                                          amount,
+                                          id,
+                                          assets_data,
+                                          chain_id,
+                                        ),
+                                        '0,0.000',
+                                      )}
+                                    </span>
+                                  )
+                                }
+                                <span className="text-xs">
+                                  {symbol}
+                                </span>
+                              </div>
+                            )
+                          }
+                        </a>
+                      )
+                    })
+                  }
+                </div> :
                 <a
+                  href={_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium py-1 px-2"
+                  className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium py-0.5 px-2"
                 >
                   {name(event)
                     .split(' ')
                     .join('')
                   }
-                </a>
-              </Link> :
+                </a> :
               <ProgressBar
                 borderColor={loader_color(theme)}
                 width="24"
