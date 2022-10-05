@@ -230,14 +230,14 @@ export default () => {
                           Total Locked
                         </span>
                         <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
-                          ({currency_symbol}
+                          {currency_symbol}
                           {number_format(
                             _.sumBy(
                               data.filter(d => d?.value > 0),
                               'value',
                             ),
                             '0,0.0a',
-                          )})
+                          )}
                         </div>
                       </div>
                     ),
@@ -337,14 +337,14 @@ export default () => {
                           Moved to EVM
                         </span>
                         <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
-                          ({currency_symbol}
+                          {currency_symbol}
                           {number_format(
                             _.sumBy(
                               data.filter(d => d?.value_on_evm > 0),
                               'value_on_evm',
                             ),
                             '0,0.0a',
-                          )})
+                          )}
                         </div>
                       </div>
                     ),
@@ -424,14 +424,14 @@ export default () => {
                           Moved to Cosmos
                         </span>
                         <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
-                          ({currency_symbol}
+                          {currency_symbol}
                           {number_format(
                             _.sumBy(
                               data.filter(d => d?.value_on_cosmos > 0),
                               'value_on_cosmos',
                             ),
                             '0,0.0a',
-                          )})
+                          )}
                         </div>
                       </div>
                     ),
@@ -589,11 +589,11 @@ export default () => {
                           </span>
                         </div>
                         <div className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-bold">
-                          ({currency_symbol}
+                          {currency_symbol}
                           {number_format(
                             total_value,
                             '0,0.0a',
-                          )})
+                          )}
                         </div>
                       </div>
                     ),

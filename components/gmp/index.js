@@ -7,7 +7,7 @@ import moment from 'moment'
 import Web3 from 'web3'
 import { BigNumber, Contract, FixedNumber, constants, providers, utils } from 'ethers'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
-import { ProgressBar, TailSpin, Watch, Puff, ColorRing } from 'react-loader-spinner'
+import { ProgressBar, TailSpin, Watch, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle, BiSave, BiEditAlt } from 'react-icons/bi'
 import { MdRefresh } from 'react-icons/md'
 import { HiArrowSmRight, HiArrowSmLeft } from 'react-icons/hi'
@@ -804,7 +804,9 @@ export default () => {
   const steps = [
     {
       id: 'call',
-      title: 'Contract Call',
+      title: staging ?
+        'Called' :
+        'Contract Call',
       chain_data: source_chain_data,
       data: call,
     },
@@ -814,15 +816,18 @@ export default () => {
       chain_data: source_chain_data,
       data: gas_paid,
     },
-    forecalled && {
-      id: 'forecalled',
-      title: 'Forecalled',
-      chain_data: destination_chain_data,
-      data: forecalled,
-    },
+    forecalled &&
+      {
+        id: 'forecalled',
+        title: 'Forecalled',
+        chain_data: destination_chain_data,
+        data: forecalled,
+      },
     {
       id: 'approved',
-      title: 'Call Approved',
+      title: staging ?
+        'Approved' :
+        'Call Approved',
       chain_data: destination_chain_data,
       data: approved,
     },
@@ -836,12 +841,12 @@ export default () => {
       (refunded.receipt && refunded.receipt?.status) ||
       no_gas_remain === false
     ) &&
-    {
-      id: 'refunded',
-      title: 'Gas Refunded',
-      chain_data: source_chain_data,
-      data: refunded,
-    },
+      {
+        id: 'refunded',
+        title: 'Gas Refunded',
+        chain_data: source_chain_data,
+        data: refunded,
+      },
   ]
   .filter(s => s)
 
@@ -1363,8 +1368,8 @@ export default () => {
                       </div>
                     )}
                   </div>
-                  <div className="min-w-max flex flex-col space-y-1">
-                    <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                  <div className="min-w-max flex flex-col space-y-0">
+                    <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold pt-0.5 pb-1 px-2">
                       Status
                     </div>
                     {steps
@@ -1386,11 +1391,11 @@ export default () => {
                           (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             'text-green-400 dark:text-green-300' :
                             i === current_step && !['refunded'].includes(s.id) ?
-                              'text-blue-500 dark:text-white' :
+                              'text-yellow-500 dark:text-yellow-400' :
                               (['executed'].includes(s.id) && _error) ||
                               (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
                                 'text-red-500 dark:text-red-600' :
-                                'text-slate-400 dark:text-slate-600'
+                                'text-slate-300 dark:text-slate-700'
 
                         const {
                           explorer,
@@ -1415,8 +1420,9 @@ export default () => {
                                   className="text-green-400 dark:text-green-300"
                                 /> :
                                 i === current_step && !['refunded'].includes(s.id) ?
-                                  <Puff
-                                    color={loader_color(theme)}
+                                  <ProgressBar
+                                    borderColor="#ca8a04"
+                                    barColor="#facc15"
                                     width="20"
                                     height="20"
                                   /> :
@@ -1428,7 +1434,7 @@ export default () => {
                                     /> :
                                     <FiCircle
                                       size={20}
-                                      className="text-slate-400 dark:text-slate-600"
+                                      className="text-slate-300 dark:text-slate-700"
                                     />
                             }
                             <div className="flex items-center space-x-1">

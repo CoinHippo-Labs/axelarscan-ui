@@ -878,18 +878,18 @@ export default () => {
       }
       <div className="space-y-2">
         <span className="tracking_wider text-base font-medium">
-          Data
+          Signed Commands
         </span>
         {matched ?
-          data?.data?.data ?
+          data?.data?.execute_data ?
             <div className="flex items-start">
               <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                {data.data.data}
+                {data.data.execute_data}
               </div>
               <div className="mt-4">
                 <Copy
                   size={20}
-                  value={data.data.data}
+                  value={data.data.execute_data}
                 />
               </div>
             </div> :
@@ -905,18 +905,18 @@ export default () => {
       </div>
       <div className="space-y-2">
         <span className="tracking_wider text-base font-medium">
-          Execute Data
+          Commands
         </span>
         {matched ?
-          data?.data?.execute_data ?
+          data?.data?.data ?
             <div className="flex items-start">
               <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-xl text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                {data.data.execute_data}
+                {data.data.data}
               </div>
               <div className="mt-4">
                 <Copy
                   size={20}
-                  value={data.data.execute_data}
+                  value={data.data.data}
                 />
               </div>
             </div> :

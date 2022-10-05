@@ -4,7 +4,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, providers, utils } from 'ethers'
-import { ProgressBar, Puff, ColorRing } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -216,32 +216,48 @@ export default () => {
                     </div>
                   )}
                 </div>
-                <div className="min-w-max flex flex-col space-y-1">
-                  <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold py-0.5 px-2">
+                <div className="min-w-max flex flex-col space-y-0">
+                  <div className="max-w-min bg-slate-50 dark:bg-slate-800 rounded-xl text-base font-semibold pt-0.5 pb-1 px-2">
                     Status
                   </div>
                   {steps.map((s, i) => {
                     const text_color = s?.data?.receipt?.status ?
                       'text-green-400 dark:text-green-300' :
                       i === current_step ?
-                        'text-blue-500 dark:text-white' :
+                        'text-yellow-500 dark:text-yellow-400' :
                         s?.data?.receipt && !s.data.receipt.status ?
                           'text-red-500 dark:text-red-600' :
-                          'text-slate-400 dark:text-slate-600'
+                          'text-slate-300 dark:text-slate-700'
+
                     const { explorer } = { ...s.chain_data }
                     const { url, transaction_path, icon } = { ...explorer }
+
                     return (
                       <div
                         key={i}
                         className="flex items-center space-x-1.5 pb-0.5"
                       >
                         {s?.data?.receipt?.status ?
-                          <BiCheckCircle size={20} className="text-green-400 dark:text-green-300" /> :
+                          <BiCheckCircle
+                            size={20}
+                            className="text-green-400 dark:text-green-300"
+                          /> :
                           i === current_step ?
-                            <Puff color={loader_color(theme)} width="20" height="20" /> :
+                            <ProgressBar
+                              borderColor="#ca8a04"
+                              barColor="#facc15"
+                              width="20"
+                              height="20"
+                            /> :
                             s?.data?.receipt && !s.data.receipt.status ?
-                              <BiXCircle size={20} className="text-red-500 dark:text-red-600" /> :
-                              <FiCircle size={20} className="text-slate-400 dark:text-slate-600" />
+                              <BiXCircle
+                                size={20}
+                                className="text-red-500 dark:text-red-600"
+                              /> :
+                              <FiCircle
+                                size={20}
+                                className="text-slate-300 dark:text-slate-700"
+                              />
                         }
                         <div className="flex items-center space-x-1">
                           {s.data?.transactionHash ?

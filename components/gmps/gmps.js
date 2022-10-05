@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, utils } from 'ethers'
-import { ProgressBar, ColorRing, Puff } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -294,6 +294,8 @@ export default ({ n }) => {
       )
     }
   }, [data])
+
+  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   const chains_data = _.concat(
     evm_chains_data,
@@ -704,7 +706,9 @@ export default ({ n }) => {
                 const steps = [
                   {
                     id: 'call',
-                    title: 'Contract Call',
+                    title: staging ?
+                      'Called' :
+                      'Contract Call',
                     chain_data: source_chain_data,
                     data: call,
                   },
@@ -714,15 +718,18 @@ export default ({ n }) => {
                     chain_data: source_chain_data,
                     data: gas_paid,
                   },
-                  forecalled && {
-                    id: 'forecalled',
-                    title: 'Forecalled',
-                    chain_data: destination_chain_data,
-                    data: forecalled,
-                  },
+                  forecalled &&
+                    {
+                      id: 'forecalled',
+                      title: 'Forecalled',
+                      chain_data: destination_chain_data,
+                      data: forecalled,
+                    },
                   {
                     id: 'approved',
-                    title: 'Call Approved',
+                    title: staging ?
+                      'Approved' :
+                      'Call Approved',
                     chain_data: destination_chain_data,
                     data: approved,
                   },
@@ -732,12 +739,13 @@ export default ({ n }) => {
                     chain_data: destination_chain_data,
                     data: executed,
                   },
-                  refunded && {
-                    id: 'refunded',
-                    title: 'Gas Refunded',
-                    chain_data: source_chain_data,
-                    data: refunded,
-                  },
+                  refunded &&
+                    {
+                      id: 'refunded',
+                      title: 'Gas Refunded',
+                      chain_data: source_chain_data,
+                      data: refunded,
+                    },
                 ]
                 .filter(s => s)
 
@@ -819,7 +827,7 @@ export default ({ n }) => {
                 )
 
                 return (
-                  <div className="min-w-max flex flex-col space-y-1 mb-4">
+                  <div className="min-w-max flex flex-col space-y-0 mb-4">
                     {steps
                       .filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status)
                       .map((s, i) => {
@@ -839,11 +847,11 @@ export default ({ n }) => {
                           (['refunded'].includes(s.id) && s?.data?.receipt?.status) ?
                             'text-green-400 dark:text-green-300' :
                             i === current_step && !['refunded'].includes(s.id) ?
-                              'text-blue-500 dark:text-white' :
+                              'text-yellow-500 dark:text-yellow-400' :
                               (['executed'].includes(s.id) && _error) ||
                               (['refunded'].includes(s.id) && !s?.data?.receipt?.status) ?
                                 'text-red-500 dark:text-red-600' :
-                                'text-slate-400 dark:text-slate-600'
+                                'text-slate-300 dark:text-slate-700'
 
                         const {
                           explorer,
@@ -868,8 +876,9 @@ export default ({ n }) => {
                                   className="text-green-400 dark:text-green-300"
                                 /> :
                                 i === current_step && !['refunded'].includes(s.id) ?
-                                  <Puff
-                                    color={loader_color(theme)}
+                                  <ProgressBar
+                                    borderColor="#ca8a04"
+                                    barColor="#facc15"
                                     width="20"
                                     height="20"
                                   /> :
@@ -881,7 +890,7 @@ export default ({ n }) => {
                                     /> :
                                     <FiCircle
                                       size={20}
-                                      className="text-slate-400 dark:text-slate-600"
+                                      className="text-slate-300 dark:text-slate-700"
                                     />
                             }
                             <div className="flex items-center space-x-1">

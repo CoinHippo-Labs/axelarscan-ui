@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { CSVLink } from 'react-csv'
-import { ProgressBar, ColorRing, Puff } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -313,6 +313,8 @@ export default ({ n }) => {
 
     return data
   }
+
+  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   const chains_data = _.concat(
     evm_chains_data,
@@ -640,14 +642,18 @@ export default ({ n }) => {
                 const steps = [
                   {
                     id: 'source',
-                    title: 'Send Asset',
+                    title: staging ?
+                      'Deposited' :
+                      'Send Asset',
                     chain_data: source_chain_data,
                     data: source,
                     id_field: 'id',
                   },
                   {
                     id: 'confirm_deposit',
-                    title: 'Confirm Deposit',
+                    title: staging ?
+                      'Confirmed' :
+                      'Confirm Deposit',
                     chain_data: axelar_chain_data,
                     data: confirm_deposit,
                     id_field: 'id',
@@ -655,7 +661,9 @@ export default ({ n }) => {
                   evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 &&
                     {
                       id: 'vote',
-                      title: 'Vote Confirm',
+                      title: staging ?
+                        'Approved' :
+                        'Vote Confirm',
                       chain_data: axelar_chain_data,
                       data: vote,
                       id_field: 'id',
@@ -663,7 +671,9 @@ export default ({ n }) => {
                   evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
                     {
                       id: 'sign_batch',
-                      title: 'Sign Batch',
+                      title: staging ?
+                        'Signed' :
+                        'Sign Batch',
                       chain_data: axelar_chain_data,
                       data: sign_batch,
                       id_field: 'batch_id',
@@ -675,7 +685,9 @@ export default ({ n }) => {
                   evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
                     {
                       id: 'executed',
-                      title: 'Executed',
+                      title: staging ?
+                        'Received' :
+                        'Executed',
                       ...(
                         sign_batch?.transactionHash ?
                           {
@@ -696,7 +708,9 @@ export default ({ n }) => {
                   cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
                     {
                       id: 'ibc_send',
-                      title: 'IBC Transfer',
+                      title: staging ?
+                        'Received' :
+                        'IBC Transfer',
                       chain_data: ibc_send?.recv_txhash ?
                         destination_chain_data :
                         axelar_chain_data,
@@ -712,7 +726,9 @@ export default ({ n }) => {
                   [axelar_chain_data].findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
                     {
                       id: 'axelar_transfer',
-                      title: 'Axelar Transfer',
+                      title: staging ?
+                        'Received' :
+                        'Axelar Transfer',
                       chain_data: axelar_chain_data,
                       data: axelar_transfer,
                       id_field: 'id',
@@ -770,7 +786,7 @@ export default ({ n }) => {
                   )
 
                 return (
-                  <div className="min-w-max flex flex-col space-y-1 mb-4">
+                  <div className="min-w-max flex flex-col space-y-0 mb-4">
                     {steps.map((s, i) => {
                       const { title, chain_data, data, id_field, path, params, finish } = { ...s }
                       const id = data?.[id_field]
@@ -785,10 +801,10 @@ export default ({ n }) => {
                       const text_color = finish ?
                         'text-green-400 dark:text-green-300' :
                         i === current_step ?
-                          'text-blue-500 dark:text-white' :
+                          'text-yellow-500 dark:text-yellow-400' :
                           data?.status === 'failed' ?
                             'text-red-500 dark:text-red-600' :
-                            'text-slate-400 dark:text-slate-600'
+                            'text-slate-300 dark:text-slate-700'
 
                       return (
                         <div
@@ -801,8 +817,9 @@ export default ({ n }) => {
                               className="text-green-400 dark:text-green-300"
                             /> :
                             i === current_step ?
-                              <Puff
-                                color={loader_color(theme)}
+                              <ProgressBar
+                                borderColor="#ca8a04"
+                                barColor="#facc15"
                                 width="20"
                                 height="20"
                               /> :
@@ -813,7 +830,7 @@ export default ({ n }) => {
                                 /> :
                                 <FiCircle
                                   size={20}
-                                  className="text-slate-400 dark:text-slate-600"
+                                  className="text-slate-300 dark:text-slate-700"
                                 />
                           }
                           <div className="flex items-center space-x-1">
