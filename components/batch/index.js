@@ -157,14 +157,36 @@ export default () => {
           },
         )
 
-        console.log(response)
+        const {
+          hash,
+        } = { ...response }
+
+        setExecuteResponse(
+          {
+            status: 'pending',
+            message: 'Wait for Confirmation',
+            txHash: hash,
+          },
+        )
+
+        const receipt = await signer.provider.waitForTransaction(
+          hash,
+        )
+
+        const {
+          status,
+        } = { ...receipt }
 
         setExecuting(false)
         setExecuteResponse(
           {
-            status: 'success',
-            message: 'Execute successful',
-            // txHash: transactionHash,
+            status: status ?
+              'success' :
+              'failed',
+            message: status ?
+              'Execute successful' :
+              'Failed to execute',
+            txHash: hash,
           }
         )
       } catch (error) {
@@ -226,8 +248,9 @@ export default () => {
     wallet_chain_id !== chain_id &&
     !executing
 
-  const executeButton = false &&
+  const executeButton =
     matched &&
+    data?.data?.execute_data &&
     equals_ignore_case(status, 'BATCHED_COMMANDS_STATUS_SIGNED') &&
     commands?.filter(c => c?.executed).length < commands?.length &&
     moment().diff(moment(created_at?.ms), 'minutes') >= 10 &&
