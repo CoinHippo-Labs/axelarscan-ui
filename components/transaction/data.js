@@ -11,7 +11,7 @@ import Image from '../image'
 import ValidatorProfile from '../validator-profile'
 import { getChain } from '../../lib/object/chain'
 import { assetManager } from '../../lib/object/asset'
-import { number_format, name, ellipse, equals_ignore_case, to_json, decode_base64, json_theme } from '../../lib/utils'
+import { number_format, name, ellipse, equals_ignore_case, to_json, to_hex, decode_base64, json_theme } from '../../lib/utils'
 
 const FORMATS = [
   {
@@ -984,20 +984,39 @@ export default ({
                                       </span>
                                       <div className="flex items-start space-x-1.5">
                                         <span className="max-w-xl break-all font-semibold">
-                                          {typeof v === 'string' ?
-                                            ellipse(
-                                              v,
-                                              256,
-                                            ) :
-                                            typeof v === 'object' && v ?
-                                              <pre className="bg-slate-100 dark:bg-slate-900 rounded-lg text-xs font-normal text-left">
-                                                {JSON.stringify(
+                                          {
+                                            (
+                                              Array.isArray(v) ||
+                                              (
+                                                typeof v === 'string' &&
+                                                v.startsWith('[') &&
+                                                v.endsWith(']')
+                                              )
+                                            ) &&
+                                            [
+                                              'gateway_address',
+                                              'deposit_address',
+                                              'token_address',
+                                              'tx_id',
+                                            ].includes(k) ?
+                                              to_hex(
+                                                JSON.parse(v)
+                                              ) :
+                                              typeof v === 'string' ?
+                                                ellipse(
                                                   v,
-                                                  null,
-                                                  2,
-                                                )}
-                                              </pre> :
-                                            v?.toString()
+                                                  256,
+                                                ) :
+                                                typeof v === 'object' &&
+                                                v ?
+                                                  <pre className="bg-slate-100 dark:bg-slate-900 rounded-lg text-xs font-normal text-left">
+                                                    {JSON.stringify(
+                                                      v,
+                                                      null,
+                                                      2,
+                                                    )}
+                                                  </pre> :
+                                                  v?.toString()
                                           }
                                         </span>
                                         {
