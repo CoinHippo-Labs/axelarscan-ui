@@ -486,7 +486,7 @@ export default () => {
                 {
                   Header: !status ?
                     'Consensus Power' :
-                    'Bonded Tokens',
+                    'Staked Tokens',
                   accessor: 'tokens',
                   sortType: (a, b) => a.original.tokens > b.original.tokens ?
                     1 :
@@ -1264,6 +1264,7 @@ export default () => {
                     'quadratic_voting_power',
                     'cumulative_share',
                     'quadratic_cumulative_share',
+                    'apr',
                     // 'supported_chains',
                   ].includes(c.accessor) :
                   ![
