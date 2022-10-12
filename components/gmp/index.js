@@ -1474,43 +1474,45 @@ export default () => {
                         )
                       })
                     }
-                    {is_invalid_call && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
-                        Invalid Call
-                      </div>
-                    )}
-                    {is_insufficient_fee && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
-                        Insufficient Fee
-                      </div>
-                    )}
-                    {forecall_time_spent && (
-                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
-                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                          Forecall time:
-                        </span>
-                        <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-medium">
-                          {forecall_time_spent}
-                        </span>
-                      </div>
-                    )}
-                    {gasAddButton}
-                    {refundButton}
-                    {approveButton ||
-                      executeButton ||
-                      (
-                        time_spent && (
-                          <div className="flex items-center space-x-1 mx-1 pt-0.5">
-                            <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                              Time spent:
-                            </span>
-                            <span className="whitespace-nowrap font-bold">
-                              {time_spent}
-                            </span>
-                          </div>
+                    <div className="flex flex-col space-y-1">
+                      {is_invalid_call && (
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                          Invalid Call
+                        </div>
+                      )}
+                      {is_insufficient_fee && (
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                          Insufficient Fee
+                        </div>
+                      )}
+                      {forecall_time_spent && (
+                        <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                            Forecall time:
+                          </span>
+                          <span className="whitespace-nowrap text-slate-800 dark:text-slate-200 font-medium">
+                            {forecall_time_spent}
+                          </span>
+                        </div>
+                      )}
+                      {gasAddButton}
+                      {refundButton}
+                      {approveButton ||
+                        executeButton ||
+                        (
+                          time_spent && (
+                            <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                                Time spent:
+                              </span>
+                              <span className="whitespace-nowrap font-bold">
+                                {time_spent}
+                              </span>
+                            </div>
+                          )
                         )
-                      )
-                    }
+                      }
+                    </div>
                   </div>
                 </div> :
                 <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
