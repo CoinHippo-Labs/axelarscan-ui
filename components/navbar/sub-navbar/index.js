@@ -465,7 +465,7 @@ export default () => {
       )
       right = right ||
         (
-          pathname.startsWith('/transfers/search') &&
+          pathname.startsWith('/transfers') &&
             (
               <TransferFilters />
             )

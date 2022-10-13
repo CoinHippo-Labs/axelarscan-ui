@@ -79,46 +79,74 @@ export default () => {
         sortBy,
       } = { ...params }
 
-      setFilters({
-        txHash,
-        confirmed: [
-          'confirmed',
-          'unconfirmed',
-        ].includes(confirmed?.toLowerCase()) ?
-          confirmed.toLowerCase() :
-          undefined,
-        state: [
-          'completed',
-          'pending',
-        ].includes(state?.toLowerCase()) ?
-          state.toLowerCase() :
-          undefined,
-        sourceChain: getChain(
-          sourceChain,
-          chains_data,
-        )?.id ||
-          sourceChain,
-        destinationChain: getChain(
-          destinationChain,
-          chains_data,
-        )?.id ||
-          destinationChain,
-        asset: getAsset(
-          asset,
-          assets_data,
-        )?.id ||
-          asset,
-        depositAddress,
-        senderAddress,
-        recipientAddress,
-        time: fromTime &&
-          toTime &&
-          [
-            moment(Number(fromTime)),
-            moment(Number(toTime)),
-          ],
-        sortBy,
-      })
+      setFilters(
+        pathname == '/transfers' ?
+          {
+            sourceChain: getChain(
+              sourceChain,
+              chains_data,
+            )?.id ||
+              sourceChain,
+            destinationChain: getChain(
+              destinationChain,
+              chains_data,
+            )?.id ||
+              destinationChain,
+            asset: getAsset(
+              asset,
+              assets_data,
+            )?.id ||
+              asset,
+            time:
+              fromTime &&
+              toTime &&
+              [
+                moment(Number(fromTime)),
+                moment(Number(toTime)),
+              ],
+          } :
+          {
+            txHash,
+            confirmed: [
+              'confirmed',
+              'unconfirmed',
+            ].includes(confirmed?.toLowerCase()) ?
+              confirmed.toLowerCase() :
+              undefined,
+            state: [
+              'completed',
+              'pending',
+            ].includes(state?.toLowerCase()) ?
+              state.toLowerCase() :
+              undefined,
+            sourceChain: getChain(
+              sourceChain,
+              chains_data,
+            )?.id ||
+              sourceChain,
+            destinationChain: getChain(
+              destinationChain,
+              chains_data,
+            )?.id ||
+              destinationChain,
+            asset: getAsset(
+              asset,
+              assets_data,
+            )?.id ||
+              asset,
+            depositAddress,
+            senderAddress,
+            recipientAddress,
+            time:
+              fromTime &&
+              toTime &&
+              [
+                moment(Number(fromTime)),
+                moment(Number(toTime)),
+              ],
+            sortBy,
+          }
+      )
     }
   }, [evm_chains_data, cosmos_chains_data, assets_data, asPath])
 
@@ -348,11 +376,25 @@ export default () => {
       ],
     },
   ]
+  .filter(f =>
+    pathname !== '/transfers' ||
+    ![
+      'txHash',
+      'confirmed',
+      'state',
+      'depositAddress',
+      'senderAddress',
+      'recipientAddress',
+      'sortBy',
+    ].includes(f?.name)
+  )
 
-  const filtered = (
-    !!filterTrigger ||
-    filterTrigger === undefined
-  ) && Object.keys({ ...query }).length > 0
+  const filtered =
+    (
+      !!filterTrigger ||
+      filterTrigger === undefined
+    ) &&
+    Object.keys({ ...query }).length > 0
 
   return (
     <Modal
