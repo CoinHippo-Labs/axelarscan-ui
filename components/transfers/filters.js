@@ -80,7 +80,7 @@ export default () => {
       } = { ...params }
 
       setFilters(
-        pathname == '/transfers' ?
+        pathname === '/transfers' ?
           {
             sourceChain: getChain(
               sourceChain,
@@ -101,8 +101,8 @@ export default () => {
               fromTime &&
               toTime &&
               [
-                moment(Number(fromTime)),
-                moment(Number(toTime)),
+                moment(Number(fromTime)).startOf('day'),
+                moment(Number(toTime)).endOf('day'),
               ],
           } :
           {
@@ -475,8 +475,8 @@ export default () => {
                   </select> :
                   type === 'datetime-range' ?
                     <DatePicker.RangePicker
-                      showTime
-                      format="YYYY/MM/DD HH:mm:ss"
+                      showTime={pathname !== '/transfers'}
+                      format={`YYYY/MM/DD${pathname !== '/transfers' ? ' HH:mm:ss' : ''}`}
                       ranges={{
                         Today: [
                           moment().startOf('day'),
