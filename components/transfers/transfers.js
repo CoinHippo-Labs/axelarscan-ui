@@ -878,22 +878,15 @@ export default ({ n }) => {
                               size={20}
                               className="text-green-400 dark:text-green-300"
                             /> :
-                            i === current_step ?
-                              <ProgressBarSpinner
-                                borderColor="#ca8a04"
-                                barColor="#facc15"
-                                width="20"
-                                height="20"
+                            step?.data?.status === 'failed' ?
+                              <BiXCircle
+                                size={20}
+                                className="text-red-500 dark:text-red-600"
                               /> :
-                              data?.status === 'failed' ?
-                                <BiXCircle
-                                  size={20}
-                                  className="text-red-500 dark:text-red-600"
-                                /> :
-                                <FiCircle
-                                  size={20}
-                                  className="text-slate-300 dark:text-slate-700"
-                                />
+                              <FiCircle
+                                size={20}
+                                className="text-slate-300 dark:text-slate-700"
+                              />
                           }
                           <div className="flex items-center space-x-1">
                             {id ?
