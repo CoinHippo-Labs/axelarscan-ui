@@ -325,7 +325,14 @@ export default ({
     axelarnet
   ) {
     chains_data
-      .filter(c => c && !(equals_ignore_case(c.id, axelarnet.id)))
+      .filter(c =>
+        c &&
+        (
+          !c.maintainer_id ||
+          !c.no_inflation
+        ) &&
+        !equals_ignore_case(c.id, axelarnet.id)
+      )
       .forEach(c => {
         const {
           id,

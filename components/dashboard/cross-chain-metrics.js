@@ -25,7 +25,7 @@ export default ({
   } = { ...preferences }
 
   const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-6 px-5'
-  const titleClassName = 'text-3xl lg:text-xl xl:text-3xl font-semibold space-x-1'
+  const titleClassName = 'uppercase text-3xl lg:text-xl xl:text-3xl font-semibold space-x-1'
   const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-base font-normal ml-1 lg:ml-0.5 xl:ml-1'
 
   const {

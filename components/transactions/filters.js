@@ -188,10 +188,12 @@ export default () => {
     },
   ]
 
-  const filtered = (
-    !!filterTrigger ||
-    filterTrigger === undefined
-  ) && Object.keys({ ...query }).length > 0
+  const filtered =
+    (
+      !!filterTrigger ||
+      filterTrigger === undefined
+    ) &&
+    Object.keys({ ...query }).length > 0
 
   return (
     <Modal

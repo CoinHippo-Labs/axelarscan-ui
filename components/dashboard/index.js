@@ -161,7 +161,13 @@ export default () => {
             data,
             'volume',
           ),
-          num_chains: chains_data.length,
+          num_chains: chains_data
+            .filter(c =>
+              !c?.maintainer_id ||
+              !c?.no_inflation ||
+              c?.gateway_address
+            )
+            .length,
           network_graph_data: _.orderBy(
             Object.entries(
               _.groupBy(

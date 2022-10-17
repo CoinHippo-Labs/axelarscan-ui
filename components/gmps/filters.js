@@ -176,18 +176,23 @@ export default () => {
           value: '',
           title: 'Any',
         },
-        (evm_chains_data || [])
-          .map(c => {
-            const {
-              id,
-              name,
-            } = { ...c }
+        _.orderBy(
+          evm_chains_data ||
+          [],
+          ['deprecated'],
+          ['desc'],
+        )
+        .map(c => {
+          const {
+            id,
+            name,
+          } = { ...c }
 
-            return {
-              value: id,
-              title: name,
-            }
-          }),
+          return {
+            value: id,
+            title: name,
+          }
+        }),
       ),
     },
     {
@@ -200,18 +205,23 @@ export default () => {
           value: '',
           title: 'Any',
         },
-        (evm_chains_data || [])
-          .map(c => {
-            const {
-              id,
-              name,
-            } = { ...c }
+        _.orderBy(
+          evm_chains_data ||
+          [],
+          ['deprecated'],
+          ['desc'],
+        )
+        .map(c => {
+          const {
+            id,
+            name,
+          } = { ...c }
 
-            return {
-              value: id,
-              title: name,
-            }
-          }),
+          return {
+            value: id,
+            title: name,
+          }
+        }),
       ),
     },
     {
@@ -310,10 +320,12 @@ export default () => {
     },
   ]
 
-  const filtered = (
-    !!filterTrigger ||
-    filterTrigger === undefined
-  ) && Object.keys({ ...query }).length > 0
+  const filtered =
+    (
+      !!filterTrigger ||
+      filterTrigger === undefined
+    ) &&
+    Object.keys({ ...query }).length > 0
 
   return (
     <Modal
