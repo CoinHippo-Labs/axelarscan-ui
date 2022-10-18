@@ -279,7 +279,10 @@ export default () => {
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                title={amount_exact_formatted}
+                                title={
+                                  amount_exact_formatted
+                                    .toUpperCase()
+                                }
                                 className="uppercase text-blue-500 dark:text-blue-400 text-xs font-bold"
                               >
                                 {amount_formatted}
@@ -288,7 +291,10 @@ export default () => {
                                 </span>
                               </a> :
                               <span
-                                title={amount_exact_formatted}
+                                title={
+                                  amount_exact_formatted
+                                    .toUpperCase()
+                                }
                                 className="uppercase text-slate-400 dark:text-slate-400 text-xs font-bold"
                               >
                                 {amount_formatted}
@@ -305,10 +311,15 @@ export default () => {
                             props.value > -1 &&
                             (
                               <span
-                                title={number_format(
-                                  props.value,
-                                  `${currency_symbol}0,0.000`,
-                                )}
+                                title={
+                                  `${currency_symbol}${
+                                    number_format(
+                                      props.value,
+                                      '0,0.000',
+                                    )
+                                  }`
+                                  .toUpperCase()
+                                }
                                 className="uppercase text-sm font-bold"
                               >
                                 {currency_symbol}
@@ -365,10 +376,13 @@ export default () => {
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {typeof total_on_evm === 'number' ?
                             <span
-                              title={number_format(
-                                total_on_evm,
-                                '0,0.00000000',
-                              )}
+                              title={
+                                number_format(
+                                  total_on_evm,
+                                  '0,0.00000000',
+                                )
+                                .toUpperCase()
+                              }
                               className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
                             >
                               {number_format(
@@ -392,10 +406,15 @@ export default () => {
                             props.value > -1  &&
                             (
                               <span
-                                title={number_format(
-                                  props.value,
-                                  `${currency_symbol}0,0.000`,
-                                )}
+                                title={
+                                  `${currency_symbol}${
+                                    number_format(
+                                      props.value,
+                                      '0,0.000',
+                                    )
+                                  }`
+                                  .toUpperCase()
+                                }
                                 className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
                               >
                                 {currency_symbol}
@@ -452,10 +471,13 @@ export default () => {
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {typeof total_on_cosmos === 'number' ?
                             <span
-                              title={number_format(
-                                total_on_cosmos,
-                                '0,0.00000000',
-                              )}
+                              title={
+                                number_format(
+                                  total_on_cosmos,
+                                  '0,0.00000000',
+                                )
+                                .toUpperCase()
+                              }
                               className="uppercase text-slate-400 dark:text-slate-500 text-2xs font-medium -mt-0.5"
                             >
                               {number_format(
@@ -479,7 +501,15 @@ export default () => {
                             props.value > -1 &&
                             (
                               <span
-                                title={number_format(props.value, `${currency_symbol}0,0.000`)}
+                                title={
+                                  `${currency_symbol}${
+                                    number_format(
+                                      props.value,
+                                      '0,0.000',
+                                    )
+                                  }`
+                                  .toUpperCase()
+                                }
                                 className="uppercase text-slate-800 dark:text-slate-200 text-xs font-semibold"
                               >
                                 {currency_symbol}
@@ -505,8 +535,14 @@ export default () => {
                 _.orderBy(
                   _.uniqBy(
                     _.concat(
-                      evm_chains_data || [],
-                      cosmos_chains_data || [],
+                      evm_chains_data ||
+                      [],
+                      cosmos_chains_data ||
+                      [],
+                    )
+                    .filter(c =>
+                      !c?.no_inflation ||
+                      c?.deprecated
                     )
                     .flatMap(c => {
                       const {
@@ -658,13 +694,19 @@ export default () => {
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                title={amount_exact_formatted}
+                                title={
+                                  amount_exact_formatted
+                                    .toUpperCase()
+                                }
                                 className="uppercase text-blue-500 dark:text-blue-400 text-xs font-bold"
                               >
                                 {amount_formatted}
                               </a> :
                               <span
-                                title={amount_exact_formatted}
+                                title={
+                                  amount_exact_formatted
+                                    .toUpperCase()
+                                }
                                 className="uppercase text-slate-400 dark:text-slate-400 text-xs font-bold"
                               >
                                 {amount_formatted}
@@ -678,10 +720,15 @@ export default () => {
                             typeof price === 'number' &&
                             (
                               <span
-                                title={number_format(
-                                  value,
-                                  `${currency_symbol}0,0.000`,
-                                )}
+                                title={
+                                  `${currency_symbol}${
+                                    number_format(
+                                      value,
+                                      '0,0.000',
+                                    )
+                                  }`
+                                  .toUpperCase()
+                                }
                                 className="uppercase text-slate-800 dark:text-slate-200 text-2xs font-medium"
                               >
                                 {currency_symbol}

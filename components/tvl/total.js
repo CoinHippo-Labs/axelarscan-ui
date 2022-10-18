@@ -113,10 +113,15 @@ export default () => {
       <div className="overflow-x-auto flex items-center space-x-2 sm:space-x-4 sm:ml-2 py-0.5">
         <div className="bg-zinc-100 dark:bg-zinc-900 rounded-xl shadow dark:shadow-zinc-600 text-center p-2 sm:pt-3.5 sm:pb-2.5 sm:px-4">
           <div
-            title={number_format(
-              value_on_evm,
-              `${currency_symbol}0,0.000000`,
-            )}
+            title={
+              `${currency_symbol}${
+                number_format(
+                  value_on_evm,
+                  '0,0.000',
+                )
+              }`
+              .toUpperCase()
+            }
             className="uppercase text-base font-bold"
           >
             {currency_symbol}
@@ -135,10 +140,15 @@ export default () => {
         </div>
         <div className="bg-zinc-100 dark:bg-zinc-900 rounded-xl shadow dark:shadow-zinc-600 text-center p-2 sm:pt-3.5 sm:pb-2.5 sm:px-4">
           <div
-            title={number_format(
-              value_on_cosmos,
-              `${currency_symbol}0,0.000000`,
-            )}
+            title={
+              `${currency_symbol}${
+                number_format(
+                  value_on_cosmos,
+                  '0,0.000',
+                )
+              }`
+              .toUpperCase()
+            }
             className="uppercase text-base font-bold"
           >
             {currency_symbol}
@@ -157,10 +167,15 @@ export default () => {
         </div>
         <div className="bg-green-100 dark:bg-green-800 rounded-xl shadow dark:shadow-green-400 border-2 border-green-600 dark:border-green-400 text-center p-1.5 sm:pt-2.5 sm:pb-2.5 sm:px-3">
           <div
-            title={number_format(
-              value,
-              `${currency_symbol}0,0.000000`,
-            )}
+            title={
+              `${currency_symbol}${
+                number_format(
+                  value,
+                  '0,0.000',
+                )
+              }`
+              .toUpperCase()
+            }
             className="uppercase text-green-600 dark:text-green-400 text-lg font-extrabold"
           >
             {currency_symbol}

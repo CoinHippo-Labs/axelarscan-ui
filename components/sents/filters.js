@@ -152,18 +152,27 @@ export default () => {
           value: '',
           title: 'Any',
         },
-        (evm_chains_data || [])
-          .map(c => {
-            const {
-              id,
-              name,
-            } = { ...c }
+        _.orderBy(
+          evm_chains_data ||
+          [],
+          ['deprecated'],
+          ['desc'],
+        )
+        .filter(c =>
+          !c?.no_inflation ||
+          c?.deprecated
+        )
+        .map(c => {
+          const {
+            id,
+            name,
+          } = { ...c }
 
-            return {
-              value: id,
-              title: name,
-            }
-          }),
+          return {
+            value: id,
+            title: name,
+          }
+        }),
       ),
     },
     {
@@ -181,6 +190,10 @@ export default () => {
           [],
           ['deprecated'],
           ['desc'],
+        )
+        .filter(c =>
+          !c?.no_inflation ||
+          c?.deprecated
         )
         .map(c => {
           const {

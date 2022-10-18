@@ -383,7 +383,10 @@ export default () => {
             )}
             <div className="flex flex-wrap items-center">
               {(evm_chains_data || [])
-                .filter(c => !c?.deprecated)
+                .filter(c =>
+                  !c?.no_inflation &&
+                  !c?.deprecated
+                )
                 .map((c, i) => (
                   <div
                     key={i}

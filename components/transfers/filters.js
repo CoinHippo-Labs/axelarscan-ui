@@ -256,34 +256,44 @@ export default () => {
           value: '',
           title: 'Any',
         },
-        chains_data
-          .flatMap(c => {
+        _.orderBy(
+          chains_data,
+          ['deprecated'],
+          ['desc'],
+        )
+        .filter(c =>
+          !c?.no_inflation ||
+          c?.deprecated
+        )
+        .flatMap(c => {
+          const {
+            id,
+            name,
+            overrides,
+          } = { ...c }
+
+          return _.uniqBy(
+            _.concat(
+              Object.values({ ...overrides })
+                .filter(v =>
+                  Object.keys(v).length > 0
+                ),
+              c,
+            ),
+            'id',
+          )
+          .map(c => {
             const {
               id,
               name,
-              overrides,
             } = { ...c }
 
-            return _.uniqBy(
-              _.concat(
-                Object.values({ ...overrides })
-                  .filter(v => Object.keys(v).length > 0),
-                c,
-              ),
-              'id',
-            )
-            .map(c => {
-              const {
-                id,
-                name,
-              } = { ...c }
-
-              return {
-                value: id,
-                title: name,
-              }
-            })
-          }),
+            return {
+              value: id,
+              title: name,
+            }
+          })
+        }),
       ),
     },
     {
@@ -296,7 +306,32 @@ export default () => {
           value: '',
           title: 'Any',
         },
-        chains_data
+        _.orderBy(
+          chains_data,
+          ['deprecated'],
+          ['desc'],
+        )
+        .filter(c =>
+          !c?.no_inflation ||
+          c?.deprecated
+        )
+        .flatMap(c => {
+          const {
+            id,
+            name,
+            overrides,
+          } = { ...c }
+
+          return _.uniqBy(
+            _.concat(
+              Object.values({ ...overrides })
+                .filter(v =>
+                  Object.keys(v).length > 0
+                ),
+              c,
+            ),
+            'id',
+          )
           .map(c => {
             const {
               id,
@@ -307,7 +342,8 @@ export default () => {
               value: id,
               title: name,
             }
-          }),
+          })
+        }),
       ),
     },
     {

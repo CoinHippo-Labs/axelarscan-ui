@@ -71,7 +71,13 @@ export default () => {
         (
           <div className="flex flex-wrap items-center justify-start space-x-3">
             <Dropdown
-              data={evm_chains_data}
+              data={
+                evm_chains_data
+                  .filter(c =>
+                    !c?.no_inflation ||
+                    c?.deprecated
+                  )
+              }
               placeholder="Select Chain"
               allOptionsName="All Chains"
               defaultSelectedKey={chainData?.id || ''}

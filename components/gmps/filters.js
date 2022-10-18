@@ -182,6 +182,10 @@ export default () => {
           ['deprecated'],
           ['desc'],
         )
+        .filter(c =>
+          !c?.no_inflation ||
+          c?.deprecated
+        )
         .map(c => {
           const {
             id,
@@ -210,6 +214,10 @@ export default () => {
           [],
           ['deprecated'],
           ['desc'],
+        )
+        .filter(c =>
+          !c?.no_inflation ||
+          c?.deprecated
         )
         .map(c => {
           const {
