@@ -467,99 +467,198 @@ export default ({ n }) => {
               accessor: 'event.receipt.status',
               disableSortBy: true,
               Cell: props => {
-                const { event } = { ...props.row.original }
-                const { chain, returnValues } = { ...event }
-                const { destinationChain } = { ...returnValues }
-                const source_chain_data = getChain(chain, chains_data)
-                const destination_chain_data = getChain(destinationChain, chains_data)
-                const steps = [{
-                  id: 'send',
-                  title: 'Send Token',
-                  chain_data: source_chain_data,
-                  data: event,
-                }].filter(s => s)
-                let current_step
-                switch (props.value) {
-                  case 0:
-                  case 1:
-                    current_step = 1
-                    break
-                  default:
-                    current_step = 0
-                    break
-                }
+                const {
+                  event,
+                  vote,
+                } = { ...props.row.original }
+                const {
+                  chain,
+                  returnValues,
+                } = { ...event }
+                const {
+                  destinationChain,
+                } = { ...returnValues }
+
+                const source_chain_data =
+                  getChain(
+                    chain,
+                    chains_data,
+                  )
+                const destination_chain_data =
+                  getChain(
+                    destinationChain,
+                    chains_data,
+                  )
+                const axelar_chain_data =
+                  getChain(
+                    'axelarnet',
+                    chains_data,
+                  )
+
+                const steps =
+                  [
+                    {
+                      id: 'send',
+                      title: 'Send Token',
+                      chain_data: source_chain_data,
+                      data: event,
+                      id_field: 'transactionHash',
+                    },
+                    {
+                      id: 'vote',
+                      title: 'Approved',
+                      chain_data: axelar_chain_data,
+                      data: vote,
+                      id_field: 'poll_id',
+                      path: '/evm-poll/{id}',
+                    },
+                  ]
+                  .filter(s => s)
+                  .map((s, i) => {
+                    return {
+                      ...s,
+                      i,
+                      finish: !!(
+                        s.data
+                      ),
+                    }
+                  })
+
+                const current_step = steps.findIndex(s => s.finish) < 0 ?
+                  -1 :
+                  (
+                    _.maxBy(
+                      steps.filter(s => s.finish),
+                      'i',
+                    )?.i ||
+                    0
+                  ) + 1
+
                 return (
                   <div className="min-w-max flex flex-col space-y-0 mb-4">
                     {steps.map((s, i) => {
-                      const text_color = s?.data?.receipt?.status ?
-                        'text-green-400 dark:text-green-300' :
-                        i === current_step ?
-                          'text-yellow-500 dark:text-yellow-400' :
-                          s?.data?.receipt && !s.data.receipt.status ?
-                            'text-red-500 dark:text-red-600' :
-                            'text-slate-300 dark:text-slate-700'
+                      const {
+                        title,
+                        chain_data,
+                        data,
+                        id_field,
+                        path,
+                        params,
+                        finish,
+                      } = { ...s }
 
-                      const { explorer } = { ...s.chain_data }
-                      const { url, transaction_path, icon } = { ...explorer }
+                      const id = data?.[id_field]
+
+                      const {
+                        explorer,
+                      } = { ...chain_data }
+                      const {
+                        url,
+                        transaction_path,
+                        icon,
+                      } = { ...explorer }
+                      const {
+                        receipt,
+                      } = { ...data }
+
+                      let _path =
+                        (path || '')
+                          .replace(
+                            '{id}',
+                            id,
+                          ) ||
+                        (transaction_path || '')
+                          .replace(
+                            '{tx}',
+                            id,
+                          )
+
+                      Object.entries({ ...params })
+                        .forEach(([k, v]) => {
+                          _path =
+                            (_path || '')
+                              .replace(
+                                `{${k}}`,
+                                v,
+                              )
+                        })
+
+                      const text_color =
+                        finish &&
+                        receipt?.status !== 0 ?
+                          'text-green-400 dark:text-green-300' :
+                          i === current_step ?
+                            'text-yellow-500 dark:text-yellow-400' :
+                            data?.status === 'failed' ||
+                            receipt?.status === 0 ?
+                              'text-red-500 dark:text-red-600' :
+                              'text-slate-300 dark:text-slate-700'
 
                       return (
                         <div
                           key={i}
                           className="flex items-center space-x-1.5 pb-0.5"
                         >
-                          {s?.data?.receipt?.status ?
-                            <BiCheckCircle
-                              size={20}
-                              className="text-green-400 dark:text-green-300"
-                            /> :
-                            i === current_step ?
-                              <ProgressBar
-                                borderColor="#ca8a04"
-                                barColor="#facc15"
-                                width="20"
-                                height="20"
+                          {
+                            finish &&
+                            receipt?.status !== 0 ?
+                              <BiCheckCircle
+                                size={20}
+                                className="text-green-400 dark:text-green-300"
                               /> :
-                              s?.data?.receipt && !s.data.receipt.status ?
-                                <BiXCircle
-                                  size={20}
-                                  className="text-red-500 dark:text-red-600"
+                              i === current_step ?
+                                <ProgressBar
+                                  borderColor="#ca8a04"
+                                  barColor="#facc15"
+                                  width="20"
+                                  height="20"
                                 /> :
-                                <FiCircle
-                                  size={20}
-                                  className="text-slate-300 dark:text-slate-700"
-                                />
+                                data?.status === 'failed' ||
+                                receipt?.status === 0 ?
+                                  <BiXCircle
+                                    size={20}
+                                    className="text-red-500 dark:text-red-600"
+                                  /> :
+                                  <FiCircle
+                                    size={20}
+                                    className="text-slate-300 dark:text-slate-700"
+                                  />
                           }
                           <div className="flex items-center space-x-1">
-                            {s.data?.transactionHash ?
+                            {id ?
                               <Copy
-                                value={s.data.transactionHash}
+                                value={id}
                                 title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
-                                  {s.title}
+                                  {title}
                                 </span>}
-                                size={18}
-                              />
-                              :
+                              /> :
                               <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                {s.title}
+                                {title}
                               </span>
                             }
-                            {s.data?.transactionHash && url && (
-                              <a
-                                href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-white"
-                              >
-                                {icon ?
-                                  <Image
-                                    src={icon}
-                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                  />
-                                  :
-                                  <TiArrowRight size={16} className="transform -rotate-45" />
-                                }
-                              </a>
-                            )}
+                            {
+                              id &&
+                              url &&
+                              (
+                                <a
+                                  href={`${url}${_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 dark:text-white"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
+                                    />
+                                  }
+                                </a>
+                              )
+                            }
                           </div>
                         </div>
                       )
@@ -587,8 +686,23 @@ export default ({ n }) => {
             },
           ]}
           data={data}
-          noPagination={data.length <= 10 || (!n && !(address || ['/sent/search'].includes(pathname)))}
-          defaultPageSize={n ? 10 : 25}
+          noPagination={
+            data.length <= 10 ||
+            (
+              !n &&
+              !(
+                address ||
+                [
+                  '/sent/search',
+                ].includes(pathname)
+              )
+            )
+          }
+          defaultPageSize={
+            n ?
+              10 :
+              25
+          }
           className="min-h-full no-border"
         />
         {

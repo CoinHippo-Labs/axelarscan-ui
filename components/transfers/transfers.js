@@ -802,10 +802,10 @@ export default ({ n }) => {
                   -1 :
                   (
                     _.maxBy(
-                        steps.filter(s => s.finish),
-                        'i',
-                      )?.i ||
-                        0
+                      steps.filter(s => s.finish),
+                      'i',
+                    )?.i ||
+                    0
                   ) +
                   (
                     !insufficient_fee &&

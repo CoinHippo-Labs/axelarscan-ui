@@ -194,8 +194,10 @@ export default () => {
   }, [filterTrigger])
 
   const chains_data = _.concat(
-    evm_chains_data || [],
-    cosmos_chains_data || [],
+    evm_chains_data ||
+    [],
+    cosmos_chains_data ||
+    [],
   )
 
   const fields = [

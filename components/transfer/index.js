@@ -386,10 +386,10 @@ export default () => {
     -1 :
     (
       _.maxBy(
-          steps.filter(s => s.finish),
-          'i',
-        )?.i ||
-          0
+        steps.filter(s => s.finish),
+        'i',
+      )?.i ||
+      0
     ) +
     (
       !insufficient_fee &&
@@ -836,11 +836,27 @@ export default () => {
             const { url, transaction_path, block_path, icon } = { ...explorer }
 
             const _id = data?.[id_field]
-            let _path = path?.replace('{id}', _id) ||
-              transaction_path?.replace('{tx}', _id)
+
+            let _path =
+              (path || '')
+                .replace(
+                  '{id}',
+                  id,
+                ) ||
+              (transaction_path || '')
+                .replace(
+                  '{tx}',
+                  id,
+                )
+
             Object.entries({ ...params })
               .forEach(([k, v]) => {
-                _path = _path?.replace(`{${k}}`, v)
+                _path =
+                  (_path || '')
+                    .replace(
+                      `{${k}}`,
+                      v,
+                    )
               })
 
             const time = block_timestamp ?
@@ -849,7 +865,11 @@ export default () => {
                 received_at?.ms :
                 created_at?.ms
 
-            const _chain_data = chains_data?.find(c => c?.id === chain)
+            const _chain_data =
+              getChain(
+                chain,
+                chains_data,
+              )
 
             const rowClassName = 'flex flex-col space-y-1'
             const rowTitleClassName = `text-black dark:text-slate-300 text-sm lg:text-base font-bold`
@@ -1088,7 +1108,8 @@ export default () => {
                         }
                         <span>
                           {executed ?
-                            'Executed' : status
+                            'Executed' :
+                            status
                         }
                         </span>
                       </div>

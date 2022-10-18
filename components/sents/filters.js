@@ -134,6 +134,13 @@ export default () => {
     }
   }, [filterTrigger])
 
+  const chains_data = _.concat(
+    evm_chains_data ||
+    [],
+    cosmos_chains_data ||
+    [],
+  )
+
   const fields = [
     {
       label: 'Tx Hash',
@@ -186,8 +193,7 @@ export default () => {
           title: 'Any',
         },
         _.orderBy(
-          evm_chains_data ||
-          [],
+          chains_data,
           ['deprecated'],
           ['desc'],
         )
@@ -195,16 +201,34 @@ export default () => {
           !c?.no_inflation ||
           c?.deprecated
         )
-        .map(c => {
+        .flatMap(c => {
           const {
             id,
             name,
+            overrides,
           } = { ...c }
 
-          return {
-            value: id,
-            title: name,
-          }
+          return _.uniqBy(
+            _.concat(
+              Object.values({ ...overrides })
+                .filter(v =>
+                  Object.keys(v).length > 0
+                ),
+              c,
+            ),
+            'id',
+          )
+          .map(c => {
+            const {
+              id,
+              name,
+            } = { ...c }
+
+            return {
+              value: id,
+              title: name,
+            }
+          })
         }),
       ),
     },
