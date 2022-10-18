@@ -517,14 +517,14 @@ export default () => {
                 } = { ...chain_data }
 
                 return (
-                  <div className="h-6 flex items-center space-x-2">
+                  <div className="h-5 flex items-center space-x-2">
                     {chain_data ?
                       <>
                         {image && (
                           <Image
                             src={image}
                             alt=""
-                            className="w-6 h-6 rounded-full"
+                            className="w-5 h-5 rounded-full"
                           />
                         )}
                         <span className="text-base font-semibold">

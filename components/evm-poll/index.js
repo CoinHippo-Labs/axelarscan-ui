@@ -70,13 +70,20 @@ export default () => {
           const {
             height,
             event,
+            participants,
           } = { ..._data }
 
           const confirmation_vote = votes.find(v => v?.confirmed)
 
           if (
             height &&
-            !confirmation_vote
+            (
+              !confirmation_vote ||
+              (
+                participants &&
+                votes.length < participants.length
+              )
+            )
           ) {
             for (let i = -3; i <= 5; i++) {
               const _height = height + i
