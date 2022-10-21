@@ -85,7 +85,7 @@ export default ({
     `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
     `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
 
-  const rowClassName = 'flex flex-col md:flex-row items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
+  const rowClassName = 'flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
 
   return (
@@ -225,7 +225,7 @@ export default ({
                           href={__url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="min-w-fit bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
+                          className="w-fit bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
                         >
                           <span className="capitalize text-sm lg:text-base font-medium">
                             {name(_type)

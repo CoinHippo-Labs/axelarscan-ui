@@ -625,7 +625,7 @@ export default () => {
                             href={__url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="min-w-fit max-w-min bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
+                            className="w-fit min-w-max bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
                           >
                             <span className="capitalize text-sm lg:text-base font-medium">
                               {name(_type)
