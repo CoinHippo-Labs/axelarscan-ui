@@ -7,6 +7,7 @@ import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
 import Copy from '../copy'
 import ValidatorProfile from '../validator-profile'
+import AccountProfile from '../account-profile'
 import { number_format, name, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
 export default ({
@@ -235,11 +236,9 @@ export default ({
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                   >
-                    {ellipse(
-                      sender,
-                      10,
-                      process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
-                    )}
+                    <AccountProfile
+                      address={sender}
+                    />
                   </a>
                 </Link>
                 <Copy

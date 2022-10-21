@@ -114,7 +114,7 @@ export default () => {
           <Datatable
             columns={[
               {
-                Header: 'Asset',
+                Header: 'Symbol',
                 accessor: 'symbol',
                 disableSortBy: true,
                 Cell: props => {
@@ -143,20 +143,44 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => {
                   const {
+                    id,
                     name,
                     image,
                   } = { ...evm_chains_data.find(c => c?.chain_id === props.value) }
 
                   return (
-                    <div className="flex items-center space-x-1.5">
+                    <div className="flex items-start space-x-1.5">
                       {image && (
                         <Image
                           src={image}
                           className="w-5 h-5 rounded-full"
                         />
                       )}
-                      <span className="font-semibold">
-                        {name}
+                      <div className="flex flex-col">
+                        <span className="font-semibold">
+                          {name}
+                        </span>
+                        <span className="text-slate-400 dark:text-slate-600">
+                          {id}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                },
+              },
+              {
+                Header: 'Denom',
+                accessor: 'id',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    value,
+                  } = { ...props }
+
+                  return (
+                    <div className="flex items-center space-x-1">
+                      <span className="font-medium">
+                        {value}
                       </span>
                     </div>
                   )
@@ -212,7 +236,7 @@ export default () => {
               },
               {
                 Header: 'Add Token',
-                accessor: 'id',
+                accessor: 'add_token',
                 disableSortBy: true,
                 Cell: props => (
                   <div className="flex items-center justify-end">

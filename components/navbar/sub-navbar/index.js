@@ -16,6 +16,7 @@ import TotalTVL from '../../tvl/total'
 import BatchFilters from '../../batches/filters'
 import Copy from '../../copy'
 import EnsProfile from '../../ens-profile'
+import AccountProfile from '../../account-profile'
 import Image from '../../image'
 import { currency, currency_symbol } from '../../../lib/object/currency'
 import { number_format, ellipse } from '../../../lib/utils'
@@ -217,20 +218,10 @@ export default () => {
         <Copy
           value={address}
           title={<div className="text-slate-400 dark:text-slate-600 text-sm">
-            <span className="xl:hidden">
-              {ellipse(
-                address,
-                12,
-                process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
-              )}
-            </span>
-            <span className="hidden xl:block">
-              {ellipse(
-                address,
-                16,
-                process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
-              )}
-            </span>
+            <AccountProfile
+              address={address}
+              ellipse_size={12}
+            />
           </div>}
         />
       )

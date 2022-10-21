@@ -11,6 +11,7 @@ import { BiCheckCircle, BiXCircle, BiLeftArrowCircle, BiRightArrowCircle } from 
 
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
+import AccountProfile from '../account-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { assets as getAssetsPrice } from '../../lib/api/assets'
@@ -926,11 +927,9 @@ export default ({
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                           >
-                            {ellipse(
-                              value,
-                              6,
-                              process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
-                            )}
+                            <AccountProfile
+                              address={value}
+                            />
                           </a>
                         </Link>
                         <Copy
@@ -1032,11 +1031,9 @@ export default ({
                                   rel="noopener noreferrer"
                                   className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                                 >
-                                  {ellipse(
-                                    value,
-                                    6,
-                                    process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
-                                  )}
+                                  <AccountProfile
+                                    address={value}
+                                  />
                                 </a>
                               </Link>
                               <Copy

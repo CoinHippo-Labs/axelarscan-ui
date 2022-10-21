@@ -4,6 +4,7 @@ import { ProgressBar } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
 import Copy from '../copy'
+import AccountProfile from '../account-profile'
 import { number_format, ellipse, loader_color } from '../../lib/utils'
 
 export default ({ data }) => {
@@ -34,10 +35,15 @@ export default ({ data }) => {
               <div className="flex items-center space-x-1">
                 <Link href={`/account/${props.value}`}>
                   <a className="font-medium">
-                    {ellipse(props.value, 16, process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)}
+                    <AccountProfile
+                      address={props.value}
+                      ellipse_size={16}
+                    />
                   </a>
                 </Link>
-                <Copy value={props.value} />
+                <Copy
+                  value={props.value}
+                />
                 {props.row.original.self && (
                   <span className="bg-blue-600 rounded-lg capitalize text-white text-xs font-semibold px-2 py-0.5">
                     Self

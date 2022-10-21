@@ -9,6 +9,7 @@ import { BiRightArrowAlt } from 'react-icons/bi'
 import Copy from '../copy'
 import Image from '../image'
 import ValidatorProfile from '../validator-profile'
+import AccountProfile from '../account-profile'
 import { getChain } from '../../lib/object/chain'
 import { assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse, equals_ignore_case, to_json, to_hex, decode_base64, json_theme } from '../../lib/utils'
@@ -344,18 +345,16 @@ export default ({
                                         rel="noopenner noreferrer"
                                         className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
                                       >
-                                        {ellipse(
-                                          sender,
-                                          16,
-                                          sender_chain_data.prefix_address,
-                                        )}
+                                        <AccountProfile
+                                          address={sender}
+                                          ellipse_size={16}
+                                          prefix={sender_chain_data.prefix_address}
+                                        />
                                       </a> :
-                                      <span className="font-medium">
-                                        {ellipse(
-                                          sender,
-                                          16,
-                                        )}
-                                      </span>
+                                      <AccountProfile
+                                        address={sender}
+                                        ellipse_size={16}
+                                      />
                                     }
                                   </div>
                                   <Copy
@@ -505,18 +504,16 @@ export default ({
                                         rel="noopenner noreferrer"
                                         className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
                                       >
-                                        {ellipse(
-                                          recipient,
-                                          16,
-                                          recipient_chain_data.prefix_address,
-                                        )}
+                                        <AccountProfile
+                                          address={recipient}
+                                          ellipse_size={16}
+                                          prefix={recipient_chain_data.prefix_address}
+                                        />
                                       </a> :
-                                      <span className="font-medium">
-                                        {ellipse(
-                                          recipient,
-                                          16,
-                                        )}
-                                      </span>
+                                      <AccountProfile
+                                        address={recipient}
+                                        ellipse_size={16}
+                                      />
                                     }
                                   </div>
                                   <Copy
@@ -572,18 +569,16 @@ export default ({
                                       rel="noopenner noreferrer"
                                       className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
                                     >
-                                      {ellipse(
-                                        deposit_address,
-                                        16,
-                                        deposit_address_chain_data.prefix_address,
-                                      )}
+                                      <AccountProfile
+                                        address={deposit_address}
+                                        ellipse_size={16}
+                                        prefix={deposit_address_chain_data.prefix_address}
+                                      />
                                     </a> :
-                                    <span className="font-medium">
-                                      {ellipse(
-                                        deposit_address,
-                                        16,
-                                      )}
-                                    </span>
+                                    <AccountProfile
+                                      address={deposit_address}
+                                      ellipse_size={16}
+                                    />
                                   }
                                 </div>
                                 <Copy
@@ -610,18 +605,16 @@ export default ({
                                       rel="noopenner noreferrer"
                                       className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
                                     >
-                                      {ellipse(
-                                        burner_address,
-                                        16,
-                                        chain_data.prefix_address,
-                                      )}
+                                      <AccountProfile
+                                        address={burner_address}
+                                        ellipse_size={16}
+                                        prefix={chain_data.prefix_address}
+                                      />
                                     </a> :
-                                    <span className="font-medium">
-                                      {ellipse(
-                                        burner_address,
-                                        16,
-                                      )}
-                                    </span>
+                                    <AccountProfile
+                                      address={burner_address}
+                                      ellipse_size={16}
+                                    />
                                   }
                                 </div>
                                 <Copy
