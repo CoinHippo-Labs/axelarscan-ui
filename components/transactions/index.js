@@ -156,7 +156,9 @@ export default ({
             data || []
           const size = n ||
             ['/transactions/search'].includes(pathname) ?
-              50 :
+              filters?.type ?
+                25 :
+                50 :
               LIMIT
           const from = fetchTrigger === true || fetchTrigger === 1 ?
             _data.length :
