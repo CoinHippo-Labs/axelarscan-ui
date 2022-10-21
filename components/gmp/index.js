@@ -2718,7 +2718,6 @@ export default () => {
                                     address={call.transaction.from}
                                     prefix={chain_data?.prefix_address}
                                   />
-                                  </span>
                                 </div>
                               )}
                             />
