@@ -11,6 +11,7 @@ import { MdChevronRight } from 'react-icons/md'
 import { TiArrowRight } from 'react-icons/ti'
 
 import EnsProfile from '../ens-profile'
+import AccountProfile from '../account-profile'
 import Image from '../image'
 import Copy from '../copy'
 import Popover from '../popover'
@@ -500,19 +501,16 @@ export default () => {
                             no_copy={true}
                             fallback={(
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                <span className="xl:hidden">
-                                  {ellipse(sender_address, 8, source_chain_data?.prefix_address)}
-                                </span>
-                                <span className="hidden xl:block">
-                                  {ellipse(sender_address, 12, source_chain_data?.prefix_address)}
-                                </span>
+                                <AccountProfile
+                                  address={sender_address}
+                                  prefix={source_chain_data?.prefix_address}
+                                />
                               </div>
                             )}
                           />
                         </a>
                         <Copy
                           value={sender_address}
-                          size={18}
                         />
                       </div>
                     </div>
@@ -570,19 +568,16 @@ export default () => {
                             no_copy={true}
                             fallback={(
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                <span className="xl:hidden">
-                                  {ellipse(deposit_address, 8, deposit_chain_data?.prefix_address)}
-                                </span>
-                                <span className="hidden xl:block">
-                                  {ellipse(deposit_address, 12, deposit_chain_data?.prefix_address)}
-                                </span>
+                                <AccountProfile
+                                  address={deposit_address}
+                                  prefix={deposit_chain_data?.prefix_address}
+                                />
                               </div>
                             )}
                           />
                         </a>
                         <Copy
                           value={deposit_address}
-                          size={18}
                         />
                       </div>
                     )}
@@ -623,19 +618,16 @@ export default () => {
                             no_copy={true}
                             fallback={(
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                <span className="xl:hidden">
-                                  {ellipse(recipient_address, 8, destination_chain_data?.prefix_address)}
-                                </span>
-                                <span className="hidden xl:block">
-                                  {ellipse(recipient_address, 12, destination_chain_data?.prefix_address)}
-                                </span>
+                                <AccountProfile
+                                  address={recipient_address}
+                                  prefix={destination_chain_data?.prefix_address}
+                                />
                               </div>
                             )}
                           />
                         </a>
                         <Copy
                           value={recipient_address}
-                          size={18}
                         />
                       </div>
                     </div>

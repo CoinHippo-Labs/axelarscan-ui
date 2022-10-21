@@ -43,6 +43,7 @@ export default ({
     (
       <span
         title={name}
+        className={`${is_name ? 'font-semibold' : ''}`}
       >
         <span className="xl:hidden">
           {ellipse(

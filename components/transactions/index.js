@@ -929,6 +929,7 @@ export default ({
                           >
                             <AccountProfile
                               address={value}
+                              ellipse_size={6}
                             />
                           </a>
                         </Link>
@@ -1033,6 +1034,7 @@ export default ({
                                 >
                                   <AccountProfile
                                     address={value}
+                                    ellipse_size={6}
                                   />
                                 </a>
                               </Link>

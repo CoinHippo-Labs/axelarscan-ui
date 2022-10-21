@@ -12,6 +12,7 @@ import { TiArrowRight } from 'react-icons/ti'
 
 import Datatable from '../datatable'
 import EnsProfile from '../ens-profile'
+import AccountProfile from '../account-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
@@ -379,19 +380,16 @@ export default ({ n }) => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(sender, 6, prefix_address)}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(sender, 8, prefix_address)}
-                                  </span>
+                                  <AccountProfile
+                                    address={sender}
+                                    prefix={prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={sender}
-                            size={18}
                           />
                         </div>
                       </div>
@@ -441,19 +439,16 @@ export default ({ n }) => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(destinationAddress, 6, prefix_address)}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(destinationAddress, 8, prefix_address)}
-                                  </span>
+                                  <AccountProfile
+                                    address={destinationAddress}
+                                    prefix={prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={destinationAddress}
-                            size={18}
                           />
                         </div>
                       </div>

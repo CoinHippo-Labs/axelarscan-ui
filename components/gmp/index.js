@@ -16,6 +16,7 @@ import { TiArrowRight } from 'react-icons/ti'
 import { RiCloseCircleFill } from 'react-icons/ri'
 
 import EnsProfile from '../ens-profile'
+import AccountProfile from '../account-profile'
 import Image from '../image'
 import Copy from '../copy'
 import Notification from '../notifications'
@@ -1203,27 +1204,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      from,
-                                      8,
-                                      source_chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      from,
-                                      12,
-                                      source_chain_data?.prefix_address,
-                                    )}
-                                  </span>
+                                  <AccountProfile
+                                    address={from}
+                                    prefix={source_chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={from}
-                            size={18}
                           />
                         </div>
                       </div>
@@ -1245,27 +1235,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      sender,
-                                      8,
-                                      source_chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      sender,
-                                      12,
-                                      source_chain_data?.prefix_address,
-                                    )}
-                                  </span>
+                                  <AccountProfile
+                                    address={sender}
+                                    prefix={source_chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={sender}
-                            size={18}
                           />
                         </div>
                       </div>
@@ -1308,27 +1287,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      destinationContractAddress,
-                                      8,
-                                      destination_chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      destinationContractAddress,
-                                      12,
-                                      destination_chain_data?.prefix_address,
-                                    )}
-                                  </span>
+                                  <AccountProfile
+                                    address={destinationContractAddress}
+                                    prefix={destination_chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={destinationContractAddress}
-                            size={18}
                           />
                         </div>
                       </div>
@@ -1350,19 +1318,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(relayer, 8, destination_chain_data?.prefix_address)}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(relayer, 12, destination_chain_data?.prefix_address)}
-                                  </span>
+                                  <AccountProfile
+                                    address={relayer}
+                                    prefix={destination_chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
-                            value={from}
-                            size={18}
+                            value={relayer}
                           />
                         </div>
                       </div>
@@ -2598,27 +2563,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      to,
-                                      10,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      to,
-                                      12,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
+                                  <AccountProfile
+                                    address={to}
+                                    prefix={chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={to}
-                            size={18}
                           />
                           <a
                             href={`${url}${address_path?.replace('{address}', to)}`}
@@ -2664,27 +2618,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      from,
-                                      10,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      from,
-                                      12,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
+                                  <AccountProfile
+                                    address={from}
+                                    prefix={chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={from}
-                            size={18}
                           />
                           <a
                             href={`${url}${address_path?.replace('{address}', from)}`}
@@ -2723,27 +2666,16 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      sender,
-                                      10,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      sender,
-                                      12,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
+                                  <AccountProfile
+                                    address={sender}
+                                    prefix={chain_data?.prefix_address}
+                                  />
                                 </div>
                               )}
                             />
                           </a>
                           <Copy
                             value={sender}
-                            size={18}
                           />
                           <a
                             href={`${url}${address_path?.replace('{address}', sender)}`}
@@ -2782,19 +2714,10 @@ export default () => {
                               no_copy={true}
                               fallback={(
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white text-sm lg:text-base font-bold">
-                                  <span className="xl:hidden">
-                                    {ellipse(
-                                      call.transaction.from,
-                                      10,
-                                      chain_data?.prefix_address,
-                                    )}
-                                  </span>
-                                  <span className="hidden xl:block">
-                                    {ellipse(
-                                      call.transaction.from,
-                                      12,
-                                      chain_data?.prefix_address,
-                                    )}
+                                  <AccountProfile
+                                    address={call.transaction.from}
+                                    prefix={chain_data?.prefix_address}
+                                  />
                                   </span>
                                 </div>
                               )}
@@ -2802,7 +2725,6 @@ export default () => {
                           </a>
                           <Copy
                             value={call.transaction.from}
-                            size={18}
                           />
                           <a
                             href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
