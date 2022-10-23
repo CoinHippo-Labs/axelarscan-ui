@@ -469,6 +469,7 @@ export default ({ n }) => {
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                   <AccountProfile
                                     address={sender_address}
+                                    ellipse_size={6}
                                     prefix={prefix_address}
                                   />
                                 </div>
@@ -550,6 +551,7 @@ export default ({ n }) => {
                               <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                 <AccountProfile
                                   address={recipient_address}
+                                  ellipse_size={6}
                                   prefix={prefix_address}
                                 />
                               </div>
@@ -608,6 +610,7 @@ export default ({ n }) => {
                                 <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
                                   <AccountProfile
                                     address={recipient_address}
+                                    ellipse_size={6}
                                     prefix={prefix_address}
                                   />
                                 </div>
