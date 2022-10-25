@@ -7,42 +7,67 @@ import moment from 'moment'
 import { ProgressBar as ProgressBarSpinner } from 'react-loader-spinner'
 import { HiArrowSmRight } from 'react-icons/hi'
 
+import BarChart from './charts/bar'
 import Image from '../image'
 import { ProgressBar } from '../progress-bars'
-import { search as searchGMP, stats } from '../../lib/api/gmp'
+import { search as searchGMP, stats, chart } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, ellipse, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const DEFAULT_TIMEFRAME_DAYS = 7
-const TIMEFRAME_OPTIONS = [
-  {
-    title: 'All-Time',
-    n_day: null,
-  },
-  {
-    title: 'Last 90 days',
-    n_day: 90,
-  },
-  {
-    title: 'Last 30 days',
-    n_day: 30,
-  },
-  {
-    title: 'Last 7 days',
-    n_day: 7,
-  },
-]
+const TIMEFRAME_OPTIONS =
+  [
+    {
+      title: 'All-Time',
+      n_day: null,
+    },
+    {
+      title: 'Last 90 days',
+      n_day: 90,
+    },
+    {
+      title: 'Last 30 days',
+      n_day: 30,
+    },
+    {
+      title: 'Last 7 days',
+      n_day: 7,
+    },
+  ]
 
 export default () => {
-  const { preferences, evm_chains, cosmos_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
+  const {
+    preferences,
+    evm_chains,
+    cosmos_chains,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
+      },
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
 
   const router = useRouter()
-  const { pathname, asPath } = { ...router }
+  const {
+    pathname,
+    asPath,
+  } = { ...router }
 
   const [timeframeSelected, setTimeframeSelected] = useState(false)
+  const [dailyStats, setDailyStats] = useState(null)
   const [methods, setMethods] = useState(null)
   const [statuses, setStatuses] = useState(null)
   const [chainPairs, setChainPairs] = useState(null)
@@ -52,7 +77,11 @@ export default () => {
   const [filters, setFilters] = useState(null)
 
   useEffect(() => {
-    if (evm_chains_data && cosmos_chains_data && asPath) {
+    if (
+      evm_chains_data &&
+      cosmos_chains_data &&
+      asPath
+    ) {
       const params = params_to_obj(
         asPath.indexOf('?') > -1 &&
         asPath.substring(asPath.indexOf('?') + 1)
@@ -81,48 +110,57 @@ export default () => {
         setTimeframeSelected(true)
       }
       else {
-        setFilters({
-          txHash,
-          sourceChain: getChain(
+        setFilters(
+          {
+            txHash,
+            sourceChain: getChain(
+              sourceChain,
+              chains_data,
+            )?._id ||
             sourceChain,
-            chains_data,
-          )?._id ||
-            sourceChain,
-          destinationChain: getChain(
+            destinationChain: getChain(
+              destinationChain,
+              chains_data,
+            )?._id ||
             destinationChain,
-            chains_data,
-          )?._id ||
-            destinationChain,
-          method: [
-            'callContract',
-            'callContractWithToken',
-          ].includes(method) ?
-            method :
-            undefined,
-          status: [
-            'approving',
-            'called',
-            'forecalled',
-            'approved',
-            'executing',
-            'executed',
-            'error',
-            'insufficient_fee',
-          ].includes(status?.toLowerCase()) ?
-            status.toLowerCase() :
-            undefined,
-          senderAddress,
-          sourceAddress,
-          contractAddress,
-          relayerAddress,
-          time: fromTime &&
-            [
-              moment(Number(fromTime)),
-              toTime ?
-                moment(Number(toTime)) :
-                moment(),
-            ],
-        })
+            method:
+              [
+                'callContract',
+                'callContractWithToken',
+              ].includes(method) ?
+                method :
+                undefined,
+            status:
+              [
+                'approving',
+                'called',
+                'forecalled',
+                'approved',
+                'executing',
+                'executed',
+                'error',
+                'insufficient_fee',
+              ].includes(status?.toLowerCase()) ?
+                status.toLowerCase() :
+                undefined,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            time:
+              fromTime &&
+              [
+                moment(
+                  Number(fromTime)
+                ),
+                toTime ?
+                  moment(
+                    Number(toTime)
+                  ) :
+                  moment(),
+              ],
+          }
+        )
       }
     }
   }, [evm_chains_data, cosmos_chains_data, asPath, timeframeSelected])
@@ -131,7 +169,8 @@ export default () => {
     const triggering = is_interval => {
       setFetchTrigger(
         is_interval ?
-          moment().valueOf() :
+          moment()
+            .valueOf() :
           typeof fetchTrigger === 'number' ?
             null :
             0
@@ -190,11 +229,18 @@ export default () => {
 
         qs.append(
           'fromTime',
-          moment().subtract(DEFAULT_TIMEFRAME_DAYS, 'days').valueOf(),
+          moment()
+            .subtract(
+              DEFAULT_TIMEFRAME_DAYS,
+              'days',
+            )
+            .valueOf(),
         )
+
         qs.append(
           'toTime',
-          moment().valueOf(),
+          moment()
+            .valueOf(),
         )
 
         const qs_string = qs.toString()
@@ -245,26 +291,40 @@ export default () => {
         }
 
         if (time?.length > 0) {
-          fromTime = time[0].unix()
-          toTime = time[1].unix() ||
-            moment().unix()
+          fromTime =
+            time[0]
+              .unix()
+          toTime =
+            time[1]
+              .unix() ||
+            moment()
+              .unix()
         }
 
-        const response = await stats(
-          {
-            txHash,
-            sourceChain,
-            destinationChain,
-            event,
-            status,
-            senderAddress,
-            sourceAddress,
-            contractAddress,
-            relayerAddress,
-            fromTime,
-            toTime,
-          },
+        const params = {
+          txHash,
+          sourceChain,
+          destinationChain,
+          event,
+          status,
+          senderAddress,
+          sourceAddress,
+          contractAddress,
+          relayerAddress,
+          fromTime,
+          toTime,
+        }
+
+        setDailyStats(
+          await chart(
+            {
+              ...params,
+              granularity: timeframe,
+            }
+          )
         )
+
+        const response = await stats(params)
 
         const {
           messages,
@@ -281,14 +341,16 @@ export default () => {
               } = { ...m }
 
               return {
-                key: key?.replace(
-                  'ContractCall',
-                  'callContract',
-                ),
+                key: (key || '')
+                  .replace(
+                    'ContractCall',
+                    'callContract',
+                  ),
                 num_txs,
               }
             })
         )
+
         setStatuses(
           _.orderBy(
             Object.entries({ ...statuses })
@@ -328,6 +390,7 @@ export default () => {
             ['desc'],
           )
         )
+
         setChainPairs(
           _.orderBy(
             Object.entries(
@@ -376,6 +439,7 @@ export default () => {
             ['desc'],
           )
         )
+
         setContracts(
           _.orderBy(
             Object.entries(
@@ -434,8 +498,10 @@ export default () => {
             ['desc'],
           )
         )
+
         setTimeSpents(
-          time_spents || []
+          time_spents ||
+          []
         )
       }
     }
@@ -447,6 +513,7 @@ export default () => {
     evm_chains_data,
     cosmos_chains_data,
   )
+
   const total = _.sumBy(
     (statuses || [])
       .filter(s =>
@@ -455,87 +522,157 @@ export default () => {
     'num_txs',
   )
 
+  const diff_time_filter =
+    filters?.time?.length > 0 &&
+    Math.abs(
+      (
+        filters.time[1] ||
+        moment()
+      )
+      .diff(
+        filters.time[0],
+        'days',
+      )
+    )
+
+  const timeframe =
+    (
+      filters &&
+      !(filters.time?.length > 0)
+    ) ||
+    diff_time_filter > 90 ?
+      'month' :
+      'day'
+
   const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
-  const colors = [
-    'bg-yellow-500',
-    'bg-blue-500',
-    'bg-green-500',
-    'bg-red-500',
-  ]
+
+  const colors =
+    [
+      'bg-yellow-500',
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-red-500',
+    ]
 
   return (
     <>
       <div className="flex items-center mb-2">
-        {TIMEFRAME_OPTIONS.map((o, i) => {
-          const {
-            title,
-            n_day,
-          } = { ...o }
-          const selected = (!n_day && !(filters?.time?.length > 0)) ||
-            (
-              filters?.time?.length > 0 &&
-              Math.abs(filters.time[0].diff(moment().subtract(n_day, 'days'), 'minutes')) < 30 &&
-              Math.abs((filters.time[1] || moment()).diff(moment(), 'minutes')) < 30
-            )
+        {TIMEFRAME_OPTIONS
+          .map((o, i) => {
+            const {
+              title,
+              n_day,
+            } = { ...o }
 
-          const qs = new URLSearchParams()
+            const selected =
+              (
+                !n_day &&
+                !(filters?.time?.length > 0)
+              ) ||
+              (
+                filters?.time?.length > 0 &&
+                Math.abs(
+                  filters.time[0]
+                    .diff(
+                      moment()
+                        .subtract(
+                          n_day,
+                          'days',
+                        ),
+                      'minutes',
+                    )
+                ) < 30 &&
+                Math.abs(
+                  (
+                    filters.time[1] ||
+                    moment()
+                  )
+                  .diff(
+                    moment(),
+                    'minutes',
+                  )
+                ) < 30
+              )
 
-          Object.entries({ ...filters })
-            .filter(([k, v]) => v)
-            .forEach(([k, v]) => {
-              let key,
-                value
+            const qs = new URLSearchParams()
 
-              switch (k) {
-                case 'time':
-                  break
-                default:
-                  key = k
-                  value = v
-                  break
-              }
+            Object.entries({ ...filters })
+              .filter(([k, v]) => v)
+              .forEach(([k, v]) => {
+                let key,
+                  value
 
-              if (key) {
+                switch (k) {
+                  case 'time':
+                    break
+                  default:
+                    key = k
+                    value = v
+                    break
+                }
+
+                if (key) {
+                  qs.append(
+                    key,
+                    value,
+                  )
+                }
+              })
+
+            switch (n_day) {
+              case null:
+                break
+              default:
                 qs.append(
-                  key,
-                  value,
+                  'fromTime',
+                  moment()
+                    .subtract(
+                      n_day,
+                      'days',
+                    )
+                    .valueOf(),
                 )
-              }
-            })
+                qs.append(
+                  'toTime',
+                  moment()
+                    .valueOf(),
+                )
+                break
+            }
 
-          switch (n_day) {
-            case null:
-              break
-            default:
-              qs.append(
-                'fromTime',
-                moment().subtract(n_day, 'days').valueOf(),
-              )
-              qs.append(
-                'toTime',
-                moment().valueOf(),
-              )
-              break
-          }
+            const qs_string = qs.toString()
 
-          const qs_string = qs.toString()
-
-          return (
-            <Link
-              key={i}
-              href={`${pathname}${qs_string ? `?${qs_string}` : ''}`}
-            >
-              <a
-                onClick={() => setTimeframeSelected(true)}
-                className={`${selected ? 'bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold' : 'bg-slate-100 dark:bg-slate-900 text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium'} rounded-lg whitespace-nowrap mr-1.5 py-0.5 px-1.5`}
+            return (
+              <Link
+                key={i}
+                href={`${pathname}${qs_string ? `?${qs_string}` : ''}`}
               >
-                {title}
-              </a>
-            </Link>
-          )
-        })}
+                <a
+                  onClick={() => setTimeframeSelected(true)}
+                  className={`${selected ? 'bg-slate-200 dark:bg-slate-800 text-blue-600 dark:text-blue-400 font-bold' : 'bg-slate-100 dark:bg-slate-900 text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium'} rounded-lg whitespace-nowrap mr-1.5 py-0.5 px-1.5`}
+                >
+                  {title}
+                </a>
+              </Link>
+            )
+          })
+        }
       </div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        <div className={`sm:col-span-2 ${metricClassName}`}>
+          <BarChart
+            id="total_gmp"
+            title="Messages"
+            description={`Number of messages passed by ${timeframe}`}
+            date_format={
+              timeframe === 'month' ?
+                'MMM YYYY' :
+                undefined
+            }
+            timeframe={timeframe}
+            chart_data={dailyStats}
+          />
+        </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
             Messages
@@ -553,63 +690,67 @@ export default () => {
               />
             }
           </div>
-          <div className="text-slate-400 dark:text-slate-600 text-sm font-medium">
+          <div className="text-slate-400 dark:text-slate-600 text-xs font-medium">
             messages passed through the network
           </div>
-        </div>
-        <div className={`${metricClassName}`}>
+          <div className="h-4" />
           <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
             Methods
           </span>
-          <div className="space-y-1">
-            {methods && statuses ?
-              methods.map((m, i) => (
-                <div
-                  key={i}
-                  className="space-y-0"
-                >
-                  <div className="flex items-center justify-between space-x-2">
-                    <span className="text-base font-bold">
-                      {m?.key}
-                    </span>
-                    <span className="font-bold">
-                      {number_format(
-                        m?.num_txs,
-                        '0,0',
-                      )}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between space-x-2">
-                    <ProgressBar
-                      width={m?.num_txs * 100 / total}
-                      color={`${colors[i % colors.length]}`}
-                      className="h-1.5 rounded-lg"
-                    />
-                    <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                      {number_format(
-                        m?.num_txs / total,
-                        '0,0.000%',
-                      )}
-                    </span>
-                  </div>
-                </div>
-              )) :
-              <ProgressBarSpinner
-                borderColor={loader_color(theme)}
-                width="36"
-                height="36"
-              />
+          <div className="space-y-1 mt-1">
+            {
+              methods &&
+              statuses ?
+                methods
+                  .map((m, i) => (
+                    <div
+                      key={i}
+                      className="space-y-0"
+                    >
+                      <div className="flex items-center justify-between space-x-2">
+                        <span className="text-base font-bold">
+                          {m?.key}
+                        </span>
+                        <span className="font-bold">
+                          {number_format(
+                            m?.num_txs,
+                            '0,0',
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between space-x-2">
+                        <ProgressBar
+                          width={m?.num_txs * 100 / total}
+                          color={`${colors[i % colors.length]}`}
+                          className="h-1.5 rounded-lg"
+                        />
+                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                          {number_format(
+                            m?.num_txs * 100 / total,
+                            '0,0.000',
+                          )}%
+                        </span>
+                      </div>
+                    </div>
+                  )) :
+                <ProgressBarSpinner
+                  borderColor={loader_color(theme)}
+                  width="36"
+                  height="36"
+                />
             }
           </div>
         </div>
-        <div className={`sm:col-span-2 ${metricClassName}`}>
+        <div className={`lg:col-span-2 ${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-base font-semibold">
             Statuses
           </span>
           <div className="grid sm:grid-cols-2 gap-y-1 gap-x-5">
             {statuses ?
               statuses
-                .filter(s => !['called'].includes(s?.key))
+                .filter(s =>
+                  !['called'].includes(s?.key)
+                )
                 .map((m, i) => (
                   <div
                     key={i}
@@ -634,9 +775,9 @@ export default () => {
                       />
                       <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                         {number_format(
-                          m?.num_txs / total,
-                          '0,0.000%',
-                        )}
+                          m?.num_txs * 100 / total,
+                          '0,0.000',
+                        )}%
                       </span>
                     </div>
                   </div>
@@ -656,76 +797,79 @@ export default () => {
             Chain Pairs
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-y-1 gap-x-10">
-            {chainPairs && statuses ?
-              chainPairs.map((p, i) => {
-                const {
-                  source_chain,
-                  destination_chain,
-                  num_txs,
-                } = { ...p }
+            {
+              chainPairs &&
+              statuses ?
+                chainPairs
+                  .map((p, i) => {
+                    const {
+                      source_chain,
+                      destination_chain,
+                      num_txs,
+                    } = { ...p }
 
-                const source_chain_data = getChain(
-                  source_chain,
-                  chains_data,
-                )
-                const destination_chain_data = getChain(
-                  destination_chain,
-                  chains_data,
-                )
+                    const source_chain_data = getChain(
+                      source_chain,
+                      chains_data,
+                    )
+                    const destination_chain_data = getChain(
+                      destination_chain,
+                      chains_data,
+                    )
 
-                return (
-                  <div
-                    key={i}
-                    className="space-y-0"
-                  >
-                    <div className="flex items-center justify-between space-x-2">
-                      <div className="flex items-center space-x-2">
-                        <Image
-                          src={source_chain_data?.image}
-                          className="w-5 h-5 rounded-full"
-                        />
-                        <HiArrowSmRight size={20} />
-                        {destination_chain_data ?
-                          <Image
-                            src={destination_chain_data?.image}
-                            className="w-5 h-5 rounded-full"
-                          /> :
-                          <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                            {ellipse(
-                              destination_chain,
-                              8,
+                    return (
+                      <div
+                        key={i}
+                        className="space-y-0"
+                      >
+                        <div className="flex items-center justify-between space-x-2">
+                          <div className="flex items-center space-x-2">
+                            <Image
+                              src={source_chain_data?.image}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <HiArrowSmRight size={20} />
+                            {destination_chain_data ?
+                              <Image
+                                src={destination_chain_data?.image}
+                                className="w-5 h-5 rounded-full"
+                              /> :
+                              <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                                {ellipse(
+                                  destination_chain,
+                                  8,
+                                )}
+                              </span>
+                            }
+                          </div>
+                          <span className="font-bold">
+                            {number_format(
+                              num_txs,
+                              '0,0',
                             )}
                           </span>
-                        }
+                        </div>
+                        <div className="flex items-center justify-between space-x-2">
+                          <ProgressBar
+                            width={num_txs * 100 / total}
+                            color={`${colors[i % colors.length]}`}
+                            className="h-1.5 rounded-lg"
+                          />
+                          <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                            {number_format(
+                              num_txs * 100 / total,
+                              '0,0.000',
+                            )}%
+                          </span>
+                        </div>
                       </div>
-                      <span className="font-bold">
-                        {number_format(
-                          num_txs,
-                          '0,0',
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between space-x-2">
-                      <ProgressBar
-                        width={num_txs * 100 / total}
-                        color={`${colors[i % colors.length]}`}
-                        className="h-1.5 rounded-lg"
-                      />
-                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        {number_format(
-                          num_txs / total,
-                          '0,0.000%',
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )
-              }) :
-              <ProgressBarSpinner
-                borderColor={loader_color(theme)}
-                width="36"
-                height="36"
-              />
+                    )
+                  }) :
+                <ProgressBarSpinner
+                  borderColor={loader_color(theme)}
+                  width="36"
+                  height="36"
+                />
             }
           </div>
         </div>
@@ -735,67 +879,71 @@ export default () => {
           </div>
           <div className="space-y-3">
             {contracts ?
-              contracts.map((c, i) => {
-                const {
-                  key,
-                  num_contracts,
-                } = { ...c }
+              contracts
+                .map((c, i) => {
+                  const {
+                    key,
+                    num_contracts,
+                  } = { ...c }
 
-                const chain_data = getChain(
-                  key,
-                  chains_data,
-                )
+                  const chain_data = getChain(
+                    key,
+                    chains_data,
+                  )
 
-                const {
-                  name,
-                  image,
-                } = { ...chain_data }
+                  const {
+                    name,
+                    image,
+                  } = { ...chain_data }
 
-                const total = _.sumBy(
-                  contracts,
-                  'num_contracts',
-                )
+                  const total = _.sumBy(
+                    contracts,
+                    'num_contracts',
+                  )
 
-                return (
-                  <div
-                    key={i}
-                    className="space-y-0"
-                  >
-                    <div className="flex items-center justify-between space-x-2">
-                      <div className="flex items-center space-x-2">
-                        {image && (
-                          <Image
-                            src={image}
-                            className="w-6 h-6 rounded-full"
-                          />
-                        )}
-                        <span className="text-base font-bold">
-                          {name || key}
+                  return (
+                    <div
+                      key={i}
+                      className="space-y-0"
+                    >
+                      <div className="flex items-center justify-between space-x-2">
+                        <div className="flex items-center space-x-2">
+                          {image && (
+                            <Image
+                              src={image}
+                              className="w-6 h-6 rounded-full"
+                            />
+                          )}
+                          <span className="text-base font-bold">
+                            {
+                              name ||
+                              key
+                            }
+                          </span>
+                        </div>
+                        <span className="font-bold">
+                          {number_format(
+                            num_contracts,
+                            '0,0',
+                          )}
                         </span>
                       </div>
-                      <span className="font-bold">
-                        {number_format(
-                          num_contracts,
-                          '0,0',
-                        )}
-                      </span>
+                      <div className="flex items-center justify-between space-x-2">
+                        <ProgressBar
+                          width={num_contracts * 100 / total}
+                          color={`${colors[i % colors.length]}`}
+                          className="h-1.5 rounded-lg"
+                        />
+                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                          {number_format(
+                            num_contracts * 100 / total,
+                            '0,0.000',
+                          )}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between space-x-2">
-                      <ProgressBar
-                        width={num_contracts * 100 / total}
-                        color={`${colors[i % colors.length]}`}
-                        className="h-1.5 rounded-lg"
-                      />
-                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        {number_format(
-                          num_contracts / total,
-                          '0,0.000%',
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                )
-              }) :
+                  )
+                }) :
               <ProgressBarSpinner
                 borderColor={loader_color(theme)}
                 width="36"
@@ -839,7 +987,10 @@ export default () => {
                           />
                         )}
                         <span className="text-sm font-bold">
-                          {source_chain_data?.name || key}
+                          {
+                            source_chain_data?.name ||
+                            key
+                          }
                         </span>
                       </div>
                     </div>
