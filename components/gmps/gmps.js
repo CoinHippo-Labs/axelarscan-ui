@@ -95,6 +95,7 @@ export default ({ n }) => {
           'executed',
           'error',
           'insufficient_fee',
+          'no_created_at',
         ].includes(status?.toLowerCase()) ?
           status.toLowerCase() :
           undefined,

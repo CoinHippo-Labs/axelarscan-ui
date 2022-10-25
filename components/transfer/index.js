@@ -833,12 +833,12 @@ export default () => {
               (path || '')
                 .replace(
                   '{id}',
-                  id,
+                  _id,
                 ) ||
               (transaction_path || '')
                 .replace(
                   '{tx}',
-                  id,
+                  _id,
                 )
 
             Object.entries({ ...params })
@@ -1034,7 +1034,6 @@ export default () => {
                           </a>
                           <Copy
                             value={_id}
-                            size={18}
                           />
                           <a
                             href={`${url}${_path}`}
