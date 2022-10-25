@@ -835,10 +835,13 @@ export default () => {
                                 className="w-5 h-5 rounded-full"
                               /> :
                               <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                                {ellipse(
-                                  destination_chain,
-                                  8,
-                                )}
+                                {
+                                  ellipse(
+                                    destination_chain,
+                                    8,
+                                  ) ||
+                                  'Invalid Chain'
+                                }
                               </span>
                             }
                           </div>
@@ -917,7 +920,8 @@ export default () => {
                           <span className="text-base font-bold">
                             {
                               name ||
-                              key
+                              key ||
+                              'Invalid Chain'
                             }
                           </span>
                         </div>
