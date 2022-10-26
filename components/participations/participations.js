@@ -242,7 +242,7 @@ export default ({
                                     <a
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-blue-600 dark:text-white font-bold"
+                                      className="text-blue-500 dark:text-blue-500 font-medium"
                                     >
                                       {ellipse(moniker, 12)}
                                     </a>
@@ -386,7 +386,7 @@ export default ({
                                     <a
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-blue-600 dark:text-white font-bold"
+                                      className="text-blue-500 dark:text-blue-500 font-medium"
                                     >
                                       {ellipse(moniker, 12)}
                                     </a>

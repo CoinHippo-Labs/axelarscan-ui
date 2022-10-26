@@ -263,7 +263,7 @@ export default ({ n }) => {
                       <a
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 dark:text-white font-bold"
+                        className="text-blue-500 dark:text-blue-500 font-medium"
                       >
                         {ellipse(props.value)}
                       </a>
@@ -368,30 +368,38 @@ export default ({ n }) => {
                         <span className="text-slate-400 dark:text-slate-600 font-semibold">
                           Sender address
                         </span>
-                        <div className="flex items-center space-x-1">
-                          <a
-                            href={`${url}${address_path?.replace('{address}', sender)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <EnsProfile
-                              address={sender}
-                              no_copy={true}
-                              fallback={(
-                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <AccountProfile
-                                    address={sender}
-                                    prefix={prefix_address}
-                                  />
-                                </div>
-                              )}
+                        {sender.startsWith('0x') ?
+                          <div className="flex items-center space-x-1">
+                            <a
+                              href={`${url}${address_path?.replace('{address}', sender)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <EnsProfile
+                                address={sender}
+                                no_copy={true}
+                                fallback={(
+                                  <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                    {ellipse(
+                                      sender,
+                                      12,
+                                      prefix_address,
+                                    )}
+                                  </div>
+                                )}
+                              />
+                            </a>
+                            <Copy
+                              value={sender}
                             />
-                          </a>
-                          <Copy
-                            value={sender}
-                          />
-                        </div>
+                          </div> :
+                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                            <AccountProfile
+                              address={sender}
+                              prefix={prefix_address}
+                            />
+                          </div>
+                        }
                       </div>
                     )}
                   </div>
@@ -427,30 +435,38 @@ export default ({ n }) => {
                         <span className="text-slate-400 dark:text-slate-600 font-semibold">
                           Recipient address
                         </span>
-                        <div className="flex items-center space-x-1">
-                          <a
-                            href={`${url}${address_path?.replace('{address}', destinationAddress)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
-                          >
-                            <EnsProfile
-                              address={destinationAddress}
-                              no_copy={true}
-                              fallback={(
-                                <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                  <AccountProfile
-                                    address={destinationAddress}
-                                    prefix={prefix_address}
-                                  />
-                                </div>
-                              )}
+                        {destinationAddress.startsWith('0x') ?
+                          <div className="flex items-center space-x-1">
+                            <a
+                              href={`${url}${address_path?.replace('{address}', destinationAddress)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <EnsProfile
+                                address={destinationAddress}
+                                no_copy={true}
+                                fallback={(
+                                  <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                    {ellipse(
+                                      destinationAddress,
+                                      12,
+                                      prefix_address,
+                                    )}
+                                  </div>
+                                )}
+                              />
+                            </a>
+                            <Copy
+                              value={destinationAddress}
                             />
-                          </a>
-                          <Copy
-                            value={destinationAddress}
-                          />
-                        </div>
+                          </div> :
+                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                            <AccountProfile
+                              address={destinationAddress}
+                              prefix={prefix_address}
+                            />
+                          </div>
+                        }
                       </div>
                     )}
                   </div>
@@ -639,7 +655,7 @@ export default ({ n }) => {
                                   href={`${url}${_path}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 dark:text-white"
+                                  className="text-blue-500 dark:text-blue-500"
                                 >
                                   {icon ?
                                     <Image

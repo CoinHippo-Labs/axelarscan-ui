@@ -8,7 +8,6 @@ import Datatable from '../datatable'
 import Image from '../image'
 import ValidatorProfile from '../validator-profile'
 import EnsProfile from '../ens-profile'
-import AccountProfile from '../account-profile'
 import Copy from '../copy'
 import { type } from '../../lib/object/id'
 import { assetManager } from '../../lib/object/asset'
@@ -382,7 +381,11 @@ export default ({
                   size={20}
                   value={address}
                   title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
-                    {address}
+                    {ellipse(
+                      address,
+                      28,
+                      process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+                    )}
                   </span>}
                 />
               )

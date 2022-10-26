@@ -336,32 +336,17 @@ export default ({
                                     </div>
                                   </div>
                                 </div> :
-                                <div className="flex items-center">
-                                  <div className="mr-1.5">
-                                    {sender_chain_data ?
-                                      <a
-                                        href={`${sender_chain_data.explorer?.url}${sender_chain_data.explorer?.address_path?.replace('{address}', sender)}`}
-                                        target="_blank"
-                                        rel="noopenner noreferrer"
-                                        className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                      >
-                                        <AccountProfile
-                                          address={sender}
-                                          ellipse_size={16}
-                                          prefix={sender_chain_data.prefix_address}
-                                        />
-                                      </a> :
-                                      <AccountProfile
-                                        address={sender}
-                                        ellipse_size={16}
-                                      />
-                                    }
-                                  </div>
-                                  <Copy
-                                    size={20}
-                                    value={sender}
+                                sender_chain_data ?
+                                  <AccountProfile
+                                    address={sender}
+                                    ellipse_size={16}
+                                    prefix={sender_chain_data.prefix_address}
+                                    url={`${sender_chain_data.explorer?.url}${sender_chain_data.explorer?.address_path?.replace('{address}', sender)}`}
+                                  /> :
+                                  <AccountProfile
+                                    address={sender}
+                                    ellipse_size={16}
                                   />
-                                </div>
                               }
                               <div className="dark:text-slate-200 font-semibold">
                                 {signer ?
@@ -495,32 +480,17 @@ export default ({
                                     </div>
                                   </div>
                                 </div> :
-                                <div className="flex items-center">
-                                  <div className="mr-1.5">
-                                    {recipient_chain_data ?
-                                      <a
-                                        href={`${recipient_chain_data.explorer?.url}${recipient_chain_data.explorer?.address_path?.replace('{address}', recipient)}`}
-                                        target="_blank"
-                                        rel="noopenner noreferrer"
-                                        className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                      >
-                                        <AccountProfile
-                                          address={recipient}
-                                          ellipse_size={16}
-                                          prefix={recipient_chain_data.prefix_address}
-                                        />
-                                      </a> :
-                                      <AccountProfile
-                                        address={recipient}
-                                        ellipse_size={16}
-                                      />
-                                    }
-                                  </div>
-                                  <Copy
-                                    size={20}
-                                    value={recipient}
+                                recipient_chain_data ?
+                                  <AccountProfile
+                                    address={recipient}
+                                    ellipse_size={16}
+                                    prefix={recipient_chain_data.prefix_address}
+                                    url={`${recipient_chain_data.explorer?.url}${recipient_chain_data.explorer?.address_path?.replace('{address}', recipient)}`}
+                                  /> :
+                                  <AccountProfile
+                                    address={recipient}
+                                    ellipse_size={16}
                                   />
-                                </div>
                               }
                               <div className="dark:text-slate-200 font-semibold">
                                 {recipient_validator_data ?
@@ -560,32 +530,18 @@ export default ({
                           deposit_address &&
                           (
                             <div className="space-y-1 my-2 mr-4 sm:mr-6">
-                              <div className="flex items-center">
-                                <div className="mr-1.5">
-                                  {deposit_address_chain_data ?
-                                    <a
-                                      href={`${deposit_address_chain_data.explorer?.url}${deposit_address_chain_data.explorer?.address_path?.replace('{address}', deposit_address)}`}
-                                      target="_blank"
-                                      rel="noopenner noreferrer"
-                                      className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                    >
-                                      <AccountProfile
-                                        address={deposit_address}
-                                        ellipse_size={16}
-                                        prefix={deposit_address_chain_data.prefix_address}
-                                      />
-                                    </a> :
-                                    <AccountProfile
-                                      address={deposit_address}
-                                      ellipse_size={16}
-                                    />
-                                  }
-                                </div>
-                                <Copy
-                                  size={20}
-                                  value={deposit_address}
+                              {deposit_address_chain_data ?
+                                <AccountProfile
+                                  address={deposit_address}
+                                  ellipse_size={16}
+                                  prefix={deposit_address_chain_data.prefix_address}
+                                  url={`${deposit_address_chain_data.explorer?.url}${deposit_address_chain_data.explorer?.address_path?.replace('{address}', deposit_address)}`}
+                                /> :
+                                <AccountProfile
+                                  address={deposit_address}
+                                  ellipse_size={16}
                                 />
-                              </div>
+                              }
                               <div className="dark:text-slate-200 font-semibold">
                                 Deposit address
                               </div>
@@ -596,32 +552,18 @@ export default ({
                           burner_address &&
                           (
                             <div className="space-y-1 my-2 mr-4 sm:mr-6">
-                              <div className="flex items-center">
-                                <div className="mr-1.5">
-                                  {chain_data ?
-                                    <a
-                                      href={`${chain_data.explorer?.url}${chain_data.explorer?.address_path?.replace('{address}', burner_address)}`}
-                                      target="_blank"
-                                      rel="noopenner noreferrer"
-                                      className="text-blue-500 hover:text-blue-600 darl:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                    >
-                                      <AccountProfile
-                                        address={burner_address}
-                                        ellipse_size={16}
-                                        prefix={chain_data.prefix_address}
-                                      />
-                                    </a> :
-                                    <AccountProfile
-                                      address={burner_address}
-                                      ellipse_size={16}
-                                    />
-                                  }
-                                </div>
-                                <Copy
-                                  size={20}
-                                  value={burner_address}
+                              {chain_data ?
+                                <AccountProfile
+                                  address={burner_address}
+                                  ellipse_size={16}
+                                  prefix={chain_data.prefix_address}
+                                  url={`${chain_data.explorer?.url}${chain_data.explorer?.address_path?.replace('{address}', burner_address)}`}
+                                /> :
+                                <AccountProfile
+                                  address={burner_address}
+                                  ellipse_size={16}
                                 />
-                              </div>
+                              }
                               <div className="dark:text-slate-200 font-semibold">
                                 Burner address
                               </div>

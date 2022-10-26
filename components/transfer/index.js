@@ -489,30 +489,38 @@ export default () => {
                       <span className="text-slate-400 dark:text-slate-600 font-semibold">
                         Sender address
                       </span>
-                      <div className="flex items-center space-x-1">
-                        <a
-                          href={`${source_chain_data?.explorer?.url}${source_chain_data?.explorer?.address_path?.replace('{address}', sender_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
-                        >
-                          <EnsProfile
-                            address={sender_address}
-                            no_copy={true}
-                            fallback={(
-                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                <AccountProfile
-                                  address={sender_address}
-                                  prefix={source_chain_data?.prefix_address}
-                                />
-                              </div>
-                            )}
+                      {sender_address.startsWith('0x') ?
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${source_chain_data?.explorer?.url}${source_chain_data?.explorer?.address_path?.replace('{address}', sender_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <EnsProfile
+                              address={sender_address}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                  {ellipse(
+                                    sender_address,
+                                    12,
+                                    source_chain_data?.prefix_address,
+                                  )}
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={sender_address}
                           />
-                        </a>
-                        <Copy
-                          value={sender_address}
-                        />
-                      </div>
+                        </div> :
+                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <AccountProfile
+                            address={sender_address}
+                            prefix={source_chain_data?.prefix_address}
+                          />
+                        </div>
+                      }
                     </div>
                   )}
                 </div>
@@ -556,30 +564,37 @@ export default () => {
                       Deposit address
                     </span>
                     {deposit_address && (
-                      <div className="flex items-center space-x-1">
-                        <a
-                          href={`${deposit_chain_data?.explorer?.url}${deposit_chain_data?.explorer?.address_path?.replace('{address}', deposit_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
-                        >
-                          <EnsProfile
-                            address={deposit_address}
-                            no_copy={true}
-                            fallback={(
-                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                <AccountProfile
-                                  address={deposit_address}
-                                  prefix={deposit_chain_data?.prefix_address}
-                                />
-                              </div>
-                            )}
+                      deposit_address.startsWith('0x') ?
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${deposit_chain_data?.explorer?.url}${deposit_chain_data?.explorer?.address_path?.replace('{address}', deposit_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <EnsProfile
+                              address={deposit_address}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                  {ellipse(
+                                    deposit_address,
+                                    12,
+                                    deposit_chain_data?.prefix_address,
+                                  )}
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={deposit_address}
                           />
-                        </a>
-                        <Copy
-                          value={deposit_address}
-                        />
-                      </div>
+                        </div> :
+                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <AccountProfile
+                            address={deposit_address}
+                            prefix={deposit_chain_data?.prefix_address}
+                          />
+                        </div>
                     )}
                   </div>
                 </div>
@@ -606,30 +621,38 @@ export default () => {
                       <span className="text-slate-400 dark:text-slate-600 font-semibold">
                         Recipient address
                       </span>
-                      <div className="flex items-center space-x-1">
-                        <a
-                          href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.address_path?.replace('{address}', recipient_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
-                        >
-                          <EnsProfile
-                            address={recipient_address}
-                            no_copy={true}
-                            fallback={(
-                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-bold">
-                                <AccountProfile
-                                  address={recipient_address}
-                                  prefix={destination_chain_data?.prefix_address}
-                                />
-                              </div>
-                            )}
+                      {recipient_address.startsWith('0x') ?
+                        <div className="flex items-center space-x-1">
+                          <a
+                            href={`${destination_chain_data?.explorer?.url}${destination_chain_data?.explorer?.address_path?.replace('{address}', recipient_address)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <EnsProfile
+                              address={recipient_address}
+                              no_copy={true}
+                              fallback={(
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                  {ellipse(
+                                    recipient_address,
+                                    12,
+                                    destination_chain_data?.prefix_address,
+                                  )}
+                                </div>
+                              )}
+                            />
+                          </a>
+                          <Copy
+                            value={recipient_address}
                           />
-                        </a>
-                        <Copy
-                          value={recipient_address}
-                        />
-                      </div>
+                        </div> :
+                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <AccountProfile
+                            address={recipient_address}
+                            prefix={destination_chain_data?.prefix_address}
+                          />
+                        </div>
+                      }
                     </div>
                   )}
                 </div>
@@ -679,7 +702,7 @@ export default () => {
                               href={`${url}${_path}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
+                              className="text-blue-500 dark:text-blue-500"
                             >
                               {icon ?
                                 <Image
@@ -762,7 +785,7 @@ export default () => {
                                   href={`${url}${_path}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 dark:text-white"
+                                  className="text-blue-500 dark:text-blue-500"
                                 >
                                   {icon ?
                                     <Image
@@ -885,9 +908,9 @@ export default () => {
                           href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
+                          className="text-blue-500 dark:text-blue-500 font-medium"
                         >
-                          <div className="font-bold">
+                          <div>
                             <span className="xl:hidden">
                               {ellipse(
                                 transactionHash,
@@ -910,7 +933,7 @@ export default () => {
                           href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white"
+                          className="text-blue-500 dark:text-blue-500"
                         >
                           {_chain_data.explorer.icon ?
                             <Image
@@ -960,9 +983,9 @@ export default () => {
                               href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
+                              className="text-blue-500 dark:text-blue-500 font-medium"
                             >
-                              <div className="font-bold">
+                              <div>
                                 <span className="xl:hidden">
                                   {ellipse(
                                     tx,
@@ -985,7 +1008,7 @@ export default () => {
                               href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 dark:text-white"
+                              className="text-blue-500 dark:text-blue-500"
                             >
                               {_explorer?.icon ?
                                 <Image
@@ -1015,9 +1038,9 @@ export default () => {
                             href={`${url}${_path}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
+                            className="text-blue-500 dark:text-blue-500 font-medium"
                           >
-                            <div className="font-bold">
+                            <div>
                               <span className="xl:hidden">
                                 {ellipse(
                                   _id,
@@ -1039,7 +1062,7 @@ export default () => {
                             href={`${url}${_path}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-white"
+                            className="text-blue-500 dark:text-blue-500"
                           >
                             {icon ?
                               <Image
@@ -1070,7 +1093,7 @@ export default () => {
                           href={`${url}${block_path?.replace('{block}', height)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-white font-bold"
+                          className="text-blue-500 dark:text-blue-500 font-medium"
                         >
                           {number_format(height, '0,0')}
                         </a>

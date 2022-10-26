@@ -215,14 +215,9 @@ export default () => {
     case '/account/[address]':
       title = 'Account'
       subtitle = (
-        <Copy
-          value={address}
-          title={<div className="text-slate-400 dark:text-slate-600 text-sm">
-            <AccountProfile
-              address={address}
-              ellipse_size={12}
-            />
-          </div>}
+        <AccountProfile
+          address={address}
+          ellipse_size={12}
         />
       )
       break

@@ -1,9 +1,7 @@
-import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import { ProgressBar } from 'react-loader-spinner'
 
 import Datatable from '../datatable'
-import Copy from '../copy'
 import AccountProfile from '../account-profile'
 import { number_format, ellipse, loader_color } from '../../lib/utils'
 
@@ -33,16 +31,10 @@ export default ({ data }) => {
             disableSortBy: true,
             Cell: props => (
               <div className="flex items-center space-x-1">
-                <Link href={`/account/${props.value}`}>
-                  <a className="font-medium">
-                    <AccountProfile
-                      address={props.value}
-                      ellipse_size={16}
-                    />
-                  </a>
-                </Link>
-                <Copy
-                  value={props.value}
+                <AccountProfile
+                  address={props.value}
+                  ellipse_size={16}
+                  url={true}
                 />
                 {props.row.original.self && (
                   <span className="bg-blue-600 rounded-lg capitalize text-white text-xs font-semibold px-2 py-0.5">

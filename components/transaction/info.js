@@ -229,22 +229,10 @@ export default ({
               </div>
             </div> :
             sender ?
-              <div className="flex items-center space-x-1">
-                <Link href={`/account/${sender}`}>
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                  >
-                    <AccountProfile
-                      address={sender}
-                    />
-                  </a>
-                </Link>
-                <Copy
-                  value={sender}
-                />
-              </div> :
+              <AccountProfile
+                address={sender}
+                url={true}
+              /> :
               <span>
                 -
               </span> :

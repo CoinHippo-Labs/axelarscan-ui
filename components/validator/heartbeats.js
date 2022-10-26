@@ -21,7 +21,7 @@ export default ({ data }) => {
                   <a
                     target="_blank"
                     rel="noopenner noreferrer"
-                    className="text-base text-blue-600 dark:text-white font-bold"
+                    className="text-base text-blue-500 dark:text-blue-500 font-medium"
                   >
                     {number_format(b.height, '0,0')}
                   </a>

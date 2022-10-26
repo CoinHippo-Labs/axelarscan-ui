@@ -922,23 +922,11 @@ export default ({
                       </div>
                     </div> :
                     value ?
-                      <div className="flex items-center space-x-1">
-                        <Link href={`/account/${value}`}>
-                          <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                          >
-                            <AccountProfile
-                              address={value}
-                              ellipse_size={6}
-                            />
-                          </a>
-                        </Link>
-                        <Copy
-                          value={value}
-                        />
-                      </div> :
+                      <AccountProfile
+                        address={value}
+                        ellipse_size={6}
+                        url={true}
+                      /> :
                       <span>
                         -
                       </span>
@@ -1028,20 +1016,10 @@ export default ({
                               key={i}
                               className="flex items-center space-x-1"
                             >
-                              <Link href={`/account/${value}`}>
-                                <a
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                >
-                                  <AccountProfile
-                                    address={value}
-                                    ellipse_size={6}
-                                  />
-                                </a>
-                              </Link>
-                              <Copy
-                                value={value}
+                              <AccountProfile
+                                address={value}
+                                ellipse_size={6}
+                                url={true}
                               />
                             </div> :
                             <span key={i}>
