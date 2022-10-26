@@ -5,6 +5,7 @@ import evm_chains from './evm-chains'
 import cosmos_chains from './cosmos-chains'
 import assets from './assets'
 import ens from './ens'
+import accounts from './accounts'
 import chain from './chain'
 import status from './status'
 import tvl from './tvl'
@@ -21,6 +22,7 @@ export default combineReducers({
   cosmos_chains,
   assets,
   ens,
+  accounts,
   chain,
   status,
   tvl,

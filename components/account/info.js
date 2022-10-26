@@ -380,13 +380,18 @@ export default ({
                 <Copy
                   size={20}
                   value={address}
-                  title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
-                    {ellipse(
-                      address,
-                      28,
-                      process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
-                    )}
-                  </span>}
+                  title={
+                    <span
+                      title={address}
+                      className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium"
+                    >
+                      {ellipse(
+                        address,
+                        24,
+                        process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+                      )}
+                    </span>
+                  }
                 />
               )
             }

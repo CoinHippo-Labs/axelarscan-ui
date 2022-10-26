@@ -11,6 +11,9 @@ export const ASSETS_DATA = 'assets_data'
 // ens
 export const ENS_DATA = 'ens_data'
 
+// accounts
+export const ACCOUNTS_DATA = 'accounts_data'
+
 // status
 export const CHAIN_DATA = 'chain_data'
 export const STATUS_DATA = 'status_data'

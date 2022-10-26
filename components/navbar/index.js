@@ -18,13 +18,14 @@ import { getStatus } from '../../lib/api/rpc'
 import { staking_params, bank_supply, staking_pool, slashing_params, all_validators, all_validators_broadcaster, all_validators_status, chain_maintainer } from '../../lib/api/lcd'
 import { token } from '../../lib/api/coingecko'
 import { ens as getEns } from '../../lib/api/ens'
+import { escrow_addresses } from '../../lib/api/escrow-addresses'
 import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { equals_ignore_case } from '../../lib/utils'
-import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
+import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
@@ -40,7 +41,8 @@ export default () => {
     rpc_providers,
   } = useSelector(state =>
     (
-      { evm_chains: state.evm_chains,
+      {
+        evm_chains: state.evm_chains,
         cosmos_chains: state.cosmos_chains,
         assets: state.assets,
         ens: state.ens,
@@ -516,6 +518,26 @@ export default () => {
 
     getData()
   }, [address])
+
+  // ens
+  useEffect(() => {
+    const getData = async () => {
+      const response = await escrow_addresses()
+
+      const {
+        data,
+      } = { ...response }
+
+      if (data) {
+        dispatch({
+          type: ACCOUNTS_DATA,
+          value: data,
+        })
+      }
+    }
+
+    getData()
+  }, [])
 
   // tvl
   useEffect(() => {

@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 
 import Image from '../image'
 import Copy from '../copy'
@@ -12,26 +14,52 @@ export default ({
   prefix = process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
   url,
 }) => {
-  const [name, setName] = useState(null)
+  const {
+    _accounts,
+  } = useSelector(state =>
+    (
+      {
+        _accounts: state.accounts,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    accounts_data,
+  } = { ..._accounts }
+
+  const [account, setAccount] = useState(null)
 
   useEffect(() => {
     if (address) {
-      setName(
-        accounts.find(a =>
-          equals_ignore_case(a?.address, address) &&
-          (
-            !a?.environment ||
-            equals_ignore_case(a.environment, environment)
-          )
-        )?.name ||
-        address
+      setAccount(
+        {
+          ...(
+            _.concat(
+              accounts,
+              accounts_data ||
+              [],
+            )
+            .find(a =>
+              equals_ignore_case(a?.address, address) &&
+              (
+                !a?.environment ||
+                equals_ignore_case(a.environment, environment)
+              )
+            )
+          ),
+          address,
+        }
       )
     }
-  }, [address])
+  }, [address, accounts_data])
 
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT
 
-  const is_name = !equals_ignore_case(name, address)
+  const {
+    name,
+    image,
+  } = { ...account }
 
   const nameComponent = (
     <>
@@ -50,15 +78,18 @@ export default ({
     </>
   )
 
-  return is_name ?
+  return name ?
     <div className="min-w-max flex items-start space-x-2">
-      {/*
-        <Image
-          src={image}
-          alt=""
-          className="w-6 h-6 rounded-full"
-        />
-      */}
+      {
+        image &&
+        (
+          <Image
+            src={image}
+            alt=""
+            className="w-6 h-6 rounded-full"
+          />
+        )
+      }
       <div className="flex flex-col">
         {
           url ?
@@ -81,21 +112,16 @@ export default ({
               {nameComponent}
             </div>
         }
-        {
-          is_name &&
-          (
-            <Copy
-              value={address}
-              title={<div className="cursor-pointer text-slate-400 dark:text-slate-600">
-                {ellipse(
-                  address,
-                  ellipse_size,
-                  prefix,
-                )}
-              </div>}
-            />
-          )
-        }
+        <Copy
+          value={address}
+          title={<div className="cursor-pointer text-slate-400 dark:text-slate-600">
+            {ellipse(
+              address,
+              ellipse_size,
+              prefix,
+            )}
+          </div>}
+        />
       </div>
     </div> :
     url ?

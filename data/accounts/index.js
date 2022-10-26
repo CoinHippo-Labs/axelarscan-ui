@@ -1,7 +1,17 @@
+/*
+{
+  address,
+  name,
+  image: '/logos/accounts/{image}',
+  environment, // undefined for any
+}
+*/
+
 export default [
   {
     address: 'axelar1d4v2fad26kze27s9przdc6zrcyxqsj20vas39m',
     name: 'Cross-chain Faucet',
+    image: '/logos/accounts/axelarnet.svg',
     environment: 'testnet',
   },
   {
@@ -111,7 +121,7 @@ export default [
   },
   {
     address: 'axelar1z5znvgnwn295h26a88530d6kqs3sg4klagnvze',
-    name: 'Comdex relayer: IBC Relayer',
+    name: 'Comdex: IBC Relayer',
     environment: 'mainnet',
   },
 ]
