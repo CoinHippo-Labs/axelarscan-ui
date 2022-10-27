@@ -6,6 +6,7 @@ import Image from '../image'
 import Copy from '../copy'
 import { ellipse, equals_ignore_case } from '../../lib/utils'
 import accounts from '../../data/accounts'
+import broadcasters from '../../data/broadcasters'
   
 export default ({
   address,
@@ -42,7 +43,12 @@ export default ({
           !a?.environment ||
           equals_ignore_case(a.environment, environment)
         )
-      )
+      ) ||
+      broadcasters[environment][address?.toLowerCase()] &&
+      {
+        name: broadcasters[environment][address.toLowerCase()],
+        image: '/logos/accounts/axelarnet.svg',
+      }
     ),
     address,
   }

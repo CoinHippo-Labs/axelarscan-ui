@@ -1139,34 +1139,41 @@ export default () => {
                       </span>
                     </div>
                   )}
-                  {transfer_id && (
-                    <div className={rowClassName}>
-                      <span className={rowTitleClassName}>
-                        Transfer ID:
-                      </span>
-                      <Copy
-                        value={transfer_id}
-                        title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-semibold">
-                          {transfer_id}
-                        </span>}
-                        size={20}
-                      />
-                    </div>
-                  )}
-                  {command_id && (
-                    <div className={rowClassName}>
-                      <span className={rowTitleClassName}>
-                        Command ID:
-                      </span>
-                      <Copy
-                        value={command_id}
-                        title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-semibold">
-                          {ellipse(command_id, 16)}
-                        </span>}
-                        size={20}
-                      />
-                    </div>
-                  )}
+                  {
+                    transfer_id &&
+                    (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Transfer ID:
+                        </span>
+                        <Copy
+                          value={transfer_id}
+                          title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
+                            {transfer_id}
+                          </span>}
+                        />
+                      </div>
+                    )
+                  }
+                  {
+                    command_id &&
+                    (
+                      <div className={rowClassName}>
+                        <span className={rowTitleClassName}>
+                          Command ID:
+                        </span>
+                        <Copy
+                          value={command_id}
+                          title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
+                            {ellipse(
+                              command_id,
+                              16,
+                            )}
+                          </span>}
+                        />
+                      </div>
+                    )
+                  }
                 </div>
               </div>
             )

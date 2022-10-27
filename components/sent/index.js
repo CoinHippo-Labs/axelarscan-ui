@@ -438,6 +438,7 @@ export default () => {
                   type,
                   status,
                   chain,
+                  transfer_id,
                   created_at,
                   block_timestamp,
                   receipt,
@@ -525,7 +526,10 @@ export default () => {
                       {_id ?
                         <div className={rowClassName}>
                           <span className={rowTitleClassName}>
-                            Transaction:
+                            {_path.includes('/evm-poll') ?
+                              'Poll' :
+                              'Transaction'
+                            }:
                           </span>
                           <div className="flex items-center space-x-1">
                             <a
@@ -659,6 +663,22 @@ export default () => {
                                   .format('MMM D, YYYY h:mm:ss A')
                               })
                             </span>
+                          </div>
+                        )
+                      }
+                      {
+                        transfer_id &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Transfer ID:
+                            </span>
+                            <Copy
+                              value={transfer_id}
+                              title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
+                                {transfer_id}
+                              </span>}
+                            />
                           </div>
                         )
                       }
