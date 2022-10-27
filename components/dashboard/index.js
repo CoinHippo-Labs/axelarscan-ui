@@ -402,9 +402,11 @@ export default () => {
               </h2>
             </a>
           </Link>
-          <Blocks
-            n={10}
-          />
+          <div>
+            <Blocks
+              n={10}
+            />
+          </div>
         </div>
         <div className="space-y-2">
           <Link href="/transactions">
@@ -414,9 +416,11 @@ export default () => {
               </h2>
             </a>
           </Link>
-          <Transactions
-            n={10}
-          />
+          <div>
+            <Transactions
+              n={10}
+            />
+          </div>
         </div>
       </div>
     </div>
