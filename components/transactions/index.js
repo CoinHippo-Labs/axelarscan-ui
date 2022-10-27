@@ -636,7 +636,7 @@ export default ({
 
   return (
     data ?
-      <div className="min-h-full grid gap-2">
+      <div className="min-h-full contents space-y-2">
         {!n && (
           <div className="flex items-center justify-between space-x-2">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
@@ -1229,27 +1229,30 @@ export default ({
             data.length < total
           ) &&
           (
-            !fetching ?
-              <button
-                onClick={() => {
-                  setOffet(data.length)
-                  setFetchTrigger(
-                    typeof fetchTrigger === 'number' ?
-                      true :
-                      1
-                  )
-                }}
-                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
-              >
-                Load more
-              </button> :
-              <div className="flex justify-center">
-                <ColorRing
-                  color={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              </div>
+            <div className="w-full flex justify-center">
+              {!fetching ?
+                <button
+                  onClick={() => {
+                    setOffet(data.length)
+                    setFetchTrigger(
+                      typeof fetchTrigger === 'number' ?
+                        true :
+                        1
+                    )
+                  }}
+                  className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+                >
+                  Load more
+                </button> :
+                <div className="flex justify-center">
+                  <ColorRing
+                    color={loader_color(theme)}
+                    width="32"
+                    height="32"
+                  />
+                </div>
+              }
+            </div>
           )
         }
       </div> :

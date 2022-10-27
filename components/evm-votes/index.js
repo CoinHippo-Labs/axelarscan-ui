@@ -362,7 +362,7 @@ export default () => {
 
   return (
     data ?
-      <div className="min-h-full grid gap-2">
+      <div className="grid gap-2">
         {typeof total === 'number' && (
           <div className="flex items-center space-x-1.5 sm:mb-1 ml-2 sm:ml-0">
             <span className="tracking-wider text-sm font-semibold">
