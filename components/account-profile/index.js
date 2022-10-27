@@ -44,7 +44,7 @@ export default ({
           equals_ignore_case(a.environment, environment)
         )
       ) ||
-      broadcasters[environment][address?.toLowerCase()] &&
+      broadcasters[environment]?.[address?.toLowerCase()] &&
       {
         name: broadcasters[environment][address.toLowerCase()],
         image: '/logos/accounts/axelarnet.svg',
