@@ -636,7 +636,7 @@ export default ({
 
   return (
     data ?
-      <div className="min-h-full contents space-y-2">
+      <div className="w-full space-y-2">
         {!n && (
           <div className="flex items-center justify-between space-x-2">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">

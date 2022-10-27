@@ -119,7 +119,7 @@ export default ({
 
   return (
     data ?
-      <div className="min-h-full contents space-y-2">
+      <div className="w-full space-y-2">
         <Datatable
           columns={[
             {

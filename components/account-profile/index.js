@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 
@@ -28,34 +27,25 @@ export default ({
     accounts_data,
   } = { ..._accounts }
 
-  const [account, setAccount] = useState(null)
-
-  useEffect(() => {
-    if (address) {
-      setAccount(
-        {
-          ...(
-            _.concat(
-              accounts,
-              accounts_data ||
-              [],
-            )
-            .find(a =>
-              equals_ignore_case(a?.address, address) &&
-              (
-                !a?.environment ||
-                equals_ignore_case(a.environment, environment)
-              )
-            )
-          ),
-          address,
-        }
-      )
-    }
-  }, [address, accounts_data])
-
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT
 
+  const account = {
+    ...(
+      _.concat(
+        accounts,
+        accounts_data ||
+        [],
+      )
+      .find(a =>
+        equals_ignore_case(a?.address, address) &&
+        (
+          !a?.environment ||
+          equals_ignore_case(a.environment, environment)
+        )
+      )
+    ),
+    address,
+  }
   const {
     name,
     image,

@@ -402,7 +402,7 @@ export default () => {
               </h2>
             </a>
           </Link>
-          <div>
+          <div className="min-h-full flex">
             <Blocks
               n={10}
             />
@@ -416,7 +416,7 @@ export default () => {
               </h2>
             </a>
           </Link>
-          <div>
+          <div className="min-h-full flex">
             <Transactions
               n={10}
             />
