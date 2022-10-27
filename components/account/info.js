@@ -145,7 +145,7 @@ export default ({
                       sender_chain
                     }
                   </span>
-                  {
+                  {/*
                     sender_address?.startsWith(source_chain_data.prefix_address || '0x') &&
                     (
                       <div className="flex items-center space-x-1">
@@ -181,7 +181,7 @@ export default ({
                         />
                       </div>
                     )
-                  }
+                  */}
                 </div>
               </div> :
               sender_address ?

@@ -259,7 +259,7 @@ export default ({
                     onClick={p => {
                       gotoPage(p - 1)
 
-                      tableRef.current.scrollIntoView() 
+                      // tableRef.current.scrollIntoView() 
                     }}
                     icons={true}
                     className="space-x-0.5"
@@ -286,7 +286,7 @@ export default ({
                       onClick={() => {
                         previousPage()
 
-                        tableRef.current.scrollIntoView() 
+                        // tableRef.current.scrollIntoView() 
                       }}
                     >
                       Previous
@@ -298,7 +298,7 @@ export default ({
                       onClick={() => {
                         nextPage()
 
-                        tableRef.current.scrollIntoView() 
+                        // tableRef.current.scrollIntoView() 
                       }}
                     >
                       Next
