@@ -393,7 +393,7 @@ export default ({ n }) => {
                               value={sender}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={sender}
                               prefix={prefix_address}
@@ -460,7 +460,7 @@ export default ({ n }) => {
                               value={destinationAddress}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={destinationAddress}
                               prefix={prefix_address}

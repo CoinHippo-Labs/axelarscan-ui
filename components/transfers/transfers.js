@@ -480,7 +480,7 @@ export default ({ n }) => {
                               value={sender_address}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={sender_address}
                               ellipse_size={8}
@@ -570,7 +570,7 @@ export default ({ n }) => {
                             value={recipient_address}
                           />
                         </div> :
-                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                        <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                           <AccountProfile
                             address={recipient_address}
                             ellipse_size={8}
@@ -637,7 +637,7 @@ export default ({ n }) => {
                               value={recipient_address}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={recipient_address}
                               ellipse_size={8}

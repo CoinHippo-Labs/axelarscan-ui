@@ -1215,7 +1215,7 @@ export default () => {
                               value={from}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={from}
                               prefix={source_chain_data?.prefix_address}
@@ -1254,7 +1254,7 @@ export default () => {
                               value={sender}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={sender}
                               prefix={source_chain_data?.prefix_address}
@@ -1314,7 +1314,7 @@ export default () => {
                               value={destinationContractAddress}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={destinationContractAddress}
                               prefix={destination_chain_data?.prefix_address}
@@ -1353,7 +1353,7 @@ export default () => {
                               value={relayer}
                             />
                           </div> :
-                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                          <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                             <AccountProfile
                               address={relayer}
                               prefix={destination_chain_data?.prefix_address}
@@ -2606,7 +2606,7 @@ export default () => {
                                 value={to}
                               />
                             </div> :
-                            <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                            <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                               <AccountProfile
                                 address={to}
                                 prefix={chain_data?.prefix_address}
@@ -2671,7 +2671,7 @@ export default () => {
                                 value={from}
                               />
                             </div> :
-                            <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                            <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                               <AccountProfile
                                 address={from}
                                 prefix={chain_data?.prefix_address}
@@ -2729,7 +2729,7 @@ export default () => {
                                 value={sender}
                               />
                             </div> :
-                            <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                            <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                               <AccountProfile
                                 address={sender}
                                 prefix={chain_data?.prefix_address}
@@ -2787,7 +2787,7 @@ export default () => {
                                 value={call.transaction.from}
                               />
                             </div> :
-                            <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                            <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                               <AccountProfile
                                 address={call.transaction.from}
                                 prefix={chain_data?.prefix_address}

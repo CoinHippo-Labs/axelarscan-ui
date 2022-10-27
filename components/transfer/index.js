@@ -514,7 +514,7 @@ export default () => {
                             value={sender_address}
                           />
                         </div> :
-                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                        <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                           <AccountProfile
                             address={sender_address}
                             prefix={source_chain_data?.prefix_address}
@@ -589,7 +589,7 @@ export default () => {
                             value={deposit_address}
                           />
                         </div> :
-                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                        <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                           <AccountProfile
                             address={deposit_address}
                             prefix={deposit_chain_data?.prefix_address}
@@ -646,7 +646,7 @@ export default () => {
                             value={recipient_address}
                           />
                         </div> :
-                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                        <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                           <AccountProfile
                             address={recipient_address}
                             prefix={destination_chain_data?.prefix_address}

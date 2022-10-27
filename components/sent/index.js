@@ -206,7 +206,7 @@ export default () => {
                             value={sender}
                           />
                         </div> :
-                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                        <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                           <AccountProfile
                             address={sender}
                             prefix={source_chain_data?.prefix_address}
@@ -261,7 +261,7 @@ export default () => {
                             value={destinationAddress}
                           />
                         </div> :
-                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                        <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                           <AccountProfile
                             address={destinationAddress}
                             prefix={destination_chain_data?.prefix_address}
@@ -693,7 +693,7 @@ export default () => {
                                   value={to}
                                 />
                               </div> :
-                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={to}
                                   prefix={chain_data?.prefix_address}
@@ -751,7 +751,7 @@ export default () => {
                                   value={from}
                                 />
                               </div> :
-                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={from}
                                   prefix={chain_data?.prefix_address}
@@ -809,7 +809,7 @@ export default () => {
                                   value={destinationAddress}
                                 />
                               </div> :
-                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={destinationAddress}
                                   prefix={destination_chain_data?.prefix_address}
