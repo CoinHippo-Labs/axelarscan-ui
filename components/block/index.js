@@ -162,7 +162,9 @@ export default () => {
             data
           }
         />
-        <Transactions />
+        <div>
+          <Transactions />
+        </div>
       </div>
       <Events
         data={

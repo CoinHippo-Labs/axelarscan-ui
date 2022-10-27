@@ -736,7 +736,9 @@ export default () => {
             }
         }
       />
-      <Transactions />
+      <div>
+        <Transactions />
+      </div>
     </div>
   )
 }
