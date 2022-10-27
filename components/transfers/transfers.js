@@ -802,7 +802,7 @@ export default ({ n }) => {
                     ...s,
                     i,
                     finish: !!(
-                    s.id === 'executed' ?
+                      s.id === 'executed' ?
                         s.data?.executed :
                         s.id === 'ibc_send' ?
                           s.data?.ack_txhash ||
@@ -999,31 +999,34 @@ export default ({ n }) => {
                                     title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
                                       {title}
                                     </span>}
-                                    size={18}
                                   /> :
                                   <span className={`uppercase ${text_color} text-xs font-medium`}>
                                     {title}
                                   </span>
                                 }
-                                {id && url && (
-                                  <a
-                                    href={`${url}${_path}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 dark:text-blue-500"
-                                  >
-                                    {icon ?
-                                      <Image
-                                        src={icon}
-                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                      /> :
-                                      <TiArrowRight
-                                        size={16}
-                                        className="transform -rotate-45"
-                                      />
-                                    }
-                                  </a>
-                                )}
+                                {
+                                  id &&
+                                  url &&
+                                  (
+                                    <a
+                                      href={`${url}${_path}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 dark:text-blue-500"
+                                    >
+                                      {icon ?
+                                        <Image
+                                          src={icon}
+                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                        /> :
+                                        <TiArrowRight
+                                          size={16}
+                                          className="transform -rotate-45"
+                                        />
+                                      }
+                                    </a>
+                                  )
+                                }
                               </div>
                             </div>
                           )
@@ -1047,27 +1050,30 @@ export default ({ n }) => {
                       ibc_send?.failed_txhash &&
                       !ibc_send.ack_txhash
                       (
-                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-medium py-0.5 px-2">
                           Timeout
                         </div>
                       )
                     }
-                    {time_spent && (
-                      <div className="flex items-center space-x-1 mx-1 pt-0.5">
-                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
-                          Time spent:
-                        </span>
-                        <span className="whitespace-nowrap font-bold">
-                          {time_spent}
-                        </span>
-                      </div>
-                    )}
+                    {
+                      time_spent &&
+                      (
+                        <div className="flex items-center space-x-1 mx-1 pt-0.5">
+                          <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">
+                            Time spent:
+                          </span>
+                          <span className="whitespace-nowrap font-bold">
+                            {time_spent}
+                          </span>
+                        </div>
+                      )
+                    }
                   </div>
                 )
               },
             },
             {
-              Header: 'Created At',
+              Header: 'Created at',
               accessor: 'source.created_at.ms',
               disableSortBy: true,
               Cell: props => (
@@ -1077,12 +1083,27 @@ export default ({ n }) => {
                   className="ml-auto"
                 />
               ),
-              headerClassName: 'justify-end text-right',
+              headerClassName: 'whitespace-nowrap justify-end text-right',
             },
           ]}
           data={data_filtered}
-          noPagination={data_filtered.length <= 10 || (!n && !(address || ['/transfers/search'].includes(pathname)))}
-          defaultPageSize={n ? 10 : 25}
+          noPagination={
+            data.length <= 10 ||
+            (
+              !n &&
+              !(
+                address ||
+                [
+                  '/tranfers/search',
+                ].includes(pathname)
+              )
+            )
+          }
+          defaultPageSize={
+            n ?
+              10 :
+              25
+          }
           className="min-h-full no-border"
         />
         {
