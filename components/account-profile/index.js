@@ -46,7 +46,7 @@ export default ({
       ) ||
       broadcasters[environment]?.[address?.toLowerCase()] &&
       {
-        name: broadcasters[environment][address.toLowerCase()],
+        name: 'Axelar Relayer', // broadcasters[environment][address.toLowerCase()],
         image: '/logos/accounts/axelarnet.svg',
       }
     ),
