@@ -132,6 +132,7 @@ export default ({ n }) => {
           setData(null)
           setOffet(0)
         }
+
         const _data = !fetchTrigger ?
           [] :
           data || []
@@ -140,6 +141,7 @@ export default ({ n }) => {
         const from = fetchTrigger === true || fetchTrigger === 1 ?
           _data.length :
           0
+
         let params
 
         if (address) {
@@ -161,8 +163,10 @@ export default ({ n }) => {
             toTime
 
           if (time?.length > 1) {
-            fromTime = time[0].unix()
-            toTime = time[1].unix()
+            fromTime = time[0]
+              .unix()
+            toTime = time[1]
+              .unix()
           }
 
           params = {
