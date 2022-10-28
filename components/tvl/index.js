@@ -157,7 +157,7 @@ export default () => {
                         </div>
                       )
                     },
-                    headerClassName: 'w-34 justify-center',
+                    headerClassName: 'w-36 justify-center',
                     className: 'bg-violet-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-0 z-40',
                     order: 0,
                   },
@@ -220,7 +220,7 @@ export default () => {
                       )
                     },
                     headerClassName: 'w-24 whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
-                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-40 z-30',
+                    className: 'w-24 bg-slate-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-44 z-30',
                     order: 1,
                   },
                   {
@@ -338,7 +338,7 @@ export default () => {
                       )
                     },
                     headerClassName: 'whitespace-nowrap justify-start sm:justify-end normal-case text-2xs text-left sm:text-right',
-                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-71.6 z-30',
+                    className: 'bg-green-50 dark:bg-slate-900 bg-opacity-90 dark:bg-opacity-90 sticky left-75.6 z-30',
                     order: 2,
                   },
                   {

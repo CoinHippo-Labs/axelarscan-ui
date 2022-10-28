@@ -980,8 +980,8 @@ export default () => {
       {
         process.env.NEXT_PUBLIC_REINDEXING === 'true' &&
         (
-          <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center">
-            <span className="text-slate-500 dark:text-slate-300">
+          <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 overflow-auto flex items-center justify-center">
+            <span className="whitespace-nowrap text-slate-500 dark:text-slate-300">
               We're reindexing the recent data. It will be updated shortly.
             </span>
           </div>
