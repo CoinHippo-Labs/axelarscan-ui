@@ -226,7 +226,8 @@ export default () => {
       ) {
         const response = await getStatus(
           undefined,
-          is_interval && status_data,
+          is_interval &&
+          status_data,
         )
 
         if (response) {
@@ -236,7 +237,10 @@ export default () => {
           })
 
           if (!is_interval) {
-            setValidatorsTrigger(moment().valueOf())
+            setValidatorsTrigger(
+              moment()
+                .valueOf()
+            )
           }
         }
       }
@@ -973,6 +977,16 @@ export default () => {
           </div>
         </div>
       </div>
+      {
+        process.env.NEXT_PUBLIC_REINDEXING === 'true' &&
+        (
+          <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center">
+            <span className="text-slate-500 dark:text-slate-300">
+              We're reindexing the recent data. It will be updated shortly.
+            </span>
+          </div>
+        )
+      }
       <SubNavbar />
     </>
   )
