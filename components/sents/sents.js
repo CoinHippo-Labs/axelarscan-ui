@@ -370,15 +370,13 @@ export default ({ n }) => {
                             )
                           }
                           <span className="text-sm font-semibold">
-                            (
-                              <span className="mr-1">
-                                {number_format(
-                                  amount,
-                                  '0,0.000',
-                                  true,
-                                )}
-                              </span>
-                            )
+                            <span className="mr-1">
+                              {number_format(
+                                amount,
+                                '0,0.000',
+                                true,
+                              )}
+                            </span>
                             <span>
                               {_symbol}
                             </span>
