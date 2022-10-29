@@ -568,6 +568,14 @@ export default () => {
                     })
                   }
                   {
+                    insufficient_fee &&
+                    (
+                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                        Insufficient Fee
+                      </div>
+                    )
+                  }
+                  {
                     ibc_send?.failed_txhash &&
                     !ibc_send.ack_txhash
                     (
