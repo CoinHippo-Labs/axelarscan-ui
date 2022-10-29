@@ -649,13 +649,13 @@ export default ({ n }) => {
                         destination_chain_data :
                         axelar_chain_data,
                       data: ibc_send,
-                      id_field: ibc_send?.ack_txhash ?
+                      id_field: ibc_send?.recv_txhash ?
+                        'recv_txhash' :
+                        ibc_send?.ack_txhash ?
                         'ack_txhash' :
                         ibc_send?.failed_txhash ?
                           'failed_txhash' :
-                          ibc_send?.recv_txhash ?
-                            'recv_txhash' :
-                            'id',
+                          'id',
                     },
                     [
                       axelar_chain_data,

@@ -186,12 +186,12 @@ export default () => {
           destination_chain_data :
           axelar_chain_data,
         data: ibc_send,
-        id_field: ibc_send?.ack_txhash ?
-          'ack_txhash' :
-          ibc_send?.failed_txhash ?
-            'failed_txhash' :
-            ibc_send?.recv_txhash ?
-              'recv_txhash' :
+        id_field: ibc_send?.recv_txhash ?
+          'recv_txhash' :
+          ibc_send?.ack_txhash ?
+            'ack_txhash' :
+            ibc_send?.failed_txhash ?
+              'failed_txhash' :
               'id',
       },
       [
@@ -680,14 +680,15 @@ export default () => {
                   contract_address,
                   returnValues,
                   transaction,
-                } = { ..._data }
+                } = { ...event }
                 const {
                   sender,
+                  destinationChain,
                   destinationAddress,
                 } = { ...returnValues }
 
                 const source_chain = chain
-                const destination_chain = returnValues?.destinationChain
+                const destination_chain = destinationChain
                 const source_chain_data =
                   getChain(
                     source_chain,
