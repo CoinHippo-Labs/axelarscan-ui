@@ -520,30 +520,44 @@ export default ({ n }) => {
                   <div className="flex flex-col space-y-1 mb-3">
                     {typeof amount === 'number' && asset_data && (
                       <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                        {_image && (
-                          <Image
-                            src={_image}
-                            className="w-5 h-5 rounded-full"
-                          />
-                        )}
+                        {
+                          _image &&
+                          (
+                            <Image
+                              src={_image}
+                              className="w-5 h-5 rounded-full"
+                            />
+                          )
+                        }
                         <span className="text-sm font-semibold">
                           <span className="mr-1">
-                            {number_format(amount, '0,0.000', true)}
+                            {number_format(
+                              amount,
+                              '0,0.000',
+                              true,
+                            )}
                           </span>
                           <span>
                             {ellipse(symbol)}
                           </span>
                         </span>
-                        {fee > 0 && (
-                          <span className="text-xs font-semibold">
-                            (<span className="mr-1">
-                              Fee:
+                        {
+                          fee > 0 &&
+                          (
+                            <span className="text-xs font-semibold">
+                              (<span className="mr-1">
+                                Fee:
+                              </span>
+                              <span>
+                                {number_format(
+                                  fee,
+                                  '0,0.000000',
+                                  true,
+                                )}
+                              </span>)
                             </span>
-                            <span >
-                              {number_format(fee, '0,0.000000', true)}
-                            </span>)
-                          </span>
-                        )}
+                          )
+                        }
                       </div>
                     )}
                     <div className="flex flex-col">

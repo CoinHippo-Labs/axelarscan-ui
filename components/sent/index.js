@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, providers, utils } from 'ethers'
+import { providers } from 'ethers'
 import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
@@ -67,6 +67,7 @@ export default () => {
   const {
     chain,
     returnValues,
+    amount,
     fee,
     insufficient_fee,
   } = { ...event }
@@ -75,7 +76,6 @@ export default () => {
     destinationChain,
     destinationAddress,
     symbol,
-    amount,
   } = { ...returnValues }
 
   const chains_data = _.concat(
@@ -239,7 +239,7 @@ export default () => {
     (
       !insufficient_fee &&
       (
-        event?.amount > fee ||
+        amount > fee ||
         !fee
       ) &&
       (
@@ -295,33 +295,52 @@ export default () => {
                         '-'
                       }
                     </div>
-                    {amount && _symbol && (
-                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                        {asset_image && (
-                          <Image
-                            src={asset_image}
-                            className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
-                          />
-                        )}
-                        <span className="text-base sm:text-sm lg:text-base font-semibold">
-                          {asset_data && (
+                    {
+                      typeof amount === 'number' &&
+                      _symbol &&
+                      (
+                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                          {
+                            asset_image &&
+                            (
+                              <Image
+                                src={asset_image}
+                                className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                              />
+                            )
+                          }
+                          <span className="text-base sm:text-sm lg:text-base font-semibold">
                             <span className="mr-1">
                               {number_format(
-                                utils.formatUnits(
-                                  BigNumber.from(amount),
-                                  decimals,
-                                ),
+                                amount,
                                 '0,0.000',
                                 true,
                               )}
                             </span>
-                          )}
-                          <span>
-                            {_symbol}
+                            <span>
+                              {_symbol}
+                            </span>
                           </span>
-                        </span>
-                      </div>
-                    )}
+                          {
+                            fee > 0 &&
+                            (
+                              <span className="text-xs lg:text-sm font-semibold">
+                                (<span className="mr-1">
+                                  Fee:
+                                </span>
+                                <span>
+                                  {number_format(
+                                    fee,
+                                    '0,0.000000',
+                                    true,
+                                  )}
+                                </span>)
+                              </span>
+                            )
+                          }
+                        </div>
+                      )
+                    }
                   </div>
                 </div>
                 <div className="flex flex-col space-y-2">

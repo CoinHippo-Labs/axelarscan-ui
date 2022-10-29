@@ -575,30 +575,44 @@ export default () => {
                   </div>
                   {typeof amount === 'number' && asset_data && (
                     <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                      {asset_image && (
-                        <Image
-                          src={asset_image}
-                          className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
-                        />
-                      )}
+                      {
+                        asset_image &&
+                        (
+                          <Image
+                            src={asset_image}
+                            className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                          />
+                        )
+                      }
                       <span className="text-base sm:text-sm lg:text-base font-semibold">
                         <span className="mr-1">
-                          {number_format(amount, '0,0.000', true)}
+                          {number_format(
+                            amount,
+                            '0,0.000',
+                            true,
+                          )}
                         </span>
                         <span>
                           {ellipse(symbol)}
                         </span>
                       </span>
-                      {fee > 0 && (
-                        <span className="text-xs lg:text-sm font-semibold">
-                          (<span className="mr-1">
-                            Fee:
+                      {
+                        fee > 0 &&
+                        (
+                          <span className="text-xs lg:text-sm font-semibold">
+                            (<span className="mr-1">
+                              Fee:
+                            </span>
+                            <span>
+                              {number_format(
+                                fee,
+                                '0,0.000000',
+                                true,
+                              )}
+                            </span>)
                           </span>
-                          <span>
-                            {number_format(fee, '0,0.000000', true)}
-                          </span>)
-                        </span>
-                      )}
+                        )
+                      }
                     </div>
                   )}
                   <div className="flex flex-col">

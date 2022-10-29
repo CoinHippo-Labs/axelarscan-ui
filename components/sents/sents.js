@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, utils } from 'ethers'
 import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
@@ -302,43 +301,108 @@ export default ({ n }) => {
               accessor: 'event.event',
               disableSortBy: true,
               Cell: props => {
-                const { event } = { ...props.row.original }
-                const { chain, returnValues } = { ...event }
-                const { symbol, amount } = { ...returnValues }
-                const chain_data = getChain(chain, chains_data)
-                const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol) || a?.contracts?.findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c.symbol, symbol)) > -1)
-                const contract_data = asset_data?.contracts?.find(c => c?.chain_id === chain_data?.chain_id)
-                const decimals = contract_data?.decimals || asset_data?.decimals || 18
-                const _symbol = contract_data?.symbol || asset_data?.symbol || symbol
-                const image = contract_data?.image || asset_data?.image
+                const {
+                  event,
+                } = { ...props.row.original }
+                const {
+                  chain,
+                  returnValues,
+                  amount,
+                  fee,
+                } = { ...event }
+                const {
+                  symbol,
+                } = { ...returnValues }
+
+                const chain_data = getChain(
+                  chain,
+                  chains_data,
+                )
+                const {
+                  chain_id,
+                } = { ...chain_data }
+
+                const asset_data = assets_data?.find(a =>
+                  equals_ignore_case(a?.symbol, symbol) ||
+                  a?.contracts?.findIndex(c =>
+                    c?.chain_id === chain_id &&
+                    equals_ignore_case(c.symbol, symbol)
+                  ) > -1
+                )
+                const {
+                  contracts,
+                } = { ...asset_data }
+
+                const contract_data = contracts?.find(c =>
+                  c?.chain_id === chain_id
+                )
+
+                const _symbol =
+                  contract_data?.symbol ||
+                  asset_data?.symbol ||
+                  symbol
+
+                const image =
+                  contract_data?.image ||
+                  asset_data?.image
+
                 return (
                   <div className="flex flex-col space-y-2 mb-3">
                     <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg text-xs lg:text-sm font-semibold -mt-0.5 py-0.5 px-1.5">
                       {props.value === 'TokenSent' ?
                         'sendToken' :
-                        props.value || '-'
+                        props.value ||
+                        '-'
                       }
                     </div>
-                    {amount && _symbol && (
-                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                        {image && (
-                          <Image
-                            src={image}
-                            className="w-5 h-5 rounded-full"
-                          />
-                        )}
-                        <span className="text-sm font-semibold">
-                          {asset_data && (
-                            <span className="mr-1">
-                              {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000', true)}
+                    {
+                      typeof amount === 'number' &&
+                      _symbol &&
+                      (
+                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-900 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                          {
+                            image &&
+                            (
+                              <Image
+                                src={image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )
+                          }
+                          <span className="text-sm font-semibold">
+                            (
+                              <span className="mr-1">
+                                {number_format(
+                                  amount,
+                                  '0,0.000',
+                                  true,
+                                )}
+                              </span>
+                            )
+                            <span>
+                              {_symbol}
                             </span>
-                          )}
-                          <span>
-                            {_symbol}
                           </span>
-                        </span>
-                      </div>
-                    )}
+                          {
+                            fee > 0 &&
+                            (
+                              <span className="text-xs font-semibold">
+                                (<span className="mr-1">
+                                  Fee:
+                                </span>
+                                <span>
+                                  {number_format(
+                                    fee,
+                                    '0,0.000000',
+                                    true,
+                                  )}
+                                </span>)
+                              </span>
+                            )
+                          }
+                        </div>
+                      )
+                    }
                   </div>
                 )
               },
