@@ -15,7 +15,7 @@ import AccountProfile from '../account-profile'
 import Image from '../image'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
-import { token_sent } from '../../lib/api/gateway'
+import { token_sent } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 

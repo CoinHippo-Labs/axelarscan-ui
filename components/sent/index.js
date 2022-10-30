@@ -13,7 +13,7 @@ import EnsProfile from '../ens-profile'
 import AccountProfile from '../account-profile'
 import Image from '../image'
 import Copy from '../copy'
-import { token_sent } from '../../lib/api/gateway'
+import { token_sent } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { number_format, name, ellipse, equals_ignore_case, total_time_string, loader_color } from '../../lib/utils'
 

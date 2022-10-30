@@ -6,7 +6,7 @@ import { FiSearch } from 'react-icons/fi'
 
 import { ens as getEns, domainFromEns } from '../../../lib/api/ens'
 import { transfers, deposit_addresses } from '../../../lib/api/index'
-import { token_sent } from '../../../lib/api/gateway'
+import { token_sent } from '../../../lib/api/transfer'
 import { type } from '../../../lib/object/id'
 import { equals_ignore_case } from '../../../lib/utils'
 import { ENS_DATA } from '../../../reducers/types'
