@@ -330,7 +330,13 @@ export default ({ n }) => {
             [
               'error',
             ].includes(status) &&
-            reExecute === 'true'
+            reExecute === 'true' &&
+            (
+              staging ||
+              ![
+                'mainnet',
+              ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
+            )
           ) {
             for (const d of response) {
               const {

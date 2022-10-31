@@ -635,7 +635,9 @@ export default () => {
       edit === 'true' &&
       (
         staging ||
-        !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
+        ![
+          'mainnet',
+        ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
       )
     )
 
