@@ -1294,7 +1294,7 @@ export default () => {
               ],
             )}
             noPagination={data_filtered.length <= 10}
-            defaultPageSize={50}
+            defaultPageSize={100}
             className="no-border"
           />
         </div> :
