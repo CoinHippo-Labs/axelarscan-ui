@@ -35,10 +35,10 @@
     "antd": "^4.23.0",
     "bech32": "^2.0.0",
     "env-cmd": "^10.1.0",
-    "ethers": "^5.7.0",
+    "ethers": "^5.7.2",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
-    "next": "^12.2.5",
+    "next": "^12.3.1",
     "next-secure-headers": "^2.2.0",
     "nprogress": "^0.2.0",
     "numeral": "^2.0.6",
@@ -52,7 +52,7 @@
     "react-dom": "18.2.0",
     "react-gtm-module": "^2.0.11",
     "react-hook-form": "^7.34.2",
-    "react-icons": "^4.4.0",
+    "react-icons": "^4.6.0",
     "react-image": "^4.0.3",
     "react-json-view": "^1.21.3",
     "react-linkify": "^1.0.0-alpha",
@@ -64,13 +64,13 @@
     "recharts": "2.1.11",
     "redux": "^4.2.0",
     "tendermint": "^5.0.2",
-    "web3": "^1.7.5",
+    "web3": "^1.8.0",
     "web3modal": "^1.9.9"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.8",
     "postcss": "^8.4.14",
     "postcss-color-function": "^4.1.0",
-    "tailwindcss": "^3.1.8"
+    "tailwindcss": "^3.2.1"
   }
 }
