@@ -72,7 +72,7 @@ export default ({
           }
         </div>
         <span className={subtitleClassName}>
-          total transfers
+          total transactions
         </span>
       </div>
       <div className={`grid grid-cols-2 sm:grid-cols-2 gap-3 ${metricClassName}`}>
