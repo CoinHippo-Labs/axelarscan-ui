@@ -78,6 +78,8 @@ export default () => {
     symbol,
   } = { ...returnValues }
 
+  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+
   const chains_data = _.concat(
     evm_chains_data,
     cosmos_chains_data,
@@ -126,7 +128,9 @@ export default () => {
       },
       {
         id: 'vote',
-        title: 'Approved',
+        title: staging ?
+          'Approved' :
+          'Vote Confirm',
         chain_data: axelar_chain_data,
         data: vote,
         id_field: 'poll_id',
@@ -138,7 +142,9 @@ export default () => {
         ) > -1 &&
       {
         id: 'sign_batch',
-        title: 'Signed',
+        title: staging ?
+          'Signed' :
+          'Sign Batch',
         chain_data: axelar_chain_data,
         data: sign_batch,
         id_field: 'batch_id',
@@ -153,7 +159,9 @@ export default () => {
         ) > -1 &&
       {
         id: 'executed',
-        title: 'Received',
+        title: staging ?
+          'Received' :
+          'Executed',
         ...(
           sign_batch?.transactionHash ?
             {
@@ -181,7 +189,9 @@ export default () => {
         ) > -1 &&
       {
         id: 'ibc_send',
-        title: 'Received',
+        title: staging ?
+          'Received' :
+          'IBC Transfer',
         chain_data: ibc_send?.recv_txhash ?
           destination_chain_data :
           axelar_chain_data,
@@ -202,7 +212,9 @@ export default () => {
       ) > -1 &&
       {
         id: 'axelar_transfer',
-        title: 'Received',
+        title: staging ?
+          'Received' :
+          'Axelar Transfer',
         chain_data: axelar_chain_data,
         data: axelar_transfer,
         id_field: 'id',
