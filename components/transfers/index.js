@@ -288,7 +288,7 @@ export default () => {
         <LineChart
           id="cumulative_volume"
           title="Cumulative Volume"
-          description="Cumulative transfers volume by month"
+          description="Cumulative transfer volume by month"
           date_format="MMM YYYY"
           timeframe="month"
           value_field="cumulative_volume"
@@ -318,10 +318,10 @@ export default () => {
                   '0,0',
                 )
               }-Day`
-            } Volumes`
+            } Volume`
           }
           description={
-            `The number of volumes transferred in the past ${
+            `Sum of volume transferred in the past ${
               number_format(
                 NUM_STATS_DAYS,
                 '0,0',
@@ -368,7 +368,7 @@ export default () => {
             }-Day `
           }Top Paths`
         }
-        description="Top transfers paths by volume"
+        description="Top transfer paths by volume"
         topData={topPaths}
         by="volume"
         num_days={NUM_STATS_DAYS}
@@ -386,7 +386,7 @@ export default () => {
             }-Day `
           }Top Chain Pairs`
         }
-        description="Top transfers chain pairs by volume"
+        description="Top transfer chain pairs by volume"
         topData={topChainPairs}
         by="volume"
         num_days={NUM_STATS_DAYS}
@@ -404,7 +404,7 @@ export default () => {
             }-Day `
           }Top Paths`
         }
-        description="Top transfers paths by number of transfers"
+        description="Top transfer paths by number of transfers"
         topData={topPaths}
         by="num_txs"
         num_days={NUM_STATS_DAYS}
@@ -422,7 +422,7 @@ export default () => {
             }-Day `
           }Top Chain Pairs`
         }
-        description="Top transfers chain pairs by number of transfers"
+        description="Top transfer chain pairs by number of transfers"
         topData={topChainPairs}
         by="num_txs"
         num_days={NUM_STATS_DAYS}
