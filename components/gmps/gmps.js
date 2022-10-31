@@ -23,15 +23,45 @@ import { number_format, ellipse, equals_ignore_case, total_time_string, params_t
 const LIMIT = 25
 
 export default ({ n }) => {
-  const { preferences, evm_chains, cosmos_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { cosmos_chains_data } = { ...cosmos_chains }
-  const { assets_data } = { ...assets }
+  const {
+    preferences,
+    evm_chains,
+    cosmos_chains,
+    assets,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
+        assets: state.assets,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
+  const {
+    assets_data,
+  } = { ...assets }
 
   const router = useRouter()
-  const { pathname, query, asPath } = { ...router }
-  const { address } = { ...query }
+  const {
+    pathname,
+    query,
+    asPath,
+  } = { ...router }
+  const {
+    address,
+    reExecute,
+  } = { ...query }
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
@@ -43,16 +73,23 @@ export default ({ n }) => {
   const [filterTypes, setFilterTypes] = useState(null)
 
   useEffect(() => {
-    if (evm_chains_data && cosmos_chains_data && asPath) {
+    if (
+      evm_chains_data &&
+      cosmos_chains_data &&
+      asPath
+    ) {
       const params = params_to_obj(
         asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
+        asPath.substring(
+          asPath.indexOf('?') + 1,
+        )
       )
 
-      const chains_data = _.concat(
-        evm_chains_data,
-        cosmos_chains_data,
-      )
+      const chains_data =
+        _.concat(
+          evm_chains_data,
+          cosmos_chains_data,
+        )
 
       const {
         txHash,
@@ -68,48 +105,59 @@ export default ({ n }) => {
         toTime,
       } = { ...params }
 
-      setFilters({
-        txHash,
-        sourceChain: getChain(
-          sourceChain,
-          chains_data,
-        )?._id ||
-          sourceChain,
-        destinationChain: getChain(
-          destinationChain,
-          chains_data,
-        )?._id ||
-          destinationChain,
-        method: [
-          'callContract',
-          'callContractWithToken',
-        ].includes(method) ?
-          method :
-          undefined,
-        status: [
-          'approving',
-          'called',
-          'forecalled',
-          'approved',
-          'executing',
-          'executed',
-          'error',
-          'insufficient_fee',
-          'no_created_at',
-        ].includes(status?.toLowerCase()) ?
-          status.toLowerCase() :
-          undefined,
-        senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
-        time: fromTime &&
-          toTime &&
-          [
-            moment(Number(fromTime)),
-            moment(Number(toTime)),
-          ],
-      })
+      setFilters(
+        {
+          txHash,
+          sourceChain:
+            getChain(
+              sourceChain,
+              chains_data,
+            )?._id ||
+            sourceChain,
+          destinationChain:
+            getChain(
+              destinationChain,
+              chains_data,
+            )?._id ||
+            destinationChain,
+          method:
+            [
+              'callContract',
+              'callContractWithToken',
+            ].includes(method) ?
+              method :
+              undefined,
+          status:
+            [
+              'approving',
+              'called',
+              'forecalled',
+              'approved',
+              'executing',
+              'executed',
+              'error',
+              'insufficient_fee',
+              'no_created_at',
+            ].includes(status?.toLowerCase()) ?
+              status.toLowerCase() :
+              undefined,
+          senderAddress,
+          sourceAddress,
+          contractAddress,
+          relayerAddress,
+          time:
+            fromTime &&
+            toTime &&
+            [
+              moment(
+                Number(fromTime)
+              ),
+              moment(
+                Number(toTime)
+              ),
+            ],
+        }
+      )
     }
   }, [evm_chains_data, cosmos_chains_data, asPath])
 
@@ -117,7 +165,8 @@ export default ({ n }) => {
     const triggering = is_interval => {
       setFetchTrigger(
         is_interval ?
-          moment().valueOf() :
+          moment()
+            .valueOf() :
           typeof fetchTrigger === 'number' ?
             null :
             0
@@ -133,7 +182,15 @@ export default ({ n }) => {
 
     const interval = setInterval(() =>
       triggering(true),
-      (address || ['/gmp/search'].includes(pathname) ? 0.33 : 0.25) * 60 * 1000,
+      (
+        address ||
+        [
+          '/gmp/search',
+        ].includes(pathname) ?
+          0.33 :
+          0.25
+      ) *
+      60 * 1000,
     )
 
     return () => clearInterval(interval)
@@ -268,6 +325,30 @@ export default ({ n }) => {
             ['desc'],
           )
 
+          // for re execute all that must retry
+          if (
+            [
+              'error',
+            ].includes(status) &&
+            reExecute === 'true'
+          ) {
+            for (const d of response) {
+              const {
+                call,
+              } = { ...d }
+
+              await saveGMP(
+                call?.transactionHash,
+                call?.transactionIndex,
+                call?.logIndex,
+                undefined,
+                undefined,
+                undefined,
+                're_execute',
+              )
+            }
+          }
+
           setData(response)
         }
         else if (!fetchTrigger) {
@@ -297,21 +378,59 @@ export default ({ n }) => {
     }
   }, [data])
 
+  const saveGMP = async (
+    sourceTransactionHash,
+    sourceTransactionIndex,
+    sourceTransactionLogIndex,
+    transactionHash,
+    relayerAddress,
+    error,
+    event,
+  ) => {
+    const params = {
+      method: 'saveGMP',
+      sourceTransactionHash,
+      sourceTransactionIndex,
+      sourceTransactionLogIndex,
+      transactionHash,
+      relayerAddress,
+      error,
+      event,
+    }
+
+    // request api
+    await fetch(
+      process.env.NEXT_PUBLIC_GMP_API_URL,
+      {
+        method: 'POST',
+        body: JSON.stringify(params),
+      },
+    ).catch(error => { return null })
+  }
+
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
-  const chains_data = _.concat(
-    evm_chains_data,
-    cosmos_chains_data,
-  )
-  const data_filtered = _.slice(
-    data?.filter(d =>
-      !(filterTypes?.length > 0) ||
-      filterTypes.includes(d?.call?.event) ||
-      (filterTypes.includes('undefined') && !d?.call?.event)
-    ),
-    0,
-    n || undefined,
-  )
+  const chains_data =
+    _.concat(
+      evm_chains_data,
+      cosmos_chains_data,
+    )
+
+  const data_filtered =
+    _.slice(
+      (data || [])
+        .filter(d =>
+          !(filterTypes?.length > 0) ||
+          filterTypes.includes(d?.call?.event) ||
+          (
+            filterTypes.includes('undefined') &&
+            !d?.call?.event
+          )
+        ),
+      0,
+      n ||
+      undefined,
+    )
 
   return (
     data ?
