@@ -324,7 +324,12 @@ export default () => {
           )
         )
 
-        const response = await stats(params)
+        const response = await stats(
+          {
+            ...params,
+            all_stats: true,
+          }
+        )
 
         const {
           messages,

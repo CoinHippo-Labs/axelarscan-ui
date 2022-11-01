@@ -61,6 +61,7 @@ export default ({ n }) => {
   const {
     address,
     reExecute,
+    intervalUpdate,
   } = { ...query }
 
   const [data, setData] = useState(null)
@@ -187,7 +188,9 @@ export default ({ n }) => {
         [
           '/gmp/search',
         ].includes(pathname) ?
-          0.33 :
+          intervalUpdate ?
+            0.5 :
+            0.33 :
           0.25
       ) *
       60 * 1000,
@@ -197,7 +200,7 @@ export default ({ n }) => {
   }, [pathname, address, filters])
 
   useEffect(() => {
-    const getData = async () => {
+    const getData = async is_interval => {
       if (
         filters &&
         (
@@ -273,8 +276,10 @@ export default ({ n }) => {
           }
 
           if (time?.length > 1) {
-            fromTime = time[0].unix()
-            toTime = time[1].unix()
+            fromTime = time[0]
+              .unix()
+            toTime = time[1]
+              .unix()
           }
 
           params = {
@@ -332,6 +337,10 @@ export default ({ n }) => {
             ].includes(status) &&
             reExecute === 'true' &&
             (
+              !is_interval ||
+              intervalUpdate === 'true'
+            ) &&
+            (
               staging ||
               ![
                 'mainnet',
@@ -366,7 +375,7 @@ export default ({ n }) => {
       }
     }
 
-    getData()
+    getData(fetchTrigger > 0)
   }, [fetchTrigger])
 
   useEffect(() => {
