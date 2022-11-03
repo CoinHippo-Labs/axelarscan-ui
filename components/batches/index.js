@@ -660,9 +660,10 @@ export default () => {
 
                           const typeComponent = (
                             <div
-                              title={executed ?
-                                'Executed' :
-                                ''
+                              title={
+                                executed ?
+                                  'Executed' :
+                                  ''
                               }
                               className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
                             >
@@ -1112,31 +1113,40 @@ export default () => {
                   commands,
                 } = { ...props.row.original }
 
+                const executed = 
+                  commands &&
+                  commands.length ===
+                  commands
+                    .filter(c =>
+                      c?.executed
+                    )
+                    .length
+
                 return value &&
                   (
-                    <div className={`max-w-min ${equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
-                      {equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ?
-                        <BiCheckCircle
-                          size={18}
-                        /> :
-                        equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
-                          <MdOutlineWatchLater
+                    <div className={`max-w-min ${equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') || executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
+                      {
+                        equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ||
+                        executed ?
+                          <BiCheckCircle
                             size={18}
                           /> :
-                          <BiXCircle
-                            size={18}
-                          />
+                          equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
+                            <MdOutlineWatchLater
+                              size={18}
+                            /> :
+                            <BiXCircle
+                              size={18}
+                            />
                       }
                       <span className="capitalize text-xs font-semibold">
                         {
-                          (
-                            commands &&
-                            commands.length === commands.filter(c => c?.executed).length ?
-                              'Executed' :
-                              value.replace(
-                                'BATCHED_COMMANDS_STATUS_',
-                                '',
-                              )
+                          (executed ?
+                            'Executed' :
+                            value.replace(
+                              'BATCHED_COMMANDS_STATUS_',
+                              '',
+                            )
                           )
                           .toLowerCase()
                         }
