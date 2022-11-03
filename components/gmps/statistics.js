@@ -324,17 +324,16 @@ export default () => {
           )
         )
 
-        const response = await stats(
+        let response = await stats(
           {
             ...params,
-            all_stats: true,
+            includes: 'status',
           }
         )
 
         const {
           messages,
           statuses,
-          time_spents,
         } = { ...response }
 
         setMethods(
@@ -503,6 +502,17 @@ export default () => {
             ['desc'],
           )
         )
+
+        response = await stats(
+          {
+            ...params,
+            avg_times: true,
+          }
+        )
+
+        const {
+          time_spents,
+        } = { ...response }
 
         setTimeSpents(
           time_spents ||
