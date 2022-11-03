@@ -1124,7 +1124,7 @@ export default () => {
 
                 return value &&
                   (
-                    <div className={`max-w-min ${equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') || executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
+                    <div className={`max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
                       {
                         equals_ignore_case(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ||
                         executed ?
