@@ -764,6 +764,7 @@ export default () => {
                     </div>
                     <div className="flex flex-col space-y-3">
                       {
+                        s.id === 'sign_batch' &&
                         transactionHash &&
                         _chain_data?.explorer &&
                         (
@@ -898,9 +899,12 @@ export default () => {
                           _id ?
                             <div className={rowClassName}>
                               <span className={rowTitleClassName}>
-                                {_path.includes('/evm-poll') ?
-                                  'Poll' :
-                                  'Transaction'
+                                {
+                                  _path.includes('/evm-poll') ?
+                                    'Poll' :
+                                    _path.includes('/batch') ?
+                                      'Batch' :
+                                      'Transaction'
                                 }:
                               </span>
                               <div className="flex items-center space-x-1">
