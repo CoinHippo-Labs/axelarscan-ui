@@ -1125,8 +1125,21 @@ export default ({ n }) => {
               accessor: 'call.block_timestamp',
               disableSortBy: true,
               Cell: props => {
-                const { call, gas_paid, forecalled, approved, executed, error } = { ...props.row.original }
-                const updated_at = executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || forecalled?.block_timestamp
+                const {
+                  call,
+                  gas_paid,
+                  forecalled,
+                  approved,
+                  executed,
+                  error,
+                } = { ...props.row.original }
+
+                const updated_at =
+                  executed?.block_timestamp ||
+                  error?.block_timestamp ||
+                  approved?.block_timestamp ||
+                  forecalled?.block_timestamp
+
                 return (
                   <div className="space-y-2">
                     <TimeAgo
@@ -1134,18 +1147,21 @@ export default ({ n }) => {
                       title="Contract Call Time"
                       className="ml-auto"
                     />
-                    {updated_at && (
-                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg flex flex-col items-end py-1 px-2 ml-auto -mr-1">
-                        <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                          Updated at
-                        </span>
-                        <TimeAgo
-                          time={updated_at * 1000}
-                          title="Updated Time"
-                          className="text-xs ml-auto"
-                        />
-                      </div>
-                    )}
+                    {
+                      updated_at &&
+                      (
+                        <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg flex flex-col items-end py-1 px-2 ml-auto -mr-1">
+                          <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                            Updated at
+                          </span>
+                          <TimeAgo
+                            time={updated_at * 1000}
+                            title="Updated Time"
+                            className="text-xs ml-auto"
+                          />
+                        </div>
+                      )
+                    }
                   </div>
                 )
               },
