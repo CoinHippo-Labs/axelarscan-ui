@@ -268,7 +268,7 @@ export default () => {
       buttonClassName={`max-w-min ${filtered ? 'border-2 border-blue-500 dark:border-blue-500 text-blue-500 dark:text-blue-500 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-75 dark:hover:bg-opacity-75 font-normal'} rounded tracking-wider text-sm sm:text-base py-1 px-2.5`}
       title={<div className="flex items-center justify-between">
         <span>
-          Filter Votes
+          Filter Polls
         </span>
         <div
           onClick={() => setHidden(true)}
