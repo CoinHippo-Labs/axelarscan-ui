@@ -764,7 +764,10 @@ export default () => {
                     </div>
                     <div className="flex flex-col space-y-3">
                       {
-                        s.id === 'sign_batch' &&
+                        [
+                          'send',
+                          'sign_batch',
+                        ].includes(s.id) &&
                         transactionHash &&
                         _chain_data?.explorer &&
                         (
@@ -897,60 +900,64 @@ export default () => {
                             )
                           }) :
                           _id ?
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                {
-                                  _path.includes('/evm-poll') ?
-                                    'Poll' :
-                                    _path.includes('/batch') ?
-                                      'Batch' :
-                                      'Transaction'
-                                }:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                <a
-                                  href={`${url}${_path}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500 font-medium"
-                                >
-                                  <div>
-                                    <span className="xl:hidden">
-                                      {ellipse(
-                                        _id,
-                                        12,
-                                      )}
-                                    </span>
-                                    <span className="hidden xl:block">
-                                      {ellipse(
-                                        _id,
-                                        16,
-                                      )}
-                                    </span>
-                                  </div>
-                                </a>
-                                <Copy
-                                  value={_id}
-                                />
-                                <a
-                                  href={`${url}${_path}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500"
-                                >
-                                  {icon ?
-                                    <Image
-                                      src={icon}
-                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                    /> :
-                                    <TiArrowRight
-                                      size={16}
-                                      className="transform -rotate-45"
-                                    />
-                                  }
-                                </a>
-                              </div>
-                            </div> :
+                            ![
+                              'send',
+                            ].includes(s.id) ?
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  {
+                                    _path.includes('/evm-poll') ?
+                                      'Poll' :
+                                      _path.includes('/batch') ?
+                                        'Batch' :
+                                        'Transaction'
+                                  }:
+                                </span>
+                                <div className="flex items-center space-x-1">
+                                  <a
+                                    href={`${url}${_path}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500 font-medium"
+                                  >
+                                    <div>
+                                      <span className="xl:hidden">
+                                        {ellipse(
+                                          _id,
+                                          12,
+                                        )}
+                                      </span>
+                                      <span className="hidden xl:block">
+                                        {ellipse(
+                                          _id,
+                                          16,
+                                        )}
+                                      </span>
+                                    </div>
+                                  </a>
+                                  <Copy
+                                    value={_id}
+                                  />
+                                  <a
+                                    href={`${url}${_path}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500"
+                                  >
+                                    {icon ?
+                                      <Image
+                                        src={icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </div>
+                              </div> :
+                              null :
                             <ColorRing
                               color={loader_color(theme)}
                               width="32"
