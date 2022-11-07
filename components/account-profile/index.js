@@ -38,10 +38,16 @@ export default ({
         [],
       )
       .find(a =>
-        equals_ignore_case(a?.address, address) &&
+        equals_ignore_case(
+          a?.address,
+          address,
+        ) &&
         (
           !a?.environment ||
-          equals_ignore_case(a.environment, environment)
+          equals_ignore_case(
+            a.environment,
+            environment,
+          )
         )
       ) ||
       broadcasters[environment]?.[address?.toLowerCase()] &&

@@ -42,8 +42,9 @@ export default ({
         placement={placement}
         title={title}
         content={<div className="w-38 whitespace-nowrap text-xs font-normal">
-          {_time
-            .format('MMM D, YYYY h:mm:ss A')
+          {
+            _time
+              .format('MMM D, YYYY h:mm:ss A')
           }
         </div>}
         titleClassName={titleClassName}

@@ -47,15 +47,18 @@ export default () => {
         assets_data &&
         validators_data
       ) {
-        const response = await getProposal(
-          id,
-          null,
-          assets_data,
-        )
+        const response =
+          await getProposal(
+            id,
+            null,
+            assets_data,
+          )
 
-        const _response = await all_proposal_votes(
-          id,
-        )
+        const _response =
+          await all_proposal_votes(
+            id,
+          )
+
         const {
           data,
         } = { ..._response }
@@ -64,49 +67,59 @@ export default () => {
           {
             data: {
               ...response,
-              votes: _.orderBy(
-                (data || [])
-                  .map(v => {
-                    const {
-                      voter,
-                    } = { ...v }
+              votes:
+                _.orderBy(
+                  (data || [])
+                    .map(v => {
+                      const {
+                        voter,
+                      } = { ...v }
 
-                    const validator_data = validators_data.find(_v => equals_ignore_case(_v?.delegator_address, voter))
-                    const {
-                      tokens,
-                    } = { ...validator_data }
+                      const validator_data = validators_data
+                        .find(_v =>
+                          equals_ignore_case(
+                            _v?.delegator_address,
+                            voter,
+                          )
+                        )
+                      const {
+                        tokens,
+                      } = { ...validator_data }
 
-                    const _tokens = assetManager.amount(
-                      tokens,
-                      native_asset_id,
-                      assets_data,
-                    )
+                      const _tokens =
+                        assetManager
+                          .amount(
+                            tokens,
+                            native_asset_id,
+                            assets_data,
+                          )
 
-                    return {
-                      ...v,
-                      validator_data: {
-                        ...validator_data,
-                        tokens: _tokens,
-                        quadratic_voting_power: _tokens > 0 &&
-                          Math.floor(
-                            Math.sqrt(
-                              _tokens,
-                            )
-                          ),
-                      },
-                    }
-                  }),
-                [
-                  // 'validator_data.quadratic_voting_power',
-                  'validator_data.tokens',
-                  'validator_data.description.moniker',
-                ],
-                [
-                  // 'desc',
-                  'desc',
-                  'asc',
-                ],
-              ),
+                      return {
+                        ...v,
+                        validator_data: {
+                          ...validator_data,
+                          tokens: _tokens,
+                          quadratic_voting_power:
+                            _tokens > 0 &&
+                            Math.floor(
+                              Math.sqrt(
+                                _tokens,
+                              )
+                            ),
+                        },
+                      }
+                    }),
+                  [
+                    // 'validator_data.quadratic_voting_power',
+                    'validator_data.tokens',
+                    'validator_data.description.moniker',
+                  ],
+                  [
+                    // 'desc',
+                    'desc',
+                    'asc',
+                  ],
+                ),
             },
             id,
           }
@@ -116,10 +129,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      3 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        3 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [id, assets_data, validators_data])
@@ -135,25 +149,29 @@ export default () => {
 
   const matched = proposal?.id === id
 
-  const vote_options = matched ?
-    Object.entries(
-      _.groupBy(
-        votes || [],
-        'option',
+  const vote_options =
+    matched ?
+      Object.entries(
+        _.groupBy(
+          votes || [],
+          'option',
+        )
       )
-    )
-    .map(([k, v]) => {
-      return {
-        option: k,
-        value: (v || [])
-          .length,
-      }
-    })
-    .filter(v => v.value) :
-    []
+      .map(([k, v]) => {
+        return {
+          option: k,
+          value: (v || [])
+            .length,
+        }
+      })
+      .filter(v => v.value) :
+      []
 
-  const end = voting_end_time &&
-    voting_end_time < moment().valueOf()
+  const end =
+    voting_end_time &&
+    voting_end_time <
+    moment()
+      .valueOf()
 
   return (
     <div className="space-y-5 mt-2 mb-6 mx-auto">

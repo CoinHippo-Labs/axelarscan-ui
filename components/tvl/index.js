@@ -53,10 +53,11 @@ export default () => {
       assets_data &&
       Object.keys({ ...tvl_data }).length > 5
     ) {
-      const chains_data = _.concat(
-        evm_chains_data,
-        cosmos_chains_data,
-      )
+      const chains_data =
+        _.concat(
+          evm_chains_data,
+          cosmos_chains_data,
+        )
 
       setData(
         _.orderBy(
@@ -72,34 +73,53 @@ export default () => {
                 price,
               } = { ...v }
 
-              price = typeof price === 'number' ?
-                price :
-                -1
+              price =
+                typeof price === 'number' ?
+                  price :
+                  -1
 
               return {
                 ...v,
-                asset_data: getAsset(
-                  k,
-                  assets_data,
-                ),
-                value_on_evm: price * (total_on_evm || 0),
-                value_on_cosmos: price * (total_on_cosmos || 0),
-                value: price * (total || 0),
-                native: Object.entries({ ...tvl })
-                  .map(([k, v]) => {
-                    return {
-                      chain: k,
-                      chain_data: getChain(
-                        k,
-                        chains_data,
-                      ),
-                      ...v,
-                    }
-                  })
-                  .find(c =>
-                    c?.contract_data?.is_native ||
-                    c?.denom_data?.is_native
+                asset_data:
+                  getAsset(
+                    k,
+                    assets_data,
                   ),
+                value_on_evm:
+                  price *
+                  (
+                    total_on_evm ||
+                    0
+                  ),
+                value_on_cosmos:
+                  price *
+                  (
+                    total_on_cosmos ||
+                    0
+                  ),
+                value:
+                  price *
+                  (
+                    total ||
+                    0
+                  ),
+                native:
+                  Object.entries({ ...tvl })
+                    .map(([k, v]) => {
+                      return {
+                        chain: k,
+                        chain_data:
+                          getChain(
+                            k,
+                            chains_data,
+                          ),
+                        ...v,
+                      }
+                    })
+                    .find(c =>
+                      c?.contract_data?.is_native ||
+                      c?.denom_data?.is_native
+                    ),
               }
             }),
           ['value'],
@@ -112,7 +132,16 @@ export default () => {
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
   return (
-    data?.length >= assets_data?.filter(a => a && (!a.is_staging || staging)).length ?
+    data?.length >=
+    (assets_data || [])
+      .filter(a =>
+        a &&
+        (
+          !a.is_staging ||
+          staging
+        )
+      )
+      .length ?
       <div className="space-y-2">
         <Datatable
           columns={
@@ -122,9 +151,10 @@ export default () => {
                   {
                     Header: 'Asset',
                     accessor: 'asset_data',
-                    sortType: (a, b) => a.original.value > b.original.value ?
-                      1 :
-                      -1,
+                    sortType: (a, b) =>
+                      a.original.value > b.original.value ?
+                        1 :
+                        -1,
                     Cell: props => {
                       const {
                         name,
@@ -134,15 +164,21 @@ export default () => {
 
                       return (
                         <div className={`min-w-max flex items-${name ? 'start' : 'center'} space-x-2`}>
-                          {image && (
-                            <Image
-                              src={image}
-                              className="w-5 h-5 rounded-full"
-                            />
-                          )}
+                          {
+                            image &&
+                            (
+                              <Image
+                                src={image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )
+                          }
                           <div className="flex flex-col">
                             <div className="text-xs font-bold">
-                              {name || symbol}
+                              {
+                                name ||
+                                symbol
+                              }
                             </div>
                             {
                               name &&
@@ -164,9 +200,17 @@ export default () => {
                   {
                     Header: 'Native Chain',
                     accessor: 'native',
-                    sortType: (a, b) => (a.original.native?.chain_data?.name || '') > (b.original.native?.chain_data?.name || '') ?
-                      1 :
-                      -1,
+                    sortType: (a, b) =>
+                      (
+                        a.original.native?.chain_data?.name ||
+                        ''
+                      ) >
+                      (
+                        b.original.native?.chain_data?.name ||
+                        ''
+                      ) ?
+                        1 :
+                        -1,
                     Cell: props => {
                       const {
                         chain_data,
@@ -185,9 +229,12 @@ export default () => {
                         is_native,
                       } = { ...denom_data }
 
-                      const amount = supply ||
+                      const amount =
+                        supply ||
                         total
-                      const has_asset = typeof amount === 'number' ||
+
+                      const has_asset =
+                        typeof amount === 'number' ||
                         contract_data ||
                         (
                           escrow_addresses?.length > 0 &&
@@ -202,12 +249,15 @@ export default () => {
                         <div className="flex flex-col items-start sm:items-end space-y-0">
                           {has_asset ?
                             <div className="min-w-max flex items-center space-x-1.5">
-                              {image && (
-                                <Image
-                                  src={image}
-                                  className="w-5 h-5 rounded-full"
-                                />
-                              )}
+                              {
+                                image &&
+                                (
+                                  <Image
+                                    src={image}
+                                    className="w-5 h-5 rounded-full"
+                                  />
+                                )
+                              }
                               <span className="text-xs font-semibold">
                                 {chainName(chain_data)}
                               </span>
@@ -233,7 +283,10 @@ export default () => {
                           {currency_symbol}
                           {number_format(
                             _.sumBy(
-                              data.filter(d => d?.value > 0),
+                              data
+                                .filter(d =>
+                                  d?.value > 0
+                                ),
                               'value',
                             ),
                             '0,0.0a',
@@ -242,9 +295,10 @@ export default () => {
                       </div>
                     ),
                     accessor: 'value',
-                    sortType: (a, b) => a.original.value > b.original.value ?
-                      1 :
-                      -1,
+                    sortType: (a, b) =>
+                      a.original.value > b.original.value ?
+                        1 :
+                        -1,
                     Cell: props => {
                       const {
                         asset_data,
@@ -258,18 +312,21 @@ export default () => {
                         url,
                       } = { ...native }
 
-                      const amount_exact_formatted = number_format(
-                        total,
-                        '0,0.00000000',
-                      )
-                      const amount_formatted = number_format(
-                        total,
-                        total > 1000 ?
-                          '0,0.0a' :
-                          total > 100 ?
-                            '0,0.0' :
-                            '0,0.00',
-                      )
+                      const amount_exact_formatted =
+                        number_format(
+                          total,
+                          '0,0.00000000',
+                        )
+
+                      const amount_formatted =
+                        number_format(
+                          total,
+                          total > 1000 ?
+                            '0,0.0a' :
+                            total > 100 ?
+                              '0,0.0' :
+                              '0,0.00',
+                        )
 
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0.5">
@@ -351,7 +408,10 @@ export default () => {
                           {currency_symbol}
                           {number_format(
                             _.sumBy(
-                              data.filter(d => d?.value_on_evm > 0),
+                              data
+                                .filter(d =>
+                                  d?.value_on_evm > 0
+                                ),
                               'value_on_evm',
                             ),
                             '0,0.0a',
@@ -360,9 +420,10 @@ export default () => {
                       </div>
                     ),
                     accessor: 'value_on_evm',
-                    sortType: (a, b) => a.original.value_on_evm > b.original.value_on_evm ?
-                      1 :
-                      -1,
+                    sortType: (a, b) =>
+                      a.original.value_on_evm > b.original.value_on_evm ?
+                        1 :
+                        -1,
                     Cell: props => {
                       const {
                         asset_data,
@@ -446,7 +507,10 @@ export default () => {
                           {currency_symbol}
                           {number_format(
                             _.sumBy(
-                              data.filter(d => d?.value_on_cosmos > 0),
+                              data
+                                .filter(d =>
+                                  d?.value_on_cosmos > 0
+                                ),
                               'value_on_cosmos',
                             ),
                             '0,0.0a',
@@ -455,9 +519,10 @@ export default () => {
                       </div>
                     ),
                     accessor: 'value_on_cosmos',
-                    sortType: (a, b) => a.original.value_on_cosmos > b.original.value_on_cosmos ?
-                      1 :
-                      -1,
+                    sortType: (a, b) =>
+                      a.original.value_on_cosmos > b.original.value_on_cosmos ?
+                        1 :
+                        -1,
                     Cell: props => {
                       const {
                         asset_data,
@@ -581,9 +646,15 @@ export default () => {
                                       total,
                                     } = { ...tvl?.[id] }
 
-                                    const amount = supply ||
+                                    const amount =
+                                      supply ||
                                       total
-                                    const value = (amount * price) ||
+
+                                    const value =
+                                      (
+                                        amount *
+                                        price
+                                      ) ||
                                       0
 
                                     return {
@@ -591,7 +662,9 @@ export default () => {
                                       value,
                                     }
                                   })
-                                  .filter(d => d.value > 0),
+                                  .filter(d =>
+                                    d.value > 0
+                                  ),
                                 'value',
                               ),
                           }
@@ -614,12 +687,15 @@ export default () => {
                     Header: (
                       <div className="flex flex-col space-y-0.5">
                         <div className="min-w-max flex items-center space-x-1.5">
-                          {image && (
-                            <Image
-                              src={image}
-                              className="w-4 h-4 rounded-full"
-                            />
-                          )}
+                          {
+                            image &&
+                            (
+                              <Image
+                                src={image}
+                                className="w-4 h-4 rounded-full"
+                              />
+                            )
+                          }
                           <span className="text-2xs">
                             {chainName(c)}
                           </span>
@@ -635,10 +711,24 @@ export default () => {
                     ),
                     accessor: `tvl.${id}`,
                     sortType: (a, b) =>
-                      (a.original.tvl?.[id]?.supply || a.original.tvl?.[id]?.total || -1) *
-                      (a.original.price || 0) >
-                      (b.original.tvl?.[id]?.supply || b.original.tvl?.[id]?.total || -1) *
-                      (b.original.price || 0) ?
+                      (
+                        a.original.tvl?.[id]?.supply ||
+                        a.original.tvl?.[id]?.total ||
+                        -1
+                      ) *
+                      (
+                        a.original.price ||
+                        0
+                      ) >
+                      (
+                        b.original.tvl?.[id]?.supply ||
+                        b.original.tvl?.[id]?.total ||
+                        -1
+                      ) *
+                      (
+                        b.original.price ||
+                        0
+                      ) ?
                         1 :
                         -1,
                     Cell: props => {
@@ -659,10 +749,14 @@ export default () => {
                         is_native,
                       } = { ...denom_data }
 
-                      const amount = supply ||
+                      const amount =
+                        supply ||
                         total
+
                       const value = amount * price
-                      const has_asset = typeof amount === 'number' ||
+
+                      const has_asset =
+                        typeof amount === 'number' ||
                         contract_data ||
                         (
                           escrow_addresses?.length > 0 &&
@@ -673,18 +767,21 @@ export default () => {
                           id?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)
                         )
 
-                      const amount_exact_formatted = number_format(
-                        amount,
-                        '0,0.000000',
-                      )
-                      const amount_formatted = number_format(
-                        amount,
-                        amount > 10-0 ?
-                          '0,0.0a' :
-                          amount > 100 ?
-                            '0,0.0' :
-                            '0,0.00',
-                      )
+                      const amount_exact_formatted =
+                        number_format(
+                          amount,
+                          '0,0.000000',
+                        )
+
+                      const amount_formatted =
+                        number_format(
+                          amount,
+                          amount > 1000 ?
+                            '0,0.0a' :
+                            amount > 100 ?
+                              '0,0.0' :
+                              '0,0.00',
+                        )
 
                       return (
                         <div className="flex flex-col items-start sm:items-end space-y-0">
@@ -746,11 +843,16 @@ export default () => {
                       )
                     },
                     headerClassName: 'whitespace-nowrap justify-start sm:justify-end text-left sm:text-right',
-                    order: 5 + i + (
-                      cosmos_chains_data.findIndex(_c => _c?.id === id) > -1 ?
-                        1 :
-                        0
-                    ),
+                    order:
+                      5 + i +
+                      (
+                        cosmos_chains_data
+                          .findIndex(_c =>
+                            _c?.id === id
+                          ) > -1 ?
+                          1 :
+                          0
+                      ),
                   }
                 }),
               ),
@@ -772,9 +874,10 @@ export default () => {
 
                 return {
                   ...d,
-                  i: asset === native_asset_id ?
-                    0.5 :
-                    i,
+                  i: asset ===
+                    native_asset_id ?
+                      0.5 :
+                      i,
                 }
               }),
               ['i'],
@@ -788,7 +891,12 @@ export default () => {
           className="no-border block-table"
         />
         {
-          data.length < assets_data?.filter(a => !a?.is_staging || staging).length &&
+          data.length <
+          (assets_data || [])
+            .filter(a =>
+              !a?.is_staging ||
+              staging
+            ).length &&
           (
             <div className="flex justify-center p-1.5">
               <ColorRing

@@ -44,24 +44,32 @@ export default () => {
     chain_id,
   } = { ...chainData }
 
-  const data = (assets_data || [])
-    .filter(a => (!a?.is_staging || staging))
-    .flatMap(a =>
-      (a?.contracts || [])
-        .filter(c => !chain_id || c?.chain_id === chain_id)
-        .map(c => {
-          return {
-            ...a,
-            ...c,
-          }
-        })
-    )
+  const data =
+    (assets_data || [])
+      .filter(a =>
+        !a?.is_staging ||
+        staging
+      )
+      .flatMap(a =>
+        (a?.contracts || [])
+          .filter(c =>
+            !chain_id ||
+            c?.chain_id === chain_id
+          )
+          .map(c => {
+            return {
+              ...a,
+              ...c,
+            }
+          })
+      )
 
-  const data_filtered = data
-    .filter(d =>
-      !assetData?.id ||
-      d?.id === assetData.id
-    )
+  const data_filtered =
+    data
+      .filter(d =>
+        !assetData?.id ||
+        d?.id === assetData.id
+      )
 
   return (
     <div className="space-y-4 mx-auto pt-2 pb-6">
@@ -86,23 +94,35 @@ export default () => {
 
                 if (
                   c &&
-                  assets_data.findIndex(a =>
-                    (!assetData || a?.id === assetData.id) &&
-                    a?.contracts?.findIndex(_c => _c?.chain_id === c?.chain_id) > -1
-                  ) < 0
+                  assets_data
+                    .findIndex(a =>
+                      (
+                        !assetData ||
+                        a?.id === assetData.id
+                      ) &&
+                      (a?.contracts || [])
+                        .findIndex(_c =>
+                          _c?.chain_id === c?.chain_id
+                        ) > -1
+                    ) < 0
                 ) {
                   setAssetData('')
                 }
               }}
             />
             <Dropdown
-              data={_.uniqBy(
-                data,
-                'id',
-              )}
+              data={
+                _.uniqBy(
+                  data,
+                  'id',
+                )
+              }
               placeholder="Select Asset"
               allOptionsName="All Assets"
-              defaultSelectedKey={assetData?.id || ''}
+              defaultSelectedKey={
+                assetData?.id ||
+                ''
+              }
               onSelect={a => setAssetData(a)}
             />
           </div>
@@ -124,12 +144,15 @@ export default () => {
 
                   return (
                     <div className="flex items-center space-x-1.5">
-                      {image && (
-                        <Image
-                          src={image}
-                          className="w-5 h-5 rounded-full"
-                        />
-                      )}
+                      {
+                        image &&
+                        (
+                          <Image
+                            src={image}
+                            className="w-5 h-5 rounded-full"
+                          />
+                        )
+                      }
                       <span className="font-semibold">
                         {props.value}
                       </span>
@@ -146,16 +169,26 @@ export default () => {
                     id,
                     name,
                     image,
-                  } = { ...evm_chains_data.find(c => c?.chain_id === props.value) }
+                  } = {
+                    ...(
+                      evm_chains_data
+                        .find(c =>
+                          c?.chain_id === props.value
+                        )
+                    ),
+                  }
 
                   return (
                     <div className="flex items-start space-x-1.5">
-                      {image && (
-                        <Image
-                          src={image}
-                          className="w-5 h-5 rounded-full"
-                        />
-                      )}
+                      {
+                        image &&
+                        (
+                          <Image
+                            src={image}
+                            className="w-5 h-5 rounded-full"
+                          />
+                        )
+                      }
                       <div className="flex flex-col">
                         <span className="font-semibold">
                           {name}
@@ -197,7 +230,14 @@ export default () => {
                   const {
                     explorer,
                     prefix_address,
-                  } = { ...evm_chains_data.find(c => c?.chain_id === chain_id) }
+                  } = {
+                    ...(
+                      evm_chains_data
+                        .find(c =>
+                          c?.chain_id === chain_id
+                        )
+                    ),
+                  }
                   const {
                     url,
                     contract_path,
@@ -227,7 +267,6 @@ export default () => {
                         </span>
                       </a>
                       <Copy
-                        size={18}
                         value={props.value}
                       />
                     </div>
@@ -241,9 +280,11 @@ export default () => {
                 Cell: props => (
                   <div className="flex items-center justify-end">
                     <AddToken
-                      token_data={{
-                        ...props.row.original,
-                      }}
+                      token_data={
+                        {
+                          ...props.row.original,
+                        }
+                      }
                     />
                   </div>
                 ),
@@ -251,7 +292,7 @@ export default () => {
               }
             ]}
             data={data_filtered}
-            noPagination={data_filtered.length <= 10}
+            noPagination={data_filtered.length <= 25}
             defaultPageSize={25}
             className="min-h-full no-border"
           /> :

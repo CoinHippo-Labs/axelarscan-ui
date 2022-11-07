@@ -42,7 +42,8 @@ export default ({
           identity,
         } = { ...validator_description }
 
-        const key = identity ||
+        const key =
+          identity ||
           (moniker || '')
             .split(' ')
             .filter(s => s)
@@ -54,11 +55,12 @@ export default ({
           _image = validators_profile_data[key]
         }
         else if (identity) {
-          const response = await validator_profile(
-            {
-              key_suffix: identity,
-            },
-          )
+          const response =
+            await validator_profile(
+              {
+                key_suffix: identity,
+              },
+            )
 
           const {
             url,
@@ -68,7 +70,11 @@ export default ({
         }
 
         if (!_image) {
-          if (moniker?.toLowerCase().startsWith('axelar-core-')) {
+          if (
+            (moniker || '')
+              .toLowerCase()
+              .startsWith('axelar-core-')
+          ) {
             _image = '/logos/chains/axelarnet.svg'
           }
           else if (!identity) {
@@ -78,12 +84,14 @@ export default ({
 
         setImage(_image)
 
-        dispatch({
-          type: VALIDATORS_PROFILE_DATA,
-          value: {
-            [`${key}`]: _image,
-          },
-        })
+        dispatch(
+          {
+            type: VALIDATORS_PROFILE_DATA,
+            value: {
+              [`${key}`]: _image,
+            },
+          }
+        )
       }
     }
 
@@ -95,13 +103,15 @@ export default ({
     identity,
   } = { ...validator_description }
 
-  const key = identity ||
+  const key =
+    identity ||
     (moniker || '')
       .split(' ')
       .filter(s => s)
       .join('_')
 
-  const _image = validators_profile_data?.[key] ||
+  const _image =
+    validators_profile_data?.[key] ||
     image
 
   return _image ?

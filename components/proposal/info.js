@@ -22,10 +22,11 @@ export default ({
     theme,
   } = { ...preferences }
 
-  const ReactJson = typeof window !== 'undefined' &&
-    dynamic(
-      import('react-json-view')
-    )
+  const ReactJson =
+    typeof window !== 'undefined' &&
+      dynamic(
+        import('react-json-view')
+      )
 
   const {
     content,
@@ -222,7 +223,13 @@ export default ({
           submit_time &&
           (
             <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-              {moment(submit_time).fromNow()} ({moment(submit_time).format('MMM D, YYYY h:mm:ss A')})
+              {
+                moment(submit_time)
+                  .fromNow()
+              } ({
+                moment(submit_time)
+                  .format('MMM D, YYYY h:mm:ss A')
+              })
             </span>
           ) :
           <ProgressBar
@@ -240,7 +247,13 @@ export default ({
           deposit_end_time &&
           (
             <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-              {moment(deposit_end_time).fromNow()} ({moment(deposit_end_time).format('MMM D, YYYY h:mm:ss A')})
+              {
+                moment(deposit_end_time)
+                  .fromNow()
+              } ({
+                moment(deposit_end_time)
+                  .format('MMM D, YYYY h:mm:ss A')
+              })
             </span>
           ) :
           <ProgressBar
@@ -258,7 +271,13 @@ export default ({
           voting_start_time &&
           (
             <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-              {moment(voting_start_time).fromNow()} ({moment(voting_start_time).format('MMM D, YYYY h:mm:ss A')})
+              {
+                moment(voting_start_time)
+                  .fromNow()
+              } ({
+                moment(voting_start_time)
+                  .format('MMM D, YYYY h:mm:ss A')
+              })
             </span>
           ) :
           <ProgressBar
@@ -276,7 +295,13 @@ export default ({
           voting_end_time &&
           (
             <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-              {moment(voting_end_time).fromNow()} ({moment(voting_end_time).format('MMM D, YYYY h:mm:ss A')})
+              {
+                moment(voting_end_time)
+                  .fromNow()
+              } ({
+                moment(voting_end_time)
+                  .format('MMM D, YYYY h:mm:ss A')
+              })
             </span>
           ) :
           <ProgressBar

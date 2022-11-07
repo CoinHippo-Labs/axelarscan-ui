@@ -35,10 +35,11 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (assets_data) {
-        const response = await all_proposals(
-          null,
-          assets_data,
-        )
+        const response =
+          await all_proposals(
+            null,
+            assets_data,
+          )
 
         const {
           data,
@@ -63,9 +64,10 @@ export default () => {
             {
               Header: 'ID',
               accessor: 'proposal_id',
-              sortType: (a, b) => a.original.proposal_id > b.original.proposal_id ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.proposal_id > b.original.proposal_id ?
+                  1 :
+                  -1,
               Cell: props => (
                 <span className="font-medium">
                   {number_format(
@@ -78,9 +80,10 @@ export default () => {
             {
               Header: 'Proposal',
               accessor: 'content.title',
-              sortType: (a, b) => a.original.content?.title > b.original.content?.title ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.content?.title > b.original.content?.title ?
+                  1 :
+                  -1,
               Cell: props => {
                 const {
                   proposal_id,
@@ -118,9 +121,10 @@ export default () => {
             {
               Header: 'Height',
               accessor: 'content.plan.height',
-              sortType: (a, b) => a.original.content?.plan?.height > b.original.content?.plan?.height ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.content?.plan?.height > b.original.content?.plan?.height ?
+                  1 :
+                  -1,
               Cell: props => (
                 <div className="font-medium text-left sm:text-right">
                   {props.value > 0 ?
@@ -137,9 +141,10 @@ export default () => {
             {
               Header: 'Type',
               accessor: 'type',
-              sortType: (a, b) => a.original.type > b.original.type ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.type > b.original.type ?
+                  1 :
+                  -1,
               Cell: props => (
                 <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                   {props.value ?
@@ -157,14 +162,16 @@ export default () => {
             {
               Header: 'Voting Start',
               accessor: 'voting_start_time',
-              sortType: (a, b) => a.original.voting_start_time > b.original.voting_start_time ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.voting_start_time > b.original.voting_start_time ?
+                  1 :
+                  -1,
               Cell: props => (
                 <div className="flex flex-col items-end text-right">
                   <span className="text-slate-400 dark:text-slate-600 font-normal">
                     {props.value > -1 ?
-                      moment(props.value).format('MMM D, YYYY h:mm:ss A z') :
+                      moment(props.value)
+                        .format('MMM D, YYYY h:mm:ss A z') :
                       '-'
                     }
                   </span>
@@ -175,14 +182,16 @@ export default () => {
             {
               Header: 'Voting End',
               accessor: 'voting_end_time',
-              sortType: (a, b) => a.original.voting_end_time > b.original.voting_end_time ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.voting_end_time > b.original.voting_end_time ?
+                  1 :
+                  -1,
               Cell: props => (
                 <div className="flex flex-col items-end text-right">
                   <span className="text-slate-400 dark:text-slate-600 font-normal">
                     {props.value > -1 ?
-                      moment(props.value).format('MMM D, YYYY h:mm:ss A z') :
+                      moment(props.value)
+                        .format('MMM D, YYYY h:mm:ss A z') :
                       '-'
                     }
                   </span>
@@ -196,12 +205,16 @@ export default () => {
               sortType: (a, b) =>
                 _.sumBy(
                   (a.original.total_deposit || [])
-                    .filter(d => d?.denom === native_asset_id),
+                    .filter(d =>
+                      d?.denom === native_asset_id
+                    ),
                   'amount',
                 ) >
                 _.sumBy(
                   (b.original.total_deposit || [])
-                    .filter(d => d?.denom === native_asset_id),
+                    .filter(d =>
+                      d?.denom === native_asset_id
+                    ),
                   'amount',
                 ) ?
                   1 :
@@ -248,9 +261,10 @@ export default () => {
             {
               Header: 'Status',
               accessor: 'status',
-              sortType: (a, b) => a.original.status > b.original.status ?
-                1 :
-                -1,
+              sortType: (a, b) =>
+                a.original.status > b.original.status ?
+                  1 :
+                  -1,
               Cell: props => {
                 const {
                   final_tally_result,

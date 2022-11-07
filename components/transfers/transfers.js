@@ -5,7 +5,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { CSVLink } from 'react-csv'
-import { ProgressBar as ProgressBarSpinner, ColorRing } from 'react-loader-spinner'
+import { ProgressBar, ColorRing } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -17,7 +17,6 @@ import Image from '../image'
 import Copy from '../copy'
 import Popover from '../popover'
 import TimeAgo from '../time-ago'
-import { ProgressBar } from '../progress-bars'
 import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
@@ -902,29 +901,54 @@ export default ({ n }) => {
 
                 return (
                   <div className="min-w-max flex flex-col space-y-0 mb-4">
-                    {staging ?
-                      <div className="flex flex-col space-y-0.5 mt-2 px-1">
-                        <ProgressBar
-                          width={current_step * 100 / steps.length}
-                          color="bg-green-400"
-                          backgroundClassName="h-1.5 bg-yellow-400"
-                          className="h-1.5"
-                        />
-                        <div className="flex items-center space-x-1.5">
+                    {steps.map((s, i) => {
+                      const { title, chain_data, data, id_field, path, params, finish } = { ...s }
+                      const id = data?.[id_field]
+                      const { explorer } = { ...chain_data }
+                      const { url, transaction_path, icon } = { ...explorer }
+
+                      let _path = path?.replace('{id}', id) ||
+                        transaction_path?.replace('{tx}', id)
+
+                      Object.entries({ ...params })
+                        .forEach(([k, v]) => {
+                          _path = _path?.replace(`{${k}}`, v)
+                        })
+
+                      const text_color = finish ?
+                        'text-green-400 dark:text-green-300' :
+                        i === current_step ?
+                          'text-yellow-500 dark:text-yellow-400' :
+                          data?.status === 'failed' ?
+                            'text-red-500 dark:text-red-600' :
+                            'text-slate-300 dark:text-slate-700'
+
+                      return (
+                        <div
+                          key={i}
+                          className="flex items-center space-x-1.5 pb-0.5"
+                        >
                           {finish ?
                             <BiCheckCircle
                               size={20}
                               className="text-green-400 dark:text-green-300"
                             /> :
-                            step?.data?.status === 'failed' ?
-                              <BiXCircle
-                                size={20}
-                                className="text-red-500 dark:text-red-600"
+                            i === current_step ?
+                              <ProgressBar
+                                borderColor="#ca8a04"
+                                barColor="#facc15"
+                                width="20"
+                                height="20"
                               /> :
-                              <FiCircle
-                                size={20}
-                                className="text-slate-300 dark:text-slate-700"
-                              />
+                              data?.status === 'failed' ?
+                                <BiXCircle
+                                  size={20}
+                                  className="text-red-500 dark:text-red-600"
+                                /> :
+                                <FiCircle
+                                  size={20}
+                                  className="text-slate-300 dark:text-slate-700"
+                                />
                           }
                           <div className="flex items-center space-x-1">
                             {id ?
@@ -933,125 +957,38 @@ export default ({ n }) => {
                                 title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
                                   {title}
                                 </span>}
-                                size={18}
                               /> :
                               <span className={`uppercase ${text_color} text-xs font-medium`}>
                                 {title}
                               </span>
                             }
-                            {id && url && (
-                              <a
-                                href={`${url}${_path}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-500 dark:text-blue-500"
-                              >
-                                {icon ?
-                                  <Image
-                                    src={icon}
-                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                  /> :
-                                  <TiArrowRight
-                                    size={16}
-                                    className="transform -rotate-45"
-                                  />
-                                }
-                              </a>
-                            )}
+                            {
+                              id &&
+                              url &&
+                              (
+                                <a
+                                  href={`${url}${_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
+                                    />
+                                  }
+                                </a>
+                              )
+                            }
                           </div>
                         </div>
-                      </div> :
-                      <>
-                        {steps.map((s, i) => {
-                          const { title, chain_data, data, id_field, path, params, finish } = { ...s }
-                          const id = data?.[id_field]
-                          const { explorer } = { ...chain_data }
-                          const { url, transaction_path, icon } = { ...explorer }
-
-                          let _path = path?.replace('{id}', id) ||
-                            transaction_path?.replace('{tx}', id)
-
-                          Object.entries({ ...params })
-                            .forEach(([k, v]) => {
-                              _path = _path?.replace(`{${k}}`, v)
-                            })
-
-                          const text_color = finish ?
-                            'text-green-400 dark:text-green-300' :
-                            i === current_step ?
-                              'text-yellow-500 dark:text-yellow-400' :
-                              data?.status === 'failed' ?
-                                'text-red-500 dark:text-red-600' :
-                                'text-slate-300 dark:text-slate-700'
-
-                          return (
-                            <div
-                              key={i}
-                              className="flex items-center space-x-1.5 pb-0.5"
-                            >
-                              {finish ?
-                                <BiCheckCircle
-                                  size={20}
-                                  className="text-green-400 dark:text-green-300"
-                                /> :
-                                i === current_step ?
-                                  <ProgressBarSpinner
-                                    borderColor="#ca8a04"
-                                    barColor="#facc15"
-                                    width="20"
-                                    height="20"
-                                  /> :
-                                  data?.status === 'failed' ?
-                                    <BiXCircle
-                                      size={20}
-                                      className="text-red-500 dark:text-red-600"
-                                    /> :
-                                    <FiCircle
-                                      size={20}
-                                      className="text-slate-300 dark:text-slate-700"
-                                    />
-                              }
-                              <div className="flex items-center space-x-1">
-                                {id ?
-                                  <Copy
-                                    value={id}
-                                    title={<span className={`cursor-pointer uppercase ${text_color} text-xs font-bold`}>
-                                      {title}
-                                    </span>}
-                                  /> :
-                                  <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                    {title}
-                                  </span>
-                                }
-                                {
-                                  id &&
-                                  url &&
-                                  (
-                                    <a
-                                      href={`${url}${_path}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 dark:text-blue-500"
-                                    >
-                                      {icon ?
-                                        <Image
-                                          src={icon}
-                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                        /> :
-                                        <TiArrowRight
-                                          size={16}
-                                          className="transform -rotate-45"
-                                        />
-                                      }
-                                    </a>
-                                  )
-                                }
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </>
-                    }
+                      )
+                    })}
                     {
                       insufficient_fee &&
                       (
@@ -1159,7 +1096,7 @@ export default ({ n }) => {
           )
         }
       </div> :
-      <ProgressBarSpinner
+      <ProgressBar
         borderColor={loader_color(theme)}
         width="36"
         height="36"

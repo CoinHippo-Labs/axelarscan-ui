@@ -101,8 +101,12 @@ export default ({
 
       web3Modal = new Web3Modal(
         {
-          network: getNetwork(defaultChainId) ||
-            'mainnet',
+          network:
+            getNetwork(defaultChainId) ||
+            (process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
+              'mainnet' :
+              'goerli'
+            ),
           cacheProvider: true,
           providerOptions,
         }
@@ -138,16 +142,18 @@ export default ({
         chainId,
       } = { ...network }
 
-      dispatch({
-        type: WALLET_DATA,
-        value: {
-          chain_id: chainId,
-          provider,
-          web3_provider: web3Provider,
-          address,
-          signer,
-        },
-      })
+      dispatch(
+        {
+          type: WALLET_DATA,
+          value: {
+            chain_id: chainId,
+            provider,
+            web3_provider: web3Provider,
+            address,
+            signer,
+          },
+        }
+        )
     },
     [web3Modal],
   )
@@ -170,9 +176,11 @@ export default ({
       await provider.disconnect()
     }
 
-    dispatch({
-      type: WALLET_RESET,
-    })
+    dispatch(
+      {
+        type: WALLET_RESET,
+      }
+    )
   }, [web3Modal, provider])
 
   const switchChain = async () => {
@@ -182,16 +190,17 @@ export default ({
       provider
     ) {
       try {
-        await provider.request(
-          {
-            method: 'wallet_switchEthereumChain',
-            params: [
-              {
-                chainId: utils.hexValue(connectChainId),
-              },
-            ],
-          },
-        )
+        await provider
+          .request(
+            {
+              method: 'wallet_switchEthereumChain',
+              params: [
+                {
+                  chainId: utils.hexValue(connectChainId),
+                },
+              ],
+            },
+          )
       } catch (error) {
         const {
           code,
@@ -201,14 +210,22 @@ export default ({
           try {
             const {
               provider_params,
-            } = { ...evm_chains_data?.find(c => c.chain_id === connectChainId) }
+            } = {
+              ...(
+                (evm_chains_data || [])
+                  .find(c =>
+                    c.chain_id === connectChainId
+                  )
+              ),
+            }
 
-            await provider.request(
-              {
-                method: 'wallet_addEthereumChain',
-                params: provider_params,
-              },
-            )
+            await provider
+              .request(
+                {
+                  method: 'wallet_addEthereumChain',
+                  params: provider_params,
+                },
+              )
           } catch (error) {}
         }
       }
@@ -231,12 +248,14 @@ export default ({
           disconnect()
         }
         else {
-          dispatch({
-            type: WALLET_DATA,
-            value: {
-              address: _.head(accounts),
-            },
-          })
+          dispatch(
+            {
+              type: WALLET_DATA,
+              value: {
+                address: _.head(accounts),
+              },
+            }
+          )
         }
       }
 
@@ -287,61 +306,62 @@ export default ({
     }
   }, [provider, disconnect])
 
-  return !hidden && (
-    <>
-      {web3_provider ?
-        !mainController &&
-        connectChainId &&
-        connectChainId !== chain_id ?
-          <button
-            disabled={disabled}
-            onClick={() => {
-              switchChain()
+  return !hidden &&
+    (
+      <>
+        {web3_provider ?
+          !mainController &&
+          connectChainId &&
+          connectChainId !== chain_id ?
+            <button
+              disabled={disabled}
+              onClick={() => {
+                switchChain()
 
-              if (onSwitch) {
-                onSwitch()
+                if (onSwitch) {
+                  onSwitch()
+                }
+              }}
+              className={className}
+            >
+              {
+                children ||
+                (
+                  <div className="bg-slate-100 hover:bg-zinc-200 dark:bg-slate-800 dark:hover:bg-zinc-800 rounded whitespace-nowrap py-1 px-2">
+                    Switch Network
+                  </div>
+                )
               }
-            }}
-            className={className}
-          >
-            {
-              children ||
-              (
-                <div className="bg-slate-100 hover:bg-zinc-200 dark:bg-slate-800 dark:hover:bg-zinc-800 rounded whitespace-nowrap py-1 px-2">
-                  Switch Network
-                </div>
-              )
-            }
-          </button> :
+            </button> :
+            <button
+              disabled={disabled}
+              onClick={disconnect}
+              className={className}
+            >
+              {
+                children ||
+                (
+                  <div className="bg-red-400 hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500 rounded whitespace-nowrap text-white py-1 px-2">
+                    Disconnect
+                  </div>
+                )
+              }
+            </button> :
           <button
             disabled={disabled}
-            onClick={disconnect}
+            onClick={connect}
             className={className}
           >
             {
               children ||
               (
-                <div className="bg-red-400 hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-500 rounded whitespace-nowrap text-white py-1 px-2">
-                  Disconnect
+                <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 rounded whitespace-nowrap text-white py-1 px-2">
+                  Connect
                 </div>
               )
             }
-          </button> :
-        <button
-          disabled={disabled}
-          onClick={connect}
-          className={className}
-        >
-          {
-            children ||
-            (
-              <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 rounded whitespace-nowrap text-white py-1 px-2">
-                Connect
-              </div>
-            )
-          }
-        </button>
-      }
-    </>
-  )
+          </button>
+        }
+      </>
+    )
 }

@@ -25,7 +25,11 @@ export default ({
     setSelectedKey(defaultSelectedKey)
   }, [defaultSelectedKey])
 
-  const selectedData = options?.find(o => o?.id === selectedKey) ||
+  const selectedData =
+    (options || [])
+      .find(o =>
+        o?.id === selectedKey
+      ) ||
     selectedKey
 
   const {
@@ -46,12 +50,15 @@ export default ({
             >
               {selectedData ?
                 <div className="flex items-center space-x-2">
-                  {image && (
-                    <Image
-                      src={image}
-                      className="w-5 h-5 rounded-full"
-                    />
-                  )}
+                  {
+                    image &&
+                    (
+                      <Image
+                        src={image}
+                        className="w-5 h-5 rounded-full"
+                      />
+                    )
+                  }
                   <span className="font-bold">
                     {name}
                   </span>
@@ -87,56 +94,70 @@ export default ({
               className="w-48 min-w-max bg-white dark:bg-black absolute z-10 rounded shadow ring-1 ring-black ring-opacity-5 focus:outline-none origin-top-left left-0 mt-2"
             >
               <div className="py-1">
-                {hasAllOptions && (
-                  <Menu.Item
-                    key={-1}
-                  >
-                    {({ active }) => (
-                      <div
-                        onClick={() => {
-                          setSelectedKey('')
+                {
+                  hasAllOptions &&
+                  (
+                    <Menu.Item
+                      key={-1}
+                    >
+                      {({ active }) => (
+                        <div
+                          onClick={() => {
+                            setSelectedKey('')
 
-                          if (onSelect) {
-                            onSelect('')
-                          }
-                        }}
-                        className={`${active ? 'bg-slate-100 dark:bg-slate-900' : 'text-slate-800 dark:text-slate-200'} ${selectedKey === '' ? 'font-bold' : active ? 'font-semibold' : 'font-medium'} cursor-pointer flex items-center text-sm space-x-2 py-2 px-3`}
+                            if (onSelect) {
+                              onSelect('')
+                            }
+                          }}
+                          className={`${active ? 'bg-slate-100 dark:bg-slate-900' : 'text-slate-800 dark:text-slate-200'} ${selectedKey === '' ? 'font-bold' : active ? 'font-semibold' : 'font-medium'} cursor-pointer flex items-center text-sm space-x-2 py-2 px-3`}
+                        >
+                          <span>
+                            {allOptionsName}
+                          </span>
+                        </div>
+                      )}
+                    </Menu.Item>
+                  )
+                }
+                {
+                  (options || [])
+                    .map((o, k) => (
+                      <Menu.Item
+                        key={k}
                       >
-                        <span>
-                          {allOptionsName}
-                        </span>
-                      </div>
-                    )}
-                  </Menu.Item>
-                )}
-                {options?.map((o, k) => (
-                  <Menu.Item
-                    key={k}
-                  >
-                    {({ active }) => (
-                      <div
-                        onClick={() => {
-                          setSelectedKey(o.id)
+                        {({ active }) => (
+                          <div
+                            onClick={() => {
+                              setSelectedKey(o.id)
 
-                          if (onSelect) {
-                            onSelect(options.find(_o => _o?.id === o.id))
-                          }
-                        }}
-                        className={`${active ? 'bg-slate-100 dark:bg-slate-900' : 'text-slate-800 dark:text-slate-200'} ${selectedKey === o.id ? 'font-bold' : active ? 'font-semibold' : 'font-medium'} cursor-pointer flex items-center text-sm space-x-2 py-2 px-3`}
-                      >
-                        {o.image && (
-                          <Image
-                            src={o.image}
-                            className="w-5 h-5 rounded-full"
-                          />
+                              if (onSelect) {
+                                onSelect(
+                                  options
+                                    .find(_o =>
+                                      _o?.id === o.id
+                                    )
+                                )
+                              }
+                            }}
+                            className={`${active ? 'bg-slate-100 dark:bg-slate-900' : 'text-slate-800 dark:text-slate-200'} ${selectedKey === o.id ? 'font-bold' : active ? 'font-semibold' : 'font-medium'} cursor-pointer flex items-center text-sm space-x-2 py-2 px-3`}
+                          >
+                            {
+                              o.image &&
+                              (
+                                <Image
+                                  src={o.image}
+                                  className="w-5 h-5 rounded-full"
+                                />
+                              )
+                            }
+                            <span>
+                              {o.name}
+                            </span>
+                          </div>
                         )}
-                        <span>
-                          {o.name}
-                        </span>
-                      </div>
-                    )}
-                  </Menu.Item>
-                ))}
+                      </Menu.Item>
+                    ))
+                }
               </div>
             </Menu.Items>
           </Transition>

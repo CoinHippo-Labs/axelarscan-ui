@@ -74,21 +74,26 @@ export default () => {
         address?.endsWith('"')
       ) {
         router.push(
-          `${pathname.replace(
-            '[address]',
-            address
-              .split('"')
-              .join('')
-          )}`
+          `${
+            pathname
+              .replace(
+                '[address]',
+                address
+                  .split('"')
+                  .join('')
+              )
+          }`
         )
       }
       else if (
         address &&
         assets_data
       ) {
-        const response = await all_bank_balances(
-          address,
-        )
+        const response =
+          await all_bank_balances(
+            address,
+          )
+
         const {
           data,
         } = { ...response }
@@ -104,22 +109,29 @@ export default () => {
 
                 return {
                   ...b,
-                  denom: assetManager.symbol(
-                    denom,
-                    assets_data,
-                  ),
-                  amount: assetManager.amount(
-                    amount,
-                    denom,
-                    assets_data,
-                  ),
-                  asset_data: getAsset(
-                    denom,
-                    assets_data,
-                  ),
+                  denom:
+                    assetManager
+                      .symbol(
+                        denom,
+                        assets_data,
+                      ),
+                  amount:
+                    assetManager
+                      .amount(
+                        amount,
+                        denom,
+                        assets_data,
+                      ),
+                  asset_data:
+                    getAsset(
+                      denom,
+                      assets_data,
+                    ),
                 }
               })
-              .filter(b => b.amount > -1)
+              .filter(b =>
+                b.amount > -1
+              )
               .map(b => {
                 const {
                   amount,
@@ -131,8 +143,12 @@ export default () => {
 
                 return {
                   ...b,
-                  value: amount *
-                    (price || 0),
+                  value:
+                    amount *
+                    (
+                      price ||
+                      0
+                    ),
                 }
               }) :
             []
@@ -157,9 +173,11 @@ export default () => {
         assets_data &&
         validators_data
       ) {
-        const response = await all_staking_delegations(
-          address,
-        )
+        const response =
+          await all_staking_delegations(
+            address,
+          )
+
         const {
           data,
         } = { ...response }
@@ -184,34 +202,51 @@ export default () => {
                 return {
                   ...delegation,
                   validator_data: {
-                    ...validators_data.find(v => equals_ignore_case(v?.operator_address, validator_address)),
+                    ...(
+                      validators_data
+                        .find(v =>
+                          equals_ignore_case(
+                            v?.operator_address,
+                            validator_address,
+                          )
+                        )
+                    ),
                   },
-                  shares: isNaN(shares) ?
-                    -1 :
-                    assetManager.amount(
-                      shares,
-                      denom,
-                      assets_data,
-                    ),
+                  shares:
+                    isNaN(shares) ?
+                      -1 :
+                      assetManager
+                        .amount(
+                          shares,
+                          denom,
+                          assets_data,
+                        ),
                   ...balance,
-                  denom: assetManager.symbol(
-                    denom,
-                    assets_data,
-                  ),
-                  amount: isNaN(amount) ?
-                    -1 :
-                    assetManager.amount(
-                      amount,
+                  denom:
+                    assetManager
+                      .symbol(
+                        denom,
+                        assets_data,
+                      ),
+                  amount:
+                    isNaN(amount) ?
+                      -1 :
+                      assetManager
+                        .amount(
+                          amount,
+                          denom,
+                          assets_data,
+                        ),
+                  asset_data:
+                    getAsset(
                       denom,
                       assets_data,
                     ),
-                  asset_data: getAsset(
-                    denom,
-                    assets_data,
-                  ),
                 }
               })
-              .filter(d => d.amount > -1)
+              .filter(d =>
+                d.amount > -1
+              )
               .map(d => {
                 const {
                   amount,
@@ -223,8 +258,12 @@ export default () => {
 
                 return {
                   ...d,
-                  value: amount *
-                    (price || 0),
+                  value:
+                    amount *
+                    (
+                      price ||
+                      0
+                    ),
                 }
               }) :
             []
@@ -253,9 +292,11 @@ export default () => {
           staking_params,
         } = { ...chain_data }
 
-        const response = await all_staking_redelegations(
-          address,
-        )
+        const response =
+          await all_staking_redelegations(
+            address,
+          )
+
         const {
           data,
         } = { ...response }
@@ -281,24 +322,44 @@ export default () => {
                       return {
                         ...r.redelegation,
                         source_validator_data: {
-                          ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_src_address)),
+                          ...(
+                            (validators_data || [])
+                              .find(v =>
+                                equals_ignore_case(
+                                  v?.operator_address,
+                                  validator_src_address,
+                                )
+                              )
+                          ),
                         },
                         destination_validator_data: {
-                          ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_dst_address)),
+                          ...(
+                            (validators_data || [])
+                              .find(v =>
+                                equals_ignore_case(
+                                  v?.operator_address,
+                                  validator_dst_address,
+                                )
+                              )
+                          ),
                         },
                         entries: undefined,
                         ...e,
                         creation_height: Number(creation_height),
-                        initial_balance: assetManager.amount(
-                          Number(initial_balance),
-                          native_asset_id,
-                          assets_data,
-                        ),
-                        shares_dst: assetManager.amount(
-                          Number(shares_dst),
-                          native_asset_id,
-                          assets_data,
-                        ),
+                        initial_balance:
+                          assetManager
+                            .amount(
+                              Number(initial_balance),
+                              native_asset_id,
+                              assets_data,
+                            ),
+                        shares_dst:
+                          assetManager
+                            .amount(
+                              Number(shares_dst),
+                              native_asset_id,
+                              assets_data,
+                            ),
                       }
                     })
               )
@@ -311,23 +372,29 @@ export default () => {
                   denom,
                 } = { ...r }
 
-                denom = denom ||
+                denom =
+                  denom ||
                   staking_params?.bond_denom
 
                 return {
                   ...r,
-                  denom: assetManager.symbol(
-                    denom,
-                    assets_data,
-                  ),
+                  denom:
+                    assetManager
+                      .symbol(
+                        denom,
+                        assets_data,
+                      ),
                   amount: shares_dst - initial_balance,
-                  asset_data: getAsset(
-                    denom,
-                    assets_data,
-                  ),
+                  asset_data:
+                    getAsset(
+                      denom,
+                      assets_data,
+                    ),
                 }
               })
-              .filter(r => r.amount > -1)
+              .filter(r =>
+                r.amount > -1
+              )
               .map(r => {
                 const {
                   amount,
@@ -339,8 +406,12 @@ export default () => {
 
                 return {
                   ...r,
-                  value: amount *
-                    (price || 0),
+                  value:
+                    amount *
+                    (
+                      price ||
+                      0
+                    ),
                 }
               }) :
             []
@@ -369,9 +440,11 @@ export default () => {
           staking_params,
         } = { ...chain_data }
 
-        const response = await all_staking_unbonding(
-          address,
-        )
+        const response =
+          await all_staking_unbonding(
+            address,
+          )
+
         const {
           data,
         } = { ...response }
@@ -379,39 +452,52 @@ export default () => {
         setunbondings(
           Array.isArray(data) ?
             data
-              .flatMap(u => !u?.entries ?
-                [] :
-                u.entries
-                  .map(e => {
-                    const {
-                      validator_address,
-                    } = { ...u }
-                    const {
-                      creation_height,
-                      initial_balance,
-                      balance,
-                    } = { ...e }
+              .flatMap(u =>
+                !u?.entries ?
+                  [] :
+                  u.entries
+                    .map(e => {
+                      const {
+                        validator_address,
+                      } = { ...u }
+                      const {
+                        creation_height,
+                        initial_balance,
+                        balance,
+                      } = { ...e }
 
-                    return {
-                      ...u,
-                      validator_data: {
-                        ...validators_data?.find(v => equals_ignore_case(v?.operator_address, validator_address)),
-                      },
-                      entries: undefined,
-                      ...e,
-                      creation_height: Number(creation_height),
-                      initial_balance: assetManager.amount(
-                        Number(initial_balance),
-                        native_asset_id,
-                        assets_data,
-                      ),
-                      balance: assetManager.amount(
-                        Number(balance),
-                        native_asset_id,
-                        assets_data,
-                      ),
-                    }
-                  })
+                      return {
+                        ...u,
+                        validator_data: {
+                          ...(
+                            (validators_data || [])
+                              .find(v =>
+                                equals_ignore_case(
+                                  v?.operator_address,
+                                  validator_address,
+                                )
+                              )
+                          ),
+                        },
+                        entries: undefined,
+                        ...e,
+                        creation_height: Number(creation_height),
+                        initial_balance:
+                          assetManager
+                            .amount(
+                              Number(initial_balance),
+                              native_asset_id,
+                              assets_data,
+                            ),
+                        balance:
+                          assetManager
+                            .amount(
+                              Number(balance),
+                              native_asset_id,
+                              assets_data,
+                            ),
+                      }
+                    })
               )
               .map(u => {
                 const {
@@ -427,18 +513,23 @@ export default () => {
 
                 return {
                   ...u,
-                  denom: assetManager.symbol(
-                    denom,
-                    assets_data,
-                  ),
+                  denom:
+                    assetManager
+                      .symbol(
+                        denom,
+                        assets_data,
+                      ),
                   amount: initial_balance - balance,
-                  asset_data: getAsset(
-                    denom,
-                    assets_data,
-                  ),
+                  asset_data:
+                    getAsset(
+                      denom,
+                      assets_data,
+                    ),
                 }
               })
-              .filter(u => u.amount > -1)
+              .filter(u =>
+                u.amount > -1
+              )
               .map(u => {
                 const {
                   amount,
@@ -450,8 +541,12 @@ export default () => {
 
                 return {
                   ...u,
-                  value: amount *
-                    (price || 0),
+                  value:
+                    amount *
+                    (
+                      price ||
+                      0
+                    ),
                 }
               }) :
             []
@@ -475,9 +570,11 @@ export default () => {
         ) &&
         assets_data
       ) {
-        const response = await distribution_rewards(
-          address,
-        )
+        const response =
+          await distribution_rewards(
+            address,
+          )
+
         const {
           rewards,
           total,
@@ -499,30 +596,37 @@ export default () => {
 
                       return {
                         ...r,
-                        denom: assetManager.symbol(
-                          denom,
-                          assets_data,
-                        ),
-                        amount: isNaN(amount) ?
-                          -1 :
-                          assetManager.amount(
-                            amount,
-                            denom,
-                            assets_data,
-                          ),
+                        denom:
+                          assetManager
+                            .symbol(
+                              denom,
+                              assets_data,
+                            ),
+                        amount:
+                          isNaN(amount) ?
+                            -1 :
+                            assetManager
+                              .amount(
+                                amount,
+                                denom,
+                                assets_data,
+                              ),
                       }
                     })
-                    .filter(r => r.amount > -1),
+                    .filter(r =>
+                      r.amount > -1
+                    ),
                   'denom',
                 )
               )
               .map(([k, v]) => {
                 return {
                   denom: k,
-                  amount: _.sumBy(
-                    v,
-                    'amount',
-                  ),
+                  amount:
+                    _.sumBy(
+                      v,
+                      'amount',
+                    ),
                 }
               }),
             total:
@@ -537,15 +641,19 @@ export default () => {
 
                       return {
                         ...t,
-                        denom: assetManager.symbol(
-                          denom,
-                          assets_data,
-                        ),
-                        amount: assetManager.amount(
-                          amount,
-                          denom,
-                          assets_data,
-                        ),
+                        denom:
+                          assetManager
+                            .symbol(
+                              denom,
+                              assets_data,
+                            ),
+                        amount:
+                          assetManager
+                            .amount(
+                              amount,
+                              denom,
+                              assets_data,
+                            ),
                       }
                     }),
                   'denom',
@@ -554,13 +662,16 @@ export default () => {
               .map(([k, v]) => {
                 return {
                   denom: k,
-                  amount: _.sumBy(
-                    v,
-                    'amount',
-                  ),
+                  amount:
+                    _.sumBy(
+                      v,
+                      'amount',
+                    ),
                 }
               })
-              .filter(t => t.amount > -1),
+              .filter(t =>
+                t.amount > -1
+              ),
           }
         )
       }
@@ -583,15 +694,24 @@ export default () => {
         assets_data &&
         validators_data
       ) {
-        const validator_data = validators_data.find(v => equals_ignore_case(v?.delegator_address, address))
+        const validator_data = validators_data
+          .find(v =>
+            equals_ignore_case(
+              v?.delegator_address,
+              address,
+            )
+          )
+
         const {
           operator_address,
         } = { ...validator_data }
 
         if (operator_address) {
-          const response = await distribution_commissions(
-            operator_address,
-          )
+          const response =
+            await distribution_commissions(
+              operator_address,
+            )
+
           const {
             commission,
           } = { ...response }
@@ -607,20 +727,26 @@ export default () => {
 
                   return {
                     ...c,
-                    denom: assetManager.symbol(
-                      denom,
-                      assets_data,
-                    ),
-                    amount: isNaN(amount) ?
-                      -1 :
-                      assetManager.amount(
-                        amount,
-                        denom,
-                        assets_data,
-                      ),
+                    denom:
+                      assetManager
+                        .symbol(
+                          denom,
+                          assets_data,
+                        ),
+                    amount:
+                      isNaN(amount) ?
+                        -1 :
+                        assetManager
+                          .amount(
+                            amount,
+                            denom,
+                            assets_data,
+                          ),
                   }
                 })
-                .filter(c => c.amount > -1) :
+                .filter(c =>
+                  c.amount > -1
+                ) :
               []
           )
         }
@@ -642,24 +768,27 @@ export default () => {
         cosmos_chains_data &&
         assets_data
       ) {
-        const response = await deposit_addresses(
-          {
-            query: {
-              match: { deposit_address: address },
+        const response =
+          await deposit_addresses(
+            {
+              query: {
+                match: { deposit_address: address },
+              },
+              size: 10,
+              sort: [{ height: 'desc' }],
             },
-            size: 10,
-            sort: [{ height: 'desc' }],
-          },
-        )
+          )
+
         const {
           data,
         } = { ...response }
 
-        const _response = await transfers(
-          {
-            depositAddress: address,
-          },
-        )
+        const _response =
+          await transfers(
+            {
+              depositAddress: address,
+            },
+          )
 
         const transfer_data = _.head(_response?.data)
 
@@ -677,7 +806,14 @@ export default () => {
 
                 return {
                   ...d,
-                  source_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, sender_chain)) ||
+                  source_chain_data:
+                    evm_chains_data
+                      .find(c =>
+                        equals_ignore_case(
+                          c?.id,
+                          sender_chain,
+                        )
+                      ) ||
                     getChain(
                       original_sender_chain,
                       cosmos_chains_data,
@@ -686,7 +822,14 @@ export default () => {
                       sender_chain,
                       cosmos_chains_data,
                     ),
-                  destination_chain_data: evm_chains_data.find(c => equals_ignore_case(c?.id, recipient_chain)) ||
+                  destination_chain_data:
+                    evm_chains_data
+                      .find(c =>
+                        equals_ignore_case(
+                          c?.id,
+                          recipient_chain,
+                        )
+                      ) ||
                     getChain(
                       original_recipient_chain,
                       cosmos_chains_data,
@@ -695,11 +838,20 @@ export default () => {
                       recipient_chain,
                       cosmos_chains_data,
                     ),
-                  denom: assetManager.symbol(
-                    denom,
-                    assets_data,
-                  ),
-                  asset_data: assets_data.find(a => equals_ignore_case(a?.id, denom)),
+                  denom:
+                    assetManager
+                      .symbol(
+                        denom,
+                        assets_data,
+                      ),
+                  asset_data:
+                    assets_data
+                      .find(a =>
+                        equals_ignore_case(
+                          a?.id,
+                          denom,
+                        )
+                      ),
                   transfer_data,
                 }
               }) :

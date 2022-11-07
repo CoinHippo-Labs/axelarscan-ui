@@ -43,9 +43,10 @@ export default ({
           {
             Header: '#',
             accessor: 'i',
-            sortType: (a, b) => a.original.i > b.original.i ?
-              1 :
-              -1,
+            sortType: (a, b) =>
+              a.original.i > b.original.i ?
+                1 :
+                -1,
             Cell: props => (
               <span className="font-medium">
                 {number_format(
@@ -62,9 +63,10 @@ export default ({
           {
             Header: 'Voter',
             accessor: 'voter',
-            sortType: (a, b) => a.original.voter > b.original.voter ?
-              1 :
-              -1,
+            sortType: (a, b) =>
+              a.original.voter > b.original.voter ?
+                1 :
+                -1,
             Cell: props => (
               <div className="flex items-center space-x-1">
                 <Link href={`/account/${props.value}`}>
@@ -115,20 +117,23 @@ export default ({
                       </a>
                     </Link>
                     <div className="flex flex-col">
-                      {moniker && (
-                        <Link href={`/validator/${value}`}>
-                          <a
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                          >
-                            {ellipse(
-                              moniker,
-                              16,
-                            )}
-                          </a>
-                        </Link>
-                      )}
+                      {
+                        moniker &&
+                        (
+                          <Link href={`/validator/${value}`}>
+                            <a
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                            >
+                              {ellipse(
+                                moniker,
+                                16,
+                              )}
+                            </a>
+                          </Link>
+                        )
+                      }
                       <div className="flex items-center space-x-1">
                         <Link href={`/validator/${value}`}>
                           <a
@@ -177,26 +182,29 @@ export default ({
           {
             Header: 'Voting Power',
             accessor: 'validator_data.tokens',
-            sortType: (a, b) => a.original.validator_data?.tokens > b.original.validator_data?.tokens ?
-              1 :
-              -1,
+            sortType: (a, b) =>
+              a.original.validator_data?.tokens > b.original.validator_data?.tokens ?
+                1 :
+                -1,
             Cell: props => {
               const {
                 value,
               } = { ...props }
 
-              const total_voting_power = assetManager.amount(
-                _.sumBy(
-                  (validators_data || [])
-                    .filter(v =>
-                      !v.jailed &&
-                      ['BOND_STATUS_BONDED'].includes(v.status)
+              const total_voting_power =
+                assetManager
+                  .amount(
+                    _.sumBy(
+                      (validators_data || [])
+                        .filter(v =>
+                          !v.jailed &&
+                          ['BOND_STATUS_BONDED'].includes(v.status)
+                        ),
+                      'tokens',
                     ),
-                  'tokens',
-                ),
-                native_asset_id,
-                assets_data,
-              )
+                    native_asset_id,
+                    assets_data,
+                  )
 
               return (
                 <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
@@ -233,9 +241,10 @@ export default ({
           {
             Header: 'Vote',
             accessor: 'option',
-            sortType: (a, b) => a.original.status > b.original.status ?
-              1 :
-              -1,
+            sortType: (a, b) =>
+              a.original.status > b.original.status ?
+                1 :
+                -1,
             Cell: props => {
               const {
                 value,
