@@ -70,20 +70,30 @@ export default ({
     transaction_path,
   } = { ...explorer }
 
-  const status = success ?
-    'completed' :
-    failed ?
-      'failed' :
-      confirmation ||
-      votes?.findIndex(v => v?.confirmed) > -1 ?
-        'confirmed' :
-        'pending'
+  const status =
+    success ?
+      'completed' :
+      failed ?
+        'failed' :
+        confirmation ||
+        (votes || [])
+          .findIndex(v =>
+            v?.confirmed
+          ) > -1 ?
+          'confirmed' :
+          'pending'
 
-  const _url = [
-    'operator',
-  ].findIndex(s => event?.toLowerCase().includes(s)) > -1 ?
-    `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
-    `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
+  const _url =
+    [
+      'operator',
+      'token_deployed',
+    ].findIndex(s =>
+      (event || '')
+        .toLowerCase()
+        .includes(s)
+    ) > -1 ?
+      `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
+      `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
 
   const rowClassName = 'flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
@@ -175,9 +185,13 @@ export default ({
                         symbol,
                       } = { ...e }
 
-                      const __url = txID ?
-                        `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
-                        _url
+                      const __url =
+                        ![
+                          'tokenConfirmation',
+                        ].includes(type) &&
+                        txID ?
+                          `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
+                          _url
 
                       let _type
 

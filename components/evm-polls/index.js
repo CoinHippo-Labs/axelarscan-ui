@@ -80,34 +80,43 @@ export default () => {
         toTime,
       } = { ...params }
 
-      setFilters({
-        pollId,
-        chain,
-        status: [
-          'completed',
-          'failed',
-          'comfirmed',
-        ].includes(status?.toLowerCase()) ?
-          status.toLowerCase() :
-          undefined,
-        transactionId,
-        transferId,
-        depositAddress,
-        voter,
-        vote: [
-          'yes',
-          'no',
-          'unsubmitted',
-        ].includes(vote?.toLowerCase()) ?
-          vote.toLowerCase() :
-          undefined,
-        time: fromTime &&
-          toTime &&
-          [
-            moment(Number(fromTime)),
-            moment(Number(toTime)),
-          ],
-      })
+      setFilters(
+        {
+          pollId,
+          chain,
+          status:
+            [
+              'completed',
+              'failed',
+              'comfirmed',
+            ].includes(status?.toLowerCase()) ?
+              status.toLowerCase() :
+              undefined,
+          transactionId,
+          transferId,
+          depositAddress,
+          voter,
+          vote:
+            [
+              'yes',
+              'no',
+              'unsubmitted',
+            ].includes(vote?.toLowerCase()) ?
+              vote.toLowerCase() :
+              undefined,
+          time: 
+            fromTime &&
+            toTime &&
+            [
+              moment(
+                Number(fromTime)
+              ),
+              moment(
+                Number(toTime)
+              ),
+            ],
+        }
+      )
     }
   }, [asPath])
 
@@ -115,7 +124,8 @@ export default () => {
     const triggering = is_interval => {
       setFetchTrigger(
         is_interval ?
-          moment().valueOf() :
+          moment()
+            .valueOf() :
           typeof fetchTrigger === 'number' ?
             null :
             0
@@ -130,10 +140,11 @@ export default () => {
       triggering()
     }
 
-    const interval = setInterval(() =>
-      triggering(true),
-      0.5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        triggering(true),
+        0.5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [evm_chains_data, pathname, filters])
@@ -149,13 +160,19 @@ export default () => {
           setOffet(0)
         }
 
-        let _data = !fetchTrigger ?
-          [] :
-          data || []
+        let _data =
+          !fetchTrigger ?
+            [] :
+            data ||
+            []
+
         const size = LIMIT
-        const from = fetchTrigger === true || fetchTrigger === 1 ?
-          _data.length :
-          0
+
+        const from =
+          fetchTrigger === true ||
+          fetchTrigger === 1 ?
+            _data.length :
+            0
 
         const {
           pollId,
@@ -169,22 +186,23 @@ export default () => {
           time,
         } = { ...filters }
 
-        const response = await evm_polls(
-          {
-            pollId,
-            chain,
-            status,
-            transactionId,
-            transferId,
-            depositAddress,
-            voter,
-            vote,
-            fromTime: time?.[0]?.unix(),
-            toTime: time?.[1]?.unix(),
-            from,
-            size,
-          },
-        )
+        const response =
+          await evm_polls(
+            {
+              pollId,
+              chain,
+              status,
+              transactionId,
+              transferId,
+              depositAddress,
+              voter,
+              vote,
+              fromTime: time?.[0]?.unix(),
+              toTime: time?.[1]?.unix(),
+              from,
+              size,
+            },
+          )
 
         if (response) {
           const {
@@ -194,180 +212,191 @@ export default () => {
 
           setTotal(total)
 
-          _data = _.orderBy(
-            _.uniqBy(
-              _.concat(
-                (data || [])
-                  .map(d => {
-                    const {
-                      sender_chain,
-                      transaction_id,
-                      deposit_address,
-                      transfer_id,
-                      event,
-                      participants,
-                    } = { ...d }
+          _data =
+            _.orderBy(
+              _.uniqBy(
+                _.concat(
+                  (data || [])
+                    .map(d => {
+                      const {
+                        sender_chain,
+                        transaction_id,
+                        deposit_address,
+                        transfer_id,
+                        event,
+                        participants,
+                      } = { ...d }
 
-                    const chain_data = getChain(
-                      sender_chain,
-                      evm_chains_data,
-                    )
-                    const {
-                      explorer,
-                    } = { ...chain_data }
-                    const {
-                      url,
-                      transaction_path,
-                    } = { ...explorer }
-
-                    const _data = {},
-                      votes = []
-
-                    Object.entries({ ...d })
-                      .forEach(([k, v]) => {
-                        if (k) {
-                          if (k.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)) {
-                            votes.push(v)
-                          }
-                          else {
-                            _data[k] = v
-                          }
-                        }
-                      })
-
-                    const vote_options =
-                      Object.entries(
-                        _.groupBy(
-                          (votes || [])
-                            .map(v => {
-                              const {
-                                vote,
-                              } = { ...v }
-
-                              return {
-                                ...v,
-                                option: vote ?
-                                  'yes' :
-                                  typeof vote === 'boolean' ?
-                                    'no' :
-                                    'unsubmitted',
-                              }
-                            }),
-                          'option',
+                      const chain_data =
+                        getChain(
+                          sender_chain,
+                          evm_chains_data,
                         )
-                      )
-                      .map(([k, v]) => {
-                        return {
-                          option: k,
-                          value: (v || [])
-                            .length,
-                        }
-                      })
-                      .filter(v => v.value)
-                      .map(v => {
-                        const {
-                          option,
-                        } = { ...v }
+                      const {
+                        explorer,
+                      } = { ...chain_data }
+                      const {
+                        url,
+                        transaction_path,
+                      } = { ...explorer }
 
-                        return {
-                          ...v,
-                          i: option === 'yes' ?
-                            0 :
-                            option === 'no' ?
-                              1 :
-                              2
-                        }
-                      })
+                      const _data = {},
+                        votes = []
 
-                    if (
-                      participants?.length > 0 &&
-                      vote_options.findIndex(v => v?.option === 'unsubmitted') < 0 &&
-                      _.sumBy(
+                      Object.entries({ ...d })
+                        .forEach(([k, v]) => {
+                          if (k) {
+                            if (k.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)) {
+                              votes.push(v)
+                            }
+                            else {
+                              _data[k] = v
+                            }
+                          }
+                        })
+
+                      const vote_options =
+                        Object.entries(
+                          _.groupBy(
+                            (votes || [])
+                              .map(v => {
+                                const {
+                                  vote,
+                                } = { ...v }
+
+                                return {
+                                  ...v,
+                                  option: vote ?
+                                    'yes' :
+                                    typeof vote === 'boolean' ?
+                                      'no' :
+                                      'unsubmitted',
+                                }
+                              }),
+                            'option',
+                          )
+                        )
+                        .map(([k, v]) => {
+                          return {
+                            option: k,
+                            value: (v || [])
+                              .length,
+                          }
+                        })
+                        .filter(v => v.value)
+                        .map(v => {
+                          const {
+                            option,
+                          } = { ...v }
+
+                          return {
+                            ...v,
+                            i: option === 'yes' ?
+                              0 :
+                              option === 'no' ?
+                                1 :
+                                2
+                          }
+                        })
+
+                      if (
+                        participants?.length > 0 &&
+                        vote_options.findIndex(v => v?.option === 'unsubmitted') < 0 &&
+                        _.sumBy(
+                          vote_options,
+                          'value',
+                        ) < participants.length
+                      ) {
+                        vote_options.push(
+                          {
+                            option: 'unsubmitted',
+                            value: participants.length -
+                              _.sumBy(
+                                vote_options,
+                                'value',
+                              ),
+                          }
+                        )
+                      }
+
+                      vote_options = _.orderBy(
                         vote_options,
-                        'value',
-                      ) < participants.length
-                    ) {
-                      vote_options.push(
-                        {
-                          option: 'unsubmitted',
-                          value: participants.length -
-                            _.sumBy(
-                              vote_options,
-                              'value',
-                            ),
-                        }
+                        ['i'],
+                        ['asc'],
                       )
-                    }
 
-                    vote_options = _.orderBy(
-                      vote_options,
-                      ['i'],
-                      ['asc'],
-                    )
-
-                    return {
-                      ..._data,
-                      votes: _.orderBy(
-                        votes,
-                        [
-                          'height',
-                          'created_at',
-                        ],
-                        [
-                          'desc',
-                          'desc',
-                        ],
-                      ),
-                      vote_options,
-                      _url:
-                        [
-                          'operator',
-                        ].findIndex(s => event?.toLowerCase().includes(s)) > -1 ?
-                          `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
-                          `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`,
-                    }
-                  }),
-                _data,
-              ),
-              'id',
-            )
-            .map(d => {
-              const {
-                id,
-                votes,
-              } = { ...d }
-
-              const id_number = !isNaN(id) ?
-                Number(id) :
-                id
-
-              const {
-                height,
-              } = { ...
-                _.minBy(
+                      return {
+                        ..._data,
+                        votes: _.orderBy(
+                          votes,
+                          [
+                            'height',
+                            'created_at',
+                          ],
+                          [
+                            'desc',
+                            'desc',
+                          ],
+                        ),
+                        vote_options,
+                        _url:
+                          [
+                            'operator',
+                            'token_deployed',
+                          ].findIndex(s =>
+                            (event || '')
+                              .toLowerCase()
+                              .includes(s)
+                          ) > -1 ?
+                            `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
+                            `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`,
+                      }
+                    }),
+                  _data,
+                ),
+                'id',
+              )
+              .map(d => {
+                const {
+                  id,
                   votes,
-                  'height',
-                )
-              }
+                } = { ...d }
 
-              const confirmation_vote = votes?.find(v => v?.confirmed)
+                const id_number =
+                  !isNaN(id) ?
+                    Number(id) :
+                    id
 
-              return {
-                ...d,
-                id_number,
-                height,
-                confirmation_vote,
-              }
-            }),
-            [
-              'id_number',
-              'created_at.ms',
-            ],
-            [
-              'desc',
-              'desc',
-            ],
-          )
+                const {
+                  height,
+                } = { ...
+                  _.minBy(
+                    votes,
+                    'height',
+                  )
+                }
+
+                const confirmation_vote = (votes || [])
+                  .find(v =>
+                    v?.confirmed
+                  )
+
+                return {
+                  ...d,
+                  id_number,
+                  height,
+                  confirmation_vote,
+                }
+              }),
+              [
+                'id_number',
+                'created_at.ms',
+              ],
+              [
+                'desc',
+                'desc',
+              ],
+            )
 
           setData(_data)
         }
@@ -398,14 +427,16 @@ export default () => {
     }
   }, [data])
 
-  const data_filtered = data?.filter(d =>
-    !(filterTypes?.length > 0) ||
-    filterTypes.includes(d?.event) ||
-    (
-      filterTypes.includes('undefined') &&
-      !d?.event
-    )
-  )
+  const data_filtered =
+    (data || [])
+      .filter(d =>
+        !(filterTypes?.length > 0) ||
+        filterTypes.includes(d?.event) ||
+        (
+          filterTypes.includes('undefined') &&
+          !d?.event
+        )
+      )
 
   return (
     data ?
@@ -434,9 +465,15 @@ export default () => {
                       _.uniq(
                         filterTypes?.includes(k) ?
                           filterTypes
-                            .filter(t => !equals_ignore_case(t, k)) :
+                            .filter(t =>
+                              !equals_ignore_case(
+                                t,
+                                k,
+                              )
+                            ) :
                         _.concat(
-                          filterTypes || [],
+                          filterTypes ||
+                          [],
                           k,
                         )
                       )
@@ -508,10 +545,11 @@ export default () => {
                   value,
                 } = { ...props }
 
-                const chain_data = getChain(
-                  value,
-                  evm_chains_data,
-                )
+                const chain_data =
+                  getChain(
+                    value,
+                    evm_chains_data,
+                  )
                 const {
                   image,
                 } = { ...chain_data }
@@ -553,10 +591,11 @@ export default () => {
                   _url,
                 } = { ...props.row.original }
 
-                const chain_data = getChain(
-                  sender_chain,
-                  evm_chains_data,
-                )
+                const chain_data =
+                  getChain(
+                    sender_chain,
+                    evm_chains_data,
+                  )
                 const {
                   chain_id,
                 } = { ...chain_data }
@@ -575,9 +614,13 @@ export default () => {
                           symbol,
                         } = { ...e }
 
-                        const __url = txID ?
-                          `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
-                          _url
+                        const __url =
+                          ![
+                            'tokenConfirmation',
+                          ].includes(type) &&
+                          txID ?
+                            `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
+                            _url
 
                         let _type
 
@@ -597,11 +640,12 @@ export default () => {
                             break
                         }
 
-                        const asset_data = getAsset(
-                          asset ||
+                        const asset_data =
+                          getAsset(
+                            asset ||
                             symbol,
-                          assets_data,
-                        )
+                            assets_data,
+                          )
                         const {
                           id,
                           contracts,
@@ -610,13 +654,18 @@ export default () => {
                           image,
                         } = { ...asset_data }
 
-                        const contract_data = contracts?.find(c => c?.chain_id === chain_id)
+                        const contract_data = (contracts || [])
+                          .find(c =>
+                            c?.chain_id === chain_id
+                          )
 
-                        symbol = contract_data?.symbol ||
+                        symbol =
+                          contract_data?.symbol ||
                           asset_data?.symbol ||
                           symbol
 
-                        image = contract_data?.image ||
+                        image =
+                          contract_data?.image ||
                           image
 
                         return (
@@ -628,9 +677,10 @@ export default () => {
                             className="w-fit min-w-max bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
                           >
                             <span className="capitalize text-sm lg:text-base font-medium">
-                              {name(_type)
-                                .split(' ')
-                                .join('')
+                              {
+                                name(_type)
+                                  .split(' ')
+                                  .join('')
                               }
                             </span>
                             {
@@ -702,10 +752,11 @@ export default () => {
                   sender_chain,
                 } = { ...props.row.original }
 
-                const chain_data = getChain(
-                  sender_chain,
-                  evm_chains_data,
-                )
+                const chain_data =
+                  getChain(
+                    sender_chain,
+                    evm_chains_data,
+                  )
                 const {
                   explorer,
                 } = { ...chain_data }
@@ -850,14 +901,18 @@ export default () => {
                   votes,
                 } = { ...props.row.original }
 
-                const status = success ?
-                  'completed' :
-                  failed ?
-                    'failed' :
-                    confirmation ||
-                    votes?.findIndex(v => v?.confirmed) > -1 ?
-                      'confirmed' :
-                      'pending'
+                const status =
+                  success ?
+                    'completed' :
+                    failed ?
+                      'failed' :
+                      confirmation ||
+                      (votes || [])
+                        .findIndex(v =>
+                          v?.confirmed
+                        ) > -1 ?
+                        'confirmed' :
+                        'pending'
 
                 return (
                   <div className={`${['completed', 'confirmed'].includes(status) ? 'text-green-400 dark:text-green-300' : status === 'failed' ? 'text-red-500 dark:text-red-600' : 'text-blue-400 dark:text-blue-500'} flex items-center space-x-1`}>
