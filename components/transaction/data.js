@@ -748,7 +748,8 @@ export default ({
                                             v,
                                             256,
                                           ) :
-                                          typeof v === 'object' && v ?
+                                          typeof v === 'object' &&
+                                          v ?
                                             <pre className="bg-zinc-100 dark:bg-zinc-900 rounded-lg text-xs font-normal text-left">
                                               {JSON.stringify(
                                                 v,
@@ -823,23 +824,25 @@ export default ({
             logsFormattable &&
             (
               <div className="w-fit bg-slate-100 dark:bg-zinc-900 rounded-xl flex flex-wrap item-center space-x-1 p-1">
-                {FORMATS.map((f, i) => {
-                  const {
-                    id,
-                    name,
-                  } = { ...f }
+                {
+                  FORMATS
+                    .map((f, i) => {
+                      const {
+                        id,
+                        name,
+                      } = { ...f }
 
-                  return (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setLogsFormat(id)}
-                      className={`${id === logsFormat ? 'bg-white dark:bg-black shadow dark:shadow-zinc-800 text-black dark:text-white font-semibold' : 'bg-transparent text-slate-400 dark:text-slate-600 hover:text-slate-800 dark:hover:text-slate-200 font-normal hover:font-medium'} rounded-lg py-1 px-2`}
-                    >
-                      {name}
-                    </button>
-                  )
-                })}
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setLogsFormat(id)}
+                          className={`${id === logsFormat ? 'bg-white dark:bg-black shadow dark:shadow-zinc-800 text-black dark:text-white font-semibold' : 'bg-transparent text-slate-400 dark:text-slate-600 hover:text-slate-800 dark:hover:text-slate-200 font-normal hover:font-medium'} rounded-lg py-1 px-2`}
+                        >
+                          {name}
+                        </button>
+                      )
+                    })}
               </div>
             )
           }

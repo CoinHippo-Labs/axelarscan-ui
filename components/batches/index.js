@@ -162,20 +162,21 @@ export default () => {
           time,
         } = { ...filters }
 
-        let response = await getBatches(
-          {
-            chain,
-            batchId,
-            commandId,
-            keyId,
-            type,
-            status,
-            fromTime: time?.[0]?.unix(),
-            toTime: time?.[1]?.unix(),
-            from,
-            size,
-          },
-        )
+        let response =
+          await getBatches(
+            {
+              chain,
+              batchId,
+              commandId,
+              keyId,
+              type,
+              status,
+              fromTime: time?.[0]?.unix(),
+              toTime: time?.[1]?.unix(),
+              from,
+              size,
+            },
+          )
 
         if (response) {
           const {

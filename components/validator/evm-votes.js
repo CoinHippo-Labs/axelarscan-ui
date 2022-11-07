@@ -46,14 +46,18 @@ export default ({
           transaction_id,
         } = { ...v }
 
-        transaction_id = transaction_id ||
-          poll?.transaction_id ||
-          _.head(
-            id?.split('_') || []
-          )
-        transaction_id = Array.isArray(transaction_id) ?
-          to_hex(transaction_id) :
-          transaction_id
+        transaction_id =
+          transaction_id ||
+            poll?.transaction_id ||
+            _.head(
+              id?.split('_') ||
+              []
+            )
+
+        transaction_id =
+          Array.isArray(transaction_id) ?
+            to_hex(transaction_id) :
+            transaction_id
 
         return (
           <Popover

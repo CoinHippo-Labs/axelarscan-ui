@@ -39,16 +39,17 @@ export default () => {
 
   useEffect(() => {
     const getData = async () => {
-      const response = await getBatches(
-        {
-          size: 0,
-          aggs: {
-            types: {
-              terms: { field: 'commands.type.keyword', size: 100 },
+      const response =
+        await getBatches(
+          {
+            size: 0,
+            aggs: {
+              types: {
+                terms: { field: 'commands.type.keyword', size: 100 },
+              },
             },
           },
-        },
-      )
+        )
 
       const {
         data,
@@ -56,7 +57,8 @@ export default () => {
 
       setTypes(
         _.orderBy(
-          data || [],
+          data ||
+          [],
         )
       )
     }
