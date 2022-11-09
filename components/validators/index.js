@@ -216,7 +216,8 @@ export default () => {
   }, [assets_data, validators_data, validators_chains_data, inflationData])
 
   const filterByStatus = status =>
-    (validatorsData || [])
+    validatorsData &&
+    validatorsData
       .filter(v =>
         status === 'inactive' ?
           !['BOND_STATUS_BONDED'].includes(v.status) :
