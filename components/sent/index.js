@@ -121,16 +121,20 @@ export default () => {
     [
       {
         id: 'send',
-        title: 'Send Token',
+        title:
+          staging ?
+            'Sent' :
+            'Send Token',
         chain_data: source_chain_data,
         data: event,
         id_field: 'transactionHash',
       },
       {
         id: 'vote',
-        title: staging ?
-          'Approved' :
-          'Vote Confirm',
+        title:
+          staging ?
+            'Approved' :
+            'Vote Confirm',
         chain_data: axelar_chain_data,
         data: vote,
         id_field: 'poll_id',
@@ -142,9 +146,10 @@ export default () => {
         ) > -1 &&
       {
         id: 'sign_batch',
-        title: staging ?
-          'Signed' :
-          'Sign Batch',
+        title:
+          staging ?
+            'Signed' :
+            'Sign Batch',
         chain_data: axelar_chain_data,
         data: sign_batch,
         id_field: 'batch_id',
@@ -159,9 +164,10 @@ export default () => {
         ) > -1 &&
       {
         id: 'executed',
-        title: staging ?
-          'Received' :
-          'Executed',
+        title:
+          staging ?
+            'Received' :
+            'Executed',
         ...(
           sign_batch?.transactionHash ?
             {
@@ -189,9 +195,10 @@ export default () => {
         ) > -1 &&
       {
         id: 'ibc_send',
-        title: staging ?
-          'Received' :
-          'IBC Transfer',
+        title:
+          staging ?
+            'Received' :
+            'IBC Transfer',
         chain_data: ibc_send?.recv_txhash ?
           destination_chain_data :
           axelar_chain_data,
@@ -212,9 +219,10 @@ export default () => {
       ) > -1 &&
       {
         id: 'axelar_transfer',
-        title: staging ?
-          'Received' :
-          'Axelar Transfer',
+        title:
+          staging ?
+            'Received' :
+            'Axelar Transfer',
         chain_data: axelar_chain_data,
         data: axelar_transfer,
         id_field: 'id',
@@ -225,17 +233,18 @@ export default () => {
       return {
         ...s,
         i,
-        finish: !!(
-          s.id === 'executed' ?
-            s.data?.executed :
-            s.id === 'ibc_send' ?
-              s.data?.ack_txhash ||
-              (
-                s.data?.recv_txhash &&
-                !s.data.failed_txhash
-              ) :
-              s.data
-        ),
+        finish:
+          !!(
+            s.id === 'executed' ?
+              s.data?.executed :
+              s.id === 'ibc_send' ?
+                s.data?.ack_txhash ||
+                (
+                  s.data?.recv_txhash &&
+                  !s.data.failed_txhash
+                ) :
+                s.data
+          ),
       }
     })
 
@@ -262,19 +271,21 @@ export default () => {
         0
     )
 
-  const detail_steps = _.slice(
-    steps,
-    0,
-    current_step > -1 ?
-      steps.length - (
-        _.last(steps)?.id === 'executed' ?
-          1 :
-          0
-      ) :
-      1,
-  )
+  const detail_steps =
+    _.slice(
+      steps,
+      0,
+      current_step > -1 ?
+        steps.length - (
+          _.last(steps)?.id === 'executed' ?
+            1 :
+            0
+        ) :
+        1,
+    )
 
-  const time_spent = _.last(steps)?.finish &&
+  const time_spent =
+    _.last(steps)?.finish &&
     total_time_string(
       _.head(steps)?.data?.created_at?.ms / 1000,
       _.last(steps)?.data?.block_timestamp ||

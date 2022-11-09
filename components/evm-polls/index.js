@@ -88,7 +88,8 @@ export default () => {
             [
               'completed',
               'failed',
-              'comfirmed',
+              'confirmed',
+              'pending',
             ].includes(status?.toLowerCase()) ?
               status.toLowerCase() :
               undefined,

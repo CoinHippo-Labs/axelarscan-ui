@@ -722,18 +722,20 @@ export default ({ n }) => {
                 const steps = [
                   {
                     id: 'source',
-                    title: staging ?
-                      'Deposited' :
-                      'Send Asset',
+                    title:
+                      staging ?
+                        'Sent' :
+                        'Send Asset',
                     chain_data: source_chain_data,
                     data: source,
                     id_field: 'id',
                   },
                   {
                     id: 'confirm_deposit',
-                    title: staging ?
-                      'Confirmed' :
-                      'Confirm Deposit',
+                    title:
+                      staging ?
+                        'Confirmed' :
+                        'Confirm Deposit',
                     chain_data: axelar_chain_data,
                     data: confirm_deposit,
                     id_field: 'id',
@@ -741,9 +743,10 @@ export default ({ n }) => {
                   evm_chains_data?.findIndex(c => c?.id === source_chain_data?.id) > -1 &&
                     {
                       id: 'vote',
-                      title: staging ?
-                        'Approved' :
-                        'Vote Confirm',
+                      title:
+                        staging ?
+                          'Approved' :
+                          'Vote Confirm',
                       chain_data: axelar_chain_data,
                       data: vote,
                       id_field: 'id',
@@ -751,9 +754,10 @@ export default ({ n }) => {
                   evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
                     {
                       id: 'sign_batch',
-                      title: staging ?
-                        'Signed' :
-                        'Sign Batch',
+                      title:
+                        staging ?
+                          'Signed' :
+                          'Sign Batch',
                       chain_data: axelar_chain_data,
                       data: sign_batch,
                       id_field: 'batch_id',
@@ -765,9 +769,10 @@ export default ({ n }) => {
                   evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
                     {
                       id: 'executed',
-                      title: staging ?
-                        'Received' :
-                        'Executed',
+                      title:
+                        staging ?
+                          'Received' :
+                          'Executed',
                       ...(
                         sign_batch?.transactionHash ?
                           {
@@ -788,9 +793,10 @@ export default ({ n }) => {
                   cosmos_chains_data?.filter(c => c?.id !== 'axelarnet').findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
                     {
                       id: 'ibc_send',
-                      title: staging ?
-                        'Received' :
-                        'IBC Transfer',
+                      title:
+                        staging ?
+                          'Received' :
+                          'IBC Transfer',
                       chain_data: ibc_send?.recv_txhash ?
                         destination_chain_data :
                         axelar_chain_data,
@@ -806,9 +812,10 @@ export default ({ n }) => {
                   [axelar_chain_data].findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
                     {
                       id: 'axelar_transfer',
-                      title: staging ?
-                        'Received' :
-                        'Axelar Transfer',
+                      title:
+                        staging ?
+                          'Received' :
+                          'Axelar Transfer',
                       chain_data: axelar_chain_data,
                       data: axelar_transfer,
                       id_field: 'id',
@@ -819,19 +826,20 @@ export default ({ n }) => {
                   return {
                     ...s,
                     i,
-                    finish: !!(
-                      s.id === 'executed' ?
-                        s.data?.executed :
-                        s.id === 'ibc_send' ?
-                          s.data?.ack_txhash ||
-                          (
-                            s.data?.recv_txhash &&
-                            !s.data.failed_txhash
-                          ) :
-                          s.id === 'source' ?
-                            s.data?.status === 'success' :
-                            s.data
-                    ),
+                    finish:
+                      !!(
+                        s.id === 'executed' ?
+                          s.data?.executed :
+                          s.id === 'ibc_send' ?
+                            s.data?.ack_txhash ||
+                            (
+                              s.data?.recv_txhash &&
+                              !s.data.failed_txhash
+                            ) :
+                            s.id === 'source' ?
+                              s.data?.status === 'success' :
+                              s.data
+                      ),
                   }
                 })
 

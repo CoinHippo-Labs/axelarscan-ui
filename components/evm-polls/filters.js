@@ -61,7 +61,8 @@ export default () => {
         status: [
           'completed',
           'failed',
-          'comfirmed',
+          'confirmed',
+          'pending',
         ].includes(status?.toLowerCase()) ?
           status.toLowerCase() :
           undefined,
@@ -189,8 +190,12 @@ export default () => {
           title: 'Failed',
         },
         {
-          value: 'comfirmed',
-          title: 'Comfirmed',
+          value: 'confirmed',
+          title: 'Confirmed',
+        },
+        {
+          value: 'pending',
+          title: 'Pending',
         },
       ],
     },
