@@ -129,73 +129,85 @@ export default () => {
               rate,
             } = { ...commission?.commission_rates }
 
-            supported_chains = Object.entries({ ...validators_chains_data })
-              .filter(([k, _v]) => _v?.includes(v?.operator_address))
-              .map(([k, _v]) => k)
+            supported_chains =
+              Object.entries({ ...validators_chains_data })
+                .filter(([k, _v]) =>
+                  _v?.includes(v?.operator_address)
+                )
+                .map(([k, _v]) => k)
 
-            const _tokens = assetManager.amount(
-              tokens,
-              native_asset_id,
-              assets_data,
-            )
+            const _tokens =
+              assetManager
+                .amount(
+                  tokens,
+                  native_asset_id,
+                  assets_data,
+                )
 
-            const _inflation = parseFloat(
-              (
+            const _inflation =
+              parseFloat(
                 (
-                  (uptime / 100) *
-                  (tendermintInflationRate || 0)
-                ) +
-                (
-                  (heartbeats_uptime / 100) *
-                  (keyMgmtRelativeInflationRate || 0) *
-                  (tendermintInflationRate || 0)
-                ) +
-                (
-                  (externalChainVotingInflationRate || 0) *
-                  _.sum(
-                    supported_chains
-                      .map(c => {
-                        const _votes = votes?.chains?.[c]
-                        const {
-                          total,
-                          total_polls,
-                        } = { ..._votes }
+                  (
+                    (uptime / 100) *
+                    (tendermintInflationRate || 0)
+                  ) +
+                  (
+                    (heartbeats_uptime / 100) *
+                    (keyMgmtRelativeInflationRate || 0) *
+                    (tendermintInflationRate || 0)
+                  ) +
+                  (
+                    (externalChainVotingInflationRate || 0) *
+                    _.sum(
+                      supported_chains
+                        .map(c => {
+                          const _votes = votes?.chains?.[c]
+                          const {
+                            total,
+                            total_polls,
+                          } = { ..._votes }
 
-                        return 1 -
-                          (total_polls ?
-                            (total_polls - total) / total_polls :
-                            0
-                          )
-                      })
+                          return 1 -
+                            (total_polls ?
+                              (total_polls - total) / total_polls :
+                              0
+                            )
+                        })
+                    )
                   )
                 )
+                .toFixed(6)
               )
-              .toFixed(6)
-            )
 
             return {
               ...v,
               tokens: _tokens,
-              quadratic_voting_power: _tokens > 0 &&
+              quadratic_voting_power:
+                _tokens > 0 &&
                 Math.floor(
                   Math.sqrt(
                     _tokens,
                   )
                 ),
               inflation: _inflation,
-              apr: (_inflation * 100) *
+              apr:
+                (_inflation * 100) *
                 total_supply *
                 (1 - (communityTax || 0)) *
                 (1 - (rate || 0)) /
                 bonded_tokens,
               supported_chains,
-              votes: votes &&
+              votes:
+                votes &&
                 {
                   ...votes,
-                  chains: Object.fromEntries(
-                    Object.entries({ ...votes?.chains })
-                      .filter(([k, v]) => supported_chains?.includes(k))
-                  ),
+                  chains:
+                    Object.fromEntries(
+                      Object.entries({ ...votes?.chains })
+                        .filter(([k, v]) =>
+                          supported_chains?.includes(k)
+                        )
+                    ),
                 },
             }
           })
@@ -204,19 +216,23 @@ export default () => {
   }, [assets_data, validators_data, validators_chains_data, inflationData])
 
   const filterByStatus = status =>
-    validatorsData?.filter(v =>
-      status === 'inactive' ?
-        !['BOND_STATUS_BONDED'].includes(v.status) :
-        !v.jailed &&
-        ['BOND_STATUS_BONDED'].includes(v.status)
+    (validatorsData || [])
+      .filter(v =>
+        status === 'inactive' ?
+          !['BOND_STATUS_BONDED'].includes(v.status) :
+          !v.jailed &&
+          ['BOND_STATUS_BONDED'].includes(v.status)
+      )
+
+  const data_filtered =
+    filterByStatus(
+      status,
     )
 
-  const data_filtered = filterByStatus(
-    status,
-  )
-
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-  const show_cumulative = staging ||
+
+  const show_cumulative =
+    staging ||
     [
       'mainnet',
       'testnet',
@@ -229,7 +245,9 @@ export default () => {
         {STATUSES
           .map((s, i) => {
             const total = filterByStatus(s)?.length
-            const selected = s === status ||
+
+            const selected =
+              s === status ||
               (
                 s === 'active' &&
                 !status
@@ -272,9 +290,10 @@ export default () => {
                 {
                   Header: '#',
                   accessor: 'i',
-                  sortType: (a, b) => a.original.i > b.original.i ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.i > b.original.i ?
+                      1 :
+                      -1,
                   Cell: props => (
                     <span className="font-medium">
                       {number_format(
@@ -327,20 +346,23 @@ export default () => {
                             </a>
                           </Link>
                           <div className="flex flex-col">
-                            {moniker && (
-                              <Link href={`/validator/${value}`}>
-                                <a
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                >
-                                  {ellipse(
-                                    moniker,
-                                    10,
-                                  )}
-                                </a>
-                              </Link>
-                            )}
+                            {
+                              moniker &&
+                              (
+                                <Link href={`/validator/${value}`}>
+                                  <a
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                  >
+                                    {ellipse(
+                                      moniker,
+                                      10,
+                                    )}
+                                  </a>
+                                </Link>
+                              )
+                            }
                             <div className="flex items-center space-x-1">
                               <Link href={`/validator/${value}`}>
                                 <a
@@ -405,27 +427,31 @@ export default () => {
                     </div>
                   ),
                   accessor: 'voting_power',
-                  sortType: (a, b) => a.original.quadratic_voting_power > b.original.quadratic_voting_power ?
-                    1 :
-                    a.original.quadratic_voting_power < b.original.quadratic_voting_power ?
-                      -1 :
-                      a.original.tokens > b.original.tokens ?
-                        1 :
-                        -1,
+                  sortType: (a, b) =>
+                    a.original.quadratic_voting_power > b.original.quadratic_voting_power ?
+                      1 :
+                      a.original.quadratic_voting_power < b.original.quadratic_voting_power ?
+                        -1 :
+                        a.original.tokens > b.original.tokens ?
+                          1 :
+                          -1,
                   Cell: props => {
                     const {
                       tokens,
                       quadratic_voting_power,
                     } = { ...props.row.original }
 
-                    const total_voting_power = _.sumBy(
-                      filterByStatus('active'),
-                      'tokens',
-                    )
-                    const total_quadratic_voting_power = _.sumBy(
-                      filterByStatus('active'),
-                      'quadratic_voting_power',
-                    )
+                    const total_voting_power =
+                      _.sumBy(
+                        filterByStatus('active'),
+                        'tokens',
+                      )
+
+                    const total_quadratic_voting_power =
+                      _.sumBy(
+                        filterByStatus('active'),
+                        'quadratic_voting_power',
+                      )
 
                     return (
                       <div className="grid grid-cols-2 gap-3">
@@ -433,10 +459,12 @@ export default () => {
                           <>
                             <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                               <span
-                                title={number_format(
-                                  tokens,
-                                  '0,0',
-                                )}
+                                title={
+                                  number_format(
+                                    tokens,
+                                    '0,0',
+                                  )
+                                }
                                 className="uppercase text-slate-600 dark:text-slate-200 text-xs lg:text-sm font-medium"
                               >
                                 {number_format(
@@ -454,10 +482,12 @@ export default () => {
                             </div>
                             <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                               <span
-                                title={number_format(
-                                  quadratic_voting_power,
-                                  '0,0',
-                                )}
+                                title={
+                                  number_format(
+                                    quadratic_voting_power,
+                                    '0,0',
+                                  )
+                                }
                                 className="uppercase text-slate-600 dark:text-slate-200 text-xs lg:text-sm font-bold"
                               >
                                 {number_format(
@@ -488,28 +518,32 @@ export default () => {
                     'Consensus Power' :
                     'Staked Tokens',
                   accessor: 'tokens',
-                  sortType: (a, b) => a.original.tokens > b.original.tokens ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.tokens > b.original.tokens ?
+                      1 :
+                      -1,
                   Cell: props => {
                     const {
                       value,
                     } = { ...props }
 
-                    const total = _.sumBy(
-                      filterByStatus('active'),
-                      'tokens',
-                    )
+                    const total =
+                      _.sumBy(
+                        filterByStatus('active'),
+                        'tokens',
+                      )
 
                     return (
                       <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                         {value > 0 ?
                           <>
                             <span
-                              title={number_format(
-                                value,
-                                '0,0',
-                              )}
+                              title={
+                                number_format(
+                                  value,
+                                  '0,0',
+                                )
+                              }
                               className="uppercase text-slate-600 dark:text-slate-200 text-xs lg:text-sm font-medium"
                             >
                               {number_format(
@@ -537,18 +571,20 @@ export default () => {
                 {
                   Header: 'Quadratic Voting Power',
                   accessor: 'quadratic_voting_power',
-                  sortType: (a, b) => a.original.quadratic_voting_power > b.original.quadratic_voting_power ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.quadratic_voting_power > b.original.quadratic_voting_power ?
+                      1 :
+                      -1,
                   Cell: props => {
                     const {
                       value,
                     } = { ...props }
 
-                    const total = _.sumBy(
-                      filterByStatus('active'),
-                      'quadratic_voting_power',
-                    )
+                    const total =
+                      _.sumBy(
+                        filterByStatus('active'),
+                        'quadratic_voting_power',
+                      )
 
                     return (
                       <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
@@ -604,40 +640,43 @@ export default () => {
 
                     const index = flatRows?.indexOf(row)
 
-                    const total = _.sumBy(
-                      filterByStatus('active'),
-                      'tokens',
-                    )
+                    const total =
+                      _.sumBy(
+                        filterByStatus('active'),
+                        'tokens',
+                      )
 
-                    const _data = index > -1 ?
-                      _.slice(
-                        flatRows
-                          .map(d => {
-                            const {
-                              original,
-                            } = { ...d }
-                            const {
-                              tokens,
-                            } = { ...original }
+                    const _data =
+                      index > -1 ?
+                        _.slice(
+                          flatRows
+                            .map(d => {
+                              const {
+                                original,
+                              } = { ...d }
+                              const {
+                                tokens,
+                              } = { ...original }
 
-                            return {
-                              ...original,
-                              tokens_share: tokens * 100 / total,
-                            }
-                          }),
-                        0,
-                        index + 1,
-                      ) :
-                      []
+                              return {
+                                ...original,
+                                tokens_share: tokens * 100 / total,
+                              }
+                            }),
+                          0,
+                          index + 1,
+                        ) :
+                        []
 
                     const {
                       tokens_share,
                     } = { ..._.last(_data) }
 
-                    const total_share = _.sumBy(
-                      _data,
-                      'tokens_share',
-                    )
+                    const total_share =
+                      _.sumBy(
+                        _data,
+                        'tokens_share',
+                      )
 
                     return (
                       <div className="flex items-start space-x-1.5 mt-0.5">
@@ -684,40 +723,43 @@ export default () => {
 
                     const index = flatRows?.indexOf(row)
 
-                    const total = _.sumBy(
-                      filterByStatus('active'),
-                      'quadratic_voting_power',
-                    )
+                    const total =
+                      _.sumBy(
+                        filterByStatus('active'),
+                        'quadratic_voting_power',
+                      )
 
-                    const _data = index > -1 ?
-                      _.slice(
-                        flatRows
-                          .map(d => {
-                            const {
-                              original,
-                            } = { ...d }
-                            const {
-                              quadratic_voting_power,
-                            } = { ...original }
+                    const _data =
+                      index > -1 ?
+                        _.slice(
+                          flatRows
+                            .map(d => {
+                              const {
+                                original,
+                              } = { ...d }
+                              const {
+                                quadratic_voting_power,
+                              } = { ...original }
 
-                            return {
-                              ...original,
-                              quadratic_voting_power_share: quadratic_voting_power * 100 / total,
-                            }
-                          }),
-                        0,
-                        index + 1,
-                      ) :
-                      []
+                              return {
+                                ...original,
+                                quadratic_voting_power_share: quadratic_voting_power * 100 / total,
+                              }
+                            }),
+                          0,
+                          index + 1,
+                        ) :
+                        []
 
                     const {
                       quadratic_voting_power_share,
                     } = { ..._.last(_data) }
 
-                    const total_share = _.sumBy(
-                      _data,
-                      'quadratic_voting_power_share',
-                    )
+                    const total_share =
+                      _.sumBy(
+                        _data,
+                        'quadratic_voting_power_share',
+                      )
 
                     return (
                       <div className="flex items-start space-x-1.5 mt-0.5">
@@ -782,9 +824,10 @@ export default () => {
                     </span>
                   ),
                   accessor: 'apr',
-                  sortType: (a, b) => a.original.apr > b.original.apr ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.apr > b.original.apr ?
+                      1 :
+                      -1,
                   Cell: props => {
                     const {
                       value,
@@ -799,10 +842,12 @@ export default () => {
                         {!isNaN(value) ?
                           <>
                             <div
-                              title={`${number_format(
-                                value,
-                                '0,0.00',
-                              )}%`}
+                              title={
+                                `${number_format(
+                                  value,
+                                  '0,0.00',
+                                )}%`
+                              }
                               className="font-medium mt-0.5"
                             >
                               {number_format(
@@ -815,10 +860,12 @@ export default () => {
                               typeof inflation === 'number' &&
                               (
                                 <div
-                                  title={`${number_format(
-                                    inflation * 100,
-                                    '0,0.000',
-                                  )}%`}
+                                  title={
+                                    `${number_format(
+                                      inflation * 100,
+                                      '0,0.000',
+                                    )}%`
+                                  }
                                   className="space-x-0.5"
                                 >
                                   <span className="text-2xs text-slate-400 dark:text-slate-600 font-medium">
@@ -827,7 +874,7 @@ export default () => {
                                   <span className="text-2xs lg:text-2xs">
                                     {number_format(
                                       inflation * 100,
-                                      '0,0.0',
+                                      '0,0.00',
                                     )}
                                     %
                                   </span>
@@ -855,10 +902,14 @@ export default () => {
                 {
                   Header: (
                     <span
-                      title={`No. of blocks signed off by the validator in the last ${number_format(
-                        process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS,
-                        '0,0a',
-                      )} blocks`}
+                      title={
+                        `No. of blocks signed off by the validator in the last ${
+                          number_format(
+                            process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS,
+                            '0,0a',
+                          )
+                        } blocks`
+                      }
                       className="flex items-center space-x-1"
                     >
                       <span>
@@ -877,9 +928,10 @@ export default () => {
                     </span>
                   ),
                   accessor: 'uptime',
-                  sortType: (a, b) => a.original.uptime > b.original.uptime ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.uptime > b.original.uptime ?
+                      1 :
+                      -1,
                   Cell: props => {
                     const {
                       value,
@@ -918,30 +970,33 @@ export default () => {
                             />
                           </div>
                         }
-                        {typeof start_height === 'number' && (
-                          <div className="text-2xs space-x-1">
-                            <span className="text-slate-400 dark:text-slate-200 font-medium space-x-0.5">
-                              <span>
-                                Started
+                        {
+                          typeof start_height === 'number' &&
+                          (
+                            <div className="text-2xs space-x-1">
+                              <span className="text-slate-400 dark:text-slate-200 font-medium space-x-0.5">
+                                <span>
+                                  Started
+                                </span>
+                                <span>
+                                  @
+                                </span>
                               </span>
-                              <span>
-                                @
-                              </span>
-                            </span>
-                            <Link href={`/block/${start_height}`}>
-                              <a
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium"
-                              >
-                                {number_format(
-                                  start_height,
-                                  '0,0',
-                                )}
-                              </a>
-                            </Link>
-                          </div>
-                        )}
+                              <Link href={`/block/${start_height}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-medium"
+                                >
+                                  {number_format(
+                                    start_height,
+                                    '0,0',
+                                  )}
+                                </a>
+                              </Link>
+                            </div>
+                          )
+                        }
                       </div>
                     )
                   },
@@ -950,10 +1005,14 @@ export default () => {
                 {
                   Header: (
                     <span
-                      title={`No. of heartbeats from validator in the last ${number_format(
-                        process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS,
-                        '0,0a',
-                      )} blocks`}
+                      title={
+                        `No. of heartbeats from validator in the last ${
+                          number_format(
+                            process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS,
+                            '0,0a',
+                          )
+                        } blocks`
+                      }
                       className="flex items-center uppercase space-x-1"
                     >
                       <span>
@@ -972,9 +1031,10 @@ export default () => {
                     </span>
                   ),
                   accessor: 'heartbeats_uptime',
-                  sortType: (a, b) => a.original.heartbeats_uptime > b.original.heartbeats_uptime ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.heartbeats_uptime > b.original.heartbeats_uptime ?
+                      1 :
+                      -1,
                   Cell: props => {
                     const {
                       value,
@@ -1014,35 +1074,41 @@ export default () => {
                             />
                           </div>
                         }
-                        {typeof start_proxy_height === 'number' && (
-                          <div className="text-2xs space-x-1">
-                            <span className="text-slate-400 dark:text-slate-200 font-medium space-x-0.5">
-                              <span>
-                                Started
+                        {
+                          typeof start_proxy_height === 'number' &&
+                          (
+                            <div className="text-2xs space-x-1">
+                              <span className="text-slate-400 dark:text-slate-200 font-medium space-x-0.5">
+                                <span>
+                                  Started
+                                </span>
+                                <span>
+                                  @
+                                </span>
                               </span>
-                              <span>
-                                @
-                              </span>
-                            </span>
-                            <Link href={`/block/${start_proxy_height}`}>
-                              <a
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium"
-                              >
-                                {number_format(
-                                  start_proxy_height,
-                                  '0,0',
-                                )}
-                              </a>
-                            </Link>
-                          </div>
-                        )}
-                        {stale_heartbeats && (
-                          <div className="bg-red-200 dark:bg-red-400 text-red-500 dark:text-red-800 rounded-xl whitespace-nowrap text-xs font-semibold py-0.5 px-2">
-                            Stale Heartbeats
-                          </div>
-                        )}
+                              <Link href={`/block/${start_proxy_height}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="font-medium"
+                                >
+                                  {number_format(
+                                    start_proxy_height,
+                                    '0,0',
+                                  )}
+                                </a>
+                              </Link>
+                            </div>
+                          )
+                        }
+                        {
+                          stale_heartbeats &&
+                          (
+                            <div className="bg-red-200 dark:bg-red-400 text-red-500 dark:text-red-800 rounded-xl whitespace-nowrap text-xs font-semibold py-0.5 px-2">
+                              Stale Heartbeats
+                            </div>
+                          )
+                        }
                       </div>
                     )
                   },
@@ -1070,23 +1136,27 @@ export default () => {
                     </span>
                   ),
                   accessor: 'votes',
-                  sortType: (a, b) => a.original.total_yes_votes > b.original.total_yes_votes ?
-                    1 :
-                    a.original.total_yes_votes < b.original.total_yes_votes ?
-                      -1 :
-                      a.original.total_no_votes <= b.original.total_no_votes ?
-                        1 :
-                        -1,
+                  sortType: (a, b) =>
+                    a.original.total_yes_votes > b.original.total_yes_votes ?
+                      1 :
+                      a.original.total_yes_votes < b.original.total_yes_votes ?
+                        -1 :
+                        a.original.total_no_votes <= b.original.total_no_votes ?
+                          1 :
+                          -1,
                   Cell: props => (
                     <div className="flex flex-col justify-center space-y-0.5 mt-0.5 mx-3">
                       {props.value ?
                         Object.keys({ ...props.value.chains }).length > 0 ?
                           Object.entries(props.value.chains)
                             .map(([k, v]) => {
-                              const image = chainManager.image(
-                                k,
-                                evm_chains_data,
-                              )
+                              const image =
+                                chainManager
+                                  .image(
+                                    k,
+                                    evm_chains_data,
+                                  )
+
                               const {
                                 votes,
                                 total_polls,
@@ -1099,16 +1169,22 @@ export default () => {
                                   className="min-w-max flex items-center justify-between space-x-2"
                                 >
                                   <div className="flex items-center space-x-2">
-                                    {image && (
-                                      <Image
-                                        src={image}
-                                        title={chainManager.name(
-                                          k,
-                                          evm_chains_data,
-                                        )}
-                                        className="w-5 h-5 rounded-full"
-                                      />
-                                    )}
+                                    {
+                                      image &&
+                                      (
+                                        <Image
+                                          src={image}
+                                          title={
+                                            chainManager
+                                              .name(
+                                                k,
+                                                evm_chains_data,
+                                              )
+                                          }
+                                          className="w-5 h-5 rounded-full"
+                                        />
+                                      )
+                                    }
                                     <span className={`${votes?.true ? 'text-green-400 dark:text-green-300 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} text-xs -mt-0.5`}>
                                       {number_format(
                                         votes?.true ||
@@ -1159,31 +1235,39 @@ export default () => {
                 {
                   Header: 'EVM Chains Supported',
                   accessor: 'supported_chains',
-                  sortType: (a, b) => a.original.supported_chains?.length > b.original.supported_chains?.length ?
-                    1 :
-                    -1,
+                  sortType: (a, b) =>
+                    a.original.supported_chains?.length > b.original.supported_chains?.length ?
+                      1 :
+                      -1,
                   Cell: props => (
                     <div className="max-w-fit flex flex-wrap items-center mt-0.5">
                       {validators_chains_data ?
                         props.value?.length > 0 ?
                           props.value
                             .filter(c =>
-                              chainManager.image(
-                                c,
-                                evm_chains_data,
-                              )
+                              chainManager
+                                .image(
+                                  c,
+                                  evm_chains_data,
+                                )
                             )
                             .map((c, i) => (
                               <Image
                                 key={i}
-                                src={chainManager.image(
-                                  c,
-                                  evm_chains_data,
-                                )}
-                                title={chainManager.name(
-                                  c,
-                                  evm_chains_data,
-                                )}
+                                src={
+                                  chainManager
+                                    .image(
+                                      c,
+                                      evm_chains_data,
+                                    )
+                                }
+                                title={
+                                  chainManager
+                                    .name(
+                                      c,
+                                      evm_chains_data,
+                                    )
+                                }
                                 className="w-6 h-6 rounded-full mb-1 mr-1"
                               />
                             )) :
@@ -1203,19 +1287,20 @@ export default () => {
                 {
                   Header: 'Status',
                   accessor: 'status',
-                  sortType: (a, b) => a.original.tombstoned > b.original.tombstoned ?
-                    -1 :
-                    a.original.tombstoned < b.original.tombstoned ?
-                      1 :
-                      a.original.jailed > b.original.jailed ?
-                        -1 :
-                        a.original.jailed < b.original.jailed ?
-                          1 :
-                          a.original.status > b.original.status ?
+                  sortType: (a, b) =>
+                    a.original.tombstoned > b.original.tombstoned ?
+                      -1 :
+                      a.original.tombstoned < b.original.tombstoned ?
+                        1 :
+                        a.original.jailed > b.original.jailed ?
+                          -1 :
+                          a.original.jailed < b.original.jailed ?
                             1 :
-                            a.original.status < b.original.status ?
-                              -1 :
-                              -1,
+                            a.original.status > b.original.status ?
+                              1 :
+                              a.original.status < b.original.status ?
+                                -1 :
+                                -1,
                   Cell: props => {
                     const {
                       tombstoned,
@@ -1229,21 +1314,29 @@ export default () => {
                         {status ?
                           <>
                             <div className={`${status.includes('UN') ? status.endsWith('ED') ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-yellow-200 dark:bg-yellow-300 border-2 border-yellow-400 dark:border-yellow-600 text-yellow-500 dark:text-yellow-700' : 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700'} rounded-xl text-xs font-semibold py-0.5 px-2`}>
-                              {status.replace(
-                                'BOND_STATUS_',
-                                '',
-                              )}
+                              {status
+                                .replace(
+                                  'BOND_STATUS_',
+                                  '',
+                                )
+                              }
                             </div>
-                            {tombstoned && (
-                              <div className="bg-slate-100 dark:bg-slate-800 rounded-xl capitalize text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
-                                Tombstoned
-                              </div>
-                            )}
-                            {jailed && (
-                              <div className="bg-slate-100 dark:bg-slate-800 rounded-xl capitalize text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
-                                Jailed
-                              </div>
-                            )}
+                            {
+                              tombstoned &&
+                              (
+                                <div className="bg-slate-100 dark:bg-slate-800 rounded-xl capitalize text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
+                                  Tombstoned
+                                </div>
+                              )
+                            }
+                            {
+                              jailed &&
+                              (
+                                <div className="bg-slate-100 dark:bg-slate-800 rounded-xl capitalize text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
+                                  Jailed
+                                </div>
+                              )
+                            }
                           </> :
                           <span>
                             -
@@ -1282,17 +1375,19 @@ export default () => {
                 ![].includes(c.accessor)
               )
             }
-            data={_.orderBy(
-              data_filtered,
-              [
-                'quadratic_voting_power',
-                'tokens',
-              ],
-              [
-                'desc',
-                'desc',
-              ],
-            )}
+            data={
+              _.orderBy(
+                data_filtered,
+                [
+                  'quadratic_voting_power',
+                  'tokens',
+                ],
+                [
+                  'desc',
+                  'desc',
+                ],
+              )
+            }
             noPagination={data_filtered.length <= 10}
             defaultPageSize={100}
             className="no-border"
