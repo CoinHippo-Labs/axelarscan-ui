@@ -354,7 +354,8 @@ export default () => {
             'Vote Confirm',
         chain_data: axelar_chain_data,
         data: vote,
-        id_field: 'id',
+        id_field: 'poll_id',
+        path: '/evm-poll/{id}',
       },
     evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
       {
@@ -1064,9 +1065,12 @@ export default () => {
                       _id ?
                         <div className={rowClassName}>
                           <span className={rowTitleClassName}>
-                            {s.id === 'sign_batch' ?
-                              'Batch' :
-                              'Transaction'
+                            {
+                              _path.includes('/evm-poll') ?
+                                'Poll' :
+                                _path.includes('/batch') ?
+                                  'Batch' :
+                                  'Transaction'
                             }:
                           </span>
                           <div className="flex items-center space-x-1">

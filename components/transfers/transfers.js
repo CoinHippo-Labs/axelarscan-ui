@@ -749,7 +749,8 @@ export default ({ n }) => {
                           'Vote Confirm',
                       chain_data: axelar_chain_data,
                       data: vote,
-                      id_field: 'id',
+                      id_field: 'poll_id',
+                      path: '/evm-poll/{id}',
                     },
                   evm_chains_data?.findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
                     {
