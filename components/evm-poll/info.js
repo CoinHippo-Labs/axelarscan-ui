@@ -56,10 +56,11 @@ export default ({
     ms,
   } = { ...created_at }
 
-  const chain_data = getChain(
-    sender_chain,
-    evm_chains_data,
-  )
+  const chain_data =
+    getChain(
+      sender_chain,
+      evm_chains_data,
+    )
   const {
     chain_id,
     image,
@@ -135,13 +136,16 @@ export default ({
             <div className="h-6 flex items-center space-x-2">
               {chain_data ?
                 <>
-                  {image && (
-                    <Image
-                      src={image}
-                      alt=""
-                      className="w-6 h-6 rounded-full"
-                    />
-                  )}
+                  {
+                    image &&
+                    (
+                      <Image
+                        src={image}
+                        alt=""
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )
+                  }
                   <span className="text-base font-semibold">
                     {chainName(chain_data)}
                   </span>
@@ -206,16 +210,18 @@ export default ({
                           _type = 'ContractCallWithToken'
                           break
                         default:
-                          _type = type ||
+                          _type =
+                            type ||
                             value
                           break
                       }
 
-                      const asset_data = getAsset(
-                        asset ||
-                          symbol,
-                        assets_data,
-                      )
+                      const asset_data =
+                        getAsset(
+                          asset ||
+                            symbol,
+                          assets_data,
+                        )
                       const {
                         id,
                         contracts,
@@ -224,13 +230,18 @@ export default ({
                         image,
                       } = { ...asset_data }
 
-                      const contract_data = contracts?.find(c => c?.chain_id === chain_id)
+                      const contract_data = (contracts || [])
+                        .find(c =>
+                          c?.chain_id === chain_id
+                        )
 
-                      symbol = contract_data?.symbol ||
+                      symbol =
+                        contract_data?.symbol ||
                         asset_data?.symbol ||
                         symbol
 
-                      image = contract_data?.image ||
+                      image =
+                        contract_data?.image ||
                         image
 
                       return (
@@ -266,12 +277,13 @@ export default ({
                                   (
                                     <span className="text-xs">
                                       {number_format(
-                                        assetManager.amount(
-                                          amount,
-                                          id,
-                                          assets_data,
-                                          chain_id,
-                                        ),
+                                        assetManager
+                                          .amount(
+                                            amount,
+                                            id,
+                                            assets_data,
+                                            chain_id,
+                                          ),
                                         '0,0.000',
                                       )}
                                     </span>
@@ -372,10 +384,10 @@ export default ({
                 <Copy
                   size={20}
                   value={transaction_id}
-                  title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
+                  title={<span className="cursor-pointer break-all text-slate-400 dark:text-slate-200 font-medium">
                     {ellipse(
                       transaction_id,
-                      16,
+                      12,
                     )}
                   </span>}
                 />
@@ -448,7 +460,13 @@ export default ({
           ms &&
           (
             <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-              {moment(ms).fromNow()} ({moment(ms).format('MMM D, YYYY h:mm:ss A')})
+              {
+                moment(ms)
+                  .fromNow()
+              } ({
+                moment(ms)
+                  .format('MMM D, YYYY h:mm:ss A')
+              })
             </span>
           ) :
           <ProgressBar

@@ -90,6 +90,7 @@ export default () => {
               'failed',
               'confirmed',
               'pending',
+              'to_recover',
             ].includes(status?.toLowerCase()) ?
               status.toLowerCase() :
               undefined,
@@ -302,7 +303,9 @@ export default () => {
 
                       if (
                         participants?.length > 0 &&
-                        vote_options.findIndex(v => v?.option === 'unsubmitted') < 0 &&
+                        vote_options.findIndex(v =>
+                          v?.option === 'unsubmitted'
+                        ) < 0 &&
                         _.sumBy(
                           vote_options,
                           'value',
@@ -311,7 +314,8 @@ export default () => {
                         vote_options.push(
                           {
                             option: 'unsubmitted',
-                            value: participants.length -
+                            value:
+                              participants.length -
                               _.sumBy(
                                 vote_options,
                                 'value',
@@ -320,25 +324,27 @@ export default () => {
                         )
                       }
 
-                      vote_options = _.orderBy(
-                        vote_options,
-                        ['i'],
-                        ['asc'],
-                      )
+                      vote_options =
+                        _.orderBy(
+                          vote_options,
+                          ['i'],
+                          ['asc'],
+                        )
 
                       return {
                         ..._data,
-                        votes: _.orderBy(
-                          votes,
-                          [
-                            'height',
-                            'created_at',
-                          ],
-                          [
-                            'desc',
-                            'desc',
-                          ],
-                        ),
+                        votes:
+                          _.orderBy(
+                            votes,
+                            [
+                              'height',
+                              'created_at',
+                            ],
+                            [
+                              'desc',
+                              'desc',
+                            ],
+                          ),
                         vote_options,
                         _url:
                           [
@@ -362,20 +368,21 @@ export default () => {
                   id,
                   votes,
                 } = { ...d }
+                let {
+                  height,
+                } = { ...d }
 
                 const id_number =
                   !isNaN(id) ?
                     Number(id) :
                     id
 
-                const {
-                  height,
-                } = { ...
+                height =
                   _.minBy(
                     votes,
                     'height',
-                  )
-                }
+                  )?.height ||
+                  height
 
                 const confirmation_vote = (votes || [])
                   .find(v =>
@@ -790,10 +797,10 @@ export default () => {
                         <Copy
                           size={20}
                           value={value}
-                          title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
+                          title={<span className="cursor-pointer break-all text-slate-400 dark:text-slate-200 font-medium">
                             {ellipse(
                               value,
-                              16,
+                              12,
                             )}
                           </span>}
                         />

@@ -37,10 +37,13 @@ export default () => {
 
   useEffect(() => {
     if (asPath) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
-      )
+      const params =
+        params_to_obj(
+          asPath.indexOf('?') > -1 &&
+          asPath.substring(
+            asPath.indexOf('?') + 1,
+          )
+        )
 
       const {
         pollId,
@@ -55,35 +58,45 @@ export default () => {
         toTime,
       } = { ...params }
 
-      setFilters({
-        pollId,
-        chain,
-        status: [
-          'completed',
-          'failed',
-          'confirmed',
-          'pending',
-        ].includes(status?.toLowerCase()) ?
-          status.toLowerCase() :
-          undefined,
-        transactionId,
-        transferId,
-        depositAddress,
-        voter,
-        vote: [
-          'yes',
-          'no',
-          'unsubmitted',
-        ].includes(vote?.toLowerCase()) ?
-          vote.toLowerCase() :
-          undefined,
-        time: fromTime &&
-          toTime &&
-          [
-            moment(Number(fromTime)),
-            moment(Number(toTime)),
-          ],
-      })
+      setFilters(
+        {
+          pollId,
+          chain,
+          status:
+            [
+              'completed',
+              'failed',
+              'confirmed',
+              'pending',
+              'to_recover',
+            ].includes(status?.toLowerCase()) ?
+              status.toLowerCase() :
+              undefined,
+          transactionId,
+          transferId,
+          depositAddress,
+          voter,
+          vote:
+            [
+              'yes',
+              'no',
+              'unsubmitted',
+            ].includes(vote?.toLowerCase()) ?
+              vote.toLowerCase() :
+              undefined,
+          time:
+            fromTime &&
+            toTime &&
+            [
+              moment(
+                Number(fromTime)
+              ),
+              moment(
+                Number(toTime)
+              ),
+            ],
+        }
+      )
     }
   }, [asPath])
 
@@ -100,7 +113,9 @@ export default () => {
           switch (k) {
             case 'time':
               key = 'fromTime'
-              value = moment(v[0]).valueOf()
+              value =
+                moment(v[0])
+                  .valueOf()
 
               qs.append(
                 key,
@@ -108,7 +123,9 @@ export default () => {
               )
 
               key = 'toTime'
-              value = moment(v[1]).valueOf()
+              value =
+                moment(v[1])
+                  .valueOf()
               break
             default:
               key = k
@@ -143,33 +160,34 @@ export default () => {
       name: 'chain',
       type: 'select',
       placeholder: 'Select chain',
-      options: _.concat(
-        {
-          value: '',
-          title: 'Any',
-        },
-        _.orderBy(
-          evm_chains_data ||
-          [],
-          ['deprecated'],
-          ['desc'],
-        )
-        .filter(c =>
-          !c?.no_inflation ||
-          c?.deprecated
-        )
-        .map(c => {
-          const {
-            id,
-            name,
-          } = { ...c }
+      options:
+        _.concat(
+          {
+            value: '',
+            title: 'Any',
+          },
+          _.orderBy(
+            evm_chains_data ||
+            [],
+            ['deprecated'],
+            ['desc'],
+          )
+          .filter(c =>
+            !c?.no_inflation ||
+            c?.deprecated
+          )
+          .map(c => {
+            const {
+              id,
+              name,
+            } = { ...c }
 
-          return {
-            value: id,
-            title: name,
-          }
-        }),
-      ),
+            return {
+              value: id,
+              title: name,
+            }
+          }),
+        ),
     },
     {
       label: 'Status',
@@ -308,86 +326,100 @@ export default () => {
               )
             )
 
-            return !hidden && (
-              <div
-                key={i}
-                className={`form-element ${className || ''}`}
-              >
-                {label && (
-                  <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                    {label}
-                  </div>
-                )}
-                {type === 'select' ?
-                  <select
-                    placeholder={placeholder}
-                    value={filters?.[name]}
-                    onChange={e =>
-                      setFilters({
-                        ...filters,
-                        [`${name}`]: e.target.value,
-                      })
-                    }
-                    className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
-                  >
-                    {(options || [])
-                      .map((o, i) => {
-                        const {
-                          title,
-                          value,
-                        } = { ...o }
-
-                        return (
-                          <option
-                            key={i}
-                            title={title}
-                            value={value}
-                          >
-                            {title}
-                          </option>
-                        )
-                      })
-                    }
-                  </select> :
-                  type === 'datetime-range' ?
-                    <DatePicker.RangePicker
-                      showTime
-                      format="YYYY/MM/DD HH:mm:ss"
-                      ranges={{
-                        Today: [
-                          moment().startOf('day'),
-                          moment().endOf('day'),
-                        ],
-                        'This Month': [
-                          moment().startOf('month'),
-                          moment().endOf('month'),
-                        ],
-                      }}
-                      value={filters?.[name]}
-                      onChange={v =>
-                        setFilters({
-                          ...filters,
-                          [`${name}`]: v,
-                        })
-                      }
-                      className="form-input border-0 focus:ring-0 rounded"
-                      style={{ display: 'flex' }}
-                    /> :
-                    <input
-                      type={type}
+            return !hidden &&
+              (
+                <div
+                  key={i}
+                  className={`form-element ${className || ''}`}
+                >
+                  {
+                    label &&
+                    (
+                      <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                        {label}
+                      </div>
+                    )
+                  }
+                  {type === 'select' ?
+                    <select
                       placeholder={placeholder}
                       value={filters?.[name]}
                       onChange={e =>
-                        setFilters({
-                          ...filters,
-                          [`${name}`]: e.target.value,
+                        setFilters(
+                          {
+                            ...filters,
+                            [`${name}`]: e.target.value,
+                          }
+                        )
+                      }
+                      className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
+                    >
+                      {(options || [])
+                        .map((o, i) => {
+                          const {
+                            title,
+                            value,
+                          } = { ...o }
+
+                          return (
+                            <option
+                              key={i}
+                              title={title}
+                              value={value}
+                            >
+                              {title}
+                            </option>
+                          )
                         })
                       }
-                      className="form-input border-0 focus:ring-0 rounded"
-                    />
-                }
-              </div>
-            )
+                    </select> :
+                    type === 'datetime-range' ?
+                      <DatePicker.RangePicker
+                        showTime
+                        format="YYYY/MM/DD HH:mm:ss"
+                        ranges={{
+                          Today: [
+                            moment()
+                              .startOf('day'),
+                            moment()
+                              .endOf('day'),
+                          ],
+                          'This Month': [
+                            moment()
+                              .startOf('month'),
+                            moment()
+                              .endOf('month'),
+                          ],
+                        }}
+                        value={filters?.[name]}
+                        onChange={v =>
+                          setFilters(
+                            {
+                              ...filters,
+                              [`${name}`]: v,
+                            }
+                          )
+                        }
+                        className="form-input border-0 focus:ring-0 rounded"
+                        style={{ display: 'flex' }}
+                      /> :
+                      <input
+                        type={type}
+                        placeholder={placeholder}
+                        value={filters?.[name]}
+                        onChange={e =>
+                          setFilters(
+                            {
+                              ...filters,
+                              [`${name}`]: e.target.value,
+                            }
+                          )
+                        }
+                        className="form-input border-0 focus:ring-0 rounded"
+                      />
+                  }
+                </div>
+              )
           })
         }
       </div>}
@@ -401,7 +433,12 @@ export default () => {
         )
       }}
       cancelButtonTitle="Reset"
-      onConfirm={() => setFilterTrigger(moment().valueOf())}
+      onConfirm={() =>
+        setFilterTrigger(
+          moment()
+            .valueOf()
+        )
+      }
       confirmButtonTitle="Search"
     />
   )
