@@ -6,10 +6,9 @@ This is the frontend of [Axelarscan](https://axelarscan.io), which displays the 
 ## Pages
 - [Home](https://axelarscan.io) - The overview information of the network, including the current consensus state, the latest blocks produced, the latest transactions, etc.
 - [Validators](https://axelarscan.io/validators) - Lists of the network validators and their statistics.   
-- [Votes](https://axelarscan.io/evm-votes) - List of the EVM votes records.
+- [Votes](https://axelarscan.io/evm-polls) - List of the EVM votes records.
 - [Blocks](https://axelarscan.io/blocks) - List of the latest blocks produced in the network.
 - [TX](https://axelarscan.io/transactions) - List of the latest transactions in. the network.
-- [KeyGen](https://axelarscan.io/participations) displays the information on keys generation and signed events.
 - [Transfers](https://axelarscan.io/transfers) displays the statistics of cross-chain transfers happening through the Axelar network.
 - [Batches](https://axelarscan.io/batches) displays a list of the recent command batches that are going to (or have been submitted) to EVM chains.
 - [Assets](https://axelarscan.io/assets) - List of the assets and chains supported on the Axelar network

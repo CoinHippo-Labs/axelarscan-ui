@@ -9,10 +9,15 @@ export default [
       '/validator/[address]',
     ],
   },
-  {
+  /*{
     id: 'evm_votes',
     title: 'EVM votes',
     path: '/evm-votes',
+  },*/
+  {
+    id: 'evm_polls',
+    title: 'EVM polls',
+    path: '/evm-polls',
   },
   {
     id: 'blocks',
