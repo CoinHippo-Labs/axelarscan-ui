@@ -149,7 +149,11 @@ export default () => {
                 contracts,
               } = { ...id }
 
-              const chain = _.head(contracts?.map(c => c?.chain))
+              const chain =
+                _.head(
+                  (contracts || [])
+                    .map(c => c?.chain)
+                )
 
               if (chain) {
                 return {
@@ -162,11 +166,12 @@ export default () => {
             })
 
           if (denoms.length > 0) {
-            const response = await getAssetsPrice(
-              {
-                denoms,
-              },
-            )
+            const response =
+              await getAssetsPrice(
+                {
+                  denoms,
+                },
+              )
 
             if (Array.isArray(response)) {
               response.forEach(a => {
@@ -175,7 +180,13 @@ export default () => {
                   price,
                 } = { ...a }
 
-                const asset_index = assets_data.findIndex(_a => equals_ignore_case(_a?.id, denom))
+                const asset_index = assets_data
+                  .findIndex(_a =>
+                    equals_ignore_case(
+                      _a?.id,
+                      denom,
+                    )
+                  )
 
                 if (asset_index > -1) {
                   const asset_data = assets_data[asset_index]
@@ -191,12 +202,13 @@ export default () => {
                     )
 
                   assets_data[asset_index] = asset_data
-                  updated_ids = _.uniq(
-                    _.concat(
-                      updated_ids,
-                      id,
+                  updated_ids =
+                    _.uniq(
+                      _.concat(
+                        updated_ids,
+                        id,
+                      )
                     )
-                  )
 
                   updated = true
                 }
@@ -205,10 +217,12 @@ export default () => {
           }
 
           if (updated) {
-            dispatch({
-              type: ASSETS_DATA,
-              value: _.cloneDeep(assets_data),
-            })
+            dispatch(
+              {
+                type: ASSETS_DATA,
+                value: _.cloneDeep(assets_data),
+              }
+            )
           }
         }
       }
@@ -224,17 +238,20 @@ export default () => {
         !status_data ||
         is_interval
       ) {
-        const response = await getStatus(
-          undefined,
-          is_interval &&
-          status_data,
-        )
+        const response =
+          await getStatus(
+            undefined,
+            is_interval &&
+            status_data,
+          )
 
         if (response) {
-          dispatch({
-            type: STATUS_DATA,
-            value: response,
-          })
+          dispatch(
+            {
+              type: STATUS_DATA,
+              value: response,
+            }
+          )
 
           if (!is_interval) {
             setValidatorsTrigger(
@@ -248,10 +265,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(true),
-      6 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(true),
+        6 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [status_data])
@@ -263,20 +281,23 @@ export default () => {
         cosmos_chains_data &&
         assets_data
       ) {
-        const chain_data = getChain(
-          'axelarnet',
-          cosmos_chains_data,
-        )
+        const chain_data =
+          getChain(
+            'axelarnet',
+            cosmos_chains_data,
+          )
         const {
           coingecko_id,
         } = { ...chain_data }
 
-        dispatch({
-          type: CHAIN_DATA,
-          value: {
-            ...chain_data,
-          },
-        })
+        dispatch(
+          {
+            type: CHAIN_DATA,
+            value: {
+              ...chain_data,
+            },
+          }
+        )
 
         let response = await staking_params()
 
@@ -288,14 +309,16 @@ export default () => {
             bond_denom,
           } = { ...params }
 
-          dispatch({
-            type: CHAIN_DATA,
-            value: {
-              staking_params: {
-                ...params,
+          dispatch(
+            {
+              type: CHAIN_DATA,
+              value: {
+                staking_params: {
+                  ...params,
+                },
               },
-            },
-          })
+            }
+          )
 
           if (bond_denom) {
             response = await bank_supply(bond_denom)
@@ -307,29 +330,34 @@ export default () => {
               denom,
             } = { ...amount }
 
-            dispatch({
-              type: CHAIN_DATA,
-              value: {
-                bank_supply: Object.fromEntries(
-                  Object.entries({ ...amount })
-                    .map(([k, v]) =>
-                      [
-                        k,
-                        k === 'denom' ?
-                          assetManager.symbol(
-                            v,
-                            assets_data,
-                          ) :
-                          assetManager.amount(
-                            v,
-                            denom,
-                            assets_data,
-                          ),
-                      ]
-                    )
-                ),
-              },
-            })
+            dispatch(
+              {
+                type: CHAIN_DATA,
+                value: {
+                  bank_supply:
+                    Object.fromEntries(
+                      Object.entries({ ...amount })
+                        .map(([k, v]) =>
+                          [
+                            k,
+                            k === 'denom' ?
+                              assetManager
+                                .symbol(
+                                  v,
+                                  assets_data,
+                                ) :
+                              assetManager
+                                .amount(
+                                  v,
+                                  denom,
+                                  assets_data,
+                                ),
+                          ]
+                        )
+                    ),
+                },
+              }
+            )
           }
         }
 
@@ -340,24 +368,28 @@ export default () => {
             pool,
           } = { ...response }
 
-          dispatch({
-            type: CHAIN_DATA,
-            value: {
-              staking_pool: Object.fromEntries(
-                Object.entries({ ...pool })
-                  .map(([k, v]) =>
-                    [
-                      k,
-                      assetManager.amount(
-                        v,
-                        native_asset_id,
-                        assets_data,
-                      ),
-                    ]
-                )
-              ),
-            },
-          })
+          dispatch(
+            {
+              type: CHAIN_DATA,
+              value: {
+                staking_pool:
+                  Object.fromEntries(
+                    Object.entries({ ...pool })
+                      .map(([k, v]) =>
+                        [
+                          k,
+                          assetManager
+                            .amount(
+                              v,
+                              native_asset_id,
+                              assets_data,
+                            ),
+                        ]
+                    )
+                  ),
+              },
+            }
+          )
         }
 
         if (!is_interval) {
@@ -368,72 +400,85 @@ export default () => {
               params,
             } = { ...response }
 
-            dispatch({
-              type: CHAIN_DATA,
-              value: {
-                slashing_params: {
-                  ...params,
+            dispatch(
+              {
+                type: CHAIN_DATA,
+                value: {
+                  slashing_params: {
+                    ...params,
+                  },
                 },
-              },
-            })
+              }
+            )
           }
 
-          response = await (
-            await fetch(
-              process.env.NEXT_PUBLIC_RELEASES_URL,
+          response =
+            await (
+              await fetch(
+                process.env.NEXT_PUBLIC_RELEASES_URL,
+              )
             )
-          ).text()
+            .text()
 
           if (response?.includes('`axelar-core` version')) {
             response = response
               .split('\n')
-              .filter(l => l?.includes('`axelar-core` version'))
+              .filter(l =>
+                l?.includes('`axelar-core` version')
+              )
 
-            dispatch({
-              type: CHAIN_DATA,
-              value: {
-                ...Object.fromEntries(
-                  [
-                    _.head(response)
-                      .split('|')
-                      .map(s =>
-                        (s || '')
-                          .trim()
-                          .split('`')
-                          .join('')
-                          .split(' ')
-                          .join('_')
-                      )
-                      .filter(s => s),
-                  ]
-                ),
-              },
-            })
+            dispatch(
+              {
+                type: CHAIN_DATA,
+                value: {
+                  ...Object.fromEntries(
+                    [
+                      _.head(response)
+                        .split('|')
+                        .map(s =>
+                          (s || '')
+                            .trim()
+                            .split('`')
+                            .join('')
+                            .split(' ')
+                            .join('_')
+                        )
+                        .filter(s => s),
+                    ]
+                  ),
+                },
+              }
+            )
           }
           else {
-            dispatch({
-              type: CHAIN_DATA,
-              value: {
-                'axelar-core_version': '-',
-              },
-            })
+            dispatch(
+              {
+                type: CHAIN_DATA,
+                value: {
+                  'axelar-core_version': '-',
+                },
+              }
+            )
           }
         }
 
         /*if (coingecko_id) {
-          response = await token(
-            coingecko_id,
-          )
+          response =
+            await token(
+              coingecko_id,
+            )
 
           if (response) {
-            dispatch({
-              type: CHAIN_DATA,
-              value: {
-                token_data: {
-                  ...response,
+            dispatch(
+              {
+                type: CHAIN_DATA,
+                value: {
+                  token_data: {
+                    ...response,
+                  },
                 },
-              },
-            })
+              }
+            )
           }
         }*/
       }
@@ -441,10 +486,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(true),
-      0.5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(true),
+        0.5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [cosmos_chains_data, assets_data])
@@ -470,19 +516,21 @@ export default () => {
               rpcUrls,
             } = { ..._.head(provider_params) }
  
-            const rpc_urls = (rpcUrls || [])
-              .filter(url => url)
+            const rpc_urls =
+              (rpcUrls || [])
+                .filter(url => url)
 
             const provider = rpc_urls.length === 1 ?
               new providers.JsonRpcProvider(rpc_urls[0]) :
               new providers.FallbackProvider(
-                rpc_urls.map((url, i) => {
-                  return {
-                    provider: new providers.JsonRpcProvider(url),
-                    priority: i + 1,
-                    stallTimeout: 1000,
-                  }
-                }),
+                rpc_urls
+                  .map((url, i) => {
+                    return {
+                      provider: new providers.JsonRpcProvider(url),
+                      priority: i + 1,
+                      stallTimeout: 1000,
+                    }
+                  }),
                 rpc_urls.length / 3,
               )
 
@@ -491,10 +539,12 @@ export default () => {
         }
 
         if (!rpcs) {
-          dispatch({
-            type: RPCS,
-            value: _rpcs,
-          })
+          dispatch(
+            {
+              type: RPCS,
+              value: _rpcs,
+            }
+          )
         }
       }
     }
@@ -506,16 +556,22 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (['evm_address'].includes(type(address))) {
-        const addresses = [address]
-          .filter(a => a && !ens_data?.[a])
+        const addresses =
+          [address]
+            .filter(a =>
+              a &&
+              !ens_data?.[a]
+            )
 
         const ens_data = await getEns(addresses)
 
         if (ens_data) {
-          dispatch({
-            type: ENS_DATA,
-            value: ens_data,
-          })
+          dispatch(
+            {
+              type: ENS_DATA,
+              value: ens_data,
+            }
+          )
         }
       }
     }
@@ -533,10 +589,12 @@ export default () => {
       } = { ...response }
 
       if (data) {
-        dispatch({
-          type: ACCOUNTS_DATA,
-          value: data,
-        })
+        dispatch(
+          {
+            type: ACCOUNTS_DATA,
+            value: data,
+          }
+        )
       }
     }
 
@@ -554,11 +612,12 @@ export default () => {
         } = { ...asset_data }
 
         for (let i = 0; i < 3; i++) {
-          const response = await getTVL(
-            {
-              asset: id,
-            },
-          )
+          const response =
+            await getTVL(
+              {
+                asset: id,
+              },
+            )
 
           const {
             data,
@@ -566,15 +625,17 @@ export default () => {
           } = { ...response }
 
           if (data) {
-            dispatch({
-              type: TVL_DATA,
-              value: {
-                [id]: {
-                  ..._.head(data),
-                  updated_at,
+            dispatch(
+              {
+                type: TVL_DATA,
+                value: {
+                  [id]: {
+                    ..._.head(data),
+                    updated_at,
+                  },
                 },
-              },
-            })
+              }
+            )
 
             break
           }
@@ -586,10 +647,19 @@ export default () => {
       if (assets_data) {
         if (
           ['/tvl'].includes(pathname) &&
-          (!tvl_data || is_interval)
+          (
+            !tvl_data ||
+            is_interval
+          )
         ) {
           assets_data
-            .filter(a => a && (!a.is_staging || staging))
+            .filter(a =>
+              a &&
+              (
+                !a.is_staging ||
+                staging
+              )
+            )
             .forEach(a => getAssetData(a))
         }
       }
@@ -597,10 +667,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(true),
-      3 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(true),
+        3 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [assets_data, pathname])
@@ -619,11 +690,14 @@ export default () => {
           '/gmp',
           '/batch',
           '/assets',
-        ].findIndex(p => pathname?.startsWith(p)) < 0
+        ].findIndex(p =>
+          pathname?.startsWith(p)
+        ) < 0
       ) {
         let response
 
         switch (pathname) {
+          case '/':
           case '/validators':
           case '/validators/[status]':
           case '/validator/[address]':
@@ -640,25 +714,28 @@ export default () => {
               latest_block_height,
             } = { ...status_data }
 
-            response = await all_validators(
-              null,
-              validators_data,
-              status ||
-                (address ?
-                  null :
-                  'active'
-                ),
-              address,
-              latest_block_height,
-              assets_data,
-            )
+            response =
+              await all_validators(
+                null,
+                validators_data,
+                status ||
+                  (address ?
+                    null :
+                    'active'
+                  ),
+                address,
+                latest_block_height,
+                assets_data,
+              )
 
             if (response) {
               if (!validators_data) {
-                dispatch({
-                  type: VALIDATORS_DATA,
-                  value: response,
-                })
+                dispatch(
+                  {
+                    type: VALIDATORS_DATA,
+                    value: response,
+                  }
+                )
               }
 
               if (
@@ -666,11 +743,12 @@ export default () => {
                   '/participations',
                 ].includes(pathname)
               ) {
-                response = await all_validators_broadcaster(
-                  response,
-                  null,
-                  assets_data,
-                )
+                response =
+                  await all_validators_broadcaster(
+                    response,
+                    null,
+                    assets_data,
+                  )
 
                 if (response?.length > 0) {
                   let _response = response
@@ -685,49 +763,58 @@ export default () => {
                     const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS),
                       num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT),
                       first = firstHeartbeatBlock(latest_block_height - num_heartbeat_blocks),
-                      last = lastHeartbeatBlock(latest_block_height),
+                      last = lastHeartbeatBlock(latest_block_height)
 
-                    response = await getHeartbeats({
-                      query: {
-                        bool: {
-                          must: [
-                            { range: { height: { gte: first, lte: latest_block_height } } },
-                          ],
-                        },
-                      },
-                      aggs: {
-                        heartbeats: {
-                          terms: { field: 'sender.keyword', size: 1000 },
-                          aggs: {
-                            period_height: {
-                              terms: { field: 'period_height', size: 1000 },
+                    response =
+                      await getHeartbeats(
+                        {
+                          query: {
+                            bool: {
+                              must: [
+                                { range: { height: { gte: first, lte: latest_block_height } } },
+                              ],
                             },
                           },
+                          aggs: {
+                            heartbeats: {
+                              terms: { field: 'sender.keyword', size: 1000 },
+                              aggs: {
+                                period_height: {
+                                  terms: { field: 'period_height', size: 1000 },
+                                },
+                              },
+                            },
+                          },
+                          _source: false,
                         },
-                      },
-                      _source: false,
-                    })
+                      )
 
                     for (let i = 0; i < _response.length; i++) {
                       const v = _response[i]
+
                       const {
                         broadcaster_address,
                       } = { ...v }
 
-                      const total = Math.floor(
-                        (last - first) /
-                        num_blocks_per_heartbeat
-                      ) + 1
+                      const total =
+                        Math.floor(
+                          (last - first) /
+                          num_blocks_per_heartbeat
+                        ) + 1
 
-                      const up = response?.data?.[broadcaster_address] ||
+                      const up =
+                        response?.data?.[broadcaster_address] ||
                         0
 
-                      let uptime = total > 0 ?
-                        up * 100 / total :
-                        0
-                      uptime = uptime > 100 ?
-                        100 :
-                        uptime
+                      let uptime =
+                        total > 0 ?
+                          up * 100 / total :
+                          0
+
+                      uptime =
+                        uptime > 100 ?
+                          100 :
+                          uptime
 
                       v.heartbeats_uptime = uptime
                       _response[i] = v
@@ -735,33 +822,37 @@ export default () => {
 
                     response = _response
 
-                    dispatch({
-                      type: VALIDATORS_DATA,
-                      value: response,
-                    })
+                    dispatch(
+                      {
+                        type: VALIDATORS_DATA,
+                        value: response,
+                      }
+                    )
 
                     const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
 
-                    response = await getEvmVotes({
-                      query: {
-                        range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
-                      },
-                      aggs: {
-                        voters: {
-                          terms: { field: 'voter.keyword', size: 1000 },
-                          aggs: {
-                            chains: {
-                              terms: { field: 'sender_chain.keyword', size: 1000 },
-                              aggs: {
-                                votes: {
-                                  terms: { field: 'vote' },
+                    response = await getEvmVotes(
+                      {
+                        query: {
+                          range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
+                        },
+                        aggs: {
+                          voters: {
+                            terms: { field: 'voter.keyword', size: 1000 },
+                            aggs: {
+                              chains: {
+                                terms: { field: 'sender_chain.keyword', size: 1000 },
+                                aggs: {
+                                  votes: {
+                                    terms: { field: 'vote' },
+                                  },
                                 },
                               },
                             },
                           },
                         },
                       },
-                    })
+                    )
 
                     for (let i = 0; i < _response.length; i++) {
                       const v = _response[i]
@@ -772,93 +863,112 @@ export default () => {
                       v.votes = {
                         ...response?.data?.[broadcaster_address],
                       }
-                      v.total_votes = v.votes.total ||
+                      v.total_votes =
+                        v.votes.total ||
                         0
 
-                      const get_votes = vote => _.sum(
-                        Object.entries({ ...v.votes?.chains })
-                          .map(c =>
-                            Object.entries({ ...c[1]?.votes })
-                              .find(_v => equals_ignore_case(_v[0], vote?.toString()))?.[1] ||
-                            0
-                          )
-                      )
+                      const get_votes = vote =>
+                        _.sum(
+                          Object.entries({ ...v.votes?.chains })
+                            .map(c =>
+                              Object.entries({ ...c[1]?.votes })
+                                .find(_v =>
+                                  equals_ignore_case(
+                                    _v[0],
+                                    vote?.toString(),
+                                  )
+                                )?.[1] ||
+                              0
+                            )
+                        )
 
                       v.total_yes_votes = get_votes(true)
                       v.total_no_votes = get_votes(false)
                       _response[i] = v
                     }
 
-                    response = await getEvmPolls({
-                      query: {
-                        range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
-                      },
-                      aggs: {
-                        chains: {
-                          terms: { field: 'sender_chain.keyword', size: 1000 },
+                    response =
+                      await getEvmPolls(
+                        {
+                          query: {
+                            range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
+                          },
+                          aggs: {
+                            chains: {
+                              terms: { field: 'sender_chain.keyword', size: 1000 },
+                            },
+                          },
+                          track_total_hits: true,
                         },
-                      },
-                      track_total_hits: true,
-                    })
+                      )
 
                     const {
                       data,
                       total,
                     } = { ...response }
 
-                    const total_polls = total ||
+                    const total_polls =
+                      total ||
                       _.maxBy(
                         _response,
                         'total_votes',
                       )?.total_votes ||
                       0
 
-                    _response = _response.map(v => {
-                      const {
-                        votes,
-                        total_votes,
-                        total_yes_votes,
-                        total_no_votes,
-                      } = { ...v }
-                      const {
-                        chains,
-                      } = { ...votes }
-
-                      Object.entries({ ...chains })
-                        .forEach(([k, _v]) => {
-                          chains[k] = {
-                            ..._v,
-                            total_polls: data?.[k] ||
-                              _v?.total,
-                          }
-                        })
-
-                      return {
-                        ...v,
-                        votes: {
-                          ...votes,
-                          chains,
-                        },
-                        total_votes: total_votes > total_polls ?
-                          total_polls :
+                    _response =
+                      _response
+                        .map(v => {
+                        const {
+                          votes,
                           total_votes,
-                        total_yes_votes: total_yes_votes > total_polls ?
-                          total_polls :
                           total_yes_votes,
-                        total_no_votes: total_no_votes > total_polls ?
-                          total_polls :
                           total_no_votes,
-                        total_polls,
-                      }
-                    })
+                        } = { ...v }
+                        const {
+                          chains,
+                        } = { ...votes }
+
+                        Object.entries({ ...chains })
+                          .forEach(([k, _v]) => {
+                            chains[k] = {
+                              ..._v,
+                              total_polls:
+                                data?.[k] ||
+                                _v?.total,
+                            }
+                          })
+
+                        return {
+                          ...v,
+                          votes: {
+                            ...votes,
+                            chains,
+                          },
+                          total_votes:
+                            total_votes > total_polls ?
+                              total_polls :
+                              total_votes,
+                          total_yes_votes:
+                            total_yes_votes > total_polls ?
+                              total_polls :
+                              total_yes_votes,
+                          total_no_votes:
+                            total_no_votes > total_polls ?
+                              total_polls :
+                              total_no_votes,
+                          total_polls,
+                        }
+                      })
                   }
 
                   response = _response
 
-                  dispatch({
-                    type: VALIDATORS_DATA,
-                    value: response,
-                  })
+                  dispatch(
+                    {
+                      type: VALIDATORS_DATA,
+                      value: response,
+                    }
+                  )
                 }
               }
 
@@ -866,46 +976,52 @@ export default () => {
             }
             break
           default:
-            response = await all_validators(
-              ['/validators/tier'].includes(pathname) ?
-                {} :
+            response =
+              await all_validators(
+                ['/validators/tier'].includes(pathname) ?
+                  {} :
+                  null,
+                validators_data,
                 null,
-              validators_data,
-              null,
-              null,
-              null,
-              assets_data,
-            )
-
-            if (['/validators/tier'].includes(pathname)) {
-              const {
-                data,
-              } = { ...response }
-
-              response = await all_validators_broadcaster(
-                data,
+                null,
                 null,
                 assets_data,
               )
-            }
+
+              if (['/validators/tier'].includes(pathname)) {
+                const {
+                  data,
+                } = { ...response }
+
+                response =
+                  await all_validators_broadcaster(
+                    data,
+                    null,
+                    assets_data,
+                  )
+              }
+
             break
         }
 
         if (response) {
-          dispatch({
-            type: VALIDATORS_DATA,
-            value: response,
-          })
+          dispatch(
+            {
+              type: VALIDATORS_DATA,
+              value: response,
+            }
+          )
         }
       }
     }
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [assets_data, pathname, validatorsTrigger])
@@ -916,16 +1032,19 @@ export default () => {
       id,
       chains_data,
     ) => {
-      const response = await chain_maintainer(
-        id,
-        chains_data,
-      )
+      const response =
+        await chain_maintainer(
+          id,
+          chains_data,
+        )
 
       if (response) {
-        dispatch({
-          type: VALIDATORS_CHAINS_DATA,
-          value: response,
-        })
+        dispatch(
+          {
+            type: VALIDATORS_CHAINS_DATA,
+            value: response,
+          }
+        )
       }
     }
 
@@ -937,7 +1056,9 @@ export default () => {
           '/evm-votes',
           '/participations',
           '/proposals',
-        ].findIndex(p => pathname?.includes(p)) > -1
+        ].findIndex(p =>
+          pathname?.includes(p)
+        ) > -1
       ) {
         evm_chains_data
           .map(c => c?.id)
@@ -952,10 +1073,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [evm_chains_data, pathname])
