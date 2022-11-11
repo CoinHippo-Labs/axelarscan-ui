@@ -78,10 +78,13 @@ export default ({
 
   useEffect(() => {
     if (asPath) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
-      )
+      const params =
+        params_to_obj(
+          asPath.indexOf('?') > -1 &&
+          asPath.substring(
+            asPath.indexOf('?') + 1,
+          )
+        )
 
       const {
         txHash,
@@ -92,23 +95,31 @@ export default ({
         toTime,
       } = { ...params }
 
-      setFilters({
-        txHash,
-        type,
-        status: [
-          'success',
-          'failed',
-        ].includes(status?.toLowerCase()) ?
-          status.toLowerCase() :
-          undefined,
-        account,
-        time: fromTime &&
-          toTime &&
-          [
-            moment(Number(fromTime)),
-            moment(Number(toTime)),
-          ],
-      })
+      setFilters(
+        {
+          txHash,
+          type,
+          status:
+            [
+              'success',
+              'failed',
+            ].includes(status?.toLowerCase()) ?
+              status.toLowerCase() :
+              undefined,
+          account,
+          time:
+            fromTime &&
+            toTime &&
+            [
+              moment(
+                Number(fromTime)
+              ),
+              moment(
+                Number(toTime)
+              ),
+            ],
+        }
+        )
     }
   }, [asPath])
 
@@ -116,7 +127,8 @@ export default ({
     const triggering = is_interval => {
       setFetchTrigger(
         is_interval ?
-          moment().valueOf() :
+          moment()
+            .valueOf() :
           typeof fetchTrigger === 'number' ?
             null :
             0
@@ -131,10 +143,19 @@ export default ({
       triggering()
     }
 
-    const interval = setInterval(() =>
-      triggering(true),
-      (height || address || ['/transactions/search'].includes(pathname) ? 3 : 0.1) * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        triggering(true),
+        (
+          height ||
+          address ||
+          [
+            '/transactions/search',
+          ].includes(pathname) ?
+            3 :
+            0.1
+        ) * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [assets_data, pathname, height, address, filters])
@@ -151,42 +172,51 @@ export default ({
             setOffet(0)
           }
 
-          const _data = !fetchTrigger ?
-            [] :
-            data || []
-          const size = n ||
+          const _data =
+            !fetchTrigger ?
+              [] :
+              data ||
+              []
+
+          const size =
+            n ||
             ['/transactions/search'].includes(pathname) ?
               filters?.type ?
                 25 :
                 50 :
               LIMIT
-          const from = fetchTrigger === true || fetchTrigger === 1 ?
-            _data.length :
-            0
+
+          const from =
+            fetchTrigger === true ||
+            fetchTrigger === 1 ?
+              _data.length :
+              0
 
           let response
 
           if (height) {
-            response = await transactions_by_events(
-              `tx.height=${height}`,
-              _data,
-              true,
-              assets_data,
-            )
+            response =
+              await transactions_by_events(
+                `tx.height=${height}`,
+                _data,
+                true,
+                assets_data,
+              )
           }
           else if (
             address?.length >= 65 ||
             type(address) === 'evm_address'
           ) {
-            const _response = await deposit_addresses(
-              {
-                query: {
-                  match: { deposit_address: address },
+            const _response =
+              await deposit_addresses(
+                {
+                  query: {
+                    match: { deposit_address: address },
+                  },
+                  size: 10,
+                  sort: [{ height: 'desc' }],
                 },
-                size: 10,
-                sort: [{ height: 'desc' }],
-              },
-            )
+              )
 
             const {
               data,
@@ -200,60 +230,70 @@ export default ({
                 deposit_address,
               } = { ..._.head(_response.data) }
 
-              if (equals_ignore_case(address, deposit_address)) {
+              if (
+                equals_ignore_case(
+                  address,
+                  deposit_address,
+                )
+              ) {
                 address = deposit_address
               }
 
               if (type(address) === 'account') {
-                response = await transactions_by_events(
-                  `transfer.sender='${address}'`,
-                  response?.data,
-                  false,
-                  assets_data,
-                  10,
-                )
+                response =
+                  await transactions_by_events(
+                    `transfer.sender='${address}'`,
+                    response?.data,
+                    false,
+                    assets_data,
+                    10,
+                  )
 
-                response = await transactions_by_events(
-                  `message.sender='${address}'`,
-                  response?.data,
-                  false,
-                  assets_data,
-                  10,
-                )
+                response =
+                  await transactions_by_events(
+                    `message.sender='${address}'`,
+                    response?.data,
+                    false,
+                    assets_data,
+                    10,
+                  )
               }
 
               if (type(address) === 'evm_address') {
                 address = utils.getAddress(address)
               }
 
-              response = await transactions_by_events(
-                `link.depositAddress='${address}'`,
-                response?.data,
-                false,
-                assets_data,
-                10,
-              )
+              response =
+                await transactions_by_events(
+                  `link.depositAddress='${address}'`,
+                  response?.data,
+                  false,
+                  assets_data,
+                  10,
+                )
 
-              response = await transactions_by_events(
-                `transfer.recipient='${address}'`,
-                response?.data,
-                false,
-                assets_data,
-                10,
-              )
+              response =
+                await transactions_by_events(
+                  `transfer.recipient='${address}'`,
+                  response?.data,
+                  false,
+                  assets_data,
+                  10,
+                )
 
               const {
                 data,
               } = { ...response }
 
               if (data) {
-                data.forEach(d => {
-                  const {
-                    txhash,
-                  } = { ...d }
+                data
+                  .forEach(d => {
+                    const {
+                      txhash,
+                    } = { ...d }
 
-                  getTransaction(txhash)
-                })
+                    getTransaction(txhash)
+                  })
 
                 await sleep(1 * 1000)
               }
@@ -322,101 +362,137 @@ export default ({
                 must.push({ match: { addresses: account } })
               }
               if (time?.length > 1) {
-                must.push({ range: { timestamp: { gte: time[0].valueOf(), lte: time[1].valueOf() } } })
+                must.push({
+                  range: {
+                    timestamp: {
+                      gte:
+                        time[0]
+                          .valueOf(),
+                      lte:
+                        time[1]
+                          .valueOf(),
+                    },
+                  },
+                })
               }
             }
 
-            response = await getTransactions(
-              {
-                query: {
-                  bool: {
-                    must,
-                    must_not,
+            response =
+              await getTransactions(
+                {
+                  query: {
+                    bool: {
+                      must,
+                      must_not,
+                    },
                   },
-                },
-                size,
-                from,
-                sort: [{ timestamp: 'desc' }],
-                fields: [
-                  'txhash',
-                  'height',
-                  'types',
-                  'code',
-                  'tx.body.messages.sender',
-                  'tx.body.messages.signer',
-                  'tx.body.messages.delegator_address',
-                  'tx.body.messages.validator_address',
-                  'tx.auth_info.fee.amount.*',
-                  'timestamp',
-                ],
-                _source: {
-                  includes: [
-                    'logs',
-                    'tx',
+                  size,
+                  from,
+                  sort: [{ timestamp: 'desc' }],
+                  fields: [
+                    'txhash',
+                    'height',
+                    'types',
+                    'code',
+                    'tx.body.messages.sender',
+                    'tx.body.messages.signer',
+                    'tx.body.messages.delegator_address',
+                    'tx.body.messages.validator_address',
+                    'tx.auth_info.fee.amount.*',
+                    'timestamp',
                   ],
+                  _source: {
+                    includes: [
+                      'logs',
+                      'tx',
+                    ],
+                  },
+                  track_total_hits: true,
                 },
-                track_total_hits: true,
-              },
-              assets_data,
-            )
-          }
+                assets_data,
+              )
+            }
 
           if (response) {
             const {
               total,
             } = { ...response }
 
-            response = _.orderBy(
-              _.uniqBy(
-                _.concat(
-                  (response.data || [])
-                    .map(d => {
-                      const {
-                        txhash,
-                        type,
-                        types,
-                        timestamp,
-                        activities,
-                      } = { ...d }
-
-                      return {
-                        ...d,
-                        txhash: Array.isArray(txhash) ?
-                          _.last(txhash) :
+            response =
+              _.orderBy(
+                _.uniqBy(
+                  _.concat(
+                    (response.data || [])
+                      .map(d => {
+                        const {
                           txhash,
-                        type: _.head(types) ||
                           type,
-                        timestamp: Array.isArray(timestamp) ?
-                          _.last(timestamp) :
+                          types,
                           timestamp,
-                        transfer: activities?.findIndex(a => equals_ignore_case(a?.sender, address)) > -1 ?
-                          'out' :
-                          activities?.findIndex(a =>
-                            equals_ignore_case(a?.receiver, address) ||
-                            (Array.isArray(a?.recipient) ?
-                              a?.recipient?.findIndex(_a => equals_ignore_case(_a, address)) > -1 :
-                              equals_ignore_case(a?.recipient, address)
-                            )
-                          ) > -1 ?
-                            'in' :
-                            null
-                      }
-                    }),
-                  _data,
+                          activities,
+                        } = { ...d }
+
+                        return {
+                          ...d,
+                          txhash:
+                            Array.isArray(txhash) ?
+                              _.last(txhash) :
+                              txhash,
+                          type:
+                            _.head(types) ||
+                            type,
+                          timestamp:
+                            Array.isArray(timestamp) ?
+                              _.last(timestamp) :
+                              timestamp,
+                          transfer:
+                            (activities || [])
+                              .findIndex(a =>
+                                equals_ignore_case(
+                                  a?.sender,
+                                  address,
+                                )
+                              ) > -1 ?
+                              'out' :
+                              (activities || [])
+                                .findIndex(a =>
+                                  equals_ignore_case(
+                                    a?.receiver,
+                                    address,
+                                  ) ||
+                                  (Array.isArray(a?.recipient) ?
+                                    (a?.recipient || [])
+                                      .findIndex(_a =>
+                                        equals_ignore_case(
+                                          _a,
+                                          address,
+                                        )
+                                      ) > -1 :
+                                    equals_ignore_case(
+                                      a?.recipient,
+                                      address,
+                                    )
+                                  )
+                                ) > -1 ?
+                                  'in' :
+                                  null
+                        }
+                      }),
+                    _data,
+                  ),
+                  'txhash',
                 ),
-                'txhash',
-              ),
-              [
-                'timestamp',
-                'txhash',
-              ],
-              [
-                'desc',
-                height ?
-                  'asc' :
+                [
+                  'timestamp',
+                  'txhash',
+                ],
+                [
                   'desc',
-              ],
-            )
+                  height ?
+                    'asc' :
+                    'desc',
+                ],
+              )
 
             setTotal(
               response.length > total ?
@@ -474,33 +550,54 @@ export default ({
 
         return {
           ...d,
-          amount: (activities || [])
-            .filter(a =>
-              a?.amount &&
-              a.amount !== fee &&
-              (
-                !(address || account) ||
-                equals_ignore_case(a?.recipient, address || account) ||
-                equals_ignore_case(a?.sender, address || account)
-              )
-            ),
+          amount:
+            (activities || [])
+              .filter(a =>
+                a?.amount &&
+                a.amount !== fee &&
+                (
+                  !(
+                    address ||
+                    account
+                  ) ||
+                  equals_ignore_case(
+                    a?.recipient,
+                    address ||
+                    account,
+                  ) ||
+                  equals_ignore_case(
+                    a?.sender,
+                    address ||
+                    account,
+                  )
+                )
+              ),
         }
       })
 
     const need_price =
       (
-        process.env.NEXT_PUBLIC_SUPPORT_EXPORT_ADDRESSES?.split(',') ||
-        []
-      ).includes(address || account) ||
+        (process.env.NEXT_PUBLIC_SUPPORT_EXPORT_ADDRESSES || '')
+          .split(',')
+          .filter(a => a)
+      ).includes(
+        address ||
+        account
+      ) ||
       (
-        (address || account) &&
+        (
+          address ||
+          account
+        ) &&
         data.length > 0 &&
-        data.filter(d =>
-          [
-            'ExecutePendingTransfers',
-            'MsgSend',
-          ].includes(d.type)
-        ).length === data.length
+        data
+          .filter(d =>
+            [
+              'ExecutePendingTransfers',
+              'MsgSend',
+            ].includes(d.type)
+          )
+          .length === data.length
       )
 
     if (need_price) {
@@ -514,10 +611,13 @@ export default ({
         } = { ...d }
 
         if (amount) {
-          const time_string = moment(timestamp).format('DD-MM-YYYY')
+          const time_string =
+            moment(timestamp)
+              .format('DD-MM-YYYY')
 
           for (let j = 0; j < amount.length; j++) {
             const a = amount[j]
+
             const {
               denom,
             } = { ...a }
@@ -530,12 +630,13 @@ export default ({
                 price = assets_price[denom][time_string]
               }
               else {
-                const response = await getAssetsPrice(
-                  {
-                    denom,
-                    timestamp,
-                  },
-                )
+                const response =
+                  await getAssetsPrice(
+                    {
+                      denom,
+                      timestamp,
+                    },
+                  )
 
                 if (typeof _.head(response)?.price === 'number') {
                   price = _.head(response).price
@@ -560,59 +661,73 @@ export default ({
       }
     }
 
-    data = data.flatMap(d => {
-      if (need_price) {
-        return d.amount
-          .map(a => {
-            const multipier = equals_ignore_case(a.sender, address || filters?.account) ?
-              -1 :
-              1
-
-            return {
-              ...d,
-              ...a,
-              amount: typeof a.amount === 'number' ?
-                a.amount * multipier :
-                '',
-              value: typeof a.amount === 'number' && typeof a.price === 'number' ?
-                a.amount * a.price * multipier :
-                '',
-              type: d.type,
-              timestamp_utc_string: moment(d.timestamp).format('DD-MM-YYYY HH:mm:ss A'),
-            }
-          })
-      }
-      else {
-        return [{
-          ...d,
-          amount: d.amount
+    data = data
+      .flatMap(d => {
+        if (need_price) {
+          return d.amount
             .map(a => {
-              const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ?
-                -1 :
-                1
+              const multipier =
+                equals_ignore_case(
+                  a.sender,
+                  address ||
+                  filters?.account,
+                ) ?
+                  -1 :
+                  1
 
-              return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}`.trim()
+              return {
+                ...d,
+                ...a,
+                amount:
+                  typeof a.amount === 'number' ?
+                    a.amount * multipier :
+                    '',
+                value:
+                  typeof a.amount === 'number' &&
+                  typeof a.price === 'number' ?
+                    a.amount * a.price * multipier :
+                    '',
+                type: d.type,
+                timestamp_utc_string:
+                  moment(d.timestamp)
+                    .format('DD-MM-YYYY HH:mm:ss A'),
+              }
             })
-            .join('\n'),
-        }]
-      }
-    })
+        }
+        else {
+          return [{
+            ...d,
+            amount: d.amount
+              .map(a => {
+                const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ?
+                  -1 :
+                  1
+
+                return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}`.trim()
+              })
+              .join('\n'),
+          }]
+        }
+      })
 
     return data
   }
 
-  const data_filtered = _.slice(
-    data?.filter(d =>
-      !(filterTypes?.length > 0) ||
-      filterTypes.includes(d?.type) ||
-      (
-        filterTypes.includes('undefined') &&
-        !d?.type
-      )
-    ),
-    0,
-    n || undefined,
-  )
+  const data_filtered =
+    _.slice(
+      (data || [])
+        .filter(d =>
+          !(filterTypes?.length > 0) ||
+          filterTypes.includes(d?.type) ||
+          (
+            filterTypes.includes('undefined') &&
+            !d?.type
+          )
+        ),
+      0,
+      n ||
+      undefined,
+    )
 
   const {
     account,
@@ -620,18 +735,27 @@ export default ({
 
   const need_price =
     (
-      process.env.NEXT_PUBLIC_SUPPORT_EXPORT_ADDRESSES?.split(',') ||
-      []
-    ).includes(address || account) ||
+      (process.env.NEXT_PUBLIC_SUPPORT_EXPORT_ADDRESSES || '')
+        .split(',')
+        .filter(a => a)
+    ).includes(
+      address ||
+      account
+    ) ||
     (
-      (address || account) &&
+      (
+        address ||
+        account
+      ) &&
       data?.length > 0 &&
-      data.filter(d =>
-        [
-          'ExecutePendingTransfers',
-          'MsgSend',
-        ].includes(d.type)
-      ).length === data.length
+      data
+        .filter(d =>
+          [
+            'ExecutePendingTransfers',
+            'MsgSend',
+          ].includes(d.type)
+        )
+        .length === data.length
     )
 
   return (
@@ -640,19 +764,22 @@ export default ({
         {!n && (
           <div className="flex items-center justify-between space-x-2">
             <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-              {typeof total === 'number' && (
-                <div className="flex items-center space-x-1.5 ml-2 sm:ml-0 sm:mb-1">
-                  <span className="tracking-wider text-sm font-semibold">
-                    {number_format(
-                      total,
-                      '0,0',
-                    )}
-                  </span>
-                  <span className="tracking-wider text-sm">
-                    Results
-                  </span>
-                </div>
-              )}
+              {
+                typeof total === 'number' &&
+                (
+                  <div className="flex items-center space-x-1.5 ml-2 sm:ml-0 sm:mb-1">
+                    <span className="tracking-wider text-sm font-semibold">
+                      {number_format(
+                        total,
+                        '0,0',
+                      )}
+                    </span>
+                    <span className="tracking-wider text-sm">
+                      Results
+                    </span>
+                  </div>
+                )
+              }
               <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5">
                 {Object.entries({ ...types })
                   .map(([k, v]) => (
@@ -860,10 +987,17 @@ export default ({
                   value,
                 } = { ...props }
 
-                const validator_data = validators_data?.find(v =>
-                  equals_ignore_case(v?.broadcaster_address, value) ||
-                  equals_ignore_case(v?.operator_address, value)
-                )
+                const validator_data = (validators_data || [])
+                  .find(v =>
+                    equals_ignore_case(
+                      v?.broadcaster_address,
+                      value,
+                    ) ||
+                    equals_ignore_case(
+                      v?.operator_address,
+                      value,
+                    )
+                  )
                 const {
                   operator_address,
                   description,
@@ -938,7 +1072,20 @@ export default ({
               accessor: 'recipient',
               disableSortBy: true,
               Cell: props => {
-                const values = props.value
+                const {
+                  type,
+                } = { ...props.row.original }
+
+                const values =
+                  [
+                    'HeartBeat',
+                    'SubmitSignature',
+                    'SubmitPubKey',
+                  ].findIndex(t =>
+                    type?.includes(t)
+                  ) > -1 ?
+                    [] :
+                    props.value
 
                 return (
                   <div className="flex flex-col space-y-0.5">
@@ -947,10 +1094,17 @@ export default ({
                       [values]
                     )
                     .map((value, i) => {
-                      const validator_data = validators_data?.find(v =>
-                        equals_ignore_case(v?.broadcaster_address, value) ||
-                        equals_ignore_case(v?.operator_address, value)
-                      )
+                      const validator_data = (validators_data || [])
+                        .find(v =>
+                          equals_ignore_case(
+                            v?.broadcaster_address,
+                            value,
+                          ) ||
+                          equals_ignore_case(
+                            v?.operator_address,
+                            value,
+                          )
+                        )
                       const {
                         operator_address,
                         description,
