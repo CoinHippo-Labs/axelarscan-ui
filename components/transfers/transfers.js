@@ -1016,7 +1016,7 @@ export default ({ n }) => {
                     }
                     {
                       ibc_send?.failed_txhash &&
-                      !ibc_send.ack_txhash
+                      !ibc_send.ack_txhash &&
                       (
                         <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-medium py-0.5 px-2">
                           Timeout
