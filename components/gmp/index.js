@@ -588,48 +588,81 @@ export default () => {
   const {
     from,
   } = { ...call?.transaction }
+
   const relayer = executed?.transaction?.from
 
-  no_gas_remain = gas?.gas_remain_amount < 0.001 || (
-    typeof no_gas_remain === 'boolean' ?
-      no_gas_remain :
-      refunded && !refunded.receipt?.status
-  )
+  no_gas_remain =
+    gas?.gas_remain_amount < 0.001 ||
+    (
+      typeof no_gas_remain === 'boolean' ?
+        no_gas_remain :
+        refunded &&
+        !refunded.receipt?.status
+    )
 
-  const chains_data = _.concat(
-    evm_chains_data,
-    cosmos_chains_data,
-  )
-  const source_chain_data = getChain(
-    chain,
-    chains_data,
-  )
-  const axelar_chain_data = getChain(
-    'axelarnet',
-    chains_data,
-  )
-  const destination_chain_data = getChain(
-    destinationChain,
-    chains_data,
-  )
-  const asset_data = assets_data?.find(a => equals_ignore_case(a?.symbol, symbol))
-  const source_contract_data = asset_data?.contracts?.find(c => c.chain_id === source_chain_data?.chain_id)
-  const decimals = source_contract_data?.decimals ||
+  const chains_data =
+    _.concat(
+      evm_chains_data,
+      cosmos_chains_data,
+    )
+
+  const source_chain_data =
+    getChain(
+      chain,
+      chains_data,
+    )
+
+  const axelar_chain_data =
+    getChain(
+      'axelarnet',
+      chains_data,
+    )
+
+  const destination_chain_data =
+    getChain(
+      destinationChain,
+      chains_data,
+    )
+
+  const asset_data = (assets_data || [])
+    .find(a =>
+      equals_ignore_case(
+        a?.symbol,
+        symbol,
+      )
+    )
+
+  const source_contract_data = (asset_data?.contracts || [])
+    .find(c =>
+      c.chain_id === source_chain_data?.chain_id
+    )
+
+  const decimals =
+    source_contract_data?.decimals ||
     asset_data?.decimals ||
     18
-  const _symbol = source_contract_data?.symbol ||
+
+  const _symbol =
+    source_contract_data?.symbol ||
     asset_data?.symbol ||
     symbol
-  const asset_image = source_contract_data?.image ||
+
+  const asset_image =
+    source_contract_data?.image ||
     asset_data?.image
-  const wrong_source_chain = source_chain_data &&
+
+  const wrong_source_chain =
+    source_chain_data &&
     chain_id !== source_chain_data.chain_id &&
     !gasAdding
-  const wrong_destination_chain = destination_chain_data &&
+
+  const wrong_destination_chain =
+    destination_chain_data &&
     chain_id !== destination_chain_data.chain_id &&
     !executing
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+
   const editable =
     (
       edit === 'true' &&
@@ -653,7 +686,27 @@ export default () => {
       is_insufficient_fee ||
       gas?.gas_remain_amount < 0.00001
     ) &&
-    moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 3 &&
+    moment()
+      .diff(
+        moment(
+          call.block_timestamp * 1000
+        ),
+        'minutes',
+      ) >= (
+        [
+          'ethereum',
+        ].includes(chain) ?
+          process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
+            15 :
+            20 :
+          [
+            'polygon',
+          ].includes(chain) ?
+            process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
+              7 :
+              15 :
+            3
+      ) &&
     (
       <div className="flex items-center space-x-2">
         <button
