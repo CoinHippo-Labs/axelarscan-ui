@@ -779,7 +779,7 @@ export default () => {
           />
         </div>
       </div>
-      <div className="sm:grid sm:grid-cols-2 xl:grid-cols-2 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">
+      {/*<div className="sm:grid sm:grid-cols-2 xl:grid-cols-2 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm sm:text-lg font-bold">
@@ -814,7 +814,7 @@ export default () => {
             className="min-h-full"
           />
         </div>
-      </div>
+      </div>*/}
     </div>
   )
 }
