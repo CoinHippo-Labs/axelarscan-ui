@@ -876,149 +876,85 @@ export default () => {
               </span>
             }
           </div>
-          {data && detail_steps.map((s, i) => {
-            const { title, chain_data, data, id_field, path, params, finish } = { ...s }
-            const { id, height, type, status, executed, chain, transfer_id, command_id, created_at, ack_txhash, recv_txhash, failed_txhash, transactionHash, block_timestamp, received_at } = { ...data }
-            const { explorer } = { ...chain_data }
-            const { url, transaction_path, block_path, icon } = { ...explorer }
+          {
+            data &&
+            detail_steps
+              .map((s, i) => {
+                const { title, chain_data, data, id_field, path, params, finish } = { ...s }
+                const { id, height, type, status, executed, chain, transfer_id, command_id, created_at, ack_txhash, recv_txhash, failed_txhash, transactionHash, block_timestamp, received_at } = { ...data }
 
-            const _id = data?.[id_field]
+                const explorer =
+                  s.id === 'ibc_send' ?
+                    axelar_chain_data?.explorer :
+                    chain_data?.explorer
 
-            let _path =
-              (path || '')
-                .replace(
-                  '{id}',
-                  _id,
-                ) ||
-              (transaction_path || '')
-                .replace(
-                  '{tx}',
-                  _id,
-                )
+                const {
+                  url,
+                  transaction_path,
+                  block_path,
+                  icon,
+                } = { ...explorer }
 
-            Object.entries({ ...params })
-              .forEach(([k, v]) => {
-                _path =
-                  (_path || '')
+                const _id = data?.[id_field]
+
+                let _path =
+                  (path || '')
                     .replace(
-                      `{${k}}`,
-                      v,
+                      '{id}',
+                      _id,
+                    ) ||
+                  (transaction_path || '')
+                    .replace(
+                      '{tx}',
+                      _id,
                     )
-              })
 
-            const time = block_timestamp ?
-              block_timestamp * 1000 :
-              received_at ?
-                received_at?.ms :
-                created_at?.ms
+                Object.entries({ ...params })
+                  .forEach(([k, v]) => {
+                    _path =
+                      (_path || '')
+                        .replace(
+                          `{${k}}`,
+                          v,
+                        )
+                  })
 
-            const _chain_data =
-              getChain(
-                chain,
-                chains_data,
-              )
+                const time =
+                  block_timestamp ?
+                    block_timestamp * 1000 :
+                    received_at ?
+                      received_at?.ms :
+                      created_at?.ms
 
-            const rowClassName = 'flex flex-col space-y-1'
-            const rowTitleClassName = `text-black dark:text-slate-300 text-sm lg:text-base font-bold`
+                const _chain_data =
+                  getChain(
+                    chain,
+                    chains_data,
+                  )
 
-            return (
-              <div
-                key={i}
-                className={`${stepClassName} sm:col-span-3 lg:col-span-2`}
-              >
-                <div className={`${titleClassName}`}>
-                  {title}
-                </div>
-                <div className="flex flex-col space-y-3">
-                  {
-                    transactionHash &&
-                    _chain_data?.explorer &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Transaction:
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <a
-                            href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 dark:text-blue-500 font-medium"
-                          >
-                            <div>
-                              <span className="xl:hidden">
-                                {ellipse(
-                                  transactionHash,
-                                  12,
-                                )}
-                              </span>
-                              <span className="hidden xl:block">
-                                {ellipse(
-                                  transactionHash,
-                                  16,
-                                )}
-                              </span>
-                            </div>
-                          </a>
-                          <Copy
-                            value={transactionHash}
-                          />
-                          <a
-                            href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 dark:text-blue-500"
-                          >
-                            {_chain_data.explorer.icon ?
-                              <Image
-                                src={_chain_data.explorer.icon}
-                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                              /> :
-                              <TiArrowRight
-                                size={16}
-                                className="transform -rotate-45"
-                              />
-                            }
-                          </a>
-                        </div>
-                      </div>
-                    )
-                  }
-                  {
-                    s.id === 'ibc_send' &&
-                    _id ?
-                      [
-                        id,
-                        recv_txhash,
-                        ack_txhash ||
-                        failed_txhash,
-                      ]
-                      .filter(tx => tx)
-                      .map((tx, j) => {
-                        const _chain_data = tx === recv_txhash ?
-                          destination_chain_data :
-                          axelar_chain_data
+                const rowClassName = 'flex flex-col space-y-1'
+                const rowTitleClassName = `text-black dark:text-slate-300 text-sm lg:text-base font-bold`
 
-                        const _explorer = _chain_data?.explorer
-
-                        return (
-                          <div
-                            key={j}
-                            className={rowClassName}
-                          >
+                return (
+                  <div
+                    key={i}
+                    className={`${stepClassName} sm:col-span-3 lg:col-span-2`}
+                  >
+                    <div className={`${titleClassName}`}>
+                      {title}
+                    </div>
+                    <div className="flex flex-col space-y-3">
+                      {
+                        transactionHash &&
+                        _chain_data?.explorer &&
+                        (
+                          <div className={rowClassName}>
                             <span className={rowTitleClassName}>
-                              {tx === ack_txhash ?
-                                'Acknowledge' :
-                                tx === failed_txhash ?
-                                  'Timeout' :
-                                  tx === recv_txhash ?
-                                    'Receive' :
-                                    'Send'
-                              }:
+                              Transaction:
                             </span>
                             <div className="flex items-center space-x-1">
                               <a
-                                href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
+                                href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-500 dark:text-blue-500 font-medium"
@@ -1026,30 +962,30 @@ export default () => {
                                 <div>
                                   <span className="xl:hidden">
                                     {ellipse(
-                                      tx,
+                                      transactionHash,
                                       12,
                                     )}
                                   </span>
                                   <span className="hidden xl:block">
                                     {ellipse(
-                                      tx,
+                                      transactionHash,
                                       16,
                                     )}
                                   </span>
                                 </div>
                               </a>
                               <Copy
-                                value={tx}
+                                value={transactionHash}
                               />
                               <a
-                                href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
+                                href={`${_chain_data.explorer.url}${_chain_data.explorer.transaction_path?.replace('{tx}', transactionHash)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-500 dark:text-blue-500"
                               >
-                                {_explorer?.icon ?
+                                {_chain_data.explorer.icon ?
                                   <Image
-                                    src={_explorer.icon}
+                                    src={_chain_data.explorer.icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                   /> :
                                   <TiArrowRight
@@ -1061,193 +997,273 @@ export default () => {
                             </div>
                           </div>
                         )
-                      }) :
-                      _id ?
-                        <div className={rowClassName}>
-                          <span className={rowTitleClassName}>
-                            {
-                              _path.includes('/evm-poll') ?
-                                'Poll' :
-                                _path.includes('/batch') ?
-                                  'Batch' :
-                                  'Transaction'
-                            }:
-                          </span>
-                          <div className="flex items-center space-x-1">
-                            <a
-                              href={`${url}${_path}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 dark:text-blue-500 font-medium"
-                            >
-                              <div>
-                                <span className="xl:hidden">
-                                  {ellipse(
-                                    _id,
-                                    12,
-                                  )}
+                      }
+                      {
+                        s.id === 'ibc_send' &&
+                        _id ?
+                          [
+                            id,
+                            recv_txhash,
+                            ack_txhash ||
+                            failed_txhash,
+                          ]
+                          .filter(tx => tx)
+                          .map((tx, j) => {
+                            const _chain_data =
+                              tx === recv_txhash ?
+                                destination_chain_data :
+                                axelar_chain_data
+
+                            const _explorer = _chain_data?.explorer
+
+                            return (
+                              <div
+                                key={j}
+                                className={rowClassName}
+                              >
+                                <span className={rowTitleClassName}>
+                                  {tx === ack_txhash ?
+                                    'Acknowledge' :
+                                    tx === failed_txhash ?
+                                      'Timeout' :
+                                      tx === recv_txhash ?
+                                        'Receive' :
+                                        'Send'
+                                  }:
                                 </span>
-                                <span className="hidden xl:block">
-                                  {ellipse(
-                                    _id,
-                                    16,
-                                  )}
-                                </span>
+                                <div className="flex items-center space-x-1">
+                                  <a
+                                    href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500 font-medium"
+                                  >
+                                    <div>
+                                      <span className="xl:hidden">
+                                        {ellipse(
+                                          tx,
+                                          12,
+                                        )}
+                                      </span>
+                                      <span className="hidden xl:block">
+                                        {ellipse(
+                                          tx,
+                                          16,
+                                        )}
+                                      </span>
+                                    </div>
+                                  </a>
+                                  <Copy
+                                    value={tx}
+                                  />
+                                  <a
+                                    href={`${_explorer?.url}${_explorer?.transaction_path?.replace('{tx}', tx)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500"
+                                  >
+                                    {_explorer?.icon ?
+                                      <Image
+                                        src={_explorer.icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </div>
                               </div>
-                            </a>
-                            <Copy
-                              value={_id}
-                            />
-                            <a
-                              href={`${url}${_path}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 dark:text-blue-500"
-                            >
-                              {icon ?
-                                <Image
-                                  src={icon}
-                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                /> :
-                                <TiArrowRight
-                                  size={16}
-                                  className="transform -rotate-45"
+                            )
+                          }) :
+                          _id ?
+                            <div className={rowClassName}>
+                              <span className={rowTitleClassName}>
+                                {
+                                  _path.includes('/evm-poll') ?
+                                    'Poll' :
+                                    _path.includes('/batch') ?
+                                      'Batch' :
+                                      'Transaction'
+                                }:
+                              </span>
+                              <div className="flex items-center space-x-1">
+                                <a
+                                  href={`${url}${_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500 font-medium"
+                                >
+                                  <div>
+                                    <span className="xl:hidden">
+                                      {ellipse(
+                                        _id,
+                                        12,
+                                      )}
+                                    </span>
+                                    <span className="hidden xl:block">
+                                      {ellipse(
+                                        _id,
+                                        16,
+                                      )}
+                                    </span>
+                                  </div>
+                                </a>
+                                <Copy
+                                  value={_id}
                                 />
-                              }
-                            </a>
+                                <a
+                                  href={`${url}${_path}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
+                                    />
+                                  }
+                                </a>
+                              </div>
+                            </div> :
+                            <ColorRing
+                              color={loader_color(theme)}
+                              width="32"
+                              height="32"
+                            />
+                      }
+                      {
+                        height &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Block:
+                            </span>
+                            <div className="flex items-center space-x-1">
+                              <a
+                                href={`${url}${block_path?.replace('{block}', height)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 dark:text-blue-500 font-medium"
+                              >
+                                {number_format(
+                                  height,
+                                  '0,0',
+                                )}
+                              </a>
+                            </div>
                           </div>
-                        </div> :
-                        <ColorRing
-                          color={loader_color(theme)}
-                          width="32"
-                          height="32"
-                        />
-                  }
-                  {
-                    height &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Block:
-                        </span>
-                        <div className="flex items-center space-x-1">
-                          <a
-                            href={`${url}${block_path?.replace('{block}', height)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 dark:text-blue-500 font-medium"
-                          >
-                            {number_format(
-                              height,
-                              '0,0',
-                            )}
-                          </a>
-                        </div>
-                      </div>
-                    )
-                  }
-                  {
-                    type &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Type:
-                        </span>
-                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
-                          {name(type)}
-                        </div>
-                      </div>
-                    )
-                  }
-                  {
-                    (
-                      status ||
-                      executed
-                    ) &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Status:
-                        </span>
-                        <div className={`${status === 'success' || executed ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
-                          {
-                            status === 'success' ||
-                            executed ?
-                              <BiCheckCircle
-                                size={20}
-                              /> :
-                              <BiXCircle
-                                size={20}
-                              />
-                          }
-                          <span>
-                            {executed ?
-                              'Executed' :
-                              status
-                            }
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  }
-                  {
-                    time &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Time:
-                        </span>
-                        <span className="whitespace-pre-wrap text-slate-400 dark:text-slate-600 font-medium">
-                          {
-                            moment(time)
-                              .fromNow()
-                          } ({
-                            moment(time)
-                              .format('MMM D, YYYY h:mm:ss A')
-                          })
-                        </span>
-                      </div>
-                    )
-                  }
-                  {
-                    transfer_id &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Transfer ID:
-                        </span>
-                        <Copy
-                          value={transfer_id}
-                          title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
-                            {transfer_id}
-                          </span>}
-                        />
-                      </div>
-                    )
-                  }
-                  {
-                    command_id &&
-                    (
-                      <div className={rowClassName}>
-                        <span className={rowTitleClassName}>
-                          Command ID:
-                        </span>
-                        <Copy
-                          value={command_id}
-                          title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
-                            {ellipse(
-                              command_id,
-                              16,
-                            )}
-                          </span>}
-                        />
-                      </div>
-                    )
-                  }
-                </div>
-              </div>
-            )
-          })}
+                        )
+                      }
+                      {
+                        type &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Type:
+                            </span>
+                            <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg capitalize text-sm lg:text-base font-semibold py-0.5 px-2">
+                              {name(type)}
+                            </div>
+                          </div>
+                        )
+                      }
+                      {
+                        (
+                          status ||
+                          executed
+                        ) &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Status:
+                            </span>
+                            <div className={`${status === 'success' || executed ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
+                              {
+                                status === 'success' ||
+                                executed ?
+                                  <BiCheckCircle
+                                    size={20}
+                                  /> :
+                                  <BiXCircle
+                                    size={20}
+                                  />
+                              }
+                              <span>
+                                {executed ?
+                                  'Executed' :
+                                  status
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        )
+                      }
+                      {
+                        time &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Time:
+                            </span>
+                            <span className="whitespace-pre-wrap text-slate-400 dark:text-slate-600 font-medium">
+                              {
+                                moment(time)
+                                  .fromNow()
+                              } ({
+                                moment(time)
+                                  .format('MMM D, YYYY h:mm:ss A')
+                              })
+                            </span>
+                          </div>
+                        )
+                      }
+                      {
+                        transfer_id &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Transfer ID:
+                            </span>
+                            <Copy
+                              value={transfer_id}
+                              title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
+                                {transfer_id}
+                              </span>}
+                            />
+                          </div>
+                        )
+                      }
+                      {
+                        command_id &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Command ID:
+                            </span>
+                            <Copy
+                              value={command_id}
+                              title={<span className="cursor-pointer break-all text-black dark:text-white font-medium">
+                                {ellipse(
+                                  command_id,
+                                  16,
+                                )}
+                              </span>}
+                            />
+                          </div>
+                        )
+                      }
+                    </div>
+                  </div>
+                )
+              })
+          }
         </div> :
         !tx && transfer_id ?
           null :
