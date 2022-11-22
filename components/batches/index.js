@@ -454,14 +454,16 @@ export default () => {
                   commands,
                 } = { ...props.row.original }
 
-                const _types = _.countBy(
-                  _.uniqBy(
-                    commands || [],
-                    'id',
+                const _types =
+                  _.countBy(
+                    _.uniqBy(
+                      commands ||
+                      [],
+                      'id',
+                    )
+                    .map(c => c?.type)
+                    .filter(t => t)
                   )
-                  .map(c => c?.type)
-                  .filter(t => t)
-                )
 
                 return (
                   <div className="flex flex-col space-y-2 mb-3">

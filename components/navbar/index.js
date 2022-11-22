@@ -19,7 +19,8 @@ import { staking_params, bank_supply, staking_pool, slashing_params, all_validat
 import { token } from '../../lib/api/coingecko'
 import { ens as getEns } from '../../lib/api/ens'
 import { escrow_addresses } from '../../lib/api/escrow-addresses'
-import { heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls } from '../../lib/api/index'
+import { validators_evm_votes } from '../../lib/api/validators-evm-votes'
+import { heartbeats as getHeartbeats, evm_polls as getEvmPolls } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
@@ -831,28 +832,18 @@ export default () => {
 
                     const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
 
-                    response = await getEvmVotes(
-                      {
-                        query: {
-                          range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
+                    response =
+                      await validators_evm_votes(
+                        {
+                          fromBlock: latest_block_height - num_evm_votes_blocks,
+                          toBlock: latest_block_height - 10,
                         },
-                        aggs: {
-                          voters: {
-                            terms: { field: 'voter.keyword', size: 1000 },
-                            aggs: {
-                              chains: {
-                                terms: { field: 'sender_chain.keyword', size: 1000 },
-                                aggs: {
-                                  votes: {
-                                    terms: { field: 'vote' },
-                                  },
-                                },
-                              },
-                            },
-                          },
-                        },
-                      },
-                    )
+                      )
+
+                    const {
+                      data,
+                      total,
+                    } = { ...response }
 
                     for (let i = 0; i < _response.length; i++) {
                       const v = _response[i]
@@ -863,6 +854,7 @@ export default () => {
                       v.votes = {
                         ...response?.data?.[broadcaster_address],
                       }
+
                       v.total_votes =
                         v.votes.total ||
                         0
@@ -884,81 +876,11 @@ export default () => {
 
                       v.total_yes_votes = get_votes(true)
                       v.total_no_votes = get_votes(false)
+                      v.total_unsubmitted_votes = get_votes('unsubmitted')
+                      v.total_polls = total
+
                       _response[i] = v
                     }
-
-                    response =
-                      await getEvmPolls(
-                        {
-                          query: {
-                            range: { height: { gte: latest_block_height - num_evm_votes_blocks } },
-                          },
-                          aggs: {
-                            chains: {
-                              terms: { field: 'sender_chain.keyword', size: 1000 },
-                            },
-                          },
-                          track_total_hits: true,
-                        },
-                      )
-
-                    const {
-                      data,
-                      total,
-                    } = { ...response }
-
-                    const total_polls =
-                      total ||
-                      _.maxBy(
-                        _response,
-                        'total_votes',
-                      )?.total_votes ||
-                      0
-
-                    _response =
-                      _response
-                        .map(v => {
-                        const {
-                          votes,
-                          total_votes,
-                          total_yes_votes,
-                          total_no_votes,
-                        } = { ...v }
-                        const {
-                          chains,
-                        } = { ...votes }
-
-                        Object.entries({ ...chains })
-                          .forEach(([k, _v]) => {
-                            chains[k] = {
-                              ..._v,
-                              total_polls:
-                                data?.[k] ||
-                                _v?.total,
-                            }
-                          })
-
-                        return {
-                          ...v,
-                          votes: {
-                            ...votes,
-                            chains,
-                          },
-                          total_votes:
-                            total_votes > total_polls ?
-                              total_polls :
-                              total_votes,
-                          total_yes_votes:
-                            total_yes_votes > total_polls ?
-                              total_polls :
-                              total_yes_votes,
-                          total_no_votes:
-                            total_no_votes > total_polls ?
-                              total_polls :
-                              total_no_votes,
-                          total_polls,
-                        }
-                      })
                   }
 
                   response = _response

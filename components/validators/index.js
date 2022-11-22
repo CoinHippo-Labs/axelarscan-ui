@@ -1142,9 +1142,13 @@ export default () => {
                       1 :
                       a.original.total_yes_votes < b.original.total_yes_votes ?
                         -1 :
-                        a.original.total_no_votes <= b.original.total_no_votes ?
+                        a.original.total_no_votes < b.original.total_no_votes ?
                           1 :
-                          -1,
+                          a.original.total_no_votes > b.original.total_no_votes ?
+                            -1 :
+                            a.original.total_unsubmitted_votes <= b.original.total_unsubmitted_votes ?
+                              1 :
+                              -1,
                   Cell: props => (
                     <div className="flex flex-col justify-center space-y-0.5 mt-0.5 mx-3">
                       {props.value ?
@@ -1189,30 +1193,34 @@ export default () => {
                                     <span className={`${votes?.true ? 'text-green-400 dark:text-green-300 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} text-xs -mt-0.5`}>
                                       {number_format(
                                         votes?.true ||
-                                          0,
+                                        0,
                                         '0,0',
                                       )} Y
                                     </span>
                                     <span className={`${votes?.false ? 'text-red-500 dark:text-red-600 font-semibold' : 'text-slate-300 dark:text-slate-700 font-normal'} text-xs -mt-0.5`}>
                                       {number_format(
                                         votes?.false ||
-                                          0,
+                                        0,
                                         '0,0',
                                       )} N
                                     </span>
-                                    {total_polls - total > 0 && (
-                                      <span className="text-slate-400 dark:text-slate-500 text-xs font-semibold -mt-0.5">
-                                        {number_format(
-                                          total_polls - total,
-                                          '0,0',
-                                        )} UN
-                                      </span>
-                                    )}
+                                    {
+                                      votes?.unsubmitted > 0 &&
+                                      (
+                                        <span className="text-slate-400 dark:text-slate-500 text-xs font-normal -mt-0.5">
+                                          {number_format(
+                                            votes.unsubmitted,
+                                            '0,0',
+                                          )} UN
+                                        </span>
+                                      )
+                                    }
                                   </div>
                                   <span className="text-blue-400 dark:text-blue-200 text-xs font-medium -mt-0.5">
                                     [
                                     {number_format(
-                                      v?.total_polls || 0,
+                                      total_polls ||
+                                      0,
                                       '0,0',
                                     )}
                                     ]

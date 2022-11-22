@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import Info from './info'
 import Votes from './votes'
-import { evm_polls } from '../../lib/api/evm-poll'
+import { evm_polls } from '../../lib/api/evm-polls'
 import { getBlock, transactions_by_events, getTransaction } from '../../lib/api/lcd'
 import { number_format, capitalize } from '../../lib/utils'
 

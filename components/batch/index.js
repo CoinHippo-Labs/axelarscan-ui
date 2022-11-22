@@ -102,10 +102,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(true),
-      3 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(true),
+        3 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [chain, id])
@@ -122,7 +123,8 @@ export default () => {
       setTypes(
         _.countBy(
           _.uniqBy(
-            commands || [],
+            commands ||
+            [],
             'id',
           )
           .map(c => c?.type)
