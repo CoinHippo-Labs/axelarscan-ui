@@ -46,8 +46,15 @@ export default ({
     memo,
   } = { ...data }
 
-  const validator_data = sender &&
-    validators_data?.find(v => equals_ignore_case(v?.broadcaster_address, sender))
+  const validator_data =
+    sender &&
+    (validators_data || [])
+      .find(v =>
+        equals_ignore_case(
+          v?.broadcaster_address,
+          sender,
+        )
+      )
 
   const {
     operator_address,

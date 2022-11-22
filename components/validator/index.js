@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
-import { FallingLines } from 'react-loader-spinner'
+import { ProgressBar } from 'react-loader-spinner'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 
 import Info from './info'
@@ -14,7 +14,8 @@ import Participations from '../participations/participations'
 import Image from '../image'
 import { all_bank_balances, validator_sets, all_delegations } from '../../lib/api/lcd'
 import { heartbeats as searchHeartbeats } from '../../lib/api/heartbeat'
-import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, evm_votes as getEvmVotes, evm_polls as getEvmPolls, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
+import { evm_polls as searchEVMPolls } from '../../lib/api/evm-polls'
+import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chainManager } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
 import { base64ToBech32 } from '../../lib/object/key'
@@ -30,18 +31,57 @@ const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS
 const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
 
 export default () => {
-  const { preferences, evm_chains, assets, status, chain, validators, validators_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets, status: state.status, chain: state.chain, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
-  const { theme } = { ...preferences }
-  const { evm_chains_data } = { ...evm_chains }
-  const { assets_data } = { ...assets }
-  const { status_data } = { ...status }
-  const { chain_data } = { ...chain }
-  const { validators_data } = { ...validators }
-  const { validators_chains_data } = { ...validators_chains }
+  const {
+    preferences,
+    evm_chains,
+    assets,
+    status,
+    chain,
+    validators,
+    validators_chains,
+  } = useSelector(state =>
+    (
+      {
+        preferences: state.preferences,
+        evm_chains: state.evm_chains,
+        assets: state.assets,
+        status: state.status,
+        chain: state.chain,
+        validators: state.validators,
+        validators_chains: state.validators_chains,
+      }
+    ),
+    shallowEqual,
+  )
+  const {
+    theme,
+  } = { ...preferences }
+  const {
+    evm_chains_data,
+  } = { ...evm_chains }
+  const {
+    assets_data,
+  } = { ...assets }
+  const {
+    status_data,
+  } = { ...status }
+  const {
+    chain_data,
+  } = { ...chain }
+  const {
+    validators_data,
+  } = { ...validators }
+  const {
+    validators_chains_data,
+  } = { ...validators_chains }
 
   const router = useRouter()
-  const { query } = { ...router }
-  const { address } = { ...query }
+  const {
+    query,
+  } = { ...router }
+  const {
+    address,
+  } = { ...query }
 
   const [validator, setValidator] = useState(null)
   const [health, setHealth] = useState(null)
@@ -50,7 +90,6 @@ export default () => {
   const [uptimes, setUptimes] = useState(null)
   const [numberTimeJailed, setNumberTimeJailed] = useState(null)
   const [heartbeats, setHeartbeats] = useState(null)
-  const [evmVotes, setEvmVotes] = useState(null)
   const [evmPolls, setEvmPolls] = useState(null)
   const [keygens, setKeygens] = useState(null)
   const [signs, setSigns] = useState(null)
@@ -58,76 +97,158 @@ export default () => {
 
   // validator & health
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && assets_data && status_data && validators_data) {
-        if (!controller.signal.aborted) {
-          const validator_data = validators_data.find(v => equals_ignore_case(v?.operator_address, address))
-          if (validator_data?.start_proxy_height || validator_data?.start_height) {
-            const {
-              start_height,
-              start_proxy_height,
-              broadcaster_loaded,
-              broadcaster_address,
-            } = { ...validator_data }
-            setValidator({
+      if (
+        address &&
+        assets_data &&
+        status_data &&
+        validators_data
+      ) {
+        const validator_data = validators_data
+          .find(v =>
+            equals_ignore_case(
+              v?.operator_address,
+              address,
+            )
+          )
+
+        if (
+          validator_data?.start_proxy_height ||
+          validator_data?.start_height
+        ) {
+          const {
+            start_height,
+            start_proxy_height,
+            broadcaster_loaded,
+            broadcaster_address,
+          } = { ...validator_data }
+
+          setValidator(
+            {
               data: validator_data,
               address,
               broadcaster_loaded,
-            })
-            if (broadcaster_loaded) {
-              const _health = {
-                broadcaster_registration: broadcaster_address ? true : false,
+            }
+          )
+
+          if (broadcaster_loaded) {
+            const _health = {
+              broadcaster_registration: !!broadcaster_address,
+            }
+
+            if (broadcaster_address) {
+              const response = await all_bank_balances(broadcaster_address)
+
+              const {
+                data,
+              } = { ...response }
+
+              if (Array.isArray(data)) {
+                _health.broadcaster_funded =
+                  _.head(
+                    data
+                      .filter(b =>
+                        b?.denom === native_asset_id
+                      )
+                      .map(b => {
+                        const {
+                          denom,
+                          amount,
+                        } = { ...b }
+
+                        return {
+                          denom:
+                            assetManager
+                              .symbol(
+                                denom,
+                                assets_data,
+                              ),
+                          amount:
+                            assetManager
+                              .amount(
+                                amount,
+                                denom,
+                                assets_data,
+                              ),
+                        }
+                      })
+                  )
               }
-              if (broadcaster_address) {
-                const response = await all_bank_balances(broadcaster_address)
-                if (response?.data) {
-                  _health.broadcaster_funded = _.head(response.data.filter(b => b?.denom === native_asset_id).map(b => {
-                    const { denom, amount } = { ...b }
-                    return {
-                      denom: assetManager.symbol(denom, assets_data),
-                      amount: assetManager.amount(amount, denom, assets_data),
-                    }
-                  }))
-                }
-              }
-              else {
-                _health.broadcaster_funded = 'No Proxy'
-              }
-              const latest_block = Number(status_data.latest_block_height)
-              const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
-              const last = lastHeartbeatBlock(latest_block)
-              const response = await getHeartbeats({
-                query: {
-                  bool: {
-                    must: [
-                      { match: { sender: broadcaster_address } },
-                      { range: { height: {
-                        gte: first,
-                        lte: latest_block,
-                      } } },
-                    ],
+            }
+            else {
+              _health.broadcaster_funded = 'No Proxy'
+            }
+
+            const latest_block = Number(status_data.latest_block_height)
+            const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
+            const last = lastHeartbeatBlock(latest_block)
+
+            const response =
+              await getHeartbeats(
+                {
+                  query: {
+                    bool: {
+                      must: [
+                        { match: { sender: broadcaster_address } },
+                        {
+                          range: {
+                            height: {
+                              gte: first,
+                              lte: latest_block,
+                            },
+                          },
+                        },
+                      ],
+                    },
                   },
-                },
-                aggs: {
-                  heartbeats: {
-                    terms: { field: 'sender.keyword' },
-                    aggs: {
-                      period_height: {
-                        terms: { field: 'period_height', size: 1000 },
+                  aggs: {
+                    heartbeats: {
+                      terms: { field: 'sender.keyword' },
+                      aggs: {
+                        period_height: {
+                          terms: { field: 'period_height', size: 1000 },
+                        },
                       },
                     },
                   },
-                },
-                _source: false,
-              })
-              const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
-              const up = response?.data?.[broadcaster_address] || 0
-              let missed = total - up
-              missed = missed < 0 ? 0 :missed
-              let uptime = total > 0 ? up * 100 / total : 0
-              uptime = uptime > 100 ? 100 : uptime
-              setHealth({
+                  _source: false,
+                }
+              )
+
+            const {
+              data,
+            } = { ...response }
+
+            const total =
+              Math.floor(
+                (last - first) /
+                num_blocks_per_heartbeat
+              ) +
+              1
+
+            const up =
+              data?.[broadcaster_address] ||
+              0
+
+            let missed = total - up
+
+            missed =
+              missed < 0 ?
+              0 :
+              missed
+
+            let uptime =
+              total > 0 ?
+                up * 100 / total :
+                0
+
+            uptime =
+              uptime > 100 ?
+                100 :
+                uptime
+
+            setHealth(
+              {
                 data: {
                   ..._health,
                   total,
@@ -136,421 +257,748 @@ export default () => {
                   heartbeats_uptime: uptime,
                 },
                 address,
-              })
-            }
+              }
+            )
           }
-          else {
-            setValidator({
+        }
+        else {
+          setValidator(
+            {
               data: null,
               address,
               broadcaster_loaded: true,
-            })
-          }
+            }
+          )
         }
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validators_data])
 
   // voting power
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && (!votingPower || !validator.broadcaster_loaded)) {
-        if (!controller.signal.aborted) {
-          const { data } = { ...validator }
-          const { consensus_address } = { ...data }
-          const response = await validator_sets()
-          const v = response?.result?.validators?.find(_v => equals_ignore_case(_v?.address, consensus_address))
-          const { proposer_priority, voting_power } = { ...v }
-          setVotingPower({
+      if (
+        address &&
+        equals_ignore_case(
+          validator?.address,
+          address,
+        ) &&
+        (
+          !votingPower ||
+          !validator.broadcaster_loaded
+        )
+      ) {
+        const {
+          data,
+        } = { ...validator }
+        const {
+          consensus_address,
+        } = { ...data }
+
+        const response = await validator_sets()
+
+        const {
+          validators,
+        } = { ...response?.result }
+
+        const v = (validators || [])
+          .find(_v =>
+            equals_ignore_case(
+              _v?.address,
+              consensus_address,
+            )
+          )
+
+        const {
+          proposer_priority,
+          voting_power,
+        } = { ...v }
+
+        setVotingPower(
+          {
             data: {
               ...data,
               proposer_priority,
               voting_power: Number(voting_power),
             },
             address,
-          })
-        }
+          }
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validator])
 
   // delegations
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && assets_data && (!delegations || !validator.broadcaster_loaded)) {
-        if (!controller.signal.aborted) {
-          const response = await all_delegations(address)
-          setDelegations({
-            data: _.orderBy(response?.data?.map(d => {
-              const { delegation, balance } = { ...d }
-              const { delegator_address, shares } = { ...delegation }
-              const { denom, amount } = { ...balance }
-              return {
-                ...delegation,
-                self: equals_ignore_case(delegator_address, validator.data?.delegator_address),
-                shares: isNaN(shares) ? -1 : assetManager.amount(shares, denom, assets_data),
-                ...balance,
-                denom: assetManager.symbol(denom, assets_data),
-                amount: isNaN(amount) ? -1 : assetManager.amount(amount, denom, assets_data),
-                asset_data: getAsset(denom, assets_data),
-              }
-            }) || [], ['self', 'shares'], ['desc', 'desc']),
+      if (
+        address &&
+        equals_ignore_case(
+          validator?.address,
+          address,
+        ) &&
+        assets_data &&
+        (
+          !delegations ||
+          !validator.broadcaster_loaded
+        )
+      ) {
+        const response = await all_delegations(address)
+
+        const {
+          data,
+        } = { ...response }
+
+        setDelegations(
+          {
+            data:
+              _.orderBy(
+                (data || [])
+                  .map(d => {
+                    const {
+                      delegation,
+                      balance,
+                    } = { ...d }
+                    const {
+                      delegator_address,
+                      shares,
+                    } = { ...delegation }
+                    const {
+                      denom,
+                      amount,
+                    } = { ...balance }
+
+                    return {
+                      ...delegation,
+                      self:
+                        equals_ignore_case(
+                          delegator_address,
+                          validator.data?.delegator_address,
+                        ),
+                      shares:
+                        isNaN(shares) ?
+                          -1 :
+                          assetManager
+                            .amount(
+                              shares,
+                              denom,
+                              assets_data,
+                            ),
+                      ...balance,
+                      denom:
+                        assetManager
+                          .symbol(
+                            denom,
+                            assets_data,
+                          ),
+                      amount:
+                        isNaN(amount) ?
+                          -1 :
+                          assetManager
+                            .amount(
+                              amount,
+                              denom,
+                              assets_data,
+                            ),
+                      asset_data:
+                        getAsset(
+                          denom,
+                          assets_data,
+                        ),
+                    }
+                  }),
+                [
+                  'self',
+                  'shares',
+                ],
+                [
+                  'desc',
+                  'desc',
+                ],
+              ),
             address,
-          })
-        }
+          }
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validator, assets_data])
 
   // uptimes
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && status_data && (!uptimes || !validator.broadcaster_loaded)) {
-        if (!controller.signal.aborted) {
-          const { consensus_address } = { ...validator.data }
-          const latest_block = Number(status_data.latest_block_height) - 1
-          const response = await getUptimes({
-            query: { range: { height: {
-              gt: latest_block - num_uptime_display_blocks,
-              lte: latest_block,
-            } } },
-            size: num_uptime_display_blocks,
-            sort: [{ height: 'desc' }],
-          })
-          const data = response?.data || []
-          setUptimes({
-            data: [...Array(num_uptime_display_blocks).keys()].map(i => {
-              const height = latest_block - i
-              const u = data.find(d => d?.height === height)
-              const { validators } = { ...u }
-              return {
-                ...u,
-                height,
-                up: !!validators?.map(v => base64ToBech32(v, process.env.NEXT_PUBLIC_PREFIX_CONSENSUS)).includes(consensus_address),
-              }
-            }),
+      if (
+        address &&
+        equals_ignore_case(
+          validator?.address,
+          address,
+        ) &&
+        status_data &&
+        (
+          !uptimes ||
+          !validator.broadcaster_loaded
+        )
+      ) {
+        const {
+          consensus_address,
+        } = { ...validator.data }
+
+        const latest_block = Number(status_data.latest_block_height) - 1
+
+        const response =
+          await getUptimes(
+            {
+              query: {
+                range: {
+                  height: {
+                    gt: latest_block - num_uptime_display_blocks,
+                    lte: latest_block,
+                  },
+                },
+              },
+              size: num_uptime_display_blocks,
+              sort: [{ height: 'desc' }],
+            },
+          )
+
+        const {
+          data,
+        } = { ...response }
+
+        setUptimes(
+          {
+            data:
+              [...Array(num_uptime_display_blocks).keys()]
+                .map(i => {
+                  const height = latest_block - i
+
+                  const u = (data || [])
+                    .find(d =>
+                      d?.height === height
+                    )
+
+                  const {
+                    validators,
+                  } = { ...u }
+
+                  return {
+                    ...u,
+                    height,
+                    up:
+                      !!(
+                        (validators || [])
+                          .map(v =>
+                            base64ToBech32(
+                              v,
+                              process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                            )
+                          )
+                          .includes(consensus_address)
+                      ),
+                  }
+                }),
             address,
-          })
-        }
+          }
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validator])
 
   // number time jailed
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && status_data && (typeof numberTimeJailed !== 'number' || !validator.broadcaster_loaded)) {
-        if (!controller.signal.aborted) {
-          const { operator_address, jailed } = { ...validator.data }
-          const response = await getTransactions({
-            query: {
-              bool: {
-                must: [
-                  { match: { types: 'MsgUnjail' } },
-                  { match: { addresses: operator_address } },
-                  { match: { code: 0 } },
-                ],
+      if (
+        address &&
+        equals_ignore_case(
+          validator?.address,
+          address,
+        ) &&
+        status_data &&
+        (
+          typeof numberTimeJailed !== 'number' ||
+          !validator.broadcaster_loaded
+        )
+      ) {
+        const {
+          operator_address,
+          jailed,
+        } = { ...validator.data }
+
+        const response =
+          await getTransactions(
+            {
+              query: {
+                bool: {
+                  must: [
+                    { match: { types: 'MsgUnjail' } },
+                    { match: { addresses: operator_address } },
+                    { match: { code: 0 } },
+                  ],
+                },
               },
+              size: 0,
+              track_total_hits: true,
             },
-            size: 0,
-            track_total_hits: true,
-          })
-          setNumberTimeJailed((response?.total || 0) + (jailed ? 1 : 0))
-        }
+          )
+
+        setNumberTimeJailed(
+          (
+            response?.total ||
+            0
+          ) +
+          (jailed ?
+            1 :
+            0
+          )
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validator])
 
   // heartbeats
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded && !heartbeats) {
-        if (!controller.signal.aborted) {
-          const {
-            broadcaster_address,
-          } = { ...validator.data }
-          let {
-            start_proxy_height,
-          } = { ...validator.data }
-          start_proxy_height = start_proxy_height || 0
-          const latest_block = Number(status_data.latest_block_height)
-          const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks > start_proxy_height ? latest_block - num_heartbeat_blocks : start_proxy_height)
-          const heartbeats = []
-          let data
-          if (broadcaster_address) {
-            const response = await searchHeartbeats({
-              sender: broadcaster_address,
-              fromBlock: first,
-              toBlock: latest_block,
-              size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
-            })
-            data = response?.data || []
+      if (
+        address &&
+        equals_ignore_case(
+          validator?.address,
+          address,
+        ) &&
+        status_data &&
+        validator.broadcaster_loaded &&
+        !heartbeats
+      ) {
+        const {
+          broadcaster_address,
+        } = { ...validator.data }
+        let {
+          start_proxy_height,
+        } = { ...validator.data }
+
+        start_proxy_height =
+          start_proxy_height ||
+          0
+
+        const latest_block = Number(status_data.latest_block_height)
+        const first =
+          firstHeartbeatBlock(
+            latest_block - num_heartbeat_blocks > start_proxy_height ?
+              latest_block - num_heartbeat_blocks :
+              start_proxy_height
+          )
+
+        const heartbeats = []
+
+        let data
+
+        if (broadcaster_address) {
+          const response =
+            await searchHeartbeats(
+              {
+                sender: broadcaster_address,
+                fromBlock: first,
+                toBlock: latest_block,
+                size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
+              },
+            )
+
+          data =
+            response?.data ||
+            []
+        }
+
+        for (let height = latest_block; height >= first; height--) {
+          if (
+            height % num_blocks_per_heartbeat === 1 &&
+            heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat
+          ) {
+            const h = (data || [])
+              .find(d =>
+                d?.period_height === height
+              )
+
+            const {
+              sender,
+            } = { ...h }
+
+            heartbeats
+              .push(
+                {
+                  ...h,
+                  height,
+                  up:
+                    equals_ignore_case(
+                      sender,
+                      broadcaster_address,
+                    ),
+                }
+              )
           }
-          for (let height = latest_block; height >= first; height--) {
-            if (height % num_blocks_per_heartbeat === 1 && heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat) {
-              const h = data?.find(d => d?.period_height === height)
-              const {
-                sender,
-              } = { ...h }
-              heartbeats.push({
-                ...h,
-                height,
-                up: equals_ignore_case(sender, broadcaster_address),
-              })
-            }
-          }
-          setHeartbeats({
+        }
+
+        setHeartbeats(
+          {
             data: heartbeats,
             address,
-          })
-        }
-      }
-    }
-    getData()
-    return () => {
-      controller?.abort()
-    }
-  }, [address, validator])
-
-  // evm votes
-  useEffect(() => {
-    const controller = new AbortController()
-    const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && validator.broadcaster_loaded) {
-        if (!controller.signal.aborted) {
-          const {
-            broadcaster_address,
-            start_height,
-          } = { ...validator.data }
-          let votes = {}, polls = {}
-          if (broadcaster_address) {
-            let response = await getEvmVotes({
-              query: {
-                bool: {
-                  must: [
-                    { match: { voter: broadcaster_address } },
-                  ],
-                },
-              },
-              aggs: {
-                chains: {
-                  terms: { field: 'sender_chain.keyword', size: 1000 },
-                  aggs: {
-                    votes: {
-                      terms: { field: 'vote' },
-                    },
-                  },
-                },
-              },
-            })
-            votes = {
-              ...response?.data,
-            }
-
-            response = await getEvmPolls({
-              query: {
-                bool: {
-                  must: [
-                    { range: { height: { gte: start_height || 1 } } },
-                  ],
-                },
-              },
-              aggs: {
-                chains: {
-                  terms: { field: 'sender_chain.keyword', size: 1000 },
-                },
-              },
-            })
-            polls = {
-              ...response?.data,
-            }
           }
-          setEvmVotes({
-            votes,
-            polls,
-            address,
-          })
-        }
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validator])
 
   // evm polls
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
-      if (address && equals_ignore_case(validator?.address, address) && status_data && validator.broadcaster_loaded) {
-        if (!controller.signal.aborted) {
-          const {
-            broadcaster_address,
-          } = { ...validator.data }
-          let votes = [], polls = []
-          if (broadcaster_address) {
-            const latest_block = Number(status_data.latest_block_height)
-            let response = await getEvmVotes({
-              query: {
-                bool: {
-                  must: [
-                    { match: { voter: broadcaster_address } },
-                    { range: { height: { gte: latest_block - num_evm_votes_blocks } } },
-                  ],
-                },
+      if (
+        address &&
+        equals_ignore_case(
+          validator?.address,
+          address,
+        ) &&
+        status_data &&
+        validator.broadcaster_loaded
+      ) {
+        const {
+          broadcaster_address,
+        } = { ...validator.data }
+
+        let polls = [],
+          votes = []
+
+        if (broadcaster_address) {
+          const latest_block = Number(status_data.latest_block_height)
+
+          const response =
+            await searchEVMPolls(
+              {
+                voter: broadcaster_address,
+                fromBlock: latest_block - num_evm_votes_blocks,
+                size: num_evm_votes_polls,
               },
-              size: num_evm_votes_polls,
-              sort: [{ 'created_at.ms': 'desc' }],
-            })
-            votes = response?.data || []
-            response = await getEvmPolls({
-              query: {
-                bool: {
-                  must: [
-                    { range: { height: { gte: latest_block - num_evm_votes_blocks } } },
-                  ],
-                }
-              },
-              size: num_evm_votes_polls,
-              sort: [{ 'created_at.ms': 'desc' }],
-            })
-            polls = response?.data || []
-          }
-          setEvmPolls({
-            votes,
-            polls,
-            address,
-          })
+            )
+
+          polls =
+            response?.data ||
+            []
+
+          votes =
+            polls
+              .map(p =>
+                Object.fromEntries(
+                  Object.entries(p)
+                    .filter(([k, v]) =>
+                      !k?.startsWith(`${process.env.NEXT_PUBLIC_PREFIX_ACCOUNT}1`) ||
+                      equals_ignore_case(
+                        k,
+                        broadcaster_address,
+                      )
+                    )
+                    .flatMap(([k, v]) =>
+                      equals_ignore_case(
+                        k,
+                        broadcaster_address,
+                      ) ?
+                        Object.entries({ ...v })
+                          .map(([_k, _v]) =>
+                            [
+                              _k === 'id' ?
+                                'txhash' :
+                                _k,
+                              _v,
+                            ]
+                          ) :
+                        [
+                          [
+                            k,
+                            v,
+                          ]
+                        ]
+                    )
+                )
+              )
         }
+
+        setEvmPolls(
+          {
+            polls,
+            votes,
+            address,
+          }
+        )
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address, validator, supportedChains])
 
   // keygens & signs
   useEffect(() => {
-    const controller = new AbortController()
     const getData = async () => {
       if (address) {
-        if (!controller.signal.aborted) {
-          let data, total = 0, total_participations = 0
-          const results = [true, false]
+        try {
+          let data,
+            total = 0,
+            total_participations = 0
+
+          const results =
+            [
+              true,
+              false,
+            ]
+
           for (let i = 0; i < results.length; i++) {
             const result = results[i]
-            let response = await getKeygens({
-              size: 1000,
-              sort: [{ height: 'desc' }],
-              track_total_hits: true,
-            }, result)
-            total += (response?.total || 0)
-            data = _.orderBy(_.uniqBy(_.concat(data || [], response?.data?.map(d => {
-              const { key_id, key_role, snapshot_validators, snapshot_non_participant_validators } = { ...d }
-              return {
-                ...d,
-                key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
+
+            let response =
+              await getKeygens(
+                {
+                  size: 1000,
+                  sort: [{ height: 'desc' }],
+                  track_total_hits: true,
+                },
                 result,
-                participated: snapshot_validators?.validators?.findIndex(v => equals_ignore_case(v?.validator, address)) > -1 &&
-                  snapshot_non_participant_validators?.validators?.findIndex(v => equals_ignore_case(v?.validator, address)) < 0,
-              }
-            }) || []), 'key_id'), ['height'], ['desc'])
+              )
+
+            total +=
+              (
+                response?.total ||
+                0
+              )
+
+            data =
+              _.orderBy(
+                _.uniqBy(
+                  _.concat(
+                    data ||
+                    [],
+                    (response?.data || [])
+                      .map(d => {
+                        const {
+                          key_id,
+                          key_role,
+                          snapshot_validators,
+                          snapshot_non_participant_validators,
+                        } = { ...d }
+
+                        return {
+                          ...d,
+                          key_role:
+                            key_role ||
+                            (
+                              (key_id || '')
+                                .split('-')
+                                .length > 1 &&
+                              `${
+                                key_id
+                                  .split('-')[0]
+                                  .toUpperCase()
+                              }_KEY`
+                            ),
+                          result,
+                          participated:
+                            (snapshot_validators?.validators || [])
+                              .findIndex(v =>
+                                equals_ignore_case(
+                                  v?.validator,
+                                  address,
+                                )
+                              ) > -1 &&
+                            (snapshot_non_participant_validators?.validators || [])
+                              .findIndex(v =>
+                                equals_ignore_case(
+                                  v?.validator,
+                                  address,
+                                )
+                              ) < 0,
+                        }
+                      })
+                  ),
+                  'key_id',
+                ),
+                ['height'],
+                ['desc'],
+              )
+
             if (result) {
-              response = await getKeygens({
-                query: { match: { 'snapshot_validators.validators.validator': address } },
-                size: 0,
-                track_total_hits: true,
-              }, result)
-              total_participations += (response?.total || 0)
+              response =
+                await getKeygens(
+                  {
+                    query: { match: { 'snapshot_validators.validators.validator': address } },
+                    size: 0,
+                    track_total_hits: true,
+                  },
+                  result,
+                )
+
+              total_participations +=
+                (
+                  response?.total ||
+                  0
+                )
             }
           }
-          setKeygens({
-            data,
-            total,
-            total_participations,
-            address,
-          })
-        }
-        if (!controller.signal.aborted) {
-          let data, total = 0, total_participations = 0
-          const results = [true, false]
+
+          setKeygens(
+            {
+              data,
+              total,
+              total_participations,
+              address,
+            }
+          )
+        } catch (error) {}
+
+        try {
+          let data,
+            total = 0,
+            total_participations = 0
+
+          const results =
+            [
+              true,
+              false,
+            ]
+
           for (let i = 0; i < results.length; i++) {
             const result = results[i]
-            let response = await getSignAttempts({
-              query: { match: { [`${!result ? 'non_' : ''}participants`]: address } },
-              size: 1000,
-              sort: [{ height: 'desc' }],
-              track_total_hits: true,
-            })
+
+            let response =
+              await getSignAttempts(
+                {
+                  query: { match: { [`${!result ? 'non_' : ''}participants`]: address } },
+                  size: 1000,
+                  sort: [{ height: 'desc' }],
+                  track_total_hits: true,
+                },
+              )
+
             if (result) {
-              total_participations += (response?.total || 0)
+              total_participations +=
+                (
+                  response?.total ||
+                  0
+                )
             }
-            data = _.orderBy(_.uniqBy(_.concat(data || [], response?.data?.map(d => {
-              const { key_id, key_role, participants, non_participants } = { ...d }
-              return {
-                ...d,
-                key_role: key_role || (key_id?.split('-').length > 1 && `${key_id.split('-')[0].toUpperCase()}_KEY`),
-                participated: participants?.findIndex(a => equals_ignore_case(a, address)) > -1 &&
-                  non_participants?.findIndex(a => equals_ignore_case(a, address)) < 0,
-              }
-            }) || []), 'sig_id'), ['height'], ['desc'])
+
+            data =
+              _.orderBy(
+                _.uniqBy(
+                  _.concat(
+                    data ||
+                    [],
+                    (response?.data || [])
+                      .map(d => {
+                        const {
+                          key_id,
+                          key_role,
+                          participants,
+                          non_participants,
+                        } = { ...d }
+
+                        return {
+                          ...d,
+                          key_role:
+                            key_role ||
+                            (
+                              (key_id || '')
+                                .split('-')
+                                .length > 1 &&
+                              `${
+                                key_id
+                                  .split('-')[0]
+                                  .toUpperCase()
+                              }_KEY`
+                            ),
+                          participated:
+                            (participants || [])
+                              .findIndex(a =>
+                                equals_ignore_case(
+                                  a,
+                                  address,
+                                )
+                              ) > -1 &&
+                            (non_participants || [])
+                              .findIndex(a =>
+                                equals_ignore_case(
+                                  a,
+                                  address,
+                                )
+                              ) < 0,
+                        }
+                      })
+                  ),
+                  'sig_id',
+                ),
+                ['height'],
+                ['desc'],
+              )
+
             if (result) {
-              response = await getSignAttempts({
-                size: 0,
-                track_total_hits: true,
-              })
-              total += (response?.total || 0)
+              response =
+                await getSignAttempts(
+                  {
+                    size: 0,
+                    track_total_hits: true,
+                  },
+                )
+
+              total +=
+                (
+                  response?.total ||
+                  0
+                )
             }
           }
-          setSigns({
-            data,
-            total,
-            total_participations,
-            address,
-          })
-        }
+
+          setSigns(
+            {
+              data,
+              total,
+              total_participations,
+              address,
+            }
+          )
+        } catch (error) {}
       }
     }
+
     getData()
-    return () => {
-      controller?.abort()
-    }
   }, [address])
 
   // supported chains
   useEffect(() => {
-    if (address && validators_chains_data) {
-      setSupportedChains({
-        data: Object.entries(validators_chains_data).filter(([k, v]) => v?.findIndex(_v => equals_ignore_case(_v, address)) > -1).map(([k, v]) => k),
-        address,
-      })
+    if (
+      address &&
+      validators_chains_data
+    ) {
+      setSupportedChains(
+        {
+          data:
+            Object.entries(validators_chains_data)
+              .filter(([k, v]) =>
+                (v || [])
+                  .findIndex(_v =>
+                    equals_ignore_case(
+                      _v,
+                      address,
+                    )
+                  ) > -1
+              )
+              .map(([k, v]) => k),
+          address,
+        }
+      )
     }
   }, [address, validators_chains_data])
 
@@ -558,26 +1006,38 @@ export default () => {
     uptime,
     heartbeats_uptime,
     stale_heartbeats,
+    votes,
   } = { ...validator?.data }
+
   const {
     broadcaster_funded,
   } = { ...health?.data }
+
   const supported_chains = supportedChains?.data
-  const metricClassName = 'bg-white dark:bg-black border dark:border-slate-600 shadow dark:shadow-slate-600 rounded-lg p-4'
+
+  const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
+  const titleClassName = 'text-xl font-semibold space-x-1'
+  const subtitleClassName = 'text-slate-500 dark:text-slate-200 text-xs font-normal ml-0.5'
 
   return (
     <div className="space-y-6 mt-2 mb-6 mx-auto pb-16">
       <div className="sm:grid sm:grid-cols-2 space-y-6 sm:space-y-0 gap-6 mb-16">
         <Info
-          data={validator?.address === address && validator?.data}
+          data={
+            validator?.address === address &&
+            validator?.data
+          }
           votingPower={votingPower}
         />
         <div className="space-y-4">
-          <div className="text-lg font-bold lg:mt-1">
+          <div className="text-lg font-semibold lg:mt-1">
             Delegations
           </div>
           <Delegations
-            data={delegations?.address === address && delegations?.data}
+            data={
+              delegations?.address === address &&
+              delegations?.data
+            }
           />
         </div>
       </div>
@@ -586,27 +1046,48 @@ export default () => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Uptimes
           </span>
-          <div className="text-3xl font-bold">
+          <div className={titleClassName}>
             {typeof uptime === 'number' ?
-              `${number_format(uptime, '0,0.00')}%` :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              `${
+                number_format(
+                  uptime,
+                  '0,0.00',
+                )
+              }%` :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="28"
+                height="28"
+              />
             }
           </div>
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-            Last {number_format(num_uptime_blocks, '0,0')} Blocks
+          <span className={subtitleClassName}>
+            Last {
+              number_format(
+                num_uptime_blocks,
+                '0,0',
+              )
+            } Blocks
           </span>
         </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Jailed
           </span>
-          <div className="text-3xl font-bold">
+          <div className={titleClassName}>
             {typeof numberTimeJailed === 'number' ?
-              number_format(numberTimeJailed, '0,0') :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              number_format(
+                numberTimeJailed,
+                '0,0',
+              ) :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="28"
+                height="28"
+              />
             }
           </div>
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+          <span className={subtitleClassName}>
             Number time jailed
           </span>
         </div>
@@ -614,69 +1095,127 @@ export default () => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Heartbeats
           </span>
-          <div className="text-3xl font-bold">
+          <div className={`${titleClassName}`}>
             {typeof heartbeats_uptime === 'number' ?
-              `${number_format(heartbeats_uptime, '0,0.00')}%` :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              `${
+                number_format(
+                  heartbeats_uptime,
+                  '0,0.00',
+                )
+              }%` :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="28"
+                height="28"
+              />
             }
           </div>
-          {stale_heartbeats && (
-            <div className="max-w-min bg-red-100 dark:bg-red-500 border border-red-500 dark:border-red-100 rounded whitespace-nowrap capitalize text-black dark:text-white text-xs font-bold py-1 px-1.5">
-              Stale Heartbeats
-            </div>
-          )}
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-            Last {number_format(num_heartbeat_blocks, '0,0')} Blocks
+          {
+            stale_heartbeats &&
+            (
+              <div className="w-fit bg-red-200 dark:bg-red-400 text-red-500 dark:text-red-800 rounded-xl whitespace-nowrap text-xs font-semibold py-0.5 px-2">
+                Stale Heartbeats
+              </div>
+            )
+          }
+          <span className={subtitleClassName}>
+            Last {
+              number_format(
+                num_heartbeat_blocks,
+                '0,0',
+              )
+            } Blocks
           </span>
         </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Broadcaster
           </span>
-          <div className={`h-9 flex items-center ${broadcaster_funded ? broadcaster_funded.amount >= min_broadcaster_fund ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600' : ''} text-3xl font-bold space-x-1.5`}>
+          <div className={`flex items-center space-x-2 ${broadcaster_funded?.amount >= min_broadcaster_fund ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} ${titleClassName}`}>
             {broadcaster_funded ?
               <>
-                <span className={`${number_format(broadcaster_funded.amount, '0,0.00').length > 6 ? 'lg:text-xl' : ''}`}>
-                  {number_format(broadcaster_funded.amount, '0,0.00')}
+                <span>
+                  {number_format(
+                    broadcaster_funded.amount,
+                    '0,0.00',
+                  )}
                 </span>
                 {broadcaster_funded.amount >= min_broadcaster_fund ?
-                  <BiCheckCircle size={28} /> :
-                  <BiXCircle size={28} />
+                  <BiCheckCircle
+                    size={20}
+                  /> :
+                  <BiXCircle
+                    size={20}
+                  />
                 }
               </> :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="28"
+                height="28"
+              />
             }
           </div>
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-            Balance {broadcaster_funded?.denom && (
-              <>
-                ({broadcaster_funded.denom})
-              </>
-            )}
+          <span className={subtitleClassName}>
+            Balance {
+              broadcaster_funded?.denom &&
+              (
+                <>
+                  ({broadcaster_funded.denom})
+                </>
+              )
+            }
           </span>
         </div>
         <div className={`${metricClassName}`}>
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             Supported
           </span>
-          <div className="flex flex-wrap items-center overflow-x-auto text-3xl font-bold mt-1.5">
+          <div className={`${titleClassName}`}>
             {supportedChains ?
               supported_chains?.length > 0 ?
-                supported_chains.filter(c => chainManager.image(c, evm_chains_data)).map((c, i) => (
-                  <Image
-                    key={i}
-                    src={chainManager.image(c, evm_chains_data)}
-                    title={chainManager.name(c, evm_chains_data)}
-                    className="w-6 h-6 rounded-full mb-1.5 mr-1.5"
-                  />
-                )) :
-                <span className="lg:text-xl font-semibold">
-                  No EVM Supported
+                <div className="flex flex-wrap items-center overflow-x-auto -ml-1">
+                  {supported_chains
+                    .filter(c =>
+                      chainManager
+                        .image(
+                          c,
+                          evm_chains_data,
+                        )
+                    )
+                    .map((c, i) => (
+                      <Image
+                        key={i}
+                        src={
+                          chainManager
+                            .image(
+                              c,
+                              evm_chains_data,
+                            )
+                        }
+                        title={
+                          chainManager
+                            .name(
+                              c,
+                              evm_chains_data,
+                            )
+                        }
+                        className="w-5 h-5 rounded-full mt-1 mb-0.5 ml-1"
+                      />
+                    ))
+                  }
+                </div> :
+                <span className="text-slate-300 dark:text-slate-600 font-normal">
+                  No chains
                 </span> :
-              <FallingLines color={loader_color(theme)} width="36" height="36" />
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="28"
+                height="28"
+              />
             }
           </div>
-          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+          <span className={subtitleClassName}>
             EVM Chains
           </span>
         </div>
@@ -684,133 +1223,271 @@ export default () => {
           <span className="text-slate-500 dark:text-slate-300 text-sm font-semibold">
             EVM votes
           </span>
-          <div className="flex flex-wrap items-center">
-            {evmVotes ?
-              Object.keys({ ...evmVotes?.votes }).length > 0 ?
-                Object.entries(evmVotes.votes).map(([k, v]) => (
-                  <div
-                    key={k}
-                    className="min-w-max flex items-center justify-between text-2xs space-x-1 my-0.5 mr-2"
-                  >
-                    <div className="flex items-center space-x-1">
-                      {chainManager.image(k, evm_chains_data) && (
-                        <Image
-                          src={chainManager.image(k, evm_chains_data)}
-                          title={chainManager.name(k, evm_chains_data)}
-                          className="w-4 h-4 rounded-full"
-                        />
-                      )}
-                      <span className={`${v?.votes?.true ? 'text-green-400 dark:text-green-300 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>
-                        {number_format(v?.votes?.true || 0, '0,0')} Y
-                      </span>
-                      <span className={`${v?.votes?.false ? 'text-red-500 dark:text-red-600 font-bold' : 'text-slate-300 dark:text-slate-700 font-medium'}`}>
-                        {number_format(v?.votes?.false || 0, '0,0')} N
-                      </span>
-                      {evmVotes?.polls?.[k] - v?.total > 0 && (
-                        <span className="text-slate-400 dark:text-slate-500 font-bold">
-                          {number_format(evmVotes.polls[k] - v.total, '0,0')} UN
+          <div className={`flex flex-wrap items-center ${titleClassName}`}>
+            {votes ?
+              Object.keys({ ...votes?.chains }).length > 0 ?
+                <div className="flex flex-col">
+                  {Object.entries(votes.chains)
+                    .map(([k, v]) => (
+                      <div
+                        key={k}
+                        className="flex items-center justify-between space-x-2"
+                      >
+                        <div className="flex items-center space-x-1">
+                          {
+                            chainManager
+                              .image(
+                                k,
+                                evm_chains_data,
+                              ) &&
+                            (
+                              <Image
+                                src={
+                                  chainManager
+                                    .image(
+                                      k,
+                                      evm_chains_data,
+                                    )
+                                }
+                                title={
+                                  chainManager
+                                    .name(
+                                      k,
+                                      evm_chains_data,
+                                    )
+                                }
+                                className="w-4 h-4 rounded-full"
+                              />
+                            )
+                          }
+                          <span className={`h-5 leading-5 whitespace-nowrap text-2xs ${v?.votes?.true ? 'text-green-400 dark:text-green-300' : 'text-slate-300 dark:text-slate-700'}`}>
+                            {number_format(
+                              v?.votes?.true ||
+                              0,
+                              '0,0',
+                            )} Y
+                          </span>
+                          <span className={`h-5 leading-5 whitespace-nowrap text-2xs ${v?.votes?.false ? 'text-red-500 dark:text-red-600' : 'text-slate-300 dark:text-slate-700'}`}>
+                            {number_format(
+                              v?.votes?.false ||
+                              0,
+                              '0,0',
+                            )} N
+                          </span>
+                          {
+                            v?.votes?.unsubmitted > 0 &&
+                            (
+                              <span className="h-5 leading-5 whitespace-nowrap text-2xs text-slate-400 dark:text-slate-500">
+                                {number_format(
+                                  v.votes.unsubmitted,
+                                  '0,0',
+                                )} UN
+                              </span>
+                            )
+                          }
+                        </div>
+                        <span className="h-5 leading-5 whitespace-nowrap text-2xs text-blue-400 dark:text-blue-200">
+                          [{
+                            number_format(
+                              v?.total_polls ||
+                              0,
+                              '0,0',
+                            )
+                          }]
                         </span>
-                      )}
-                    </div>
-                    <span className="text-blue-400 dark:text-blue-200 font-semibold">
-                      [{number_format(evmVotes?.polls?.[k] || 0, '0,0')}]
-                    </span>
-                  </div>
-                )) :
-                <span className="text-3xl font-semibold">
-                  No Votes
+                      </div>
+                    ))
+                  }
+                </div> :
+                <span className="text-slate-300 dark:text-slate-600 font-normal">
+                  No votes
                 </span> :
-              <div className="h-9">
-                <FallingLines color={loader_color(theme)} width="36" height="36" />
-              </div>
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="28"
+                height="28"
+              />
             }
           </div>
+          <span className={subtitleClassName}>
+            Last {
+              number_format(
+                num_evm_votes_blocks,
+                '0,0',
+              )
+            } Blocks
+          </span>
         </div>
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between mr-3 xl:mr-1.5">
-            <span className="text-sm sm:text-lg font-bold">
+            <span className="text-sm sm:text-lg font-semibold">
               Uptimes
             </span>
-            {typeof uptime === 'number' && (
-              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-                {number_format(uptime * num_uptime_blocks / 100, '0,0')} / {number_format(num_uptime_blocks, '0,0')}
-              </span>
-            )}
+            {
+              typeof uptime === 'number' &&
+              (
+                <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                  {
+                    number_format(
+                      uptime * num_uptime_blocks / 100,
+                      '0,0',
+                    )
+                  } / {
+                    number_format(
+                      num_uptime_blocks,
+                      '0,0',
+                    )
+                  }
+                </span>
+              )
+            }
           </div>
-          <Uptimes data={uptimes?.address === address && uptimes?.data} />
+          <Uptimes
+            data={
+              uptimes?.address === address &&
+              uptimes?.data
+            }
+          />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between mr-3 xl:mr-1.5">
-            <span className="text-sm sm:text-lg font-bold">
+            <span className="text-sm sm:text-lg font-semibold">
               Heartbeats
             </span>
-            {heartbeats?.data && (
-              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-                {number_format(heartbeats.data.filter(h => h?.up).length, '0,0')} / {number_format(num_heartbeat_blocks / num_blocks_per_heartbeat, '0,0')}
-              </span>
-            )}
+            {
+              heartbeats?.data &&
+              (
+                <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                  {
+                    number_format(
+                      heartbeats.data
+                        .filter(h => h?.up)
+                        .length,
+                      '0,0',
+                    )
+                  } / {
+                    number_format(
+                      num_heartbeat_blocks / num_blocks_per_heartbeat,
+                      '0,0',
+                    )
+                  }
+                </span>
+              )
+            }
           </div>
-          <Heartbeats data={heartbeats?.address === address && heartbeats?.data} />
+          <Heartbeats
+            data={
+              heartbeats?.address === address &&
+              heartbeats?.data
+            }
+          />
         </div>
         <div className="md:col-span-2 xl:col-span-1 space-y-2">
           <div className="flex items-center justify-between mr-3 xl:mr-1.5">
-            <span className="text-sm sm:text-lg font-bold">
+            <span className="text-sm sm:text-lg font-semibold">
               Votes
             </span>
             <div className="flex items-center space-x-1.5">
               <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-                Last {number_format(num_evm_votes_blocks, '0,0')} Blocks
+                Last {
+                  number_format(
+                    num_evm_votes_polls,
+                    '0,0',
+                  )
+                } Polls
               </span>
-              {evmPolls?.votes && evmPolls.polls && (
-                <>
-                  :
+              {
+                evmPolls?.polls &&
+                evmPolls.votes &&
+                (
                   <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-                    {number_format(evmPolls.votes.length, '0,0')} / {number_format(evmPolls.polls.length, '0,0')}
+                    {
+                      number_format(
+                        evmPolls.votes.length,
+                        '0,0',
+                      )
+                    } / {
+                      number_format(
+                        evmPolls.polls.length,
+                        '0,0',
+                      )
+                    }
                   </span>
-                </>
-              )}
+                )
+              }
             </div>
           </div>
           <EVMVotes
-            data={evmPolls?.address === address && evmPolls}
-            supportedChains={supportedChains?.data}
+            data={
+              evmPolls?.address === address &&
+              evmPolls
+            }
           />
         </div>
       </div>
       {/*<div className="sm:grid sm:grid-cols-2 xl:grid-cols-2 space-y-6 sm:space-y-0 gap-6 sm:gap-y-12">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm sm:text-lg font-bold">
+            <span className="text-sm sm:text-lg font-semibold">
               Keygens
             </span>
             {typeof keygens?.total_participations === 'number' && (
               <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-                {number_format(keygens.total_participations, '0,0')} / {number_format(keygens.total, '0,0')}
+                {
+                  number_format(
+                    keygens.total_participations,
+                    '0,0',
+                  )
+                } / {
+                  number_format(
+                    keygens.total,
+                    '0,0',
+                  )
+                }
               </span>
             )}
           </div>
           <Participations
             table="keygens"
-            _data={keygens?.address === address && keygens}
+            _data={
+              keygens?.address === address &&
+              keygens
+            }
             className="min-h-full"
           />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm sm:text-lg font-bold">
+            <span className="text-sm sm:text-lg font-semibold">
               Signs
             </span>
-            {typeof signs?.total_participations === 'number' && (
-              <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
-                {number_format(signs.total_participations, '0,0')} / {number_format(signs.total, '0,0')}
-              </span>
-            )}
+            {
+              typeof signs?.total_participations === 'number' &&
+              (
+                <span className="text-slate-400 dark:text-slate-200 text-sm font-semibold">
+                  {
+                    number_format(
+                      signs.total_participations,
+                      '0,0',
+                    )
+                  } / {
+                    number_format(
+                      signs.total,
+                      '0,0',
+                    )
+                  }
+                </span>
+              )
+            }
           </div>
           <Participations
             table="signs"
-            _data={signs?.address === address && signs}
+            _data={
+              signs?.address === address &&
+              signs
+            }
             className="min-h-full"
           />
         </div>

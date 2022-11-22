@@ -51,9 +51,14 @@ export default ({
           <Popover
             placement="bottom"
             title={null}
-            content={<div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
-              {moment(latest_block_time).format('MMM D, YYYY h:mm:ss A z')}
-            </div>}
+            content={
+              <div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
+                {
+                  moment(latest_block_time)
+                    .format('MMM D, YYYY h:mm:ss A z')
+                }
+              </div>
+            }
             className="text-left"
           >
             <div className={titleClassName}>
@@ -80,14 +85,16 @@ export default ({
           <Popover
             placement="bottom"
             title={null}
-            content={<div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
-              the average block time from the last {
-                number_format(
-                  100,
-                  '0,0',
-                )
-              } blocks
-            </div>}
+            content={
+              <div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
+                the average block time from the last {
+                  number_format(
+                    100,
+                    '0,0',
+                  )
+                } blocks
+              </div>
+            }
             className="text-left"
           >
             <div className={titleClassName}>
@@ -121,19 +128,23 @@ export default ({
           <Popover
             placement="bottom"
             title={null}
-            content={<div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
-              {!isNaN(active_validators) &&
-                number_format(
-                  active_validators,
-                  '0,0',
-                )
-              } active validators out of {!isNaN(total_validators) &&
-                number_format(
-                  total_validators,
-                  '0,0',
-                )
-              } validators
-            </div>}
+            content={
+              <div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
+                {
+                  !isNaN(active_validators) &&
+                  number_format(
+                    active_validators,
+                    '0,0',
+                  )
+                } active validators out of {
+                  !isNaN(total_validators) &&
+                  number_format(
+                    total_validators,
+                    '0,0',
+                  )
+                } validators
+              </div>
+            }
             className="text-left"
           >
             <div className={titleClassName}>
@@ -160,21 +171,26 @@ export default ({
           <Popover
             placement="bottom"
             title={null}
-            content={<div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
-              {!isNaN(online_voting_power_percentage) &&
-                number_format(
-                  online_voting_power_percentage,
-                  '0,0.000',
-                )
-              }% staked tokens from {!isNaN(total_voting_power) &&
-                number_format(
-                  total_voting_power,
-                  total_voting_power > 250000000 ?
-                    '0,0a' :
-                    '0,0.00',
-                ).toUpperCase()
-              } {denom}
-            </div>}
+            content={
+              <div className="w-full whitespace-nowrap text-black dark:text-white text-xs font-normal">
+                {
+                  !isNaN(online_voting_power_percentage) &&
+                  number_format(
+                    online_voting_power_percentage,
+                    '0,0.000',
+                  )
+                }% staked tokens from {
+                  !isNaN(total_voting_power) &&
+                  number_format(
+                    total_voting_power,
+                    total_voting_power > 250000000 ?
+                      '0,0a' :
+                      '0,0.00',
+                  )
+                  .toUpperCase()
+                } {denom}
+              </div>
+            }
             className="text-left"
           >
             <div className={`uppercase ${titleClassName} space-x-1`}>
@@ -222,12 +238,14 @@ export default ({
         <Popover
           placement="bottom"
           title={null}
-          content={<div className="w-56 text-black dark:text-white text-xs font-normal">
-            <div>
-              Annual Percentage Rate (APR):
+          content={
+            <div className="w-56 text-black dark:text-white text-xs font-normal">
+              <div>
+                Annual Percentage Rate (APR):
+              </div>
+              the inflation rate * total supply * (1 - community tax) * (1 - commission rate) / staked tokens
             </div>
-            the inflation rate * total supply * (1 - community tax) * (1 - commission rate) / staked tokens
-          </div>}
+          }
           className="text-left"
         >
           <div className={`uppercase ${titleClassName} space-x-0.5`}>
@@ -267,9 +285,11 @@ export default ({
           <Popover
             placement="bottom"
             title={null}
-            content={<div className="w-60 text-black dark:text-white text-xs font-normal">
-              base inflation on the network + (inflation for EVM chains * # of EVM chains)
-            </div>}
+            content={
+              <div className="w-60 text-black dark:text-white text-xs font-normal">
+                base inflation on the network + (inflation for EVM chains * # of EVM chains)
+              </div>
+            }
             className="text-left"
           >
             <div className={`uppercase ${titleClassName}`}>

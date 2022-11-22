@@ -37,11 +37,12 @@ export default () => {
         tx &&
         assets_data
       ) {
-        const response = await getTransaction(
-          tx,
-          null,
-          assets_data,
-        )
+        const response =
+          await getTransaction(
+            tx,
+            null,
+            assets_data,
+          )
 
         if (response) {
           setData(
@@ -56,10 +57,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [tx, assets_data])
