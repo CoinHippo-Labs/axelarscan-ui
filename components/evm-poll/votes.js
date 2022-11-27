@@ -54,16 +54,19 @@ export default ({
               tokens,
             } = { ...v }
 
-            const _tokens = assetManager.amount(
-              tokens,
-              native_asset_id,
-              assets_data,
-            )
+            const _tokens =
+              assetManager
+                .amount(
+                  tokens,
+                  native_asset_id,
+                  assets_data,
+                )
 
             return {
               ...v,
               tokens: _tokens,
-              quadratic_voting_power: _tokens > 0 &&
+              quadratic_voting_power:
+                _tokens > 0 &&
                 Math.floor(
                   Math.sqrt(
                     _tokens,
@@ -85,37 +88,62 @@ export default ({
       data &&
       validatorsData
     ) {
-      const _votes = (votes || [])
-        .map(v => {
-          const {
-            voter,
-          } = { ...v }
+      const _votes =
+        (votes || [])
+          .map(v => {
+            const {
+              voter,
+            } = { ...v }
 
-          const validator_data = validatorsData.find(_v => equals_ignore_case(_v?.broadcaster_address, voter))
+            const validator_data = validatorsData
+              .find(_v =>
+                equals_ignore_case(
+                  _v?.broadcaster_address,
+                  voter,
+                )
+              )
 
-          return {
-            ...v,
-            validator_data,
-          }
-        })
+            return {
+              ...v,
+              validator_data,
+            }
+          })
 
-      const unsubmitted_votes = (participants || [])
-        .filter(p =>
-          _votes.findIndex(v => v?.validator_data) > -1 &&
-          _votes.findIndex(v => equals_ignore_case(v?.validator_data?.operator_address, p)) < 0
-        )
-        .map(p => {
-          const validator_data = validatorsData.find(_v => equals_ignore_case(_v?.operator_address, p))
-          const {
-            broadcaster_address,
-          } = { ...validator_data }
+      const unsubmitted_votes =
+        (participants || [])
+          .filter(p =>
+            _votes
+              .findIndex(v =>
+                v?.validator_data
+              ) > -1 &&
+            _votes
+              .findIndex(v =>
+                equals_ignore_case(
+                  v?.validator_data?.operator_address,
+                  p,
+                )
+              ) < 0
+          )
+          .map(p => {
+            const validator_data = validatorsData
+              .find(_v =>
+                equals_ignore_case(
+                  _v?.operator_address,
+                  p,
+                )
+              )
 
-          return {
-            voter: broadcaster_address ||
-              p,
-            validator_data,
-          }
-        })
+            const {
+              broadcaster_address,
+            } = { ...validator_data }
+
+            return {
+              voter:
+                broadcaster_address ||
+                p,
+              validator_data,
+            }
+          })
 
       setVotes(
         _.concat(
@@ -133,9 +161,10 @@ export default ({
           {
             Header: '#',
             accessor: 'i',
-            sortType: (a, b) => a.original.i > b.original.i ?
-              1 :
-              -1,
+            sortType: (a, b) =>
+              a.original.i > b.original.i ?
+                1 :
+                -1,
             Cell: props => (
               <span className="font-medium">
                 {number_format(
@@ -242,34 +271,41 @@ export default ({
           {
             Header: 'Voting Power',
             accessor: 'validator_data.quadratic_voting_power',
-            sortType: (a, b) => a.original.validator_data?.quadratic_voting_power > b.original.validator_data?.quadratic_voting_power ?
-              1 :
-              -1,
+            sortType: (a, b) =>
+              a.original.validator_data?.quadratic_voting_power > b.original.validator_data?.quadratic_voting_power ?
+                1 :
+                -1,
             Cell: props => {
               const {
                 value,
               } = { ...props }
 
-              const total_voting_power = _.sumBy(
-                (validatorsData || [])
-                  .filter(v =>
-                    !v.jailed &&
-                    ['BOND_STATUS_BONDED'].includes(v.status)
-                  ),
-                'quadratic_voting_power',
-              )
+              const total_voting_power =
+                _.sumBy(
+                  (validatorsData || [])
+                    .filter(v =>
+                      !v.jailed &&
+                      ['BOND_STATUS_BONDED'].includes(v.status)
+                    ),
+                  'quadratic_voting_power',
+                )
 
               return (
                 <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                   {
-                    votes.findIndex(v => v?.validator_data) > -1 &&
+                    votes
+                      .findIndex(v =>
+                        v?.validator_data
+                      ) > -1 &&
                     validatorsData ?
                     <>
                       <span
-                        title={number_format(
-                          value,
-                          '0,0',
-                        )}
+                        title={
+                          number_format(
+                            value,
+                            '0,0',
+                          )
+                        }
                         className="uppercase text-slate-600 dark:text-slate-200 font-semibold"
                       >
                         {number_format(
@@ -314,7 +350,8 @@ export default ({
                 confirmed,
               } = { ...props.row.original }
 
-              return value &&
+              return (
+                value &&
                 (
                   <div className="flex flex-col mb-3">
                     <div className="flex items-center space-x-0.5">
@@ -356,6 +393,7 @@ export default ({
                     }
                   </div>
                 )
+              )
             },
           },
           {
@@ -367,7 +405,8 @@ export default ({
                 value,
               } = { ...props }
 
-              return value &&
+              return (
+                value &&
                 (
                   <Link href={`/block/${value}`}>
                     <a
@@ -382,28 +421,31 @@ export default ({
                     </a>
                   </Link>
                 )
+              )
             },
           },
           {
             Header: 'Vote',
             accessor: 'vote',
-            sortType: (a, b) => typeof a.original.vote !== 'boolean' ?
-              -1 :
-              typeof b.original.vote !== 'boolean' ?
-                1 :
-                a.original.vote > b.original.vote ?
+            sortType: (a, b) =>
+              typeof a.original.vote !== 'boolean' ?
+                -1 :
+                typeof b.original.vote !== 'boolean' ?
                   1 :
-                  -1,
+                  a.original.vote > b.original.vote ?
+                    1 :
+                    -1,
             Cell: props => {
               let {
                 value,
               } = { ...props }
 
-              value = value ?
-                'yes' :
-                typeof value === 'boolean' ?
-                  'no' :
-                  'unsubmitted'
+              value =
+                value ?
+                  'yes' :
+                  typeof value === 'boolean' ?
+                    'no' :
+                    'unsubmitted'
 
               return (
                 <div className="flex flex-col items-end text-right">
@@ -429,13 +471,15 @@ export default ({
                 value,
               } = { ...props }
 
-              return value &&
+              return (
+                value &&
                 (
                   <TimeAgo
                     time={value}
                     className="ml-auto"
                   />
                 )
+              )
             },
             headerClassName: 'justify-end text-right',
           },

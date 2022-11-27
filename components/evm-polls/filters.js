@@ -289,122 +289,63 @@ export default () => {
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
       buttonClassName={`max-w-min ${filtered ? 'border-2 border-blue-500 dark:border-blue-500 text-blue-500 dark:text-blue-500 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-75 dark:hover:bg-opacity-75 font-normal'} rounded tracking-wider text-sm sm:text-base py-1 px-2.5`}
-      title={<div className="flex items-center justify-between">
-        <span>
-          Filter Polls
-        </span>
-        <div
-          onClick={() => setHidden(true)}
-          className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
-        >
-          <BiX
-            size={18}
-          />
+      title={
+        <div className="flex items-center justify-between">
+          <span>
+            Filter Polls
+          </span>
+          <div
+            onClick={() => setHidden(true)}
+            className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
+          >
+            <BiX
+              size={18}
+            />
+          </div>
         </div>
-      </div>}
-      body={<div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
-        {fields
-          .map((f, i) => {
-            const {
-              label,
-              name,
-              type,
-              placeholder,
-              options,
-              className,
-            } = { ...f }
+      }
+      body={
+        <div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
+          {fields
+            .map((f, i) => {
+              const {
+                label,
+                name,
+                type,
+                placeholder,
+                options,
+                className,
+              } = { ...f }
 
-            const hidden = !(
-              ![
-                'vote',
-              ].includes(name) ||
-              (
-                [
+              const hidden = !(
+                ![
                   'vote',
-                ].includes(name) &&
-                filters?.voter?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)
+                ].includes(name) ||
+                (
+                  [
+                    'vote',
+                  ].includes(name) &&
+                  filters?.voter?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)
+                )
               )
-            )
 
-            return !hidden &&
-              (
-                <div
-                  key={i}
-                  className={`form-element ${className || ''}`}
-                >
-                  {
-                    label &&
-                    (
-                      <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                        {label}
-                      </div>
-                    )
-                  }
-                  {type === 'select' ?
-                    <select
-                      placeholder={placeholder}
-                      value={filters?.[name]}
-                      onChange={e =>
-                        setFilters(
-                          {
-                            ...filters,
-                            [`${name}`]: e.target.value,
-                          }
-                        )
-                      }
-                      className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
-                    >
-                      {(options || [])
-                        .map((o, i) => {
-                          const {
-                            title,
-                            value,
-                          } = { ...o }
-
-                          return (
-                            <option
-                              key={i}
-                              title={title}
-                              value={value}
-                            >
-                              {title}
-                            </option>
-                          )
-                        })
-                      }
-                    </select> :
-                    type === 'datetime-range' ?
-                      <DatePicker.RangePicker
-                        showTime
-                        format="YYYY/MM/DD HH:mm:ss"
-                        ranges={{
-                          Today: [
-                            moment()
-                              .startOf('day'),
-                            moment()
-                              .endOf('day'),
-                          ],
-                          'This Month': [
-                            moment()
-                              .startOf('month'),
-                            moment()
-                              .endOf('month'),
-                          ],
-                        }}
-                        value={filters?.[name]}
-                        onChange={v =>
-                          setFilters(
-                            {
-                              ...filters,
-                              [`${name}`]: v,
-                            }
-                          )
-                        }
-                        className="form-input border-0 focus:ring-0 rounded"
-                        style={{ display: 'flex' }}
-                      /> :
-                      <input
-                        type={type}
+              return (
+                !hidden &&
+                (
+                  <div
+                    key={i}
+                    className={`form-element ${className || ''}`}
+                  >
+                    {
+                      label &&
+                      (
+                        <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                          {label}
+                        </div>
+                      )
+                    }
+                    {type === 'select' ?
+                      <select
                         placeholder={placeholder}
                         value={filters?.[name]}
                         onChange={e =>
@@ -415,14 +356,79 @@ export default () => {
                             }
                           )
                         }
-                        className="form-input border-0 focus:ring-0 rounded"
-                      />
-                  }
-                </div>
+                        className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
+                      >
+                        {(options || [])
+                          .map((o, i) => {
+                            const {
+                              title,
+                              value,
+                            } = { ...o }
+
+                            return (
+                              <option
+                                key={i}
+                                title={title}
+                                value={value}
+                              >
+                                {title}
+                              </option>
+                            )
+                          })
+                        }
+                      </select> :
+                      type === 'datetime-range' ?
+                        <DatePicker.RangePicker
+                          showTime
+                          format="YYYY/MM/DD HH:mm:ss"
+                          ranges={{
+                            Today: [
+                              moment()
+                                .startOf('day'),
+                              moment()
+                                .endOf('day'),
+                            ],
+                            'This Month': [
+                              moment()
+                                .startOf('month'),
+                              moment()
+                                .endOf('month'),
+                            ],
+                          }}
+                          value={filters?.[name]}
+                          onChange={v =>
+                            setFilters(
+                              {
+                                ...filters,
+                                [`${name}`]: v,
+                              }
+                            )
+                          }
+                          className="form-input border-0 focus:ring-0 rounded"
+                          style={{ display: 'flex' }}
+                        /> :
+                        <input
+                          type={type}
+                          placeholder={placeholder}
+                          value={filters?.[name]}
+                          onChange={e =>
+                            setFilters(
+                              {
+                                ...filters,
+                                [`${name}`]: e.target.value,
+                              }
+                            )
+                          }
+                          className="form-input border-0 focus:ring-0 rounded"
+                        />
+                    }
+                  </div>
+                )
               )
-          })
-        }
-      </div>}
+            })
+          }
+        </div>
+      }
       noCancelOnClickOutside={true}
       onCancel={() => {
         setFilters(null)

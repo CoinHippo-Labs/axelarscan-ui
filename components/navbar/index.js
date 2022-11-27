@@ -703,7 +703,6 @@ export default () => {
           case '/validators/[status]':
           case '/validator/[address]':
           case '/account/[address]':
-          case '/evm-votes':
           case '/evm-polls':
           case '/evm-poll/[id]':
           case '/participations':
@@ -975,7 +974,6 @@ export default () => {
         evm_chains_data &&
         [
           '/validator',
-          '/evm-votes',
           '/participations',
           '/proposals',
         ].findIndex(p =>

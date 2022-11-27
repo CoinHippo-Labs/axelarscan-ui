@@ -268,11 +268,12 @@ export default () => {
 
                                 return {
                                   ...v,
-                                  option: vote ?
-                                    'yes' :
-                                    typeof vote === 'boolean' ?
-                                      'no' :
-                                      'unsubmitted',
+                                  option:
+                                    vote ?
+                                      'yes' :
+                                      typeof vote === 'boolean' ?
+                                        'no' :
+                                        'unsubmitted',
                                 }
                               }),
                             'option',
@@ -281,8 +282,9 @@ export default () => {
                         .map(([k, v]) => {
                           return {
                             option: k,
-                            value: (v || [])
-                              .length,
+                            value:
+                              (v || [])
+                                .length,
                           }
                         })
                         .filter(v => v.value)
@@ -293,35 +295,38 @@ export default () => {
 
                           return {
                             ...v,
-                            i: option === 'yes' ?
-                              0 :
-                              option === 'no' ?
-                                1 :
-                                2
+                            i:
+                              option === 'yes' ?
+                                0 :
+                                option === 'no' ?
+                                  1 :
+                                  2
                           }
                         })
 
                       if (
                         participants?.length > 0 &&
-                        vote_options.findIndex(v =>
-                          v?.option === 'unsubmitted'
-                        ) < 0 &&
+                        vote_options
+                          .findIndex(v =>
+                            v?.option === 'unsubmitted'
+                          ) < 0 &&
                         _.sumBy(
                           vote_options,
                           'value',
                         ) < participants.length
                       ) {
-                        vote_options.push(
-                          {
-                            option: 'unsubmitted',
-                            value:
-                              participants.length -
-                              _.sumBy(
-                                vote_options,
-                                'value',
-                              ),
-                          }
-                        )
+                        vote_options
+                          .push(
+                            {
+                              option: 'unsubmitted',
+                              value:
+                                participants.length -
+                                _.sumBy(
+                                  vote_options,
+                                  'value',
+                                ),
+                            }
+                          )
                       }
 
                       vote_options =
@@ -608,144 +613,146 @@ export default () => {
                   chain_id,
                 } = { ...chain_data }
 
-                return confirmation_events?.length > 0 ?
-                  <div className="flex flex-col space-y-1">
-                    {confirmation_events
-                      .map((e, i) => {
-                        const {
-                          type,
-                          txID,
-                          asset,
-                          amount,
-                        } = { ...e }
-                        let {
-                          symbol,
-                        } = { ...e }
-
-                        const __url =
-                          ![
-                            'tokenConfirmation',
-                          ].includes(type) &&
-                          txID ?
-                            `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
-                            _url
-
-                        let _type
-
-                        switch (type) {
-                          case 'depositConfirmation':
-                            _type = 'Transfer'
-                            break
-                          case 'ContractCallApproved':
-                            _type = 'ContractCall'
-                            break
-                          case 'ContractCallApprovedWithMint':
-                            _type = 'ContractCallWithToken'
-                            break
-                          default:
-                            _type = type ||
-                              value
-                            break
-                        }
-
-                        const asset_data =
-                          getAsset(
-                            asset ||
+                return (
+                  confirmation_events?.length > 0 ?
+                    <div className="flex flex-col space-y-1">
+                      {confirmation_events
+                        .map((e, i) => {
+                          const {
+                            type,
+                            txID,
+                            asset,
+                            amount,
+                          } = { ...e }
+                          let {
                             symbol,
-                            assets_data,
-                          )
-                        const {
-                          id,
-                          contracts,
-                        } = { ...asset_data }
-                        let {
-                          image,
-                        } = { ...asset_data }
+                          } = { ...e }
 
-                        const contract_data = (contracts || [])
-                          .find(c =>
-                            c?.chain_id === chain_id
-                          )
+                          const __url =
+                            ![
+                              'tokenConfirmation',
+                            ].includes(type) &&
+                            txID ?
+                              `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
+                              _url
 
-                        symbol =
-                          contract_data?.symbol ||
-                          asset_data?.symbol ||
-                          symbol
+                          let _type
 
-                        image =
-                          contract_data?.image ||
-                          image
+                          switch (type) {
+                            case 'depositConfirmation':
+                              _type = 'Transfer'
+                              break
+                            case 'ContractCallApproved':
+                              _type = 'ContractCall'
+                              break
+                            case 'ContractCallApprovedWithMint':
+                              _type = 'ContractCallWithToken'
+                              break
+                            default:
+                              _type = type ||
+                                value
+                              break
+                          }
 
-                        return (
-                          <a
-                            key={i}
-                            href={__url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-fit min-w-max bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
-                          >
-                            <span className="capitalize text-sm lg:text-base font-medium">
+                          const asset_data =
+                            getAsset(
+                              asset ||
+                              symbol,
+                              assets_data,
+                            )
+                          const {
+                            id,
+                            contracts,
+                          } = { ...asset_data }
+                          let {
+                            image,
+                          } = { ...asset_data }
+
+                          const contract_data = (contracts || [])
+                            .find(c =>
+                              c?.chain_id === chain_id
+                            )
+
+                          symbol =
+                            contract_data?.symbol ||
+                            asset_data?.symbol ||
+                            symbol
+
+                          image =
+                            contract_data?.image ||
+                            image
+
+                          return (
+                            <a
+                              key={i}
+                              href={__url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-fit min-w-max bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
+                            >
+                              <span className="capitalize text-sm lg:text-base font-medium">
+                                {
+                                  name(_type)
+                                    .split(' ')
+                                    .join('')
+                                }
+                              </span>
                               {
-                                name(_type)
-                                  .split(' ')
-                                  .join('')
+                                symbol &&
+                                (
+                                  <div className="flex items-center space-x-1">
+                                    {
+                                      image &&
+                                      (
+                                        <Image
+                                          src={image}
+                                          alt=""
+                                          className="w-4 h-4 rounded-full"
+                                        />
+                                      )
+                                    }
+                                    {
+                                      amount &&
+                                      (
+                                        <span className="text-xs">
+                                          {number_format(
+                                            assetManager.amount(
+                                              amount,
+                                              id,
+                                              assets_data,
+                                              chain_id,
+                                            ),
+                                            '0,0.000',
+                                          )}
+                                        </span>
+                                      )
+                                    }
+                                    <span className="text-xs">
+                                      {symbol}
+                                    </span>
+                                  </div>
+                                )
                               }
-                            </span>
-                            {
-                              symbol &&
-                              (
-                                <div className="flex items-center space-x-1">
-                                  {
-                                    image &&
-                                    (
-                                      <Image
-                                        src={image}
-                                        alt=""
-                                        className="w-4 h-4 rounded-full"
-                                      />
-                                    )
-                                  }
-                                  {
-                                    amount &&
-                                    (
-                                      <span className="text-xs">
-                                        {number_format(
-                                          assetManager.amount(
-                                            amount,
-                                            id,
-                                            assets_data,
-                                            chain_id,
-                                          ),
-                                          '0,0.000',
-                                        )}
-                                      </span>
-                                    )
-                                  }
-                                  <span className="text-xs">
-                                    {symbol}
-                                  </span>
-                                </div>
-                              )
-                            }
-                          </a>
-                        )
-                      })
-                    }
-                  </div> :
-                  value &&
-                    (
-                      <a
-                        href={_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium -mt-0.5 py-0.5 px-2"
-                      >
-                        {name(value)
-                          .split(' ')
-                          .join('')
-                        }
-                      </a>
-                    )
+                            </a>
+                          )
+                        })
+                      }
+                    </div> :
+                    value &&
+                      (
+                        <a
+                          href={_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="max-w-min bg-slate-200 dark:bg-slate-800 rounded capitalize text-sm lg:text-base font-medium -mt-0.5 py-0.5 px-2"
+                        >
+                          {name(value)
+                            .split(' ')
+                            .join('')
+                          }
+                        </a>
+                      )
+                )
               },
             },
             {
@@ -773,7 +780,8 @@ export default () => {
                   transaction_path,
                 } = { ...explorer }
 
-                return value && 
+                return (
+                  value && 
                   (
                     <div className="h-6 flex items-center space-x-1">
                       {url ?
@@ -807,6 +815,7 @@ export default () => {
                       }
                     </div>
                   )
+                )
               },
               headerClassName: 'whitespace-nowrap',
             },
@@ -822,7 +831,8 @@ export default () => {
                   _url,
                 } = { ...props.row.original }
 
-                return value && 
+                return (
+                  value && 
                   (
                     <div className="flex items-center space-x-1">
                       <a
@@ -839,6 +849,7 @@ export default () => {
                       />
                     </div>
                   )
+                )
               },
               headerClassName: 'whitespace-nowrap',
             },*/
@@ -857,7 +868,8 @@ export default () => {
                   id,
                 } = { ...confirmation_vote }
 
-                return value && 
+                return (
+                  value && 
                   (
                     <div className="flex flex-col space-y-0.5">
                       <Link href={`/block/${value}`}>
@@ -894,6 +906,7 @@ export default () => {
                       }
                     </div>
                   )
+                )
               },
               headerClassName: 'whitespace-nowrap',
             },
@@ -958,7 +971,8 @@ export default () => {
                   id,
                 } = { ...props.row.original }
 
-                return value &&
+                return (
+                  value &&
                   (
                     <Link href={`/evm-poll/${id}`}>
                       <a
@@ -999,6 +1013,7 @@ export default () => {
                       </a>
                     </Link>
                   )
+                )
               },
             },
             {

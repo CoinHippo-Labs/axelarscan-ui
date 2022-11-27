@@ -6,7 +6,6 @@ import { IoMdCube } from 'react-icons/io'
 import { RiFilePaperFill } from 'react-icons/ri'
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 
-import EVMVoteFilters from '../../evm-votes/filters'
 import EVMPollFilters from '../../evm-polls/filters'
 import TransactionFilters from '../../transactions/filters'
 import TransferFilters from '../../transfers/filters'
@@ -219,12 +218,6 @@ export default () => {
           address={address}
           ellipse_size={12}
         />
-      )
-      break
-    case '/evm-votes':
-      title = 'EVM votes'
-      right = (
-        <EVMVoteFilters />
       )
       break
     case '/evm-polls':

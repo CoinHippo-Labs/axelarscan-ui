@@ -22,14 +22,16 @@ export default () => {
   useEffect(() => {
     const getData = async () => {
       if (id) {
-        const response = await evm_polls(
-          {
-            pollId: id,
-          },
-        )
+        const response =
+          await evm_polls(
+            {
+              pollId: id,
+            },
+          )
 
-        const data = Array.isArray(response?.data) &&
-           _.head(response.data)
+        const data =
+          Array.isArray(response?.data) &&
+          _.head(response.data)
 
         if (data) {
           const _data = {},
@@ -51,17 +53,18 @@ export default () => {
             {
               data: {
                 ..._data,
-                votes: _.orderBy(
-                  votes,
-                  [
-                    'height',
-                    'created_at',
-                  ],
-                  [
-                    'desc',
-                    'desc',
-                  ],
-                ),
+                votes:
+                  _.orderBy(
+                    votes,
+                    [
+                      'height',
+                      'created_at',
+                    ],
+                    [
+                      'desc',
+                      'desc',
+                    ],
+                  ),
               },
               id,
             }
@@ -73,7 +76,10 @@ export default () => {
             participants,
           } = { ..._data }
 
-          const confirmation_vote = votes.find(v => v?.confirmed)
+          const confirmation_vote = votes
+            .find(v =>
+              v?.confirmed
+            )
 
           if (
             height &&
@@ -113,10 +119,11 @@ export default () => {
 
     getData()
 
-    const interval = setInterval(() =>
-      getData(),
-      0.5 * 60 * 1000,
-    )
+    const interval =
+      setInterval(() =>
+        getData(),
+        0.5 * 60 * 1000,
+      )
 
     return () => clearInterval(interval)
   }, [id])
@@ -131,77 +138,87 @@ export default () => {
 
   const matched = poll?.id === id
 
-  let vote_options = matched ?
-    Object.entries(
-      _.groupBy(
-        (votes || [])
-          .map(v => {
-            const {
-              vote,
-            } = { ...v }
+  let vote_options =
+    matched ?
+      Object.entries(
+        _.groupBy(
+          (votes || [])
+            .map(v => {
+              const {
+                vote,
+              } = { ...v }
 
-            return {
-              ...v,
-              option: vote ?
-                'yes' :
-                typeof vote === 'boolean' ?
-                  'no' :
-                  'unsubmitted',
-            }
-          }),
-        'option',
+              return {
+                ...v,
+                option:
+                  vote ?
+                    'yes' :
+                    typeof vote === 'boolean' ?
+                      'no' :
+                      'unsubmitted',
+              }
+            }),
+          'option',
+        )
       )
-    )
-    .map(([k, v]) => {
-      return {
-        option: k,
-        value: (v || [])
-          .length,
-      }
-    })
-    .filter(v => v.value) :
-    []
+      .map(([k, v]) => {
+        return {
+          option: k,
+          value:
+            (v || [])
+              .length,
+        }
+      })
+      .filter(v => v.value) :
+      []
 
   if (
     matched &&
     participants?.length > 0 &&
-    vote_options.findIndex(v => v?.option === 'unsubmitted') < 0 &&
+    vote_options
+      .findIndex(v =>
+        v?.option === 'unsubmitted'
+      ) < 0 &&
     _.sumBy(
       vote_options,
       'value',
     ) < participants.length
   ) {
-    vote_options.push(
-      {
-        option: 'unsubmitted',
-        value: participants.length -
-          _.sumBy(
-            vote_options,
-            'value',
-          ),
-      }
-    )
+    vote_options
+      .push(
+        {
+          option: 'unsubmitted',
+          value:
+            participants.length -
+            _.sumBy(
+              vote_options,
+              'value',
+            ),
+        }
+      )
   }
 
-  vote_options = _.orderBy(
-    vote_options
-      .map(v => {
-        const {
-          option,
-        } = { ...v }
+  vote_options =
+    _.orderBy(
+      vote_options
+        .map(v => {
+          const {
+            option,
+          } = { ...v }
 
-        return {
-          ...v,
-          i: option === 'yes' ?
-            0 :
-            option === 'no' ?
-              1 :
-              2
-        }
-      }),
-    ['i'],
-    ['asc'],
-  )
+          return {
+            ...v,
+            i:
+              option === 'yes' ?
+                0 :
+                option === 'no' ?
+                  1 :
+                  2
+          }
+        }),
+      ['i'],
+      ['asc'],
+    )
 
   return (
     <div className="space-y-5 mt-2 mb-6 mx-auto">
