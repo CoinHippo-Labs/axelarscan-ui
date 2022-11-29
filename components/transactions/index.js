@@ -941,7 +941,7 @@ export default (
                         }
                         className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400'} rounded mb-1 py-1 px-2.5`}
                       >
-                        <span className="whitespace-nowrap font-bold">
+                        <span className="whitespace-nowrap font-semibold">
                           Export CSV
                         </span>
                       </CSVLink>

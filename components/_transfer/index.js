@@ -423,6 +423,12 @@ export default () => {
     send?.original_destination_chain ||
     original_destination_chain
 
+  deposit_address =
+    wrap?.deposit_address ||
+    unwrap?.deposit_address_link ||
+    send?.recipient_address ||
+    deposit_address
+
   recipient_address =
     unwrap?.recipient_address ||
     recipient_address
@@ -452,12 +458,6 @@ export default () => {
       'axelarnet',
       chains_data,
     )
-
-  deposit_address =
-    wrap?.deposit_address ||
-    unwrap?.deposit_address_link ||
-    send?.recipient_address ||
-    deposit_address
 
   const deposit_chain_data =
     getChain(
@@ -1108,15 +1108,22 @@ export default () => {
                     {
                       insufficient_fee &&
                       (
-                        <Tooltip
-                          placement="top"
-                          content={`Send more ${ellipse(symbol)} to the same recipient to cover the min fee`}
-                          className="w-56 z-50 bg-black bg-opacity-75 text-white text-xs"
-                        >
-                          <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 cursor-pointer border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                        [
+                          'deposit_address',
+                          'unwrap',
+                        ].includes(type) ?
+                          <Tooltip
+                            placement="top"
+                            content={`Send more ${ellipse(symbol)} to the same recipient to cover the min fee`}
+                            className="w-56 z-50 bg-black bg-opacity-75 text-white text-xs"
+                          >
+                            <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 cursor-pointer border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                              Insufficient Fee
+                            </div>
+                          </Tooltip> :
+                          <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                             Insufficient Fee
                           </div>
-                        </Tooltip>
                       )
                     }
                     {

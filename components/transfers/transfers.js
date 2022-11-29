@@ -374,7 +374,7 @@ export default ({ n }) => {
                 filename={`transfers${Object.entries({ ...filters }).filter(([k, v]) => v).map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`).join('') || (address ? `_${address}` : '')}.csv`}
                 className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg mb-1 py-1 px-2.5`}
               >
-                <span className="whitespace-nowrap font-bold">
+                <span className="whitespace-nowrap font-semibold">
                   Export CSV
                 </span>
               </CSVLink>
