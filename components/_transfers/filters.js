@@ -86,7 +86,9 @@ export default () => {
         } = { ...params }
 
         setFilters(
-          pathname === '/transfers' ?
+          [
+            '/_transfers',
+          ].includes(pathname) ?
             {
               sourceChain:
                 getChain(
@@ -462,7 +464,9 @@ export default () => {
       },
     ]
     .filter(f =>
-      pathname !== '/transfers' ||
+      ![
+        '/_transfers',
+      ].includes(pathname) ||
       ![
         'txHash',
         'confirmed',
@@ -571,13 +575,13 @@ export default () => {
                       <DatePicker.RangePicker
                         showTime={
                           ![
-                            '/transfers',
+                            '/_transfers',
                           ].includes(pathname)
                         }
                         format={
                           `YYYY/MM/DD${
                             ![
-                              '/transfers',
+                              '/_transfers',
                             ].includes(pathname) ?
                               ' HH:mm:ss' :
                               ''
