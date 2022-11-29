@@ -4,26 +4,35 @@ import { BiChevronDown, BiChevronUp } from 'react-icons/bi'
 
 import Image from '../image'
 
-export default ({
-  data = [],
-  placeholder = 'Select Options',
-  hasAllOptions = true,
-  allOptionsName = 'All',
-  defaultSelectedKey,
-  onSelect,
-}) => {
+export default (
+  {
+    data = [],
+    placeholder = 'Select Options',
+    hasAllOptions = true,
+    allOptionsName = 'All',
+    defaultSelectedKey,
+    onSelect,
+  },
+) => {
   const [options, setOptions] = useState(null)
   const [selectedKey, setSelectedKey] = useState(null)
 
-  useEffect(() => {
-    setOptions(
-      data.filter(d => d)
-    )
-  }, [data])
+  useEffect(
+    () => {
+      setOptions(
+        data
+          .filter(d => d)
+      )
+    },
+    [data],
+  )
 
-  useEffect(() => {
-    setSelectedKey(defaultSelectedKey)
-  }, [defaultSelectedKey])
+  useEffect(
+    () => {
+      setSelectedKey(defaultSelectedKey)
+    },
+    [defaultSelectedKey],
+  )
 
   const selectedData =
     (options || [])

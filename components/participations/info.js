@@ -202,7 +202,6 @@ export default ({ data }) => {
                     {chainManager.image(c?.params?.chain, evm_chains_data) && (
                       <Image
                         src={chainManager.image(c.params.chain, evm_chains_data)}
-                        alt=""
                         className="w-6 h-6 rounded-full"
                       />
                     )}

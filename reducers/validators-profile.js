@@ -10,12 +10,13 @@ export default (
     case VALIDATORS_PROFILE_DATA:
       return {
         ...state,
-        [`${VALIDATORS_PROFILE_DATA}`]: action.value ?
-          {
-            ...state[`${VALIDATORS_PROFILE_DATA}`],
-            ...action.value,
-          } :
-          {},
+        [`${VALIDATORS_PROFILE_DATA}`]:
+          action.value ?
+            {
+              ...state[`${VALIDATORS_PROFILE_DATA}`],
+              ...action.value,
+            } :
+            {},
       }
     default:
       return state

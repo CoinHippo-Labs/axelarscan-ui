@@ -40,103 +40,106 @@ export default () => {
 
   const [proposal, setProposal] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        id &&
-        assets_data &&
-        validators_data
-      ) {
-        const response =
-          await getProposal(
-            id,
-            null,
-            assets_data,
-          )
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          id &&
+          assets_data &&
+          validators_data
+        ) {
+          const response =
+            await getProposal(
+              id,
+              null,
+              assets_data,
+            )
 
-        const _response =
-          await all_proposal_votes(
-            id,
-          )
+          const _response =
+            await all_proposal_votes(
+              id,
+            )
 
-        const {
-          data,
-        } = { ..._response }
+          const {
+            data,
+          } = { ..._response }
 
-        setProposal(
-          {
-            data: {
-              ...response,
-              votes:
-                _.orderBy(
-                  (data || [])
-                    .map(v => {
-                      const {
-                        voter,
-                      } = { ...v }
+          setProposal(
+            {
+              data: {
+                ...response,
+                votes:
+                  _.orderBy(
+                    (data || [])
+                      .map(v => {
+                        const {
+                          voter,
+                        } = { ...v }
 
-                      const validator_data = validators_data
-                        .find(_v =>
-                          equals_ignore_case(
-                            _v?.delegator_address,
-                            voter,
+                        const validator_data = validators_data
+                          .find(_v =>
+                            equals_ignore_case(
+                              _v?.delegator_address,
+                              voter,
+                            )
                           )
-                        )
-                      const {
-                        tokens,
-                      } = { ...validator_data }
+                        const {
+                          tokens,
+                        } = { ...validator_data }
 
-                      const _tokens =
-                        assetManager
-                          .amount(
-                            tokens,
-                            native_asset_id,
-                            assets_data,
-                          )
+                        const _tokens =
+                          assetManager
+                            .amount(
+                              tokens,
+                              native_asset_id,
+                              assets_data,
+                            )
 
-                      return {
-                        ...v,
-                        validator_data: {
-                          ...validator_data,
-                          tokens: _tokens,
-                          quadratic_voting_power:
-                            _tokens > 0 &&
-                            Math.floor(
-                              Math.sqrt(
-                                _tokens,
-                              )
-                            ),
-                        },
-                      }
-                    }),
-                  [
-                    // 'validator_data.quadratic_voting_power',
-                    'validator_data.tokens',
-                    'validator_data.description.moniker',
-                  ],
-                  [
-                    // 'desc',
-                    'desc',
-                    'asc',
-                  ],
-                ),
-            },
-            id,
-          }
-        )
+                        return {
+                          ...v,
+                          validator_data: {
+                            ...validator_data,
+                            tokens: _tokens,
+                            quadratic_voting_power:
+                              _tokens > 0 &&
+                              Math.floor(
+                                Math.sqrt(
+                                  _tokens,
+                                )
+                              ),
+                          },
+                        }
+                      }),
+                    [
+                      // 'validator_data.quadratic_voting_power',
+                      'validator_data.tokens',
+                      'validator_data.description.moniker',
+                    ],
+                    [
+                      // 'desc',
+                      'desc',
+                      'asc',
+                    ],
+                  ),
+              },
+              id,
+            }
+          )
+        }
       }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(),
-        3 * 60 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(),
+          3 * 60 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [id, assets_data, validators_data])
+      return () => clearInterval(interval)
+    },
+    [id, assets_data, validators_data],
+  )
 
   const {
     data,
@@ -153,7 +156,8 @@ export default () => {
     matched ?
       Object.entries(
         _.groupBy(
-          votes || [],
+          votes ||
+          [],
           'option',
         )
       )
@@ -212,6 +216,7 @@ export default () => {
                     </div>
                   )) :
                 vote_options
+                  .filter(v => v?.option)
                   .map((v, i) => {
                     const {
                       option,
@@ -230,10 +235,13 @@ export default () => {
                           )}
                         </span>
                         <span>
-                          {option?.replace(
-                            '_',
-                            ' ',
-                          )}
+                          {
+                            option
+                              .replace(
+                                '_',
+                                ' ',
+                              )
+                          }
                         </span>
                       </div>
                     )

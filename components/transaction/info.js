@@ -10,9 +10,11 @@ import ValidatorProfile from '../validator-profile'
 import AccountProfile from '../account-profile'
 import { number_format, name, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
 
-export default ({
-  data,
-}) => {
+export default (
+  {
+    data,
+  },
+) => {
   const {
     preferences,
     validators,
@@ -79,9 +81,11 @@ export default ({
             <Copy
               size={20}
               value={txhash}
-              title={<span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
-                {txhash}
-              </span>}
+              title={
+                <span className="cursor-pointer break-all text-black dark:text-white text-sm lg:text-base font-medium">
+                  {txhash}
+                </span>
+              }
             />
           ) :
           <ProgressBar
@@ -173,7 +177,13 @@ export default ({
           timestamp &&
           (
             <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-              {moment(timestamp).fromNow()} ({moment(timestamp).format('MMM D, YYYY h:mm:ss A')})
+              {
+                moment(timestamp)
+                  .fromNow()
+              } ({
+                moment(timestamp)
+                  .format('MMM D, YYYY h:mm:ss A')
+              })
             </span>
           ) :
           <ProgressBar
@@ -201,20 +211,23 @@ export default ({
                 </a>
               </Link>
               <div className="flex flex-col">
-                {moniker && (
-                  <Link href={`/validator/${operator_address}`}>
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                    >
-                      {ellipse(
-                        moniker,
-                        16,
-                      )}
-                    </a>
-                  </Link>
-                )}
+                {
+                  moniker &&
+                  (
+                    <Link href={`/validator/${operator_address}`}>
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                      >
+                        {ellipse(
+                          moniker,
+                          16,
+                        )}
+                      </a>
+                    </Link>
+                  )
+                }
                 <div className="flex items-center space-x-1">
                   <Link href={`/validator/${operator_address}`}>
                     <a
@@ -306,7 +319,8 @@ export default ({
           Gas Limit:
         </span>
         {data ?
-          gas_limit && (
+          gas_limit &&
+          (
             <span className="text-sm lg:text-base font-medium">
               {number_format(
                 gas_limit,

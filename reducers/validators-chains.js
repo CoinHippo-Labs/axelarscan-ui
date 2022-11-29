@@ -10,12 +10,13 @@ export default (
     case VALIDATORS_CHAINS_DATA:
       return {
         ...state,
-        [`${VALIDATORS_CHAINS_DATA}`]: action.value ?
-          {
-            ...state[`${VALIDATORS_CHAINS_DATA}`],
-            ...action.value,
-          } :
-          {},
+        [`${VALIDATORS_CHAINS_DATA}`]:
+          action.value ?
+            {
+              ...state[`${VALIDATORS_CHAINS_DATA}`],
+              ...action.value,
+            } :
+            {},
       }
     default:
       return state

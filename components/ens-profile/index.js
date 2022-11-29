@@ -30,63 +30,69 @@ export default ({
 
   const [noImage, setNoImage] = useState(no_image)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (address) {
-        const addresses = [address.toLowerCase()]
-          .filter(a =>
-            a &&
-            !ens_data?.[a]
-          )
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (address) {
+          const addresses =
+            [
+              address.toLowerCase()
+            ]
+            .filter(a =>
+              a &&
+              !ens_data?.[a]
+            )
 
-        if (addresses.length > 0) {
-          let _ens_data
+          if (addresses.length > 0) {
+            let _ens_data
 
-          addresses
-            .forEach(a => {
-              if (!_ens_data?.[a]) {
-                _ens_data = {
-                  ..._ens_data,
-                  [`${a}`]: {},
+            addresses
+              .forEach(a => {
+                if (!_ens_data?.[a]) {
+                  _ens_data = {
+                    ..._ens_data,
+                    [`${a}`]: {},
+                  }
                 }
-              }
-            })
+              })
 
-          dispatch(
-            {
-              type: ENS_DATA,
-              value: {
-                ..._ens_data,
-              },
-            }
-          )
-
-          _ens_data = await getEns(addresses)
-
-          addresses
-            .forEach(a => {
-              if (!_ens_data?.[a]) {
-                _ens_data = {
+            dispatch(
+              {
+                type: ENS_DATA,
+                value: {
                   ..._ens_data,
-                  [`${a}`]: {},
-                }
+                },
               }
-            })
+            )
 
-          dispatch(
-            {
-              type: ENS_DATA,
-              value: {
-                ..._ens_data,
-              },
-            }
-          )
+            _ens_data = await getEns(addresses)
+
+            addresses
+              .forEach(a => {
+                if (!_ens_data?.[a]) {
+                  _ens_data = {
+                    ..._ens_data,
+                    [`${a}`]: {},
+                  }
+                }
+              })
+
+            dispatch(
+              {
+                type: ENS_DATA,
+                value: {
+                  ..._ens_data,
+                },
+              }
+            )
+          }
         }
       }
-    }
 
-    getData()
-  }, [address, ens_data])
+      getData()
+    },
+    [address, ens_data],
+  )
 
   address = address?.toLowerCase()
 
@@ -119,26 +125,27 @@ export default ({
       </span>
     )
 
-  return ens_name ?
-    <div className="flex items-center space-x-2">
-      {
-        !noImage &&
-        (
-          <img
-            src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${name}`}
-            alt=""
-            onError={() => setNoImage(true)}
-            className="w-6 h-6 rounded-full"
+  return (
+    ens_name ?
+      <div className="flex items-center space-x-2">
+        {
+          !noImage &&
+          (
+            <img
+              src={`${process.env.NEXT_PUBLIC_ENS_AVATAR_URL}/${name}`}
+              onError={() => setNoImage(true)}
+              className="w-6 h-6 rounded-full"
+            />
+          )
+        }
+        {no_copy ?
+          ens_name :
+          <Copy
+            value={name}
+            title={ens_name}
           />
-        )
-      }
-      {no_copy ?
-        ens_name :
-        <Copy
-          value={name}
-          title={ens_name}
-        />
-      }
-    </div> :
-    fallback
+        }
+      </div> :
+      fallback
+  )
 }

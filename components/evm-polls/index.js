@@ -493,7 +493,11 @@ export default () => {
                     )
                   }
                   className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mt-1`}
-                  style={{ textTransform: 'none' }}
+                  style={
+                    {
+                      textTransform: 'none',
+                    }
+                  }
                 >
                   <span>
                     {k === 'undefined' ?
@@ -574,7 +578,6 @@ export default () => {
                         {image && (
                           <Image
                             src={image}
-                            alt=""
                             className="w-5 h-5 rounded-full"
                           />
                         )}
@@ -706,7 +709,6 @@ export default () => {
                                       (
                                         <Image
                                           src={image}
-                                          alt=""
                                           className="w-4 h-4 rounded-full"
                                         />
                                       )

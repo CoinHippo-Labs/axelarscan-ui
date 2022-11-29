@@ -1,7 +1,9 @@
-export default ({
-  alt = '',
-  ...rest
-}) => {
+export default (
+  {
+    alt = '',
+    ...rest
+  },
+) => {
   return (
     <img
       alt={alt}

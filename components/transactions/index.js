@@ -23,9 +23,11 @@ import { number_format, name, remove_chars, ellipse, equals_ignore_case, sleep, 
 
 const LIMIT = 100
 
-export default ({
-  n,
-}) => {
+export default (
+  {
+    n,
+  },
+) => {
   const {
     preferences,
     assets,
@@ -76,462 +78,478 @@ export default ({
   const [types, setTypes] = useState(null)
   const [filterTypes, setFilterTypes] = useState(null)
 
-  useEffect(() => {
-    if (asPath) {
-      const params =
-        params_to_obj(
-          asPath.indexOf('?') > -1 &&
-          asPath.substring(
-            asPath.indexOf('?') + 1,
+  useEffect(
+    () => {
+      if (asPath) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
+              )
           )
-        )
 
-      const {
-        txHash,
-        type,
-        status,
-        account,
-        fromTime,
-        toTime,
-      } = { ...params }
-
-      setFilters(
-        {
+        const {
           txHash,
           type,
-          status:
-            [
-              'success',
-              'failed',
-            ].includes(status?.toLowerCase()) ?
-              status.toLowerCase() :
-              undefined,
+          status,
           account,
-          time:
-            fromTime &&
-            toTime &&
-            [
-              moment(
-                Number(fromTime)
-              ),
-              moment(
-                Number(toTime)
-              ),
-            ],
-        }
-        )
-    }
-  }, [asPath])
+          fromTime,
+          toTime,
+        } = { ...params }
 
-  useEffect(() => {
-    const triggering = is_interval => {
-      setFetchTrigger(
-        is_interval ?
-          moment()
-            .valueOf() :
-          typeof fetchTrigger === 'number' ?
-            null :
-            0
-      )
-    }
-
-    if (
-      assets_data &&
-      pathname &&
-      filters
-    ) {
-      triggering()
-    }
-
-    const interval =
-      setInterval(() =>
-        triggering(true),
-        (
-          height ||
-          address ||
-          [
-            '/transactions/search',
-          ].includes(pathname) ?
-            3 :
-            0.1
-        ) * 60 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [assets_data, pathname, height, address, filters])
-
-  useEffect(() => {
-    const getData = async () => {
-      if (assets_data) {
-          setFetching(true)
-
-          if (!fetchTrigger) {
-            setTotal(null)
-            setData(null)
-            setDataForExport(null)
-            setOffet(0)
+        setFilters(
+          {
+            txHash,
+            type,
+            status:
+              [
+                'success',
+                'failed',
+              ].includes(status?.toLowerCase()) ?
+                status.toLowerCase() :
+                undefined,
+            account,
+            time:
+              fromTime &&
+              toTime &&
+              [
+                moment(
+                  Number(fromTime)
+                ),
+                moment(
+                  Number(toTime)
+                ),
+              ],
           }
+          )
+      }
+    },
+    [asPath],
+  )
 
-          const _data =
-            !fetchTrigger ?
-              [] :
-              data ||
-              []
-
-          const size =
-            n ||
-            ['/transactions/search'].includes(pathname) ?
-              filters?.type ?
-                25 :
-                50 :
-              LIMIT
-
-          const from =
-            fetchTrigger === true ||
-            fetchTrigger === 1 ?
-              _data.length :
+  useEffect(
+    () => {
+      const triggering = is_interval => {
+        setFetchTrigger(
+          is_interval ?
+            moment()
+              .valueOf() :
+            typeof fetchTrigger === 'number' ?
+              null :
               0
+        )
+      }
 
-          let response
+      if (
+        assets_data &&
+        pathname &&
+        filters
+      ) {
+        triggering()
+      }
 
-          if (height) {
-            response =
-              await transactions_by_events(
-                `tx.height=${height}`,
-                _data,
-                true,
-                assets_data,
-              )
-          }
-          else if (
-            address?.length >= 65 ||
-            type(address) === 'evm_address'
-          ) {
-            const _response =
-              await deposit_addresses(
-                {
-                  query: {
-                    match: { deposit_address: address },
-                  },
-                  size: 10,
-                  sort: [{ height: 'desc' }],
-                },
-              )
+      const interval =
+        setInterval(() =>
+          triggering(true),
+          (
+            height ||
+            address ||
+            [
+              '/transactions/search',
+            ].includes(pathname) ?
+              3 :
+              0.1
+          ) * 60 * 1000,
+        )
 
-            const {
-              data,
-            } = { ..._response }
+      return () => clearInterval(interval)
+    },
+    [assets_data, pathname, height, address, filters],
+  )
 
-            if (
-              _response?.data?.length > 0 ||
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (assets_data) {
+            setFetching(true)
+
+            if (!fetchTrigger) {
+              setTotal(null)
+              setData(null)
+              setDataForExport(null)
+              setOffet(0)
+            }
+
+            const _data =
+              !fetchTrigger ?
+                [] :
+                data ||
+                []
+
+            const size =
+              n ||
+              ['/transactions/search'].includes(pathname) ?
+                filters?.type ?
+                  25 :
+                  50 :
+                LIMIT
+
+            const from =
+              fetchTrigger === true ||
+              fetchTrigger === 1 ?
+                _data.length :
+                0
+
+            let response
+
+            if (height) {
+              response =
+                await transactions_by_events(
+                  `tx.height=${height}`,
+                  _data,
+                  true,
+                  assets_data,
+                )
+            }
+            else if (
+              address?.length >= 65 ||
               type(address) === 'evm_address'
             ) {
-              const {
-                deposit_address,
-              } = { ..._.head(_response.data) }
-
-              if (
-                equals_ignore_case(
-                  address,
-                  deposit_address,
-                )
-              ) {
-                address = deposit_address
-              }
-
-              if (type(address) === 'account') {
-                response =
-                  await transactions_by_events(
-                    `transfer.sender='${address}'`,
-                    response?.data,
-                    false,
-                    assets_data,
-                    10,
-                  )
-
-                response =
-                  await transactions_by_events(
-                    `message.sender='${address}'`,
-                    response?.data,
-                    false,
-                    assets_data,
-                    10,
-                  )
-              }
-
-              if (type(address) === 'evm_address') {
-                address = utils.getAddress(address)
-              }
-
-              response =
-                await transactions_by_events(
-                  `link.depositAddress='${address}'`,
-                  response?.data,
-                  false,
-                  assets_data,
-                  10,
-                )
-
-              response =
-                await transactions_by_events(
-                  `transfer.recipient='${address}'`,
-                  response?.data,
-                  false,
-                  assets_data,
-                  10,
+              const _response =
+                await deposit_addresses(
+                  {
+                    query: {
+                      match: { deposit_address: address },
+                    },
+                    size: 10,
+                    sort: [{ height: 'desc' }],
+                  },
                 )
 
               const {
                 data,
-              } = { ...response }
+              } = { ..._response }
 
-              if (data) {
-                data
-                  .forEach(d => {
-                    const {
-                      txhash,
-                    } = { ...d }
+              if (
+                _response?.data?.length > 0 ||
+                type(address) === 'evm_address'
+              ) {
+                const {
+                  deposit_address,
+                } = { ..._.head(_response.data) }
 
-                    getTransaction(txhash)
-                  })
+                if (
+                  equals_ignore_case(
+                    address,
+                    deposit_address,
+                  )
+                ) {
+                  address = deposit_address
+                }
 
-                await sleep(1 * 1000)
+                if (type(address) === 'account') {
+                  response =
+                    await transactions_by_events(
+                      `transfer.sender='${address}'`,
+                      response?.data,
+                      false,
+                      assets_data,
+                      10,
+                    )
+
+                  response =
+                    await transactions_by_events(
+                      `message.sender='${address}'`,
+                      response?.data,
+                      false,
+                      assets_data,
+                      10,
+                    )
+                }
+
+                if (type(address) === 'evm_address') {
+                  address = utils.getAddress(address)
+                }
+
+                response =
+                  await transactions_by_events(
+                    `link.depositAddress='${address}'`,
+                    response?.data,
+                    false,
+                    assets_data,
+                    10,
+                  )
+
+                response =
+                  await transactions_by_events(
+                    `transfer.recipient='${address}'`,
+                    response?.data,
+                    false,
+                    assets_data,
+                    10,
+                  )
+
+                const {
+                  data,
+                } = { ...response }
+
+                if (data) {
+                  data
+                    .forEach(d => {
+                      const {
+                        txhash,
+                      } = { ...d }
+
+                      getTransaction(txhash)
+                    })
+
+                  await sleep(1 * 1000)
+                }
+              }
+              else {
+                response =
+                  await getTransactions(
+                    {
+                      query: {
+                        match: { addresses: address },
+                      },
+                      size,
+                      from,
+                      sort: [{ timestamp: 'desc' }],
+                      fields:
+                        [
+                          'txhash',
+                          'height',
+                          'types',
+                          'code',
+                          'tx.body.messages.sender',
+                          'tx.body.messages.signer',
+                          'tx.auth_info.fee.amount.*',
+                          'timestamp',
+                        ],
+                      _source: {
+                        includes: 'logs',
+                      },
+                      track_total_hits: true,
+                    },
+                    assets_data,
+                  )
               }
             }
             else {
-              response = await getTransactions(
-                {
-                  query: {
-                    match: { addresses: address },
-                  },
-                  size,
-                  from,
-                  sort: [{ timestamp: 'desc' }],
-                  fields: [
-                    'txhash',
-                    'height',
-                    'types',
-                    'code',
-                    'tx.body.messages.sender',
-                    'tx.body.messages.signer',
-                    'tx.auth_info.fee.amount.*',
-                    'timestamp',
-                  ],
-                  _source: {
-                    includes: 'logs',
-                  },
-                  track_total_hits: true,
-                },
-                assets_data,
-              )
-            }
-          }
-          else {
-            const must = [],
-              must_not = []
+              const must = [],
+                must_not = []
 
-            if (address) {
-              must.push({ match: { addresses: address } })
-            }
-            else if (filters) {
-              const {
-                txHash,
-                type,
-                status,
-                account,
-                time,
-              } = { ...filters }
+              if (address) {
+                must.push({ match: { addresses: address } })
+              }
+              else if (filters) {
+                const {
+                  txHash,
+                  type,
+                  status,
+                  account,
+                  time,
+                } = { ...filters }
 
-              if (txHash) {
-                must.push({ match: { txhash: txHash } })
-              }
-              if (type) {
-                must.push({ match: { types: type } })
-              }
-              if (status) {
-                switch (status) {
-                  case 'success':
-                    must.push({ match: { code: 0 } })
-                    break
-                  default:
-                    must_not.push({ match: { code: 0 } })
-                    break
+                if (txHash) {
+                  must.push({ match: { txhash: txHash } })
+                }
+                if (type) {
+                  must.push({ match: { types: type } })
+                }
+                if (status) {
+                  switch (status) {
+                    case 'success':
+                      must.push({ match: { code: 0 } })
+                      break
+                    default:
+                      must_not.push({ match: { code: 0 } })
+                      break
+                  }
+                }
+                if (account) {
+                  must.push({ match: { addresses: account } })
+                }
+                if (time?.length > 1) {
+                  must.push({
+                    range: {
+                      timestamp: {
+                        gte:
+                          time[0]
+                            .valueOf(),
+                        lte:
+                          time[1]
+                            .valueOf(),
+                      },
+                    },
+                  })
                 }
               }
-              if (account) {
-                must.push({ match: { addresses: account } })
-              }
-              if (time?.length > 1) {
-                must.push({
-                  range: {
-                    timestamp: {
-                      gte:
-                        time[0]
-                          .valueOf(),
-                      lte:
-                        time[1]
-                          .valueOf(),
+
+              response =
+                await getTransactions(
+                  {
+                    query: {
+                      bool: {
+                        must,
+                        must_not,
+                      },
                     },
-                  },
-                })
-              }
-            }
-
-            response =
-              await getTransactions(
-                {
-                  query: {
-                    bool: {
-                      must,
-                      must_not,
+                    size,
+                    from,
+                    sort: [{ timestamp: 'desc' }],
+                    fields:
+                      [
+                        'txhash',
+                        'height',
+                        'types',
+                        'code',
+                        'tx.body.messages.sender',
+                        'tx.body.messages.signer',
+                        'tx.body.messages.delegator_address',
+                        'tx.body.messages.validator_address',
+                        'tx.auth_info.fee.amount.*',
+                        'timestamp',
+                      ],
+                    _source: {
+                      includes: [
+                        'logs',
+                        'tx',
+                      ],
                     },
+                    track_total_hits: true,
                   },
-                  size,
-                  from,
-                  sort: [{ timestamp: 'desc' }],
-                  fields: [
-                    'txhash',
-                    'height',
-                    'types',
-                    'code',
-                    'tx.body.messages.sender',
-                    'tx.body.messages.signer',
-                    'tx.body.messages.delegator_address',
-                    'tx.body.messages.validator_address',
-                    'tx.auth_info.fee.amount.*',
-                    'timestamp',
-                  ],
-                  _source: {
-                    includes: [
-                      'logs',
-                      'tx',
-                    ],
-                  },
-                  track_total_hits: true,
-                },
-                assets_data,
-              )
-            }
+                  assets_data,
+                )
+              }
 
-          if (response) {
-            const {
-              total,
-            } = { ...response }
+            if (response) {
+              const {
+                total,
+              } = { ...response }
 
-            response =
-              _.orderBy(
-                _.uniqBy(
-                  _.concat(
-                    (response.data || [])
-                      .map(d => {
-                        const {
-                          txhash,
-                          type,
-                          types,
-                          timestamp,
-                          activities,
-                        } = { ...d }
-
-                        return {
-                          ...d,
-                          txhash:
-                            Array.isArray(txhash) ?
-                              _.last(txhash) :
-                              txhash,
-                          type:
-                            _.head(types) ||
+              response =
+                _.orderBy(
+                  _.uniqBy(
+                    _.concat(
+                      (response.data || [])
+                        .map(d => {
+                          const {
+                            txhash,
                             type,
-                          timestamp:
-                            Array.isArray(timestamp) ?
-                              _.last(timestamp) :
-                              timestamp,
-                          transfer:
-                            (activities || [])
-                              .findIndex(a =>
-                                equals_ignore_case(
-                                  a?.sender,
-                                  address,
-                                )
-                              ) > -1 ?
-                              'out' :
+                            types,
+                            timestamp,
+                            activities,
+                          } = { ...d }
+
+                          return {
+                            ...d,
+                            txhash:
+                              Array.isArray(txhash) ?
+                                _.last(txhash) :
+                                txhash,
+                            type:
+                              _.head(types) ||
+                              type,
+                            timestamp:
+                              Array.isArray(timestamp) ?
+                                _.last(timestamp) :
+                                timestamp,
+                            transfer:
                               (activities || [])
                                 .findIndex(a =>
                                   equals_ignore_case(
-                                    a?.receiver,
+                                    a?.sender,
                                     address,
-                                  ) ||
-                                  (Array.isArray(a?.recipient) ?
-                                    (a?.recipient || [])
-                                      .findIndex(_a =>
-                                        equals_ignore_case(
-                                          _a,
-                                          address,
-                                        )
-                                      ) > -1 :
-                                    equals_ignore_case(
-                                      a?.recipient,
-                                      address,
-                                    )
                                   )
                                 ) > -1 ?
-                                  'in' :
-                                  null
-                        }
-                      }),
-                    _data,
+                                'out' :
+                                (activities || [])
+                                  .findIndex(a =>
+                                    equals_ignore_case(
+                                      a?.receiver,
+                                      address,
+                                    ) ||
+                                    (Array.isArray(a?.recipient) ?
+                                      (a?.recipient || [])
+                                        .findIndex(_a =>
+                                          equals_ignore_case(
+                                            _a,
+                                            address,
+                                          )
+                                        ) > -1 :
+                                      equals_ignore_case(
+                                        a?.recipient,
+                                        address,
+                                      )
+                                    )
+                                  ) > -1 ?
+                                    'in' :
+                                    null
+                          }
+                        }),
+                      _data,
+                    ),
+                    'txhash',
                   ),
-                  'txhash',
-                ),
-                [
-                  'timestamp',
-                  'txhash',
-                ],
-                [
-                  'desc',
-                  height ?
-                    'asc' :
+                  [
+                    'timestamp',
+                    'txhash',
+                  ],
+                  [
                     'desc',
-                ],
+                    height ?
+                      'asc' :
+                      'desc',
+                  ],
+                )
+
+              setTotal(
+                response.length > total ?
+                  response.length :
+                  total
               )
+              setData(response)
+              setFetching(false)
+              setDataForExport(
+                await toCSV(response)
+              )
+            }
+            else if (!fetchTrigger) {
+              setTotal(0)
+              setData([])
+              setDataForExport([])
+            }
 
-            setTotal(
-              response.length > total ?
-                response.length :
-                total
-            )
-            setData(response)
             setFetching(false)
-            setDataForExport(
-              await toCSV(response)
-            )
-          }
-          else if (!fetchTrigger) {
-            setTotal(0)
-            setData([])
-            setDataForExport([])
-          }
-
-          setFetching(false)
+        }
       }
-    }
 
-    getData()
-  }, [fetchTrigger])
+      getData()
+    },
+    [fetchTrigger],
+  )
 
-  useEffect(() => {
-    if (data) {
-      setTypes(
-        _.countBy(
-          _.uniqBy(
-            data,
-            'txhash',
+  useEffect(
+    () => {
+      if (data) {
+        setTypes(
+          _.countBy(
+            _.uniqBy(
+              data,
+              'txhash',
+            )
+            .map(t => t?.type)
+            .filter(t => t)
           )
-          .map(t => t?.type)
-          .filter(t => t)
         )
-      )
-    }
-  }, [data])
+      }
+    },
+    [data],
+  )
 
   const toCSV = async data => {
     setNumLoadedData(0)
@@ -540,40 +558,41 @@ export default ({
       account,
     } = { ...filters }
 
-    data = (data || [])
-      .filter(d => d)
-      .map(d => {
-        const {
-          fee,
-          activities,
-        } = { ...d }
+    data =
+      (data || [])
+        .filter(d => d)
+        .map(d => {
+          const {
+            fee,
+            activities,
+          } = { ...d }
 
-        return {
-          ...d,
-          amount:
-            (activities || [])
-              .filter(a =>
-                a?.amount &&
-                a.amount !== fee &&
-                (
-                  !(
-                    address ||
-                    account
-                  ) ||
-                  equals_ignore_case(
-                    a?.recipient,
-                    address ||
-                    account,
-                  ) ||
-                  equals_ignore_case(
-                    a?.sender,
-                    address ||
-                    account,
+          return {
+            ...d,
+            amount:
+              (activities || [])
+                .filter(a =>
+                  a?.amount &&
+                  a.amount !== fee &&
+                  (
+                    !(
+                      address ||
+                      account
+                    ) ||
+                    equals_ignore_case(
+                      a?.recipient,
+                      address ||
+                      account,
+                    ) ||
+                    equals_ignore_case(
+                      a?.sender,
+                      address ||
+                      account,
+                    )
                   )
-                )
-              ),
-        }
-      })
+                ),
+          }
+        })
 
     const need_price =
       (
@@ -597,7 +616,8 @@ export default ({
               'MsgSend',
             ].includes(d.type)
           )
-          .length === data.length
+          .length ===
+        data.length
       )
 
     if (need_price) {
@@ -661,54 +681,80 @@ export default ({
       }
     }
 
-    data = data
-      .flatMap(d => {
-        if (need_price) {
-          return d.amount
-            .map(a => {
-              const multipier =
-                equals_ignore_case(
-                  a.sender,
-                  address ||
-                  filters?.account,
-                ) ?
-                  -1 :
-                  1
-
-              return {
-                ...d,
-                ...a,
-                amount:
-                  typeof a.amount === 'number' ?
-                    a.amount * multipier :
-                    '',
-                value:
-                  typeof a.amount === 'number' &&
-                  typeof a.price === 'number' ?
-                    a.amount * a.price * multipier :
-                    '',
-                type: d.type,
-                timestamp_utc_string:
-                  moment(d.timestamp)
-                    .format('DD-MM-YYYY HH:mm:ss A'),
-              }
-            })
-        }
-        else {
-          return [{
-            ...d,
-            amount: d.amount
+    data =
+      data
+        .flatMap(d => {
+          if (need_price) {
+            return d.amount
               .map(a => {
-                const multipier = (address || filters?.account) && equals_ignore_case(a.sender, address || filters?.account) ?
-                  -1 :
-                  1
+                const multipier =
+                  equals_ignore_case(
+                    a.sender,
+                    address ||
+                    filters?.account,
+                  ) ?
+                    -1 :
+                    1
 
-                return `${number_format(a.amount * multipier, '0,0.00000000', true)} ${a.symbol || a.denom || ''}`.trim()
+                return {
+                  ...d,
+                  ...a,
+                  amount:
+                    typeof a.amount === 'number' ?
+                      a.amount * multipier :
+                      '',
+                  value:
+                    typeof a.amount === 'number' &&
+                    typeof a.price === 'number' ?
+                      a.amount * a.price * multipier :
+                      '',
+                  type: d.type,
+                  timestamp_utc_string:
+                    moment(d.timestamp)
+                      .format('DD-MM-YYYY HH:mm:ss A'),
+                }
               })
-              .join('\n'),
-          }]
-        }
-      })
+          }
+          else {
+            return [
+              {
+                ...d,
+                amount:
+                  d.amount
+                    .map(a => {
+                      const multipier =
+                        (
+                          address ||
+                          filters?.account
+                        ) &&
+                        equals_ignore_case(
+                          a.sender,
+                          address ||
+                          filters?.account,
+                        ) ?
+                          -1 :
+                          1
+
+                      return (
+                        `${
+                          number_format(
+                            a.amount * multipier,
+                            '0,0.00000000',
+                            true,
+                          )
+                        } ${
+                          a.symbol ||
+                          a.denom ||
+                          ''
+                        }`
+                        .trim()
+                      )
+                    })
+                    .join('\n'),
+              },
+            ]
+          }
+        })
 
     return data
   }
@@ -755,602 +801,663 @@ export default ({
             'MsgSend',
           ].includes(d.type)
         )
-        .length === data.length
+        .length ===
+      data.length
     )
 
   return (
     data ?
       <div className="w-full space-y-2">
-        {!n && (
-          <div className="flex items-center justify-between space-x-2">
-            <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
-              {
-                typeof total === 'number' &&
-                (
-                  <div className="flex items-center space-x-1.5 ml-2 sm:ml-0 sm:mb-1">
-                    <span className="tracking-wider text-sm font-semibold">
-                      {number_format(
-                        total,
-                        '0,0',
-                      )}
-                    </span>
-                    <span className="tracking-wider text-sm">
-                      Results
-                    </span>
-                  </div>
-                )
-              }
-              <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5">
-                {Object.entries({ ...types })
-                  .map(([k, v]) => (
-                    <div
-                      key={k}
-                      onClick={() =>
-                        setFilterTypes(
-                          _.uniq(
-                            filterTypes?.includes(k) ?
-                              filterTypes
-                                .filter(t => !equals_ignore_case(t, k)) :
-                            _.concat(
-                              filterTypes || [],
-                              k,
-                            )
-                          )
-                        )
-                      }
-                      className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mb-1`}
-                      style={{ textTransform: 'none' }}
-                    >
-                      <span>
-                        {k === 'undefined' ?
-                          'Failed' :
-                          k?.endsWith('Request') ?
-                            k.replace(
-                              'Request',
-                              '',
-                            ) :
-                            k
-                        }
-                      </span>
-                      <span className="text-blue-500 dark:text-white">
+        {
+          !n &&
+          (
+            <div className="flex items-center justify-between space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                {
+                  typeof total === 'number' &&
+                  (
+                    <div className="flex items-center space-x-1.5 ml-2 sm:ml-0 sm:mb-1">
+                      <span className="tracking-wider text-sm font-semibold">
                         {number_format(
-                          v,
+                          total,
                           '0,0',
                         )}
                       </span>
+                      <span className="tracking-wider text-sm">
+                        Results
+                      </span>
                     </div>
-                  ))
+                  )
                 }
-              </div>
-            </div>
-            {data.length > 0 && (
-              dataForExport ?
-                dataForExport.length > 0 && (
-                  <CSVLink
-                    headers={[
-                      { label: 'Tx Hash', key: 'txhash' },
-                      { label: 'Block', key: 'height' },
-                      { label: 'Type', key: 'type' },
-                      { label: 'Status', key: 'status' },
-                      { label: 'Sender', key: 'sender' },
-                      { label: 'Recipient', key: 'recipient' },
-                      { label: 'Amount', key: 'amount' },
-                      need_price && { label: 'Symbol', key: 'symbol' },
-                      need_price && { label: 'Price', key: 'price' },
-                      need_price && { label: 'Value', key: 'value' },
-                      { label: 'Fee', key: 'fee' },
-                      { label: 'Time (ms)', key: 'timestamp' },
-                      { label: 'Time (DD-MM-YYYY HH:mm:ss A)', key: 'timestamp_utc_string' },
-                    ].filter(h => h)}
-                    data={dataForExport}
-                    filename={`transactions${
-                      Object.entries({ ...filters })
-                        .filter(([k, v]) => v)
-                        .map(([k, v]) => `_${
-                          k === 'time' ?
-                            v
-                              .map(t => t.format('DD-MM-YYYY'))
-                              .join('_') :
-                            v
-                          }`
-                        )
-                        .join('') ||
-                      (address || height ?
-                        `_${address || height}` :
-                        ''
-                      )
-                    }.csv`}
-                    className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400'} rounded mb-1 py-1 px-2.5`}
-                  >
-                    <span className="whitespace-nowrap font-bold">
-                      Export CSV
-                    </span>
-                  </CSVLink>
-                ) :
-                <div className="flex items-center space-x-2">
-                  <ProgressBar
-                    borderColor={loader_color(theme)}
-                    width="24"
-                    height="24"
-                  />
-                  <div className="tracking-wider text-slate-400 dark:text-slate-600 space-x-1.5">
-                    <span>
-                      {number_format(
-                        numLoadedData,
-                        '0,0',
-                      )}
-                    </span>
-                    <span>
-                      /
-                    </span>
-                    <span>
-                      {number_format(
-                        data.length,
-                        '0,0',
-                      )}
-                    </span>
-                  </div>
+                <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:space-x-2.5">
+                  {Object.entries({ ...types })
+                    .map(([k, v]) => (
+                      <div
+                        key={k}
+                        onClick={() =>
+                          setFilterTypes(
+                            _.uniq(
+                              filterTypes?.includes(k) ?
+                                filterTypes
+                                  .filter(t =>
+                                    !equals_ignore_case(
+                                      t,
+                                      k,
+                                    )
+                                  ) :
+                              _.concat(
+                                filterTypes ||
+                                [],
+                                k,
+                              )
+                            )
+                          )
+                        }
+                        className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mb-1`}
+                        style={
+                          {
+                            textTransform: 'none',
+                          }
+                        }
+                      >
+                        <span>
+                          {k === 'undefined' ?
+                            'Failed' :
+                            k?.endsWith('Request') ?
+                              k
+                                .replace(
+                                  'Request',
+                                  '',
+                                ) :
+                              k
+                          }
+                        </span>
+                        <span className="text-blue-500 dark:text-white">
+                          {number_format(
+                            v,
+                            '0,0',
+                          )}
+                        </span>
+                      </div>
+                    ))
+                  }
                 </div>
-            )}
-          </div>
-        )}
+              </div>
+              {
+                data.length > 0 &&
+                (
+                  dataForExport ?
+                    dataForExport.length > 0 &&
+                    (
+                      <CSVLink
+                        headers={
+                          [
+                            { label: 'Tx Hash', key: 'txhash' },
+                            { label: 'Block', key: 'height' },
+                            { label: 'Type', key: 'type' },
+                            { label: 'Status', key: 'status' },
+                            { label: 'Sender', key: 'sender' },
+                            { label: 'Recipient', key: 'recipient' },
+                            { label: 'Amount', key: 'amount' },
+                            need_price &&
+                            { label: 'Symbol', key: 'symbol' },
+                            need_price &&
+                            { label: 'Price', key: 'price' },
+                            need_price &&
+                            { label: 'Value', key: 'value' },
+                            { label: 'Fee', key: 'fee' },
+                            { label: 'Time (ms)', key: 'timestamp' },
+                            { label: 'Time (DD-MM-YYYY HH:mm:ss A)', key: 'timestamp_utc_string' },
+                          ]
+                          .filter(h => h)
+                        }
+                        data={dataForExport}
+                        filename={
+                          `transactions${
+                            Object.entries({ ...filters })
+                              .filter(([k, v]) => v)
+                              .map(([k, v]) =>
+                                `_${
+                                  k === 'time' ?
+                                    v
+                                      .map(t =>
+                                        t.format('DD-MM-YYYY')
+                                      )
+                                      .join('_') :
+                                    v
+                                }`
+                              )
+                              .join('') ||
+                            (
+                              address ||
+                              height ?
+                                `_${
+                                  address ||
+                                  height
+                                }` :
+                                ''
+                            )
+                          }.csv`
+                        }
+                        className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-slate-50 hover:bg-slate-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400'} rounded mb-1 py-1 px-2.5`}
+                      >
+                        <span className="whitespace-nowrap font-bold">
+                          Export CSV
+                        </span>
+                      </CSVLink>
+                    ) :
+                    <div className="flex items-center space-x-2">
+                      <ProgressBar
+                        borderColor={loader_color(theme)}
+                        width="24"
+                        height="24"
+                      />
+                      <div className="tracking-wider text-slate-400 dark:text-slate-600 space-x-1.5">
+                        <span>
+                          {number_format(
+                            numLoadedData,
+                            '0,0',
+                          )}
+                        </span>
+                        <span>
+                          /
+                        </span>
+                        <span>
+                          {number_format(
+                            data.length,
+                            '0,0',
+                          )}
+                        </span>
+                      </div>
+                    </div>
+                )
+              }
+            </div>
+          )
+        }
         <Datatable
-          columns={[
-            {
-              Header: 'Tx Hash',
-              accessor: 'txhash',
-              disableSortBy: true,
-              Cell: props => (
-                <div className="flex items-center space-x-0.5 mb-3">
-                  <Link href={`/tx/${props.value}`}>
+          columns={
+            [
+              {
+                Header: 'Tx Hash',
+                accessor: 'txhash',
+                disableSortBy: true,
+                Cell: props => (
+                  <div className="flex items-center space-x-0.5 mb-3">
+                    <Link href={`/tx/${props.value}`}>
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-normal hover:font-medium"
+                      >
+                        {ellipse(
+                          props.value,
+                          6,
+                        )}
+                      </a>
+                    </Link>
+                    <Copy
+                      value={props.value}
+                    />
+                  </div>
+                ),
+              },
+              {
+                Header: 'Height',
+                accessor: 'height',
+                disableSortBy: true,
+                Cell: props => (
+                  <Link href={`/block/${props.value}`}>
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
                       className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-normal hover:font-medium"
                     >
-                      {ellipse(
+                      {number_format(
                         props.value,
-                        6,
+                        '0,0',
                       )}
                     </a>
                   </Link>
-                  <Copy
-                    value={props.value}
-                  />
-                </div>
-              ),
-            },
-            {
-              Header: 'Height',
-              accessor: 'height',
-              disableSortBy: true,
-              Cell: props => (
-                <Link href={`/block/${props.value}`}>
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 text-xs font-normal hover:font-medium"
-                  >
-                    {number_format(
-                      props.value,
-                      '0,0',
-                    )}
-                  </a>
-                </Link>
-              ),
-            },
-            {
-              Header: 'Type',
-              accessor: 'type',
-              disableSortBy: true,
-              Cell: props => (
-                <div className="max-w-min bg-zinc-100 dark:bg-zinc-900 rounded capitalize text-xs font-medium py-0.5 px-2">
-                  {name(
-                    props.value?.replace(
-                      'Request',
-                      '',
-                    )
-                  ) ||
-                    '-'
-                  }
-                </div>
-              ),
-            },
-            {
-              Header: 'Status',
-              accessor: 'status',
-              disableSortBy: true,
-              Cell: props => (
-                props.value && (
-                  <div className={`${props.value === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-400'} uppercase flex items-center text-xs font-semibold space-x-1`}>
-                    {props.value === 'success' ?
-                      <BiCheckCircle
-                        size={20}
-                      /> :
-                      <BiXCircle
-                        size={20}
-                      />
-                    }
-                    <span>
-                      {props.value}
-                    </span>
-                  </div>
-                )
-              ),
-            },
-            {
-              Header: 'Sender',
-              accessor: 'sender',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  value,
-                } = { ...props }
-
-                const validator_data = (validators_data || [])
-                  .find(v =>
-                    equals_ignore_case(
-                      v?.broadcaster_address,
-                      value,
-                    ) ||
-                    equals_ignore_case(
-                      v?.operator_address,
-                      value,
-                    )
-                  )
-                const {
-                  operator_address,
-                  description,
-                } = { ...validator_data }
-                const {
-                  moniker,
-                } = { ...description }
-
-                return (
-                  operator_address ?
-                    <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-1.5`}>
-                      <Link href={`/validator/${operator_address}`}>
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ValidatorProfile
-                            validator_description={description}
-                            className="w-5 h-5"
-                          />
-                        </a>
-                      </Link>
-                      <div className="flex flex-col">
-                        {moniker && (
-                          <Link href={`/validator/${operator_address}`}>
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                            >
-                              {ellipse(
-                                moniker,
-                                12,
-                              )}
-                            </a>
-                          </Link>
-                        )}
-                        <div className="flex items-center space-x-1">
-                          <Link href={`/validator/${operator_address}`}>
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-slate-400 dark:text-slate-600 text-xs"
-                            >
-                              {ellipse(
-                                operator_address,
-                                6,
-                                process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                              )}
-                            </a>
-                          </Link>
-                          <Copy
-                            value={operator_address}
-                          />
-                        </div>
-                      </div>
-                    </div> :
-                    value ?
-                      <AccountProfile
-                        address={value}
-                        ellipse_size={6}
-                        url={true}
-                      /> :
-                      <span>
-                        -
-                      </span>
-                )
+                ),
               },
-            },
-            {
-              Header: 'Recipient',
-              accessor: 'recipient',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  type,
-                } = { ...props.row.original }
-
-                const values =
-                  [
-                    'HeartBeat',
-                    'SubmitSignature',
-                    'SubmitPubKey',
-                  ].findIndex(t =>
-                    type?.includes(t)
-                  ) > -1 ?
-                    [] :
-                    props.value
-
-                return (
-                  <div className="flex flex-col space-y-0.5">
-                    {(Array.isArray(values) ?
-                      values :
-                      [values]
-                    )
-                    .map((value, i) => {
-                      const validator_data = (validators_data || [])
-                        .find(v =>
-                          equals_ignore_case(
-                            v?.broadcaster_address,
-                            value,
-                          ) ||
-                          equals_ignore_case(
-                            v?.operator_address,
-                            value,
+              {
+                Header: 'Type',
+                accessor: 'type',
+                disableSortBy: true,
+                Cell: props => (
+                  <div className="max-w-min bg-zinc-100 dark:bg-zinc-900 rounded capitalize text-xs font-medium py-0.5 px-2">
+                    {props.value ?
+                      name(
+                        props.value
+                          .replace(
+                            'Request',
+                            '',
                           )
-                        )
-                      const {
-                        operator_address,
-                        description,
-                      } = { ...validator_data }
-                      const {
-                        moniker,
-                      } = { ...description }
+                      ) :
+                      '-'
+                    }
+                  </div>
+                ),
+              },
+              {
+                Header: 'Status',
+                accessor: 'status',
+                disableSortBy: true,
+                Cell: props => (
+                  props.value && (
+                    <div className={`${props.value === 'success' ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-400'} uppercase flex items-center text-xs font-semibold space-x-1`}>
+                      {props.value === 'success' ?
+                        <BiCheckCircle
+                          size={20}
+                        /> :
+                        <BiXCircle
+                          size={20}
+                        />
+                      }
+                      <span>
+                        {props.value}
+                      </span>
+                    </div>
+                  )
+                ),
+              },
+              {
+                Header: 'Sender',
+                accessor: 'sender',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    value,
+                  } = { ...props }
 
-                      return (
-                        operator_address ?
-                          <div
-                            key={i}
-                            className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-1.5`}
+                  const validator_data = (validators_data || [])
+                    .find(v =>
+                      equals_ignore_case(
+                        v?.broadcaster_address,
+                        value,
+                      ) ||
+                      equals_ignore_case(
+                        v?.operator_address,
+                        value,
+                      )
+                    )
+                  const {
+                    operator_address,
+                    description,
+                  } = { ...validator_data }
+                  const {
+                    moniker,
+                  } = { ...description }
+
+                  return (
+                    operator_address ?
+                      <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-1.5`}>
+                        <Link href={`/validator/${operator_address}`}>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
+                            <ValidatorProfile
+                              validator_description={description}
+                              className="w-5 h-5"
+                            />
+                          </a>
+                        </Link>
+                        <div className="flex flex-col">
+                          {
+                            moniker &&
+                            (
+                              <Link href={`/validator/${operator_address}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                >
+                                  {ellipse(
+                                    moniker,
+                                    12,
+                                  )}
+                                </a>
+                              </Link>
+                            )
+                          }
+                          <div className="flex items-center space-x-1">
                             <Link href={`/validator/${operator_address}`}>
                               <a
                                 target="_blank"
                                 rel="noopener noreferrer"
+                                className="text-slate-400 dark:text-slate-600 text-xs"
                               >
-                                <ValidatorProfile
-                                  validator_description={description}
-                                  className="w-5 h-5"
-                                />
+                                {ellipse(
+                                  operator_address,
+                                  6,
+                                  process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                )}
                               </a>
                             </Link>
-                            <div className="flex flex-col">
-                              {moniker && (
-                                <Link href={`/validator/${operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                  >
-                                    {ellipse(
-                                      moniker,
-                                      12,
-                                    )}
-                                  </a>
-                                </Link>
-                              )}
-                              <div className="flex items-center space-x-1">
-                                <Link href={`/validator/${operator_address}`}>
-                                  <a
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-slate-400 dark:text-slate-600 text-xs"
-                                  >
-                                    {ellipse(
-                                      operator_address,
-                                      6,
-                                      process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                    )}
-                                  </a>
-                                </Link>
-                                <Copy
-                                  value={operator_address}
-                                />
-                              </div>
-                            </div>
-                          </div> :
-                          value ?
-                            <div
-                              key={i}
-                              className="flex items-center space-x-1"
-                            >
-                              <AccountProfile
-                                address={value}
-                                ellipse_size={6}
-                                url={true}
-                              />
-                            </div> :
-                            <span key={i}>
-                              -
-                            </span>
-                      )
-                    })}
-                  </div>
-                )
-              },
-            },
-            {
-              Header: 'Amount',
-              accessor: 'amount',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  symbol,
-                  fee,
-                  activities,
-                } = { ...props.row.original }
-
-                return (
-                  <div className="flex flex-col items-start sm:items-end justify-center text-left sm:text-right space-y-1.5">
-                    {typeof props.value === 'number' ?
-                      <div className="h-5 flex items-center text-xs font-medium space-x-1">
-                        <span className="uppercase">
-                          {number_format(
-                            props.value,
-                            '0,0.00000000',
-                          )}
-                        </span>
-                        <span>
-                          {ellipse(
-                            symbol,
-                            4,
-                            'ibc/',
-                          )}
-                        </span>
+                            <Copy
+                              value={operator_address}
+                            />
+                          </div>
+                        </div>
                       </div> :
-                      activities?.findIndex(a => a?.amount && a.amount !== fee) > -1 ?
-                        activities
-                          .filter(a => a?.amount && a.amount !== fee)
-                          .map((a, i) => {
-                            const {
-                              sender,
-                              recipient,
-                              amount,
-                              symbol,
-                              denom,
-                            } = { ...a }
-
-                            return (
-                              <div
-                                key={i}
-                                className={`h-5 flex items-center ${address || account ? equals_ignore_case(recipient, address || account) ? 'text-green-400 dark:text-green-300' : equals_ignore_case(sender, address || account) ? 'text-red-500 dark:text-red-400' : '' : ''} text-xs font-medium space-x-1`}
-                              >
-                                <span className="uppercase">
-                                  {number_format(
-                                    amount,
-                                    '0,0.00000000',
-                                  )}
-                                </span>
-                                <span>
-                                  {ellipse(
-                                    symbol || denom,
-                                    4,
-                                    'ibc/',
-                                  )}
-                                </span>
-                              </div>
-                            )
-                          }) :
+                      value ?
+                        <AccountProfile
+                          address={value}
+                          ellipse_size={6}
+                          url={true}
+                        /> :
                         <span>
                           -
                         </span>
-                    }
-                  </div>
-                )
+                  )
+                },
               },
-              headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-            },
-            {
-              Header: 'Transfer',
-              accessor: 'transfer',
-              disableSortBy: true,
-              Cell: props => (
-                <div className="flex items-center space-x-1 mt-0.5">
-                  {props.value === 'in' ?
-                    <BiLeftArrowCircle
-                      size={16}
-                      className="text-green-400 dark:text-green-300"
-                    /> :
-                    props.value === 'out' ?
-                      <BiRightArrowCircle
-                        size={16}
-                        className="text-red-500 dark:text-red-400"
-                      /> :
-                      null
-                  }
-                  <span className={`uppercase ${props.value === 'in' ? 'text-green-400 dark:text-green-300' : props.value === 'out' ? 'text-red-500 dark:text-red-400' : ''} text-xs font-medium`}>
-                    {props.value}
-                  </span>
-                </div>
-              ),
-            },
-            {
-              Header: 'Fee',
-              accessor: 'fee',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  symbol,
-                } = { ...props.row.original }
+              {
+                Header: 'Recipient',
+                accessor: 'recipient',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    type,
+                  } = { ...props.row.original }
 
-                return (
-                  <div className="text-xs font-medium text-left sm:text-right mt-0.5">
-                    {props.value > 0 ?
-                      `${number_format(
-                        props.value,
-                        '0,0.00000000',
-                      )} ${symbol?.toUpperCase() || ''}` :
-                      'No Fee'
-                    }
-                  </div>
-                )
+                  const values =
+                    [
+                      'HeartBeat',
+                      'SubmitSignature',
+                      'SubmitPubKey',
+                    ].findIndex(t =>
+                      type?.includes(t)
+                    ) > -1 ?
+                      [] :
+                      props.value
+
+                  return (
+                    <div className="flex flex-col space-y-0.5">
+                      {(Array.isArray(values) ?
+                        values :
+                        [values]
+                      )
+                      .map((value, i) => {
+                        const validator_data = (validators_data || [])
+                          .find(v =>
+                            equals_ignore_case(
+                              v?.broadcaster_address,
+                              value,
+                            ) ||
+                            equals_ignore_case(
+                              v?.operator_address,
+                              value,
+                            )
+                          )
+                        const {
+                          operator_address,
+                          description,
+                        } = { ...validator_data }
+                        const {
+                          moniker,
+                        } = { ...description }
+
+                        return (
+                          operator_address ?
+                            <div
+                              key={i}
+                              className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-1.5`}
+                            >
+                              <Link href={`/validator/${operator_address}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ValidatorProfile
+                                    validator_description={description}
+                                    className="w-5 h-5"
+                                  />
+                                </a>
+                              </Link>
+                              <div className="flex flex-col">
+                                {
+                                  moniker &&
+                                  (
+                                    <Link href={`/validator/${operator_address}`}>
+                                      <a
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      >
+                                        {ellipse(
+                                          moniker,
+                                          12,
+                                        )}
+                                      </a>
+                                    </Link>
+                                  )
+                                }
+                                <div className="flex items-center space-x-1">
+                                  <Link href={`/validator/${operator_address}`}>
+                                    <a
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-slate-400 dark:text-slate-600 text-xs"
+                                    >
+                                      {ellipse(
+                                        operator_address,
+                                        6,
+                                        process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                      )}
+                                    </a>
+                                  </Link>
+                                  <Copy
+                                    value={operator_address}
+                                  />
+                                </div>
+                              </div>
+                            </div> :
+                            value ?
+                              <div
+                                key={i}
+                                className="flex items-center space-x-1"
+                              >
+                                <AccountProfile
+                                  address={value}
+                                  ellipse_size={6}
+                                  url={true}
+                                />
+                              </div> :
+                              <span
+                                key={i}
+                              >
+                                -
+                              </span>
+                        )
+                      })}
+                    </div>
+                  )
+                },
               },
-              headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-            },
-            {
-              Header: 'Time',
-              accessor: 'timestamp',
-              disableSortBy: true,
-              Cell: props => (
-                <TimeAgo
-                  time={props.value}
-                  className="text-xs ml-auto"
-                />
-              ),
-              headerClassName: 'justify-end text-right',
-            },
-          ].filter(c =>
-            [
-              '/block/[height]',
-            ].includes(pathname) ?
-              ![
-                'height',
-                'transfer',
-              ].includes(c.accessor) :
+              {
+                Header: 'Amount',
+                accessor: 'amount',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    symbol,
+                    fee,
+                    activities,
+                  } = { ...props.row.original }
+
+                  return (
+                    <div className="flex flex-col items-start sm:items-end justify-center text-left sm:text-right space-y-1.5">
+                      {typeof props.value === 'number' ?
+                        <div className="h-5 flex items-center text-xs font-medium space-x-1">
+                          <span className="uppercase">
+                            {number_format(
+                              props.value,
+                              '0,0.00000000',
+                            )}
+                          </span>
+                          <span>
+                            {ellipse(
+                              symbol,
+                              4,
+                              'ibc/',
+                            )}
+                          </span>
+                        </div> :
+                        (activities || [])
+                          .findIndex(a =>
+                            a?.amount &&
+                            a.amount !== fee
+                          ) > -1 ?
+                          activities
+                            .filter(a =>
+                              a?.amount &&
+                              a.amount !== fee
+                            )
+                            .map((a, i) => {
+                              const {
+                                sender,
+                                recipient,
+                                amount,
+                                symbol,
+                                denom,
+                              } = { ...a }
+
+                              return (
+                                <div
+                                  key={i}
+                                  className={`h-5 flex items-center ${address || account ? equals_ignore_case(recipient, address || account) ? 'text-green-400 dark:text-green-300' : equals_ignore_case(sender, address || account) ? 'text-red-500 dark:text-red-400' : '' : ''} text-xs font-medium space-x-1`}
+                                >
+                                  <span className="uppercase">
+                                    {number_format(
+                                      amount,
+                                      '0,0.00000000',
+                                    )}
+                                  </span>
+                                  <span>
+                                    {ellipse(
+                                      symbol ||
+                                      denom,
+                                      4,
+                                      'ibc/',
+                                    )}
+                                  </span>
+                                </div>
+                              )
+                            }) :
+                          <span>
+                            -
+                          </span>
+                      }
+                    </div>
+                  )
+                },
+                headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+              },
+              {
+                Header: 'Transfer',
+                accessor: 'transfer',
+                disableSortBy: true,
+                Cell: props => (
+                  <div className="flex items-center space-x-1 mt-0.5">
+                    {props.value === 'in' ?
+                      <BiLeftArrowCircle
+                        size={16}
+                        className="text-green-400 dark:text-green-300"
+                      /> :
+                      props.value === 'out' ?
+                        <BiRightArrowCircle
+                          size={16}
+                          className="text-red-500 dark:text-red-400"
+                        /> :
+                        null
+                    }
+                    <span className={`uppercase ${props.value === 'in' ? 'text-green-400 dark:text-green-300' : props.value === 'out' ? 'text-red-500 dark:text-red-400' : ''} text-xs font-medium`}>
+                      {props.value}
+                    </span>
+                  </div>
+                ),
+              },
+              {
+                Header: 'Fee',
+                accessor: 'fee',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    symbol,
+                  } = { ...props.row.original }
+
+                  return (
+                    <div className="text-xs font-medium text-left sm:text-right mt-0.5">
+                      {props.value > 0 ?
+                        `${
+                          number_format(
+                            props.value,
+                            '0,0.00000000',
+                          )
+                        } ${
+                          symbol?.toUpperCase() ||
+                          ''
+                        }` :
+                        'No Fee'
+                      }
+                    </div>
+                  )
+                },
+                headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+              },
+              {
+                Header: 'Time',
+                accessor: 'timestamp',
+                disableSortBy: true,
+                Cell: props => (
+                  <TimeAgo
+                    time={props.value}
+                    className="text-xs ml-auto"
+                  />
+                ),
+                headerClassName: 'justify-end text-right',
+              },
+            ]
+            .filter(c =>
               [
-                '/',
+                '/block/[height]',
               ].includes(pathname) ?
                 ![
                   'height',
-                  'recipient',
-                  'amount',
                   'transfer',
-                  'fee',
                 ].includes(c.accessor) :
                 [
-                  '/validator/[address]',
+                  '/',
                 ].includes(pathname) ?
                   ![
-                    'sender',
-                   'recipient',
+                    'height',
+                    'recipient',
                     'amount',
                     'transfer',
                     'fee',
                   ].includes(c.accessor) :
                   [
-                    '/account/[address]',
+                    '/validator/[address]',
                   ].includes(pathname) ?
-                    true :
                     ![
+                      'sender',
+                     'recipient',
+                      'amount',
                       'transfer',
-                    ].includes(c.accessor)
-          )}
+                      'fee',
+                    ].includes(c.accessor) :
+                    [
+                      '/account/[address]',
+                    ].includes(pathname) ?
+                      true :
+                      ![
+                        'transfer',
+                      ].includes(c.accessor)
+            )
+          }
           data={data_filtered}
           noPagination={
             data_filtered.length <= 10 ||
@@ -1365,11 +1472,13 @@ export default ({
               )
             )
           }
-          defaultPageSize={n ?
-            10 :
-            height || address ?
-              25 :
-              50
+          defaultPageSize={
+            n ?
+              10 :
+              height ||
+              address ?
+                25 :
+                50
           }
           className="min-h-full no-border"
         />

@@ -413,25 +413,39 @@ export default () => {
                     <DatePicker.RangePicker
                       showTime
                       format="YYYY/MM/DD HH:mm:ss"
-                      ranges={{
-                        Today: [
-                          moment().startOf('day'),
-                          moment().endOf('day'),
-                        ],
-                        'This Month': [
-                          moment().startOf('month'),
-                          moment().endOf('month'),
-                        ],
-                      }}
+                      ranges={
+                        {
+                          Today:
+                            [
+                              moment()
+                                .startOf('day'),
+                              moment()
+                                .endOf('day'),
+                            ],
+                          'This Month':
+                            [
+                              moment()
+                                .startOf('month'),
+                              moment()
+                                .endOf('month'),
+                            ],
+                        }
+                      }
                       value={filters?.[name]}
                       onChange={v =>
-                        setFilters({
-                          ...filters,
-                          [`${name}`]: v,
-                        })
+                        setFilters(
+                          {
+                            ...filters,
+                            [`${name}`]: v,
+                          }
+                        )
                       }
                       className="form-input border-0 focus:ring-0 rounded"
-                      style={{ display: 'flex' }}
+                      style={
+                        {
+                          display: 'flex',
+                        }
+                      }
                     /> :
                     <input
                       type={type}

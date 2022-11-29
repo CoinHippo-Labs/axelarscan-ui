@@ -141,7 +141,6 @@ export default ({
                     (
                       <Image
                         src={image}
-                        alt=""
                         className="w-6 h-6 rounded-full"
                       />
                     )
@@ -267,7 +266,6 @@ export default ({
                                   (
                                     <Image
                                       src={image}
-                                      alt=""
                                       className="w-4 h-4 rounded-full"
                                     />
                                   )

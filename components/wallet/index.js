@@ -38,15 +38,17 @@ const getNetwork = chain_id => {
 
 let web3Modal
 
-export default ({
-  mainController = false,
-  hidden = false,
-  disabled = false, 
-  connectChainId,
-  onSwitch,
-  children,
-  className = '',
-}) => {
+export default (
+  {
+    mainController = false,
+    hidden = false,
+    disabled = false, 
+    connectChainId,
+    onSwitch,
+    children,
+    className = '',
+  },
+) => {
   const dispatch = useDispatch()
   const {
     preferences,
@@ -79,109 +81,128 @@ export default ({
 
   const [defaultChainId, setDefaultChainId] = useState(null)
 
-  useEffect(() => {
-    if (
-      connectChainId &&
-      connectChainId !== defaultChainId
-    ) {
-      setDefaultChainId(connectChainId)
-    }
-  }, [connectChainId])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (web3_provider) {
-        dispatch({
-          type: WALLET_DATA,
-          value: {
-            default_chain_id: defaultChainId,
-          },
-        })
+  useEffect(
+    () => {
+      if (
+        connectChainId &&
+        connectChainId !== defaultChainId
+      ) {
+        setDefaultChainId(connectChainId)
       }
+    },
+    [connectChainId],
+  )
 
-      web3Modal = new Web3Modal(
-        {
-          network:
-            getNetwork(defaultChainId) ||
-            (process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
-              'mainnet' :
-              'goerli'
-            ),
-          cacheProvider: true,
-          providerOptions,
+  useEffect(
+    () => {
+      if (typeof window !== 'undefined') {
+        if (web3_provider) {
+          dispatch(
+            {
+              type: WALLET_DATA,
+              value: {
+                default_chain_id: defaultChainId,
+              },
+            }
+          )
         }
-      )
-    }
-  }, [defaultChainId])
 
-  useEffect(() => {
-    if (web3Modal?.cachedProvider) {
-      connect()
-    }
-  }, [web3Modal])
-
-  useEffect(() => {
-    const update = async () => {
-      if (web3Modal) {
-        await web3Modal.updateTheme(theme)
+        web3Modal =
+          new Web3Modal(
+            {
+              network:
+                getNetwork(defaultChainId) ||
+                (process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
+                  'mainnet' :
+                  'goerli'
+                ),
+              cacheProvider: true,
+              providerOptions,
+            }
+          )
       }
-    }
+    },
+    [defaultChainId],
+  )
 
-    update()
-  }, [theme])
-
-  const connect = useCallback(async () =>
-    {
-      const provider = await web3Modal.connect()
-      const web3Provider = new providers.Web3Provider(provider)
-      const network = await web3Provider.getNetwork()
-      const signer = web3Provider.getSigner()
-      const address = await signer.getAddress()
-
-      const {
-        chainId,
-      } = { ...network }
-
-      dispatch(
-        {
-          type: WALLET_DATA,
-          value: {
-            chain_id: chainId,
-            provider,
-            web3_provider: web3Provider,
-            address,
-            signer,
-          },
-        }
-        )
+  useEffect(
+    () => {
+      if (web3Modal?.cachedProvider) {
+        connect()
+      }
     },
     [web3Modal],
   )
 
-  const disconnect = useCallback(async (
-    e,
-    is_reestablish,
-  ) => {
-    if (
-      web3Modal &&
-      !is_reestablish
-    ) {
-      await web3Modal.clearCachedProvider()
-    }
-
-    if (
-      provider?.disconnect &&
-      typeof provider.disconnect === 'function'
-    ) {
-      await provider.disconnect()
-    }
-
-    dispatch(
-      {
-        type: WALLET_RESET,
+  useEffect(
+    () => {
+      const update = async () => {
+        if (web3Modal) {
+          await web3Modal.updateTheme(theme)
+        }
       }
-    )
-  }, [web3Modal, provider])
+
+      update()
+    },
+    [theme],
+  )
+
+  const connect = useCallback(
+    async () =>
+      {
+        const provider = await web3Modal.connect()
+        const web3Provider = new providers.Web3Provider(provider)
+        const network = await web3Provider.getNetwork()
+        const signer = web3Provider.getSigner()
+        const address = await signer.getAddress()
+
+        const {
+          chainId,
+        } = { ...network }
+
+        dispatch(
+          {
+            type: WALLET_DATA,
+            value: {
+              chain_id: chainId,
+              provider,
+              web3_provider: web3Provider,
+              address,
+              signer,
+            },
+          }
+        )
+      },
+    [web3Modal],
+  )
+
+  const disconnect = useCallback(
+    async (
+      e,
+      is_reestablish,
+    ) => {
+      if (
+        web3Modal &&
+        !is_reestablish
+      ) {
+        await web3Modal.clearCachedProvider()
+      }
+
+      if (
+        provider?.disconnect &&
+        typeof provider.disconnect === 'function'
+      ) {
+        await provider.disconnect()
+      }
+
+      dispatch(
+        {
+          type: WALLET_RESET,
+        }
+      )
+    },
+    [web3Modal, provider],
+  )
 
   const switchChain = async () => {
     if (
@@ -194,11 +215,12 @@ export default ({
           .request(
             {
               method: 'wallet_switchEthereumChain',
-              params: [
-                {
-                  chainId: utils.hexValue(connectChainId),
-                },
-              ],
+              params:
+                [
+                  {
+                    chainId: utils.hexValue(connectChainId),
+                  },
+                ],
             },
           )
       } catch (error) {
@@ -232,81 +254,95 @@ export default ({
     }
   }
 
-  useEffect(() => {
-    if (provider?.on) {
-      const handleChainChanged = chainId => {
-        if (!chainId) {
-          disconnect()
+  useEffect(
+    () => {
+      if (provider?.on) {
+        const handleChainChanged = chainId => {
+          if (!chainId) {
+            disconnect()
+          }
+          else {
+            connect()
+          }
         }
-        else {
-          connect()
-        }
-      }
 
-      const handleAccountsChanged = accounts => {
-        if (!_.head(accounts)) {
-          disconnect()
+        const handleAccountsChanged = accounts => {
+          if (!_.head(accounts)) {
+            disconnect()
+          }
+          else {
+            dispatch(
+              {
+                type: WALLET_DATA,
+                value: {
+                  address: _.head(accounts),
+                },
+              }
+            )
+          }
         }
-        else {
-          dispatch(
-            {
-              type: WALLET_DATA,
-              value: {
-                address: _.head(accounts),
-              },
-            }
+
+        const handleDisconnect = e => {
+          const {
+            code,
+          } = { ...e }
+
+          disconnect(
+            e,
+            code === 1013,
           )
+
+          if (code === 1013) {
+            connect()
+          }
         }
-      }
 
-      const handleDisconnect = e => {
-        const {
-          code,
-        } = { ...e }
-
-        disconnect(
-          e,
-          code === 1013,
-        )
-
-        if (code === 1013) {
-          connect()
-        }
-      }
-
-      provider.on(
-        'chainChanged',
-        handleChainChanged,
-      )
-      provider.on(
-        'accountsChanged',
-        handleAccountsChanged,
-      )
-      provider.on(
-        'disconnect',
-        handleDisconnect,
-      )
-
-      return () => {
-        if (provider.removeListener) {
-          provider.removeListener(
+        provider
+          .on(
             'chainChanged',
             handleChainChanged,
           )
-          provider.removeListener(
+
+        provider
+          .on(
             'accountsChanged',
             handleAccountsChanged,
           )
-          provider.removeListener(
+
+        provider
+          .on(
             'disconnect',
             handleDisconnect,
           )
+
+        return () => {
+          if (provider.removeListener) {
+            provider
+              .removeListener(
+                'chainChanged',
+                handleChainChanged,
+              )
+
+            provider
+              .removeListener(
+                'accountsChanged',
+                handleAccountsChanged,
+              )
+
+            provider
+              .removeListener(
+                'disconnect',
+                handleDisconnect,
+              )
+          }
         }
       }
-    }
-  }, [provider, disconnect])
+    },
+    [provider, disconnect],
+  )
 
-  return !hidden &&
+  return (
+    !hidden &&
     (
       <>
         {web3_provider ?
@@ -364,4 +400,5 @@ export default ({
         }
       </>
     )
+  )
 }

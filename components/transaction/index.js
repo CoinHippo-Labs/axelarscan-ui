@@ -31,40 +31,43 @@ export default () => {
 
   const [data, setData] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        tx &&
-        assets_data
-      ) {
-        const response =
-          await getTransaction(
-            tx,
-            null,
-            assets_data,
-          )
-
-        if (response) {
-          setData(
-            {
-              data: response,
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          tx &&
+          assets_data
+        ) {
+          const response =
+            await getTransaction(
               tx,
-            }
-          )
+              null,
+              assets_data,
+            )
+
+          if (response) {
+            setData(
+              {
+                data: response,
+                tx,
+              }
+            )
+          }
         }
       }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [tx, assets_data])
+      return () => clearInterval(interval)
+    },
+    [tx, assets_data],
+  )
 
   const matched = data?.tx === tx
 

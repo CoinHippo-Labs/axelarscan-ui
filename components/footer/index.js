@@ -41,14 +41,12 @@ export default () => {
             <div className="block dark:hidden">
               <Image
                 src="/logos/logo.png"
-                alt=""
                 className="w-5 h-5"
               />
             </div>
             <div className="hidden dark:block">
               <Image
                 src="/logos/logo_white.png"
-                alt=""
                 className="w-5 h-5"
               />
             </div>
@@ -64,7 +62,13 @@ export default () => {
               rel="noopener noreferrer"
               className="text-blue-500 text-xs font-medium"
             >
-              SDK v{dependencies['@axelar-network/axelarjs-sdk'].replace('^', '')}
+              SDK v{
+                dependencies['@axelar-network/axelarjs-sdk']
+                  .replace(
+                    '^',
+                    '',
+                  )
+              }
             </a>
           )
         }

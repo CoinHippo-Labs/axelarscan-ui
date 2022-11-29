@@ -5,9 +5,11 @@ import { ProgressBar } from 'react-loader-spinner'
 
 import { number_format, name, to_json, loader_color, json_theme } from '../../lib/utils'
 
-export default ({
-  data,
-}) => {
+export default (
+  {
+    data,
+  },
+) => {
   const {
     preferences,
   } = useSelector(state =>
@@ -24,9 +26,9 @@ export default ({
 
   const ReactJson =
     typeof window !== 'undefined' &&
-      dynamic(
-        import('react-json-view')
-      )
+    dynamic(
+      import('react-json-view')
+    )
 
   const {
     content,
@@ -92,7 +94,13 @@ export default ({
           status &&
           (
             <span className={`${['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(status) ? 'bg-slate-200 dark:bg-slate-800' : ['VOTING_PERIOD', 'DEPOSIT_PERIOD'].includes(status) ? 'bg-yellow-200 dark:bg-yellow-300 border-2 border-yellow-400 dark:border-yellow-600 text-yellow-500 dark:text-yellow-700' : ['REJECTED', 'FAILED'].includes(status) ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700'} rounded-xl font-semibold py-0.5 px-2`}>
-              {data.status?.replace('_', ' ')}
+              {
+                status
+                  .replace(
+                    '_',
+                    ' ',
+                  )
+              }
             </span>
           ) :
           <ProgressBar
@@ -161,7 +169,11 @@ export default ({
                         <ReactJson
                           src={to_json(info)}
                           theme={json_theme(theme)}
-                          style={{ padding: '.8rem .75rem' }}
+                          style={
+                            {
+                              padding: '.8rem .75rem',
+                            }
+                          }
                         />
                       </div> :
                       <div className="bg-slate-200 dark:bg-slate-800 rounded capitalize py-0.5 px-2">
@@ -202,7 +214,11 @@ export default ({
                       <ReactJson
                         src={to_json(value)}
                         theme={json_theme(theme)}
-                        style={{ padding: '.8rem .75rem' }}
+                        style={
+                          {
+                            padding: '.8rem .75rem',
+                          }
+                        }
                       />
                     </div>
                   </div> :

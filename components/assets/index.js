@@ -132,165 +132,167 @@ export default () => {
         evm_chains_data &&
         assets_data ?
           <Datatable
-            columns={[
-              {
-                Header: 'Symbol',
-                accessor: 'symbol',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    image,
-                  } = { ...props.row.original }
+            columns={
+              [
+                {
+                  Header: 'Symbol',
+                  accessor: 'symbol',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const {
+                      image,
+                    } = { ...props.row.original }
 
-                  return (
-                    <div className="flex items-center space-x-1.5">
-                      {
-                        image &&
-                        (
-                          <Image
-                            src={image}
-                            className="w-5 h-5 rounded-full"
-                          />
-                        )
-                      }
-                      <span className="font-semibold">
-                        {props.value}
-                      </span>
-                    </div>
-                  )
-                },
-              },
-              {
-                Header: 'Chain',
-                accessor: 'chain_id',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    id,
-                    name,
-                    image,
-                  } = {
-                    ...(
-                      evm_chains_data
-                        .find(c =>
-                          c?.chain_id === props.value
-                        )
-                    ),
-                  }
-
-                  return (
-                    <div className="flex items-start space-x-1.5">
-                      {
-                        image &&
-                        (
-                          <Image
-                            src={image}
-                            className="w-5 h-5 rounded-full"
-                          />
-                        )
-                      }
-                      <div className="flex flex-col">
+                    return (
+                      <div className="flex items-center space-x-1.5">
+                        {
+                          image &&
+                          (
+                            <Image
+                              src={image}
+                              className="w-5 h-5 rounded-full"
+                            />
+                          )
+                        }
                         <span className="font-semibold">
-                          {name}
-                        </span>
-                        <span className="text-slate-400 dark:text-slate-600">
-                          {id}
+                          {props.value}
                         </span>
                       </div>
-                    </div>
-                  )
+                    )
+                  },
                 },
-              },
-              {
-                Header: 'Denom',
-                accessor: 'id',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    value,
-                  } = { ...props }
+                {
+                  Header: 'Chain',
+                  accessor: 'chain_id',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const {
+                      id,
+                      name,
+                      image,
+                    } = {
+                      ...(
+                        evm_chains_data
+                          .find(c =>
+                            c?.chain_id === props.value
+                          )
+                      ),
+                    }
 
-                  return (
-                    <div className="flex items-center space-x-1">
-                      <span className="font-medium">
-                        {value}
-                      </span>
-                    </div>
-                  )
+                    return (
+                      <div className="flex items-start space-x-1.5">
+                        {
+                          image &&
+                          (
+                            <Image
+                              src={image}
+                              className="w-5 h-5 rounded-full"
+                            />
+                          )
+                        }
+                        <div className="flex flex-col">
+                          <span className="font-semibold">
+                            {name}
+                          </span>
+                          <span className="text-slate-400 dark:text-slate-600">
+                            {id}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  },
                 },
-              },
-              {
-                Header: 'Contract Address',
-                accessor: 'contract_address',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    chain_id,
-                  } = { ...props.row.original }
-                  const {
-                    explorer,
-                    prefix_address,
-                  } = {
-                    ...(
-                      evm_chains_data
-                        .find(c =>
-                          c?.chain_id === chain_id
-                        )
-                    ),
-                  }
-                  const {
-                    url,
-                    contract_path,
-                  } = { ...explorer }
+                {
+                  Header: 'Denom',
+                  accessor: 'id',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const {
+                      value,
+                    } = { ...props }
 
-                  return (
-                    <div className="flex items-center space-x-1">
-                      <a
-                        href={`${url}${contract_path?.replace('{address}', props.value)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                      >
-                        <span className="xl:hidden">
-                          {ellipse(
-                            props.value,
-                            12,
-                            prefix_address,
-                          )}
+                    return (
+                      <div className="flex items-center space-x-1">
+                        <span className="font-medium">
+                          {value}
                         </span>
-                        <span className="hidden xl:block">
-                          {ellipse(
-                            props.value,
-                            16,
-                            prefix_address,
-                          )}
-                        </span>
-                      </a>
-                      <Copy
-                        value={props.value}
+                      </div>
+                    )
+                  },
+                },
+                {
+                  Header: 'Contract Address',
+                  accessor: 'contract_address',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const {
+                      chain_id,
+                    } = { ...props.row.original }
+                    const {
+                      explorer,
+                      prefix_address,
+                    } = {
+                      ...(
+                        evm_chains_data
+                          .find(c =>
+                            c?.chain_id === chain_id
+                          )
+                      ),
+                    }
+                    const {
+                      url,
+                      contract_path,
+                    } = { ...explorer }
+
+                    return (
+                      <div className="flex items-center space-x-1">
+                        <a
+                          href={`${url}${contract_path?.replace('{address}', props.value)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                        >
+                          <span className="xl:hidden">
+                            {ellipse(
+                              props.value,
+                              12,
+                              prefix_address,
+                            )}
+                          </span>
+                          <span className="hidden xl:block">
+                            {ellipse(
+                              props.value,
+                              16,
+                              prefix_address,
+                            )}
+                          </span>
+                        </a>
+                        <Copy
+                          value={props.value}
+                        />
+                      </div>
+                    )
+                  },
+                },
+                {
+                  Header: 'Add Token',
+                  accessor: 'add_token',
+                  disableSortBy: true,
+                  Cell: props => (
+                    <div className="flex items-center justify-end">
+                      <AddToken
+                        token_data={
+                          {
+                            ...props.row.original,
+                          }
+                        }
                       />
                     </div>
-                  )
-                },
-              },
-              {
-                Header: 'Add Token',
-                accessor: 'add_token',
-                disableSortBy: true,
-                Cell: props => (
-                  <div className="flex items-center justify-end">
-                    <AddToken
-                      token_data={
-                        {
-                          ...props.row.original,
-                        }
-                      }
-                    />
-                  </div>
-                ),
-                headerClassName: 'whitespace-nowrap justify-end text-right',
-              }
-            ]}
+                  ),
+                  headerClassName: 'whitespace-nowrap justify-end text-right',
+                }
+              ]
+            }
             data={data_filtered}
             noPagination={data_filtered.length <= 25}
             defaultPageSize={25}

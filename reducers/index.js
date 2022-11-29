@@ -16,20 +16,22 @@ import rpc_providers from './rpc-providers'
 import wallet from './wallet'
 import chain_id from './chain-id'
 
-export default combineReducers({
-  preferences,
-  evm_chains,
-  cosmos_chains,
-  assets,
-  ens,
-  accounts,
-  chain,
-  status,
-  tvl,
-  validators,
-  validators_chains,
-  validators_profile,
-  rpc_providers,
-  wallet,
-  chain_id,
-})
+export default combineReducers(
+  {
+    preferences,
+    evm_chains,
+    cosmos_chains,
+    assets,
+    ens,
+    accounts,
+    chain,
+    status,
+    tvl,
+    validators,
+    validators_chains,
+    validators_profile,
+    rpc_providers,
+    wallet,
+    chain_id,
+  },
+)

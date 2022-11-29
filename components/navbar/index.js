@@ -97,727 +97,837 @@ export default () => {
   const [validatorsTrigger, setValidatorsTrigger] = useState(null)
 
   // chains
-  useEffect(() => {
-    const getData = async () => {
-      const {
-        evm,
-        cosmos,
-      } = { ...await getChains() }
+  useEffect(
+    () => {
+      const getData = async () => {
+        const {
+          evm,
+          cosmos,
+        } = { ...await getChains() }
 
-      if (evm) {
-        dispatch({
-          type: EVM_CHAINS_DATA,
-          value: evm,
-        })
+        if (evm) {
+          dispatch(
+            {
+              type: EVM_CHAINS_DATA,
+              value: evm,
+            }
+          )
+        }
+
+        if (cosmos) {
+          dispatch(
+            {
+              type: COSMOS_CHAINS_DATA,
+              value: cosmos,
+            }
+          )
+        }
       }
 
-      if (cosmos) {
-        dispatch({
-          type: COSMOS_CHAINS_DATA,
-          value: cosmos,
-        })
-      }
-    }
-
-    getData()
-  }, [])
+      getData()
+    },
+    [],
+  )
 
   // assets
-  useEffect(() => {
-    const getData = async () => {
-      const assets_data = await getAssets()
+  useEffect(
+    () => {
+      const getData = async () => {
+        const assets_data = await getAssets()
 
-      if (assets_data) {
-        // price
-        let updated_ids = assets_data
-          .filter(a =>
-            // a?.id === native_asset_id ||
-            typeof a?.price === 'number'
-          )
-          .map(a => a.id)
-
-        if (updated_ids.length < assets_data.length) {
-          let updated = false
-
-          const denoms = assets_data
-            .filter(a =>
-              a?.id &&
-              !updated_ids.includes(a.id)
-            )
-            .map(a => {
-              const {
-                id,
-                contracts,
-              } = { ...id }
-
-              const chain =
-                _.head(
-                  (contracts || [])
-                    .map(c => c?.chain)
-                )
-
-              if (chain) {
-                return {
-                  denom: id,
-                  chain,
-                }
-              }
-
-              return a.id
-            })
-
-          if (denoms.length > 0) {
-            const response =
-              await getAssetsPrice(
-                {
-                  denoms,
-                },
+        if (assets_data) {
+          // price
+          let updated_ids =
+            assets_data
+              .filter(a =>
+                // a?.id === native_asset_id ||
+                typeof a?.price === 'number'
               )
+              .map(a => a.id)
 
-            if (Array.isArray(response)) {
-              response.forEach(a => {
-                const {
-                  denom,
-                  price,
-                } = { ...a }
+          if (updated_ids.length < assets_data.length) {
+            let updated = false
 
-                const asset_index = assets_data
-                  .findIndex(_a =>
-                    equals_ignore_case(
-                      _a?.id,
-                      denom,
-                    )
-                  )
-
-                if (asset_index > -1) {
-                  const asset_data = assets_data[asset_index]
+            const denoms =
+              assets_data
+                .filter(a =>
+                  a?.id &&
+                  !updated_ids.includes(a.id)
+                )
+                .map(a => {
                   const {
                     id,
-                  } = { ...asset_data }
+                    contracts,
+                  } = { ...id }
 
-                  asset_data.price =
-                    (
-                      price ||
-                      asset_data.price ||
-                      0
+                  const chain =
+                    _.head(
+                      (contracts || [])
+                        .map(c => c?.chain)
                     )
 
-                  assets_data[asset_index] = asset_data
-                  updated_ids =
-                    _.uniq(
-                      _.concat(
-                        updated_ids,
-                        id,
+                  if (chain) {
+                    return {
+                      denom: id,
+                      chain,
+                    }
+                  }
+
+                  return a.id
+                })
+
+            if (denoms.length > 0) {
+              const response =
+                await getAssetsPrice(
+                  {
+                    denoms,
+                  },
+                )
+
+              if (Array.isArray(response)) {
+                response
+                  .forEach(a => {
+                    const {
+                      denom,
+                      price,
+                    } = { ...a }
+
+                    const asset_index = assets_data
+                      .findIndex(_a =>
+                        equals_ignore_case(
+                          _a?.id,
+                          denom,
+                        )
                       )
-                    )
 
-                  updated = true
-                }
-              })
-            }
-          }
+                    if (asset_index > -1) {
+                      const asset_data = assets_data[asset_index]
+                      const {
+                        id,
+                      } = { ...asset_data }
 
-          if (updated) {
-            dispatch(
-              {
-                type: ASSETS_DATA,
-                value: _.cloneDeep(assets_data),
+                      asset_data.price =
+                        (
+                          price ||
+                          asset_data.price ||
+                          0
+                        )
+
+                      assets_data[asset_index] = asset_data
+                      updated_ids =
+                        _.uniq(
+                          _.concat(
+                            updated_ids,
+                            id,
+                          )
+                        )
+
+                      updated = true
+                    }
+                  })
               }
-            )
+            }
+
+            if (updated) {
+              dispatch(
+                {
+                  type: ASSETS_DATA,
+                  value: _.cloneDeep(assets_data),
+                }
+              )
+            }
           }
         }
       }
-    }
 
-    getData()
-  }, [])
+      getData()
+    },
+    [],
+  )
 
   // status
-  useEffect(() => {
-    const getData = async is_interval => {
-      if (
-        !status_data ||
-        is_interval
-      ) {
-        const response =
-          await getStatus(
-            undefined,
-            is_interval &&
-            status_data,
-          )
-
-        if (response) {
-          dispatch(
-            {
-              type: STATUS_DATA,
-              value: response,
-            }
-          )
-
-          if (!is_interval) {
-            setValidatorsTrigger(
-              moment()
-                .valueOf()
+  useEffect(
+    () => {
+      const getData = async is_interval => {
+        if (
+          !status_data ||
+          is_interval
+        ) {
+          const response =
+            await getStatus(
+              undefined,
+              is_interval &&
+              status_data,
             )
+
+          if (response) {
+            dispatch(
+              {
+                type: STATUS_DATA,
+                value: response,
+              }
+            )
+
+            if (!is_interval) {
+              setValidatorsTrigger(
+                moment()
+                  .valueOf()
+              )
+            }
           }
         }
       }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(true),
-        6 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [status_data])
-
-  // chain
-  useEffect(() => {
-    const getData = async is_interval => {
-      if (
-        cosmos_chains_data &&
-        assets_data
-      ) {
-        const chain_data =
-          getChain(
-            'axelarnet',
-            cosmos_chains_data,
-          )
-        const {
-          coingecko_id,
-        } = { ...chain_data }
-
-        dispatch(
-          {
-            type: CHAIN_DATA,
-            value: {
-              ...chain_data,
-            },
-          }
+      const interval =
+        setInterval(() =>
+          getData(true),
+          6 * 1000,
         )
 
-        let response = await staking_params()
+      return () => clearInterval(interval)
+    },
+    [status_data],
+  )
 
-        if (response) {
-          const {
-            params,
-          } = { ...response }
-          const {
-            bond_denom,
-          } = { ...params }
-
-          dispatch(
-            {
-              type: CHAIN_DATA,
-              value: {
-                staking_params: {
-                  ...params,
-                },
-              },
-            }
-          )
-
-          if (bond_denom) {
-            response = await bank_supply(bond_denom)
-
-            const {
-              amount,
-            } = { ...response }
-            const {
-              denom,
-            } = { ...amount }
-
-            dispatch(
-              {
-                type: CHAIN_DATA,
-                value: {
-                  bank_supply:
-                    Object.fromEntries(
-                      Object.entries({ ...amount })
-                        .map(([k, v]) =>
-                          [
-                            k,
-                            k === 'denom' ?
-                              assetManager
-                                .symbol(
-                                  v,
-                                  assets_data,
-                                ) :
-                              assetManager
-                                .amount(
-                                  v,
-                                  denom,
-                                  assets_data,
-                                ),
-                          ]
-                        )
-                    ),
-                },
-              }
+  // chain
+  useEffect(
+    () => {
+      const getData = async is_interval => {
+        if (
+          cosmos_chains_data &&
+          assets_data
+        ) {
+          const chain_data =
+            getChain(
+              'axelarnet',
+              cosmos_chains_data,
             )
-          }
-        }
-
-        response = await staking_pool()
-
-        if (response) {
           const {
-            pool,
-          } = { ...response }
+            coingecko_id,
+          } = { ...chain_data }
 
           dispatch(
             {
               type: CHAIN_DATA,
               value: {
-                staking_pool:
-                  Object.fromEntries(
-                    Object.entries({ ...pool })
-                      .map(([k, v]) =>
-                        [
-                          k,
-                          assetManager
-                            .amount(
-                              v,
-                              native_asset_id,
-                              assets_data,
-                            ),
-                        ]
-                    )
-                  ),
+                ...chain_data,
               },
             }
           )
-        }
 
-        if (!is_interval) {
-          response = await slashing_params()
+          let response = await staking_params()
 
           if (response) {
             const {
               params,
             } = { ...response }
+            const {
+              bond_denom,
+            } = { ...params }
 
             dispatch(
               {
                 type: CHAIN_DATA,
                 value: {
-                  slashing_params: {
+                  staking_params: {
                     ...params,
                   },
                 },
               }
             )
-          }
 
-          response =
-            await (
-              await fetch(
-                process.env.NEXT_PUBLIC_RELEASES_URL,
+            if (bond_denom) {
+              response = await bank_supply(bond_denom)
+
+              const {
+                amount,
+              } = { ...response }
+              const {
+                denom,
+              } = { ...amount }
+
+              dispatch(
+                {
+                  type: CHAIN_DATA,
+                  value: {
+                    bank_supply:
+                      Object.fromEntries(
+                        Object.entries({ ...amount })
+                          .map(([k, v]) =>
+                            [
+                              k,
+                              k === 'denom' ?
+                                assetManager
+                                  .symbol(
+                                    v,
+                                    assets_data,
+                                  ) :
+                                assetManager
+                                  .amount(
+                                    v,
+                                    denom,
+                                    assets_data,
+                                  ),
+                            ]
+                          )
+                      ),
+                  },
+                }
               )
-            )
-            .text()
-
-          if (response?.includes('`axelar-core` version')) {
-            response = response
-              .split('\n')
-              .filter(l =>
-                l?.includes('`axelar-core` version')
-              )
-
-            dispatch(
-              {
-                type: CHAIN_DATA,
-                value: {
-                  ...Object.fromEntries(
-                    [
-                      _.head(response)
-                        .split('|')
-                        .map(s =>
-                          (s || '')
-                            .trim()
-                            .split('`')
-                            .join('')
-                            .split(' ')
-                            .join('_')
-                        )
-                        .filter(s => s),
-                    ]
-                  ),
-                },
-              }
-            )
+            }
           }
-          else {
-            dispatch(
-              {
-                type: CHAIN_DATA,
-                value: {
-                  'axelar-core_version': '-',
-                },
-              }
-            )
-          }
-        }
 
-        /*if (coingecko_id) {
-          response =
-            await token(
-              coingecko_id,
-            )
+          response = await staking_pool()
 
           if (response) {
+            const {
+              pool,
+            } = { ...response }
+
             dispatch(
               {
                 type: CHAIN_DATA,
                 value: {
-                  token_data: {
-                    ...response,
-                  },
+                  staking_pool:
+                    Object.fromEntries(
+                      Object.entries({ ...pool })
+                        .map(([k, v]) =>
+                          [
+                            k,
+                            assetManager
+                              .amount(
+                                v,
+                                native_asset_id,
+                                assets_data,
+                              ),
+                          ]
+                      )
+                    ),
                 },
               }
             )
           }
-        }*/
-      }
-    }
 
-    getData()
+          if (!is_interval) {
+            response = await slashing_params()
 
-    const interval =
-      setInterval(() =>
-        getData(true),
-        0.5 * 60 * 1000,
-      )
+            if (response) {
+              const {
+                params,
+              } = { ...response }
 
-    return () => clearInterval(interval)
-  }, [cosmos_chains_data, assets_data])
-
-  // rpcs
-  useEffect(() => {
-    const init = async => {
-      if (
-        evm_chains_data &&
-        ['/tvl'].includes(pathname)
-      ) {
-        const _rpcs = {}
-
-        for (const chain_data of evm_chains_data) {
-          const {
-            disabled,
-            chain_id,
-            provider_params,
-          } = { ...chain_data }
-
-          if (!disabled) {
-            const {
-              rpcUrls,
-            } = { ..._.head(provider_params) }
- 
-            const rpc_urls =
-              (rpcUrls || [])
-                .filter(url => url)
-
-            const provider = rpc_urls.length === 1 ?
-              new providers.JsonRpcProvider(rpc_urls[0]) :
-              new providers.FallbackProvider(
-                rpc_urls
-                  .map((url, i) => {
-                    return {
-                      provider: new providers.JsonRpcProvider(url),
-                      priority: i + 1,
-                      stallTimeout: 1000,
-                    }
-                  }),
-                rpc_urls.length / 3,
-              )
-
-            _rpcs[chain_id] = provider
-          }
-        }
-
-        if (!rpcs) {
-          dispatch(
-            {
-              type: RPCS,
-              value: _rpcs,
-            }
-          )
-        }
-      }
-    }
-
-    init()
-  }, [evm_chains_data, pathname])
-
-  // ens
-  useEffect(() => {
-    const getData = async () => {
-      if (['evm_address'].includes(type(address))) {
-        const addresses =
-          [address]
-            .filter(a =>
-              a &&
-              !ens_data?.[a]
-            )
-
-        const ens_data = await getEns(addresses)
-
-        if (ens_data) {
-          dispatch(
-            {
-              type: ENS_DATA,
-              value: ens_data,
-            }
-          )
-        }
-      }
-    }
-
-    getData()
-  }, [address])
-
-  // ens
-  useEffect(() => {
-    const getData = async () => {
-      const response = await escrow_addresses()
-
-      const {
-        data,
-      } = { ...response }
-
-      if (data) {
-        dispatch(
-          {
-            type: ACCOUNTS_DATA,
-            value: data,
-          }
-        )
-      }
-    }
-
-    getData()
-  }, [])
-
-  // tvl
-  useEffect(() => {
-    const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-
-    const getAssetData = async asset_data => {
-      if (asset_data) {
-        const {
-          id,
-        } = { ...asset_data }
-
-        for (let i = 0; i < 3; i++) {
-          const response =
-            await getTVL(
-              {
-                asset: id,
-              },
-            )
-
-          const {
-            data,
-            updated_at,
-          } = { ...response }
-
-          if (data) {
-            dispatch(
-              {
-                type: TVL_DATA,
-                value: {
-                  [id]: {
-                    ..._.head(data),
-                    updated_at,
+              dispatch(
+                {
+                  type: CHAIN_DATA,
+                  value: {
+                    slashing_params: {
+                      ...params,
+                    },
                   },
-                },
-              }
-            )
-
-            break
-          }
-        }
-      }
-    }
-
-    const getData = is_interval => {
-      if (assets_data) {
-        if (
-          ['/tvl'].includes(pathname) &&
-          (
-            !tvl_data ||
-            is_interval
-          )
-        ) {
-          assets_data
-            .filter(a =>
-              a &&
-              (
-                !a.is_staging ||
-                staging
+                }
               )
-            )
-            .forEach(a => getAssetData(a))
-        }
-      }
-    }
-
-    getData()
-
-    const interval =
-      setInterval(() =>
-        getData(true),
-        3 * 60 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [assets_data, pathname])
-
-  // validators
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        assets_data &&
-        status_data &&
-        [
-          '/address',
-          '/transfer',
-          '/tvl',
-          '/sent',
-          '/gmp',
-          '/batch',
-          '/assets',
-        ].findIndex(p =>
-          pathname?.startsWith(p)
-        ) < 0
-      ) {
-        let response
-
-        switch (pathname) {
-          case '/':
-          case '/validators':
-          case '/validators/[status]':
-          case '/validator/[address]':
-          case '/account/[address]':
-          case '/evm-polls':
-          case '/evm-poll/[id]':
-          case '/participations':
-          case '/block/[height]':
-          case '/transactions':
-          case '/transactions/search':
-          case '/tx/[tx]':
-            const {
-              latest_block_height,
-            } = { ...status_data }
+            }
 
             response =
-              await all_validators(
-                null,
-                validators_data,
-                status ||
-                  (address ?
-                    null :
-                    'active'
-                  ),
-                address,
-                latest_block_height,
-                assets_data,
+              await (
+                await fetch(
+                  process.env.NEXT_PUBLIC_RELEASES_URL,
+                )
+              )
+              .text()
+
+            if (response?.includes('`axelar-core` version')) {
+              response =
+                response
+                  .split('\n')
+                  .filter(l =>
+                    l?.includes('`axelar-core` version')
+                  )
+
+              dispatch(
+                {
+                  type: CHAIN_DATA,
+                  value: {
+                    ...Object.fromEntries(
+                      [
+                        _.head(response)
+                          .split('|')
+                          .map(s =>
+                            (s || '')
+                              .trim()
+                              .split('`')
+                              .join('')
+                              .split(' ')
+                              .join('_')
+                          )
+                          .filter(s => s),
+                      ]
+                    ),
+                  },
+                }
+              )
+            }
+            else {
+              dispatch(
+                {
+                  type: CHAIN_DATA,
+                  value: {
+                    'axelar-core_version': '-',
+                  },
+                }
+              )
+            }
+          }
+
+          /*if (coingecko_id) {
+            response =
+              await token(
+                coingecko_id,
               )
 
             if (response) {
-              if (!validators_data) {
-                dispatch(
-                  {
-                    type: VALIDATORS_DATA,
-                    value: response,
-                  }
-                )
-              }
+              dispatch(
+                {
+                  type: CHAIN_DATA,
+                  value: {
+                    token_data: {
+                      ...response,
+                    },
+                  },
+                }
+              )
+            }
+          }*/
+        }
+      }
 
-              if (
-                ![
-                  '/participations',
-                ].includes(pathname)
-              ) {
-                response =
-                  await all_validators_broadcaster(
-                    response,
-                    null,
-                    assets_data,
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(true),
+          0.5 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [cosmos_chains_data, assets_data],
+  )
+
+  // rpcs
+  useEffect(
+    () => {
+      const init = async => {
+        if (
+          evm_chains_data &&
+          ['/tvl'].includes(pathname)
+        ) {
+          const _rpcs = {}
+
+          for (const chain_data of evm_chains_data) {
+            const {
+              disabled,
+              chain_id,
+              provider_params,
+            } = { ...chain_data }
+
+            if (!disabled) {
+              const {
+                rpcUrls,
+              } = { ..._.head(provider_params) }
+   
+              const rpc_urls =
+                (rpcUrls || [])
+                  .filter(url => url)
+
+              const provider =
+                rpc_urls.length === 1 ?
+                  new providers.JsonRpcProvider(
+                    _.head(rpc_urls)
+                  ) :
+                  new providers.FallbackProvider(
+                    rpc_urls
+                      .map((url, i) => {
+                        return {
+                          provider: new providers.JsonRpcProvider(url),
+                          priority: i + 1,
+                          stallTimeout: 1000,
+                        }
+                      }),
+                    rpc_urls.length / 3,
                   )
 
-                if (response?.length > 0) {
-                  let _response = response
+              _rpcs[chain_id] = provider
+            }
+          }
 
-                  if (
-                    [
-                      '/validators',
-                      '/validators/[status]',
-                      '/validator/[address]',
-                    ].includes(pathname)
-                  ) {
-                    const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS),
-                      num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT),
-                      first = firstHeartbeatBlock(latest_block_height - num_heartbeat_blocks),
-                      last = lastHeartbeatBlock(latest_block_height)
+          if (!rpcs) {
+            dispatch(
+              {
+                type: RPCS,
+                value: _rpcs,
+              }
+            )
+          }
+        }
+      }
 
-                    response =
-                      await getHeartbeats(
-                        {
-                          query: {
-                            bool: {
-                              must: [
-                                { range: { height: { gte: first, lte: latest_block_height } } },
-                              ],
+      init()
+    },
+    [evm_chains_data, pathname],
+  )
+
+  // ens
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (['evm_address'].includes(type(address))) {
+          const addresses =
+            [address]
+              .filter(a =>
+                a &&
+                !ens_data?.[a]
+              )
+
+          const ens_data = await getEns(addresses)
+
+          if (ens_data) {
+            dispatch(
+              {
+                type: ENS_DATA,
+                value: ens_data,
+              }
+            )
+          }
+        }
+      }
+
+      getData()
+    },
+    [address],
+  )
+
+  // ens
+  useEffect(
+    () => {
+      const getData = async () => {
+        const response = await escrow_addresses()
+
+        const {
+          data,
+        } = { ...response }
+
+        if (data) {
+          dispatch(
+            {
+              type: ACCOUNTS_DATA,
+              value: data,
+            }
+          )
+        }
+      }
+
+      getData()
+    },
+    [],
+  )
+
+  // tvl
+  useEffect(
+    () => {
+      const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+
+      const getAssetData = async asset_data => {
+        if (asset_data) {
+          const {
+            id,
+          } = { ...asset_data }
+
+          for (let i = 0; i < 3; i++) {
+            const response =
+              await getTVL(
+                {
+                  asset: id,
+                },
+              )
+
+            const {
+              data,
+              updated_at,
+            } = { ...response }
+
+            if (data) {
+              dispatch(
+                {
+                  type: TVL_DATA,
+                  value: {
+                    [id]: {
+                      ..._.head(data),
+                      updated_at,
+                    },
+                  },
+                }
+              )
+
+              break
+            }
+          }
+        }
+      }
+
+      const getData = is_interval => {
+        if (assets_data) {
+          if (
+            [
+              '/tvl',
+            ].includes(pathname) &&
+            (
+              !tvl_data ||
+              is_interval
+            )
+          ) {
+            assets_data
+              .filter(a =>
+                a &&
+                (
+                  !a.is_staging ||
+                  staging
+                )
+              )
+              .forEach(a => getAssetData(a))
+          }
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(true),
+          3 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [assets_data, pathname],
+  )
+
+  // validators
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          assets_data &&
+          status_data &&
+          [
+            '/address',
+            '/transfer',
+            '/tvl',
+            '/sent',
+            '/gmp',
+            '/batch',
+            '/assets',
+          ].findIndex(p =>
+            pathname?.startsWith(p)
+          ) < 0
+        ) {
+          let response
+
+          switch (pathname) {
+            case '/':
+            case '/validators':
+            case '/validators/[status]':
+            case '/validator/[address]':
+            case '/account/[address]':
+            case '/evm-polls':
+            case '/evm-poll/[id]':
+            case '/participations':
+            case '/block/[height]':
+            case '/transactions':
+            case '/transactions/search':
+            case '/tx/[tx]':
+              const {
+                latest_block_height,
+              } = { ...status_data }
+
+              response =
+                await all_validators(
+                  null,
+                  validators_data,
+                  status ||
+                    (address ?
+                      null :
+                      'active'
+                    ),
+                  address,
+                  latest_block_height,
+                  assets_data,
+                )
+
+              if (response) {
+                if (!validators_data) {
+                  dispatch(
+                    {
+                      type: VALIDATORS_DATA,
+                      value: response,
+                    }
+                  )
+                }
+
+                if (
+                  ![
+                    '/participations',
+                  ].includes(pathname)
+                ) {
+                  response =
+                    await all_validators_broadcaster(
+                      response,
+                      null,
+                      assets_data,
+                    )
+
+                  if (response?.length > 0) {
+                    let _response = response
+
+                    if (
+                      [
+                        '/validators',
+                        '/validators/[status]',
+                        '/validator/[address]',
+                      ].includes(pathname)
+                    ) {
+                      const num_heartbeat_blocks =
+                        Number(
+                          process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS
+                        )
+                      const num_blocks_per_heartbeat =
+                        Number(
+                          process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEA
+                        )
+
+                      const first = firstHeartbeatBlock(latest_block_height - num_heartbeat_blocks)
+                      const last = lastHeartbeatBlock(latest_block_height)
+
+                      response =
+                        await getHeartbeats(
+                          {
+                            query: {
+                              bool: {
+                                must: [
+                                  { range: { height: { gte: first, lte: latest_block_height } } },
+                                ],
+                              },
                             },
-                          },
-                          aggs: {
-                            heartbeats: {
-                              terms: { field: 'sender.keyword', size: 1000 },
-                              aggs: {
-                                period_height: {
-                                  terms: { field: 'period_height', size: 1000 },
+                            aggs: {
+                              heartbeats: {
+                                terms: { field: 'sender.keyword', size: 1000 },
+                                aggs: {
+                                  period_height: {
+                                    terms: { field: 'period_height', size: 1000 },
+                                  },
                                 },
                               },
                             },
+                            _source: false,
                           },
-                          _source: false,
-                        },
-                      )
+                        )
 
-                    for (let i = 0; i < _response.length; i++) {
-                      const v = _response[i]
+                      for (let i = 0; i < _response.length; i++) {
+                        const v = _response[i]
 
-                      const {
-                        broadcaster_address,
-                      } = { ...v }
+                        const {
+                          broadcaster_address,
+                        } = { ...v }
 
-                      const total =
-                        Math.floor(
-                          (last - first) /
-                          num_blocks_per_heartbeat
-                        ) + 1
+                        const total =
+                          Math.floor(
+                            (last - first) /
+                            num_blocks_per_heartbeat
+                          ) + 1
 
-                      const up =
-                        response?.data?.[broadcaster_address] ||
-                        0
-
-                      let uptime =
-                        total > 0 ?
-                          up * 100 / total :
+                        const up =
+                          response?.data?.[broadcaster_address] ||
                           0
 
-                      uptime =
-                        uptime > 100 ?
-                          100 :
-                          uptime
+                        let uptime =
+                          total > 0 ?
+                            up * 100 / total :
+                            0
 
-                      v.heartbeats_uptime = uptime
-                      _response[i] = v
+                        uptime =
+                          uptime > 100 ?
+                            100 :
+                            uptime
+
+                        v.heartbeats_uptime = uptime
+                        _response[i] = v
+                      }
+
+                      response = _response
+
+                      dispatch(
+                        {
+                          type: VALIDATORS_DATA,
+                          value: response,
+                        }
+                      )
+
+                      const num_evm_votes_blocks =
+                        Number(
+                          process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS
+                        )
+
+                      response =
+                        await validators_evm_votes(
+                          {
+                            fromBlock: latest_block_height - num_evm_votes_blocks,
+                            toBlock: latest_block_height - 10,
+                          },
+                        )
+
+                      const {
+                        data,
+                        total,
+                      } = { ...response }
+
+                      for (let i = 0; i < _response.length; i++) {
+                        const v = _response[i]
+                        const {
+                          broadcaster_address,
+                        } = { ...v }
+
+                        v.votes = {
+                          ...response?.data?.[broadcaster_address],
+                        }
+
+                        v.total_votes =
+                          v.votes.total ||
+                          0
+
+                        const get_votes = vote =>
+                          _.sum(
+                            Object.entries({ ...v.votes?.chains })
+                              .map(c =>
+                                Object.entries({ ...c[1]?.votes })
+                                  .find(_v =>
+                                    equals_ignore_case(
+                                      _v[0],
+                                      vote?.toString(),
+                                    )
+                                  )?.[1] ||
+                                0
+                              )
+                          )
+
+                        v.total_yes_votes = get_votes(true)
+                        v.total_no_votes = get_votes(false)
+                        v.total_unsubmitted_votes = get_votes('unsubmitted')
+                        v.total_polls = total
+
+                        _response[i] = v
+                      }
                     }
 
                     response = _response
@@ -828,179 +938,122 @@ export default () => {
                         value: response,
                       }
                     )
-
-                    const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
-
-                    response =
-                      await validators_evm_votes(
-                        {
-                          fromBlock: latest_block_height - num_evm_votes_blocks,
-                          toBlock: latest_block_height - 10,
-                        },
-                      )
-
-                    const {
-                      data,
-                      total,
-                    } = { ...response }
-
-                    for (let i = 0; i < _response.length; i++) {
-                      const v = _response[i]
-                      const {
-                        broadcaster_address,
-                      } = { ...v }
-
-                      v.votes = {
-                        ...response?.data?.[broadcaster_address],
-                      }
-
-                      v.total_votes =
-                        v.votes.total ||
-                        0
-
-                      const get_votes = vote =>
-                        _.sum(
-                          Object.entries({ ...v.votes?.chains })
-                            .map(c =>
-                              Object.entries({ ...c[1]?.votes })
-                                .find(_v =>
-                                  equals_ignore_case(
-                                    _v[0],
-                                    vote?.toString(),
-                                  )
-                                )?.[1] ||
-                              0
-                            )
-                        )
-
-                      v.total_yes_votes = get_votes(true)
-                      v.total_no_votes = get_votes(false)
-                      v.total_unsubmitted_votes = get_votes('unsubmitted')
-                      v.total_polls = total
-
-                      _response[i] = v
-                    }
                   }
-
-                  response = _response
-
-                  dispatch(
-                    {
-                      type: VALIDATORS_DATA,
-                      value: response,
-                    }
-                  )
                 }
+
+                response = await all_validators_status(response)
               }
-
-              response = await all_validators_status(response)
-            }
-            break
-          default:
-            response =
-              await all_validators(
-                ['/validators/tier'].includes(pathname) ?
-                  {} :
-                  null,
-                validators_data,
-                null,
-                null,
-                null,
-                assets_data,
-              )
-
-              if (['/validators/tier'].includes(pathname)) {
-                const {
-                  data,
-                } = { ...response }
-
-                response =
-                  await all_validators_broadcaster(
-                    data,
+              break
+            default:
+              response =
+                await all_validators(
+                  ['/validators/tier'].includes(pathname) ?
+                    {} :
                     null,
-                    assets_data,
-                  )
-              }
+                  validators_data,
+                  null,
+                  null,
+                  null,
+                  assets_data,
+                )
 
-            break
+                if (['/validators/tier'].includes(pathname)) {
+                  const {
+                    data,
+                  } = { ...response }
+
+                  response =
+                    await all_validators_broadcaster(
+                      data,
+                      null,
+                      assets_data,
+                    )
+                }
+
+              break
+          }
+
+          if (response) {
+            dispatch(
+              {
+                type: VALIDATORS_DATA,
+                value: response,
+              }
+            )
+          }
         }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [assets_data, pathname, validatorsTrigger],
+  )
+
+  // chain maintainner
+  useEffect(
+    () => {
+      const getChainData = async (
+        id,
+        chains_data,
+      ) => {
+        const response =
+          await chain_maintainer(
+            id,
+            chains_data,
+          )
 
         if (response) {
           dispatch(
             {
-              type: VALIDATORS_DATA,
+              type: VALIDATORS_CHAINS_DATA,
               value: response,
             }
           )
         }
       }
-    }
 
-    getData()
-
-    const interval =
-      setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
-
-    return () => clearInterval(interval)
-  }, [assets_data, pathname, validatorsTrigger])
-
-  // chain maintainner
-  useEffect(() => {
-    const getChainData = async (
-      id,
-      chains_data,
-    ) => {
-      const response =
-        await chain_maintainer(
-          id,
-          chains_data,
-        )
-
-      if (response) {
-        dispatch(
-          {
-            type: VALIDATORS_CHAINS_DATA,
-            value: response,
-          }
-        )
-      }
-    }
-
-    const getData = () => {
-      if (
-        evm_chains_data &&
-        [
-          '/validator',
-          '/participations',
-          '/proposals',
-        ].findIndex(p =>
-          pathname?.includes(p)
-        ) > -1
-      ) {
-        evm_chains_data
-          .map(c => c?.id)
-          .forEach(id =>
-            getChainData(
-              id,
-              evm_chains_data,
+      const getData = () => {
+        if (
+          evm_chains_data &&
+          [
+            '/validator',
+            '/participations',
+            '/proposals',
+          ].findIndex(p =>
+            pathname?.includes(p)
+          ) > -1
+        ) {
+          evm_chains_data
+            .map(c => c?.id)
+            .forEach(id =>
+              getChainData(
+                id,
+                evm_chains_data,
+              )
             )
-          )
+        }
       }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [evm_chains_data, pathname])
+      return () => clearInterval(interval)
+    },
+    [evm_chains_data, pathname],
+  )
 
   return (
     <>

@@ -11,36 +11,46 @@ export default () => {
     asPath,
   } = { ...router }
 
-  const _asPath = asPath.includes('?') ?
-    asPath.substring(
-      0,
-      asPath.indexOf('?'),
-    ) :
-    asPath
+  const _asPath =
+    asPath.includes('?') ?
+      asPath
+        .substring(
+          0,
+          asPath.indexOf('?'),
+        ) :
+      asPath
 
   const [ssr, setSsr] = useState(true)
 
-  useEffect(() => {
-    setSsr(false)
-  }, [])
+  useEffect(
+    () => {
+      setSsr(false)
+    },
+    [],
+  )
 
   if (
     !ssr &&
     typeof window !== 'undefined' &&
     pathname !== _asPath
   ) {
-    router.push(
-      is_route_exist(_asPath) ?
-        asPath :
-        '/'
-    )
+    router
+      .push(
+        is_route_exist(_asPath) ?
+          asPath :
+          '/'
+      )
   }
 
-  return !ssr &&
-    ['/'].includes(asPath) &&
+  return (
+    !ssr &&
+    [
+      '/',
+    ].includes(asPath) &&
     (
       <div className="max-w-8xl mx-auto">
         <Dashboard />
       </div>
     )
+  )
 }

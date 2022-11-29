@@ -50,11 +50,26 @@ export default () => {
     if (input_type) {
       if (
         Object.values({ ...ens_data })
-          .findIndex(v => equals_ignore_case(v?.name, input)) > -1
+          .findIndex(v =>
+            equals_ignore_case(
+              v?.name,
+              input,
+            )
+          ) > -1
       ) {
         const {
           resolvedAddress,
-        } = { ...Object.values(ens_data).find(v => equals_ignore_case(v?.name, input)) }
+        } = {
+          ...(
+            Object.values(ens_data)
+              .find(v =>
+                equals_ignore_case(
+                  v?.name,
+                  input,
+                )
+              )
+          ),
+        }
         const {
           id,
         } = { ...resolvedAddress }
@@ -63,10 +78,11 @@ export default () => {
         input_type = 'address'
       }
       else if (input_type === 'ens') {
-        const domain = await domainFromEns(
-          input,
-          ens_data,
-        )
+        const domain =
+          await domainFromEns(
+            input,
+            ens_data,
+          )
 
         const {
           resolvedAddress,
@@ -78,12 +94,14 @@ export default () => {
         if (id) {
           input = id
 
-          dispatch({
-            type: ENS_DATA,
-            value: {
-              [`${input.toLowerCase()}`]: domain,
-            },
-          })
+          dispatch(
+            {
+              type: ENS_DATA,
+              value: {
+                [`${input.toLowerCase()}`]: domain,
+              },
+            }
+          )
         }
 
         input_type = 'address'
@@ -94,20 +112,21 @@ export default () => {
           'cosmos_address',
         ].includes(input_type)
       ) {
-        let response = await transfers(
-          {
-            query: {
-              bool: {
-                should: [
-                  { match: { 'source.sender_address': input } },
-                  { match: { 'source.recipient_address': input } },
-                  { match: { 'link.recipient_address': input } },
-                ],
-                minimum_should_match: 1,
+        let response =
+          await transfers(
+            {
+              query: {
+                bool: {
+                  should: [
+                    { match: { 'source.sender_address': input } },
+                    { match: { 'source.recipient_address': input } },
+                    { match: { 'link.recipient_address': input } },
+                  ],
+                  minimum_should_match: 1,
+                },
               },
             },
-          },
-        )
+          )
 
         const {
           total,
@@ -117,21 +136,23 @@ export default () => {
           input_type = 'address'
         }
         else {
-          response = await deposit_addresses(
-            {
-              query: {
-                match: { 'deposit_address': input },
+          response =
+            await deposit_addresses(
+              {
+                query: {
+                  match: { 'deposit_address': input },
+                },
               },
-            },
-          )
+            )
 
           const {
             total,
           } = { ...response }
 
-          input_type = total ?
-            'account' :
-            'address'
+          input_type =
+            total ?
+              'account' :
+              'address'
         }
       }
       else if (
@@ -140,11 +161,14 @@ export default () => {
           'tx',
         ].includes(input_type)
       ) {
-        let response = await transfers({
-          query: {
-            match: { 'source.id': input },
-          },
-        })
+        let response =
+          await transfers(
+            {
+              query: {
+                match: { 'source.id': input },
+              },
+            },
+          )
 
         const {
           total,
@@ -154,11 +178,12 @@ export default () => {
           input_type = 'transfer'
         }
         else {
-          response = await token_sent(
-            {
-              txHash: input,
-            },
-          )
+          response =
+            await token_sent(
+              {
+                txHash: input,
+              },
+            )
 
           const {
             total,
@@ -168,24 +193,31 @@ export default () => {
             input_type = 'sent'
           }
           else if (input_type === 'evm_tx') {
-            input_type = process.env.NEXT_PUBLIC_GMP_API_URL ?
-              'gmp' :
-              'tx'
+            input_type =
+              process.env.NEXT_PUBLIC_GMP_API_URL ?
+                'gmp' :
+                'tx'
           }
         }
       }
 
       if (input_type === 'address') {
-        const addresses = [input?.toLowerCase()]
-          .filter(a => a && !ens_data?.[a])
+        const addresses =
+          [input?.toLowerCase()]
+            .filter(a =>
+              a &&
+              !ens_data?.[a]
+            )
 
         const ens_data = await getEns(addresses)
 
         if (ens_data) {
-          dispatch({
-            type: ENS_DATA,
-            value: ens_data,
-          })
+          dispatch(
+            {
+              type: ENS_DATA,
+              value: ens_data,
+            }
+          )
         }
       }
 
@@ -195,13 +227,19 @@ export default () => {
     }
   }
 
-  const canSearch = inputSearch &&
+  const canSearch =
+    inputSearch &&
     [
       address,
       tx,
     ]
     .filter(s => s)
-    .findIndex(s => equals_ignore_case(s, inputSearch)) < 0
+    .findIndex(s =>
+      equals_ignore_case(
+        s,
+        inputSearch,
+      )
+    ) < 0
 
   return (
     <div className="navbar-search mr-2 sm:mx-2">
@@ -217,16 +255,19 @@ export default () => {
             onChange={e => setInputSearch(e.target.value?.trim())}
             className={`w-64 sm:w-80 h-10 appearance-none focus:ring-0 rounded text-sm pl-3 ${canSearch ? 'pr-10' : 'pr-3'}`}
           />
-          {canSearch && (
-            <button
-              onClick={() => onSubmit()}
-              className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 absolute rounded text-white right-0 p-1.5 mt-1.5 mr-2"
-            >
-              <FiSearch
-                size={16}
-              />
-            </button>
-          )}
+          {
+            canSearch &&
+            (
+              <button
+                onClick={() => onSubmit()}
+                className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 absolute rounded text-white right-0 p-1.5 mt-1.5 mr-2"
+              >
+                <FiSearch
+                  size={16}
+                />
+              </button>
+            )
+          }
         </div>
       </form>
     </div>

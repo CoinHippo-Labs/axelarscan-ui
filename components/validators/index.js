@@ -16,10 +16,11 @@ import { chainManager } from '../../lib/object/chain'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse, loader_color } from '../../lib/utils'
 
-const STATUSES = [
-  'active',
-  'inactive',
-]
+const STATUSES =
+  [
+    'active',
+    'inactive',
+  ]
 
 export default () => {
   const {
@@ -72,157 +73,167 @@ export default () => {
   const [inflationData, setInflationData] = useState(null)
   const [validatorsData, setValidatorsData] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      setInflationData(
-        await getInflation()
-      )
-    }
+  useEffect(
+    () => {
+      const getData = async () => {
+        setInflationData(
+          await getInflation()
+        )
+      }
 
-    getData()
-  }, [])
+      getData()
+    },
+    [],
+  )
 
-  useEffect(() => {
-    const {
-      staking_pool,
-      bank_supply,
-    } = { ...chain_data }
-
-    if (
-      assets_data &&
-      validators_data &&
-      validators_chains_data &&
-      staking_pool &&
-      bank_supply &&
-      inflationData
-    ) {
+  useEffect(
+    () => {
       const {
-        bonded_tokens,
-      } = { ...staking_pool }
-      const {
-        amount,
-      } = { ...bank_supply }
+        staking_pool,
+        bank_supply,
+      } = { ...chain_data }
 
-      const total_supply = amount;
+      if (
+        assets_data &&
+        validators_data &&
+        validators_chains_data &&
+        staking_pool &&
+        bank_supply &&
+        inflationData
+      ) {
+        const {
+          bonded_tokens,
+        } = { ...staking_pool }
+        const {
+          amount,
+        } = { ...bank_supply }
 
-      const {
-        tendermintInflationRate,
-        keyMgmtRelativeInflationRate,
-        externalChainVotingInflationRate,
-        communityTax,
-      } = { ...inflationData }
+        const total_supply = amount;
 
-      setValidatorsData(
-        validators_data
-          .map(v => {
-            const {
-              tokens,
-              commission,
-              uptime,
-              heartbeats_uptime,
-              votes,
-            } = { ...v }
-            let {
-              supported_chains,
-            } = { ...v }
-            const {
-              rate,
-            } = { ...commission?.commission_rates }
+        const {
+          tendermintInflationRate,
+          keyMgmtRelativeInflationRate,
+          externalChainVotingInflationRate,
+          communityTax,
+        } = { ...inflationData }
 
-            supported_chains =
-              Object.entries({ ...validators_chains_data })
-                .filter(([k, _v]) =>
-                  _v?.includes(v?.operator_address)
-                )
-                .map(([k, _v]) => k)
+        setValidatorsData(
+          validators_data
+            .map(v => {
+              const {
+                tokens,
+                commission,
+                uptime,
+                heartbeats_uptime,
+                votes,
+              } = { ...v }
+              let {
+                supported_chains,
+              } = { ...v }
+              const {
+                rate,
+              } = { ...commission?.commission_rates }
 
-            const _tokens =
-              assetManager
-                .amount(
-                  tokens,
-                  native_asset_id,
-                  assets_data,
-                )
+              supported_chains =
+                Object.entries({ ...validators_chains_data })
+                  .filter(([k, _v]) =>
+                    _v?.includes(v?.operator_address)
+                  )
+                  .map(([k, _v]) => k)
 
-            const _inflation =
-              parseFloat(
-                (
+              const _tokens =
+                assetManager
+                  .amount(
+                    tokens,
+                    native_asset_id,
+                    assets_data,
+                  )
+
+              const _inflation =
+                parseFloat(
                   (
-                    (uptime / 100) *
-                    (tendermintInflationRate || 0)
-                  ) +
-                  (
-                    (heartbeats_uptime / 100) *
-                    (keyMgmtRelativeInflationRate || 0) *
-                    (tendermintInflationRate || 0)
-                  ) +
-                  (
-                    (externalChainVotingInflationRate || 0) *
-                    _.sum(
-                      supported_chains
-                        .map(c => {
-                          const _votes = votes?.chains?.[c]
-                          const {
-                            total,
-                            total_polls,
-                          } = { ..._votes }
+                    (
+                      (uptime / 100) *
+                      (tendermintInflationRate || 0)
+                    ) +
+                    (
+                      (heartbeats_uptime / 100) *
+                      (keyMgmtRelativeInflationRate || 0) *
+                      (tendermintInflationRate || 0)
+                    ) +
+                    (
+                      (externalChainVotingInflationRate || 0) *
+                      _.sum(
+                        supported_chains
+                          .map(c => {
+                            const _votes = votes?.chains?.[c]
+                            const {
+                              total,
+                              total_polls,
+                            } = { ..._votes }
 
-                          return 1 -
-                            (total_polls ?
-                              (total_polls - total) / total_polls :
-                              0
-                            )
-                        })
+                            return 1 -
+                              (total_polls ?
+                                (total_polls - total) / total_polls :
+                                0
+                              )
+                          })
+                      )
                     )
                   )
+                  .toFixed(6)
                 )
-                .toFixed(6)
-              )
 
-            return {
-              ...v,
-              tokens: _tokens,
-              quadratic_voting_power:
-                _tokens > 0 &&
-                Math.floor(
-                  Math.sqrt(
-                    _tokens,
-                  )
-                ),
-              inflation: _inflation,
-              apr:
-                (_inflation * 100) *
-                total_supply *
-                (1 - (communityTax || 0)) *
-                (1 - (rate || 0)) /
-                bonded_tokens,
-              supported_chains,
-              votes:
-                votes &&
-                {
-                  ...votes,
-                  chains:
-                    Object.fromEntries(
-                      Object.entries({ ...votes?.chains })
-                        .filter(([k, v]) =>
-                          supported_chains?.includes(k)
-                        )
-                    ),
-                },
-            }
-          })
-      )
-    }
-  }, [assets_data, validators_data, validators_chains_data, inflationData])
+              return {
+                ...v,
+                tokens: _tokens,
+                quadratic_voting_power:
+                  _tokens > 0 &&
+                  Math.floor(
+                    Math.sqrt(
+                      _tokens,
+                    )
+                  ),
+                inflation: _inflation,
+                apr:
+                  (_inflation * 100) *
+                  total_supply *
+                  (1 - (communityTax || 0)) *
+                  (1 - (rate || 0)) /
+                  bonded_tokens,
+                supported_chains,
+                votes:
+                  votes &&
+                  {
+                    ...votes,
+                    chains:
+                      Object.fromEntries(
+                        Object.entries({ ...votes?.chains })
+                          .filter(([k, v]) =>
+                            supported_chains?.includes(k)
+                          )
+                      ),
+                  },
+              }
+            })
+        )
+      }
+    },
+    [assets_data, validators_data, validators_chains_data, inflationData],
+  )
 
   const filterByStatus = status =>
     validatorsData &&
     validatorsData
       .filter(v =>
         status === 'inactive' ?
-          !['BOND_STATUS_BONDED'].includes(v.status) :
+          ![
+            'BOND_STATUS_BONDED',
+          ].includes(v.status) :
           !v.jailed &&
-          ['BOND_STATUS_BONDED'].includes(v.status)
+          [
+            'BOND_STATUS_BONDED',
+          ].includes(v.status)
       )
 
   const data_filtered =
@@ -682,7 +693,13 @@ export default () => {
                     return (
                       <div className="flex items-start space-x-1.5 mt-0.5">
                         <div className="w-20 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
-                          <div style={{ width: `${total_share}%` }}>
+                          <div
+                            style={
+                              {
+                                width: `${total_share}%`,
+                              }
+                            }
+                          >
                             <ProgressBar
                               width={(total_share - tokens_share) * 100 / total_share}
                               color="bg-blue-200 dark:bg-blue-500"
@@ -765,7 +782,13 @@ export default () => {
                     return (
                       <div className="flex items-start space-x-1.5 mt-0.5">
                         <div className="w-20 bg-zinc-100 dark:bg-zinc-900 mt-0.5">
-                          <div style={{ width: `${total_share}%` }}>
+                          <div
+                            style={
+                              {
+                                width: `${total_share}%`,
+                              }
+                            }
+                          >
                             <ProgressBar
                               width={(total_share - quadratic_voting_power_share) * 100 / total_share}
                               color="bg-orange-200 dark:bg-orange-500"
@@ -844,10 +867,12 @@ export default () => {
                           <>
                             <div
                               title={
-                                `${number_format(
-                                  value,
-                                  '0,0.00',
-                                )}%`
+                                `${
+                                  number_format(
+                                    value,
+                                    '0,0.00',
+                                  )
+                                }%`
                               }
                               className="font-medium mt-0.5"
                             >
@@ -862,10 +887,12 @@ export default () => {
                               (
                                 <div
                                   title={
-                                    `${number_format(
-                                      inflation * 100,
-                                      '0,0.000',
-                                    )}%`
+                                    `${
+                                      number_format(
+                                        inflation * 100,
+                                        '0,0.000',
+                                      )
+                                    }%`
                                   }
                                   className="space-x-0.5"
                                 >
@@ -948,13 +975,15 @@ export default () => {
                             <div className="w-full mt-1">
                               <ProgressBarWithText
                                 width={value}
-                                text={<div className="text-white text-2xs font-semibold mx-1.5">
-                                  {number_format(
-                                    value,
-                                    '0,0.0',
-                                  )}
-                                  %
-                                </div>}
+                                text={
+                                  <div className="text-white text-2xs font-semibold mx-1.5">
+                                    {number_format(
+                                      value,
+                                      '0,0.0',
+                                    )}
+                                    %
+                                  </div>
+                                }
                                 color={`${value < 95 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-400 dark:bg-green-500'} rounded-lg`}
                                 backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 hover:bg-opacity-50 rounded-lg"
                                 className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}
@@ -1052,13 +1081,15 @@ export default () => {
                             <div className="w-full mt-1">
                               <ProgressBarWithText
                                 width={value}
-                                text={<div className="text-white text-2xs font-semibold mx-1.5">
-                                  {number_format(
-                                    value,
-                                    '0,0.0',
-                                  )}
-                                  %
-                                </div>}
+                                text={
+                                  <div className="text-white text-2xs font-semibold mx-1.5">
+                                    {number_format(
+                                      value,
+                                      '0,0.0',
+                                    )}
+                                    %
+                                  </div>
+                                }
                                 color={`${value < 95 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-400 dark:bg-green-500'} rounded-lg`}
                                 backgroundClassName="h-4 bg-slate-200 dark:bg-slate-800 hover:bg-opacity-50 rounded-lg"
                                 className={`h-4 flex items-center justify-${value < 33 ? 'start' : 'end'}`}
@@ -1323,11 +1354,12 @@ export default () => {
                         {status ?
                           <>
                             <div className={`${status.includes('UN') ? status.endsWith('ED') ? 'bg-red-200 dark:bg-red-300 border-2 border-red-400 dark:border-red-600 text-red-500 dark:text-red-700' : 'bg-yellow-200 dark:bg-yellow-300 border-2 border-yellow-400 dark:border-yellow-600 text-yellow-500 dark:text-yellow-700' : 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700'} rounded-xl text-xs font-semibold py-0.5 px-2`}>
-                              {status
-                                .replace(
-                                  'BOND_STATUS_',
-                                  '',
-                                )
+                              {
+                                status
+                                  .replace(
+                                    'BOND_STATUS_',
+                                    '',
+                                  )
                               }
                             </div>
                             {

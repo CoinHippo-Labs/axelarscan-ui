@@ -8,10 +8,12 @@ import { validator_profile } from '../../lib/api/lcd'
 import { loader_color, rand_image } from '../../lib/utils'
 import { VALIDATORS_PROFILE_DATA } from '../../reducers/types'
 
-export default ({
-  validator_description,
-  className = '',
-}) => {
+export default (
+  {
+    validator_description,
+    className = '',
+  },
+) => {
   const dispatch = useDispatch()
   const {
     preferences,
@@ -34,69 +36,72 @@ export default ({
 
   const [image, setImage] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (validator_description) {
-        const {
-          moniker,
-          identity,
-        } = { ...validator_description }
-
-        const key =
-          identity ||
-          (moniker || '')
-            .split(' ')
-            .filter(s => s)
-            .join('_')
-
-        let _image
-
-        if (validators_profile_data?.[key]) {
-          _image = validators_profile_data[key]
-        }
-        else if (identity) {
-          const response =
-            await validator_profile(
-              {
-                key_suffix: identity,
-              },
-            )
-
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (validator_description) {
           const {
-            url,
-          } = { ..._.head(response?.them)?.pictures?.primary }
+            moniker,
+            identity,
+          } = { ...validator_description }
 
-          _image = url
-        }
-
-        if (!_image) {
-          if (
+          const key =
+            identity ||
             (moniker || '')
-              .toLowerCase()
-              .startsWith('axelar-core-')
-          ) {
-            _image = '/logos/chains/axelarnet.svg'
+              .split(' ')
+              .filter(s => s)
+              .join('_')
+
+          let _image
+
+          if (validators_profile_data?.[key]) {
+            _image = validators_profile_data[key]
           }
-          else if (!identity) {
-            _image = rand_image()
+          else if (identity) {
+            const response =
+              await validator_profile(
+                {
+                  key_suffix: identity,
+                },
+              )
+
+            const {
+              url,
+            } = { ..._.head(response?.them)?.pictures?.primary }
+
+            _image = url
           }
+
+          if (!_image) {
+            if (
+              (moniker || '')
+                .toLowerCase()
+                .startsWith('axelar-core-')
+            ) {
+              _image = '/logos/chains/axelarnet.svg'
+            }
+            else if (!identity) {
+              _image = rand_image()
+            }
+          }
+
+          setImage(_image)
+
+          dispatch(
+            {
+              type: VALIDATORS_PROFILE_DATA,
+              value: {
+                [`${key}`]: _image,
+              },
+            }
+          )
         }
-
-        setImage(_image)
-
-        dispatch(
-          {
-            type: VALIDATORS_PROFILE_DATA,
-            value: {
-              [`${key}`]: _image,
-            },
-          }
-        )
       }
-    }
 
-    getData()
-  }, [validator_description])
+      getData()
+    },
+    [validator_description],
+  )
 
   const {
     moniker,
@@ -114,17 +119,18 @@ export default ({
     validators_profile_data?.[key] ||
     image
 
-  return _image ?
-    <Image
-      src={_image}
-      alt=""
-      className={`w-6 h-6 rounded-full ${className}`}
-    /> :
-    <div className={`flex items-center justify-center ${className}`}>
-      <ColorRing
-        color={loader_color(theme)}
-        width="24"
-        height="24"
-      />
-    </div>
+  return (
+    _image ?
+      <Image
+        src={_image}
+        className={`w-6 h-6 rounded-full ${className}`}
+      /> :
+      <div className={`flex items-center justify-center ${className}`}>
+        <ColorRing
+          color={loader_color(theme)}
+          width="24"
+          height="24"
+        />
+      </div>
+  )
 }

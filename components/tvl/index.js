@@ -46,88 +46,91 @@ export default () => {
 
   const [data, setData] = useState(null)
 
-  useEffect(() => {
-    if (
-      evm_chains_data &&
-      cosmos_chains_data &&
-      assets_data &&
-      Object.keys({ ...tvl_data }).length > 5
-    ) {
-      const chains_data =
-        _.concat(
-          evm_chains_data,
-          cosmos_chains_data,
-        )
+  useEffect(
+    () => {
+      if (
+        evm_chains_data &&
+        cosmos_chains_data &&
+        assets_data &&
+        Object.keys({ ...tvl_data }).length > 5
+      ) {
+        const chains_data =
+          _.concat(
+            evm_chains_data,
+            cosmos_chains_data,
+          )
 
-      setData(
-        _.orderBy(
-          Object.entries(tvl_data)
-            .map(([k, v]) => {
-              const {
-                total_on_evm,
-                total_on_cosmos,
-                total,
-                tvl,
-              } = { ...v }
-              let {
-                price,
-              } = { ...v }
+        setData(
+          _.orderBy(
+            Object.entries(tvl_data)
+              .map(([k, v]) => {
+                const {
+                  total_on_evm,
+                  total_on_cosmos,
+                  total,
+                  tvl,
+                } = { ...v }
+                let {
+                  price,
+                } = { ...v }
 
-              price =
-                typeof price === 'number' ?
-                  price :
-                  -1
+                price =
+                  typeof price === 'number' ?
+                    price :
+                    -1
 
-              return {
-                ...v,
-                asset_data:
-                  getAsset(
-                    k,
-                    assets_data,
-                  ),
-                value_on_evm:
-                  price *
-                  (
-                    total_on_evm ||
-                    0
-                  ),
-                value_on_cosmos:
-                  price *
-                  (
-                    total_on_cosmos ||
-                    0
-                  ),
-                value:
-                  price *
-                  (
-                    total ||
-                    0
-                  ),
-                native:
-                  Object.entries({ ...tvl })
-                    .map(([k, v]) => {
-                      return {
-                        chain: k,
-                        chain_data:
-                          getChain(
-                            k,
-                            chains_data,
-                          ),
-                        ...v,
-                      }
-                    })
-                    .find(c =>
-                      c?.contract_data?.is_native ||
-                      c?.denom_data?.is_native
+                return {
+                  ...v,
+                  asset_data:
+                    getAsset(
+                      k,
+                      assets_data,
                     ),
-              }
-            }),
-          ['value'],
-          ['desc'],
+                  value_on_evm:
+                    price *
+                    (
+                      total_on_evm ||
+                      0
+                    ),
+                  value_on_cosmos:
+                    price *
+                    (
+                      total_on_cosmos ||
+                      0
+                    ),
+                  value:
+                    price *
+                    (
+                      total ||
+                      0
+                    ),
+                  native:
+                    Object.entries({ ...tvl })
+                      .map(([k, v]) => {
+                        return {
+                          chain: k,
+                          chain_data:
+                            getChain(
+                              k,
+                              chains_data,
+                            ),
+                          ...v,
+                        }
+                      })
+                      .find(c =>
+                        c?.contract_data?.is_native ||
+                        c?.denom_data?.is_native
+                      ),
+                }
+              }),
+            ['value'],
+            ['desc'],
+          )
         )
-      )
-    }
-  }, [evm_chains_data, cosmos_chains_data, assets_data, tvl_data])
+      }
+    },
+    [evm_chains_data, cosmos_chains_data, assets_data, tvl_data],
+  )
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
 
@@ -896,7 +899,8 @@ export default () => {
             .filter(a =>
               !a?.is_staging ||
               staging
-            ).length &&
+            )
+            .length &&
           (
             <div className="flex justify-center p-1.5">
               <ColorRing

@@ -14,9 +14,11 @@ import { number_format, ellipse, equals_ignore_case, loader_color } from '../../
 
 const LIMIT = 50
 
-export default ({
-  n,
-}) => {
+export default (
+  {
+    n,
+  },
+) => {
   const {
     preferences,
     validators,
@@ -41,255 +43,286 @@ export default ({
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
 
-  useEffect(() => {
-    const triggering = is_interval => {
-      setFetchTrigger(
-        is_interval ?
-          moment().valueOf() :
-          typeof fetchTrigger === 'number' ?
-            null :
-            0
-      )
-    }
-
-    triggering()
-
-    const interval = setInterval(() =>
-      triggering(true),
-      0.1 * 60 * 1000,
-    )
-
-    return () => clearInterval()
-  }, [])
-
-  useEffect(() => {
-    const getData = async () => {
-      setFetching(true)
-
-      if (!fetchTrigger) {
-        setData(null)
-        setOffet(0)
-      }
-
-      const _data = !fetchTrigger ?
-        [] :
-        data || []
-      const size = n ||
-        LIMIT
-      const from = fetchTrigger === true || fetchTrigger === 1 ?
-        _data.length :
-        0
-
-      const response = await getBlocks(
-        {
-          size,
-          from,
-          sort: [{ height: 'desc' }],
-        },
-      )
-
-      if (response) {
-        const {
-          data,
-        } = { ...response }
-
-        setData(
-          _.orderBy(
-            _.uniqBy(
-              _.concat(
-                data || [],
-                _data,
-              ),
-              'height',
-            ),
-            ['height'],
-            ['desc'],
-          )
+  useEffect(
+    () => {
+      const triggering = is_interval => {
+        setFetchTrigger(
+          is_interval ?
+            moment()
+              .valueOf() :
+            typeof fetchTrigger === 'number' ?
+              null :
+              0
         )
       }
-      else if (!fetchTrigger) {
-        setData([])
+
+      triggering()
+
+      const interval =
+        setInterval(() =>
+          triggering(true),
+          0.1 * 60 * 1000,
+        )
+
+      return () => clearInterval()
+    },
+    [],
+  )
+
+  useEffect(
+    () => {
+      const getData = async () => {
+        setFetching(true)
+
+        if (!fetchTrigger) {
+          setData(null)
+          setOffet(0)
+        }
+
+        const _data =
+          !fetchTrigger ?
+            [] :
+            data ||
+            []
+
+        const size =
+          n ||
+          LIMIT
+
+        const from =
+          fetchTrigger === true ||
+          fetchTrigger === 1 ?
+            _data.length :
+            0
+
+        const response =
+          await getBlocks(
+            {
+              size,
+              from,
+              sort: [{ height: 'desc' }],
+            },
+          )
+
+        if (response) {
+          const {
+            data,
+          } = { ...response }
+
+          setData(
+            _.orderBy(
+              _.uniqBy(
+                _.concat(
+                  data ||
+                  [],
+                  _data,
+                ),
+                'height',
+              ),
+              ['height'],
+              ['desc'],
+            )
+          )
+        }
+        else if (!fetchTrigger) {
+          setData([])
+        }
+
+        setFetching(false)
       }
 
-      setFetching(false)
-    }
-
-    getData()
-  }, [fetchTrigger])
+      getData()
+    },
+    [fetchTrigger],
+  )
 
   return (
     data ?
       <div className="w-full space-y-2">
         <Datatable
-          columns={[
-            {
-              Header: 'Height',
-              accessor: 'height',
-              disableSortBy: true,
-              Cell: props => (
-                <Link href={`/block/${props.value}`}>
-                  <a
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
-                  >
-                    {number_format(
-                      props.value,
-                      '0,0',
-                    )}
-                  </a>
-                </Link>
-              ),
-            },
-            {
-              Header: 'Block Hash',
-              accessor: 'hash',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  height,
-                } = { ...props.row.original }
-
-                return (
-                  <Link href={`/block/${height}`}>
+          columns={
+            [
+              {
+                Header: 'Height',
+                accessor: 'height',
+                disableSortBy: true,
+                Cell: props => (
+                  <Link href={`/block/${props.value}`}>
                     <a
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-slate-400 dark:text-slate-600"
+                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
                     >
-                      {ellipse(
+                      {number_format(
                         props.value,
-                        8,
+                        '0,0',
                       )}
                     </a>
                   </Link>
-                )
+                ),
               },
-            },
-            {
-              Header: 'Proposer',
-              accessor: 'proposer_address',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  operator_address,
-                  validator_description,
-                } = { ...props.row.original }
-                const {
-                  moniker,
-                } = { ...validator_description }
+              {
+                Header: 'Block Hash',
+                accessor: 'hash',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    height,
+                  } = { ...props.row.original }
 
-                return (
-                  operator_address ?
-                    <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
-                      <Link href={`/validator/${operator_address}`}>
-                        <a
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ValidatorProfile
-                            validator_description={validator_description}
-                          />
-                        </a>
-                      </Link>
-                      <div className="flex flex-col">
-                        {moniker && (
-                          <Link href={`/validator/${operator_address}`}>
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                            >
-                              {ellipse(
-                                moniker,
-                                16,
-                              )}
-                            </a>
-                          </Link>
-                        )}
-                        <div className="flex items-center space-x-1">
-                          <Link href={`/validator/${operator_address}`}>
-                            <a
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-slate-400 dark:text-slate-600"
-                            >
-                              {ellipse(
-                                operator_address,
-                                12,
-                                process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                              )}
-                            </a>
-                          </Link>
-                          <Copy
-                            value={operator_address}
-                          />
-                        </div>
-                      </div>
-                    </div> :
-                    <Copy
-                      size={18}
-                      value={props.value}
-                      title={<span className="cursor-pointer text-slate-400 dark:text-slate-600">
+                  return (
+                    <Link href={`/block/${height}`}>
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-slate-400 dark:text-slate-600"
+                      >
                         {ellipse(
                           props.value,
-                          12,
-                          process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                          8,
                         )}
-                      </span>}
-                    />
-                )
+                      </a>
+                    </Link>
+                  )
+                },
               },
-            },
-            {
-              Header: 'TXs',
-              accessor: 'num_txs',
-              disableSortBy: true,
-              Cell: props => (
-                <div className="text-right">
-                  {props.value > -1 ?
-                    number_format(
-                      props.value,
-                      '0,0',
-                    ) :
-                    '-'
-                  }
-                </div>
-              ),
-              headerClassName: 'justify-end text-right',
-            },
-            {
-              Header: 'Time',
-              accessor: 'time',
-              disableSortBy: true,
-              Cell: props => {
-                const {
-                  height,
-                } = { ...props.row.original }
+              {
+                Header: 'Proposer',
+                accessor: 'proposer_address',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    operator_address,
+                    validator_description,
+                  } = { ...props.row.original }
+                  const {
+                    moniker,
+                  } = { ...validator_description }
 
-                return (
-                  <TimeAgo
-                    time={props.value}
-                    title={`Block: ${number_format(
-                      height,
-                      '0,0',
-                    )}`}
-                    className="ml-auto"
-                  />
-                )
+                  return (
+                    operator_address ?
+                      <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
+                        <Link href={`/validator/${operator_address}`}>
+                          <a
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ValidatorProfile
+                              validator_description={validator_description}
+                            />
+                          </a>
+                        </Link>
+                        <div className="flex flex-col">
+                          {
+                            moniker &&
+                            (
+                              <Link href={`/validator/${operator_address}`}>
+                                <a
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                >
+                                  {ellipse(
+                                    moniker,
+                                    16,
+                                  )}
+                                </a>
+                              </Link>
+                            )
+                          }
+                          <div className="flex items-center space-x-1">
+                            <Link href={`/validator/${operator_address}`}>
+                              <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-slate-400 dark:text-slate-600"
+                              >
+                                {ellipse(
+                                  operator_address,
+                                  12,
+                                  process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
+                                )}
+                              </a>
+                            </Link>
+                            <Copy
+                              value={operator_address}
+                            />
+                          </div>
+                        </div>
+                      </div> :
+                      <Copy
+                        value={props.value}
+                        title={
+                          <span className="cursor-pointer text-slate-400 dark:text-slate-600">
+                            {ellipse(
+                              props.value,
+                              12,
+                              process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                            )}
+                          </span>
+                        }
+                      />
+                  )
+                },
               },
-              headerClassName: 'justify-end text-right',
-            },
-          ].filter(c =>
-            !(
-              !isNaN(n) ?
-              ['hash'] :
-              []
-            ).includes(c.accessor)
-          )}
+              {
+                Header: 'TXs',
+                accessor: 'num_txs',
+                disableSortBy: true,
+                Cell: props => (
+                  <div className="text-right">
+                    {props.value > -1 ?
+                      number_format(
+                        props.value,
+                        '0,0',
+                      ) :
+                      '-'
+                    }
+                  </div>
+                ),
+                headerClassName: 'justify-end text-right',
+              },
+              {
+                Header: 'Time',
+                accessor: 'time',
+                disableSortBy: true,
+                Cell: props => {
+                  const {
+                    height,
+                  } = { ...props.row.original }
+
+                  return (
+                    <TimeAgo
+                      time={props.value}
+                      title={
+                        `Block: ${
+                          number_format(
+                            height,
+                            '0,0',
+                          )
+                        }`
+                      }
+                      className="ml-auto"
+                    />
+                  )
+                },
+                headerClassName: 'justify-end text-right',
+              },
+            ]
+            .filter(c =>
+              !(
+                !isNaN(n) ?
+                ['hash'] :
+                []
+              ).includes(c.accessor)
+            )
+          }
           data={
             data
-              .filter((d, i) => !n || i < n)
+              .filter((d, i) =>
+                !n ||
+                i < n
+              )
               .map((d, i) => {
                 const {
                   proposer_address,
@@ -297,7 +330,17 @@ export default ({
                 const {
                   operator_address,
                   description,
-                } = { ...validators_data?.find(v => equals_ignore_case(v?.consensus_address, proposer_address)) }
+                } = {
+                  ...(
+                    (validators_data || [])
+                      .find(v =>
+                        equals_ignore_case(
+                          v?.consensus_address,
+                          proposer_address,
+                        )
+                      )
+                  ),
+                }
 
                 return {
                   ...d,
