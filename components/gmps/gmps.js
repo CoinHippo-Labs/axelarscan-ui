@@ -1086,16 +1086,22 @@ export default ({ n }) => {
                         )
                       })
                     }
-                    {is_invalid_call && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
-                        Invalid Call
-                      </div>
-                    )}
-                    {is_insufficient_fee && (
-                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
-                        Insufficient Fee
-                      </div>
-                    )}
+                    {
+                      is_invalid_call &&
+                      (
+                        <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                          Invalid Call
+                        </div>
+                      )
+                    }
+                    {
+                      is_insufficient_fee &&
+                      (
+                        <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                          Insufficient Fee
+                        </div>
+                      )
+                    }
                     {forecall_time_spent && (
                       <div className="flex items-center space-x-1 mx-1 pt-0.5">
                         <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 font-medium">

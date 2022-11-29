@@ -804,7 +804,7 @@ export default () => {
                         )
                       const num_blocks_per_heartbeat =
                         Number(
-                          process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEA
+                          process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT
                         )
 
                       const first = firstHeartbeatBlock(latest_block_height - num_heartbeat_blocks)

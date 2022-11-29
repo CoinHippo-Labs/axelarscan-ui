@@ -6,6 +6,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import { CSVLink } from 'react-csv'
 import { ProgressBar, ColorRing } from 'react-loader-spinner'
+import { Tooltip } from '@material-tailwind/react'
 import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import { FiCircle } from 'react-icons/fi'
 import { TiArrowRight } from 'react-icons/ti'
@@ -15,7 +16,6 @@ import EnsProfile from '../ens-profile'
 import AccountProfile from '../account-profile'
 import Image from '../image'
 import Copy from '../copy'
-import Popover from '../popover'
 import TimeAgo from '../time-ago'
 import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
@@ -1001,24 +1001,22 @@ export default ({ n }) => {
                     {
                       insufficient_fee &&
                       (
-                        <Popover
-                          placement="bottom"
-                          title={null}
-                          content={<div className="w-40 whitespace-pre-wrap text-black dark:text-white text-xs font-normal">
-                            Send more {ellipse(symbol)} to the same recipient to cover the min fee
-                          </div>}
+                        <Tooltip
+                          placement="top"
+                          content={`Send more ${ellipse(symbol)} to the same recipient to cover the min fee`}
+                          className="w-56 z-50 bg-black bg-opacity-75 text-white text-xs"
                         >
-                          <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-semibold py-0.5 px-2">
+                          <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 cursor-pointer border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                             Insufficient Fee
                           </div>
-                        </Popover>
+                        </Tooltip>
                       )
                     }
                     {
                       ibc_send?.failed_txhash &&
                       !ibc_send.ack_txhash &&
                       (
-                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap font-medium py-0.5 px-2">
+                        <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                           Timeout
                         </div>
                       )
