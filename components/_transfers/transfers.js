@@ -575,7 +575,7 @@ export default (
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
-                      <div className="flex items-center space-x-1">
+                      <div className="min-w-max flex items-center space-x-1">
                         <Link href={`/_transfer/${value}`}>
                           <a
                             target="_blank"
@@ -684,7 +684,7 @@ export default (
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
-                      <div className="flex items-center space-x-2">
+                      <div className="h-6 flex items-center space-x-2">
                         {
                           image &&
                           (
@@ -988,7 +988,7 @@ export default (
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
-                      <div className="flex items-center space-x-2">
+                      <div className="h-6 flex items-center space-x-2">
                         {
                           image &&
                           (
@@ -1361,7 +1361,7 @@ export default (
                     )
 
                   return (
-                    <div className="w-fit flex flex-col mb-3">
+                    <div className="min-w-max flex flex-col mb-3">
                       {
                         steps
                           .map((s, i) => {

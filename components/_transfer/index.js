@@ -749,7 +749,7 @@ export default () => {
                     <div className="text-lg font-bold">
                       Source
                     </div>
-                    <div className="flex items-center space-x-3 sm:space-x-2 lg:space-x-3">
+                    <div className="h-8 sm:h-6 lg:h-8 flex items-center space-x-3 sm:space-x-2 lg:space-x-3">
                       {
                         source_chain_data?.image &&
                         (
@@ -915,7 +915,7 @@ export default () => {
                     <div className="text-lg font-bold">
                       Destination
                     </div>
-                    <div className="flex items-center space-x-3 sm:space-x-2 lg:space-x-3">
+                    <div className="h-8 sm:h-6 lg:h-8 flex items-center space-x-3 sm:space-x-2 lg:space-x-3">
                       {
                         destination_chain_data?.image &&
                         (

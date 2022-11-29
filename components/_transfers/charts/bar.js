@@ -109,7 +109,7 @@ export default (
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg space-y-2 pt-4 pb-0 sm:pb-1 px-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between space-x-1">
         <div className="flex flex-col space-y-0.5">
           <span className="font-semibold">
             {title}
@@ -130,7 +130,7 @@ export default (
                     '0,0'
                 )}
               </span>
-              <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+              <span className="leading-4 whitespace-nowrap text-slate-400 dark:text-slate-500 text-2xs sm:text-xs font-medium text-right">
                 {focus_time_string}
               </span>
             </div>
