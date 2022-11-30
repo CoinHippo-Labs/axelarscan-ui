@@ -1100,7 +1100,6 @@ export default (
                           >
                             <ValidatorProfile
                               validator_description={description}
-                              className="w-5 h-5"
                             />
                           </a>
                         </Link>
@@ -1213,7 +1212,6 @@ export default (
                                 >
                                   <ValidatorProfile
                                     validator_description={description}
-                                    className="w-5 h-5"
                                   />
                                 </a>
                               </Link>
