@@ -21,7 +21,7 @@ import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { number_format, name, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
-const LIMIT = 100
+const LIMIT = 50
 
 export default (
   {

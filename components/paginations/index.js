@@ -4,6 +4,7 @@ export const PageWithText = (
   {
     disabled = false,
     active,
+    size,
     onClick,
     activeClassNames = 'btn btn-default bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 shadow rounded text-white',
     inactiveClassNames = 'btn btn-default bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 shadow rounded text-slate-600 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-100',
@@ -17,6 +18,14 @@ export const PageWithText = (
       active ?
         activeClassNames :
         inactiveClassNames
+    }
+    style={
+      {
+        padding:
+          size === 'small' ?
+            '6px 4px' :
+            undefined
+      }
     }
   >
     {children}

@@ -23,7 +23,7 @@ import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { number_format, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
-const LIMIT = 100
+const LIMIT = 50
 
 export default ({ n }) => {
   const { preferences, evm_chains, cosmos_chains, assets } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, cosmos_chains: state.cosmos_chains, assets: state.assets }), shallowEqual)

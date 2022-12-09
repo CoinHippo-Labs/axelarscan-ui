@@ -41,6 +41,7 @@ const IndeterminateCheckbox =
 export default (
   {
     columns,
+    size,
     data,
     rowSelectEnable = false,
     defaultPageSize = 10,
@@ -319,6 +320,7 @@ export default (
                     pageIndex !== 0 &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={loading}
                         onClick={() => {
                           gotoPage(0)
@@ -336,6 +338,7 @@ export default (
                     canPreviousPage &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={loading}
                         onClick={() => {
                           previousPage()
@@ -351,6 +354,7 @@ export default (
                     canNextPage &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={
                           !canNextPage ||
                           loading
@@ -369,6 +373,7 @@ export default (
                     pageIndex !== pageCount - 1 &&
                     (
                       <PageWithText
+                        size={size}
                         disabled={
                           !canNextPage ||
                           loading

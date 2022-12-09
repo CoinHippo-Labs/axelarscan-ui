@@ -1085,6 +1085,20 @@ export default () => {
                               c.symbol,
                               symbol,
                             )
+                          ) > -1 ||
+                        (a?.contracts || [])
+                          .findIndex(c =>
+                            equals_ignore_case(
+                              c.symbol,
+                              symbol,
+                            )
+                          ) > -1 ||
+                        (a?.ibc || [])
+                          .findIndex(c =>
+                            equals_ignore_case(
+                              c.symbol,
+                              symbol,
+                            )
                           ) > -1
                       )
                     const {
@@ -1104,7 +1118,15 @@ export default () => {
                     decimals =
                       decimals ||
                       asset_data?.decimals ||
-                      18
+                      (
+                        [
+                          asset_data?.id,
+                        ].findIndex(s =>
+                          s?.includes('-wei')
+                        ) > -1 ?
+                          18 :
+                          6
+                      )
 
                     symbol =
                       contract_data?.symbol ||
