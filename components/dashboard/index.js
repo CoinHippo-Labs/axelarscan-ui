@@ -370,7 +370,7 @@ export default () => {
           <div className="sm:flex items-center justify-between space-y-1.5 sm:space-y-0 sm:space-x-3">
             <Link href="/transfers">
               <a>
-                <h2 className="uppercase tracking-wider text-base font-medium">
+                <h2 className="text-black dark:text-white uppercase tracking-wider text-base font-medium">
                   Axelar Cross-Chain Activities
                 </h2>
               </a>
@@ -397,7 +397,7 @@ export default () => {
         <div className="space-y-2">
           <Link href="/blocks">
             <a>
-              <h2 className="uppercase tracking-wider text-base font-medium">
+              <h2 className="text-black dark:text-white uppercase tracking-wider text-base font-medium">
                 Latest blocks
               </h2>
             </a>
@@ -411,7 +411,7 @@ export default () => {
         <div className="space-y-2">
           <Link href="/transactions">
             <a>
-              <h2 className="uppercase tracking-wider text-base font-medium">
+              <h2 className="text-black dark:text-white uppercase tracking-wider text-base font-medium">
                 Latest transactions
               </h2>
             </a>
