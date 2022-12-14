@@ -532,7 +532,8 @@ export default () => {
         title: 'Wrapped',
         chain_data: source_chain_data,
         data: send,
-        id_field: 'tx_hash_wrap',
+        // id_field: 'tx_hash_wrap',
+        id_field: 'txhash',
       },
       ![
         'send_token',
@@ -626,7 +627,8 @@ export default () => {
         title: 'Unwrapped',
         chain_data: destination_chain_data,
         data: unwrap,
-        id_field: 'tx_hash_unwrap',
+        // id_field: 'tx_hash_unwrap',
+        id_field: 'txhash',
       },
     ]
     .filter(s => s)
