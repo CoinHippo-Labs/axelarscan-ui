@@ -867,6 +867,7 @@ export default (
                   },
                 ]
               }
+              size="small"
               data={balances}
               noPagination={balances.length <= 10}
               defaultPageSize={10}
@@ -1055,6 +1056,7 @@ export default (
                         },
                       ]
                     }
+                    size="small"
                     data={delegations}
                     noPagination={delegations.length <= 10}
                     noRecordPerPage={true}
@@ -1311,6 +1313,7 @@ export default (
                         },
                       ]
                     }
+                    size="small"
                     data={redelegations}
                     noPagination={redelegations.length <= 10}
                     noRecordPerPage={true}
@@ -1488,6 +1491,7 @@ export default (
                         },
                       ]
                     }
+                    size="small"
                     data={unbondings}
                     noPagination={unbondings.length <= 10}
                     noRecordPerPage={true}

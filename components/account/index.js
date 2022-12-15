@@ -527,7 +527,7 @@ export default () => {
                           denom,
                           assets_data,
                         ),
-                    amount: initial_balance - balance,
+                    amount: /*initial_balance - */balance,
                     asset_data:
                       getAsset(
                         denom,
