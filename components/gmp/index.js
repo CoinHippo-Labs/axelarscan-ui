@@ -101,15 +101,16 @@ export default () => {
       } = { ...data }
 
       if (callback?.transactionHash) {
-        const _response = await api.execGet(
-          process.env.NEXT_PUBLIC_GMP_API_URL,
-          {
-            method: 'searchGMP',
-            txHash: callback.transactionHash,
-            txIndex: callback.transactionIndex,
-            txLogIndex: callback.logIndex,
-          },
-        )
+        const _response =
+          await api.execGet(
+            process.env.NEXT_PUBLIC_GMP_API_URL,
+            {
+              method: 'searchGMP',
+              txHash: callback.transactionHash,
+              txIndex: callback.transactionIndex,
+              txLogIndex: callback.logIndex,
+            },
+          )
 
         callback = _response?.find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
       }
@@ -124,13 +125,14 @@ export default () => {
       } = { ...data }
 
       if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
-        const _response = await api.execGet(
-          process.env.NEXT_PUBLIC_GMP_API_URL,
-          {
-            method: 'searchGMP',
-            txHash: call.transactionHash,
-          },
-        )
+        const _response =
+          await api.execGet(
+            process.env.NEXT_PUBLIC_GMP_API_URL,
+            {
+              method: 'searchGMP',
+              txHash: call.transactionHash,
+            },
+          )
 
         origin = _response?.find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
       }
@@ -152,31 +154,53 @@ export default () => {
         } = { ...approved.returnValues }
 
         // setup provider
-        const rpcs = _.head(
+        const chain_data =
           getChain(
             destinationChain,
             evm_chains_data,
-          )?.provider_params
-        )?.rpcUrls || []
-
-        const provider = rpcs.length === 1 ?
-          new providers.JsonRpcProvider(rpcs[0]) :
-          new providers.FallbackProvider(
-            rpcs.map((url, i) => {
-              return {
-                provider: new providers.JsonRpcProvider(url),
-                priority: i + 1,
-                stallTimeout: 1000,
-              }
-            }),
-            rpcs.length / 3,
           )
 
-        const executable_contract = new Contract(
-          contractAddress,
-          IAxelarExecutable.abi,
-          provider,
-        )
+        const {
+          chain_id,
+          provider_params,
+        } = { ...chain_data }
+
+        const {
+          rpcUrls,
+        } = { ..._.head(provider_params) }
+
+        const rpcs =
+          rpcUrls ||
+          []
+
+        const provider =
+          rpcs.length === 1 ?
+            new providers.StaticJsonRpcProvider(
+              _.head(rpcs),
+              chain_id,
+            ) :
+            new providers.FallbackProvider(
+              rpcs
+                .map((url, i) => {
+                  return {
+                    provider:
+                      new providers.StaticJsonRpcProvider(
+                        url,
+                        chain_id,
+                      ),
+                    priority: i + 1,
+                    stallTimeout: 1000,
+                  }
+                }),
+              rpcs.length / 3,
+            )
+
+        const executable_contract =
+          new Contract(
+            contractAddress,
+            IAxelarExecutable.abi,
+            provider,
+          )
 
         let _response
         const method = `execute${symbol ? 'WithToken' : ''}`
@@ -209,13 +233,15 @@ export default () => {
         }
       }
 
-      setGmp({
-        data,
-        execute_data,
-        callback,
-        origin,
-        tx,
-      })
+      setGmp(
+        {
+          data,
+          execute_data,
+          callback,
+          origin,
+          tx,
+        }
+      )
     }
   }
 
@@ -359,10 +385,11 @@ export default () => {
           logIndex,
         } = { ...call }
 
-        const response = await api.execute(
-          transactionHash,
-          logIndex,
-        )
+        const response =
+          await api.execute(
+            transactionHash,
+            logIndex,
+          )
 
         console.log('[execute response]', response)
 
@@ -629,7 +656,29 @@ export default () => {
       equals_ignore_case(
         a?.symbol,
         symbol,
-      )
+      ) ||
+      (a?.contracts || [])
+        .findIndex(c =>
+          c?.chain_id === source_chain_data?.chain_id &&
+          equals_ignore_case(
+            c.symbol,
+            symbol,
+          )
+        ) > -1 ||
+      (a?.contracts || [])
+        .findIndex(c =>
+          equals_ignore_case(
+            c.symbol,
+            symbol,
+          )
+        ) > -1 ||
+      (a?.ibc || [])
+        .findIndex(c =>
+          equals_ignore_case(
+            c.symbol,
+            symbol,
+          )
+        ) > -1
     )
 
   const source_contract_data = (asset_data?.contracts || [])
@@ -966,28 +1015,33 @@ export default () => {
 
   const detail_steps = steps
 
-  const forecall_time_spent = total_time_string(
-    call?.block_timestamp,
-    forecalled?.block_timestamp,
-  )
+  const forecall_time_spent =
+    total_time_string(
+      call?.block_timestamp,
+      forecalled?.block_timestamp,
+    )
 
-  const time_spent = total_time_string(
-    call?.block_timestamp,
-    executed?.block_timestamp,
-  )
+  const time_spent =
+    total_time_string(
+      call?.block_timestamp,
+      executed?.block_timestamp,
+    )
 
-  const notificationResponse = executeResponse ||
+  const notificationResponse =
+    executeResponse ||
     approveResponse ||
     gasAddResponse ||
     refundResponse
 
-  const explorer = notificationResponse && (
-    notificationResponse.is_axelar_transaction ?
-      axelar_chain_data :
-      executeResponse ?
-        destination_chain_data :
-        source_chain_data
-  )?.explorer
+  const explorer =
+    notificationResponse &&
+      (
+        notificationResponse.is_axelar_transaction ?
+          axelar_chain_data :
+          executeResponse ?
+            destination_chain_data :
+            source_chain_data
+      )?.explorer
 
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 rounded-lg space-y-2 py-4 px-5'
   const titleClassName = 'whitespace-nowrap uppercase text-lg font-bold'
@@ -1066,77 +1120,98 @@ export default () => {
                             event || '-'
                         }
                       </div>
-                      {amount && _symbol && (
-                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                          {asset_image && (
-                            <Image
-                              src={asset_image}
-                              className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
-                            />
-                          )}
-                          <span className="text-base sm:text-sm lg:text-base font-semibold">
-                            {asset_data && (
-                              <span className="mr-1">
-                                {number_format(
-                                  utils.formatUnits(
-                                    BigNumber.from(amount),
-                                    decimals,
-                                  ),
-                                  '0,0.000',
-                                  true,
-                                )}
-                              </span>
-                            )}
-                            <span>
-                              {_symbol}
-                            </span>
-                          </span>
-                        </div>
-                      )}
-                      {is_insufficient_minimum_amount && (
-                        <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-2">
-                          Insufficient Amount
-                        </div>
-                      )}
-                      {(fees?.destination_base_fee || fees?.base_fee) > 0 && (
-                        <div className="flex items-center space-x-2">
-                          <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
-                            <span>
-                              Fees:
-                            </span>
-                            <span>
-                              {number_format(
-                                fees?.destination_base_fee || fees?.base_fee,
-                                '0,0.000000',
-                              )}
-                            </span>
-                            <span>
-                              {fees.destination_native_token?.symbol}
-                            </span>
-                          </div>
-                          {typeof gas?.gas_base_fee_amount === 'number' && (
-                            <>
-                              <span className="text-sm font-medium">
-                                =
-                              </span>
-                              <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
-                                <span className="text-xs font-semibold">
+                      {
+                        amount &&
+                        _symbol &&
+                        (
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                            {
+                              asset_image &&
+                              (
+                                <Image
+                                  src={asset_image}
+                                  className="w-6 sm:w-5 lg:w-6 h-6 sm:h-5 lg:h-6 rounded-full"
+                                />
+                              )
+                            }
+                            <span className="text-base sm:text-sm lg:text-base font-semibold">
+                              {
+                                asset_data &&
+                                (
                                   <span className="mr-1">
                                     {number_format(
-                                      gas.gas_base_fee_amount,
-                                      '0,0.00000000',
+                                      utils.formatUnits(
+                                        BigNumber.from(
+                                          amount,
+                                        ),
+                                        decimals,
+                                      ),
+                                      '0,0.000',
                                       true,
                                     )}
                                   </span>
-                                  <span>
-                                    {fees.source_token?.symbol || _.head(source_chain_data?.provider_params)?.nativeCurrency?.symbol}
-                                  </span>
+                                )
+                              }
+                              <span>
+                                {_symbol}
+                              </span>
+                            </span>
+                          </div>
+                        )
+                      }
+                      {
+                        is_insufficient_minimum_amount &&
+                        (
+                          <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-2">
+                            Insufficient Amount
+                          </div>
+                        )
+                      }
+                      {
+                        (
+                          fees?.destination_base_fee ||
+                          fees?.base_fee
+                        ) >= 0 &&
+                        (
+                          <div className="flex items-center space-x-2">
+                            <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap text-xs font-semibold space-x-1 py-0.5 px-1.5">
+                              <span>
+                                Fees:
+                              </span>
+                              <span>
+                                {number_format(
+                                  fees?.destination_base_fee || fees?.base_fee,
+                                  '0,0.000000',
+                                )}
+                              </span>
+                              <span>
+                                {fees.destination_native_token?.symbol}
+                              </span>
+                            </div>
+                            {typeof gas?.gas_base_fee_amount === 'number' && (
+                              <>
+                                <span className="text-sm font-medium">
+                                  =
                                 </span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      )}
+                                <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
+                                  <span className="text-xs font-semibold">
+                                    <span className="mr-1">
+                                      {number_format(
+                                        gas.gas_base_fee_amount,
+                                        '0,0.00000000',
+                                        true,
+                                      )}
+                                    </span>
+                                    <span>
+                                      {fees.source_token?.symbol || _.head(source_chain_data?.provider_params)?.nativeCurrency?.symbol}
+                                    </span>
+                                  </span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )
+                      }
                     </div>
                     {callback?.call && (
                       <div className="space-y-1.5">
