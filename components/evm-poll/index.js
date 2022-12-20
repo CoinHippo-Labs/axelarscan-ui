@@ -19,114 +19,117 @@ export default () => {
 
   const [poll, setPoll] = useState(null)
 
-  useEffect(() => {
-    const getData = async () => {
-      if (id) {
-        const response =
-          await evm_polls(
-            {
-              pollId: id,
-            },
-          )
-
-        const data =
-          Array.isArray(response?.data) &&
-          _.head(response.data)
-
-        if (data) {
-          const _data = {},
-            votes = []
-
-          Object.entries(data)
-            .forEach(([k, v]) => {
-              if (k) {
-                if (k.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)) {
-                  votes.push(v)
-                }
-                else {
-                  _data[k] = v
-                }
-              }
-            })
-
-          setPoll(
-            {
-              data: {
-                ..._data,
-                votes:
-                  _.orderBy(
-                    votes,
-                    [
-                      'height',
-                      'created_at',
-                    ],
-                    [
-                      'desc',
-                      'desc',
-                    ],
-                  ),
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (id) {
+          const response =
+            await evm_polls(
+              {
+                pollId: id,
               },
-              id,
-            }
-          )
-
-          const {
-            height,
-            event,
-            participants,
-          } = { ..._data }
-
-          const confirmation_vote = votes
-            .find(v =>
-              v?.confirmed
             )
 
-          if (
-            height &&
-            (
-              !confirmation_vote ||
-              (
-                participants &&
-                votes.length < participants.length
-              )
+          const data =
+            Array.isArray(response?.data) &&
+            _.head(response.data)
+
+          if (data) {
+            const _data = {},
+              votes = []
+
+            Object.entries(data)
+              .forEach(([k, v]) => {
+                if (k) {
+                  if (k.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT)) {
+                    votes.push(v)
+                  }
+                  else {
+                    _data[k] = v
+                  }
+                }
+              })
+
+            setPoll(
+              {
+                data: {
+                  ..._data,
+                  votes:
+                    _.orderBy(
+                      votes,
+                      [
+                        'height',
+                        'created_at',
+                      ],
+                      [
+                        'desc',
+                        'desc',
+                      ],
+                    ),
+                },
+                id,
+              }
             )
-          ) {
-            for (let i = -3; i <= 5; i++) {
-              const _height = height + i
 
-              getBlock(_height)
-
-              await transactions_by_events(
-                `tx.height=${_height}`,
-              )
-            }
-          }
-          if (
-            !event &&
-            confirmation_vote
-          ) {
             const {
-              id,
-            } = { ...confirmation_vote }
+              height,
+              event,
+              participants,
+            } = { ..._data }
 
-            if (id) {
-              getTransaction(id)
+            const confirmation_vote = votes
+              .find(v =>
+                v?.confirmed
+              )
+
+            if (
+              height &&
+              (
+                !confirmation_vote ||
+                (
+                  participants &&
+                  votes.length < participants.length
+                )
+              )
+            ) {
+              for (let i = -3; i <= 5; i++) {
+                const _height = height + i
+
+                getBlock(_height)
+
+                await transactions_by_events(
+                  `tx.height=${_height}`,
+                )
+              }
+            }
+            if (
+              !event &&
+              confirmation_vote
+            ) {
+              const {
+                id,
+              } = { ...confirmation_vote }
+
+              if (id) {
+                getTransaction(id)
+              }
             }
           }
         }
       }
-    }
 
-    getData()
+      getData()
 
-    const interval =
-      setInterval(() =>
-        getData(),
-        0.5 * 60 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(),
+          0.5 * 60 * 1000,
+        )
 
-    return () => clearInterval(interval)
-  }, [id])
+      return () => clearInterval(interval)
+    },
+    [id],
+  )
 
   const {
     data,

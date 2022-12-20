@@ -6,13 +6,15 @@ import { ens as getEns } from '../../lib/api/ens'
 import { ellipse } from '../../lib/utils'
 import { ENS_DATA } from '../../reducers/types'
 
-export default ({
-  address,
-  no_copy = false,
-  no_image = false,
-  fallback,
-  className = '',
-}) => {
+export default (
+  {
+    address,
+    no_copy = false,
+    no_image = false,
+    fallback,
+    className = '',
+  },
+) => {
   const dispatch = useDispatch()
   const {
     ens,

@@ -10,9 +10,11 @@ import { getChain, chainName } from '../../lib/object/chain'
 import { getAsset, assetManager } from '../../lib/object/asset'
 import { number_format, name, ellipse, loader_color } from '../../lib/utils'
 
-export default ({
-  data,
-}) => {
+export default (
+  {
+    data,
+  },
+) => {
   const {
     preferences,
     evm_chains,
@@ -40,6 +42,7 @@ export default ({
   const {
     id,
     created_at,
+    updated_at,
     sender_chain,
     transaction_id,
     transfer_id,
@@ -94,7 +97,24 @@ export default ({
         .includes(s)
     ) > -1 ?
       `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
-      `/${event?.includes('token_sent') ? 'sent' : event?.includes('contract_call') || !(event?.includes('transfer') || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id || (transfer_id ? `?transfer_id=${transfer_id}` : '')}`
+      `/${
+        event?.includes('token_sent') ?
+          'sent' :
+          event?.includes('contract_call') ||
+          !(
+            event?.includes('transfer') ||
+            deposit_address
+          ) ?
+            'gmp' :
+            'transfer'
+      }/${
+        transaction_id ||
+        (
+          transfer_id ?
+            `?transfer_id=${transfer_id}` :
+            ''
+        )
+      }`
 
   const rowClassName = 'flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 space-x-0 md:space-x-2'
   const titleClassName = 'w-40 lg:w-64 tracking-wider text-slate-600 dark:text-slate-300 text-sm lg:text-base font-medium'
@@ -452,7 +472,7 @@ export default ({
       }
       <div className={rowClassName}>
         <span className={titleClassName}>
-          Updated:
+          Created:
         </span>
         {data ?
           ms &&
@@ -474,6 +494,36 @@ export default ({
           />
         }
       </div>
+      {
+        updated_at?.ms &&
+        updated_at.ms > ms &&
+        (
+          <div className={rowClassName}>
+            <span className={titleClassName}>
+              Updated:
+            </span>
+            {data ?
+              updated_at?.ms &&
+              (
+                <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
+                  {
+                    moment(updated_at.ms)
+                      .fromNow()
+                  } ({
+                    moment(updated_at.ms)
+                      .format('MMM D, YYYY h:mm:ss A')
+                  })
+                </span>
+              ) :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="24"
+                height="24"
+              />
+            }
+          </div>
+        )
+      }
       {
         participants &&
         (
