@@ -1935,7 +1935,7 @@ export default () => {
                 )
 
               const rowClassName = 'flex space-x-4'
-              const rowTitleClassName = `w-32 text-black dark:text-slate-300 text-sm lg:text-base font-bold`
+              const rowTitleClassName = `w-32 whitespace-nowrap text-black dark:text-slate-300 text-sm lg:text-base font-bold`
 
               return (
                 <div
@@ -2346,7 +2346,7 @@ export default () => {
                         <span className={rowTitleClassName}>
                           Time:
                         </span>
-                        <span className="text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
+                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
                           {moment(block_timestamp * 1000).fromNow()} ({moment(block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})
                         </span>
                       </div>
@@ -2426,8 +2426,8 @@ export default () => {
                             'Gas Used'
                           }:
                         </span>
-                        <div className="flex items-center space-x-2">
-                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                        <div className="flex flex-wrap items-center">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2 py-1 px-2.5">
                             {destination_gas_data?.image && (
                               <Image
                                 src={destination_gas_data.image}
@@ -2463,7 +2463,7 @@ export default () => {
                           </div>
                           {(forecall_gas_price_rate || gas_price_rate) && (
                             <>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium mr-2">
                                 =
                               </span>
                               <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
@@ -2499,8 +2499,8 @@ export default () => {
                             'Gas Used'
                           }:
                         </span>
-                        <div className="flex items-center space-x-2">
-                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                        <div className="flex flex-wrap items-center">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2 py-1 px-2.5">
                             {destination_gas_data?.image && (
                               <Image
                                 src={destination_gas_data.image}
@@ -2512,14 +2512,25 @@ export default () => {
                                 {number_format(
                                   utils.formatUnits(
                                     FixedNumber.fromString(
-                                      BigNumber.from(gasUsed).toString()
+                                      BigNumber.from(
+                                        gasUsed
+                                      )
+                                      .toString()
                                     )
                                     .mulUnsafe(
                                       FixedNumber.fromString(
-                                        BigNumber.from(effectiveGasPrice).toString()
+                                        BigNumber.from(
+                                          effectiveGasPrice
+                                        )
+                                        .toString()
                                       )
                                     )
-                                    .round(0).toString().replace('.0', ''),
+                                    .round(0)
+                                    .toString()
+                                    .replace(
+                                      '.0',
+                                      '',
+                                    ),
                                     destination_gas_data.decimals,
                                   ),
                                   '0,0.00000000',
@@ -2533,7 +2544,7 @@ export default () => {
                           </div>
                           {source_token?.token_price?.usd && destination_native_token?.token_price?.usd && (
                             <>
-                              <span className="text-sm font-medium">
+                              <span className="text-sm font-medium mr-2">
                                 =
                               </span>
                               <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
