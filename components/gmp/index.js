@@ -2975,7 +2975,8 @@ export default () => {
                               [
                                 {
                                   id: 'message',
-                                  value: _data.error?.data?.message ||
+                                  value:
+                                    _data.error?.data?.message ||
                                     _data.error?.message,
                                 },
                               ]
@@ -2983,7 +2984,8 @@ export default () => {
                               .map((e, j) => (
                                 <div
                                   key={j}
-                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500'} font-semibold`}>
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500'} font-semibold`}
+                                >
                                   {ellipse(
                                     e.value,
                                     256,
@@ -3005,7 +3007,8 @@ export default () => {
                               [
                                 {
                                   id: 'reason',
-                                  value: _data.error?.reason &&
+                                  value:
+                                    _data.error?.reason &&
                                     `Reason: ${_data.error.reason}`,
                                 },
                               ]
@@ -3053,17 +3056,19 @@ export default () => {
                               [
                                 {
                                   id: 'body',
-                                  value: _data.error?.body?.replaceAll(
-                                    '"""',
-                                    '',
-                                  ),
+                                  value:
+                                    (_data.error?.body || '')
+                                      .replaceAll(
+                                        '"""',
+                                        '',
+                                      ),
                                 }
                               ]
                               .filter(e => e?.value)
                               .map((e, j) => (
                                 <div
                                   key={j}
-                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-400'} font-normal`}
+                                  className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg break-all p-2' : 'text-red-400'} font-normal`}
                                 >
                                   {ellipse(
                                     e.value,
