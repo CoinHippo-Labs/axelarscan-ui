@@ -4,17 +4,13 @@
   "description": "UI of Axelarscan",
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
-    "deploy": "aws s3 sync out/ s3://axelarscan.io --acl public-read --profile axelarscan.io",
-    "dev-dev": "env-cmd -f .env.staging next dev",
-    "build-dev": "env-cmd -f .env.staging next build && next export",
-    "deploy-dev": "aws s3 sync out/ s3://staging.axelarscan.io --acl public-read --profile axelarscan.io",
+    "build": "next build",
+    "dev-staging": "env-cmd -f .env.staging next dev",
+    "build-staging": "env-cmd -f .env.staging next build",
     "dev-testnet": "env-cmd -f .env.testnet next dev",
-    "build-testnet": "env-cmd -f .env.testnet next build && next export",
-    "deploy-testnet": "aws s3 sync out/ s3://testnet.axelarscan.io --acl public-read --profile axelarscan.io",
+    "build-testnet": "env-cmd -f .env.testnet next build",
     "dev-testnet-2": "env-cmd -f .env.testnet-2 next dev",
-    "build-testnet-2": "env-cmd -f .env.testnet-2 next build && next export",
-    "deploy-testnet-2": "aws s3 sync out/ s3://testnet-2.axelarscan.io --acl public-read --profile axelarscan.io"
+    "build-testnet-2": "env-cmd -f .env.testnet-2 next build"
   },
   "repository": {
     "type": "git",
