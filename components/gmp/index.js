@@ -581,7 +581,6 @@ export default () => {
     executed,
     is_executed,
     error,
-    is_not_enough_gas,
     refunded,
     fees,
     status,
@@ -593,6 +592,7 @@ export default () => {
     is_call_from_relayer,
   } = { ...data }
   let {
+    is_not_enough_gas,
     no_gas_remain,
   } = { ...data }
   const {
@@ -617,6 +617,31 @@ export default () => {
   } = { ...call?.transaction }
 
   const relayer = executed?.transaction?.from
+
+  is_not_enough_gas =
+    is_not_enough_gas ||
+    (
+      error?.transaction?.gasLimit &&
+      error.receipt?.gasUsed ?
+        Number(
+          FixedNumber.fromString(
+            BigNumber.from(
+              error.receipt.gasUsed
+            )
+            .toString()
+          )
+          .divUnsafe(
+            FixedNumber.fromString(
+              BigNumber.from(
+                error.transaction.gasLimit
+              )
+              .toString()
+            )
+          )
+          .toString()
+        ) > 0.95 :
+        is_not_enough_gas
+    )
 
   no_gas_remain =
     gas?.gas_remain_amount < 0.001 ||
@@ -1653,7 +1678,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, refunded, refunded_more_transactions, is_not_enough_gas, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
+              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, refunded, refunded_more_transactions, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ?
                 data ||
@@ -1756,7 +1781,10 @@ export default () => {
                       )
                       .round(0)
                       .toString()
-                      .replace('.0', ''),
+                      .replace(
+                        '.0',
+                        '',
+                      ),
                       decimals,
                     )
                   )
