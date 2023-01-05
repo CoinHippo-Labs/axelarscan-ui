@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
@@ -8,12 +7,6 @@ import { ColorRing } from 'react-loader-spinner'
 
 import { getChain } from '../../lib/object/chain'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
-
-const G6 =
-  dynamic(
-    () => import('@antv/g6'),
-    { ssr: false },
-  )
 
 export default (
   {
@@ -55,56 +48,57 @@ export default (
 
   useEffect(
     () => {
-      if (G6) {
-        if (
-          rendered &&
-          !graph
-        ) {
-          setGraph(
-            new G6.Graph(
-              {
-                container: id,
-                width: 800,
-                height: 600,
-                fitView: true,
-                fitViewPadding:
-                  [
-                    0,
-                    33,
-                    0,
-                    0,
-                  ],
-                fitCenter: true,
-                layout: {
-                  type: 'concentric',
-                  preventOverlap: true,
-                  clockwise: false,
-                },
-                defaultNode: {
-                  size: 64,
-                },
-                defaultEdge: {
-                  labelCfg: {
-                    autoRotate: true,
+      import('@antv/g6')
+        .then(G6 => {
+          if (
+            rendered &&
+            !graph
+          ) {
+            setGraph(
+              new G6.Graph(
+                {
+                  container: id,
+                  width: 800,
+                  height: 600,
+                  fitView: true,
+                  fitViewPadding:
+                    [
+                      0,
+                      33,
+                      0,
+                      0,
+                    ],
+                  fitCenter: true,
+                  layout: {
+                    type: 'concentric',
+                    preventOverlap: true,
+                    clockwise: false,
                   },
+                  defaultNode: {
+                    size: 64,
+                  },
+                  defaultEdge: {
+                    labelCfg: {
+                      autoRotate: true,
+                    },
+                  },
+                  modes: {
+                    default: [
+                      'drag-canvas',
+                      'drag-node',
+                    ],
+                  },
+                  plugins: [],
                 },
-                modes: {
-                  default: [
-                    'drag-canvas',
-                    'drag-node',
-                  ],
-                },
-                plugins: [],
-              },
+              )
             )
-          )
-        }
-        else {
-          setRendered(true)
-        }
-      }
+          }
+          else {
+            setRendered(true)
+          }
+        })
     },
-    [G6, rendered],
+    [rendered],
   )
 
   useEffect(
@@ -235,74 +229,77 @@ export default (
               )
           })
 
-        G6.registerEdge(
-          'circle-running',
-          {
-            afterDraw(
-              cfg,
-              group,
-            ) {
-              const shape =
-                _.head(
-                  group.get('children')
-                )
-              const start_point = shape.getPoint(0)
-              const {
-                x,
-                y,
-              } = { ...start_point }
-
-              const {
-                color,
-              } = { ...cfg?.d?.source_chain_data }
-
-              const circle =
-                group.addShape(
-                  'circle',
-                  {
-                    attrs: {
-                      x,
-                      y,
-                      fill:
-                        color ||
-                        '#3b82f6',
-                      r: 3.5,
-                    },
-                    name: 'circle-shape',
-                  },
-                )
-
-              circle.animate(ratio =>
-                {
-                  const tmp_point = shape.getPoint(ratio)
+        import('@antv/g6')
+          .then(G6 => {
+            G6.registerEdge(
+              'circle-running',
+              {
+                afterDraw(
+                  cfg,
+                  group,
+                ) {
+                  const shape =
+                    _.head(
+                      group.get('children')
+                    )
+                  const start_point = shape.getPoint(0)
                   const {
                     x,
                     y,
-                  } = { ...tmp_point }
+                  } = { ...start_point }
 
-                  return {
-                    x,
-                    y,
-                  }
+                  const {
+                    color,
+                  } = { ...cfg?.d?.source_chain_data }
+
+                  const circle =
+                    group.addShape(
+                      'circle',
+                      {
+                        attrs: {
+                          x,
+                          y,
+                          fill:
+                            color ||
+                            '#3b82f6',
+                          r: 3.5,
+                        },
+                        name: 'circle-shape',
+                      },
+                    )
+
+                  circle.animate(ratio =>
+                    {
+                      const tmp_point = shape.getPoint(ratio)
+                      const {
+                        x,
+                        y,
+                      } = { ...tmp_point }
+
+                      return {
+                        x,
+                        y,
+                      }
+                    },
+                    {
+                      repeat: true,
+                      duration: 3000,
+                    },
+                  )
                 },
-                {
-                  repeat: true,
-                  duration: 3000,
-                },
-              )
-            },
-          },
-          'quadratic',
-        )
+              },
+              'quadratic',
+            )
 
-        graph.data(
-          {
-            nodes,
-            edges,
-          }
-        )
+            graph.data(
+              {
+                nodes,
+                edges,
+              }
+            )
 
-        graph.render()
+            graph.render()
+          })
       }
     },
     [theme, transfers, gmps, graph],
