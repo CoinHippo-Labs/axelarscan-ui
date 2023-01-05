@@ -1,12 +1,15 @@
+import dynamic from 'next/dynamic'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import G6 from '@antv/g6'
+// import G6 from '@antv/g6'
 import { ColorRing } from 'react-loader-spinner'
 
 import { getChain } from '../../lib/object/chain'
 import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+
+const G6 = dynamic(() => import('@antv/g6'), { ssr: false })
 
 export default ({
   id = `network-graph_${moment().valueOf()}`,
