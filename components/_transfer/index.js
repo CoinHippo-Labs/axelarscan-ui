@@ -627,8 +627,8 @@ export default () => {
         title: 'Unwrapped',
         chain_data: destination_chain_data,
         data: unwrap,
-        // id_field: 'tx_hash_unwrap',
-        id_field: 'txhash',
+        id_field: 'tx_hash_unwrap',
+        // id_field: 'txhash',
       },
     ]
     .filter(s => s)
@@ -874,7 +874,11 @@ export default () => {
                                 'send_token',
                               ].includes(type) ?
                                 'Gateway address' :
-                                'Deposit address'
+                                [
+                                  'wrap',
+                                ].includes(type) ?
+                                  'Contract address' :
+                                  'Deposit address'
                             }
                           </span>
                           {deposit_address.startsWith('0x') ?

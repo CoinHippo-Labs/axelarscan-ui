@@ -538,13 +538,14 @@ export default (
                 accessor: 'send.txhash',
                 disableSortBy: true,
                 Cell: props => {
-                  const {
+                  let {
                     value,
                   } = { ...props }
                   const {
                     type,
                     send,
                     link,
+                    wrap,
                   } = { ...props.row.original }
                   const {
                     source_chain,
@@ -572,6 +573,10 @@ export default (
                     transaction_path,
                     icon,
                   } = { ...explorer }
+
+                  value =
+                    wrap?.txhash ||
+                    value
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
@@ -892,7 +897,11 @@ export default (
                               'send_token',
                             ].includes(type) ?
                               'Gateway address' :
-                              'Deposit address'
+                              [
+                                'wrap',
+                              ].includes(type) ?
+                                'Contract address' :
+                                'Deposit address'
                           }
                         </span>
                         {deposit_address.startsWith('0x') ?
@@ -1283,8 +1292,8 @@ export default (
                         title: 'Unwrapped',
                         chain_data: destination_chain_data,
                         data: unwrap,
-                        // id_field: 'tx_hash_unwrap',
-                        id_field: 'txhash',
+                        id_field: 'tx_hash_unwrap',
+                        // id_field: 'txhash',
                       },
                     ]
                     .filter(s => s)
