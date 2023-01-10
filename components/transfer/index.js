@@ -375,7 +375,6 @@ export default () => {
   } = { ...transfer }
 
   const {
-    type,
     send,
     link,
     confirm,
@@ -386,6 +385,15 @@ export default () => {
     wrap,
     unwrap,
   } = { ...data }
+  let {
+    type,
+  } = { ...data }
+
+  type =
+    data ?
+      type ||
+      'deposit_address' :
+    type
 
   const {
     source_chain,

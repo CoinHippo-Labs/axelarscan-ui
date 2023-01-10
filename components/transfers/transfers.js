@@ -542,11 +542,18 @@ export default (
                     value,
                   } = { ...props }
                   const {
-                    type,
                     send,
                     link,
                     wrap,
                   } = { ...props.row.original }
+                  let {
+                    type,
+                  } = { ...props.row.original }
+
+                  type =
+                    type ||
+                    'deposit_address'
+
                   const {
                     source_chain,
                   } = { ...send }
