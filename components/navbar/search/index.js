@@ -6,7 +6,6 @@ import { FiSearch } from 'react-icons/fi'
 
 import { ens as getEns, domainFromEns } from '../../../lib/api/ens'
 import { transfers, deposit_addresses } from '../../../lib/api/index'
-import { token_sent } from '../../../lib/api/transfer'
 import { type } from '../../../lib/object/id'
 import { equals_ignore_case } from '../../../lib/utils'
 import { ENS_DATA } from '../../../reducers/types'
@@ -118,8 +117,8 @@ export default () => {
               query: {
                 bool: {
                   should: [
-                    { match: { 'source.sender_address': input } },
-                    { match: { 'source.recipient_address': input } },
+                    { match: { 'send.sender_address': input } },
+                    { match: { 'send.recipient_address': input } },
                     { match: { 'link.recipient_address': input } },
                   ],
                   minimum_should_match: 1,
@@ -161,11 +160,11 @@ export default () => {
           'tx',
         ].includes(input_type)
       ) {
-        let response =
+        const response =
           await transfers(
             {
               query: {
-                match: { 'source.id': input },
+                match: { 'send.txhash': input },
               },
             },
           )
@@ -177,27 +176,11 @@ export default () => {
         if (total) {
           input_type = 'transfer'
         }
-        else {
-          response =
-            await token_sent(
-              {
-                txHash: input,
-              },
-            )
-
-          const {
-            total,
-          } = { ...response }
-
-          if (total) {
-            input_type = 'sent'
-          }
-          else if (input_type === 'evm_tx') {
-            input_type =
-              process.env.NEXT_PUBLIC_GMP_API_URL ?
-                'gmp' :
-                'tx'
-          }
+        else if (input_type === 'evm_tx') {
+          input_type =
+            process.env.NEXT_PUBLIC_GMP_API_URL ?
+              'gmp' :
+              'tx'
         }
       }
 

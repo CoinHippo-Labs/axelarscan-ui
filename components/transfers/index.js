@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { FiCode } from 'react-icons/fi'
 
 import LineChart from './charts/line'
 import BarChart from './charts/bar'
@@ -14,7 +13,6 @@ import Transfers from './transfers'
 import { transfers_stats as getTransfersStats, transfers_chart as getTransfersChart, cumulative_volume as getCumulativeVolume } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
-import { currency } from '../../lib/object/currency'
 import { number_format, params_to_obj } from '../../lib/utils'
 
 const NUM_STATS_DAYS = 30
@@ -61,215 +59,242 @@ export default () => {
   const [topChainPairs, setTopChainPairs] = useState(null)
   const [filters, setFilters] = useState(null)
 
-  useEffect(() => {
-    if (
-      evm_chains_data &&
-      cosmos_chains_data &&
-      assets_data &&
-      asPath
-    ) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1
-        )
-      )
+  useEffect(
+    () => {
+      if (
+        evm_chains_data &&
+        cosmos_chains_data &&
+        assets_data &&
+        asPath
+      ) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
+              )
+          )
 
-      const chains_data =
-        _.concat(
-          evm_chains_data,
-          cosmos_chains_data,
-        )
-
-      const {
-        sourceChain,
-        destinationChain,
-        asset,
-        fromTime,
-        toTime,
-      } = { ...params }
-
-      setFilters(
-        {
-          sourceChain: getChain(
-            sourceChain,
-            chains_data,
-          )?.id ||
-            sourceChain,
-          destinationChain: getChain(
-            destinationChain,
-            chains_data,
-          )?.id ||
-            destinationChain,
-          asset: getAsset(
-            asset,
-            assets_data,
-          )?.id ||
-            asset,
-          fromTime:
-            fromTime &&
-            moment(
-              Number(fromTime)
-            )
-            .unix(),
-          toTime:
-            toTime &&
-            moment(
-              Number(toTime)
-            )
-            .unix(),
-        }
-      )
-    }
-  }, [evm_chains_data, cosmos_chains_data, assets_data, asPath])
-
-  useEffect(() => {
-    const getData = async () => {
-      if (filters) {
-        const response = await getCumulativeVolume(filters)
-
-        setCumulativeStats(response)
-      }
-    }
-
-    getData()
-
-    const interval = setInterval(() =>
-      getData(),
-      5 * 60 * 1000,
-    )
-
-    return () => clearInterval(interval)
-  }, [filters])
-
-  useEffect(() => {
-    const getData = async () => {
-      if (filters) {
-        const response = await getTransfersChart(filters)
-
-        setDailyStats(response)
-      }
-    }
-
-    getData()
-
-    const interval = setInterval(() =>
-      getData(),
-      5 * 60 * 1000,
-    )
-
-    return () => clearInterval(interval)
-  }, [filters])
-
-  useEffect(() => {
-    const getData = async () => {
-      if (filters) {
-        const chains_data = _.concat(
-          evm_chains_data,
-          cosmos_chains_data,
-        )
+        const chains_data =
+          _.concat(
+            evm_chains_data,
+            cosmos_chains_data,
+          )
 
         const {
+          sourceChain,
+          destinationChain,
+          asset,
           fromTime,
           toTime,
-        } = { ...filters }
+        } = { ...params }
 
-        const response = await getTransfersStats(
+        setFilters(
           {
-            ...filters,
+            sourceChain:
+              getChain(
+                sourceChain,
+                chains_data,
+              )?.id ||
+              sourceChain,
+            destinationChain:
+              getChain(
+                destinationChain,
+                chains_data,
+              )?.id ||
+              destinationChain,
+            asset:
+              getAsset(
+                asset,
+                assets_data,
+              )?.id ||
+              asset,
             fromTime:
-              fromTime ||
-              moment()
-                .subtract(
-                  NUM_STATS_DAYS,
-                  'days',
-                )
-                .unix(),
+              fromTime &&
+              moment(
+                Number(fromTime)
+              )
+              .unix(),
             toTime:
-              toTime ||
-              moment()
-                .unix(),
-          }
-        )
-
-        setTopPaths(
-          {
-            ...response,
-            data: (response?.data || [])
-              .map(d => {
-                const {
-                  asset,
-                } = { ...d }
-                let {
-                  source_chain,
-                  destination_chain,
-                } = { ...d }
-
-                source_chain = getChain(
-                  source_chain,
-                  chains_data,
-                )?.id ||
-                source_chain
-
-                destination_chain = getChain(
-                  destination_chain,
-                  chains_data,
-                )?.id ||
-                destination_chain
-
-                return {
-                  ...d,
-                  source_chain,
-                  destination_chain,
-                  id: `${source_chain}_${destination_chain}_${asset}`,
-                }
-              }),
-          }
-        )
-
-        setTopChainPairs(
-          {
-            ...response,
-            data: (response?.data || [])
-              .map(d => {
-                let {
-                  source_chain,
-                  destination_chain,
-                } = { ...d }
-
-                source_chain = getChain(
-                  source_chain,
-                  chains_data,
-                )?.id ||
-                source_chain
-
-                destination_chain = getChain(
-                  destination_chain,
-                  chains_data,
-                )?.id ||
-                destination_chain
-
-                return {
-                  ...d,
-                  source_chain,
-                  destination_chain,
-                  id: `${source_chain}_${destination_chain}`,
-                }
-              }),
+              toTime &&
+              moment(
+                Number(toTime)
+              )
+              .unix(),
           }
         )
       }
-    }
+    },
+    [evm_chains_data, cosmos_chains_data, assets_data, asPath],
+  )
 
-    getData()
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (filters) {
+          const response = await getCumulativeVolume(filters)
 
-    const interval = setInterval(() =>
-      getData(),
-      5 * 60 * 1000,
-    )
+          setCumulativeStats(response)
+        }
+      }
 
-    return () => clearInterval(interval)
-  }, [evm_chains_data, cosmos_chains_data, filters])
+      getData()
+
+      const interval = setInterval(() =>
+        getData(),
+        5 * 60 * 1000,
+      )
+
+      return () => clearInterval(interval)
+    },
+    [filters],
+  )
+
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (filters) {
+          setDailyStats(
+            await getTransfersChart(filters)
+          )
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [filters],
+  )
+
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (filters) {
+          const chains_data =
+            _.concat(
+              evm_chains_data,
+              cosmos_chains_data,
+            )
+
+          const {
+            fromTime,
+            toTime,
+          } = { ...filters }
+
+          const response =
+            await getTransfersStats(
+              {
+                ...filters,
+                fromTime:
+                  fromTime ||
+                  moment()
+                    .subtract(
+                      NUM_STATS_DAYS,
+                      'days',
+                    )
+                    .unix(),
+                toTime:
+                  toTime ||
+                  moment()
+                    .unix(),
+              }
+            )
+
+          setTopPaths(
+            {
+              ...response,
+              data:
+                (response?.data || [])
+                  .map(d => {
+                    const {
+                      asset,
+                    } = { ...d }
+                    let {
+                      source_chain,
+                      destination_chain,
+                    } = { ...d }
+
+                    source_chain =
+                      getChain(
+                        source_chain,
+                        chains_data,
+                      )?.id ||
+                      source_chain
+
+                    destination_chain =
+                      getChain(
+                        destination_chain,
+                        chains_data,
+                      )?.id ||
+                      destination_chain
+
+                    return {
+                      ...d,
+                      source_chain,
+                      destination_chain,
+                      id: `${source_chain}_${destination_chain}_${asset}`,
+                    }
+                  }),
+            }
+          )
+
+          setTopChainPairs(
+            {
+              ...response,
+              data:
+                (response?.data || [])
+                  .map(d => {
+                    let {
+                      source_chain,
+                      destination_chain,
+                    } = { ...d }
+
+                    source_chain =
+                      getChain(
+                        source_chain,
+                        chains_data,
+                      )?.id ||
+                      source_chain
+
+                    destination_chain =
+                      getChain(
+                        destination_chain,
+                        chains_data,
+                      )?.id ||
+                      destination_chain
+
+                    return {
+                      ...d,
+                      source_chain,
+                      destination_chain,
+                      id: `${source_chain}_${destination_chain}`,
+                    }
+                  }),
+            }
+          )
+        }
+      }
+
+      getData()
+
+      const interval =
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [evm_chains_data, cosmos_chains_data, filters],
+  )
 
   const {
     fromTime,
@@ -310,14 +335,15 @@ export default () => {
         <LineChart
           id="daily_volumes"
           title={
-            `${time_filtered ?
-              'Daily' :
-              `${
-                number_format(
-                  NUM_STATS_DAYS,
-                  '0,0',
-                )
-              }-Day`
+            `${
+              time_filtered ?
+                'Daily' :
+                `${
+                  number_format(
+                    NUM_STATS_DAYS,
+                    '0,0',
+                  )
+                }-Day`
             } Volume`
           }
           description={
@@ -335,14 +361,15 @@ export default () => {
         <BarChart
           id="daily_transfers"
           title={
-            `${time_filtered ?
-              'Daily' :
-              `${
-                number_format(
-                  NUM_STATS_DAYS,
-                  '0,0',
-                )
-              }-Day`
+            `${
+              time_filtered ?
+                'Daily' :
+                `${
+                  number_format(
+                    NUM_STATS_DAYS,
+                    '0,0',
+                  )
+                }-Day`
             } Transfers`
           }
           description={
@@ -358,14 +385,15 @@ export default () => {
       </div>
       <TopPath
         title={
-          `${time_filtered ?
-            '' :
-            `${
-              number_format(
-                NUM_STATS_DAYS,
-                '0,0',
-              )
-            }-Day `
+          `${
+            time_filtered ?
+              '' :
+              `${
+                number_format(
+                  NUM_STATS_DAYS,
+                  '0,0',
+                )
+              }-Day `
           }Top Paths`
         }
         description="Top transfer paths by volume"
@@ -376,14 +404,15 @@ export default () => {
       />
       <TopChainPair
         title={
-          `${time_filtered ?
-            '' :
-            `${
-              number_format(
-                NUM_STATS_DAYS,
-                '0,0',
-              )
-            }-Day `
+          `${
+            time_filtered ?
+              '' :
+              `${
+                number_format(
+                  NUM_STATS_DAYS,
+                  '0,0',
+                )
+              }-Day `
           }Top Chain Pairs`
         }
         description="Top transfer chain pairs by volume"
@@ -394,14 +423,15 @@ export default () => {
       />
       <TopPath
         title={
-          `${time_filtered ?
-            '' :
-            `${
-              number_format(
-                NUM_STATS_DAYS,
-                '0,0',
-              )
-            }-Day `
+          `${
+            time_filtered ?
+              '' :
+              `${
+                number_format(
+                  NUM_STATS_DAYS,
+                  '0,0',
+                )
+              }-Day `
           }Top Paths`
         }
         description="Top transfer paths by number of transfers"
@@ -412,14 +442,15 @@ export default () => {
       />
       <TopChainPair
         title={
-          `${time_filtered ?
-            '' :
-            `${
-              number_format(
-                NUM_STATS_DAYS,
-                '0,0',
-              )
-            }-Day `
+          `${
+            time_filtered ?
+              '' :
+              `${
+                number_format(
+                  NUM_STATS_DAYS,
+                  '0,0',
+                )
+              }-Day `
           }Top Chain Pairs`
         }
         description="Top transfer chain pairs by number of transfers"
@@ -428,15 +459,10 @@ export default () => {
         num_days={NUM_STATS_DAYS}
         filters={filters}
       />
-      <div className="sm:col-span-2 lg:col-span-4 space-y-2 pt-1">
+      <div className="sm:col-span-2 lg:col-span-4 space-y-3 pt-1">
         <Link href="/transfers/search">
-          <a className="flex items-center space-x-2">
-            <FiCode
-              size={20}
-            />
-            <span className="uppercase font-bold">
-              Latest transfers
-            </span>
+          <a className="uppercase font-semibold">
+            Latest transfers
           </a>
         </Link>
         <Transfers
