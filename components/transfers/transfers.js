@@ -631,9 +631,16 @@ export default (
                               [
                                 'deposit_address',
                                 'send_token',
+                                'wrap',
                               ].includes(type) ?
                                 <span className="normal-case">
-                                  via {name(type)}
+                                  via {
+                                    [
+                                      'wrap',
+                                    ].includes(type) ?
+                                      'Deposit Service' :
+                                      name(type)
+                                  }
                                 </span> :
                                 type
                             }
@@ -835,11 +842,27 @@ export default (
                       c?.chain_id === id
                     )
 
-                  const symbol =
+                  let symbol =
                     contract_data?.symbol ||
                     ibc_data?.symbol ||
                     asset_data?.symbol ||
                     denom
+
+                  if (
+                    (
+                      [
+                        'wrap',
+                      ].includes(type) ||
+                      wrap
+                    ) &&
+                    symbol?.startsWith('W')
+                  ) {
+                    symbol =
+                      symbol
+                        .substring(
+                          1,
+                        )
+                  }
 
                   const image =
                     contract_data?.image ||
@@ -1384,7 +1407,6 @@ export default (
                         steps
                           .map((s, i) => {
                             const {
-                              title,
                               chain_data,
                               data,
                               id_field,
@@ -1392,6 +1414,16 @@ export default (
                               params,
                               finish,
                             } = { ...s }
+                            let {
+                              title,
+                            } = { ...s }
+
+                            title =
+                              [
+                                'Approved',
+                              ].includes(title) ?
+                                'Confirmed' :
+                                title
 
                             const id = data?.[id_field]
 
@@ -1437,74 +1469,86 @@ export default (
                                   'text-red-500 dark:text-red-400' :
                                   'text-slate-300 dark:text-slate-700'
 
+                            const hidden =
+                              [
+                                'confirm',
+                              ].includes(s?.id) &&
+                              [
+                                'vote',
+                              ].includes(steps[i + 1]?.id)
+
                             return (
-                              <div
-                                key={i}
-                                className="flex items-center space-x-1 pb-0.5"
-                              >
-                                {finish ?
-                                  <BiCheckCircle
-                                    size={18}
-                                    className="text-green-500 dark:text-green-400"
-                                  /> :
-                                  i === current_step ?
-                                    <ProgressBar
-                                      borderColor="#ca8a04"
-                                      barColor="#facc15"
-                                      width="18"
-                                      height="18"
+                              !hidden &&
+                              (
+                                <div
+                                  key={i}
+                                  className="flex items-center space-x-1 pb-0.5"
+                                >
+                                  {finish ?
+                                    <BiCheckCircle
+                                      size={18}
+                                      className="text-green-500 dark:text-green-400"
                                     /> :
-                                    data?.status === 'failed' ?
-                                      <BiXCircle
-                                        size={18}
-                                        className="text-red-500 dark:text-red-400"
+                                    i === current_step ?
+                                      <ProgressBar
+                                        borderColor="#ca8a04"
+                                        barColor="#facc15"
+                                        width="18"
+                                        height="18"
                                       /> :
-                                      <BiCircle
-                                        size={18}
-                                        className="text-slate-300 dark:text-slate-700"
-                                      />
-                                }
-                                <div className="flex items-center space-x-0.5">
-                                  {id ?
-                                    <Copy
-                                      value={id}
-                                      title={
-                                        <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
-                                          {title}
-                                        </span>
-                                      }
-                                    /> :
-                                    <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                      {title}
-                                    </span>
+                                      data?.status === 'failed' ?
+                                        <BiXCircle
+                                          size={18}
+                                          className="text-red-500 dark:text-red-400"
+                                        /> :
+                                        <BiCircle
+                                          size={18}
+                                          className="text-slate-300 dark:text-slate-700"
+                                        />
                                   }
-                                  {
-                                    id &&
-                                    url &&
-                                    (
-                                      <a
-                                        href={`${url}${_path}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 dark:text-blue-500"
-                                      >
-                                        {icon ?
-                                          <Image
-                                            src={icon}
-                                            className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                          /> :
-                                          <TiArrowRight
-                                            size={16}
-                                            className="transform -rotate-45"
-                                          />
+                                  <div className="flex items-center space-x-0.5">
+                                    {id ?
+                                      <Copy
+                                        value={id}
+                                        title={
+                                          <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
+                                            {title}
+                                          </span>
                                         }
-                                      </a>
-                                    )
-                                  }
+                                      /> :
+                                      <span className={`uppercase ${text_color} text-xs font-medium`}>
+                                        {title}
+                                      </span>
+                                    }
+                                    {
+                                      id &&
+                                      url &&
+                                      (
+                                        <a
+                                          href={`${url}${_path}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-500 dark:text-blue-500"
+                                        >
+                                          {icon ?
+                                            <Image
+                                              src={icon}
+                                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                            /> :
+                                            <TiArrowRight
+                                              size={16}
+                                              className="transform -rotate-45"
+                                            />
+                                          }
+                                        </a>
+                                      )
+                                    }
+                                  </div>
                                 </div>
-                              </div>
+                              )
                             )
                           })
+                          .filter(s => s)
                       }
                       {
                         insufficient_fee &&
@@ -1597,6 +1641,7 @@ export default (
         />
         {
           data.length > 0 &&
+          !n &&
           (
             typeof total !== 'number' ||
             data.length < total
