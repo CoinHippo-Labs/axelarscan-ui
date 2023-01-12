@@ -11,6 +11,7 @@ import { transfers } from '../../lib/api/transfer'
 import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
+import { hexToBech32 } from '../../lib/object/key'
 import { remove_chars, equals_ignore_case } from '../../lib/utils'
 
 export default () => {
@@ -88,8 +89,118 @@ export default () => {
             )
         }
         else if (
+          address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_VALIDATOR) &&
+          validators_data &&
+          validators_data
+            .findIndex(v =>
+              equals_ignore_case(
+                v?.operator_address,
+                address,
+              )
+            ) > -1
+        ) {
+          const {
+            operator_address,
+          } = {
+            ...(
+              validators_data
+                .find(v =>
+                  equals_ignore_case(
+                    v?.operator_address,
+                    address,
+                  )
+                )
+            ),
+          }
+
+          router
+            .push(
+              `/validator/${operator_address}`
+            )
+        }
+        else if (
+          address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_CONSENSUS) &&
+          validators_data &&
+          validators_data
+            .findIndex(v =>
+              v?.operator_address &&
+              equals_ignore_case(
+                v.consensus_address,
+                address,
+              )
+            ) > -1
+        ) {
+          const {
+            operator_address,
+          } = {
+            ...(
+              validators_data
+                .find(v =>
+                  v?.operator_address &&
+                  equals_ignore_case(
+                    v.consensus_address,
+                    address,
+                  )
+                )
+            ),
+          }
+
+          router
+            .push(
+              `/validator/${operator_address}`
+            )
+        }
+        else if (
           address &&
-          assets_data
+          [
+            process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+            process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+          ].findIndex(p =>
+            address.startsWith(p)
+          ) < 0 &&
+          validators_data &&
+          validators_data
+            .findIndex(v =>
+              v?.operator_address &&
+              equals_ignore_case(
+                v.consensus_address,
+                hexToBech32(
+                  address,
+                  process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                ),
+              )
+            ) > -1
+        ) {
+          const {
+            operator_address,
+          } = {
+            ...(
+              validators_data
+                .find(v =>
+                  v?.operator_address &&
+                  equals_ignore_case(
+                    v.consensus_address,
+                    hexToBech32(
+                      address,
+                      process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                    ),
+                  )
+                )
+            ),
+          }
+
+          router
+            .push(
+              `/validator/${operator_address}`
+            )
+        }
+        else if (
+          address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) &&
+          assets_data &&
+          (
+            !validators_data ||
+            !balances
+          )
         ) {
           const response =
             await all_bank_balances(
@@ -160,7 +271,7 @@ export default () => {
 
       getData()
     },
-    [address, assets_data],
+    [address, assets_data, validators_data],
   )
 
   useEffect(

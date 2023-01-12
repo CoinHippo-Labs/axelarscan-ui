@@ -18,17 +18,43 @@ import { evm_polls as searchEVMPolls } from '../../lib/api/evm-polls'
 import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chainManager } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
-import { base64ToBech32 } from '../../lib/object/key'
+import { hexToBech32, base64ToBech32 } from '../../lib/object/key'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
 
-const num_uptime_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS)
-const num_uptime_display_blocks = Number(process.env.NEXT_PUBLIC_NUM_UPTIME_DISPLAY_BLOCKS)
-const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
-const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
-const min_broadcaster_fund = Number(process.env.NEXT_PUBLIC_MIN_BROADCASTER_FUND)
-const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
-const num_evm_votes_polls = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS)
+const num_uptime_blocks =
+  Number(
+    process.env.NEXT_PUBLIC_NUM_UPTIME_BLOCKS
+  )
+
+const num_uptime_display_blocks =
+  Number(process.env.NEXT_PUBLIC_NUM_UPTIME_DISPLAY_BLOCKS
+  )
+
+const num_heartbeat_blocks =
+  Number(
+    process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS
+  )
+
+const num_blocks_per_heartbeat =
+  Number(
+    process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT
+  )
+
+const min_broadcaster_fund =
+  Number(
+    process.env.NEXT_PUBLIC_MIN_BROADCASTER_FUND
+  )
+
+const num_evm_votes_blocks =
+  Number(
+    process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS
+  )
+
+const num_evm_votes_polls =
+  Number(
+    process.env.NEXT_PUBLIC_NUM_EVM_VOTES_DISPLAY_POLLS
+  )
 
 export default () => {
   const {
@@ -95,862 +121,804 @@ export default () => {
   const [signs, setSigns] = useState(null)
   const [supportedChains, setSupportedChains] = useState(null)
 
-  // validator & health
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        assets_data &&
-        status_data &&
-        validators_data
-      ) {
-        const validator_data = validators_data
-          .find(v =>
-            equals_ignore_case(
-              v?.operator_address,
-              address,
-            )
-          )
-
+  useEffect(
+    () => {
+      const getData = async () => {
         if (
-          validator_data?.start_proxy_height ||
-          validator_data?.start_height
+          address?.startsWith('"') ||
+          address?.endsWith('"')
+        ) {
+          router
+            .push(
+              `${
+                pathname
+                  .replace(
+                    '[address]',
+                    address
+                      .split('"')
+                      .join('')
+                  )
+              }`
+            )
+        }
+        else if (
+          address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_CONSENSUS) &&
+          validators_data &&
+          validators_data
+            .findIndex(v =>
+              v?.operator_address &&
+              equals_ignore_case(
+                v.consensus_address,
+                address,
+              )
+            ) > -1
         ) {
           const {
-            start_height,
-            start_proxy_height,
-            broadcaster_loaded,
-            broadcaster_address,
-          } = { ...validator_data }
+            operator_address,
+          } = {
+            ...(
+              validators_data
+                .find(v =>
+                  v?.operator_address &&
+                  equals_ignore_case(
+                    v.consensus_address,
+                    address,
+                  )
+                )
+            ),
+          }
 
-          setValidator(
-            {
-              data: validator_data,
-              address,
+          router
+            .push(
+              `/validator/${operator_address}`
+            )
+        }
+        else if (
+          address &&
+          [
+            process.env.NEXT_PUBLIC_PREFIX_ACCOUNT,
+            process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+          ].findIndex(p =>
+            address.startsWith(p)
+          ) < 0 &&
+          validators_data &&
+          validators_data
+            .findIndex(v =>
+              v?.operator_address &&
+              equals_ignore_case(
+                v.consensus_address,
+                hexToBech32(
+                  address,
+                  process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                ),
+              )
+            ) > -1
+        ) {
+          const {
+            operator_address,
+          } = {
+            ...(
+              validators_data
+                .find(v =>
+                  v?.operator_address &&
+                  equals_ignore_case(
+                    v.consensus_address,
+                    hexToBech32(
+                      address,
+                      process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                    ),
+                  )
+                )
+            ),
+          }
+
+          router
+            .push(
+              `/validator/${operator_address}`
+            )
+        }
+      }
+
+      getData()
+    },
+    [address, validators_data],
+  )
+
+  // validator & health
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          assets_data &&
+          status_data &&
+          validators_data
+        ) {
+          const validator_data = validators_data
+            .find(v =>
+              equals_ignore_case(
+                v?.operator_address,
+                address,
+              )
+            )
+
+          if (
+            validator_data?.start_proxy_height ||
+            validator_data?.start_height
+          ) {
+            const {
+              start_height,
+              start_proxy_height,
               broadcaster_loaded,
-            }
-          )
+              broadcaster_address,
+            } = { ...validator_data }
 
-          if (broadcaster_loaded) {
-            const _health = {
-              broadcaster_registration: !!broadcaster_address,
-            }
+            setValidator(
+              {
+                data: validator_data,
+                address,
+                broadcaster_loaded,
+              }
+            )
 
-            if (broadcaster_address) {
-              const response = await all_bank_balances(broadcaster_address)
+            if (broadcaster_loaded) {
+              const _health = {
+                broadcaster_registration: !!broadcaster_address,
+              }
+
+              if (broadcaster_address) {
+                const response = await all_bank_balances(broadcaster_address)
+
+                const {
+                  data,
+                } = { ...response }
+
+                if (Array.isArray(data)) {
+                  _health.broadcaster_funded =
+                    _.head(
+                      data
+                        .filter(b =>
+                          b?.denom === native_asset_id
+                        )
+                        .map(b => {
+                          const {
+                            denom,
+                            amount,
+                          } = { ...b }
+
+                          return {
+                            denom:
+                              assetManager
+                                .symbol(
+                                  denom,
+                                  assets_data,
+                                ),
+                            amount:
+                              assetManager
+                                .amount(
+                                  amount,
+                                  denom,
+                                  assets_data,
+                                ),
+                          }
+                        })
+                    )
+                }
+              }
+              else {
+                _health.broadcaster_funded = 'No Proxy'
+              }
+
+              const latest_block = Number(status_data.latest_block_height)
+              const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
+              const last = lastHeartbeatBlock(latest_block)
+
+              const response =
+                await getHeartbeats(
+                  {
+                    query: {
+                      bool: {
+                        must: [
+                          { match: { sender: broadcaster_address } },
+                          {
+                            range: {
+                              height: {
+                                gte: first,
+                                lte: latest_block,
+                              },
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    aggs: {
+                      heartbeats: {
+                        terms: { field: 'sender.keyword' },
+                        aggs: {
+                          period_height: {
+                            terms: { field: 'period_height', size: 1000 },
+                          },
+                        },
+                      },
+                    },
+                    _source: false,
+                  }
+                )
 
               const {
                 data,
               } = { ...response }
 
-              if (Array.isArray(data)) {
-                _health.broadcaster_funded =
-                  _.head(
-                    data
-                      .filter(b =>
-                        b?.denom === native_asset_id
-                      )
-                      .map(b => {
-                        const {
-                          denom,
-                          amount,
-                        } = { ...b }
+              const total =
+                Math.floor(
+                  (last - first) /
+                  num_blocks_per_heartbeat
+                ) +
+                1
 
-                        return {
-                          denom:
+              const up =
+                data?.[broadcaster_address] ||
+                0
+
+              let missed = total - up
+
+              missed =
+                missed < 0 ?
+                0 :
+                missed
+
+              let uptime =
+                total > 0 ?
+                  up * 100 / total :
+                  0
+
+              uptime =
+                uptime > 100 ?
+                  100 :
+                  uptime
+
+              setHealth(
+                {
+                  data: {
+                    ..._health,
+                    total,
+                    up,
+                    missed,
+                    heartbeats_uptime: uptime,
+                  },
+                  address,
+                }
+              )
+            }
+          }
+          else {
+            setValidator(
+              {
+                data: null,
+                address,
+                broadcaster_loaded: true,
+              }
+            )
+          }
+        }
+      }
+
+      getData()
+    },
+    [address, validators_data],
+  )
+
+  // voting power
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          equals_ignore_case(
+            validator?.address,
+            address,
+          ) &&
+          (
+            !votingPower ||
+            !validator.broadcaster_loaded
+          )
+        ) {
+          const {
+            data,
+          } = { ...validator }
+          const {
+            consensus_address,
+          } = { ...data }
+
+          const response = await validator_sets()
+
+          const {
+            validators,
+          } = { ...response?.result }
+
+          const v = (validators || [])
+            .find(_v =>
+              equals_ignore_case(
+                _v?.address,
+                consensus_address,
+              )
+            )
+
+          const {
+            proposer_priority,
+            voting_power,
+          } = { ...v }
+
+          setVotingPower(
+            {
+              data: {
+                ...data,
+                proposer_priority,
+                voting_power: Number(voting_power),
+              },
+              address,
+            }
+          )
+        }
+      }
+
+      getData()
+    },
+    [address, validator],
+  )
+
+  // delegations
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          equals_ignore_case(
+            validator?.address,
+            address,
+          ) &&
+          assets_data &&
+          (
+            !delegations ||
+            !validator.broadcaster_loaded
+          )
+        ) {
+          const response = await all_delegations(address)
+
+          const {
+            data,
+          } = { ...response }
+
+          setDelegations(
+            {
+              data:
+                _.orderBy(
+                  (data || [])
+                    .map(d => {
+                      const {
+                        delegation,
+                        balance,
+                      } = { ...d }
+                      const {
+                        delegator_address,
+                        shares,
+                      } = { ...delegation }
+                      const {
+                        denom,
+                        amount,
+                      } = { ...balance }
+
+                      return {
+                        ...delegation,
+                        self:
+                          equals_ignore_case(
+                            delegator_address,
+                            validator.data?.delegator_address,
+                          ),
+                        shares:
+                          isNaN(shares) ?
+                            -1 :
                             assetManager
-                              .symbol(
+                              .amount(
+                                shares,
                                 denom,
                                 assets_data,
                               ),
-                          amount:
+                        ...balance,
+                        denom:
+                          assetManager
+                            .symbol(
+                              denom,
+                              assets_data,
+                            ),
+                        amount:
+                          isNaN(amount) ?
+                            -1 :
                             assetManager
                               .amount(
                                 amount,
                                 denom,
                                 assets_data,
                               ),
-                        }
-                      })
-                  )
-              }
-            }
-            else {
-              _health.broadcaster_funded = 'No Proxy'
-            }
-
-            const latest_block = Number(status_data.latest_block_height)
-            const first = firstHeartbeatBlock(latest_block - num_heartbeat_blocks)
-            const last = lastHeartbeatBlock(latest_block)
-
-            const response =
-              await getHeartbeats(
-                {
-                  query: {
-                    bool: {
-                      must: [
-                        { match: { sender: broadcaster_address } },
-                        {
-                          range: {
-                            height: {
-                              gte: first,
-                              lte: latest_block,
-                            },
-                          },
-                        },
-                      ],
-                    },
-                  },
-                  aggs: {
-                    heartbeats: {
-                      terms: { field: 'sender.keyword' },
-                      aggs: {
-                        period_height: {
-                          terms: { field: 'period_height', size: 1000 },
-                        },
-                      },
-                    },
-                  },
-                  _source: false,
-                }
-              )
-
-            const {
-              data,
-            } = { ...response }
-
-            const total =
-              Math.floor(
-                (last - first) /
-                num_blocks_per_heartbeat
-              ) +
-              1
-
-            const up =
-              data?.[broadcaster_address] ||
-              0
-
-            let missed = total - up
-
-            missed =
-              missed < 0 ?
-              0 :
-              missed
-
-            let uptime =
-              total > 0 ?
-                up * 100 / total :
-                0
-
-            uptime =
-              uptime > 100 ?
-                100 :
-                uptime
-
-            setHealth(
-              {
-                data: {
-                  ..._health,
-                  total,
-                  up,
-                  missed,
-                  heartbeats_uptime: uptime,
-                },
-                address,
-              }
-            )
-          }
-        }
-        else {
-          setValidator(
-            {
-              data: null,
-              address,
-              broadcaster_loaded: true,
-            }
-          )
-        }
-      }
-    }
-
-    getData()
-  }, [address, validators_data])
-
-  // voting power
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        equals_ignore_case(
-          validator?.address,
-          address,
-        ) &&
-        (
-          !votingPower ||
-          !validator.broadcaster_loaded
-        )
-      ) {
-        const {
-          data,
-        } = { ...validator }
-        const {
-          consensus_address,
-        } = { ...data }
-
-        const response = await validator_sets()
-
-        const {
-          validators,
-        } = { ...response?.result }
-
-        const v = (validators || [])
-          .find(_v =>
-            equals_ignore_case(
-              _v?.address,
-              consensus_address,
-            )
-          )
-
-        const {
-          proposer_priority,
-          voting_power,
-        } = { ...v }
-
-        setVotingPower(
-          {
-            data: {
-              ...data,
-              proposer_priority,
-              voting_power: Number(voting_power),
-            },
-            address,
-          }
-        )
-      }
-    }
-
-    getData()
-  }, [address, validator])
-
-  // delegations
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        equals_ignore_case(
-          validator?.address,
-          address,
-        ) &&
-        assets_data &&
-        (
-          !delegations ||
-          !validator.broadcaster_loaded
-        )
-      ) {
-        const response = await all_delegations(address)
-
-        const {
-          data,
-        } = { ...response }
-
-        setDelegations(
-          {
-            data:
-              _.orderBy(
-                (data || [])
-                  .map(d => {
-                    const {
-                      delegation,
-                      balance,
-                    } = { ...d }
-                    const {
-                      delegator_address,
-                      shares,
-                    } = { ...delegation }
-                    const {
-                      denom,
-                      amount,
-                    } = { ...balance }
-
-                    return {
-                      ...delegation,
-                      self:
-                        equals_ignore_case(
-                          delegator_address,
-                          validator.data?.delegator_address,
-                        ),
-                      shares:
-                        isNaN(shares) ?
-                          -1 :
-                          assetManager
-                            .amount(
-                              shares,
-                              denom,
-                              assets_data,
-                            ),
-                      ...balance,
-                      denom:
-                        assetManager
-                          .symbol(
+                        asset_data:
+                          getAsset(
                             denom,
                             assets_data,
                           ),
-                      amount:
-                        isNaN(amount) ?
-                          -1 :
-                          assetManager
-                            .amount(
-                              amount,
-                              denom,
-                              assets_data,
-                            ),
-                      asset_data:
-                        getAsset(
-                          denom,
-                          assets_data,
-                        ),
-                    }
-                  }),
-                [
-                  'self',
-                  'shares',
-                ],
-                [
-                  'desc',
-                  'desc',
-                ],
-              ),
-            address,
-          }
-        )
-      }
-    }
-
-    getData()
-  }, [address, validator, assets_data])
-
-  // uptimes
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        equals_ignore_case(
-          validator?.address,
-          address,
-        ) &&
-        status_data &&
-        (
-          !uptimes ||
-          !validator.broadcaster_loaded
-        )
-      ) {
-        const {
-          consensus_address,
-        } = { ...validator.data }
-
-        const latest_block = Number(status_data.latest_block_height) - 1
-
-        const response =
-          await getUptimes(
-            {
-              query: {
-                range: {
-                  height: {
-                    gt: latest_block - num_uptime_display_blocks,
-                    lte: latest_block,
-                  },
-                },
-              },
-              size: num_uptime_display_blocks,
-              sort: [{ height: 'desc' }],
-            },
-          )
-
-        const {
-          data,
-        } = { ...response }
-
-        setUptimes(
-          {
-            data:
-              [...Array(num_uptime_display_blocks).keys()]
-                .map(i => {
-                  const height = latest_block - i
-
-                  const u = (data || [])
-                    .find(d =>
-                      d?.height === height
-                    )
-
-                  const {
-                    validators,
-                  } = { ...u }
-
-                  return {
-                    ...u,
-                    height,
-                    up:
-                      !!(
-                        (validators || [])
-                          .map(v =>
-                            base64ToBech32(
-                              v,
-                              process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
-                            )
-                          )
-                          .includes(consensus_address)
-                      ),
-                  }
-                }),
-            address,
-          }
-        )
-      }
-    }
-
-    getData()
-  }, [address, validator])
-
-  // number time jailed
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        equals_ignore_case(
-          validator?.address,
-          address,
-        ) &&
-        status_data &&
-        (
-          typeof numberTimeJailed !== 'number' ||
-          !validator.broadcaster_loaded
-        )
-      ) {
-        const {
-          operator_address,
-          jailed,
-        } = { ...validator.data }
-
-        const response =
-          await getTransactions(
-            {
-              query: {
-                bool: {
-                  must: [
-                    { match: { types: 'MsgUnjail' } },
-                    { match: { addresses: operator_address } },
-                    { match: { code: 0 } },
+                      }
+                    }),
+                  [
+                    'self',
+                    'shares',
                   ],
-                },
-              },
-              size: 0,
-              track_total_hits: true,
-            },
-          )
-
-        setNumberTimeJailed(
-          (
-            response?.total ||
-            0
-          ) +
-          (jailed ?
-            1 :
-            0
-          )
-        )
-      }
-    }
-
-    getData()
-  }, [address, validator])
-
-  // heartbeats
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        equals_ignore_case(
-          validator?.address,
-          address,
-        ) &&
-        status_data &&
-        validator.broadcaster_loaded &&
-        !heartbeats
-      ) {
-        const {
-          broadcaster_address,
-        } = { ...validator.data }
-        let {
-          start_proxy_height,
-        } = { ...validator.data }
-
-        start_proxy_height =
-          start_proxy_height ||
-          0
-
-        const latest_block = Number(status_data.latest_block_height)
-        const first =
-          firstHeartbeatBlock(
-            latest_block - num_heartbeat_blocks > start_proxy_height ?
-              latest_block - num_heartbeat_blocks :
-              start_proxy_height
-          )
-
-        const heartbeats = []
-
-        let data
-
-        if (broadcaster_address) {
-          const response =
-            await searchHeartbeats(
-              {
-                sender: broadcaster_address,
-                fromBlock: first,
-                toBlock: latest_block,
-                size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
-              },
-            )
-
-          data =
-            response?.data ||
-            []
-        }
-
-        for (let height = latest_block; height >= first; height--) {
-          if (
-            height % num_blocks_per_heartbeat === 1 &&
-            heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat
-          ) {
-            const h = (data || [])
-              .find(d =>
-                d?.period_height === height
-              )
-
-            const {
-              sender,
-            } = { ...h }
-
-            heartbeats
-              .push(
-                {
-                  ...h,
-                  height,
-                  up:
-                    equals_ignore_case(
-                      sender,
-                      broadcaster_address,
-                    ),
-                }
-              )
-          }
-        }
-
-        setHeartbeats(
-          {
-            data: heartbeats,
-            address,
-          }
-        )
-      }
-    }
-
-    getData()
-  }, [address, validator])
-
-  // evm polls
-  useEffect(() => {
-    const getData = async () => {
-      if (
-        address &&
-        equals_ignore_case(
-          validator?.address,
-          address,
-        ) &&
-        status_data &&
-        validator.broadcaster_loaded
-      ) {
-        const {
-          broadcaster_address,
-        } = { ...validator.data }
-
-        let polls = [],
-          votes = []
-
-        if (broadcaster_address) {
-          const latest_block = Number(status_data.latest_block_height)
-
-          const response =
-            await searchEVMPolls(
-              {
-                voter: broadcaster_address,
-                fromBlock: latest_block - num_evm_votes_blocks,
-                size: num_evm_votes_polls,
-              },
-            )
-
-          polls =
-            response?.data ||
-            []
-
-          votes =
-            polls
-              .map(p =>
-                Object.fromEntries(
-                  Object.entries(p)
-                    .filter(([k, v]) =>
-                      !k?.startsWith(`${process.env.NEXT_PUBLIC_PREFIX_ACCOUNT}1`) ||
-                      equals_ignore_case(
-                        k,
-                        broadcaster_address,
-                      )
-                    )
-                    .flatMap(([k, v]) =>
-                      equals_ignore_case(
-                        k,
-                        broadcaster_address,
-                      ) ?
-                        Object.entries({ ...v })
-                          .map(([_k, _v]) =>
-                            [
-                              _k === 'id' ?
-                                'txhash' :
-                                _k,
-                              _v,
-                            ]
-                          ) :
-                        [
-                          [
-                            k,
-                            v,
-                          ]
-                        ]
-                    )
-                )
-              )
-        }
-
-        setEvmPolls(
-          {
-            polls,
-            votes,
-            address,
-          }
-        )
-      }
-    }
-
-    getData()
-  }, [address, validator, supportedChains])
-
-  // keygens & signs
-  useEffect(() => {
-    const getData = async () => {
-      if (address) {
-        try {
-          let data,
-            total = 0,
-            total_participations = 0
-
-          const results =
-            [
-              true,
-              false,
-            ]
-
-          for (let i = 0; i < results.length; i++) {
-            const result = results[i]
-
-            let response =
-              await getKeygens(
-                {
-                  size: 1000,
-                  sort: [{ height: 'desc' }],
-                  track_total_hits: true,
-                },
-                result,
-              )
-
-            total +=
-              (
-                response?.total ||
-                0
-              )
-
-            data =
-              _.orderBy(
-                _.uniqBy(
-                  _.concat(
-                    data ||
-                    [],
-                    (response?.data || [])
-                      .map(d => {
-                        const {
-                          key_id,
-                          key_role,
-                          snapshot_validators,
-                          snapshot_non_participant_validators,
-                        } = { ...d }
-
-                        return {
-                          ...d,
-                          key_role:
-                            key_role ||
-                            (
-                              (key_id || '')
-                                .split('-')
-                                .length > 1 &&
-                              `${
-                                key_id
-                                  .split('-')[0]
-                                  .toUpperCase()
-                              }_KEY`
-                            ),
-                          result,
-                          participated:
-                            (snapshot_validators?.validators || [])
-                              .findIndex(v =>
-                                equals_ignore_case(
-                                  v?.validator,
-                                  address,
-                                )
-                              ) > -1 &&
-                            (snapshot_non_participant_validators?.validators || [])
-                              .findIndex(v =>
-                                equals_ignore_case(
-                                  v?.validator,
-                                  address,
-                                )
-                              ) < 0,
-                        }
-                      })
-                  ),
-                  'key_id',
+                  [
+                    'desc',
+                    'desc',
+                  ],
                 ),
-                ['height'],
-                ['desc'],
-              )
-
-            if (result) {
-              response =
-                await getKeygens(
-                  {
-                    query: { match: { 'snapshot_validators.validators.validator': address } },
-                    size: 0,
-                    track_total_hits: true,
-                  },
-                  result,
-                )
-
-              total_participations +=
-                (
-                  response?.total ||
-                  0
-                )
-            }
-          }
-
-          setKeygens(
-            {
-              data,
-              total,
-              total_participations,
               address,
             }
           )
-        } catch (error) {}
+        }
+      }
 
-        try {
-          let data,
-            total = 0,
-            total_participations = 0
+      getData()
+    },
+    [address, validator, assets_data],
+  )
 
-          const results =
-            [
-              true,
-              false,
-            ]
+  // uptimes
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          equals_ignore_case(
+            validator?.address,
+            address,
+          ) &&
+          status_data &&
+          (
+            !uptimes ||
+            !validator.broadcaster_loaded
+          )
+        ) {
+          const {
+            consensus_address,
+          } = { ...validator.data }
 
-          for (let i = 0; i < results.length; i++) {
-            const result = results[i]
+          const latest_block = Number(status_data.latest_block_height) - 1
 
-            let response =
-              await getSignAttempts(
+          const response =
+            await getUptimes(
+              {
+                query: {
+                  range: {
+                    height: {
+                      gt: latest_block - num_uptime_display_blocks,
+                      lte: latest_block,
+                    },
+                  },
+                },
+                size: num_uptime_display_blocks,
+                sort: [{ height: 'desc' }],
+              },
+            )
+
+          const {
+            data,
+          } = { ...response }
+
+          setUptimes(
+            {
+              data:
+                [...Array(num_uptime_display_blocks).keys()]
+                  .map(i => {
+                    const height = latest_block - i
+
+                    const u = (data || [])
+                      .find(d =>
+                        d?.height === height
+                      )
+
+                    const {
+                      validators,
+                    } = { ...u }
+
+                    return {
+                      ...u,
+                      height,
+                      up:
+                        !!(
+                          (validators || [])
+                            .map(v =>
+                              base64ToBech32(
+                                v,
+                                process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                              )
+                            )
+                            .includes(consensus_address)
+                        ),
+                    }
+                  }),
+              address,
+            }
+          )
+        }
+      }
+
+      getData()
+    },
+    [address, validator],
+  )
+
+  // number time jailed
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          equals_ignore_case(
+            validator?.address,
+            address,
+          ) &&
+          status_data &&
+          (
+            typeof numberTimeJailed !== 'number' ||
+            !validator.broadcaster_loaded
+          )
+        ) {
+          const {
+            operator_address,
+            jailed,
+          } = { ...validator.data }
+
+          const response =
+            await getTransactions(
+              {
+                query: {
+                  bool: {
+                    must: [
+                      { match: { types: 'MsgUnjail' } },
+                      { match: { addresses: operator_address } },
+                      { match: { code: 0 } },
+                    ],
+                  },
+                },
+                size: 0,
+                track_total_hits: true,
+              },
+            )
+
+          setNumberTimeJailed(
+            (
+              response?.total ||
+              0
+            ) +
+            (jailed ?
+              1 :
+              0
+            )
+          )
+        }
+      }
+
+      getData()
+    },
+    [address, validator],
+  )
+
+  // heartbeats
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          equals_ignore_case(
+            validator?.address,
+            address,
+          ) &&
+          status_data &&
+          validator.broadcaster_loaded &&
+          !heartbeats
+        ) {
+          const {
+            broadcaster_address,
+          } = { ...validator.data }
+          let {
+            start_proxy_height,
+          } = { ...validator.data }
+
+          start_proxy_height =
+            start_proxy_height ||
+            0
+
+          const latest_block = Number(status_data.latest_block_height)
+          const first =
+            firstHeartbeatBlock(
+              latest_block - num_heartbeat_blocks > start_proxy_height ?
+                latest_block - num_heartbeat_blocks :
+                start_proxy_height
+            )
+
+          const heartbeats = []
+
+          let data
+
+          if (broadcaster_address) {
+            const response =
+              await searchHeartbeats(
                 {
-                  query: { match: { [`${!result ? 'non_' : ''}participants`]: address } },
-                  size: 1000,
-                  sort: [{ height: 'desc' }],
-                  track_total_hits: true,
+                  sender: broadcaster_address,
+                  fromBlock: first,
+                  toBlock: latest_block,
+                  size: num_heartbeat_blocks / num_blocks_per_heartbeat + 1 + 50,
                 },
               )
 
-            if (result) {
-              total_participations +=
-                (
-                  response?.total ||
-                  0
+            data =
+              response?.data ||
+              []
+          }
+
+          for (let height = latest_block; height >= first; height--) {
+            if (
+              height % num_blocks_per_heartbeat === 1 &&
+              heartbeats.length < num_heartbeat_blocks / num_blocks_per_heartbeat
+            ) {
+              const h = (data || [])
+                .find(d =>
+                  d?.period_height === height
+                )
+
+              const {
+                sender,
+              } = { ...h }
+
+              heartbeats
+                .push(
+                  {
+                    ...h,
+                    height,
+                    up:
+                      equals_ignore_case(
+                        sender,
+                        broadcaster_address,
+                      ),
+                  }
                 )
             }
+          }
 
-            data =
-              _.orderBy(
-                _.uniqBy(
-                  _.concat(
-                    data ||
-                    [],
-                    (response?.data || [])
-                      .map(d => {
-                        const {
-                          key_id,
-                          key_role,
-                          participants,
-                          non_participants,
-                        } = { ...d }
+          setHeartbeats(
+            {
+              data: heartbeats,
+              address,
+            }
+          )
+        }
+      }
 
-                        return {
-                          ...d,
-                          key_role:
-                            key_role ||
-                            (
-                              (key_id || '')
-                                .split('-')
-                                .length > 1 &&
-                              `${
-                                key_id
-                                  .split('-')[0]
-                                  .toUpperCase()
-                              }_KEY`
-                            ),
-                          participated:
-                            (participants || [])
-                              .findIndex(a =>
-                                equals_ignore_case(
-                                  a,
-                                  address,
-                                )
-                              ) > -1 &&
-                            (non_participants || [])
-                              .findIndex(a =>
-                                equals_ignore_case(
-                                  a,
-                                  address,
-                                )
-                              ) < 0,
-                        }
-                      })
-                  ),
-                  'sig_id',
-                ),
-                ['height'],
-                ['desc'],
+      getData()
+    },
+    [address, validator],
+  )
+
+  // evm polls
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (
+          address &&
+          equals_ignore_case(
+            validator?.address,
+            address,
+          ) &&
+          status_data &&
+          validator.broadcaster_loaded
+        ) {
+          const {
+            broadcaster_address,
+          } = { ...validator.data }
+
+          let polls = [],
+            votes = []
+
+          if (broadcaster_address) {
+            const latest_block = Number(status_data.latest_block_height)
+
+            const response =
+              await searchEVMPolls(
+                {
+                  voter: broadcaster_address,
+                  fromBlock: latest_block - num_evm_votes_blocks,
+                  size: num_evm_votes_polls,
+                },
               )
 
-            if (result) {
-              response =
-                await getSignAttempts(
+            polls =
+              response?.data ||
+              []
+
+            votes =
+              polls
+                .map(p =>
+                  Object.fromEntries(
+                    Object.entries(p)
+                      .filter(([k, v]) =>
+                        !k?.startsWith(`${process.env.NEXT_PUBLIC_PREFIX_ACCOUNT}1`) ||
+                        equals_ignore_case(
+                          k,
+                          broadcaster_address,
+                        )
+                      )
+                      .flatMap(([k, v]) =>
+                        equals_ignore_case(
+                          k,
+                          broadcaster_address,
+                        ) ?
+                          Object.entries({ ...v })
+                            .map(([_k, _v]) =>
+                              [
+                                _k === 'id' ?
+                                  'txhash' :
+                                  _k,
+                                _v,
+                              ]
+                            ) :
+                          [
+                            [
+                              k,
+                              v,
+                            ]
+                          ]
+                      )
+                  )
+                )
+          }
+
+          setEvmPolls(
+            {
+              polls,
+              votes,
+              address,
+            }
+          )
+        }
+      }
+
+      getData()
+    },
+    [address, validator, supportedChains],
+  )
+
+  // keygens & signs
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (address) {
+          try {
+            let data,
+              total = 0,
+              total_participations = 0
+
+            const results =
+              [
+                true,
+                false,
+              ]
+
+            for (let i = 0; i < results.length; i++) {
+              const result = results[i]
+
+              let response =
+                await getKeygens(
                   {
-                    size: 0,
+                    size: 1000,
+                    sort: [{ height: 'desc' }],
                     track_total_hits: true,
                   },
+                  result,
                 )
 
               total +=
@@ -958,49 +926,237 @@ export default () => {
                   response?.total ||
                   0
                 )
-            }
-          }
 
-          setSigns(
-            {
-              data,
-              total,
-              total_participations,
-              address,
+              data =
+                _.orderBy(
+                  _.uniqBy(
+                    _.concat(
+                      data ||
+                      [],
+                      (response?.data || [])
+                        .map(d => {
+                          const {
+                            key_id,
+                            key_role,
+                            snapshot_validators,
+                            snapshot_non_participant_validators,
+                          } = { ...d }
+
+                          return {
+                            ...d,
+                            key_role:
+                              key_role ||
+                              (
+                                (key_id || '')
+                                  .split('-')
+                                  .length > 1 &&
+                                `${
+                                  key_id
+                                    .split('-')[0]
+                                    .toUpperCase()
+                                }_KEY`
+                              ),
+                            result,
+                            participated:
+                              (snapshot_validators?.validators || [])
+                                .findIndex(v =>
+                                  equals_ignore_case(
+                                    v?.validator,
+                                    address,
+                                  )
+                                ) > -1 &&
+                              (snapshot_non_participant_validators?.validators || [])
+                                .findIndex(v =>
+                                  equals_ignore_case(
+                                    v?.validator,
+                                    address,
+                                  )
+                                ) < 0,
+                          }
+                        })
+                    ),
+                    'key_id',
+                  ),
+                  ['height'],
+                  ['desc'],
+                )
+
+              if (result) {
+                response =
+                  await getKeygens(
+                    {
+                      query: { match: { 'snapshot_validators.validators.validator': address } },
+                      size: 0,
+                      track_total_hits: true,
+                    },
+                    result,
+                  )
+
+                total_participations +=
+                  (
+                    response?.total ||
+                    0
+                  )
+              }
             }
-          )
-        } catch (error) {}
+
+            setKeygens(
+              {
+                data,
+                total,
+                total_participations,
+                address,
+              }
+            )
+          } catch (error) {}
+
+          try {
+            let data,
+              total = 0,
+              total_participations = 0
+
+            const results =
+              [
+                true,
+                false,
+              ]
+
+            for (let i = 0; i < results.length; i++) {
+              const result = results[i]
+
+              let response =
+                await getSignAttempts(
+                  {
+                    query: { match: { [`${!result ? 'non_' : ''}participants`]: address } },
+                    size: 1000,
+                    sort: [{ height: 'desc' }],
+                    track_total_hits: true,
+                  },
+                )
+
+              if (result) {
+                total_participations +=
+                  (
+                    response?.total ||
+                    0
+                  )
+              }
+
+              data =
+                _.orderBy(
+                  _.uniqBy(
+                    _.concat(
+                      data ||
+                      [],
+                      (response?.data || [])
+                        .map(d => {
+                          const {
+                            key_id,
+                            key_role,
+                            participants,
+                            non_participants,
+                          } = { ...d }
+
+                          return {
+                            ...d,
+                            key_role:
+                              key_role ||
+                              (
+                                (key_id || '')
+                                  .split('-')
+                                  .length > 1 &&
+                                `${
+                                  key_id
+                                    .split('-')[0]
+                                    .toUpperCase()
+                                }_KEY`
+                              ),
+                            participated:
+                              (participants || [])
+                                .findIndex(a =>
+                                  equals_ignore_case(
+                                    a,
+                                    address,
+                                  )
+                                ) > -1 &&
+                              (non_participants || [])
+                                .findIndex(a =>
+                                  equals_ignore_case(
+                                    a,
+                                    address,
+                                  )
+                                ) < 0,
+                          }
+                        })
+                    ),
+                    'sig_id',
+                  ),
+                  ['height'],
+                  ['desc'],
+                )
+
+              if (result) {
+                response =
+                  await getSignAttempts(
+                    {
+                      size: 0,
+                      track_total_hits: true,
+                    },
+                  )
+
+                total +=
+                  (
+                    response?.total ||
+                    0
+                  )
+              }
+            }
+
+            setSigns(
+              {
+                data,
+                total,
+                total_participations,
+                address,
+              }
+            )
+          } catch (error) {}
+        }
       }
-    }
 
-    getData()
-  }, [address])
+      getData()
+    },
+    [address],
+  )
 
   // supported chains
-  useEffect(() => {
-    if (
-      address &&
-      validators_chains_data
-    ) {
-      setSupportedChains(
-        {
-          data:
-            Object.entries(validators_chains_data)
-              .filter(([k, v]) =>
-                (v || [])
-                  .findIndex(_v =>
-                    equals_ignore_case(
-                      _v,
-                      address,
-                    )
-                  ) > -1
-              )
-              .map(([k, v]) => k),
-          address,
-        }
-      )
-    }
-  }, [address, validators_chains_data])
+  useEffect(
+    () => {
+      if (
+        address &&
+        validators_chains_data
+      ) {
+        setSupportedChains(
+          {
+            data:
+              Object.entries(validators_chains_data)
+                .filter(([k, v]) =>
+                  (v || [])
+                    .findIndex(_v =>
+                      equals_ignore_case(
+                        _v,
+                        address,
+                      )
+                    ) > -1
+                )
+                .map(([k, v]) => k),
+            address,
+          }
+        )
+      }
+    },
+    [address, validators_chains_data],
+  )
 
   const {
     uptime,

@@ -1206,9 +1206,9 @@ export default () => {
                           <div className="flex items-center space-x-1">
                             <BiTime
                               size={18}
-                              className="text-slate-300 dark:text-slate-100"
+                              className="text-green-500 dark:text-green-400"
                             />
-                            <span className="whitespace-nowrap text-xs font-bold">
+                            <span className="whitespace-nowrap text-green-500 dark:text-green-400 text-xs font-bold">
                               {time_spent}
                             </span>
                           </div>
@@ -1262,7 +1262,7 @@ export default () => {
                       [
                         'Confirmed',
                       ].includes(title) ?
-                        'Confirm' :
+                        'Confirm Deposit' :
                         title
 
                   const explorer =
