@@ -1593,7 +1593,7 @@ export default (
                                 size={18}
                                 className="text-green-500 dark:text-green-400"
                               />
-                              <span className="whitespace-nowrap text-green-500 dark:text-green-400 text-xs font-bold">
+                              <span className="whitespace-nowrap text-xs font-bold">
                                 {time_spent}
                               </span>
                             </div>
