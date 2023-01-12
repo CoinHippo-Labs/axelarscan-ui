@@ -18,7 +18,7 @@ import { evm_polls as searchEVMPolls } from '../../lib/api/evm-polls'
 import { uptimes as getUptimes, transactions as getTransactions, heartbeats as getHeartbeats, keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
 import { chainManager } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
-import { hexToBech32, base64ToBech32 } from '../../lib/object/key'
+import { hexToBech32, base64ToBech32, bech32ToBech32 } from '../../lib/object/key'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
 import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
 
@@ -204,6 +204,44 @@ export default () => {
                   equals_ignore_case(
                     v.consensus_address,
                     hexToBech32(
+                      address,
+                      process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                    ),
+                  )
+                )
+            ),
+          }
+
+          router
+            .push(
+              `/validator/${operator_address}`
+            )
+        }
+        else if (
+          address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) &&
+          validators_data &&
+          validators_data
+            .findIndex(v =>
+              v?.operator_address &&
+              equals_ignore_case(
+                v.consensus_address,
+                bech32ToBech32(
+                  address,
+                  process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
+                ),
+              )
+            ) > -1
+        ) {
+          const {
+            operator_address,
+          } = {
+            ...(
+              validators_data
+                .find(v =>
+                  v?.operator_address &&
+                  equals_ignore_case(
+                    v.consensus_address,
+                    bech32ToBech32(
                       address,
                       process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
                     ),
