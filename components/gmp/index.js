@@ -898,16 +898,51 @@ export default () => {
     !approveButton &&
     !executeButton &&
     !no_gas_remain &&
-    (executed || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
-    (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_minimum_amount || is_insufficient_fee) &&
+    (
+      executed ||
+      error ||
+      is_executed ||
+      is_invalid_destination_chain ||
+      is_invalid_call ||
+      is_insufficient_minimum_amount ||
+      is_insufficient_fee
+    ) &&
+    (
+      approved?.block_timestamp <
+      moment()
+        .subtract(
+          3,
+          'minutes',
+        )
+        .unix() ||
+      is_invalid_destination_chain ||
+      is_invalid_call ||
+      is_insufficient_minimum_amount ||
+      is_insufficient_fee
+    ) &&
     (
       editable ||
       (
         (
-          (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
-          (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
+          (
+            gas?.gas_remain_amount >= 0.0001 &&
+            (
+              gas.gas_remain_amount / gas.gas_paid_amount > 0.1 ||
+              gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1
+            )
+          ) ||
+          (
+            gas?.gas_remain_amount >= 0.0001 &&
+            gas?.gas_paid_amount < gas?.gas_base_fee_amount &&
+            gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 &&
+            is_insufficient_fee
+          )
         ) &&
-        (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp)
+        (
+          !refunded ||
+          refunded.error ||
+          refunded.block_timestamp < gas_paid?.block_timestamp
+        )
       )
     ) &&
     (
@@ -917,13 +952,16 @@ export default () => {
           onClick={() => refund(data)}
           className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${refunding ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
         >
-          {refunding && (
-            <TailSpin
-              color="white"
-              width="16"
-              height="16"
-            />
-          )}
+          {
+            refunding &&
+            (
+              <TailSpin
+                color="white"
+                width="16"
+                height="16"
+              />
+            )
+          }
           <span>
             Refund
           </span>
@@ -3152,11 +3190,18 @@ export default () => {
             <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
               {
                 no_gas_remain &&
-                !(refunded && refunded.receipt?.status) &&
+                (
+                  !refunded ||
+                  (
+                    refunded.receipt &&
+                    !refunded.receipt.status
+                  )
+                ) &&
                 (
                   executed ||
                   error
-                ) && (
+                ) &&
+                (
                   <div className="w-fit bg-slate-100 dark:bg-slate-900 rounded-lg text-slate-400 dark:text-slate-200 text-base font-semibold p-3">
                     No refund for this GMP call.
                   </div>
