@@ -72,31 +72,67 @@ export default (
           )
 
         setData(
-          data
-            .map((d, i) => {
-              const {
-                source_chain,
-                destination_chain,
-              } = { ...d }
+          Object.entries(
+            _.groupBy(
+              data
+                .map((d, i) => {
+                  const {
+                    source_chain,
+                    destination_chain,
+                  } = { ...d }
 
-              const source_chain_data =
-                getChain(
-                  source_chain,
-                  chains_data,
-                )
+                  const source_chain_data =
+                    getChain(
+                      source_chain,
+                      chains_data,
+                    )
 
-              const destination_chain_data =
-                getChain(
-                  destination_chain,
-                  chains_data,
-                )
+                  const destination_chain_data =
+                    getChain(
+                      destination_chain,
+                      chains_data,
+                    )
 
-              return {
-                ...d,
-                source_chain_data,
-                destination_chain_data,
-              }
-            })
+                  return {
+                    ...d,
+                    id: `${source_chain}_${destination_chain}`,
+                    source_chain_data,
+                    destination_chain_data,
+                  }
+                }),
+              'id',
+            )
+          )
+          .map(([k, v]) => {
+            const {
+              source_chain,
+              destination_chain,
+              source_chain_data,
+              destination_chain_data,
+            } = {
+              ...(
+                _.head(v)
+              ),
+            }
+
+            return {
+              id: k,
+              source_chain,
+              destination_chain,
+              source_chain_data,
+              destination_chain_data,
+              num_txs:
+                _.sumBy(
+                  v,
+                  'num_txs',
+                ),
+              volume:
+                _.sumBy(
+                  v,
+                  'volume',
+                ),
+            }
+          })
         )
       }
     },

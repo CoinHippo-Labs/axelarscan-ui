@@ -72,6 +72,7 @@ export default () => {
 
         const {
           txHash,
+          type,
           confirmed,
           state,
           sourceChain,
@@ -90,6 +91,15 @@ export default () => {
             '/transfers',
           ].includes(pathname) ?
             {
+              type:
+                [
+                  'deposit_address',
+                  'send_token',
+                  'wrap',
+                  'unwrap',
+                ].includes(type?.toLowerCase()) ?
+                  type.toLowerCase() :
+                  undefined,
               sourceChain:
                 getChain(
                   sourceChain,
@@ -124,6 +134,15 @@ export default () => {
             } :
             {
               txHash,
+              type:
+                [
+                  'deposit_address',
+                  'send_token',
+                  'wrap',
+                  'unwrap',
+                ].includes(type?.toLowerCase()) ?
+                  type.toLowerCase() :
+                  undefined,
               confirmed:
                 [
                   'confirmed',
@@ -246,6 +265,60 @@ export default () => {
         type: 'text',
         placeholder: 'Transaction Hash',
         className: 'col-span-2',
+      },
+      {
+        label: 'Type',
+        name: 'type',
+        type: 'select',
+        placeholder: 'Select type',
+        options:
+          [
+            {
+              value: '',
+              title: 'Any',
+            },
+            {
+              value: 'deposit_address',
+              title: 'Deposit Address',
+            },
+            {
+              value: 'send_token',
+              title: 'Send Token',
+            },
+            {
+              value: 'wrap',
+              title: 'Wrap',
+            },
+            {
+              value: 'unwrap',
+              title: 'Unwrap',
+            },
+          ],
+      },
+      {
+        label: 'Asset',
+        name: 'asset',
+        type: 'select',
+        placeholder: 'Select asset',
+        options:
+          _.concat(
+            {
+              value: '',
+              title: 'Any',
+            },
+            (assets_data || [])
+              .map(a => {
+                const {
+                  id,
+                  symbol,
+                } = { ...a }
+
+                return {
+                  value: id,
+                  title: symbol,
+                }
+              }),
+          ),
       },
       {
         label: 'Confirmed',
@@ -396,35 +469,11 @@ export default () => {
           ),
       },
       {
-        label: 'Asset',
-        name: 'asset',
-        type: 'select',
-        placeholder: 'Select asset',
-        options:
-          _.concat(
-            {
-              value: '',
-              title: 'Any',
-            },
-            (assets_data || [])
-              .map(a => {
-                const {
-                  id,
-                  symbol,
-                } = { ...a }
-
-                return {
-                  value: id,
-                  title: symbol,
-                }
-              }),
-          ),
-      },
-      {
         label: 'Deposit Address',
         name: 'depositAddress',
         type: 'text',
         placeholder: 'Deposit address',
+        className: 'col-span-2',
       },
       {
         label: 'Sender',
@@ -469,6 +518,7 @@ export default () => {
       ].includes(pathname) ||
       ![
         'txHash',
+        'type',
         'confirmed',
         'state',
         'depositAddress',

@@ -100,6 +100,7 @@ export default (
 
         const {
           txHash,
+          type,
           confirmed,
           state,
           sourceChain,
@@ -116,6 +117,15 @@ export default (
         setFilters(
           {
             txHash,
+            type:
+              [
+                'deposit_address',
+                'send_token',
+                'wrap',
+                'unwrap',
+              ].includes(type?.toLowerCase()) ?
+                type.toLowerCase() :
+                undefined,
             confirmed:
               [
                 'confirmed',

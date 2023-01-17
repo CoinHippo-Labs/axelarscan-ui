@@ -83,6 +83,7 @@ export default () => {
           )
 
         const {
+          type,
           sourceChain,
           destinationChain,
           asset,
@@ -92,6 +93,15 @@ export default () => {
 
         setFilters(
           {
+            type:
+              [
+                'deposit_address',
+                'send_token',
+                'wrap',
+                'unwrap',
+              ].includes(type?.toLowerCase()) ?
+                type.toLowerCase() :
+                undefined,
             sourceChain:
               getChain(
                 sourceChain,
