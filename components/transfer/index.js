@@ -393,9 +393,13 @@ export default () => {
 
   type =
     data ?
-      type ||
-      'deposit_address' :
-    type
+      wrap ?
+        'wrap' :
+        unwrap ?
+          'unwrap' :
+          type ||
+          'deposit_address' :
+      type
 
   const {
     source_chain,

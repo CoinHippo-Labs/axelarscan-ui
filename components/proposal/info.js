@@ -1,6 +1,7 @@
 import dynamic from 'next/dynamic'
 import { useSelector, shallowEqual } from 'react-redux'
 import moment from 'moment'
+import Linkify from 'react-linkify'
 import { ProgressBar } from 'react-loader-spinner'
 
 import { number_format, name, to_json, loader_color, json_theme } from '../../lib/utils'
@@ -76,8 +77,10 @@ export default (
           Description:
         </span>
         {data ?
-          <span className="break-words whitespace-pre-wrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
-            {description}
+          <span className="max-w-xl linkify break-words whitespace-pre-wrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-normal">
+            <Linkify>
+              {description}
+            </Linkify>
           </span> :
           <ProgressBar
             borderColor={loader_color(theme)}

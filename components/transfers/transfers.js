@@ -555,14 +555,19 @@ export default (
                     send,
                     link,
                     wrap,
+                    unwrap,
                   } = { ...props.row.original }
                   let {
                     type,
                   } = { ...props.row.original }
 
                   type =
-                    type ||
-                    'deposit_address'
+                    wrap ?
+                      'wrap' :
+                      unwrap ?
+                        'unwrap' :
+                        type ||
+                        'deposit_address'
 
                   const {
                     source_chain,
