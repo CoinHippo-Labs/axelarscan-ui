@@ -1129,6 +1129,7 @@ export default (
                     amount,
                     fee,
                     insufficient_fee,
+                    status,
                   } = { ...send }
                   let {
                     destination_chain,
@@ -1362,7 +1363,9 @@ export default (
                                   data?.recv_txhash &&
                                   !data.failed_txhash
                                 ) :
-                                data
+                                id === 'send' ?
+                                  status !== 'failed' :
+                                  data
                           ),
                       }
                     })
@@ -1384,7 +1387,9 @@ export default (
                         0
                       ) +
                       (
+
                         !insufficient_fee &&
+                        status !== 'failed' &&
                         (
                           amount > fee ||
                           !fee
@@ -1478,11 +1483,11 @@ export default (
                             const text_color =
                               finish ?
                                 'text-green-500 dark:text-green-400' :
-                                i === current_step ?
-                                  'text-yellow-500 dark:text-yellow-400' :
                                 data?.status === 'failed' ?
                                   'text-red-500 dark:text-red-400' :
-                                  'text-slate-300 dark:text-slate-700'
+                                  i === current_step ?
+                                    'text-yellow-500 dark:text-yellow-400' :
+                                    'text-slate-300 dark:text-slate-700'
 
                             const hidden =
                               [
@@ -1504,17 +1509,17 @@ export default (
                                       size={18}
                                       className="text-green-500 dark:text-green-400"
                                     /> :
-                                    i === current_step ?
-                                      <ProgressBar
-                                        borderColor="#ca8a04"
-                                        barColor="#facc15"
-                                        width="18"
-                                        height="18"
+                                    data?.status === 'failed' ?
+                                      <BiXCircle
+                                        size={18}
+                                        className="text-red-500 dark:text-red-400"
                                       /> :
-                                      data?.status === 'failed' ?
-                                        <BiXCircle
-                                          size={18}
-                                          className="text-red-500 dark:text-red-400"
+                                      i === current_step ?
+                                        <ProgressBar
+                                          borderColor="#ca8a04"
+                                          barColor="#facc15"
+                                          width="18"
+                                          height="18"
                                         /> :
                                         <BiCircle
                                           size={18}
