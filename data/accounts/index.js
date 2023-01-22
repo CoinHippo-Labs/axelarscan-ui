@@ -15,6 +15,11 @@ export default [
     environment: 'testnet',
   },
   {
+    address: '0xD36aac0c9676e984D72823Fb662ce94D3Ab5E551',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: 'axelar19s8q4zh3jyg9h5pe3al8ahul0e4e7xp68jrpvr',
     name: 'Imperator: IBC Relayer',
     environment: 'mainnet',

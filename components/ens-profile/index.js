@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
+import Image from '../image'
 import Copy from '../copy'
 import { ens as getEns } from '../../lib/api/ens'
-import { ellipse } from '../../lib/utils'
+import { equals_ignore_case, ellipse } from '../../lib/utils'
+import accounts from '../../data/accounts'
 import { ENS_DATA } from '../../reducers/types'
 
 export default (
@@ -127,6 +129,25 @@ export default (
       </span>
     )
 
+  const environment = process.env.NEXT_PUBLIC_ENVIRONMENT
+
+  const account =
+    !ens_name &&
+    accounts
+      .find(a =>
+        equals_ignore_case(
+          a?.address,
+          address,
+        ) &&
+        (
+          !a?.environment ||
+          equals_ignore_case(
+            a.environment,
+            environment,
+          )
+        )
+      )
+
   return (
     ens_name ?
       <div className="flex items-center space-x-2">
@@ -148,6 +169,58 @@ export default (
           />
         }
       </div> :
-      fallback
+      account ?
+        <div
+          className={
+            `min-w-max flex ${
+              no_copy ?
+                'items-center' :
+                'items-start'
+            } space-x-2`
+          }
+        >
+          {
+            account.image &&
+            (
+              <Image
+                src={account.image}
+                className="w-6 h-6 rounded-full"
+              />
+            )
+          }
+          <div className="flex flex-col">
+            <div className="tracking-wider text-blue-500 dark:text-blue-500 font-medium">
+              <span className="xl:hidden">
+                {ellipse(
+                  account.name,
+                  20,
+                )}
+              </span>
+              <span className="hidden xl:block">
+                {ellipse(
+                  account.name,
+                  20,
+                )}
+              </span>
+            </div>
+            {
+              !no_copy &&
+              (
+                <Copy
+                  value={address}
+                  title={
+                    <div className="cursor-pointer text-slate-400 dark:text-slate-600">
+                      {ellipse(
+                        address,
+                        10,
+                      )}
+                    </div>
+                  }
+                />
+              )
+            }
+          </div>
+        </div> :
+        fallback
   )
 }
