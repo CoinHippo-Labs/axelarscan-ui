@@ -1716,7 +1716,7 @@ export default () => {
             </div>
             {data && detail_steps.map((s, i) => {
               const { callback } = { ...gmp }
-              const { call, gas_paid, gas_added_transactions, forecalled, executed, error, refunded, refunded_more_transactions, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
+              const { call, gas_paid, gas_added_transactions, forecalled, approved, executed, error, refunded, refunded_more_transactions, forecall_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
               const { title, chain_data, data } = { ...s }
               const _data = ['executed'].includes(s.id) ?
                 data ||
@@ -1745,17 +1745,42 @@ export default () => {
               const { source_token, destination_native_token } = { ...gas_price_rate }
               const {
                 gasUsed,
-              } = { ...(executed?.receipt || error?.receipt) }
+              } = {
+                ...(
+                  s.id === 'approved' ?
+                    approved?.receipt :
+                    (
+                      executed?.receipt ||
+                      error?.receipt
+                    )
+                ),
+              }
               let {
                 effectiveGasPrice,
-              } = { ...(executed?.receipt || error?.receipt) }
+              } = {
+                ...(
+                  s.id === 'approved' ?
+                    approved?.receipt :
+                    (
+                      executed?.receipt ||
+                      error?.receipt
+                    )
+                ),
+              }
 
               if (!effectiveGasPrice) {
-                if (executed) {
-                  effectiveGasPrice = executed.transaction?.gasPrice
+                if (s.id === 'approved') {
+                  if (approved) {
+                    effectiveGasPrice = approved.transaction?.gasPrice
+                  }
                 }
-                else if (error) {
-                  effectiveGasPrice = error.transaction?.gasPrice
+                else {
+                  if (executed) {
+                    effectiveGasPrice = executed.transaction?.gasPrice
+                  }
+                  else if (error) {
+                    effectiveGasPrice = error.transaction?.gasPrice
+                  }
                 }
               }
 
@@ -2493,7 +2518,7 @@ export default () => {
                           }:
                         </span>
                         <div className="flex flex-wrap items-center">
-                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2 py-1 px-2.5">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2.5">
                             {destination_gas_data?.image && (
                               <Image
                                 src={destination_gas_data.image}
@@ -2532,7 +2557,7 @@ export default () => {
                               <span className="text-sm font-medium mr-2">
                                 =
                               </span>
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2.5">
                                 {source_gas_data?.image && (
                                   <Image
                                     src={source_gas_data.image}
@@ -2557,7 +2582,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
+                    {['approved', 'executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           {['refunded'].includes(s.id) ?
@@ -2566,7 +2591,7 @@ export default () => {
                           }:
                         </span>
                         <div className="flex flex-wrap items-center">
-                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2 py-1 px-2.5">
+                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2.5">
                             {destination_gas_data?.image && (
                               <Image
                                 src={destination_gas_data.image}
@@ -2613,7 +2638,7 @@ export default () => {
                               <span className="text-sm font-medium mr-2">
                                 =
                               </span>
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2.5">
                                 {source_gas_data?.image && (
                                   <Image
                                     src={source_gas_data.image}
