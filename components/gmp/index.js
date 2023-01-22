@@ -2582,7 +2582,7 @@ export default () => {
                         </div>
                       </div>
                     )}
-                    {['approved', 'executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
+                    {[/*'approved', */'executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
                       <div className={rowClassName}>
                         <span className={rowTitleClassName}>
                           {['refunded'].includes(s.id) ?
