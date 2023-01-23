@@ -151,10 +151,11 @@ export default () => {
 
       getData()
 
-      const interval = setInterval(() =>
-        getData(),
-        5 * 60 * 1000,
-      )
+      const interval =
+        setInterval(() =>
+          getData(),
+          5 * 60 * 1000,
+        )
 
       return () => clearInterval(interval)
     },
