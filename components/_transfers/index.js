@@ -321,12 +321,17 @@ export default () => {
             } Volume`
           }
           description={
-            `Sum of volume transferred in the past ${
-              number_format(
-                NUM_STATS_DAYS,
-                '0,0',
-              )
-            } days`
+            `Sum of volume transferred${
+              filters?.fromTime ||
+              filters?.toTime ?
+                '' :
+                ` in the past ${
+                  number_format(
+                    NUM_STATS_DAYS,
+                    '0,0',
+                  )
+                } days`
+            }`
           }
           chart_data={dailyStats}
         />
@@ -346,12 +351,17 @@ export default () => {
             } Transfers`
           }
           description={
-            `The number of transfers in the past ${
-              number_format(
-                NUM_STATS_DAYS,
-                '0,0',
-              )
-            } days`
+            `The number of transfers${
+              filters?.fromTime ||
+              filters?.toTime ?
+                '' :
+                ` in the past ${
+                  number_format(
+                    NUM_STATS_DAYS,
+                    '0,0',
+                  )
+                } days`
+            }`
           }
           chart_data={dailyStats}
         />
