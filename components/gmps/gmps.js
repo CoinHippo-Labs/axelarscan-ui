@@ -73,325 +73,355 @@ export default ({ n }) => {
   const [types, setTypes] = useState(null)
   const [filterTypes, setFilterTypes] = useState(null)
 
-  useEffect(() => {
-    if (
-      evm_chains_data &&
-      cosmos_chains_data &&
-      asPath
-    ) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(
-          asPath.indexOf('?') + 1,
-        )
-      )
+  useEffect(
+    () => {
+      if (
+        evm_chains_data &&
+        cosmos_chains_data &&
+        asPath
+      ) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
+              )
+          )
 
-      const chains_data =
-        _.concat(
-          evm_chains_data,
-          cosmos_chains_data,
-        )
+        const chains_data =
+          _.concat(
+            evm_chains_data,
+            cosmos_chains_data,
+          )
 
-      const {
-        txHash,
-        sourceChain,
-        destinationChain,
-        method,
-        status,
-        senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
-        fromTime,
-        toTime,
-      } = { ...params }
-
-      setFilters(
-        {
+        const {
           txHash,
-          sourceChain:
-            getChain(
-              sourceChain,
-              chains_data,
-            )?._id ||
-            sourceChain,
-          destinationChain:
-            getChain(
-              destinationChain,
-              chains_data,
-            )?._id ||
-            destinationChain,
-          method:
-            [
-              'callContract',
-              'callContractWithToken',
-            ].includes(method) ?
-              method :
-              undefined,
-          status:
-            [
-              'approving',
-              'called',
-              'forecalled',
-              'approved',
-              'executing',
-              'executed',
-              'error',
-              'insufficient_fee',
-              'no_created_at',
-            ].includes(status?.toLowerCase()) ?
-              status.toLowerCase() :
-              undefined,
+          sourceChain,
+          destinationChain,
+          method,
+          status,
           senderAddress,
           sourceAddress,
           contractAddress,
           relayerAddress,
-          time:
-            fromTime &&
-            toTime &&
-            [
-              moment(
-                Number(fromTime)
-              ),
-              moment(
-                Number(toTime)
-              ),
-            ],
-        }
-      )
-    }
-  }, [evm_chains_data, cosmos_chains_data, asPath])
+          fromTime,
+          toTime,
+        } = { ...params }
 
-  useEffect(() => {
-    const triggering = is_interval => {
-      setFetchTrigger(
-        is_interval ?
-          moment()
-            .valueOf() :
-          typeof fetchTrigger === 'number' ?
-            null :
-            0
-      )
-    }
-
-    if (
-      pathname &&
-      filters
-    ) {
-      triggering()
-    }
-
-    const interval = setInterval(() =>
-      triggering(true),
-      (
-        address ||
-        [
-          '/gmp/search',
-        ].includes(pathname) ?
-          intervalUpdate ?
-            0.5 :
-            0.33 :
-          0.25
-      ) *
-      60 * 1000,
-    )
-
-    return () => clearInterval(interval)
-  }, [pathname, address, filters])
-
-  useEffect(() => {
-    const getData = async is_interval => {
-      if (
-        filters &&
-        (
-          !pathname?.includes('/[address]') ||
-          address
-        )
-      ) {
-        setFetching(true)
-
-        if (!fetchTrigger) {
-          setTotal(null)
-          setData(null)
-          setOffet(0)
-        }
-
-        const {
-          status,
-        } = { ...filters }
-
-        const size = n ||
-          LIMIT
-        const _data = !fetchTrigger ||
-          (
-            [
-              'executing',
-            ].includes(status) &&
-            fetchTrigger > 1 &&
-            (
-              !data ||
-              data.length < size
-            )
-          ) ?
-            [] :
-            data || []
-        const from = fetchTrigger === true || fetchTrigger === 1 ?
-          _data.length :
-          0
-        let params
-
-        if (address) {
-          params = {
-            senderAddress: address,
-          }
-        }
-        else if (filters) {
-          const {
+        setFilters(
+          {
             txHash,
-            sourceChain,
-            destinationChain,
-            method,
-            status,
+            sourceChain:
+              getChain(
+                sourceChain,
+                chains_data,
+              )?._id ||
+              sourceChain,
+            destinationChain:
+              getChain(
+                destinationChain,
+                chains_data,
+              )?._id ||
+              destinationChain,
+            method:
+              [
+                'callContract',
+                'callContractWithToken',
+              ].includes(method) ?
+                method :
+                undefined,
+            status:
+              [
+                'approving',
+                'called',
+                'forecalled',
+                'approved',
+                'executing',
+                'executed',
+                'error',
+                'insufficient_fee',
+                'no_created_at',
+              ].includes(status?.toLowerCase()) ?
+                status.toLowerCase() :
+                undefined,
             senderAddress,
             sourceAddress,
             contractAddress,
             relayerAddress,
-            time,
+            time:
+              fromTime &&
+              toTime &&
+              [
+                moment(
+                  Number(fromTime)
+                ),
+                moment(
+                  Number(toTime)
+                ),
+              ],
+          }
+        )
+      }
+    },
+    [evm_chains_data, cosmos_chains_data, asPath],
+  )
+
+  useEffect(
+    () => {
+      const triggering = is_interval => {
+        setFetchTrigger(
+          is_interval ?
+            moment()
+              .valueOf() :
+            typeof fetchTrigger === 'number' ?
+              null :
+              0
+        )
+      }
+
+      if (
+        pathname &&
+        filters
+      ) {
+        triggering()
+      }
+
+      const interval =
+        setInterval(() =>
+          triggering(true),
+          (
+            address ||
+            [
+              '/gmp/search',
+            ].includes(pathname) ?
+              intervalUpdate ?
+                0.5 :
+                0.33 :
+              0.25
+          ) *
+          60 * 1000,
+        )
+
+      return () => clearInterval(interval)
+    },
+    [pathname, address, filters],
+  )
+
+  useEffect(
+    () => {
+      const getData = async is_interval => {
+        if (
+          filters &&
+          (
+            !pathname?.includes('/[address]') ||
+            address
+          )
+        ) {
+          setFetching(true)
+
+          if (!fetchTrigger) {
+            setTotal(null)
+            setData(null)
+            setOffet(0)
+          }
+
+          const {
+            status,
           } = { ...filters }
 
-          let event,
-            fromTime,
-            toTime
+          const size =
+            n ||
+            LIMIT
 
-          switch (method) {
-            case 'callContract':
-              event = 'ContractCall'
-              break
-            case 'callContractWithToken':
-              event = 'ContractCallWithToken'
-              break
-            default:
-              event = undefined
-              break
-          }
-
-          if (time?.length > 1) {
-            fromTime = time[0]
-              .unix()
-            toTime = time[1]
-              .unix()
-          }
-
-          params = {
-            txHash,
-            sourceChain,
-            destinationChain,
-            event,
-            status,
-            senderAddress,
-            sourceAddress,
-            contractAddress,
-            relayerAddress,
-            fromTime,
-            toTime,
-          }
-        }
-
-        let response = await searchGMP(
-          {
-            ...params,
-            size,
-            from,
-          },
-        )
-
-        if (response) {
-          const {
-            data,
-            total,
-          } = { ...response }
-
-          setTotal(total)
-
-          response = _.orderBy(
-            _.uniqBy(
-              _.concat(
-                (data || [])
-                  .map(d => {
-                    return {
-                      ...d,
-                    }
-                  }),
-                _data,
-              ),
-              'call.id',
-            ),
-            ['call.block_timestamp'],
-            ['desc'],
-          )
-
-          // for re execute all that must retry
-          if (
-            [
-              'error',
-            ].includes(status) &&
-            reExecute === 'true' &&
+          const _data =
+            !fetchTrigger ||
             (
-              !is_interval ||
-              intervalUpdate === 'true'
-            ) &&
-            (
-              staging ||
-              ![
-                'mainnet',
-              ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
-            )
-          ) {
-            for (const d of response) {
-              const {
-                call,
-              } = { ...d }
-
-              await saveGMP(
-                call?.transactionHash,
-                call?.transactionIndex,
-                call?.logIndex,
-                undefined,
-                undefined,
-                undefined,
-                're_execute',
+              [
+                'executing',
+              ].includes(status) &&
+              fetchTrigger > 1 &&
+              (
+                !data ||
+                data.length < size
               )
+            ) ?
+              [] :
+              data ||
+              []
+
+          const from =
+            fetchTrigger === true ||
+            fetchTrigger === 1 ?
+              _data.length :
+              0
+
+          let params
+
+          if (address) {
+            params = {
+              senderAddress: address,
+            }
+          }
+          else if (filters) {
+            const {
+              txHash,
+              sourceChain,
+              destinationChain,
+              method,
+              status,
+              senderAddress,
+              sourceAddress,
+              contractAddress,
+              relayerAddress,
+              time,
+            } = { ...filters }
+
+            let event,
+              fromTime,
+              toTime
+
+            switch (method) {
+              case 'callContract':
+                event = 'ContractCall'
+                break
+              case 'callContractWithToken':
+                event = 'ContractCallWithToken'
+                break
+              default:
+                event = undefined
+                break
+            }
+
+            if (time?.length > 1) {
+              fromTime =
+                time[0]
+                  .unix()
+
+              toTime =
+                time[1]
+                  .unix()
+            }
+
+            params = {
+              txHash,
+              sourceChain,
+              destinationChain,
+              event,
+              status,
+              senderAddress,
+              sourceAddress,
+              contractAddress,
+              relayerAddress,
+              fromTime,
+              toTime,
             }
           }
 
-          setData(response)
-        }
-        else if (!fetchTrigger) {
-          setTotal(0)
-          setData([])
-        }
+          let response =
+            await searchGMP(
+              {
+                ...params,
+                size,
+                from,
+              },
+            )
 
-        setFetching(false)
+          if (response) {
+            const {
+              data,
+              total,
+            } = { ...response }
+
+            setTotal(total)
+
+            response =
+              _.orderBy(
+                _.uniqBy(
+                  _.concat(
+                    (data || [])
+                      .map(d => {
+                        return {
+                          ...d,
+                        }
+                      }),
+                    _data,
+                  ),
+                  'call.id',
+                ),
+                ['call.block_timestamp'],
+                ['desc'],
+              )
+
+            // for re execute all that must retry
+            if (
+              [
+                'error',
+              ].includes(status) &&
+              reExecute === 'true' &&
+              (
+                !is_interval ||
+                intervalUpdate === 'true'
+              ) &&
+              (
+                staging ||
+                ![
+                  'mainnet',
+                ].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
+              )
+            ) {
+              for (const d of response) {
+                const {
+                  call,
+                } = { ...d }
+
+                await saveGMP(
+                  call?.transactionHash,
+                  call?.transactionIndex,
+                  call?.logIndex,
+                  undefined,
+                  undefined,
+                  undefined,
+                  're_execute',
+                )
+              }
+            }
+
+            setData(response)
+          }
+          else if (!fetchTrigger) {
+            setTotal(0)
+            setData([])
+          }
+
+          setFetching(false)
+        }
       }
-    }
 
-    getData(fetchTrigger > 0)
-  }, [fetchTrigger])
+      getData(fetchTrigger > 0)
+    },
+    [fetchTrigger],
+  )
 
-  useEffect(() => {
-    if (data) {
-      setTypes(
-        _.countBy(
-          _.uniqBy(
-            data,
-            'call.id',
+  useEffect(
+    () => {
+      if (data) {
+        setTypes(
+          _.countBy(
+            _.uniqBy(
+              data,
+              'call.id',
+            )
+            .map(t =>
+              t?.call?.event
+            )
+            .filter(t => t)
           )
-          .map(t => t?.call?.event)
-          .filter(t => t)
         )
-      )
-    }
-  }, [data])
+      }
+    },
+    [data],
+  )
 
   const saveGMP = async (
     sourceTransactionHash,
@@ -420,7 +450,10 @@ export default ({ n }) => {
         method: 'POST',
         body: JSON.stringify(params),
       },
-    ).catch(error => { return null })
+    )
+    .catch(error => {
+      return null
+    })
   }
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')

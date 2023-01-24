@@ -305,7 +305,10 @@ export default () => {
         method: 'POST',
         body: JSON.stringify(params),
       },
-    ).catch(error => { return null })
+    )
+    .catch(error => {
+      return null
+    })
 
     getMessage()
     resetTxHashEdit()

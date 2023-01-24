@@ -16,7 +16,7 @@ import TimeAgo from '../time-ago'
 import { evm_polls } from '../../lib/api/evm-polls'
 import { getChain, chainName } from '../../lib/object/chain'
 import { getAsset, assetManager } from '../../lib/object/asset'
-import { number_format, name, ellipse, equals_ignore_case, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, name, ellipse, equals_ignore_case, params_to_obj, to_json, loader_color } from '../../lib/utils'
 
 const LIMIT = 25
 
@@ -66,13 +66,15 @@ export default () => {
         const params =
           params_to_obj(
             asPath.indexOf('?') > -1 &&
-            asPath.substring(
-              asPath.indexOf('?') + 1,
-            )
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
+              )
           )
 
         const {
           pollId,
+          event,
           chain,
           status,
           transactionId,
@@ -87,6 +89,7 @@ export default () => {
         setFilters(
           {
             pollId,
+            event,
             chain,
             status:
               [
@@ -188,6 +191,7 @@ export default () => {
 
           const {
             pollId,
+            event,
             chain,
             status,
             transactionId,
@@ -202,6 +206,7 @@ export default () => {
             await evm_polls(
               {
                 pollId,
+                event,
                 chain,
                 status,
                 transactionId,
@@ -373,7 +378,7 @@ export default () => {
                               `${url}${transaction_path?.replace('{tx}', transaction_id)}` :
                               `/${
                                 event?.includes('token_sent') ?
-                                  'sent' :
+                                  'transfer' :
                                   event?.includes('contract_call') ||
                                   !(
                                     event?.includes('transfer') ||
@@ -463,7 +468,9 @@ export default () => {
               data,
               'id',
             )
-            .map(d => d?.event)
+            .map(d =>
+              d?.event
+            )
             .filter(t => t)
           )
         )
@@ -500,7 +507,7 @@ export default () => {
               </span>
             </div>
           )}
-          {/*<div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:justify-end sm:space-x-2.5">
+          <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:justify-end sm:space-x-2.5">
             {Object.entries({ ...types })
               .map(([k, v]) => (
                 <div
@@ -548,7 +555,7 @@ export default () => {
                 </div>
               ))
             }
-          </div>*/}
+          </div>
         </div>
         <Datatable
           columns={
@@ -657,10 +664,10 @@ export default () => {
                             const {
                               type,
                               txID,
-                              asset,
-                              amount,
                             } = { ...e }
                             let {
+                              asset,
+                              amount,
                               symbol,
                             } = { ...e }
 
@@ -669,7 +676,13 @@ export default () => {
                                 'tokenConfirmation',
                               ].includes(type) &&
                               txID ?
-                                `/${type?.includes('TokenSent') ? 'sent' : type?.includes('ContractCall') ? 'gmp' : 'transfer'}/${txID}` :
+                                `/${
+                                  type?.includes('TokenSent') ?
+                                    'transfer' :
+                                    type?.includes('ContractCall') ?
+                                      'gmp' :
+                                      'transfer'
+                                }/${txID}` :
                                 _url
 
                             let _type
@@ -682,12 +695,29 @@ export default () => {
                                 _type = 'ContractCall'
                                 break
                               case 'ContractCallApprovedWithMint':
+                              case 'ContractCallWithMintApproved':
                                 _type = 'ContractCallWithToken'
                                 break
                               default:
-                                _type = type ||
+                                _type =
+                                  type ||
                                   value
                                 break
+                            }
+
+                            asset =
+                              (asset || '')
+                                .split('""')
+                                .join('')
+
+                            const amount_object =
+                              to_json(
+                                asset
+                              )
+
+                            if (amount_object) {
+                              asset = amount_object.denom
+                              amount = amount_object.amount
                             }
 
                             const asset_data =
@@ -726,7 +756,7 @@ export default () => {
                                 rel="noopener noreferrer"
                                 className="w-fit min-w-max bg-slate-200 dark:bg-slate-800 rounded flex items-center space-x-2 -mt-0.5 py-0.5 px-2"
                               >
-                                <span className="capitalize text-sm lg:text-base font-medium">
+                                <span className="capitalize text-sm font-medium">
                                   {
                                     name(_type)
                                       .split(' ')

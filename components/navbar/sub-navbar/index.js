@@ -10,7 +10,6 @@ import EVMPollFilters from '../../evm-polls/filters'
 import TransactionFilters from '../../transactions/filters'
 import TransferFilters from '../../transfers/filters'
 import TransferFilters2 from '../../_transfers/filters'
-import SentFilters from '../../sents/filters'
 import GMPFilters from '../../gmps/filters'
 import TotalTVL from '../../tvl/total'
 import BatchFilters from '../../batches/filters'
@@ -414,13 +413,6 @@ export default () => {
           />
         )
       break
-    case '/sent':
-    case '/sent/search':
-      right =
-        pathname.endsWith('/search') &&
-        (
-          <SentFilters />
-        )
     case '/transfers':
     case '/transfers/search':
       title = 'Cross-chain Transfers'
@@ -485,13 +477,6 @@ export default () => {
                       'Search',
                   path: '/_transfers/search',
                 },
-                process.env.NEXT_PUBLIC_SUPPORT_TOKEN_SENT === 'true' &&
-                pathname.endsWith('/search') && (
-                  {
-                    title: 'via sendToken',
-                    path: '/sent/search',
-                  }
-                ),
               ]
               .filter(r => r)
               .map((r, i) => {
@@ -561,31 +546,6 @@ export default () => {
       right =
         (
           <TotalTVL />
-        )
-      break
-    case '/sent/[tx]':
-      title = 'Send Token'
-      subtitle =
-        (
-          <div className="flex items-center text-sm space-x-2">
-            <div>
-              <span className="xl:hidden">
-                {ellipse(
-                  tx,
-                  16,
-                )}
-              </span>
-              <span className="hidden xl:block">
-                {ellipse(
-                  tx,
-                  24,
-                )}
-              </span>
-            </div>
-            <Copy
-              value={tx}
-            />
-          </div>
         )
       break
     case '/gmp':

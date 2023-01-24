@@ -178,7 +178,7 @@ export default (
                             )
                           )
                         }
-                        className={`${c.className} ${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''}`}
+                        className={`${i === 0 ? 'rounded-tl' : i === hg.headers.length - 1 ? 'rounded-tr' : ''} ${c.className || ''}`}
                       >
                         <div className={`flex flex-row items-center ${c.headerClassName?.includes('justify-') ? '' : 'justify-start'} ${c.headerClassName || ''}`}>
                           <span>
@@ -247,24 +247,25 @@ export default (
                 <select
                   disabled={loading}
                   value={pageSize}
-                  onChange={e =>
-                    setPageSize(
-                      Number(e.target.value)
-                    )
+                  onChange={
+                    e =>
+                      setPageSize(
+                        Number(e.target.value)
+                      )
                   }
                   className="w-24 form-select bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 outline-none border-zinc-100 dark:border-zinc-900 appearance-none shadow rounded cursor-pointer text-center py-2 px-3"
                 >
                   {
                     pageSizes
                       .map((s, i) => (
-                      <option
-                        key={i}
-                        value={s}
-                        className="text-xs font-medium"
-                      >
-                        Show {s}
-                      </option>
-                    ))
+                        <option
+                          key={i}
+                          value={s}
+                          className="text-xs font-medium"
+                        >
+                          Show {s}
+                        </option>
+                      ))
                   }
                 </select>
               )

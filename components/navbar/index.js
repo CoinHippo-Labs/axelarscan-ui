@@ -730,7 +730,6 @@ export default () => {
             '/address',
             '/transfer',
             '/tvl',
-            '/sent',
             '/gmp',
             '/batch',
             '/assets',

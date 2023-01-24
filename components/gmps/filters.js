@@ -41,123 +41,158 @@ export default () => {
   const [filterTrigger, setFilterTrigger] = useState(undefined)
   const [hidden, setHidden] = useState(true)
 
-  useEffect(() => {
-    if (
-      evm_chains_data &&
-      cosmos_chains_data &&
-      asPath
-    ) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
-      )
+  useEffect(
+    () => {
+      if (
+        evm_chains_data &&
+        cosmos_chains_data &&
+        asPath
+      ) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
+              )
+          )
 
-      const chains_data = _.concat(
-        evm_chains_data,
-        cosmos_chains_data,
-      )
+        const chains_data =
+          _.concat(
+            evm_chains_data,
+            cosmos_chains_data,
+          )
 
-      const {
-        txHash,
-        sourceChain,
-        destinationChain,
-        method,
-        status,
-        senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
-        fromTime,
-        toTime,
-      } = { ...params }
-
-      setFilters({
-        txHash,
-        sourceChain: getChain(
+        const {
+          txHash,
           sourceChain,
-          chains_data,
-        )?._id ||
-          sourceChain,
-        destinationChain: getChain(
           destinationChain,
-          chains_data,
-        )?._id ||
-          destinationChain,
-        method: [
-          'callContract',
-          'callContractWithToken',
-        ].includes(method) ?
-          method :
-          undefined,
-        status: [
-          'approving',
-          'called',
-          'forecalled',
-          'approved',
-          'executing',
-          'executed',
-          'error',
-          'insufficient_fee',
-          'no_created_at',
-        ].includes(status?.toLowerCase()) ?
-          status.toLowerCase() :
-          undefined,
-        senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
-        time: fromTime &&
-          toTime &&
-          [
-            moment(Number(fromTime)),
-            moment(Number(toTime)),
-          ],
-      })
-    }
-  }, [evm_chains_data, cosmos_chains_data, asPath])
+          method,
+          status,
+          senderAddress,
+          sourceAddress,
+          contractAddress,
+          relayerAddress,
+          fromTime,
+          toTime,
+        } = { ...params }
 
-  useEffect(() => {
-    if (filterTrigger !== undefined) {
-      const qs = new URLSearchParams()
+        setFilters(
+          {
+            txHash,
+            sourceChain:
+              getChain(
+                sourceChain,
+                chains_data,
+              )?._id ||
+              sourceChain,
+            destinationChain:
+              getChain(
+                destinationChain,
+                chains_data,
+              )?._id ||
+              destinationChain,
+            method:
+              [
+                'callContract',
+                'callContractWithToken',
+              ].includes(method) ?
+                method :
+                undefined,
+            status:
+              [
+                'approving',
+                'called',
+                'forecalled',
+                'approved',
+                'executing',
+                'executed',
+                'error',
+                'insufficient_fee',
+                'no_created_at',
+              ].includes(status?.toLowerCase()) ?
+                status.toLowerCase() :
+                undefined,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            time:
+              fromTime &&
+              toTime &&
+              [
+                moment(
+                  Number(fromTime)
+                ),
+                moment(
+                  Number(toTime)
+                ),
+              ],
+          }
+        )
+      }
+    },
+    [evm_chains_data, cosmos_chains_data, asPath],
+  )
 
-      Object.entries({ ...filters })
-        .filter(([k, v]) => v)
-        .forEach(([k, v]) => {
-          let key,
-            value
+  useEffect(
+    () => {
+      if (filterTrigger !== undefined) {
+        const qs = new URLSearchParams()
 
-          switch (k) {
-            case 'time':
-              key = 'fromTime'
-              value = moment(v[0]).valueOf()
+        Object.entries({ ...filters })
+          .filter(([k, v]) => v)
+          .forEach(([k, v]) => {
+            let key,
+              value
 
-              qs.append(
+            switch (k) {
+              case 'time':
+                key = 'fromTime'
+                value =
+                  moment(v[0])
+                    .valueOf()
+
+                qs
+                  .append(
+                    key,
+                    value,
+                  )
+
+                key = 'toTime'
+                value =
+                  moment(v[1])
+                    .valueOf()
+                break
+              default:
+                key = k
+                value = v
+                break
+            }
+
+            qs
+              .append(
                 key,
                 value,
               )
+          })
 
-              key = 'toTime'
-              value = moment(v[1]).valueOf()
-              break
-            default:
-              key = k
-              value = v
-              break
-          }
+        const qs_string = qs.toString()
 
-          qs.append(
-            key,
-            value,
+        router
+          .push(
+            `${pathname}${
+              qs_string ?
+                `?${qs_string}` :
+                ''
+            }`
           )
-        })
 
-      const qs_string = qs.toString()
-
-      router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
-
-      setHidden(true)
-    }
-  }, [filterTrigger])
+        setHidden(true)
+      }
+    },
+    [filterTrigger],
+  )
 
   const fields = [
     {

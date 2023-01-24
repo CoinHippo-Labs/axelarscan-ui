@@ -17,7 +17,7 @@ import Image from '../image'
 import Copy from '../copy'
 import Popover from '../popover'
 import { transactions_by_events, getTransaction } from '../../lib/api/lcd'
-import { _transfers_status as getTransfersStatus, _transfers as getTransfers, token_sent as getTokenSent } from '../../lib/api/transfer'
+import { _transfers_status as getTransfersStatus, _transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { type } from '../../lib/object/id'
@@ -270,25 +270,6 @@ export default () => {
 
         if (id) {
           router.push(`/_transfer/${id}`)
-        }
-        else {
-          const response = await getTokenSent(
-            {
-              transferId: transfer_id,
-              size: 1,
-            },
-          )
-
-          const {
-            event,
-          } = { ..._.head(response?.data) }
-          const {
-            transactionHash,
-          } = { ...event }
-
-          if (transactionHash) {
-            router.push(`/sent/${transactionHash}`)
-          }
         }
       }
     }

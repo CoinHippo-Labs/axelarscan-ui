@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { BiCode, BiTransfer, BiMessageDots } from 'react-icons/bi'
 
 import Transfers from '../transfers/transfers'
-import Sents from '../sents/sents'
 import Gmps from '../gmps/gmps'
 
 export default () => {
@@ -21,19 +20,6 @@ export default () => {
             </a>
           </Link>
           <Transfers />
-        </div>
-        <div className="space-y-3">
-          <Link href="/sent/search">
-            <a className="flex items-center space-x-2">
-              <BiTransfer
-                size={20}
-              />
-              <span className="uppercase tracking-wider text-base font-semibold">
-                Token sent
-              </span>
-            </a>
-          </Link>
-          <Sents />
         </div>
         <div className="space-y-3">
           <Link href="/gmp/search">

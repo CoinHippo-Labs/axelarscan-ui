@@ -7,7 +7,8 @@ import { DatePicker } from 'antd'
 import { BiX } from 'react-icons/bi'
 
 import Modal from '../modals'
-import { params_to_obj } from '../../lib/utils'
+import { evm_polls as getEVMPolls } from '../../lib/api/index'
+import { capitalize, params_to_obj } from '../../lib/utils'
 
 export default () => {
   const {
@@ -33,254 +34,347 @@ export default () => {
 
   const [filters, setFilters] = useState(null)
   const [filterTrigger, setFilterTrigger] = useState(undefined)
+  const [events, setEvents] = useState(null)
   const [hidden, setHidden] = useState(true)
 
-  useEffect(() => {
-    if (asPath) {
-      const params =
-        params_to_obj(
-          asPath.indexOf('?') > -1 &&
-          asPath.substring(
-            asPath.indexOf('?') + 1,
+  useEffect(
+    () => {
+      const getData = async () => {
+        const response =
+          await getEVMPolls(
+            {
+              aggs: {
+                events: {
+                  terms: {
+                    field: 'event.keyword',
+                    size: 100,
+                  },
+                },
+              },
+              size: 0,
+            },
           )
-        )
 
-      const {
-        pollId,
-        chain,
-        status,
-        transactionId,
-        transferId,
-        depositAddress,
-        voter,
-        vote,
-        fromTime,
-        toTime,
-      } = { ...params }
+        const {
+          data,
+        } = { ...response }
 
-      setFilters(
-        {
-          pollId,
-          chain,
-          status:
+        setEvents(
+          _.orderBy(
+            Object.entries({ ...data })
+              .map(([k, v]) => {
+                return {
+                  id: k,
+                  count: v,
+                }
+              }),
             [
-              'completed',
-              'failed',
-              'confirmed',
-              'pending',
-              'to_recover',
-            ].includes(status?.toLowerCase()) ?
-              status.toLowerCase() :
-              undefined,
+              'count',
+            ],
+            [
+              'desc',
+            ],
+          )
+          .map(e => e.id)
+        )
+      }
+
+      getData()
+    },
+    [],
+  )
+
+  useEffect(
+    () => {
+      if (asPath) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
+              )
+          )
+
+        const {
+          pollId,
+          event,
+          chain,
+          status,
           transactionId,
           transferId,
           depositAddress,
           voter,
-          vote:
-            [
-              'yes',
-              'no',
-              'unsubmitted',
-            ].includes(vote?.toLowerCase()) ?
-              vote.toLowerCase() :
-              undefined,
-          time:
-            fromTime &&
-            toTime &&
-            [
-              moment(
-                Number(fromTime)
-              ),
-              moment(
-                Number(toTime)
-              ),
-            ],
-        }
-      )
-    }
-  }, [asPath])
+          vote,
+          fromTime,
+          toTime,
+        } = { ...params }
 
-  useEffect(() => {
-    if (filterTrigger !== undefined) {
-      const qs = new URLSearchParams()
+        setFilters(
+          {
+            pollId,
+            event,
+            chain,
+            status:
+              [
+                'completed',
+                'failed',
+                'confirmed',
+                'pending',
+                'to_recover',
+              ].includes(status?.toLowerCase()) ?
+                status.toLowerCase() :
+                undefined,
+            transactionId,
+            transferId,
+            depositAddress,
+            voter,
+            vote:
+              [
+                'yes',
+                'no',
+                'unsubmitted',
+              ].includes(vote?.toLowerCase()) ?
+                vote.toLowerCase() :
+                undefined,
+            time:
+              fromTime &&
+              toTime &&
+              [
+                moment(
+                  Number(fromTime)
+                ),
+                moment(
+                  Number(toTime)
+                ),
+              ],
+          }
+        )
+      }
+    },
+    [asPath],
+  )
 
-      Object.entries({ ...filters })
-        .filter(([k, v]) => v)
-        .forEach(([k, v]) => {
-          let key,
-            value
+  useEffect(
+    () => {
+      if (filterTrigger !== undefined) {
+        const qs = new URLSearchParams()
 
-          switch (k) {
-            case 'time':
-              key = 'fromTime'
-              value =
-                moment(v[0])
-                  .valueOf()
+        Object.entries({ ...filters })
+          .filter(([k, v]) => v)
+          .forEach(([k, v]) => {
+            let key,
+              value
 
-              qs.append(
+            switch (k) {
+              case 'time':
+                key = 'fromTime'
+                value =
+                  moment(v[0])
+                    .valueOf()
+
+                qs
+                  .append(
+                    key,
+                    value,
+                  )
+
+                key = 'toTime'
+                value =
+                  moment(v[1])
+                    .valueOf()
+                break
+              default:
+                key = k
+                value = v
+                break
+            }
+
+            qs
+              .append(
                 key,
                 value,
               )
+          })
 
-              key = 'toTime'
-              value =
-                moment(v[1])
-                  .valueOf()
-              break
-            default:
-              key = k
-              value = v
-              break
-          }
+        const qs_string = qs.toString()
 
-          qs.append(
-            key,
-            value,
+        router
+          .push(
+            `${pathname}${
+              qs_string ?
+                `?${qs_string}` :
+                ''
+            }`
           )
-        })
 
-      const qs_string = qs.toString()
-
-      router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
-
-      setHidden(true)
-    }
-  }, [filterTrigger])
-
-  const fields = [
-    {
-      label: 'Poll ID',
-      name: 'pollId',
-      type: 'text',
-      placeholder: 'Poll ID',
-      className: 'col-span-2',
+        setHidden(true)
+      }
     },
-    {
-      label: 'Chain',
-      name: 'chain',
-      type: 'select',
-      placeholder: 'Select chain',
-      options:
-        _.concat(
+    [filterTrigger],
+  )
+
+  const fields =
+    [
+      {
+        label: 'Poll ID',
+        name: 'pollId',
+        type: 'text',
+        placeholder: 'Poll ID',
+      },
+      {
+        label: 'Event',
+        name: 'event',
+        type: 'select',
+        placeholder: 'Select event',
+        options:
+          _.concat(
+            {
+              value: '',
+              title: 'Any',
+            },
+            (events || [])
+              .map(e => {
+                return {
+                  value: e,
+                  title:
+                    e
+                      .split('_')
+                      .map(s =>
+                        capitalize(s)
+                      )
+                      .join(''),
+                }
+              }),
+          ),
+      },
+      {
+        label: 'Chain',
+        name: 'chain',
+        type: 'select',
+        placeholder: 'Select chain',
+        options:
+          _.concat(
+            {
+              value: '',
+              title: 'Any',
+            },
+            _.orderBy(
+              evm_chains_data ||
+              [],
+              ['deprecated'],
+              ['desc'],
+            )
+            .filter(c =>
+              !c?.no_inflation ||
+              c?.deprecated
+            )
+            .map(c => {
+              const {
+                id,
+                name,
+              } = { ...c }
+
+              return {
+                value: id,
+                title: name,
+              }
+            }),
+          ),
+      },
+      {
+        label: 'Status',
+        name: 'status',
+        type: 'select',
+        placeholder: 'Select status',
+        options: [
           {
             value: '',
             title: 'Any',
           },
-          _.orderBy(
-            evm_chains_data ||
-            [],
-            ['deprecated'],
-            ['desc'],
-          )
-          .filter(c =>
-            !c?.no_inflation ||
-            c?.deprecated
-          )
-          .map(c => {
-            const {
-              id,
-              name,
-            } = { ...c }
-
-            return {
-              value: id,
-              title: name,
-            }
-          }),
-        ),
-    },
-    {
-      label: 'Status',
-      name: 'status',
-      type: 'select',
-      placeholder: 'Select status',
-      options: [
-        {
-          value: '',
-          title: 'Any',
-        },
-        {
-          value: 'completed',
-          title: 'Completed',
-        },
-        {
-          value: 'failed',
-          title: 'Failed',
-        },
-        {
-          value: 'confirmed',
-          title: 'Confirmed',
-        },
-        {
-          value: 'pending',
-          title: 'Pending',
-        },
-      ],
-    },
-    {
-      label: 'EVM Transaction ID',
-      name: 'transactionId',
-      type: 'text',
-      placeholder: 'Transaction ID',
-      className: 'col-span-2',
-    },
-    {
-      label: 'Transfer ID',
-      name: 'transferId',
-      type: 'text',
-      placeholder: 'Transfer ID',
-    },
-    {
-      label: 'Deposit Address',
-      name: 'depositAddress',
-      type: 'text',
-      placeholder: 'Deposit Address',
-    },
-    {
-      label: 'Voter (Broadcaster Address)',
-      name: 'voter',
-      type: 'text',
-      placeholder: 'Voter',
-    },
-    {
-      label: 'Vote',
-      name: 'vote',
-      type: 'select',
-      placeholder: 'Select vote',
-      options: [
-        {
-          value: '',
-          title: 'Any',
-        },
-        {
-          value: 'yes',
-          title: 'Yes',
-        },
-        {
-          value: 'no',
-          title: 'No',
-        },
-        {
-          value: 'unsubmitted',
-          title: 'Unsubmitted',
-        },
-      ],
-    },
-    {
-      label: 'Time',
-      name: 'time',
-      type: 'datetime-range',
-      placeholder: 'Select transaction time',
-      className: 'col-span-2',
-    },
-  ]
+          {
+            value: 'completed',
+            title: 'Completed',
+          },
+          {
+            value: 'failed',
+            title: 'Failed',
+          },
+          {
+            value: 'confirmed',
+            title: 'Confirmed',
+          },
+          {
+            value: 'pending',
+            title: 'Pending',
+          },
+        ],
+      },
+      {
+        label: 'EVM Transaction ID',
+        name: 'transactionId',
+        type: 'text',
+        placeholder: 'Transaction ID',
+        className: 'col-span-2',
+      },
+      {
+        label: 'Transfer ID',
+        name: 'transferId',
+        type: 'text',
+        placeholder: 'Transfer ID',
+      },
+      {
+        label: 'Deposit Address',
+        name: 'depositAddress',
+        type: 'text',
+        placeholder: 'Deposit Address',
+      },
+      {
+        label: 'Voter (Broadcaster Address)',
+        name: 'voter',
+        type: 'text',
+        placeholder: 'Voter',
+      },
+      {
+        label: 'Vote',
+        name: 'vote',
+        type: 'select',
+        placeholder: 'Select vote',
+        options: [
+          {
+            value: '',
+            title: 'Any',
+          },
+          {
+            value: 'yes',
+            title: 'Yes',
+          },
+          {
+            value: 'no',
+            title: 'No',
+          },
+          {
+            value: 'unsubmitted',
+            title: 'Unsubmitted',
+          },
+        ],
+      },
+      {
+        label: 'Time',
+        name: 'time',
+        type: 'datetime-range',
+        placeholder: 'Select transaction time',
+        className: 'col-span-2',
+      },
+    ]
 
   const filtered =
     (
       !!filterTrigger ||
       filterTrigger === undefined
     ) &&
-    Object.keys({ ...query }).length > 0
+    Object.keys({ ...query })
+      .length > 0
 
   return (
     <Modal

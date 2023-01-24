@@ -107,7 +107,7 @@ export default () => {
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                          className="max-w-sm break-words whitespace-pre-wrap text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                         >
                           {
                             props.value ||

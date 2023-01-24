@@ -76,190 +76,27 @@ export default () => {
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [filters, setFilters] = useState(null)
 
-  useEffect(() => {
-    if (
-      evm_chains_data &&
-      cosmos_chains_data &&
-      asPath
-    ) {
-      const params = params_to_obj(
-        asPath.indexOf('?') > -1 &&
-        asPath.substring(asPath.indexOf('?') + 1)
-      )
-
-      const chains_data = _.concat(
-        evm_chains_data,
-        cosmos_chains_data,
-      )
-
-      const {
-        txHash,
-        sourceChain,
-        destinationChain,
-        method,
-        status,
-        senderAddress,
-        sourceAddress,
-        contractAddress,
-        relayerAddress,
-        fromTime,
-        toTime,
-      } = { ...params }
-
-      if (!timeframeSelected) {
-        setTimeframeSelected(true)
-      }
-      else {
-        setFilters(
-          {
-            txHash,
-            sourceChain: getChain(
-              sourceChain,
-              chains_data,
-            )?._id ||
-            sourceChain,
-            destinationChain: getChain(
-              destinationChain,
-              chains_data,
-            )?._id ||
-            destinationChain,
-            method:
-              [
-                'callContract',
-                'callContractWithToken',
-              ].includes(method) ?
-                method :
-                undefined,
-            status:
-              [
-                'approving',
-                'called',
-                'forecalled',
-                'approved',
-                'executing',
-                'executed',
-                'error',
-                'insufficient_fee',
-              ].includes(status?.toLowerCase()) ?
-                status.toLowerCase() :
-                undefined,
-            senderAddress,
-            sourceAddress,
-            contractAddress,
-            relayerAddress,
-            time:
-              fromTime &&
-              [
-                moment(
-                  Number(fromTime)
-                ),
-                toTime ?
-                  moment(
-                    Number(toTime)
-                  ) :
-                  moment(),
-              ],
-          }
-        )
-      }
-    }
-  }, [evm_chains_data, cosmos_chains_data, asPath, timeframeSelected])
-
-  useEffect(() => {
-    const triggering = is_interval => {
-      setFetchTrigger(
-        is_interval ?
-          moment()
-            .valueOf() :
-          typeof fetchTrigger === 'number' ?
-            null :
-            0
-      )
-    }
-
-    if (
-      pathname &&
-      filters
-    ) {
-      triggering()
-    }
-
-    const interval = setInterval(() =>
-      triggering(true),
-      (['/gmp/stats'].includes(pathname) ?
-        1 :
-        0.25
-      ) * 60 * 1000
-    )
-
-    return () => clearInterval(interval)
-  }, [pathname, filters])
-
-  useEffect(() => {
-    if (
-      asPath &&
-      !timeframeSelected &&
-      filters
-    ) {
-      if (!filters.time) {
-        const qs = new URLSearchParams()
-
-        Object.entries({ ...filters })
-          .filter(([k, v]) => v)
-          .forEach(([k, v]) => {
-            let key,
-              value
-
-            switch (k) {
-              case 'time':
-                break
-              default:
-                key = k
-                value = v
-                break
-            }
-
-            if (key) {
-              qs.append(
-                key,
-                value,
+  useEffect(
+    () => {
+      if (
+        evm_chains_data &&
+        cosmos_chains_data &&
+        asPath
+      ) {
+        const params =
+          params_to_obj(
+            asPath.indexOf('?') > -1 &&
+            asPath
+              .substring(
+                asPath.indexOf('?') + 1,
               )
-            }
-          })
+          )
 
-        qs.append(
-          'fromTime',
-          moment()
-            .subtract(
-              DEFAULT_TIMEFRAME_DAYS,
-              'days',
-            )
-            .valueOf(),
-        )
-
-        qs.append(
-          'toTime',
-          moment()
-            .valueOf(),
-        )
-
-        const qs_string = qs.toString()
-
-        router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
-      }
-    }
-  }, [asPath, timeframeSelected, filters])
-
-  useEffect(() => {
-    const getData = async () => {
-      if (filters) {
-        if (!fetchTrigger) {
-          setMethods(null)
-          setStatuses(null)
-          setChainPairs(null)
-          setContracts(null)
-          setTimeSpents(null)
-        }
+        const chains_data =
+          _.concat(
+            evm_chains_data,
+            cosmos_chains_data,
+          )
 
         const {
           txHash,
@@ -271,271 +108,480 @@ export default () => {
           sourceAddress,
           contractAddress,
           relayerAddress,
-          time,
-        } = { ...filters }
-
-        let event,
-          fromTime,
-          toTime
-
-        switch (method) {
-          case 'callContract':
-            event = 'ContractCall'
-            break
-          case 'callContractWithToken':
-            event = 'ContractCallWithToken'
-            break
-          default:
-            event = undefined
-            break
-        }
-
-        if (time?.length > 0) {
-          fromTime =
-            time[0]
-              .unix()
-          toTime =
-            time[1]
-              .unix() ||
-            moment()
-              .unix()
-        }
-
-        const params = {
-          txHash,
-          sourceChain,
-          destinationChain,
-          event,
-          status,
-          senderAddress,
-          sourceAddress,
-          contractAddress,
-          relayerAddress,
           fromTime,
           toTime,
-        }
+        } = { ...params }
 
-        setDailyStats(
-          await chart(
+        if (!timeframeSelected) {
+          setTimeframeSelected(true)
+        }
+        else {
+          setFilters(
             {
-              ...params,
-              granularity: timeframe,
+              txHash,
+              sourceChain:
+                getChain(
+                  sourceChain,
+                  chains_data,
+                )?._id ||
+                sourceChain,
+              destinationChain:
+                getChain(
+                  destinationChain,
+                  chains_data,
+                )?._id ||
+                destinationChain,
+              method:
+                [
+                  'callContract',
+                  'callContractWithToken',
+                ].includes(method) ?
+                  method :
+                  undefined,
+              status:
+                [
+                  'approving',
+                  'called',
+                  'forecalled',
+                  'approved',
+                  'executing',
+                  'executed',
+                  'error',
+                  'insufficient_fee',
+                ].includes(status?.toLowerCase()) ?
+                  status.toLowerCase() :
+                  undefined,
+              senderAddress,
+              sourceAddress,
+              contractAddress,
+              relayerAddress,
+              time:
+                fromTime &&
+                [
+                  moment(
+                    Number(fromTime)
+                  ),
+                  toTime ?
+                    moment(
+                      Number(toTime)
+                    ) :
+                    moment(),
+                ],
             }
           )
+        }
+      }
+    },
+    [evm_chains_data, cosmos_chains_data, asPath, timeframeSelected],
+  )
+
+  useEffect(
+    () => {
+      const triggering = is_interval => {
+        setFetchTrigger(
+          is_interval ?
+            moment()
+              .valueOf() :
+            typeof fetchTrigger === 'number' ?
+              null :
+              0
+        )
+      }
+
+      if (
+        pathname &&
+        filters
+      ) {
+        triggering()
+      }
+
+      const interval =
+        setInterval(() =>
+          triggering(true),
+          (['/gmp/stats'].includes(pathname) ?
+            1 :
+            0.25
+          ) * 60 * 1000
         )
 
-        let response = await stats(
-          {
-            ...params,
-            includes: 'status',
-          }
-        )
+      return () => clearInterval(interval)
+    },
+    [pathname, filters],
+  )
 
-        const {
-          messages,
-          statuses,
-        } = { ...response }
+  useEffect(
+    () => {
+      if (
+        asPath &&
+        !timeframeSelected &&
+        filters
+      ) {
+        if (!filters.time) {
+          const qs = new URLSearchParams()
 
-        setMethods(
-          (messages || [])
-            .map(m => {
-              const {
-                key,
-                num_txs,
-              } = { ...m }
+          Object.entries({ ...filters })
+            .filter(([k, v]) => v)
+            .forEach(([k, v]) => {
+              let key,
+                value
 
-              return {
-                key: (key || '')
-                  .replace(
-                    'ContractCall',
-                    'callContract',
-                  ),
-                num_txs,
+              switch (k) {
+                case 'time':
+                  break
+                default:
+                  key = k
+                  value = v
+                  break
+              }
+
+              if (key) {
+                qs
+                  .append(
+                    key,
+                    value,
+                  )
               }
             })
-        )
 
-        setStatuses(
-          _.orderBy(
-            Object.entries({ ...statuses })
+          qs
+            .append(
+              'fromTime',
+              moment()
+                .subtract(
+                  DEFAULT_TIMEFRAME_DAYS,
+                  'days',
+                )
+                .valueOf(),
+            )
+
+          qs
+            .append(
+              'toTime',
+              moment()
+                .valueOf(),
+            )
+
+          const qs_string = qs.toString()
+
+          router
+            .push(
+              `${pathname}${
+                qs_string ?
+                  `?${qs_string}` :
+                  ''
+              }`
+            )
+        }
+      }
+    },
+    [asPath, timeframeSelected, filters],
+  )
+
+  useEffect(
+    () => {
+      const getData = async () => {
+        if (filters) {
+          if (!fetchTrigger) {
+            setMethods(null)
+            setStatuses(null)
+            setChainPairs(null)
+            setContracts(null)
+            setTimeSpents(null)
+          }
+
+          const {
+            txHash,
+            sourceChain,
+            destinationChain,
+            method,
+            status,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            time,
+          } = { ...filters }
+
+          let event,
+            fromTime,
+            toTime
+
+          switch (method) {
+            case 'callContract':
+              event = 'ContractCall'
+              break
+            case 'callContractWithToken':
+              event = 'ContractCallWithToken'
+              break
+            default:
+              event = undefined
+              break
+          }
+
+          if (time?.length > 0) {
+            fromTime =
+              time[0]
+                .unix()
+            toTime =
+              time[1]
+                .unix() ||
+              moment()
+                .unix()
+          }
+
+          const params = {
+            txHash,
+            sourceChain,
+            destinationChain,
+            event,
+            status,
+            senderAddress,
+            sourceAddress,
+            contractAddress,
+            relayerAddress,
+            fromTime,
+            toTime,
+          }
+
+          setDailyStats(
+            await chart(
+              {
+                ...params,
+                granularity: timeframe,
+              }
+            )
+          )
+
+          let response =
+            await stats(
+              {
+                ...params,
+                includes: 'status',
+              }
+            )
+
+          const {
+            messages,
+            statuses,
+          } = { ...response }
+
+          setMethods(
+            (messages || [])
+              .map(m => {
+                const {
+                  key,
+                  num_txs,
+                } = { ...m }
+
+                return {
+                  key:
+                    (key || '')
+                      .replace(
+                        'ContractCall',
+                        'callContract',
+                      ),
+                  num_txs,
+                }
+              })
+          )
+
+          setStatuses(
+            _.orderBy(
+              Object.entries({ ...statuses })
+                .map(([k, v]) => {
+                  return {
+                    key: k,
+                    name:
+                      k === 'invalid' ?
+                        'Invalid Data' :
+                        k === 'approving' ?
+                          'Wait for Approval' :
+                          [
+                            'approved',
+                            'executing',
+                          ].includes(k) ?
+                            'Wait for Execute' :
+                            k === 'error' ?
+                              'Error Execution' :
+                              capitalize(k),
+                    color:
+                      k === 'invalid' ?
+                        'bg-slate-500' :
+                        k === 'approving' ?
+                          'bg-yellow-500' :
+                          [
+                            'approved',
+                            'executing',
+                          ].includes(k) ?
+                            'bg-blue-500' :
+                            k === 'executed' ?
+                              'bg-green-500' :
+                              k === 'error' ?
+                                'bg-red-500' :
+                                  undefined,
+                    num_txs: v,
+                  }
+                }),
+              ['num_txs'],
+              ['desc'],
+            )
+          )
+
+          setChainPairs(
+            _.orderBy(
+              Object.entries(
+                _.groupBy(
+                  (messages || [])
+                    .flatMap(m => {
+                      const {
+                        source_chains,
+                      } = { ...m }
+
+                      return (
+                        (source_chains || [])
+                          .flatMap(s => {
+                            const {
+                              destination_chains,
+                            } = { ...s }
+
+                            return (
+                              (destination_chains || [])
+                                .map(d => {
+                                  const {
+                                    num_txs,
+                                  } = { ...d }
+
+                                  return {
+                                    key: `${s.key}_${d.key}`,
+                                    source_chain: s.key,
+                                    destination_chain: d.key,
+                                    num_txs,
+                                  }
+                                })
+                            )
+                          })
+                      )
+                    }),
+                  'key',
+                ),
+              )
               .map(([k, v]) => {
                 return {
                   key: k,
-                  name: k === 'invalid' ?
-                    'Invalid Data' :
-                    k === 'approving' ?
-                      'Wait for Approval' :
-                      [
-                        'approved',
-                        'executing',
-                      ].includes(k) ?
-                        'Wait for Execute' :
-                        k === 'error' ?
-                          'Error Execution' :
-                          capitalize(k),
-                  color: k === 'invalid' ?
-                    'bg-slate-500' :
-                    k === 'approving' ?
-                      'bg-yellow-500' :
-                      [
-                        'approved',
-                        'executing',
-                      ].includes(k) ?
-                        'bg-blue-500' :
-                        k === 'executed' ?
-                          'bg-green-500' :
-                          k === 'error' ?
-                            'bg-red-500' :
-                              undefined,
-                  num_txs: v,
+                  ..._.head(v),
+                  num_txs:
+                    _.sumBy(
+                      v,
+                      'num_txs',
+                    ),
                 }
               }),
-            ['num_txs'],
-            ['desc'],
-          )
-        )
-
-        setChainPairs(
-          _.orderBy(
-            Object.entries(
-              _.groupBy(
-                (messages || [])
-                  .flatMap(m => {
-                    const {
-                      source_chains,
-                    } = { ...m }
-
-                    return (source_chains || [])
-                      .flatMap(s => {
-                        const {
-                          destination_chains,
-                        } = { ...s }
-
-                        return (destination_chains || [])
-                          .map(d => {
-                            const {
-                              num_txs,
-                            } = { ...d }
-
-                            return {
-                              key: `${s.key}_${d.key}`,
-                              source_chain: s.key,
-                              destination_chain: d.key,
-                              num_txs,
-                            }
-                          })
-                      })
-                  }),
-                'key',
-              ),
+              ['num_txs'],
+              ['desc'],
             )
-            .map(([k, v]) => {
-              return {
-                key: k,
-                ..._.head(v),
-                num_txs: _.sumBy(
-                  v,
-                  'num_txs',
-                ),
-              }
-            }),
-            ['num_txs'],
-            ['desc'],
           )
-        )
 
-        setContracts(
-          _.orderBy(
-            Object.entries(
-              _.groupBy(
-                (messages || [])
-                  .flatMap(m => {
-                    const {
-                      source_chains,
-                    } = { ...m }
+          setContracts(
+            _.orderBy(
+              Object.entries(
+                _.groupBy(
+                  (messages || [])
+                    .flatMap(m => {
+                      const {
+                        source_chains,
+                      } = { ...m }
 
-                    return (source_chains || [])
-                      .flatMap(s => {
-                        const {
-                          destination_chains,
-                        } = { ...s }
-
-                        return (destination_chains || [])
-                          .flatMap(d => {
+                      return (
+                        (source_chains || [])
+                          .flatMap(s => {
                             const {
-                              contracts,
-                            } = { ...d }
+                              destination_chains,
+                            } = { ...s }
 
-                            return (contracts || [])
-                              .map(c => {
+                            return (destination_chains || [])
+                              .flatMap(d => {
                                 const {
-                                  key,
-                                  num_txs,
-                                } = { ...c }
+                                  contracts,
+                                } = { ...d }
 
-                                return {
-                                  key: d.key,
-                                  contract: key,
-                                  num_txs,
-                                }
+                                return (contracts || [])
+                                  .map(c => {
+                                    const {
+                                      key,
+                                      num_txs,
+                                    } = { ...c }
+
+                                    return {
+                                      key: d.key,
+                                      contract: key,
+                                      num_txs,
+                                    }
+                                  })
                               })
                           })
-                      })
-                  }),
-                'key',
-              ),
-            )
-            .map(([k, v]) => {
-              return {
-                key: k,
-                num_contracts: _.uniqBy(
-                  v,
-                  'contract',
-                ).length,
-                num_txs: _.sumBy(
-                  v,
-                  'num_txs',
+                      )
+                    }),
+                  'key',
                 ),
-              }
-            }),
-            ['num_contracts'],
-            ['desc'],
+              )
+              .map(([k, v]) => {
+                return {
+                  key: k,
+                  num_contracts:
+                    _.uniqBy(
+                      v,
+                      'contract',
+                    ).length,
+                  num_txs:
+                    _.sumBy(
+                      v,
+                      'num_txs',
+                    ),
+                }
+              }),
+              ['num_contracts'],
+              ['desc'],
+            )
           )
-        )
 
-        response = await stats(
-          {
-            ...params,
-            avg_times: true,
-          }
-        )
+          response =
+            await stats(
+              {
+                ...params,
+                avg_times: true,
+              }
+            )
 
-        const {
-          time_spents,
-        } = { ...response }
+          const {
+            time_spents,
+          } = { ...response }
 
-        setTimeSpents(
-          time_spents ||
-          []
-        )
+          setTimeSpents(
+            time_spents ||
+            []
+          )
+        }
       }
-    }
 
-    getData()
-  }, [fetchTrigger])
-
-  const chains_data = _.concat(
-    evm_chains_data,
-    cosmos_chains_data,
+      getData()
+    },
+    [fetchTrigger],
   )
 
-  const total = _.sumBy(
-    (statuses || [])
-      .filter(s =>
-        !['called'].includes(s?.key)
-      ),
-    'num_txs',
-  )
+  const chains_data =
+    _.concat(
+      evm_chains_data,
+      cosmos_chains_data,
+    )
+
+  const total =
+    _.sumBy(
+      (statuses || [])
+        .filter(s =>
+          !['called'].includes(s?.key)
+        ),
+      'num_txs',
+    )
 
   const diff_time_filter =
     filters?.time?.length > 0 &&
