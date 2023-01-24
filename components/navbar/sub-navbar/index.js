@@ -9,7 +9,6 @@ import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md'
 import EVMPollFilters from '../../evm-polls/filters'
 import TransactionFilters from '../../transactions/filters'
 import TransferFilters from '../../transfers/filters'
-import TransferFilters2 from '../../_transfers/filters'
 import GMPFilters from '../../gmps/filters'
 import TotalTVL from '../../tvl/total'
 import BatchFilters from '../../batches/filters'
@@ -458,61 +457,7 @@ export default () => {
           <TransferFilters />
         )
       break
-    case '/_transfers':
-    case '/_transfers/search':
-      title = 'Cross-chain Transfers'
-      subtitle =
-        (
-          <div className="flex flex-wrap items-center">
-            {
-              [
-                {
-                  title: 'Overview',
-                  path: '/_transfers',
-                },
-                {
-                  title:
-                    pathname.endsWith('/search') ?
-                      'via Deposit Address' :
-                      'Search',
-                  path: '/_transfers/search',
-                },
-              ]
-              .filter(r => r)
-              .map((r, i) => {
-                const {
-                  title,
-                  path,
-                } = { ...r }
-
-                const selected = path === pathname
-
-                return (
-                  <div
-                    key={i}
-                    onClick={() => router.push(path)}
-                    className={`${selected ? 'bg-blue-500 dark:bg-blue-500 text-white font-bold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-50 dark:hover:bg-opacity-50 text-slate-400 hover:text-blue-400 dark:text-slate-700 dark:hover:text-blue-600 hover:font-semibold'} shadow rounded-lg cursor-pointer mb-1 sm:mb-0 mr-1.5 py-1 px-2`}
-                  >
-                    <span className="whitespace-nowrap">
-                      {title}
-                    </span>
-                  </div>
-                )
-              })
-            }
-          </div>
-        )
-      right =
-        right ||
-        (
-          pathname.startsWith('/_transfers') &&
-          (
-            <TransferFilters2 />
-          )
-        )
-      break
     case '/transfer/[tx]':
-    case '/_transfer/[tx]':
       title = 'Cross-chain Transfer'
       subtitle =
         (
@@ -719,7 +664,6 @@ export default () => {
   const is_assets_path =
     [
       '/transfers',
-      '/_transfers',
       '/tvl',
       '/assets',
     ].findIndex(p =>

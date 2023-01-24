@@ -956,7 +956,10 @@ export default () => {
               },
             )
 
-          const transfer_data = _.head(_response?.data)
+          const transfer_data =
+            _.head(
+              _response?.data
+            )
 
           setDepositAddresses(
             Array.isArray(data) ?
