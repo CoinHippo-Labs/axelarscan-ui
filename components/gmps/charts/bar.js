@@ -15,16 +15,18 @@ import { ProgressBar } from 'react-loader-spinner'
 
 import { number_format, loader_color, chart_color } from '../../../lib/utils'
 
-export default ({
-  id = 'transfers',
-  title = '',
-  description = '',
-  date_format = 'D MMM',
-  timeframe = 'day',
-  value_field = 'num_txs',
-  is_cumulative = false,
-  chart_data,
-}) => {
+export default (
+  {
+    id = 'transfers',
+    title = '',
+    description = '',
+    date_format = 'D MMM',
+    timeframe = 'day',
+    value_field = 'num_txs',
+    is_cumulative = false,
+    chart_data,
+  },
+) => {
   const {
     preferences,
   } = useSelector(state =>
@@ -42,29 +44,33 @@ export default ({
   const [data, setData] = useState(null)
   const [xFocus, setXFocus] = useState(null)
 
-  useEffect(() => {
-    if (chart_data) {
-      const {
-        data,
-      } = { ...chart_data }
+  useEffect(
+    () => {
+      if (chart_data) {
+        const {
+          data,
+        } = { ...chart_data }
 
-      setData(
-        data
-          .map((d, i) => {
-            const {
-              timestamp,
-            } = { ...d }
+        setData(
+          data
+            .map((d, i) => {
+              const {
+                timestamp,
+              } = { ...d }
 
-            return {
-              ...d,
-              time_string: moment(timestamp)
-                .utc()
-                .format(date_format),
-            }
-          })
-      )
-    }
-  }, [chart_data])
+              return {
+                ...d,
+                time_string:
+                  moment(timestamp)
+                    .utc()
+                    .format(date_format),
+              }
+            })
+        )
+      }
+    },
+    [chart_data],
+  )
 
   const d = (data || [])
     .find(d =>

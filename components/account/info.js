@@ -106,7 +106,11 @@ export default (
         )
       )
 
-  const deposit_address = _.head(depositAddresses)
+  const deposit_address =
+    _.head(
+      depositAddresses
+    )
+
   const {
     sender_chain,
     recipient_chain,
@@ -118,8 +122,9 @@ export default (
     asset_data,
     transfer_data,
   } = { ...deposit_address }
+
   const {
-    source,
+    send,
   } = { ...transfer_data }
 
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
@@ -170,45 +175,6 @@ export default (
                       sender_chain
                     }
                   </span>
-                  {/*
-                    sender_address?.startsWith(source_chain_data.prefix_address || '0x') &&
-                    (
-                      <div className="flex items-center space-x-1">
-                        <a
-                          href={`${source_chain_data.explorer?.url}${source_chain_data.explorer?.address_path?.replace('{address}', sender_address)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                        >
-                          <EnsProfile
-                            address={sender_address}
-                            no_copy={true}
-                            fallback={
-                              <div className="h-6 flex items-center text-blue-600 dark:text-white font-medium">
-                                <span className="xl:hidden">
-                                  {ellipse(
-                                    sender_address,
-                                    6,
-                                    source_chain_data.prefix_address,
-                                  )}
-                                </span>
-                                <span className="hidden xl:block">
-                                  {ellipse(
-                                    sender_address,
-                                    8,
-                                    source_chain_data.prefix_address,
-                                  )}
-                                </span>
-                              </div>
-                            }
-                          />
-                        </a>
-                        <Copy
-                          value={sender_address}
-                        />
-                      </div>
-                    )
-                  */}
                 </div>
               </div> :
               sender_address ?
@@ -379,21 +345,21 @@ export default (
             Transfer:
           </span>
           {depositAddresses ?
-            source?.id ?
+            send?.txhash ?
               <div className="h-6 flex items-center space-x-1">
                 <a
-                  href={`/transfer/${source.id}`}
+                  href={`/transfer/${send.txhash}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                 >
                   {ellipse(
-                    source.id,
+                    send.txhash,
                     16,
                   )}
                 </a>
                 <Copy
-                  value={source.id}
+                  value={send.txhash}
                 />
               </div> :
               <span>

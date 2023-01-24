@@ -6,10 +6,12 @@ import { ProgressBar } from 'react-loader-spinner'
 import { currency_symbol } from '../../lib/object/currency'
 import { number_format, loader_color } from '../../lib/utils'
 
-export default ({
-  transfers,
-  gmps,
-}) => {
+export default (
+  {
+    transfers,
+    gmps,
+  },
+) => {
   const {
     preferences,
   } = useSelector(state =>
@@ -35,40 +37,45 @@ export default ({
     num_contracts,
   } = { ...gmps }
 
-  const num_txs = transfers && gmps ?
-    _.sumBy(
-      _.concat(
-        transfers,
-        gmps,
-      ),
-      'num_txs',
-    ) :
-    undefined
+  const num_txs =
+    transfers &&
+    gmps ?
+      _.sumBy(
+        _.concat(
+          transfers,
+          gmps,
+        ),
+        'num_txs',
+      ) :
+      undefined
 
-  const volume = transfers && gmps ?
-    _.sumBy(
-      _.concat(
-        transfers,
-        gmps,
-      ),
-      'volume',
-    ) :
-    undefined
+  const volume =
+    transfers &&
+    gmps ?
+      _.sumBy(
+        _.concat(
+          transfers,
+          gmps,
+        ),
+        'volume',
+      ) :
+      undefined
 
   return (
     <div className="flex flex-col space-y-4">
       <div className={`space-y-1 ${metricClassName}`}>
         <div className={titleClassName}>
-          {!isNaN(num_txs) ?
-            number_format(
-              num_txs,
-              '0,0',
-            ) :
-            <ProgressBar
-              borderColor={loader_color(theme)}
-              width="32"
-              height="32"
-            />
+          {
+            !isNaN(num_txs) ?
+              number_format(
+                num_txs,
+                '0,0',
+              ) :
+              <ProgressBar
+                borderColor={loader_color(theme)}
+                width="32"
+                height="32"
+              />
           }
         </div>
         <span className={subtitleClassName}>
@@ -79,16 +86,17 @@ export default ({
         <Link href="/transfers">
           <a className="sm:border-r border-zinc-200 dark:border-zinc-700 space-y-1">
             <div className={titleClassName}>
-              {!isNaN(transfers?.num_txs) ?
-                number_format(
-                  transfers.num_txs,
-                  '0,0',
-                ) :
-                <ProgressBar
-                  borderColor={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
+              {
+                !isNaN(transfers?.num_txs) ?
+                  number_format(
+                    transfers.num_txs,
+                    '0,0',
+                  ) :
+                  <ProgressBar
+                    borderColor={loader_color(theme)}
+                    width="32"
+                    height="32"
+                  />
               }
             </div>
             <span className={subtitleClassName}>
@@ -99,16 +107,17 @@ export default ({
         <Link href="/gmp">
           <a className="space-y-1">
             <div className={titleClassName}>
-              {!isNaN(gmps?.num_txs) ?
-                number_format(
-                  gmps.num_txs,
-                  '0,0',
-                ) :
-                <ProgressBar
-                  borderColor={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
+              {
+                !isNaN(gmps?.num_txs) ?
+                  number_format(
+                    gmps.num_txs,
+                    '0,0',
+                  ) :
+                  <ProgressBar
+                    borderColor={loader_color(theme)}
+                    width="32"
+                    height="32"
+                  />
               }
             </div>
             <span className={subtitleClassName}>
