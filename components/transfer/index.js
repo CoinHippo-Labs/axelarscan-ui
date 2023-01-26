@@ -510,6 +510,11 @@ export default () => {
     asset_data?.symbol ||
     denom
 
+  let image =
+    contract_data?.image ||
+    ibc_data?.image ||
+    asset_data?.image
+
   if (
     (
       [
@@ -524,12 +529,23 @@ export default () => {
         .substring(
           1,
         )
-  }
 
-  const image =
-    contract_data?.image ||
-    ibc_data?.image ||
-    asset_data?.image
+    if (image) {
+      image =
+        image
+          .split('/')
+          .map(p =>
+            p
+              .substring(
+                p?.includes('.') &&
+                p.startsWith('w') ?
+                  1 :
+                  0,
+              )
+          )
+          .join('/')
+    }
+  }
 
   const steps =
     [
