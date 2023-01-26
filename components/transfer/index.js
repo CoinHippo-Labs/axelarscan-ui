@@ -1269,6 +1269,7 @@ export default () => {
                     txhash,
                     status,
                     height,
+                    deposit_address,
                     created_at,
                     chain,
                     command_id,
@@ -1304,6 +1305,7 @@ export default () => {
                     url,
                     transaction_path,
                     block_path,
+                    address_path,
                     icon,
                   } = { ...explorer }
 
@@ -1612,6 +1614,49 @@ export default () => {
                                     status
                                   }
                                 </span>
+                              </div>
+                            </div>
+                          )
+                        }
+                        {
+                          deposit_address &&
+                          (
+                            <div className={rowClassName}>
+                              <span className={rowTitleClassName}>
+                                Deposit address
+                              </span>
+                              <div className="flex items-center space-x-0.5">
+                                <a
+                                  href={`${url}${address_path?.replace('{address}', deposit_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500 font-medium"
+                                >
+                                  {ellipse(
+                                    deposit_address,
+                                    12,
+                                  )}
+                                </a>
+                                <Copy
+                                  value={deposit_address}
+                                />
+                                <a
+                                  href={`${url}${address_path?.replace('{address}', deposit_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
+                                    />
+                                  }
+                                </a>
                               </div>
                             </div>
                           )
