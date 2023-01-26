@@ -1051,10 +1051,10 @@ export default () => {
                             id_field,
                             path,
                             params,
-                            finish,
                           } = { ...s }
                           let {
                             title,
+                            finish,
                           } = { ...s }
 
                           title =
@@ -1063,6 +1063,10 @@ export default () => {
                             ].includes(title) ?
                               'Confirmed' :
                               title
+
+                          finish =
+                            finish ||
+                            i < current_step
 
                           const id = data?.[id_field]
 
@@ -1496,7 +1500,11 @@ export default () => {
                               width="32"
                               height="32"
                             /> :
-                            null
+                            i < current_step ?
+                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                The data will be updated shortly.
+                              </span> :
+                              null
                         }
                         {
                           [
