@@ -1191,7 +1191,7 @@ export default (
                       forecalled &&
                       {
                         id: 'forecalled',
-                        title: 'Express Call',
+                        title: 'Express Execute',
                         chain_data: destination_chain_data,
                         data: forecalled,
                       },
@@ -1582,7 +1582,7 @@ export default (
                         (
                           <Tooltip
                             placement="bottom"
-                            content="Express call time spent"
+                            content="Express execute time spent"
                             className="z-50 bg-black bg-opacity-75 text-white text-xs -ml-7"
                           >
                             <div className="flex items-center space-x-1">
