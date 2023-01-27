@@ -95,6 +95,11 @@ export default [
     environment: 'mainnet',
   },
   {
+    address: 'axelar16dc379m0qj64g4pr4nkl7ewak52qy2srd5shys',
+    name: 'Notional: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
     address: 'terra1uf9m0mhy8y9lucpvd6p5hrgzm46xm8mvg9lquq',
     name: 'Notional: IBC Relayer',
     environment: 'mainnet',
@@ -106,6 +111,11 @@ export default [
   },
   {
     address: 'axelar19kzuzfmmy9wjr3cl0ss8wjzjup9g49hqzxn3p9',
+    name: 'Cros-nest: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1l267dmlmprhu4p5aqslf50f495vjqlg3e6uve2',
     name: 'Cros-nest: IBC Relayer',
     environment: 'mainnet',
   },
@@ -127,6 +137,96 @@ export default [
   {
     address: 'axelar1z5znvgnwn295h26a88530d6kqs3sg4klagnvze',
     name: 'Comdex: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1evdjzy3w9t2yu54w4dhc2cvrlc2fvnpt5skcqe',
+    name: 'Inter Blockchain Services: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1hhzf9u376mg8zcuvx3jsls7t805kzcrs99cusl',
+    name: 'Synergy Nodes: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar14awanvwztk4rnspjqtukq4m5lv98umw6atjnw6',
+    name: 'Qubelabs: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1ks0qeq9vyt9l7vgasaajd49ff0k8klura5027j',
+    name: 'Cosmos spaces team: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1vkjtazp8x2arv8r23vtlm8zl2w258k8z40w29t',
+    name: 'Evilnodes: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar18xkav82x6um8v4xpgy26ea7zqyyz0zv875g34k',
+    name: 'B-Harvest: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1cr4xwgkltnp7ccgk98v9u63yl94stum8x3q3a9',
+    name: 'DSRV: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1qzuuuzaeqfddnpzcl3xadka08k8dgcwcaumzxk',
+    name: 'DELIGHT: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1u4he0w85dlxf65t8pn3hwjsyz5p2dz694c42kp',
+    name: 'Stakin: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1fegapd4jc3ejqeg0eu3jk4hvr74hg660657v0v',
+    name: 'Polkachu: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar19uavz3w7p6h0ahlyw3wkhuwtynzl902048a6x5',
+    name: 'Mandragora: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1mjq48r6435aewerpruwc8up3tz3rzan2ghgl25',
+    name: 'StakeLab: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1fgkvrphcnwckj2pp5hdvy5zvrc25aa0de7f99f',
+    name: 'StakeRun: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1y4t6q5hg4896mz68kn2dfwv2jkcqhfzlx22jqm',
+    name: 'Alkadeta: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1t6tveyjtmcf54p56yrd9x48vecu94fyfkmpnm2',
+    name: 'Carbon Demex: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1jsxwpl3gwcs54se0nj86qx2n58hjztggwh204r',
+    name: 'AsGuard: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar17uwjyc7e8enfdkdxslgteuff6hs5apdtfq3qnd',
+    name: 'OKX Chain: IBC Relayer',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1xj04c8cx5etajpwsypmk3vej4sejqxuzxy9f72',
+    name: 'AUDIT.one: IBC Relayer',
     environment: 'mainnet',
   },
 ]
