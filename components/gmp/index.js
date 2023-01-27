@@ -703,7 +703,7 @@ export default () => {
             sourceTransactionIndex: transactionIndex,
             sourceTransactionLogIndex: logIndex,
             event: 'to_refund',
-          },
+          }
 
         console.log(
           '[refund request]',
