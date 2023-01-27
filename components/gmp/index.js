@@ -405,7 +405,10 @@ export default () => {
   }
 
   const approve = async data => {
-    if (api && data) {
+    if (
+      api &&
+      data
+    ) {
       try {
         setApproving(true)
         setApproveResponse(
@@ -423,6 +426,13 @@ export default () => {
           transactionIndex,
           logIndex,
         } = { ...call }
+
+        console.log(
+          '[approve request]',
+          {
+            transactionHash,
+          },
+        )
 
         const response =
           await api.manualRelayToDestChain(
@@ -500,6 +510,14 @@ export default () => {
           transactionIndex,
           logIndex,
         } = { ...call }
+
+        console.log(
+          '[execute request]',
+          {
+            transactionHash,
+            logIndex,
+          },
+        )
 
         const response =
           await api.execute(
@@ -580,6 +598,15 @@ export default () => {
           transactionIndex,
           logIndex,
         } = { ...call }
+
+        console.log(
+          '[addNativeGas request]',
+          {
+            chain,
+            transactionHash,
+            refundAddress: address,
+          },
+        )
 
         const response =
           await api.addNativeGas(
@@ -669,17 +696,27 @@ export default () => {
           logIndex,
         } = { ...call }
 
+        const params =
+          {
+            method: 'saveGMP',
+            sourceTransactionHash: transactionHash,
+            sourceTransactionIndex: transactionIndex,
+            sourceTransactionLogIndex: logIndex,
+            event: 'to_refund',
+          },
+
+        console.log(
+          '[refund request]',
+          {
+            ...params,
+          },
+        )
+
         const _response =
           await api.execPost(
             process.env.NEXT_PUBLIC_GMP_API_URL,
             '',
-            {
-              method: 'saveGMP',
-              sourceTransactionHash: transactionHash,
-              sourceTransactionIndex: transactionIndex,
-              sourceTransactionLogIndex: logIndex,
-              event: 'to_refund',
-            },
+            params,
           )
 
         console.log(
@@ -1192,7 +1229,7 @@ export default () => {
       forecalled &&
       {
         id: 'forecalled',
-        title: 'Express Call',
+        title: 'Express Execute',
         chain_data: destination_chain_data,
         data: forecalled,
       },
@@ -2122,7 +2159,7 @@ export default () => {
                           (
                             <Tooltip
                               placement="bottom"
-                              content="Express call time spent"
+                              content="Express execute time spent"
                               className="z-50 bg-black bg-opacity-75 text-white text-xs -ml-7"
                             >
                               <div className="flex items-center space-x-1">

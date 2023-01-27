@@ -1066,7 +1066,13 @@ export default () => {
 
                           finish =
                             finish ||
-                            i < current_step
+                            (
+                              i < current_step &&
+                              (
+                                s?.id !== 'unwrap' ||
+                                data?.tx_hash_unwrap
+                              )
+                            )
 
                           const id = data?.[id_field]
 
