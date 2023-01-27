@@ -863,6 +863,11 @@ export default (
                     asset_data?.symbol ||
                     denom
 
+                  let image =
+                    contract_data?.image ||
+                    ibc_data?.image ||
+                    asset_data?.image
+
                   if (
                     (
                       [
@@ -877,12 +882,23 @@ export default (
                         .substring(
                           1,
                         )
-                  }
 
-                  const image =
-                    contract_data?.image ||
-                    ibc_data?.image ||
-                    asset_data?.image
+                    if (image) {
+                      image =
+                        image
+                          .split('/')
+                          .map(p =>
+                            p
+                              .substring(
+                                p?.includes('.') &&
+                                p.startsWith('w') ?
+                                  1 :
+                                  0,
+                              )
+                          )
+                          .join('/')
+                    }
+                  }
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
@@ -1432,10 +1448,10 @@ export default (
                               id_field,
                               path,
                               params,
-                              finish,
                             } = { ...s }
                             let {
                               title,
+                              finish,
                             } = { ...s }
 
                             title =
@@ -1444,6 +1460,16 @@ export default (
                               ].includes(title) ?
                                 'Confirmed' :
                                 title
+
+                            finish =
+                              finish ||
+                              (
+                                i < current_step &&
+                                (
+                                  s?.id !== 'unwrap' ||
+                                  data?.tx_hash_unwrap
+                                )
+                              )
 
                             const id = data?.[id_field]
 

@@ -510,6 +510,11 @@ export default () => {
     asset_data?.symbol ||
     denom
 
+  let image =
+    contract_data?.image ||
+    ibc_data?.image ||
+    asset_data?.image
+
   if (
     (
       [
@@ -524,12 +529,23 @@ export default () => {
         .substring(
           1,
         )
-  }
 
-  const image =
-    contract_data?.image ||
-    ibc_data?.image ||
-    asset_data?.image
+    if (image) {
+      image =
+        image
+          .split('/')
+          .map(p =>
+            p
+              .substring(
+                p?.includes('.') &&
+                p.startsWith('w') ?
+                  1 :
+                  0,
+              )
+          )
+          .join('/')
+    }
+  }
 
   const steps =
     [
@@ -1035,10 +1051,10 @@ export default () => {
                             id_field,
                             path,
                             params,
-                            finish,
                           } = { ...s }
                           let {
                             title,
+                            finish,
                           } = { ...s }
 
                           title =
@@ -1047,6 +1063,16 @@ export default () => {
                             ].includes(title) ?
                               'Confirmed' :
                               title
+
+                          finish =
+                            finish ||
+                            (
+                              i < current_step &&
+                              (
+                                s?.id !== 'unwrap' ||
+                                data?.tx_hash_unwrap
+                              )
+                            )
 
                           const id = data?.[id_field]
 
@@ -1249,6 +1275,7 @@ export default () => {
                     txhash,
                     status,
                     height,
+                    deposit_address,
                     created_at,
                     chain,
                     command_id,
@@ -1284,6 +1311,7 @@ export default () => {
                     url,
                     transaction_path,
                     block_path,
+                    address_path,
                     icon,
                   } = { ...explorer }
 
@@ -1480,7 +1508,11 @@ export default () => {
                               width="32"
                               height="32"
                             /> :
-                            null
+                            i < current_step ?
+                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                The data will be updated shortly.
+                              </span> :
+                              null
                         }
                         {
                           [
@@ -1588,6 +1620,49 @@ export default () => {
                                     status
                                   }
                                 </span>
+                              </div>
+                            </div>
+                          )
+                        }
+                        {
+                          deposit_address &&
+                          (
+                            <div className={rowClassName}>
+                              <span className={rowTitleClassName}>
+                                Deposit address
+                              </span>
+                              <div className="flex items-center space-x-0.5">
+                                <a
+                                  href={`${url}${address_path?.replace('{address}', deposit_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500 font-medium"
+                                >
+                                  {ellipse(
+                                    deposit_address,
+                                    12,
+                                  )}
+                                </a>
+                                <Copy
+                                  value={deposit_address}
+                                />
+                                <a
+                                  href={`${url}${address_path?.replace('{address}', deposit_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 dark:text-blue-500"
+                                >
+                                  {icon ?
+                                    <Image
+                                      src={icon}
+                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                    /> :
+                                    <TiArrowRight
+                                      size={16}
+                                      className="transform -rotate-45"
+                                    />
+                                  }
+                                </a>
                               </div>
                             </div>
                           )
