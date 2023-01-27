@@ -289,4 +289,16 @@ export default [
     name: 'Delegate Notional: IBC Relayer',
     environment: 'testnet',
   },
+  {
+    address: '0xc3468a191fe51815b26535ed1f82c1f79e6ec37d',
+    name: 'Squid Router',
+    image: '/logos/accounts/squid.svg',
+    environment: 'testnet',
+  },
+  {
+    address: '0xce16F69375520ab01377ce7B88f5BA8C48F8D666',
+    name: 'Squid Router',
+    image: '/logos/accounts/squid.svg',
+    environment: 'mainnet',
+  },
 ]
