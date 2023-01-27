@@ -229,4 +229,64 @@ export default [
     name: 'AUDIT.one: IBC Relayer',
     environment: 'mainnet',
   },
+  {
+    address: 'axelar1r7445s2hrny8p4yr707s62g4g4q90a0vxcn8wk',
+    name: 'Tovi: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1ym3rcer9p0cehj380tdp2qfpa6ksvtcfnssv2g',
+    name: 'StingRay: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1e2hmtt9c28tncuwrq0ct45wd0tgp5ms5zkrk8h',
+    name: 'Etienne Klub Staking: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1jxn2v002u4utjkgd9hcr6etwsxvr06g0mk3ws7',
+    name: 'nakanodo.xyz: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1qfmxkhhvjufjlmvhs9ccghc78hkcqw5asev87v',
+    name: 'AUDIT.one: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1gmm70h2p4qx0yrjcawcdccjwpa6zmxd6d602vg',
+    name: 'Raul BitCanna 420 Relayer: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar17kkx87dupug844zuzrh38exyc48mrr27fvj7yf',
+    name: 'DELIGHT: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1hhzf9u376mg8zcuvx3jsls7t805kzcrs99cusl',
+    name: 'Synergy Nodes: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1em3kpqz32zg3dmhwt5xj5xked5m63u83h5v5m4',
+    name: 'Czar: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar10rrxectjm6sz6u2ayvrupm8drvjxvpeqpuqjcn',
+    name: 'Zenscape: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar1fegapd4jc3ejqeg0eu3jk4hvr74hg660657v0v',
+    name: 'Polkachu: IBC Relayer',
+    environment: 'testnet',
+  },
+  {
+    address: 'axelar16dc379m0qj64g4pr4nkl7ewak52qy2srd5shys',
+    name: 'Delegate Notional: IBC Relayer',
+    environment: 'testnet',
+  },
 ]
