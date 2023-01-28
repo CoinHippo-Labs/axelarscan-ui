@@ -613,7 +613,7 @@ export default (
                             href={`${url}${transaction_path?.replace('{tx}', value)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="min-w-max text-blue-600 dark:text-white"
+                            className="text-blue-500 dark:text-blue-500"
                           >
                             {
                               icon ?
@@ -702,8 +702,8 @@ export default (
                     asset_data?.image
 
                   return (
-                    <div className="flex flex-col space-y-2 mb-3">
-                      <div className="max-w-min text-xs lg:text-sm font-semibold">
+                    <div className="space-y-1.5">
+                      <div className="max-w-min text-sm font-medium">
                         {
                           value === 'ContractCall' ?
                             'callContract' :
@@ -717,13 +717,13 @@ export default (
                         amount &&
                         _symbol &&
                         (
-                          <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5">
+                          <div className="flex items-center space-x-2">
                             {
                               image &&
                               (
                                 <Image
                                   src={image}
-                                  className="w-5 h-5 rounded-full"
+                                  className="w-6 h-6 rounded-full"
                                 />
                               )
                             }
@@ -767,10 +767,10 @@ export default (
                         ) >= 0 &&
                         (
                           <div className="flex flex-col">
-                            <span className="font-semibold">
+                            <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Base fees:
                             </span>
-                            <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
+                            <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap my-0.5 py-0.5 px-1.5">
                               <span className="text-2xs font-semibold mr-1">
                                 {number_format(
                                   fees?.destination_base_fee ||
@@ -857,7 +857,7 @@ export default (
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
-                      <div className="flex items-center space-x-1.5">
+                      <div className="h-6 flex items-center space-x-2">
                         {
                           image &&
                           (
@@ -867,7 +867,7 @@ export default (
                             />
                           )
                         }
-                        <span className="font-bold">
+                        <span className="font-semibold">
                           {
                             name ||
                             value
@@ -878,7 +878,7 @@ export default (
                         from &&
                         (
                           <div className="flex flex-col">
-                            <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                            <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Sender address
                             </span>
                             {
@@ -896,7 +896,7 @@ export default (
                                         <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                           {ellipse(
                                             from,
-                                            12,
+                                            8,
                                             prefix_address,
                                           )}
                                         </div>
@@ -910,6 +910,7 @@ export default (
                                 <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={from}
+                                    ellipse_size={8}
                                     prefix={prefix_address}
                                   />
                                 </div>
@@ -921,7 +922,7 @@ export default (
                         sender &&
                         (
                           <div className="flex flex-col">
-                            <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                            <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Source address
                             </span>
                             {
@@ -939,7 +940,7 @@ export default (
                                         <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                           {ellipse(
                                             sender,
-                                            12,
+                                            8,
                                             prefix_address,
                                           )}
                                         </div>
@@ -953,6 +954,7 @@ export default (
                                 <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={sender}
+                                    ellipse_size={8}
                                     prefix={prefix_address}
                                   />
                                 </div>
@@ -1010,23 +1012,28 @@ export default (
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
-                      <div className="flex items-center space-x-1.5">
-                        {
-                          image &&
-                          (
-                            <Image
-                              src={image}
-                              className="w-6 h-6 rounded-full"
-                            />
-                          )
-                        }
-                        <span className="font-bold">
-                          {
-                            name ||
-                            value
-                          }
-                        </span>
-                      </div>
+                      {
+                        !is_invalid_destination_chain &&
+                        (
+                          <div className="h-6 flex items-center space-x-2">
+                            {
+                              image &&
+                              (
+                                <Image
+                                  src={image}
+                                  className="w-6 h-6 rounded-full"
+                                />
+                              )
+                            }
+                            <span className="font-semibold">
+                              {
+                                name ||
+                                value
+                              }
+                            </span>
+                          </div>
+                        )
+                      }
                       {
                         is_invalid_destination_chain &&
                         (
@@ -1039,7 +1046,7 @@ export default (
                         destinationContractAddress &&
                         (
                           <div className="flex flex-col">
-                            <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                            <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Contract address
                             </span>
                             {
@@ -1057,7 +1064,7 @@ export default (
                                         <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                           {ellipse(
                                             destinationContractAddress,
-                                            12,
+                                            8,
                                             prefix_address,
                                           )}
                                         </div>
@@ -1071,6 +1078,7 @@ export default (
                                 <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={destinationContractAddress}
+                                    ellipse_size={8}
                                     prefix={prefix_address}
                                   />
                                 </div>
@@ -1086,7 +1094,7 @@ export default (
                         from &&
                         (
                           <div className="flex flex-col">
-                            <span className="text-slate-400 dark:text-slate-600 font-semibold">
+                            <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Relayer address
                             </span>
                             {
@@ -1104,7 +1112,7 @@ export default (
                                         <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                           {ellipse(
                                             from,
-                                            12,
+                                            8,
                                             prefix_address,
                                           )}
                                         </div>
@@ -1118,6 +1126,7 @@ export default (
                                 <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={from}
+                                    ellipse_size={8}
                                     prefix={prefix_address}
                                   />
                                 </div>
@@ -1270,7 +1279,7 @@ export default (
                             0
                         )
                       break
-                    case 'forecalled':
+                    case 'express_executed':
                       current_step =
                         steps
                           .findIndex(s =>
@@ -1328,7 +1337,7 @@ export default (
                       break
                   }
 
-                  const forecall_time_spent =
+                  const express_execute_time_spent =
                     total_time_string(
                       call?.block_timestamp,
                       forecalled?.block_timestamp,
@@ -1578,7 +1587,7 @@ export default (
                         )
                       }
                       {
-                        forecall_time_spent &&
+                        express_execute_time_spent &&
                         (
                           <Tooltip
                             placement="bottom"
@@ -1591,7 +1600,7 @@ export default (
                                 className="text-green-500 dark:text-green-400"
                               />
                               <span className="whitespace-nowrap text-xs font-bold">
-                                {forecall_time_spent}
+                                {express_execute_time_spent}
                               </span>
                             </div>
                           </Tooltip>
@@ -1627,6 +1636,9 @@ export default (
                 disableSortBy: true,
                 Cell: props => {
                   const {
+                    value,
+                  } = { ...props }
+                  const {
                     call,
                     gas_paid,
                     forecalled,
@@ -1643,16 +1655,21 @@ export default (
 
                   return (
                     <div className="space-y-2">
-                      <TimeAgo
-                        time={props.value * 1000}
-                        title="Contract Call Time"
-                        className="ml-auto"
-                      />
+                      {
+                        !isNaN(value) &&
+                        (
+                          <TimeAgo
+                            time={value * 1000}
+                            title="Contract Call Time"
+                            className="ml-auto"
+                          />
+                        )
+                      }
                       {
                         updated_at &&
                         (
                           <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg flex flex-col items-end py-1 px-2 ml-auto -mr-1">
-                            <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                            <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
                               Updated at
                             </span>
                             <TimeAgo

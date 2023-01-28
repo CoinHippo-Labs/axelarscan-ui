@@ -609,7 +609,9 @@ export default (
                             rel="noopener noreferrer"
                             className="text-blue-500 dark:text-blue-500 font-medium"
                           >
-                            {ellipse(value)}
+                            {ellipse(
+                              value,
+                            )}
                           </a>
                         </Link>
                         <Copy
@@ -624,15 +626,16 @@ export default (
                               rel="noopener noreferrer"
                               className="text-blue-500 dark:text-blue-500"
                             >
-                              {icon ?
-                                <Image
-                                  src={icon}
-                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                /> :
-                                <TiArrowRight
-                                  size={16}
-                                  className="transform -rotate-45"
-                                />
+                              {
+                                icon ?
+                                  <Image
+                                    src={icon}
+                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                  /> :
+                                  <TiArrowRight
+                                    size={16}
+                                    className="transform -rotate-45"
+                                  />
                               }
                             </a>
                           )
@@ -742,38 +745,39 @@ export default (
                             <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Sender address
                             </span>
-                            {sender_address.startsWith('0x') ?
-                              <div className="flex items-center space-x-1">
-                                <a
-                                  href={`${url}${address_path?.replace('{address}', sender_address)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <EnsProfile
-                                    address={sender_address}
-                                    no_copy={true}
-                                    fallback={
-                                      <div className="h-5 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                        {ellipse(
-                                          sender_address,
-                                          8,
-                                          prefix_address,
-                                        )}
-                                      </div>
-                                    }
+                            {
+                              sender_address.startsWith('0x') ?
+                                <div className="flex items-center space-x-1">
+                                  <a
+                                    href={`${url}${address_path?.replace('{address}', sender_address)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <EnsProfile
+                                      address={sender_address}
+                                      no_copy={true}
+                                      fallback={
+                                        <div className="h-5 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                          {ellipse(
+                                            sender_address,
+                                            8,
+                                            prefix_address,
+                                          )}
+                                        </div>
+                                      }
+                                    />
+                                  </a>
+                                  <Copy
+                                    value={sender_address}
                                   />
-                                </a>
-                                <Copy
-                                  value={sender_address}
-                                />
-                              </div> :
-                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                <AccountProfile
-                                  address={sender_address}
-                                  ellipse_size={8}
-                                  prefix={prefix_address}
-                                />
-                              </div>
+                                </div> :
+                                <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                  <AccountProfile
+                                    address={sender_address}
+                                    ellipse_size={8}
+                                    prefix={prefix_address}
+                                  />
+                                </div>
                             }
                           </div>
                         )
