@@ -966,14 +966,28 @@ export default () => {
       is_insufficient_fee ||
       gas?.gas_remain_amount < 0.00001
     ) &&
+    moment()
+      .diff(
+        moment(
+          confirm.block_timestamp * 1000
+        ),
+        'minutes',
+      ) >= 1 &&
     (
       <div className="flex items-center space-x-2">
         <button
           disabled={approving}
-          onClick={() =>
-            approve(data)
+          onClick={
+            () =>
+              approve(data)
           }
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${approving ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
+          className={
+            `bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${
+              approving ?
+                'pointer-events-none' :
+                ''
+            } rounded flex items-center text-white space-x-1.5 py-1 px-2`
+          }
         >
           {
             approving &&
@@ -1019,10 +1033,17 @@ export default () => {
             (
               <button
                 disabled={executing}
-                onClick={() =>
-                  execute(data)
+                onClick={
+                  () =>
+                    execute(data)
                 }
-                className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${executing ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
+                className={
+                  `bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${
+                    executing ?
+                      'pointer-events-none' :
+                      ''
+                  } rounded flex items-center text-white space-x-1.5 py-1 px-2`
+                }
               >
                 {
                   executing &&
@@ -1077,10 +1098,17 @@ export default () => {
             (
               <button
                 disabled={gasAdding}
-                onClick={() =>
-                  addNativeGas(data)
+                onClick={
+                  () =>
+                    addNativeGas(data)
                 }
-                className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${gasAdding ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
+                className={
+                  `bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${
+                    gasAdding ?
+                      'pointer-events-none' :
+                      ''
+                  } rounded flex items-center text-white space-x-1.5 py-1 px-2`
+                }
               >
                 {
                   gasAdding &&
@@ -1166,10 +1194,17 @@ export default () => {
       <div className="flex items-center space-x-2">
         <button
           disabled={refunding}
-          onClick={() =>
-            refund(data)
+          onClick={
+            () =>
+              refund(data)
           }
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${refunding ? 'pointer-events-none' : ''} rounded flex items-center text-white space-x-1.5 py-1 px-2`}
+          className={
+            `bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-400 ${
+              refunding ?
+                'pointer-events-none' :
+                ''
+            } rounded flex items-center text-white space-x-1.5 py-1 px-2`
+          }
         >
           {
             refunding &&
@@ -3221,11 +3256,17 @@ export default () => {
                                         !is_insufficient_minimum_amount &&
                                         !is_insufficient_fee &&
                                         (
-                                          <ColorRing
-                                            color={loader_color(theme)}
-                                            width="32"
-                                            height="32"
-                                          />
+                                          current_step === i ?
+                                            <ColorRing
+                                              color={loader_color(theme)}
+                                              width="32"
+                                              height="32"
+                                            /> :
+                                            i < current_step ?
+                                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                                The data will be updated shortly.
+                                              </span> :
+                                              null
                                         )
                           }
                           {
