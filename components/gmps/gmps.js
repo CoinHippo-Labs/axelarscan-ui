@@ -134,21 +134,27 @@ export default (
               [
                 'callContract',
                 'callContractWithToken',
-              ].includes(method) ?
+              ]
+              .includes(method) ?
                 method :
                 undefined,
             status:
               [
-                'approving',
                 'called',
+                'confirming',
                 'express_executed',
+                'confirmed',
+                'approving',
                 'approved',
                 'executing',
                 'executed',
                 'error',
                 'insufficient_fee',
                 'no_created_at',
-              ].includes(status?.toLowerCase()) ?
+              ]
+              .includes(
+                status?.toLowerCase()
+              ) ?
                 status.toLowerCase() :
                 undefined,
             senderAddress,
@@ -194,8 +200,9 @@ export default (
       }
 
       const interval =
-        setInterval(() =>
-          triggering(true),
+        setInterval(
+          () =>
+            triggering(true),
           (
             address ||
             [
@@ -1148,6 +1155,7 @@ export default (
                     gas_paid,
                     gas_paid_to_callback,
                     express_executed,
+                    confirm,
                     approved,
                     executed,
                     is_executed,
@@ -1180,6 +1188,12 @@ export default (
                       chains_data,
                     )
 
+                  const axelar_chain_data =
+                    getChain(
+                      'axelarnet',
+                      chains_data,
+                    )
+
                   const steps =
                     [
                       {
@@ -1203,6 +1217,19 @@ export default (
                         title: 'Express Execute',
                         chain_data: destination_chain_data,
                         data: express_executed,
+                      },
+                      (
+                        staging ||
+                        process.env.NEXT_PUBLIC_ENVIRONMENT === 'testnet'
+                      ) &&
+                      {
+                        id: 'confirm',
+                        title:
+                          staging ?
+                            'Confirmed' :
+                            'Confirmed',
+                        chain_data: axelar_chain_data,
+                        data: confirm,
                       },
                       {
                         id: 'approved',
@@ -1234,15 +1261,16 @@ export default (
                   switch (status) {
                     case 'called':
                       current_step =
-                        steps.findIndex(s =>
-                          s.id ===
-                            (
-                              gas_paid ||
-                              gas_paid_to_callback ?
-                                'gas_paid' :
-                                'call'
-                            )
-                        ) +
+                        steps
+                          .findIndex(s =>
+                            s.id ===
+                              (
+                                gas_paid ||
+                                gas_paid_to_callback ?
+                                  'gas_paid' :
+                                  'call'
+                              )
+                          ) +
                         (
                           !is_invalid_destination_chain &&
                           !is_invalid_call &&
@@ -1285,7 +1313,20 @@ export default (
                           .findIndex(s =>
                             s.id === 'express_executed'
                           ) +
-                          1
+                        (
+                          confirm ?
+                            1 :
+                            0
+                        ) +
+                        1
+                      break
+                    case 'confirmed':
+                      current_step =
+                        steps
+                          .findIndex(s =>
+                            s.id === 'confirm'
+                          ) +
+                        1
                       break
                     case 'approved':
                     case 'executing':
@@ -1300,7 +1341,7 @@ export default (
                                   'call'
                               )
                           ) +
-                          1
+                        1
                       break
                     case 'executed':
                     case 'error':
@@ -1382,7 +1423,7 @@ export default (
                                   null :
                                 error
 
-                            const text_color =
+                            const step_finish =
                               (
                                 ![
                                   'refunded',
@@ -1405,6 +1446,16 @@ export default (
                               ) ||
                               (
                                 [
+                                  'confirm',
+                                ]
+                                .includes(s.id) &&
+                                (
+                                  confirm ||
+                                  approved
+                                )
+                              ) ||
+                              (
+                                [
                                   'executed',
                                 ]
                                 .includes(s.id) &&
@@ -1415,8 +1466,11 @@ export default (
                                   'refunded',
                                 ]
                                 .includes(s.id) &&
-                                s?.data?.receipt?.status
-                              ) ?
+                                s.data?.receipt?.status
+                              )
+
+                            const text_color =
+                              step_finish ?
                                 'text-green-500 dark:text-green-400' :
                                 i === current_step &&
                                 ![
@@ -1436,7 +1490,7 @@ export default (
                                       'refunded',
                                     ]
                                     .includes(s.id) &&
-                                    !s?.data?.receipt?.status
+                                    !s.data?.receipt?.status
                                   ) ?
                                     'text-red-500 dark:text-red-400' :
                                     'text-slate-300 dark:text-slate-700'
@@ -1450,46 +1504,26 @@ export default (
                               icon,
                             } = { ...explorer }
 
+                            const link_id =
+                              s.id === 'confirm' ?
+                                s.data?.poll_id :
+                                s.data?.transactionHash
+
+                            const link_url =
+                              link_id &&
+                              (
+                                s.id === 'confirm' ?
+                                  `${url}/evm-poll/${link_id}` :
+                                  `${url}${transaction_path?.replace('{tx}', link_id)}`
+                              )
+
                             return (
                               <div
                                 key={i}
                                 className="flex items-center space-x-1.5 pb-0.5"
                               >
                                 {
-                                  (
-                                    ![
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) &&
-                                    s.data
-                                  ) ||
-                                  (
-                                    [
-                                      'gas_paid',
-                                    ]
-                                    .includes(s.id) &&
-                                    (
-                                      gas_paid_to_callback ||
-                                      (
-                                        is_call_from_relayer &&
-                                        approved
-                                      )
-                                    )
-                                  ) ||
-                                  (
-                                    [
-                                      'executed',
-                                    ]
-                                    .includes(s.id) &&
-                                    is_executed
-                                  ) ||
-                                  (
-                                    [
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) &&
-                                    s?.data?.receipt?.status
-                                  ) ?
+                                  step_finish ?
                                     <BiCheckCircle
                                       size={18}
                                       className="text-green-500 dark:text-green-400"
@@ -1513,11 +1547,12 @@ export default (
                                         _error
                                       ) ||
                                       (
-                                      [
-                                        'refunded',
-                                      ]
-                                      .includes(s.id) &&
-                                      !s?.data?.receipt?.status) ?
+                                        [
+                                          'refunded',
+                                        ]
+                                        .includes(s.id) &&
+                                        !s.data?.receipt?.status
+                                      ) ?
                                         <BiXCircle
                                           size={18}
                                           className="text-red-500 dark:text-red-400"
@@ -1529,9 +1564,9 @@ export default (
                                 }
                                 <div className="flex items-center space-x-1">
                                   {
-                                    s.data?.transactionHash ?
+                                    link_id ?
                                       <Copy
-                                        value={s.data.transactionHash}
+                                        value={link_id}
                                         title={
                                           <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
                                             {s.title}
@@ -1544,10 +1579,10 @@ export default (
                                   }
                                   {
                                     url &&
-                                    s.data?.transactionHash &&
+                                    link_url &&
                                     (
                                       <a
-                                        href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
+                                        href={link_url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-blue-500 dark:text-blue-500"

@@ -1303,7 +1303,8 @@ export default () => {
                   const explorer =
                     [
                       'ibc_send',
-                    ].includes(s.id) ?
+                    ]
+                    .includes(s.id) ?
                       axelar_chain_data?.explorer :
                       chain_data?.explorer
 
@@ -1362,7 +1363,8 @@ export default () => {
                         {id ?
                           [
                             'ibc_send',
-                          ].includes(s.id) ?
+                          ]
+                          .includes(s.id) ?
                             [
                               txhash,
                               recv_txhash,
@@ -1517,7 +1519,8 @@ export default () => {
                         {
                           [
                             'command',
-                          ].includes(s.id) &&
+                          ]
+                          .includes(s.id) &&
                           chain &&
                           batch_id &&
                           executed &&

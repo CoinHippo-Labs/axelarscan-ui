@@ -96,21 +96,27 @@ export default () => {
               [
                 'callContract',
                 'callContractWithToken',
-              ].includes(method) ?
+              ]
+              .includes(method) ?
                 method :
                 undefined,
             status:
               [
-                'approving',
                 'called',
+                'confirming',
                 'express_executed',
+                'confirmed',
+                'approving',
                 'approved',
                 'executing',
                 'executed',
                 'error',
                 'insufficient_fee',
                 'no_created_at',
-              ].includes(status?.toLowerCase()) ?
+              ]
+              .includes(
+                status?.toLowerCase()
+              ) ?
                 status.toLowerCase() :
                 undefined,
             senderAddress,
@@ -298,16 +304,20 @@ export default () => {
           title: 'Any',
         },
         {
-          value: 'approving',
-          title: 'Wait for Approval',
-        },
-        {
           value: 'called',
           title: 'Called',
         },
         {
+          value: 'confirming',
+          title: 'Wait for Confirmation',
+        },
+        {
           value: 'express_executed',
           title: 'Express Executed',
+        },
+        {
+          value: 'approving',
+          title: 'Wait for Approval',
         },
         {
           value: 'approved',
