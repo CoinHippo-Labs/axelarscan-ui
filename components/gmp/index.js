@@ -781,6 +781,7 @@ export default () => {
     gas_paid,
     gas_paid_to_callback,
     express_executed,
+    confirm,
     approved,
     executed,
     is_executed,
@@ -954,6 +955,7 @@ export default () => {
 
   const approveButton =
     call &&
+    confirm &&
     !approved &&
     !executed &&
     !is_executed &&
@@ -964,29 +966,6 @@ export default () => {
       is_insufficient_fee ||
       gas?.gas_remain_amount < 0.00001
     ) &&
-    moment()
-      .diff(
-        moment(
-          call.block_timestamp * 1000
-        ),
-        'minutes',
-      ) >= (
-        [
-          'ethereum',
-        ]
-        .includes(chain) ?
-          process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
-            15 :
-            20 :
-          [
-            'polygon',
-          ]
-          .includes(chain) ?
-            process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
-              7 :
-              15 :
-            3
-      ) &&
     (
       <div className="flex items-center space-x-2">
         <button
@@ -1233,6 +1212,19 @@ export default () => {
         chain_data: destination_chain_data,
         data: express_executed,
       },
+      (
+        staging ||
+        process.env.NEXT_PUBLIC_ENVIRONMENT === 'testnet'
+      ) &&
+      {
+        id: 'confirm',
+        title:
+          staging ?
+            'Confirmed' :
+            'Confirmed',
+        chain_data: axelar_chain_data,
+        data: confirm,
+      },
       {
         id: 'approved',
         title:
@@ -1305,18 +1297,26 @@ export default () => {
           ) +
         1
       break
+    case 'confirmed':
+      current_step =
+        steps
+          .findIndex(s =>
+            s.id === 'confirm'
+          ) +
+        1
+      break
     case 'approved':
     case 'executing':
       current_step =
         steps
           .findIndex(s =>
-            s.id === (
-              gas_paid ||
-              gas_paid_to_callback ?
-                'approved' :
-                'call'
-            )
+            s.id === 'express_executed'
           ) +
+        (
+          confirm ?
+            1 :
+            0
+        ) +
         1
       break
     case 'executed':
@@ -1920,223 +1920,218 @@ export default () => {
                         Status
                       </div>
                       <div className="flex flex-col">
-                        {steps
-                          .filter(s =>
-                            ![
-                              'refunded',
-                            ]
-                            .includes(s.id) ||
-                            s.data?.receipt?.status
-                          )
-                          .map((s, i) => {
-                            const _error =
-                              error &&
-                              (
-                                error?.block_timestamp ||
-                                approved?.block_timestamp
-                              ) ?
-                                moment()
-                                  .diff(
-                                    moment(
-                                      (
-                                        error?.block_timestamp ||
-                                        approved.block_timestamp
-                                      ) *
-                                      1000
-                                    ),
-                                    'seconds',
-                                  ) >= 45 ?
-                                  error :
-                                  null :
-                                error
-
-                            const text_color =
-                              (
-                                ![
-                                  'refunded',
-                                ]
-                                .includes(s.id) &&
-                                s.data
-                              ) ||
-                              (
-                                [
-                                  'gas_paid',
-                                ]
-                                .includes(s.id) &&
+                        {
+                          steps
+                            .filter(s =>
+                              ![
+                                'refunded',
+                              ]
+                              .includes(s.id) ||
+                              s.data?.receipt?.status
+                            )
+                            .map((s, i) => {
+                              const _error =
+                                error &&
                                 (
-                                  gas_paid_to_callback ||
+                                  error?.block_timestamp ||
+                                  approved?.block_timestamp
+                                ) ?
+                                  moment()
+                                    .diff(
+                                      moment(
+                                        (
+                                          error?.block_timestamp ||
+                                          approved.block_timestamp
+                                        ) *
+                                        1000
+                                      ),
+                                      'seconds',
+                                    ) >= 45 ?
+                                    error :
+                                    null :
+                                  error
+
+                              const step_finish =
+                                (
+                                  ![
+                                    'refunded',
+                                  ]
+                                  .includes(s.id) &&
+                                  s.data
+                                ) ||
+                                (
+                                  [
+                                    'gas_paid',
+                                  ]
+                                  .includes(s.id) &&
                                   (
-                                    is_call_from_relayer &&
+                                    gas_paid_to_callback ||
+                                    (
+                                      is_call_from_relayer &&
+                                      approved
+                                    )
+                                  )
+                                ) ||
+                                (
+                                  [
+                                    'confirm',
+                                  ]
+                                  .includes(s.id) &&
+                                  (
+                                    confirm ||
                                     approved
                                   )
+                                ) ||
+                                (
+                                  [
+                                    'executed',
+                                  ]
+                                  .includes(s.id) &&
+                                  is_executed
+                                ) ||
+                                (
+                                  [
+                                    'refunded',
+                                  ]
+                                  .includes(s.id) &&
+                                  s.data?.receipt?.status
                                 )
-                              ) ||
-                              (
-                                [
-                                  'executed',
-                                ]
-                                .includes(s.id) &&
-                                is_executed
-                              ) ||
-                              (
-                                [
-                                  'refunded',
-                                ]
-                                .includes(s.id) &&
-                                s?.data?.receipt?.status
-                              ) ?
-                                'text-green-500 dark:text-green-400' :
-                                i === current_step &&
-                                ![
-                                  'refunded',
-                                ]
-                                .includes(s.id) ?
-                                  'text-yellow-500 dark:text-yellow-400' :
-                                  (
-                                    [
-                                      'executed',
-                                    ]
-                                    .includes(s.id) &&
-                                    _error
-                                  ) ||
-                                  (
-                                    [
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) &&
-                                    !s?.data?.receipt?.status
-                                  ) ?
-                                    'text-red-500 dark:text-red-400' :
-                                    'text-slate-300 dark:text-slate-700'
 
-                            const {
-                              explorer,
-                            } = { ...s.chain_data }
-                            const {
-                              url,
-                              transaction_path,
-                              icon,
-                            } = { ...explorer }
-
-                            return (
-                              <div
-                                key={i}
-                                className="flex items-center space-x-1.5 pb-0.5"
-                              >
-                                {
-                                  (
-                                    ![
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) &&
-                                    s.data
-                                  ) ||
-                                  (
-                                    [
-                                      'gas_paid',
-                                    ]
-                                    .includes(s.id) &&
+                              const text_color =
+                                step_finish ?
+                                  'text-green-500 dark:text-green-400' :
+                                  i === current_step &&
+                                  ![
+                                    'refunded',
+                                  ]
+                                  .includes(s.id) ?
+                                    'text-yellow-500 dark:text-yellow-400' :
                                     (
-                                      gas_paid_to_callback ||
-                                      (
-                                        is_call_from_relayer &&
-                                        approved
-                                      )
-                                    )
-                                  ) ||
-                                  (
-                                    [
-                                      'executed',
-                                    ]
-                                    .includes(s.id) &&
-                                    is_executed
-                                  ) ||
-                                  (
-                                    [
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) &&
-                                    s?.data?.receipt?.status
-                                  ) ?
-                                    <BiCheckCircle
-                                      size={18}
-                                      className="text-green-500 dark:text-green-400"
-                                    /> :
-                                    i === current_step &&
-                                    ![
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) ?
-                                      <ProgressBar
-                                        borderColor="#ca8a04"
-                                        barColor="#facc15"
-                                        width="18"
-                                        height="18"
-                                      /> :
-                                      (
-                                        [
-                                          'executed',
-                                        ]
-                                        .includes(s.id) &&
-                                        _error
-                                      ) ||
-                                      (
+                                      [
+                                        'executed',
+                                      ]
+                                      .includes(s.id) &&
+                                      _error
+                                    ) ||
+                                    (
                                       [
                                         'refunded',
                                       ]
                                       .includes(s.id) &&
-                                      !s?.data?.receipt?.status) ?
-                                        <BiXCircle
-                                          size={18}
-                                          className="text-red-500 dark:text-red-400"
-                                        /> :
-                                        <FiCircle
-                                          size={18}
-                                          className="text-slate-300 dark:text-slate-700"
-                                        />
-                                }
-                                <div className="flex items-center space-x-1">
+                                      !s.data?.receipt?.status
+                                    ) ?
+                                      'text-red-500 dark:text-red-400' :
+                                      'text-slate-300 dark:text-slate-700'
+
+                              const {
+                                explorer,
+                              } = { ...s.chain_data }
+                              const {
+                                url,
+                                transaction_path,
+                                icon,
+                              } = { ...explorer }
+
+                              const link_id =
+                                s.id === 'confirm' ?
+                                  s.data?.poll_id :
+                                  s.data?.transactionHash
+
+                              const link_url =
+                                link_id &&
+                                (
+                                  s.id === 'confirm' ?
+                                    `${url}/evm-poll/${link_id}` :
+                                    `${url}${transaction_path?.replace('{tx}', link_id)}`
+                                )
+
+                              return (
+                                <div
+                                  key={i}
+                                  className="flex items-center space-x-1.5 pb-0.5"
+                                >
                                   {
-                                    s.data?.transactionHash ?
-                                      <Copy
-                                        value={s.data.transactionHash}
-                                        title={
-                                          <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
-                                            {s.title}
-                                          </span>
-                                        }
+                                    step_finish ?
+                                      <BiCheckCircle
+                                        size={18}
+                                        className="text-green-500 dark:text-green-400"
                                       /> :
-                                      <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                        {s.title}
-                                      </span>
-                                  }
-                                  {
-                                    url &&
-                                    s.data?.transactionHash &&
-                                    (
-                                      <a
-                                        href={`${url}${transaction_path?.replace('{tx}', s.data.transactionHash)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 dark:text-blue-500"
-                                      >
-                                        {icon ?
-                                          <Image
-                                            src={icon}
-                                            className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      i === current_step &&
+                                      ![
+                                        'refunded',
+                                      ]
+                                      .includes(s.id) ?
+                                        <ProgressBar
+                                          borderColor="#ca8a04"
+                                          barColor="#facc15"
+                                          width="18"
+                                          height="18"
+                                        /> :
+                                        (
+                                          [
+                                            'executed',
+                                          ]
+                                          .includes(s.id) &&
+                                          _error
+                                        ) ||
+                                        (
+                                          [
+                                            'refunded',
+                                          ]
+                                          .includes(s.id) &&
+                                          !s.data?.receipt?.status
+                                        ) ?
+                                          <BiXCircle
+                                            size={18}
+                                            className="text-red-500 dark:text-red-400"
                                           /> :
-                                          <TiArrowRight
-                                            size={16}
-                                            className="transform -rotate-45"
+                                          <FiCircle
+                                            size={18}
+                                            className="text-slate-300 dark:text-slate-700"
                                           />
-                                        }
-                                      </a>
-                                    )
                                   }
+                                  <div className="flex items-center space-x-1">
+                                    {
+                                      link_id ?
+                                        <Copy
+                                          value={link_id}
+                                          title={
+                                            <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
+                                              {s.title}
+                                            </span>
+                                          }
+                                        /> :
+                                        <span className={`uppercase ${text_color} text-xs font-medium`}>
+                                          {s.title}
+                                        </span>
+                                    }
+                                    {
+                                      url &&
+                                      link_url &&
+                                      (
+                                        <a
+                                          href={link_url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-500 dark:text-blue-500"
+                                        >
+                                          {icon ?
+                                            <Image
+                                              src={icon}
+                                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                            /> :
+                                            <TiArrowRight
+                                              size={16}
+                                              className="transform -rotate-45"
+                                            />
+                                          }
+                                        </a>
+                                      )
+                                    }
+                                  </div>
                                 </div>
-                              </div>
-                            )
-                          })
+                              )
+                            })
                         }
                         <div className="flex flex-col space-y-1">
                           {
@@ -2214,34 +2209,115 @@ export default () => {
                 data &&
                 detail_steps
                   .map((s, i) => {
-                    const { callback } = { ...gmp }
-                    const { call, gas_paid, gas_added_transactions, express_executed, approved, executed, error, refunded, refunded_more_transactions, express_gas_price_rate, gas_price_rate, is_execute_from_relayer, is_error_from_relayer, status, gas, is_invalid_destination_chain, is_invalid_call, is_insufficient_minimum_amount, is_insufficient_fee } = { ...gmp.data }
-                    const { title, chain_data, data } = { ...s }
-                    const _data = ['executed'].includes(s.id) ?
-                      data ||
-                      (
-                        error &&
-                          (
-                            error?.block_timestamp ||
-                            approved?.block_timestamp
-                          ) ?
-                            moment().diff(moment((error?.block_timestamp || approved.block_timestamp) * 1000), 'seconds') >= 45 ?
-                              error :
-                              null :
-                            error
-                      ) :
-                      data
-                    const { logIndex, blockNumber, block_timestamp, contract_address, returnValues, transaction, receipt } = { ..._data }
-                    let { transactionHash } = { ..._data }
-                    transactionHash = transactionHash ||
+                    const {
+                      callback,
+                    } = { ...gmp }
+                    const {
+                      call,
+                      gas_paid,
+                      gas_added_transactions,
+                      express_executed,
+                      confirm,
+                      approved,
+                      executed,
+                      error,
+                      refunded,
+                      refunded_more_transactions,
+                      express_gas_price_rate,
+                      gas_price_rate,
+                      is_execute_from_relayer,
+                      is_error_from_relayer,
+                      status,
+                      gas,
+                      is_invalid_destination_chain,
+                      is_invalid_call,
+                      is_insufficient_minimum_amount,
+                      is_insufficient_fee,
+                    } = { ...gmp.data }
+
+                    const {
+                      title,
+                      chain_data,
+                      data,
+                    } = { ...s }
+
+                    const _data =
+                      [
+                        'executed',
+                      ]
+                      .includes(s.id) ?
+                        data ||
+                        (
+                          error &&
+                            (
+                              error?.block_timestamp ||
+                              approved?.block_timestamp
+                            ) ?
+                              moment()
+                                .diff(
+                                  moment(
+                                    (
+                                      error?.block_timestamp ||
+                                      approved.block_timestamp
+                                    ) * 1000
+                                  ), 'seconds'
+                                ) >= 45 ?
+                                error :
+                                null :
+                              error
+                        ) :
+                        data
+
+                    const {
+                      logIndex,
+                      blockNumber,
+                      block_timestamp,
+                      contract_address,
+                      returnValues,
+                      transaction,
+                      receipt,
+                      poll_id,
+                      transfer_id,
+                    } = { ..._data }
+
+                    let {
+                      transactionHash,
+                    } = { ..._data }
+
+                    transactionHash =
+                      transactionHash ||
                       receipt?.transactionHash
-                    const { sender } = { ...returnValues }
+
+                    const {
+                      sender,
+                    } = { ...returnValues }
+
                     const source_chain = call?.chain
                     const destination_chain = call?.returnValues?.destinationChain
-                    const source_chain_data = getChain(source_chain, evm_chains_data)
-                    const destination_chain_data = getChain(destination_chain, evm_chains_data)
-                    const { gasToken, gasFeeAmount, refundAddress } = { ...gas_paid?.returnValues }
-                    const { source_token, destination_native_token } = { ...gas_price_rate }
+
+                    const source_chain_data =
+                      getChain(
+                        source_chain,
+                        evm_chains_data,
+                      )
+
+                    const destination_chain_data =
+                      getChain(
+                        destination_chain,
+                        evm_chains_data,
+                      )
+
+                    const {
+                      gasToken,
+                      gasFeeAmount,
+                      refundAddress,
+                    } = { ...gas_paid?.returnValues }
+
+                    const {
+                      source_token,
+                      destination_native_token,
+                    } = { ...gas_price_rate }
+
                     const {
                       gasUsed,
                     } = {
@@ -2254,6 +2330,7 @@ export default () => {
                           )
                       ),
                     }
+
                     let {
                       effectiveGasPrice,
                     } = {
@@ -2290,30 +2367,57 @@ export default () => {
                       source_express_executed_gas_used
 
                     if (gasFeeAmount) {
-                      source_gas_data = gasToken && gasToken !== constants.AddressZero ?
-                        assets_data?.find(a => a?.contracts?.findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
-                        {
-                          ..._.head(source_chain_data?.provider_params)?.nativeCurrency,
-                          image: source_chain_data?.image,
-                        }
+                      source_gas_data =
+                        gasToken &&
+                        gasToken !== constants.AddressZero ?
+                          (assets_data || [])
+                            .find(a =>
+                              (a?.contracts || [])
+                                .findIndex(c =>
+                                  c?.chain_id === source_chain_data?.chain_id &&
+                                  equals_ignore_case(
+                                    c?.contract_address,
+                                    gasToken,
+                                  )
+                                ) > -1
+                            ) :
+                          {
+                            ...(
+                              _.head(
+                                source_chain_data?.provider_params
+                              )?.nativeCurrency
+                            ),
+                            image: source_chain_data?.image,
+                          }
+
                       if (source_gas_data?.contracts) {
                         source_gas_data = {
                           ...source_gas_data,
-                          ...source_gas_data.contracts.find(c => c?.chain_id === source_chain_data?.chain_id),
+                          ...(
+                            source_gas_data.contracts
+                              .find(c =>
+                                c?.chain_id === source_chain_data?.chain_id
+                              )
+                          ),
                         }
                       }
                     }
                     destination_gas_data = {
-                      ..._.head(destination_chain_data?.provider_params)?.nativeCurrency,
+                      ...(
+                        _.head(
+                          destination_chain_data?.provider_params
+                        )?.nativeCurrency
+                      ),
                       image: destination_chain_data?.image,
                     }
 
                     try {
-                      if (executed?.receipt ?
-                        is_execute_from_relayer === false :
-                        error?.receipt ?
-                          is_error_from_relayer === false :
-                          false
+                      if (
+                        executed?.receipt ?
+                          is_execute_from_relayer === false :
+                          error?.receipt ?
+                            is_error_from_relayer === false :
+                            false
                       ) {
                         source_gas_used = 0
                       }
@@ -2323,35 +2427,42 @@ export default () => {
                           destination_native_token.decimals ||
                           18
 
-                        source_gas_used = Number(
-                          utils.formatUnits(
-                            FixedNumber.fromString(
-                              BigNumber.from(gasUsed).toString()
-                            )
-                            .mulUnsafe(
+                        source_gas_used =
+                          Number(
+                            utils.formatUnits(
                               FixedNumber.fromString(
-                                BigNumber.from(effectiveGasPrice).toString()
-                              )
-                            )
-                            .mulUnsafe(
-                              FixedNumber.fromString(
-                                (
-                                  destination_native_token.token_price.usd /
-                                  source_token.token_price.usd
+                                BigNumber.from(
+                                  gasUsed
                                 )
-                                .toFixed(decimals)
                                 .toString()
                               )
+                              .mulUnsafe(
+                                FixedNumber.fromString(
+                                  BigNumber.from(
+                                    effectiveGasPrice
+                                  )
+                                  .toString()
+                                )
+                              )
+                              .mulUnsafe(
+                                FixedNumber.fromString(
+                                  (
+                                    destination_native_token.token_price.usd /
+                                    source_token.token_price.usd
+                                  )
+                                  .toFixed(decimals)
+                                  .toString()
+                                )
+                              )
+                              .round(0)
+                              .toString()
+                              .replace(
+                                '.0',
+                                '',
+                              ),
+                              decimals,
                             )
-                            .round(0)
-                            .toString()
-                            .replace(
-                              '.0',
-                              '',
-                            ),
-                            decimals,
                           )
-                        )
                       }
                     } catch (error) {
                       source_gas_used = 0
@@ -2364,10 +2475,21 @@ export default () => {
                       else {
                         const {
                           gasUsed,
-                        } = { ...(callback.executed?.receipt || callback.error?.receipt) }
+                        } = {
+                          ...(
+                            callback.executed?.receipt ||
+                            callback.error?.receipt
+                          ),
+                        }
+
                         let {
                           effectiveGasPrice,
-                        } = { ...(callback.executed?.receipt || callback.error?.receipt) }
+                        } = {
+                          ...(
+                            callback.executed?.receipt ||
+                            callback.error?.receipt
+                          ),
+                        }
 
                         if (!effectiveGasPrice) {
                           if (callback.executed) {
@@ -2379,29 +2501,44 @@ export default () => {
                         }
 
                         try {
-                          if (callback.executed?.receipt ?
-                            callback.is_execute_from_relayer === false :
-                            callback.error?.receipt ?
-                              callback.is_error_from_relayer === false :
-                              false
+                          if (
+                            callback.executed?.receipt ?
+                              callback.is_execute_from_relayer === false :
+                              callback.error?.receipt ?
+                                callback.is_error_from_relayer === false :
+                                false
                           ) {
                             callback_gas_used = 0
                           }
                           else {
-                            callback_gas_used = Number(
-                              utils.formatUnits(
-                                FixedNumber.fromString(
-                                  BigNumber.from(gasUsed || '0').toString()
-                                )
-                                .mulUnsafe(
+                            callback_gas_used =
+                              Number(
+                                utils.formatUnits(
                                   FixedNumber.fromString(
-                                    BigNumber.from(effectiveGasPrice || '0').toString()
+                                    BigNumber.from(
+                                      gasUsed ||
+                                      '0'
+                                    )
+                                    .toString()
                                   )
+                                  .mulUnsafe(
+                                    FixedNumber.fromString(
+                                      BigNumber.from(
+                                        effectiveGasPrice ||
+                                        '0',
+                                      )
+                                      .toString()
+                                    )
+                                  )
+                                  .round(0)
+                                  .toString()
+                                  .replace(
+                                    '.0',
+                                    '',
+                                  ),
+                                  source_token.decimals,
                                 )
-                                .round(0).toString().replace('.0', ''),
-                                source_token.decimals,
                               )
-                            )
                           }
                         } catch (error) {
                           callback_gas_used = 0
@@ -2458,17 +2595,41 @@ export default () => {
                       source_express_executed_gas_used = 0
                     }
 
-                    const refunded_amount = gasFeeAmount &&
+                    const refunded_amount =
+                      gasFeeAmount &&
                       refunded?.amount
 
-                    const from = receipt?.from || transaction?.from
-                    const to = !['express_executed', 'executed', 'refunded'].includes(s.id) ?
-                      contract_address :
-                      ['refunded'].includes(s.id) ?
-                        _data?.to || refundAddress :
-                        destinationContractAddress
-                    const { explorer } = { ...chain_data }
-                    const { url, transaction_path, block_path, address_path, icon } = { ...explorer }
+                    const from =
+                      receipt?.from ||
+                      transaction?.from
+
+                    const to =
+                      ![
+                        'express_executed',
+                        'executed',
+                        'refunded',
+                      ]
+                      .includes(s.id) ?
+                        contract_address :
+                        [
+                          'refunded',
+                        ]
+                        .includes(s.id) ?
+                          _data?.to ||
+                          refundAddress :
+                          destinationContractAddress
+
+                    const {
+                      explorer,
+                    } = { ...chain_data }
+
+                    const {
+                      url,
+                      transaction_path,
+                      block_path,
+                      address_path,
+                      icon,
+                    } = { ...explorer }
 
                     const refreshButton =
                       editable &&
@@ -2483,7 +2644,10 @@ export default () => {
                           (
                             (
                               !executed &&
-                              (is_executed || error)
+                              (
+                                is_executed ||
+                                error
+                              )
                             ) ||
                             (
                               executed
@@ -2493,60 +2657,104 @@ export default () => {
                         (
                           [
                             'refunded',
-                          ].includes(s.id) &&
+                          ]
+                          .includes(s.id) &&
                           typeof receipt?.status !== 'number'
                         ) ||
                         !block_timestamp
                       ) &&
                       (
                         <button
-                          disabled={s.id === 'refunded' ?
-                            txHashRefundEditUpdating :
-                            txHashEditUpdating
+                          disabled={
+                            s.id === 'refunded' ?
+                              txHashRefundEditUpdating :
+                              txHashEditUpdating
                           }
-                          onClick={async () => {
-                            if (s.id === 'refunded') {
-                              setTxHashRefundEditUpdating(true)
-                            }
-                            else {
-                              setTxHashEditUpdating(true)
-                            }
+                          onClick={
+                            async () => {
+                              if (s.id === 'refunded') {
+                                setTxHashRefundEditUpdating(true)
+                              }
+                              else {
+                                setTxHashEditUpdating(true)
+                              }
 
-                            await saveGMP(
-                              call?.transactionHash,
-                              call?.transactionIndex,
-                              call?.logIndex,
-                              transactionHash,
-                              transaction?.from,
-                              undefined,
-                              [
-                                'refunded',
-                              ].includes(s.id) ?
-                                s.id :
-                                s.id === 'executed' &&
-                                !executed &&
-                                (is_executed || error) ?
-                                  'not_executed' :
-                                  executed ?
-                                    're_execute' :
-                                    undefined,
-                            )
+                              await saveGMP(
+                                call?.transactionHash,
+                                call?.transactionIndex,
+                                call?.logIndex,
+                                transactionHash,
+                                transaction?.from,
+                                undefined,
+                                [
+                                  'refunded',
+                                ]
+                                .includes(s.id) ?
+                                  s.id :
+                                  s.id === 'executed' &&
+                                  !executed &&
+                                  (
+                                    is_executed ||
+                                    error
+                                  ) ?
+                                    'not_executed' :
+                                    executed ?
+                                      're_execute' :
+                                      undefined,
+                              )
 
-                            if (s.id === 'refunded') {
-                              setTxHashRefundEditUpdating(false)
+                              if (s.id === 'refunded') {
+                                setTxHashRefundEditUpdating(false)
+                              }
+                              else {
+                                setTxHashEditUpdating(false)
+                              }
                             }
-                            else {
-                              setTxHashEditUpdating(false)
-                            }
-                          }}
-                          className={`${(s.id === 'refunded' ? txHashRefundEditUpdating : txHashEditUpdating) ? 'hidden' : ''} cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`}
+                          }
+                          className={
+                            `${
+                              (
+                                s.id === 'refunded' ?
+                                  txHashRefundEditUpdating :
+                                  txHashEditUpdating
+                              ) ?
+                                'hidden' :
+                                ''
+                            } cursor-pointer text-white hover:text-blue-500 dark:text-slate-900 dark:hover:text-white`
+                          }
                         >
-                          <MdRefresh size={20} />
+                          <MdRefresh
+                            size={20}
+                          />
                         </button>
                       )
 
-                    const rowClassName = 'flex space-x-4'
-                    const rowTitleClassName = `w-32 whitespace-nowrap text-black dark:text-slate-300 text-sm lg:text-base font-bold`
+                    const success =
+                      receipt?.status ||
+                      (
+                        typeof receipt?.status !== 'number' &&
+                        transactionHash &&
+                        ![
+                          'executed',
+                          'refunded',
+                        ]
+                        .includes(s.id)
+                      ) ||
+                      (
+                        typeof receipt?.status !== 'number' &&
+                        [
+                          'executed',
+                        ]
+                        .includes(s.id) &&
+                        is_executed
+                      ) ||
+                      [
+                        'confirm',
+                      ]
+                      .includes(s.id)
+
+                    const rowClassName = 'flex flex-col space-y-0.5'
+                    const rowTitleClassName = `text-sm lg:text-base font-bold`
 
                     return (
                       <div
@@ -2557,49 +2765,332 @@ export default () => {
                           {title}
                         </div>
                         <div className="flex flex-col space-y-3">
-                          {['executed'].includes(s.id) && (executeButton || (!data && is_executed)) ?
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Tx Hash:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {txHashEditing ?
-                                  <input
-                                    disabled={txHashEditUpdating}
-                                    placement="Transaction Hash"
-                                    value={txHashEdit}
-                                    onChange={e => setTxHashEdit(e.target.value)}
-                                    className="bg-slate-50 dark:bg-slate-800 rounded-lg text-base py-1 px-2"
-                                  /> :
-                                  transactionHash ?
-                                    <>
+                          {
+                            [
+                              'executed',
+                            ]
+                            .includes(s.id) &&
+                            (
+                              executeButton ||
+                              (
+                                !data &&
+                                is_executed
+                              )
+                            ) ?
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Tx Hash
+                                </span>
+                                <div className="flex items-center space-x-0.5">
+                                  {
+                                    txHashEditing ?
+                                      <input
+                                        disabled={txHashEditUpdating}
+                                        placement="Transaction Hash"
+                                        value={txHashEdit}
+                                        onChange={
+                                          e =>
+                                            setTxHashEdit(e.target.value)
+                                        }
+                                        className="bg-slate-50 dark:bg-slate-800 rounded-lg py-1 px-2"
+                                      /> :
+                                      transactionHash ?
+                                        <>
+                                          <a
+                                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-500 dark:text-blue-500 font-medium"
+                                          >
+                                            <div>
+                                              <span className="xl:hidden">
+                                                {ellipse(
+                                                  transactionHash,
+                                                  12,
+                                                )}
+                                              </span>
+                                              <span className="hidden xl:block">
+                                                {ellipse(
+                                                  transactionHash,
+                                                  16,
+                                                )}
+                                              </span>
+                                            </div>
+                                          </a>
+                                          <Copy
+                                            value={transactionHash}
+                                          />
+                                          <a
+                                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-500 dark:text-blue-500"
+                                          >
+                                            {icon ?
+                                              <Image
+                                                src={icon}
+                                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                              /> :
+                                              <TiArrowRight
+                                                size={16}
+                                                className="transform -rotate-45"
+                                              />
+                                            }
+                                          </a>
+                                        </> :
+                                        !(
+                                          !data &&
+                                          is_executed
+                                        ) &&
+                                        !error &&
+                                        !is_invalid_destination_chain &&
+                                        !is_invalid_call &&
+                                        !is_insufficient_minimum_amount &&
+                                        !is_insufficient_fee &&
+                                        (
+                                          <ColorRing
+                                            color={loader_color(theme)}
+                                            width="32"
+                                            height="32"
+                                          />
+                                        )
+                                  }
+                                  {
+                                    txHashEditing ?
+                                      <>
+                                        <button
+                                          disabled={txHashEditUpdating}
+                                          onClick={
+                                            () =>
+                                              resetTxHashEdit()
+                                          }
+                                          className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
+                                        >
+                                          <RiCloseCircleFill
+                                            size={20}
+                                          />
+                                        </button>
+                                        <button
+                                          disabled={
+                                            !txHashEdit ||
+                                            txHashEditUpdating
+                                          }
+                                          onClick={
+                                            async () => {
+                                              setTxHashEditUpdating(true)
+
+                                              await saveGMP(
+                                                call?.transactionHash,
+                                                call?.transactionIndex,
+                                                call?.logIndex,
+                                                txHashEdit,
+                                                address,
+                                              )
+                                            }
+                                          }
+                                          className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
+                                        >
+                                          {
+                                            txHashEditUpdating ?
+                                              <TailSpin
+                                                color={loader_color(theme)}
+                                                width="16"
+                                                height="16"
+                                              /> :
+                                              <BiSave
+                                                size={20}
+                                              />
+                                          }
+                                        </button>
+                                      </> :
+                                      editable &&
+                                      (
+                                        <button
+                                          onClick={
+                                            () =>
+                                              setTxHashEditing(true)
+                                          }
+                                          className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                                        >
+                                          <BiEditAlt
+                                            size={20}
+                                          />
+                                        </button>
+                                      )
+                                  }
+                                </div>
+                                {refreshButton}
+                              </div> :
+                              [
+                                'refunded',
+                              ]
+                              .includes(s.id) &&
+                              (
+                                !data ||
+                                data.error
+                              ) ?
+                                <div className={rowClassName}>
+                                  <span className={rowTitleClassName}>
+                                    Tx Hash
+                                  </span>
+                                  <div className="flex items-center space-x-0.5">
+                                    {
+                                      txHashRefundEditing ?
+                                        <input
+                                          disabled={txHashRefundEditUpdating}
+                                          placement="Transaction Hash"
+                                          value={txHashRefundEdit}
+                                          onChange={
+                                            e =>
+                                              setTxHashRefundEdit(e.target.value)
+                                          }
+                                          className="bg-slate-50 dark:bg-slate-800 rounded-lg py-1 px-2"
+                                        /> :
+                                        transactionHash ?
+                                          <>
+                                            <a
+                                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-500 dark:text-blue-500 font-medium"
+                                            >
+                                              <div>
+                                                <span className="xl:hidden">
+                                                  {ellipse(
+                                                    transactionHash,
+                                                    12,
+                                                  )}
+                                                </span>
+                                                <span className="hidden xl:block">
+                                                  {ellipse(
+                                                    transactionHash,
+                                                    16,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            </a>
+                                            <Copy
+                                              value={transactionHash}
+                                            />
+                                            <a
+                                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-blue-500 dark:text-blue-500"
+                                            >
+                                              {icon ?
+                                                <Image
+                                                  src={icon}
+                                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                                /> :
+                                                <TiArrowRight
+                                                  size={16}
+                                                  className="transform -rotate-45"
+                                                />
+                                              }
+                                            </a>
+                                          </> :
+                                          null
+                                    }
+                                    {
+                                      txHashRefundEditing ?
+                                        <>
+                                          <button
+                                            disabled={txHashRefundEditUpdating}
+                                            onClick={
+                                              () =>
+                                                resetTxHashEdit()
+                                            }
+                                            className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
+                                          >
+                                            <RiCloseCircleFill
+                                              size={20}
+                                            />
+                                          </button>
+                                          <button
+                                            disabled={
+                                              !txHashRefundEdit ||
+                                              txHashRefundEditUpdating
+                                            }
+                                            onClick={
+                                              async () => {
+                                                setTxHashRefundEditUpdating(true)
+
+                                                await saveGMP(
+                                                  call?.transactionHash,
+                                                  call?.transactionIndex,
+                                                  call?.logIndex,
+                                                  txHashRefundEdit,
+                                                  address,
+                                                  undefined,
+                                                  'refunded',
+                                                )
+                                              }
+                                            }
+                                            className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
+                                          >
+                                            {
+                                              txHashRefundEditUpdating ?
+                                                <TailSpin
+                                                  color={loader_color(theme)}
+                                                  width="16"
+                                                  height="16"
+                                                /> :
+                                                <BiSave
+                                                  size={20}
+                                                />
+                                            }
+                                          </button>
+                                        </> :
+                                        editable &&
+                                        (
+                                          <button
+                                            onClick={
+                                              () =>
+                                                setTxHashRefundEditing(true)
+                                            }
+                                            className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                                          >
+                                            <BiEditAlt
+                                              size={20}
+                                            />
+                                          </button>
+                                        )
+                                    }
+                                  </div>
+                                </div> :
+                                poll_id ?
+                                  <div className={rowClassName}>
+                                    <span className={rowTitleClassName}>
+                                      Poll
+                                    </span>
+                                    <div className="flex items-center space-x-0.5">
                                       <a
-                                        href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                        href={`${url}/evm-poll/${poll_id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-blue-500 dark:text-blue-500 font-medium"
                                       >
-                                        <div className="text-sm lg:text-base">
+                                        <div>
                                           <span className="xl:hidden">
                                             {ellipse(
-                                              transactionHash,
+                                              poll_id,
                                               12,
                                             )}
                                           </span>
                                           <span className="hidden xl:block">
                                             {ellipse(
-                                              transactionHash,
+                                              poll_id,
                                               16,
                                             )}
                                           </span>
                                         </div>
                                       </a>
                                       <Copy
-                                        value={transactionHash}
-                                        size={18}
+                                        value={poll_id}
                                       />
                                       <a
-                                        href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                        href={`${url}/evm-poll/${poll_id}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-blue-500 dark:text-blue-500"
@@ -2615,88 +3106,21 @@ export default () => {
                                           />
                                         }
                                       </a>
-                                    </> :
-                                    !(!data && is_executed) &&
-                                    !error &&
-                                    !is_invalid_destination_chain &&
-                                    !is_invalid_call &&
-                                    !is_insufficient_minimum_amount &&
-                                    !is_insufficient_fee && (
-                                      <ColorRing
-                                        color={loader_color(theme)}
-                                        width="32"
-                                        height="32"
-                                      />
-                                    )
-                                }
-                                {txHashEditing ?
-                                  <>
-                                    <button
-                                      disabled={txHashEditUpdating}
-                                      onClick={() => resetTxHashEdit()}
-                                      className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
-                                    >
-                                      <RiCloseCircleFill size={20} />
-                                    </button>
-                                    <button
-                                      disabled={!txHashEdit || txHashEditUpdating}
-                                      onClick={async () => {
-                                        setTxHashEditUpdating(true)
-                                        await saveGMP(
-                                          call?.transactionHash,
-                                          call?.transactionIndex,
-                                          call?.logIndex,
-                                          txHashEdit,
-                                          address,
-                                        )
-                                      }}
-                                      className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
-                                    >
-                                      {txHashEditUpdating ?
-                                        <TailSpin
-                                          color={loader_color(theme)}
-                                          width="16"
-                                          height="16"
-                                        /> :
-                                        <BiSave size={20} />
-                                      }
-                                    </button>
-                                  </> :
-                                  editable && (
-                                    <button
-                                      onClick={() => setTxHashEditing(true)}
-                                      className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
-                                    >
-                                      <BiEditAlt size={20} />
-                                    </button>
-                                  )
-                                }
-                              </div>
-                              {refreshButton}
-                            </div> :
-                            ['refunded'].includes(s.id) && (!data || data.error) ?
-                              <div className={rowClassName}>
-                                <span className={rowTitleClassName}>
-                                  Tx Hash:
-                                </span>
-                                <div className="flex items-center space-x-1">
-                                  {txHashRefundEditing ?
-                                    <input
-                                      disabled={txHashRefundEditUpdating}
-                                      placement="Transaction Hash"
-                                      value={txHashRefundEdit}
-                                      onChange={e => setTxHashRefundEdit(e.target.value)}
-                                      className="bg-slate-50 dark:bg-slate-800 rounded-lg text-base py-1 px-2"
-                                    /> :
-                                    transactionHash ?
-                                      <>
+                                    </div>
+                                  </div> :
+                                  transactionHash ?
+                                    <div className={rowClassName}>
+                                      <span className={rowTitleClassName}>
+                                        Tx Hash
+                                      </span>
+                                      <div className="flex items-center space-x-0.5">
                                         <a
                                           href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           className="text-blue-500 dark:text-blue-500 font-medium"
                                         >
-                                          <div className="text-sm lg:text-base">
+                                          <div>
                                             <span className="xl:hidden">
                                               {ellipse(
                                                 transactionHash,
@@ -2713,7 +3137,6 @@ export default () => {
                                         </a>
                                         <Copy
                                           value={transactionHash}
-                                          size={18}
                                         />
                                         <a
                                           href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
@@ -2732,194 +3155,114 @@ export default () => {
                                             />
                                           }
                                         </a>
-                                      </> :
-                                      null
-                                  }
-                                  {txHashRefundEditing ?
-                                    <>
-                                      <button
-                                        disabled={txHashRefundEditUpdating}
-                                        onClick={() => resetTxHashEdit()}
-                                        className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
-                                      >
-                                        <RiCloseCircleFill size={20} />
-                                      </button>
-                                      <button
-                                        disabled={!txHashRefundEdit || txHashRefundEditUpdating}
-                                        onClick={async () => {
-                                          setTxHashRefundEditUpdating(true)
-                                          await saveGMP(
-                                            call?.transactionHash,
-                                            call?.transactionIndex,
-                                            call?.logIndex,
-                                            txHashRefundEdit,
-                                            address,
-                                            undefined,
-                                            'refunded',
-                                          )
-                                        }}
-                                        className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
-                                      >
-                                        {txHashRefundEditUpdating ?
-                                          <TailSpin
-                                            color={loader_color(theme)}
-                                            width="16"
-                                            height="16"
-                                          /> :
-                                          <BiSave size={20} />
-                                        }
-                                      </button>
-                                    </> :
-                                    editable && (
-                                      <button
-                                        onClick={() => setTxHashRefundEditing(true)}
-                                        className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
-                                      >
-                                        <BiEditAlt size={20} />
-                                      </button>
-                                    )
-                                  }
-                                </div>
-                              </div> :
-                              transactionHash ?
-                                <div className={rowClassName}>
-                                  <span className={rowTitleClassName}>
-                                    Tx Hash:
-                                  </span>
-                                  <div className="flex items-center space-x-1">
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 dark:text-blue-500 font-medium"
-                                    >
-                                      <div className="text-sm lg:text-base">
-                                        <span className="xl:hidden">
-                                          {ellipse(
-                                            transactionHash,
-                                            12,
-                                          )}
-                                        </span>
-                                        <span className="hidden xl:block">
-                                          {ellipse(
-                                            transactionHash,
-                                            16,
-                                          )}
-                                        </span>
                                       </div>
-                                    </a>
-                                    <Copy
-                                      value={transactionHash}
-                                      size={18}
-                                    />
-                                    <a
-                                      href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 dark:text-blue-500"
-                                    >
-                                      {icon ?
-                                        <Image
-                                          src={icon}
-                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                        /> :
-                                        <TiArrowRight
-                                          size={16}
-                                          className="transform -rotate-45"
-                                        />
-                                      }
-                                    </a>
-                                    {refreshButton}
-                                  </div>
-                                </div> :
-                                ['gas_paid'].includes(s.id) && origin?.call ?
-                                  <div className="space-y-1.5">
-                                    <Link href={`/gmp/${origin.call.transactionHash}`}>
-                                      <a
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
-                                      >
-                                        <HiArrowSmLeft size={16} />
-                                        <span className="text-xs font-semibold hover:font-bold">
-                                          from 1st Call
-                                        </span>
-                                      </a>
-                                    </Link>
-                                    <div className="flex items-center space-x-1">
-                                      <Link href={`/gmp/${origin.call.transactionHash}`}>
-                                        <a
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                        >
-                                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                            <span className="xl:hidden">
-                                              {ellipse(
-                                                origin.call.transactionHash,
-                                                8,
-                                              )}
+                                    </div> :
+                                    [
+                                      'gas_paid',
+                                    ]
+                                    .includes(s.id) &&
+                                    origin?.call ?
+                                      <div className="space-y-1.5">
+                                        <Link href={`/gmp/${origin.call.transactionHash}`}>
+                                          <a
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
+                                          >
+                                            <HiArrowSmLeft
+                                              size={16}
+                                            />
+                                            <span className="text-xs font-semibold hover:font-bold">
+                                              from 1st Call
                                             </span>
-                                            <span className="hidden xl:block">
-                                              {ellipse(
-                                                origin.call.transactionHash,
-                                                12,
-                                              )}
-                                            </span>
-                                          </div>
-                                        </a>
-                                      </Link>
-                                      <Copy
-                                        value={origin.call.transactionHash}
-                                        size={18}
-                                      />
-                                    </div>
-                                  </div> :
-                                  ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
-                                    <span className="text-slate-400 dark:text-slate-200 text-base font-semibold">
-                                      No transaction
-                                    </span> :
-                                    !is_invalid_destination_chain &&
-                                    !is_invalid_call &&
-                                    !is_insufficient_minimum_amount &&
-                                    !is_insufficient_fee && (
-                                      <ColorRing
-                                        color={loader_color(theme)}
-                                        width="32"
-                                        height="32"
-                                      />
-                                    )
+                                          </a>
+                                        </Link>
+                                        <div className="flex items-center space-x-0.5">
+                                          <Link href={`/gmp/${origin.call.transactionHash}`}>
+                                            <a
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                            >
+                                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                                <span className="xl:hidden">
+                                                  {ellipse(
+                                                    origin.call.transactionHash,
+                                                    8,
+                                                  )}
+                                                </span>
+                                                <span className="hidden xl:block">
+                                                  {ellipse(
+                                                    origin.call.transactionHash,
+                                                    12,
+                                                  )}
+                                                </span>
+                                              </div>
+                                            </a>
+                                          </Link>
+                                          <Copy
+                                            value={origin.call.transactionHash}
+                                          />
+                                        </div>
+                                      </div> :
+                                      [
+                                        'gas_paid',
+                                      ]
+                                      .includes(s.id) &&
+                                      [
+                                        'executed',
+                                        'error',
+                                      ]
+                                      .includes(status) ?
+                                        <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
+                                          No transaction
+                                        </span> :
+                                        !is_invalid_destination_chain &&
+                                        !is_invalid_call &&
+                                        !is_insufficient_minimum_amount &&
+                                        !is_insufficient_fee &&
+                                        (
+                                          <ColorRing
+                                            color={loader_color(theme)}
+                                            width="32"
+                                            height="32"
+                                          />
+                                        )
                           }
-                          {typeof logIndex === 'number' && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Log Index:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                <a
-                                  href={`${url}${transaction_path?.replace('{tx}', transactionHash)}#eventlog`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500 text-sm lg:text-base font-medium"
-                                >
-                                  {number_format(
-                                    logIndex,
-                                    '0,0',
-                                  )}
-                                </a>
+                          {
+                            typeof logIndex === 'number' &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Log Index
+                                </span>
+                                <div className="flex items-center space-x-1">
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', transactionHash)}#eventlog`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500 font-medium"
+                                  >
+                                    {number_format(
+                                      logIndex,
+                                      '0,0',
+                                    )}
+                                  </a>
+                                </div>
                               </div>
-                            </div>
-                          )}
-                          {typeof blockNumber === 'number' && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Block:
-                              </span>
-                              <div className="flex items-center space-x-1">
+                            )
+                          }
+                          {
+                            typeof blockNumber === 'number' &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Block
+                                </span>
                                 <a
                                   href={`${url}${block_path?.replace('{block}', blockNumber)}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500 text-sm lg:text-base font-medium"
+                                  className="text-blue-500 dark:text-blue-500 font-medium"
                                 >
                                   {number_format(
                                     blockNumber,
@@ -2927,813 +3270,1178 @@ export default () => {
                                   )}
                                 </a>
                               </div>
-                            </div>
-                          )}
-                          {(_data || (['executed'].includes(s.id) && is_executed)) && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Status:
-                              </span>
-                              <div className={`${receipt?.status || (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) || (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ? 'text-green-400 dark:text-green-300' : 'text-red-500 dark:text-red-600'} uppercase flex items-center text-sm lg:text-base font-bold space-x-1`}>
-                                {receipt?.status ||
-                                  (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
-                                  (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ?
-                                  <BiCheckCircle size={20} /> :
-                                  <BiXCircle size={20} />
-                                }
-                                <span>
-                                  {receipt?.status ||
-                                    (typeof receipt?.status !== 'number' && transactionHash && !['executed', 'refunded'].includes(s.id)) ||
-                                    (typeof receipt?.status !== 'number' && ['executed'].includes(s.id) && is_executed) ?
-                                    'Success' :
-                                    'Error'
+                            )
+                          }
+                          {
+                            (
+                              _data ||
+                              (
+                                [
+                                  'executed',
+                                ]
+                                .includes(s.id) &&
+                                is_executed
+                              )
+                            ) &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Status
+                                </span>
+                                <div
+                                  className={
+                                    `${
+                                      success ?
+                                        'text-green-500 dark:text-green-400' :
+                                        'text-red-500 dark:text-red-400'
+                                    } flex items-center space-x-1`
                                   }
+                                >
+                                  {
+                                    success ?
+                                      <BiCheckCircle
+                                        size={18}
+                                      /> :
+                                      <BiXCircle
+                                        size={18}
+                                      />
+                                  }
+                                  <span className="uppercase text-xs font-semibold">
+                                    {
+                                      success ?
+                                        'Success' :
+                                        'Error'
+                                    }
+                                  </span>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            block_timestamp &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Time
+                                </span>
+                                <span className="flex flex-wrap text-slate-400 dark:text-slate-500 font-medium">
+                                  <span className="whitespace-nowrap mr-0.5">
+                                    {
+                                      moment(block_timestamp * 1000)
+                                        .fromNow()
+                                    }
+                                  </span>
+                                  <span className="whitespace-nowrap">
+                                    (
+                                    {
+                                      moment(block_timestamp * 1000)
+                                        .format('MMM D, YYYY h:mm:ss A')
+                                    }
+                                    )
+                                  </span>
                                 </span>
                               </div>
-                            </div>
-                          )}
-                          {block_timestamp && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Time:
-                              </span>
-                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-600 text-sm lg:text-base font-medium">
-                                {moment(block_timestamp * 1000).fromNow()} ({moment(block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})
-                              </span>
-                            </div>
-                          )}
-                          {['gas_paid', 'refunded'].includes(s.id) && gasFeeAmount && source_gas_data && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Gas Paid:
-                              </span>
-                              <div className="flex flex-wrap items-center">
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-0.5 mr-1">
-                                  {source_gas_data.image && (
-                                    <Image
-                                      src={source_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        utils.formatUnits(
-                                          BigNumber.from(gasFeeAmount),
-                                          source_gas_data.decimals,
-                                        ),
-                                        '0,0.00000000',
-                                        true,
-                                      )}
+                            )
+                          }
+                          {
+                            transfer_id &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Transfer ID
+                                </span>
+                                <Copy
+                                  value={transfer_id}
+                                  title={
+                                    <span className="cursor-pointer break-all font-medium">
+                                      {transfer_id}
                                     </span>
-                                    <span>
-                                      {ellipse(source_gas_data.symbol)}
-                                    </span>
-                                  </span>
-                                </div>
-                                {gas_added_transactions?.map((g, j) => {
-                                  const {
-                                    transactionHash,
-                                    returnValues,
-                                  } = { ...g }
-                                  const {
-                                    gasFeeAmount,
-                                  } = { ...returnValues }
-
-                                  return (
-                                    <a
-                                      key={j}
-                                      href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-0.5 mr-1"
-                                    >
-                                      <span className="text-2xs font-semibold">
-                                        <span className="mr-1">
-                                          {number_format(
-                                            utils.formatUnits(
-                                              BigNumber.from(gasFeeAmount),
-                                              source_gas_data.decimals,
-                                            ),
-                                            '+0,0.00000000',
-                                            true,
-                                          )}
-                                        </span>
-                                        <span>
-                                          {ellipse(source_gas_data.symbol)}
-                                        </span>
-                                      </span>
-                                    </a>
-                                  )
-                                })}
+                                  }
+                                />
                               </div>
-                            </div>
-                          )}
-                          {['express_executed', 'refunded'].includes(s.id) && express_executed?.receipt?.gasUsed && (express_executed.receipt.effectiveGasPrice || express_executed.transaction?.gasPrice) && destination_gas_data && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                {['refunded'].includes(s.id) ?
-                                  'Gas Express' :
-                                  'Gas Used'
-                                }:
-                              </span>
-                              <div className="flex flex-wrap items-center">
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2.5">
-                                  {destination_gas_data?.image && (
-                                    <Image
-                                      src={destination_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        utils.formatUnits(
-                                          FixedNumber.fromString(
-                                            BigNumber.from(express_executed.receipt.gasUsed).toString()
-                                          )
-                                          .mulUnsafe(
-                                            FixedNumber.fromString(
-                                              BigNumber.from(
-                                                express_executed.receipt.effectiveGasPrice ||
-                                                express_executed.transaction.gasPrice
-                                              ).toString()
-                                            )
-                                          )
-                                          .round(0).toString().replace('.0', ''),
-                                          destination_gas_data.decimals,
-                                        ),
-                                        '0,0.00000000',
-                                        true,
-                                      )}
-                                    </span>
-                                    <span>
-                                      {ellipse(destination_gas_data.symbol)}
-                                    </span>
-                                  </span>
-                                </div>
-                                {(express_gas_price_rate || gas_price_rate) && (
-                                  <>
-                                    <span className="text-sm font-medium mr-2">
-                                      =
-                                    </span>
-                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2.5">
-                                      {source_gas_data?.image && (
+                            )
+                          }
+                          {
+                            [
+                              'gas_paid',
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            gasFeeAmount &&
+                            source_gas_data &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Gas Paid
+                                </span>
+                                <div className="flex flex-wrap items-center">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1">
+                                    {
+                                      source_gas_data.image &&
+                                      (
                                         <Image
                                           src={source_gas_data.image}
                                           className="w-5 h-5 rounded-full"
                                         />
-                                      )}
-                                      <span className="text-sm font-semibold">
-                                        <span className="mr-1">
-                                          {number_format(
-                                            source_express_executed_gas_used,
-                                            '0,0.00000000',
-                                            true,
-                                          )}
-                                        </span>
-                                        <span>
-                                          {ellipse(source_gas_data?.symbol)}
-                                        </span>
-                                      </span>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {[/*'approved', */'executed', 'error', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                {['refunded'].includes(s.id) ?
-                                  'Gas Execute' :
-                                  'Gas Used'
-                                }:
-                              </span>
-                              <div className="flex flex-wrap items-center">
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2.5">
-                                  {destination_gas_data?.image && (
-                                    <Image
-                                      src={destination_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        utils.formatUnits(
-                                          FixedNumber.fromString(
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          utils.formatUnits(
                                             BigNumber.from(
-                                              gasUsed
-                                            )
-                                            .toString()
-                                          )
-                                          .mulUnsafe(
+                                              gasFeeAmount
+                                            ),
+                                            source_gas_data.decimals,
+                                          ),
+                                          '0,0.00000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {ellipse(source_gas_data.symbol)}
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {
+                                    (gas_added_transactions || [])
+                                      .map((g, j) => {
+                                        const {
+                                          transactionHash,
+                                          returnValues,
+                                        } = { ...g }
+                                        const {
+                                          gasFeeAmount,
+                                        } = { ...returnValues }
+
+                                        return (
+                                          <a
+                                            key={j}
+                                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1"
+                                          >
+                                            <span className="text-2xs font-medium">
+                                              <span className="mr-1">
+                                                {number_format(
+                                                  utils.formatUnits(
+                                                    BigNumber.from(
+                                                      gasFeeAmount
+                                                    ),
+                                                    source_gas_data.decimals,
+                                                  ),
+                                                  '+0,0.00000000',
+                                                  true,
+                                                )}
+                                              </span>
+                                              <span>
+                                                {ellipse(source_gas_data.symbol)}
+                                              </span>
+                                            </span>
+                                          </a>
+                                        )
+                                      })
+                                  }
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              'express_executed',
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            express_executed?.receipt?.gasUsed &&
+                            (
+                              express_executed.receipt.effectiveGasPrice ||
+                              express_executed.transaction?.gasPrice
+                            ) &&
+                            destination_gas_data &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  {
+                                    [
+                                      'refunded',
+                                    ]
+                                    .includes(s.id) ?
+                                      'Gas Express' :
+                                      'Gas Used'
+                                  }
+                                </span>
+                                <div className="flex flex-wrap items-center">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                    {
+                                      destination_gas_data?.image &&
+                                      (
+                                        <Image
+                                          src={destination_gas_data.image}
+                                          className="w-5 h-5 rounded-full"
+                                        />
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          utils.formatUnits(
                                             FixedNumber.fromString(
                                               BigNumber.from(
-                                                effectiveGasPrice
+                                                express_executed.receipt.gasUsed
                                               )
                                               .toString()
                                             )
-                                          )
-                                          .round(0)
-                                          .toString()
-                                          .replace(
-                                            '.0',
-                                            '',
+                                            .mulUnsafe(
+                                              FixedNumber.fromString(
+                                                BigNumber.from(
+                                                  express_executed.receipt.effectiveGasPrice ||
+                                                  express_executed.transaction.gasPrice
+                                                ).toString()
+                                              )
+                                            )
+                                            .round(0)
+                                            .toString()
+                                            .replace(
+                                              '.0',
+                                              '',
+                                            ),
+                                            destination_gas_data.decimals,
                                           ),
-                                          destination_gas_data.decimals,
-                                        ),
-                                        '0,0.00000000',
-                                        true,
-                                      )}
+                                          '0,0.00000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {ellipse(destination_gas_data.symbol)}
+                                      </span>
                                     </span>
-                                    <span>
-                                      {ellipse(destination_gas_data.symbol)}
-                                    </span>
-                                  </span>
+                                  </div>
+                                  {
+                                    (
+                                      express_gas_price_rate ||
+                                      gas_price_rate
+                                    ) &&
+                                    (
+                                      <>
+                                        <span className="text-sm font-medium mr-2">
+                                          =
+                                        </span>
+                                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                          {
+                                            source_gas_data?.image &&
+                                            (
+                                              <Image
+                                                src={source_gas_data.image}
+                                                className="w-5 h-5 rounded-full"
+                                              />
+                                            )
+                                          }
+                                          <span className="text-sm font-medium">
+                                            <span className="mr-1">
+                                              {number_format(
+                                                source_express_executed_gas_used,
+                                                '0,0.00000000',
+                                                true,
+                                              )}
+                                            </span>
+                                            <span>
+                                              {ellipse(source_gas_data?.symbol)}
+                                            </span>
+                                          </span>
+                                        </div>
+                                      </>
+                                    )
+                                  }
                                 </div>
-                                {source_token?.token_price?.usd && destination_native_token?.token_price?.usd && (
-                                  <>
-                                    <span className="text-sm font-medium mr-2">
-                                      =
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              /*'approved', */
+                              'executed',
+                              'error',
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            gasUsed &&
+                            effectiveGasPrice &&
+                            destination_gas_data &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  {
+                                    [
+                                      'refunded',
+                                    ]
+                                    .includes(s.id) ?
+                                      'Gas Execute' :
+                                      'Gas Used'
+                                  }
+                                </span>
+                                <div className="flex flex-wrap items-center">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                    {
+                                      destination_gas_data?.image &&
+                                      (
+                                        <Image
+                                          src={destination_gas_data.image}
+                                          className="w-5 h-5 rounded-full"
+                                        />
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          utils.formatUnits(
+                                            FixedNumber.fromString(
+                                              BigNumber.from(
+                                                gasUsed
+                                              )
+                                              .toString()
+                                            )
+                                            .mulUnsafe(
+                                              FixedNumber.fromString(
+                                                BigNumber.from(
+                                                  effectiveGasPrice
+                                                )
+                                                .toString()
+                                              )
+                                            )
+                                            .round(0)
+                                            .toString()
+                                            .replace(
+                                              '.0',
+                                              '',
+                                            ),
+                                            destination_gas_data.decimals,
+                                          ),
+                                          '0,0.00000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {ellipse(destination_gas_data.symbol)}
+                                      </span>
                                     </span>
-                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2.5">
-                                      {source_gas_data?.image && (
+                                  </div>
+                                  {
+                                    source_token?.token_price?.usd &&
+                                    destination_native_token?.token_price?.usd &&
+                                    (
+                                      <>
+                                        <span className="text-sm font-medium mr-2">
+                                          =
+                                        </span>
+                                        <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                          {
+                                            source_gas_data?.image &&
+                                            (
+                                              <Image
+                                                src={source_gas_data.image}
+                                                className="w-5 h-5 rounded-full"
+                                              />
+                                            )
+                                          }
+                                          <span className="text-sm font-medium">
+                                            <span className="mr-1">
+                                              {number_format(
+                                                source_gas_used,
+                                                '0,0.00000000',
+                                                true,
+                                              )}
+                                            </span>
+                                            <span>
+                                              {ellipse(source_gas_data?.symbol)}
+                                            </span>
+                                          </span>
+                                        </div>
+                                      </>
+                                    )
+                                  }
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            callback_gas_used > 0 &&
+                            source_gas_data &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Gas Callback
+                                </span>
+                                <div className="flex items-center space-x-2">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
+                                    {
+                                      source_gas_data.image &&
+                                      (
                                         <Image
                                           src={source_gas_data.image}
                                           className="w-5 h-5 rounded-full"
                                         />
-                                      )}
-                                      <span className="text-sm font-semibold">
-                                        <span className="mr-1">
-                                          {number_format(
-                                            source_gas_used,
-                                            '0,0.00000000',
-                                            true,
-                                          )}
-                                        </span>
-                                        <span>
-                                          {ellipse(source_gas_data?.symbol)}
-                                        </span>
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          callback_gas_used,
+                                          '0,0.00000000',
+                                          true,
+                                        )}
                                       </span>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          )}
-                          {['refunded'].includes(s.id) && callback_gas_used > 0 && source_gas_data && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Gas Callback:
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                                  {source_gas_data.image && (
-                                    <Image
-                                      src={source_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        callback_gas_used,
-                                        '0,0.00000000',
-                                        true,
-                                      )}
+                                      <span>
+                                        {ellipse(source_gas_data.symbol)}
+                                      </span>
                                     </span>
-                                    <span>
-                                      {ellipse(source_gas_data.symbol)}
-                                    </span>
-                                  </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                          {['refunded'].includes(s.id) && source_token && destination_native_token && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Gas Price:
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                                  {destination_gas_data?.image && (
-                                    <Image
-                                      src={destination_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        source_token.token_price?.usd /
-                                        destination_native_token.token_price?.usd,
-                                        '0,0.00000000',
-                                        true,
-                                      )}
-                                    </span>
-                                    <span>
-                                      {ellipse(destination_gas_data?.symbol)}
-                                    </span>
-                                  </span>
-                                </div>
-                                <span className="text-sm font-medium">
-                                  =
+                            )
+                          }
+                          {
+                            [
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            source_token &&
+                            destination_native_token &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Gas Price
                                 </span>
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5">
-                                  {source_gas_data?.image && (
-                                    <Image
-                                      src={source_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        1,
-                                        '0,0.00000000',
-                                        true,
-                                      )}
+                                <div className="flex items-center space-x-2">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
+                                    {
+                                      destination_gas_data?.image &&
+                                      (
+                                        <Image
+                                          src={destination_gas_data.image}
+                                          className="w-5 h-5 rounded-full"
+                                        />
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          source_token.token_price?.usd /
+                                          destination_native_token.token_price?.usd,
+                                          '0,0.00000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {ellipse(destination_gas_data?.symbol)}
+                                      </span>
                                     </span>
-                                    <span>
-                                      {ellipse(source_gas_data?.symbol)}
-                                    </span>
+                                  </div>
+                                  <span className="text-sm font-medium">
+                                    =
                                   </span>
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
+                                    {
+                                      source_gas_data?.image &&
+                                      (
+                                        <Image
+                                          src={source_gas_data.image}
+                                          className="w-5 h-5 rounded-full"
+                                        />
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          1,
+                                          '0,0.00000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {ellipse(source_gas_data?.symbol)}
+                                      </span>
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          )}
-                          {['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 && (!(executed?.block_timestamp || error?.block_timestamp) || block_timestamp > (executed?.block_timestamp || error?.block_timestamp) || block_timestamp < (executed?.block_timestamp || error?.block_timestamp)) && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Refunded:
-                              </span>
-                              <div className="flex flex-wrap items-center">
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2.5">
-                                  {source_gas_data?.image && (
-                                    <Image
-                                      src={source_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )}
-                                  <span className="text-sm font-semibold">
-                                    <span className="mr-1">
-                                      {number_format(
-                                        refunded_amount,
-                                        '0,0.00000000',
-                                        true,
-                                      )}
+                            )
+                          }
+                          {
+                            [
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            receipt?.status === 1 &&
+                            source_token?.token_price?.usd &&
+                            destination_native_token?.token_price?.usd &&
+                            refunded_amount > 0 &&
+                            (
+                              !(
+                                executed?.block_timestamp ||
+                                error?.block_timestamp
+                              ) ||
+                              block_timestamp >
+                              (
+                                executed?.block_timestamp ||
+                                error?.block_timestamp
+                              ) ||
+                              block_timestamp <
+                              (
+                                executed?.block_timestamp ||
+                                error?.block_timestamp
+                              )
+                            ) &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Refunded
+                                </span>
+                                <div className="flex flex-wrap items-center">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2">
+                                    {
+                                      source_gas_data?.image &&
+                                      (
+                                        <Image
+                                          src={source_gas_data.image}
+                                          className="w-5 h-5 rounded-full"
+                                        />
+                                      )
+                                    }
+                                    <span className="text-sm font-medium">
+                                      <span className="mr-1">
+                                        {number_format(
+                                          refunded_amount,
+                                          '0,0.00000000',
+                                          true,
+                                        )}
+                                      </span>
+                                      <span>
+                                        {ellipse(source_gas_data?.symbol)}
+                                      </span>
                                     </span>
-                                    <span>
-                                      {ellipse(source_gas_data?.symbol)}
-                                    </span>
-                                  </span>
-                                </div>
-                                {(refunded_more_transactions || [])
-                                  .filter(r => r?.amount > 0)
-                                  .map((r, j) => {
-                                    const {
-                                      transactionHash,
-                                      amount,
-                                    } = { ...r }
+                                  </div>
+                                  {
+                                    (refunded_more_transactions || [])
+                                      .filter(r =>
+                                        r?.amount > 0
+                                      )
+                                      .map((r, j) => {
+                                        const {
+                                          transactionHash,
+                                          amount,
+                                        } = { ...r }
 
-                                    return (
-                                      <a
-                                        key={j}
-                                        href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2.5 mb-0.5 mr-1"
-                                      >
-                                        <span className="text-2xs font-semibold">
-                                          <span className="mr-1">
-                                            {number_format(
-                                              amount,
-                                              '+0,0.00000000',
-                                              true,
-                                            )}
-                                          </span>
-                                          <span>
-                                            {ellipse(source_gas_data.symbol)}
-                                          </span>
-                                        </span>
-                                      </a>
+                                        return (
+                                          <a
+                                            key={j}
+                                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1"
+                                          >
+                                            <span className="text-2xs font-medium">
+                                              <span className="mr-1">
+                                                {number_format(
+                                                  amount,
+                                                  '+0,0.00000000',
+                                                  true,
+                                                )}
+                                              </span>
+                                              <span>
+                                                {ellipse(source_gas_data.symbol)}
+                                              </span>
+                                            </span>
+                                          </a>
+                                        )
+                                      })
+                                  }
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            to &&
+                            ![
+                              'confirm',
+                            ]
+                            .includes(s.id) &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  {
+                                    [
+                                      'gas_paid',
+                                    ]
+                                    .includes(s.id) ?
+                                      'Gas Service' :
+                                    [
+                                      'express_executed',
+                                      'executed',
+                                    ]
+                                    .includes(s.id) ?
+                                      'Destination' :
+                                      [
+                                        'refunded',
+                                      ]
+                                      .includes(s.id) ?
+                                        'Receiver' :
+                                        'Gateway'
+                                  }
+                                </span>
+                                <div className="flex items-center space-x-0.5">
+                                  {
+                                    to.startsWith('0x') ?
+                                      <div className="flex items-center space-x-1">
+                                        <a
+                                          href={`${url}${address_path?.replace('{address}', to)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <EnsProfile
+                                            address={to}
+                                            no_copy={true}
+                                            fallback={
+                                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                                {ellipse(
+                                                  to,
+                                                  12,
+                                                  chain_data?.prefix_address,
+                                                )}
+                                              </div>
+                                            }
+                                          />
+                                        </a>
+                                        <Copy
+                                          value={to}
+                                        />
+                                      </div> :
+                                      <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                        <AccountProfile
+                                          address={to}
+                                          prefix={chain_data?.prefix_address}
+                                        />
+                                      </div>
+                                  }
+                                  <a
+                                    href={`${url}${address_path?.replace('{address}', to)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500"
+                                  >
+                                    {icon ?
+                                      <Image
+                                        src={icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            from &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  {
+                                    ![
+                                      'express_executed',
+                                      'approved',
+                                      'executed',
+                                    ]
+                                    .includes(s.id) ?
+                                      'Sender' :
+                                      [
+                                        'refunded',
+                                      ]
+                                      .includes(s.id) ?
+                                        'Sender' :
+                                        [
+                                          'express_executed',
+                                        ]
+                                        .includes(s.id) ?
+                                          'Express Relayer' :
+                                          'Relayer'
+                                  }
+                                </span>
+                                <div className="flex items-center space-x-0.5">
+                                  {
+                                    from.startsWith('0x') ?
+                                      <div className="flex items-center space-x-1">
+                                        <a
+                                          href={`${url}${address_path?.replace('{address}', from)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <EnsProfile
+                                            address={from}
+                                            no_copy={true}
+                                            fallback={
+                                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                                {ellipse(
+                                                  from,
+                                                  12,
+                                                  chain_data?.prefix_address,
+                                                )}
+                                              </div>
+                                            }
+                                          />
+                                        </a>
+                                        <Copy
+                                          value={from}
+                                        />
+                                      </div> :
+                                      <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                        <AccountProfile
+                                          address={from}
+                                          prefix={chain_data?.prefix_address}
+                                        />
+                                      </div>
+                                  }
+                                  <a
+                                    href={`${url}${address_path?.replace('{address}', from)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500"
+                                  >
+                                    {icon ?
+                                      <Image
+                                        src={icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              'call',
+                            ]
+                            .includes(s.id) &&
+                            sender &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Source
+                                </span>
+                                <div className="flex items-center space-x-0.5">
+                                  {
+                                    sender.startsWith('0x') ?
+                                      <div className="flex items-center space-x-1">
+                                        <a
+                                          href={`${url}${address_path?.replace('{address}', sender)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <EnsProfile
+                                            address={sender}
+                                            no_copy={true}
+                                            fallback={
+                                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                                {ellipse(
+                                                  sender,
+                                                  12,
+                                                  chain_data?.prefix_address,
+                                                )}
+                                              </div>
+                                            }
+                                          />
+                                        </a>
+                                        <Copy
+                                          value={sender}
+                                        />
+                                      </div> :
+                                      <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                        <AccountProfile
+                                          address={sender}
+                                          prefix={chain_data?.prefix_address}
+                                        />
+                                      </div>
+                                  }
+                                  <a
+                                    href={`${url}${address_path?.replace('{address}', sender)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500"
+                                  >
+                                    {icon ?
+                                      <Image
+                                        src={icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              'express_executed',
+                              'executed',
+                            ]
+                            .includes(s.id) &&
+                            call?.transaction?.from &&
+                            (
+                              <div className={rowClassName}>
+                                <span className={rowTitleClassName}>
+                                  Recipient
+                                </span>
+                                <div className="flex items-center space-x-0.5">
+                                  {
+                                    call.transaction.from.startsWith('0x') ?
+                                      <div className="flex items-center space-x-1">
+                                        <a
+                                          href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <EnsProfile
+                                            address={call.transaction.from}
+                                            no_copy={true}
+                                            fallback={
+                                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                                {ellipse(
+                                                  call.transaction.from,
+                                                  12,
+                                                  chain_data?.prefix_address,
+                                                )}
+                                              </div>
+                                            }
+                                          />
+                                        </a>
+                                        <Copy
+                                          value={call.transaction.from}
+                                        />
+                                      </div> :
+                                      <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                        <AccountProfile
+                                          address={call.transaction.from}
+                                          prefix={chain_data?.prefix_address}
+                                        />
+                                      </div>
+                                  }
+                                  <a
+                                    href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 dark:text-blue-500"
+                                  >
+                                    {icon ?
+                                      <Image
+                                        src={icon}
+                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                      /> :
+                                      <TiArrowRight
+                                        size={16}
+                                        className="transform -rotate-45"
+                                      />
+                                    }
+                                  </a>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              'executed',
+                            ]
+                            .includes(s.id) &&
+                            !data &&
+                            _data &&
+                            (
+                              <div className={rowClassName}>
+                                <span
+                                  className={rowTitleClassName}
+                                  style={
+                                    {
+                                      minWidth: '8rem',
+                                    }
+                                  }
+                                >
+                                  Error
+                                </span>
+                                <div className="flex flex-col space-y-1.5">
+                                  {
+                                    (
+                                      _data.error?.data?.message ||
+                                      _data.error?.message
+                                    ) &&
+                                    (
+                                      <div className="flex flex-col space-y-1.5">
+                                        {
+                                          [
+                                            {
+                                              id: 'message',
+                                              value:
+                                                _data.error?.data?.message ||
+                                                _data.error?.message,
+                                            },
+                                          ]
+                                          .filter(e => e?.value)
+                                          .map((e, j) => (
+                                            <div
+                                              key={j}
+                                              className={
+                                                `${
+                                                  ['body'].includes(e.id) ?
+                                                    'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' :
+                                                    'text-red-500'
+                                                } font-semibold`
+                                              }
+                                            >
+                                              {ellipse(
+                                                e.value,
+                                                256,
+                                              )}
+                                              <a
+                                                href="https://docs.axelar.dev/dev/monitor-recover/recovery"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-400 dark:text-blue-500 text-xs font-normal ml-1"
+                                              >
+                                                Transaction recovery guidelines
+                                              </a>
+                                            </div>
+                                          ))
+                                        }
+                                      </div>
                                     )
-                                  })
-                                }
-                              </div>
-                            </div>
-                          )}
-                          {to && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                {['gas_paid'].includes(s.id) ?
-                                  'Gas Service' :
-                                  ['express_executed', 'executed'].includes(s.id) ?
-                                    'Destination' :
-                                    ['refunded'].includes(s.id) ?
-                                      'Receiver' :
-                                      'Gateway'
-                                }:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {to.startsWith('0x') ?
-                                  <div className="flex items-center space-x-1">
-                                    <a
-                                      href={`${url}${address_path?.replace('{address}', to)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <EnsProfile
-                                        address={to}
-                                        no_copy={true}
-                                        fallback={(
-                                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                            {ellipse(
-                                              to,
-                                              12,
-                                              chain_data?.prefix_address,
-                                            )}
-                                          </div>
-                                        )}
-                                      />
-                                    </a>
-                                    <Copy
-                                      value={to}
-                                    />
-                                  </div> :
-                                  <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                    <AccountProfile
-                                      address={to}
-                                      prefix={chain_data?.prefix_address}
-                                    />
-                                  </div>
-                                }
-                                <a
-                                  href={`${url}${address_path?.replace('{address}', to)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500"
-                                >
-                                  {icon ?
-                                    <Image
-                                      src={icon}
-                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                    /> :
-                                    <TiArrowRight
-                                      size={16}
-                                      className="transform -rotate-45"
-                                    />
                                   }
-                                </a>
-                              </div>
-                            </div>
-                          )}
-                          {from && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                {!['express_executed', 'approved', 'executed'].includes(s.id) ?
-                                  'Sender' :
-                                  ['refunded'].includes(s.id) ?
-                                    'Sender' :
-                                    ['express_executed'].includes(s.id) ?
-                                      'Express Relayer' :
-                                      'Relayer'
-                                }:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {from.startsWith('0x') ?
-                                  <div className="flex items-center space-x-1">
-                                    <a
-                                      href={`${url}${address_path?.replace('{address}', from)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <EnsProfile
-                                        address={from}
-                                        no_copy={true}
-                                        fallback={(
-                                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                            {ellipse(
-                                              from,
-                                              12,
-                                              chain_data?.prefix_address,
-                                            )}
-                                          </div>
-                                        )}
-                                      />
-                                    </a>
-                                    <Copy
-                                      value={from}
-                                    />
-                                  </div> :
-                                  <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                    <AccountProfile
-                                      address={from}
-                                      prefix={chain_data?.prefix_address}
-                                    />
-                                  </div>
-                                }
-                                <a
-                                  href={`${url}${address_path?.replace('{address}', from)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500"
-                                >
-                                  {icon ?
-                                    <Image
-                                      src={icon}
-                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                    /> :
-                                    <TiArrowRight
-                                      size={16}
-                                      className="transform -rotate-45"
-                                    />
-                                  }
-                                </a>
-                              </div>
-                            </div>
-                          )}
-                          {['call'].includes(s.id) && sender && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Source:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {sender.startsWith('0x') ?
-                                  <div className="flex items-center space-x-1">
-                                    <a
-                                      href={`${url}${address_path?.replace('{address}', sender)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <EnsProfile
-                                        address={sender}
-                                        no_copy={true}
-                                        fallback={(
-                                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                            {ellipse(
-                                              sender,
-                                              12,
-                                              chain_data?.prefix_address,
-                                            )}
-                                          </div>
-                                        )}
-                                      />
-                                    </a>
-                                    <Copy
-                                      value={sender}
-                                    />
-                                  </div> :
-                                  <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                    <AccountProfile
-                                      address={sender}
-                                      prefix={chain_data?.prefix_address}
-                                    />
-                                  </div>
-                                }
-                                <a
-                                  href={`${url}${address_path?.replace('{address}', sender)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500"
-                                >
-                                  {icon ?
-                                    <Image
-                                      src={icon}
-                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                    /> :
-                                    <TiArrowRight
-                                      size={16}
-                                      className="transform -rotate-45"
-                                    />
-                                  }
-                                </a>
-                              </div>
-                            </div>
-                          )}
-                          {['express_executed', 'executed'].includes(s.id) && call?.transaction?.from && (
-                            <div className={rowClassName}>
-                              <span className={rowTitleClassName}>
-                                Receiver:
-                              </span>
-                              <div className="flex items-center space-x-1">
-                                {call.transaction.from.startsWith('0x') ?
-                                  <div className="flex items-center space-x-1">
-                                    <a
-                                      href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <EnsProfile
-                                        address={call.transaction.from}
-                                        no_copy={true}
-                                        fallback={(
-                                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                            {ellipse(
-                                              call.transaction.from,
-                                              12,
-                                              chain_data?.prefix_address,
-                                            )}
-                                          </div>
-                                        )}
-                                      />
-                                    </a>
-                                    <Copy
-                                      value={call.transaction.from}
-                                    />
-                                  </div> :
-                                  <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                    <AccountProfile
-                                      address={call.transaction.from}
-                                      prefix={chain_data?.prefix_address}
-                                    />
-                                  </div>
-                                }
-                                <a
-                                  href={`${url}${address_path?.replace('{address}', call.transaction.from)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 dark:text-blue-500"
-                                >
-                                  {icon ?
-                                    <Image
-                                      src={icon}
-                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                    /> :
-                                    <TiArrowRight
-                                      size={16}
-                                      className="transform -rotate-45"
-                                    />
-                                  }
-                                </a>
-                              </div>
-                            </div>
-                          )}
-                          {['executed'].includes(s.id) && !data && _data && (
-                            <div className={rowClassName}>
-                              <span
-                                className={rowTitleClassName}
-                                style={{ minWidth: '8rem' }}
-                              >
-                                Error:
-                              </span>
-                              <div className="flex flex-col space-y-1.5">
-                                <div className="flex flex-col space-y-1.5">
                                   {
-                                    [
-                                      {
-                                        id: 'message',
-                                        value:
-                                          _data.error?.data?.message ||
-                                          _data.error?.message,
-                                      },
-                                    ]
-                                    .filter(e => e?.value)
-                                    .map((e, j) => (
-                                      <div
-                                        key={j}
-                                        className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500'} font-semibold`}
-                                      >
-                                        {ellipse(
-                                          e.value,
-                                          256,
-                                        )}
-                                        <a
-                                          href="https://docs.axelar.dev/dev/monitor-recover/recovery"
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-400 dark:text-blue-500 text-xs font-normal ml-1"
-                                        >
-                                          Transaction recovery guidelines
-                                        </a>
+                                    _data.error?.reason &&
+                                    (
+                                      <div className="flex flex-col space-y-1.5">
+                                        {
+                                          [
+                                            {
+                                              id: 'reason',
+                                              value:
+                                                _data.error?.reason &&
+                                                `Reason: ${_data.error.reason}`,
+                                            },
+                                          ]
+                                          .filter(e =>
+                                            e?.value
+                                          )
+                                          .map((e, j) => (
+                                            <div
+                                              key={j}
+                                              className={
+                                                `${
+                                                  ['body'].includes(e.id) ?
+                                                    'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' :
+                                                    'text-red-400'
+                                                }`
+                                              }
+                                            >
+                                              {ellipse(
+                                                e.value,
+                                                256,
+                                              )}
+                                            </div>
+                                          ))
+                                        }
                                       </div>
-                                    ))
+                                    )
                                   }
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
                                   {
-                                    [
-                                      {
-                                        id: 'reason',
-                                        value:
-                                          _data.error?.reason &&
-                                          `Reason: ${_data.error.reason}`,
-                                      },
-                                    ]
-                                    .filter(e => e?.value)
-                                    .map((e, j) => (
-                                      <div
-                                        key={j}
-                                        className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-400'} font-normal`}
-                                      >
-                                        {ellipse(
-                                          e.value,
-                                          256,
-                                        )}
+                                    (
+                                      _data.error?.code ||
+                                      is_not_enough_gas
+                                    ) &&
+                                    (
+                                      <div className="flex items-center space-x-1.5">
+                                        {
+                                          _data.error?.code &&
+                                          (
+                                            <a
+                                              href={
+                                                !isNaN(_data.error.code) ?
+                                                  'https://docs.metamask.io/guide/ethereum-provider.html#errors' :
+                                                  `https://docs.ethers.io/v5/api/utils/logger/#errors-${
+                                                    _data.error.code ?
+                                                      `-${
+                                                        _data.error.code
+                                                          .toLowerCase()
+                                                          .split('_')
+                                                          .join('-')
+                                                      }` :
+                                                      'ethereum'
+                                                  }`
+                                              }
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="max-w-min bg-slate-50 dark:bg-slate-800 rounded text-slate-400 dark:text-slate-300 text-2xs font-medium py-1 px-2"
+                                            >
+                                              {_data.error.code}
+                                            </a>
+                                          )
+                                        }
+                                        {
+                                          is_not_enough_gas &&
+                                          (
+                                            <div className="max-w-min bg-yellow-100 dark:bg-yellow-300 rounded whitespace-nowrap uppercase text-slate-400 dark:text-yellow-600 text-2xs font-medium py-1 px-2">
+                                              {
+                                                `${
+                                                  _data.error?.reason === 'transaction failed' ?
+                                                    'Can be n' : 'N'
+                                                }ot enough gas`
+                                              }
+                                            </div>
+                                          )
+                                        }
                                       </div>
-                                    ))
+                                    )
                                   }
-                                </div>
-                                {
-                                  (
-                                    _data.error?.code ||
-                                    is_not_enough_gas
-                                  ) &&
-                                  (
-                                    <div className="flex items-center space-x-1.5">
-                                      {_data.error?.code && (
-                                        <a
-                                          href={!isNaN(_data.error.code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${_data.error.code ? `-${_data.error.code.toLowerCase().split('_').join('-')}` : 'ethereum'}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="max-w-min bg-slate-50 dark:bg-slate-800 rounded text-slate-400 dark:text-slate-300 text-2xs font-medium py-1 px-2"
+                                  <div className="flex flex-col space-y-1.5">
+                                    {
+                                      [
+                                        {
+                                          id: 'body',
+                                          value:
+                                            (_data.error?.body || '')
+                                              .replaceAll(
+                                                '"""',
+                                                '',
+                                              ),
+                                        }
+                                      ]
+                                      .filter(e =>
+                                        e?.value
+                                      )
+                                      .map((e, j) => (
+                                        <div
+                                          key={j}
+                                          className={
+                                            `${
+                                              ['body'].includes(e.id) ?
+                                                'bg-slate-100 dark:bg-slate-800 rounded-lg break-all p-2' :
+                                                'text-red-400'
+                                            }`
+                                          }
                                         >
-                                          {_data.error.code}
-                                        </a>
-                                      )}
-                                      {is_not_enough_gas && (
-                                        <div className="max-w-min bg-yellow-100 dark:bg-yellow-300 rounded whitespace-nowrap uppercase text-slate-400 dark:text-yellow-600 text-2xs font-medium py-1 px-2">
-                                          {`${_data.error?.reason === 'transaction failed' ? 'Can be n' : 'N'}ot enough gas`}
+                                          {ellipse(
+                                            e.value,
+                                            256,
+                                          )}
                                         </div>
-                                      )}
-                                    </div>
-                                  )
-                                }
+                                      ))
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            [
+                              'refunded',
+                            ]
+                            .includes(s.id) &&
+                            _data?.error &&
+                            !receipt?.status &&
+                            (
+                              <div className={rowClassName}>
+                                <span
+                                  className={rowTitleClassName}
+                                  style={
+                                    {
+                                      minWidth: '8rem',
+                                    }
+                                  }
+                                >
+                                  Error
+                                </span>
                                 <div className="flex flex-col space-y-1.5">
                                   {
-                                    [
-                                      {
-                                        id: 'body',
-                                        value:
-                                          (_data.error?.body || '')
-                                            .replaceAll(
-                                              '"""',
-                                              '',
-                                            ),
-                                      }
-                                    ]
-                                    .filter(e => e?.value)
-                                    .map((e, j) => (
-                                      <div
-                                        key={j}
-                                        className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg break-all p-2' : 'text-red-400'} font-normal`}
-                                      >
-                                        {ellipse(
-                                          e.value,
-                                          256,
-                                        )}
+                                    _data.error?.code &&
+                                    (
+                                      <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
+                                        {_data.error.code}
                                       </div>
-                                    ))
+                                    )
                                   }
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                          {['refunded'].includes(s.id) && _data?.error && !receipt?.status && (
-                            <div className={rowClassName}>
-                              <span
-                                className={rowTitleClassName}
-                                style={{ minWidth: '8rem' }}
-                              >
-                                Error:
-                              </span>
-                              <div className="flex flex-col space-y-1.5">
-                                {_data.error?.code && (
-                                  <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg font-semibold py-0.5 px-2">
-                                    {_data.error.code}
+                                  <div className="flex flex-col space-y-1.5">
+                                    {
+                                      [
+                                        {
+                                          id: 'reason',
+                                          value:
+                                            _data.error?.reason &&
+                                            `Reason: ${_data.error.reason}`,
+                                        },
+                                        {
+                                          id: 'message',
+                                          value:
+                                            _data.error?.data?.message ||
+                                            _data.error?.message,
+                                        },
+                                        {
+                                          id: 'body',
+                                          value:
+                                            (_data.error?.body || '')
+                                              .replaceAll(
+                                                '"""',
+                                                '',
+                                              ),
+                                        },
+                                      ]
+                                      .filter(e =>
+                                        e?.value
+                                      )
+                                      .map((e, j) => (
+                                        <div
+                                          key={j}
+                                          className={
+                                            `${
+                                              ['body'].includes(e.id) ?
+                                                'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' :
+                                                'text-red-500 dark:text-red-600'
+                                            } ${
+                                              ['reason'].includes(e.id) ?
+                                                'font-semibold' :
+                                                'font-medium'
+                                            }`
+                                          }
+                                        >
+                                          {ellipse(
+                                            e.value,
+                                            256,
+                                          )}
+                                        </div>
+                                      ))
+                                    }
                                   </div>
-                                )}
-                                <div className="flex flex-col space-y-1.5">
-                                  {[{
-                                    id: 'reason',
-                                    value: _data.error?.reason && `Reason: ${_data.error.reason}`,
-                                  }, {
-                                    id: 'message',
-                                    value: _data.error?.data?.message || _data.error?.message,
-                                  }, {
-                                    id: 'body',
-                                    value: _data.error?.body?.replaceAll('"""', ''),
-                                  }].filter(e => e?.value).map((e, j) => (
-                                    <div
-                                      key={j}
-                                      className={`${['body'].includes(e.id) ? 'bg-slate-100 dark:bg-slate-800 rounded-lg p-2' : 'text-red-500 dark:text-red-600'} ${['reason'].includes(e.id) ? 'font-bold' : 'font-medium'}`}
-                                    >
-                                      {ellipse(e.value, 256)}
-                                    </div>
-                                  ))}
                                 </div>
                               </div>
-                            </div>
-                          )}
+                            )
+                          }
                         </div>
                       </div>
                     )
                   })
               }
-              <div className="sm:col-span-4 grid sm:grid-cols-4 gap-4">
+              <div className="max-w-6.5xl sm:col-span-4 grid sm:grid-cols-4 gap-6 mx-auto">
                 {
                   no_gas_remain &&
                   (
@@ -3748,170 +4456,217 @@ export default () => {
                     error
                   ) &&
                   (
-                    <div className="w-fit bg-slate-100 dark:bg-slate-900 rounded-lg text-slate-400 dark:text-slate-200 text-base font-semibold p-3">
+                    <div className="w-fit bg-slate-100 dark:bg-slate-900 rounded-lg text-slate-400 dark:text-slate-200 text-base font-medium p-3">
                       No refund for this GMP call.
                     </div>
                   )
                 }
-                {payloadHash && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      Payload Hash
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {payloadHash}
-                      </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={payloadHash}
-                          size={20}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {approved && (
-                  <>
+                {
+                  payloadHash &&
+                  (
                     <div className="sm:col-span-4 space-y-2">
-                      <div className="text-lg font-bold">
-                        Methods
-                      </div>
-                      <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-base font-semibold py-0.5 px-1.5">
-                        execute{symbol ? 'WithToken' : ''}
-                      </div>
-                    </div>
-                    <div className="sm:col-span-4 text-lg font-bold">
-                      Arguments
-                    </div>
-                  </>
-                )}
-                {commandId && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      commandId
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {commandId}
-                      </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={commandId}
-                          size={20}
-                        />
+                      <span className="text-base font-medium">
+                        Payload Hash
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {payloadHash}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={payloadHash}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                {(sourceChain || chain) && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      sourceChain
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {sourceChain || capitalize(chain)}
+                  )
+                }
+                {
+                  approved &&
+                  (
+                    <>
+                      <div className="sm:col-span-4 space-y-2">
+                        <div className="text-lg font-semibold">
+                          Methods
+                        </div>
+                        <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg text-base font-medium py-0.5 px-1.5">
+                          execute{
+                            symbol ?
+                              'WithToken' :
+                              ''
+                          }
+                        </div>
                       </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={sourceChain || capitalize(chain)}
-                          size={20}
-                        />
+                      <div className="sm:col-span-4 text-lg font-semibold">
+                        Arguments
                       </div>
-                    </div>
-                  </div>
-                )}
-                {sender && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      sourceAddress
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {sender}
-                      </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={sender}
-                          size={20}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {payload && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      payload
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {payload}
-                      </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={payload}
-                          size={20}
-                        />
+                    </>
+                  )
+                }
+                {
+                  commandId &&
+                  (
+                    <div className="sm:col-span-4 space-y-2">
+                      <span className="text-base font-medium">
+                        commandId
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {commandId}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={commandId}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                {symbol && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      symbol
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {symbol}
-                      </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={symbol}
-                          size={20}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-                {approved?.returnValues?.amount && (
-                  <div className="sm:col-span-4 space-y-2">
-                    <span className="text-base font-semibold">
-                      amount
-                    </span>
-                    <div className="flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {BigNumber.from(approved.returnValues.amount).toString()}
-                      </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={BigNumber.from(approved.returnValues.amount).toString()}
-                          size={20}
-                        />
+                  )
+                }
+                {
+                  (
+                    sourceChain ||
+                    chain
+                  ) &&
+                  (
+                    <div className="sm:col-span-4 space-y-2">
+                      <span className="text-base font-medium">
+                        sourceChain
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {sourceChain || capitalize(chain)}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={
+                              sourceChain ||
+                              capitalize(chain)
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                {execute_data && (
-                  <>
-                    <div className="sm:col-span-4 text-lg font-bold">
-                      Execute Data
-                    </div>
-                    <div className="sm:col-span-4 flex items-start">
-                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                        {execute_data}
+                  )
+                }
+                {
+                  sender &&
+                  (
+                    <div className="sm:col-span-4 space-y-2">
+                      <span className="text-base font-medium">
+                        sourceAddress
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {sender}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={sender}
+                          />
+                        </div>
                       </div>
-                      <div className="mt-4">
-                        <Copy
-                          value={execute_data}
-                          size={20}
-                        />
+                    </div>
+                  )
+                }
+                {
+                  payload &&
+                  (
+                    <div className="sm:col-span-4 space-y-2">
+                      <span className="text-base font-medium">
+                        payload
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {payload}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={payload}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </>
-                )}
+                  )
+                }
+                {
+                  symbol &&
+                  (
+                    <div className="sm:col-span-4 space-y-2">
+                      <span className="text-base font-medium">
+                        symbol
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {symbol}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={symbol}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+                {
+                  approved?.returnValues?.amount &&
+                  (
+                    <div className="sm:col-span-4 space-y-2">
+                      <span className="text-base font-medium">
+                        amount
+                      </span>
+                      <div className="flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {
+                            BigNumber.from(
+                              approved.returnValues.amount
+                            )
+                            .toString()
+                          }
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={
+                              BigNumber.from(
+                                approved.returnValues.amount
+                              )
+                              .toString()
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+                {
+                  execute_data &&
+                  (
+                    <>
+                      <div className="sm:col-span-4 text-lg font-semibold">
+                        Execute Data
+                      </div>
+                      <div className="sm:col-span-4 flex items-start">
+                        <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                          {execute_data}
+                        </div>
+                        <div className="mt-4">
+                          <Copy
+                            size={20}
+                            value={execute_data}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )
+                }
               </div>
             </div>
           </> :

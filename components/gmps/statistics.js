@@ -140,15 +140,21 @@ export default () => {
                   undefined,
               status:
                 [
-                  'approving',
                   'called',
+                  'confirming',
                   'express_executed',
+                  'confirmed',
+                  'approving',
                   'approved',
                   'executing',
                   'executed',
                   'error',
                   'insufficient_fee',
-                ].includes(status?.toLowerCase()) ?
+                  'no_created_at',
+                ]
+                .includes(
+                  status?.toLowerCase()
+                ) ?
                   status.toLowerCase() :
                   undefined,
               senderAddress,
@@ -394,31 +400,35 @@ export default () => {
                     name:
                       k === 'invalid' ?
                         'Invalid Data' :
-                        k === 'approving' ?
-                          'Wait for Approval' :
-                          [
-                            'approved',
-                            'executing',
-                          ].includes(k) ?
-                            'Wait for Execute' :
-                            k === 'error' ?
-                              'Error Execution' :
-                              capitalize(k),
+                        k === 'confirming' ?
+                          'Wait for Confirmation' :
+                          k === 'approving' ?
+                            'Wait for Approval' :
+                            [
+                              'approved',
+                              'executing',
+                            ].includes(k) ?
+                              'Wait for Execute' :
+                              k === 'error' ?
+                                'Error Execution' :
+                                capitalize(k),
                     color:
                       k === 'invalid' ?
                         'bg-slate-500' :
-                        k === 'approving' ?
-                          'bg-yellow-500' :
-                          [
-                            'approved',
-                            'executing',
-                          ].includes(k) ?
-                            'bg-blue-500' :
-                            k === 'executed' ?
-                              'bg-green-500' :
-                              k === 'error' ?
-                                'bg-red-500' :
-                                  undefined,
+                        k === 'confirming' ?
+                          'bg-yellow-400' :
+                          k === 'approving' ?
+                            'bg-yellow-500' :
+                            [
+                              'approved',
+                              'executing',
+                            ].includes(k) ?
+                              'bg-blue-500' :
+                              k === 'executed' ?
+                                'bg-green-500' :
+                                k === 'error' ?
+                                  'bg-red-500' :
+                                    undefined,
                     num_txs: v,
                   }
                 }),
