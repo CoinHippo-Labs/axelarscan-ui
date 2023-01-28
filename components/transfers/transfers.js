@@ -1385,7 +1385,9 @@ export default (
                                 ) :
                                 id === 'send' ?
                                   status !== 'failed' :
-                                  data
+                                  id === 'unwrap' ?
+                                    data?.tx_hash_unwrap :
+                                    data
                           ),
                       }
                     })
@@ -1452,28 +1454,19 @@ export default (
                               id_field,
                               path,
                               params,
+                              finish,
                             } = { ...s }
                             let {
                               title,
-                              finish,
                             } = { ...s }
 
                             title =
                               [
                                 'Approved',
-                              ].includes(title) ?
+                              ]
+                              .includes(title) ?
                                 'Confirmed' :
                                 title
-
-                            finish =
-                              finish ||
-                              (
-                                i < current_step &&
-                                (
-                                  s?.id !== 'unwrap' ||
-                                  data?.tx_hash_unwrap
-                                )
-                              )
 
                             const id = data?.[id_field]
 
