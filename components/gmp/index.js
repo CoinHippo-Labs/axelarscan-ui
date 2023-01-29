@@ -1336,7 +1336,6 @@ export default () => {
             0
         ) +
         (
-          confirm &&
           steps
             .findIndex(s =>
               s.id === 'confirm'
