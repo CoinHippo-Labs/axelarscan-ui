@@ -1314,6 +1314,10 @@ export default (
                             s.id === 'express_executed'
                           ) +
                         (
+                          steps
+                            .findIndex(s =>
+                              s.id === 'confirm'
+                            ) > -1 &&
                           confirm ?
                             1 :
                             0
@@ -1322,10 +1326,21 @@ export default (
                       break
                     case 'confirmed':
                       current_step =
-                        steps
-                          .findIndex(s =>
-                            s.id === 'confirm'
-                          ) +
+                        (
+                          steps
+                            .findIndex(s =>
+                              s.id === 'confirm'
+                            ) > -1 ?
+                            steps
+                              .findIndex(s =>
+                                s.id === 'confirm'
+                              ) :
+                            steps
+                              .findIndex(s =>
+                                s.id === 'approved'
+                              ) -
+                            1
+                        ) +
                         1
                       break
                     case 'approved':
