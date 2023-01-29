@@ -404,7 +404,10 @@ export default () => {
     resetTxHashEdit()
   }
 
-  const approve = async data => {
+  const approve = async (
+    data,
+    is_after_pay_gas = false,
+  ) => {
     if (
       api &&
       data
@@ -455,20 +458,26 @@ export default () => {
         }
 
         setApproving(false)
-        setApproveResponse(
-          {
-            status:
-              success ?
-                'success' :
-                'failed',
-            message:
-              error?.message ||
-              error ||
-              'Approve successful',
-            txHash: signCommandTx?.txhash,
-            is_axelar_transaction: true,
-          }
-        )
+
+        if (
+          !is_after_pay_gas ||
+          success
+        ) {
+          setApproveResponse(
+            {
+              status:
+                success ?
+                  'success' :
+                  'failed',
+              message:
+                error?.message ||
+                error ||
+                'Approve successful',
+              txHash: signCommandTx?.txhash,
+              is_axelar_transaction: true,
+            }
+          )
+        }
       } catch (error) {
         const message =
           error?.reason ||
@@ -653,7 +662,10 @@ export default () => {
         ) {
           await sleep(1 * 1000)
 
-          approve(data)
+          approve(
+            data,
+            true,
+          )
         }
       } catch (error) {
         const message =
@@ -1330,14 +1342,34 @@ export default () => {
           .findIndex(s =>
             s.id === 'express_executed'
           ) +
+        (
+          steps
+            .findIndex(s =>
+              s.id === 'confirm'
+            ) > -1 &&
+          confirm ?
+            1 :
+            0
+        ) +
         1
       break
     case 'confirmed':
       current_step =
-        steps
-          .findIndex(s =>
-            s.id === 'confirm'
-          ) +
+        (
+          steps
+            .findIndex(s =>
+              s.id === 'confirm'
+            ) > -1 ?
+            steps
+              .findIndex(s =>
+                s.id === 'confirm'
+              ) :
+            steps
+              .findIndex(s =>
+                s.id === 'approved'
+              ) -
+            1
+        ) +
         1
       break
     case 'approved':
@@ -1345,13 +1377,14 @@ export default () => {
       current_step =
         steps
           .findIndex(s =>
-            s.id === 'express_executed'
+            s.id ===
+              (
+                gas_paid ||
+                gas_paid_to_callback ?
+                  'approved' :
+                  'call'
+              )
           ) +
-        (
-          confirm ?
-            1 :
-            0
-        ) +
         1
       break
     case 'executed':
