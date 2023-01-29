@@ -1334,6 +1334,15 @@ export default () => {
           ) ?
             1 :
             0
+        ) +
+        (
+          confirm &&
+          steps
+            .findIndex(s =>
+              s.id === 'confirm'
+            ) > -1 ?
+            1 :
+            0
         )
       break
     case 'express_executed':
