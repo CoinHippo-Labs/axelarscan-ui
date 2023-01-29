@@ -664,6 +664,7 @@ export default () => {
   const is_assets_path =
     [
       '/transfers',
+      '/gmp',
       '/tvl',
       '/assets',
     ].findIndex(p =>
@@ -671,7 +672,27 @@ export default () => {
     ) > -1
 
   return (
-    <div className={`w-full flex flex-col sm:flex-row sm:items-center mx-auto py-2 px-2 sm:px-4 ${!['/tvl'].includes(pathname) ? 'pt-6 sm:pt-4' : ''} ${!['/validators', '/tvl'].includes(pathname) ? 'max-w-8xl xl:px-0' : ''}`}>
+    <div
+      className={
+        `w-full flex mx-auto p-2 pt-6 sm:pt-4 sm:px-4 ${
+          ![
+            '/',
+            '/tvl',
+          ]
+          .includes(pathname) ?
+            'items-center' :
+            'flex-col sm:flex-row items-start sm:items-center'
+        } ${
+          ![
+            '/validators',
+            '/tvl',
+          ]
+          .includes(pathname) ?
+            'max-w-8xl xl:px-0' :
+            ''
+        }`
+      }
+    >
       <div className="flex flex-col space-y-1">
         {
           title &&
@@ -693,10 +714,10 @@ export default () => {
       <span className="sm:ml-auto" />
       {right ?
         <>
-          <span className="mt-0.5 sm:mt-0 ml-auto" />
+          <span className="ml-auto" />
           {right}
         </> :
-        <div className="overflow-x-auto flex items-center mt-1 sm:mt-0">
+        <div className="overflow-x-auto flex items-center ml-auto pl-2">
           {token_component}
           {
             !isNaN(latest_block_height) &&

@@ -494,19 +494,22 @@ export default () => {
     data ?
       <div className="space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-0 sm:space-x-2 -mt-0.5">
-          {typeof total === 'number' && (
-            <div className="flex items-center space-x-1.5 sm:mb-1 ml-2 sm:ml-0">
-              <span className="tracking-wider text-sm font-semibold">
-                {number_format(
-                  total,
-                  '0,0',
-                )}
-              </span>
-              <span className="tracking-wider text-sm">
-                Results
-              </span>
-            </div>
-          )}
+          {
+            typeof total === 'number' &&
+            (
+              <div className="flex items-center space-x-1.5 sm:mb-1">
+                <span className="tracking-wider text-sm font-semibold">
+                  {number_format(
+                    total,
+                    '0,0',
+                  )}
+                </span>
+                <span className="tracking-wider text-sm">
+                  Results
+                </span>
+              </div>
+            )
+          }
           <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:justify-end sm:space-x-2.5">
             {Object.entries({ ...types })
               .map(([k, v]) => (

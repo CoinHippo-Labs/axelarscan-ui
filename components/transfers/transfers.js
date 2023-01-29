@@ -469,7 +469,7 @@ export default (
               {
                 typeof total === 'number' &&
                 (
-                  <div className="flex items-center space-x-1.5 sm:mb-1 ml-2 sm:ml-0">
+                  <div className="flex items-center space-x-1.5 sm:mb-1">
                     <span className="tracking-wider font-semibold">
                       {number_format(
                         total,

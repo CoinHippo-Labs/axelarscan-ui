@@ -195,7 +195,7 @@ export default () => {
             to Cosmos
           </div>
         </div>
-        <div className="bg-green-100 dark:bg-green-800 rounded-xl shadow dark:shadow-green-400 border-2 border-green-600 dark:border-green-400 text-center p-1.5 sm:pt-2.5 sm:pb-2.5 sm:px-3">
+        <div className="bg-green-100 dark:bg-green-900 dark:bg-opacity-50 rounded-xl shadow dark:shadow-green-500 border-2 border-green-600 dark:border-green-500 text-center p-1.5 sm:pt-2.5 sm:pb-2.5 sm:px-3">
           <div
             title={
               `${currency_symbol}${
@@ -206,7 +206,7 @@ export default () => {
               }`
               .toUpperCase()
             }
-            className="uppercase text-green-600 dark:text-green-400 text-lg font-extrabold"
+            className="uppercase text-green-600 dark:text-green-500 text-lg font-extrabold"
           >
             {currency_symbol}
             {number_format(
@@ -218,7 +218,7 @@ export default () => {
                   '0,0.00',
             )}
           </div>
-          <div className="text-green-600 dark:text-green-400 text-xs font-semibold">
+          <div className="text-green-600 dark:text-green-500 text-xs font-semibold">
             Total
           </div>
         </div>
