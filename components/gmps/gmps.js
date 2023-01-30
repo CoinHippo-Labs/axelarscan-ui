@@ -774,7 +774,7 @@ export default (
                         ) >= 0 &&
                         (
                           <div className="flex flex-col">
-                            <span className="text-slate-400 dark:text-slate-200 font-medium">
+                            <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
                               Base fees:
                             </span>
                             <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap my-0.5 py-0.5 px-1.5">

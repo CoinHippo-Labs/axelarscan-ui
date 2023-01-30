@@ -327,7 +327,11 @@ export default () => {
           tx,
         }
       )
+
+      return data
     }
+
+    return null
   }
 
   useEffect(
@@ -345,8 +349,9 @@ export default () => {
       }
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           0.15 * 60 * 1000,
         )
 
@@ -414,12 +419,15 @@ export default () => {
     ) {
       try {
         setApproving(true)
-        setApproveResponse(
-          {
-            status: 'pending',
-            message: 'Approving',
-          }
-        )
+
+        if (!is_after_pay_gas) {
+          setApproveResponse(
+            {
+              status: 'pending',
+              message: 'Approving',
+            }
+          )
+        }
 
         const {
           call,
@@ -637,8 +645,12 @@ export default () => {
           transaction,
         } = { ...response }
 
+        let _data
+
         if (success) {
-          await sleep(15 * 1000)
+          await sleep(1 * 1000)
+
+          _data = await getMessage()
         }
 
         setGasAdding(false)
@@ -660,12 +672,16 @@ export default () => {
           success &&
           !approved
         ) {
-          await sleep(1 * 1000)
+          if (_data) {
+            data = _data
+          }
 
-          approve(
-            data,
-            true,
-          )
+          if (!data.approved) {
+            approve(
+              data,
+              true,
+            )
+          }
         }
       } catch (error) {
         const message =
@@ -1624,7 +1640,7 @@ export default () => {
                           ) >= 0 &&
                           (
                             <div className="flex items-center space-x-2">
-                              <span className="text-slate-400 dark:text-slate-200 font-medium">
+                              <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
                                 Base fees:
                               </span>
                               <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
@@ -2125,7 +2141,7 @@ export default () => {
                               return (
                                 <div
                                   key={i}
-                                  className="flex items-center space-x-1.5 pb-0.5"
+                                  className="min-w-max flex items-center space-x-1.5 pb-0.5"
                                 >
                                   {
                                     step_finish ?
