@@ -260,7 +260,7 @@ export default (
                       const asset_data =
                         getAsset(
                           asset ||
-                            symbol,
+                          symbol,
                           assets_data,
                         )
                       const {
