@@ -1124,7 +1124,7 @@ export default () => {
                             (
                               <div
                                 key={i}
-                                className="flex items-center space-x-1 pb-0.5"
+                                className="min-w-max flex items-center space-x-1 pb-0.5"
                               >
                                 {finish ?
                                   <BiCheckCircle
