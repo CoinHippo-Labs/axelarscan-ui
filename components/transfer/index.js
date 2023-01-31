@@ -89,6 +89,7 @@ export default () => {
             command,
             ibc_send,
             axelar_transfer,
+            unwrap,
           } = { ...data }
           const {
             source_chain,
@@ -96,6 +97,7 @@ export default () => {
             amount,
             value,
             fee,
+            insufficient_fee,
           } = { ...send }
           let {
             recipient_address,
@@ -264,33 +266,58 @@ export default () => {
               typeof fee === 'number'
             ) ||
             (
-              !command?.executed &&
               (evm_chains_data || [])
                 .findIndex(c =>
                   equals_ignore_case(
                     c?.id,
                     destination_chain,
                   )
-                ) > -1
+                ) > -1 &&
+              !insufficient_fee &&
+              (
+                vote ||
+                confirm
+              ) &&
+              !command?.executed
             ) ||
             (
-              !ibc_send?.recv_txhash &&
-              ![
-                'axelarnet',
-              ].includes(destination_chain) &&
               (cosmos_chains_data || [])
                 .findIndex(c =>
                   equals_ignore_case(
                     c?.id,
                     destination_chain,
                   )
-                ) > -1
+                ) > -1 &&
+              ![
+                'axelarnet',
+              ]
+              .includes(destination_chain) &&
+              !insufficient_fee &&
+              (
+                vote ||
+                confirm
+              ) &&
+              !(
+                ibc_send?.failed_txhash ||
+                ibc_send?.ack_txhash ||
+                ibc_send?.recv_txhash
+              )
             ) ||
             (
               [
                 'axelarnet',
-              ].includes(destination_chain) &&
+              ]
+              .includes(destination_chain) &&
+              !insufficient_fee &&
               !axelar_transfer
+            ) ||
+            !(
+              vote?.transfer_id ||
+              confirm?.transfer_id
+            ) ||
+            (
+              unwrap &&
+              !unwrap.tx_hash_unwrap
             )
           ) {
             await getTransfersStatus(
@@ -356,8 +383,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           0.5 * 60 * 1000,
         )
 
