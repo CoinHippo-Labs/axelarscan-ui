@@ -109,7 +109,8 @@ export default () => {
         [
           'evm_address',
           'cosmos_address',
-        ].includes(input_type)
+        ]
+        .includes(input_type)
       ) {
         let response =
           await transfers(
@@ -158,13 +159,24 @@ export default () => {
         [
           'evm_tx',
           'tx',
-        ].includes(input_type)
+        ]
+        .includes(input_type)
       ) {
         const response =
           await transfers(
             {
               query: {
-                match: { 'send.txhash': input },
+                bool: {
+                  should:
+                    [
+                      { match: { 'send.txhash': input } },
+                      { match: { 'wrap.txhash': input } },
+                      { match: { 'command.transactionHash': input } },
+                      { match: { 'unwrap.txhash': input } },
+                      { match: { 'unwrap.tx_hash_unwrap': input } },
+                    ],
+                  minimum_should_match: 1,
+                },
               },
             },
           )
