@@ -22,6 +22,7 @@ import Image from '../image'
 import Copy from '../copy'
 import Notification from '../notifications'
 import Wallet from '../wallet'
+import parameters from '../../data/gmp/parameters'
 import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
@@ -521,18 +522,31 @@ export default () => {
 
         const {
           call,
+          approved,
         } = { ...data }
         const {
           transactionHash,
           transactionIndex,
           logIndex,
         } = { ...call }
+        const {
+          chain,
+        } = { ...approved }
+
+        const {
+          execute_gas_limit_buffer,
+        } = { ...parameters }
+
+        const gasLimitBuffer =
+          execute_gas_limit_buffer[process.env.NEXT_PUBLIC_ENVIRONMENT]?.[chain] ||
+          execute_gas_limit_buffer[process.env.NEXT_PUBLIC_ENVIRONMENT]?.default
 
         console.log(
           '[execute request]',
           {
             transactionHash,
             logIndex,
+            gasLimitBuffer,
           },
         )
 
@@ -540,6 +554,9 @@ export default () => {
           await api.execute(
             transactionHash,
             logIndex,
+            {
+              gasLimitBuffer,
+            },
           )
 
         console.log(
@@ -614,7 +631,19 @@ export default () => {
           transactionHash,
           transactionIndex,
           logIndex,
+          returnValues,
         } = { ...call }
+        const {
+          destinationChain,
+        } = { ...returnValues }
+
+        const {
+          gas_add_adjustment,
+        } = { ...parameters }
+
+        const multipler =
+          gas_add_adjustment[process.env.NEXT_PUBLIC_ENVIRONMENT]?.[destinationChain?.toLowerCase()] ||
+          gas_add_adjustment[process.env.NEXT_PUBLIC_ENVIRONMENT]?.default
 
         console.log(
           '[addNativeGas request]',
@@ -622,6 +651,7 @@ export default () => {
             chain,
             transactionHash,
             refundAddress: address,
+            multipler,
           },
         )
 
@@ -631,6 +661,7 @@ export default () => {
             transactionHash,
             {
               refundAddress: address,
+              multipler,
             },
           )
 
@@ -1117,7 +1148,11 @@ export default () => {
     (
       <>
         <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
-          Add gas at source chain
+          {
+            gas_paid ?
+              'Add' :
+              'Pay'
+          } gas at source chain
         </span>
         <div className="flex items-center space-x-2">
           {
