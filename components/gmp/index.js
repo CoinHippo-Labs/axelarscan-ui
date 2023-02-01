@@ -555,6 +555,7 @@ export default () => {
             transactionHash,
             logIndex,
             {
+              useWindowEthereum: true,
               gasLimitBuffer,
             },
           )
@@ -660,6 +661,7 @@ export default () => {
             chain,
             transactionHash,
             {
+              useWindowEthereum: true,
               refundAddress: address,
               multipler,
             },
