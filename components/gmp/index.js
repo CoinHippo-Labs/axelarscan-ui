@@ -1271,7 +1271,7 @@ export default () => {
       express_executed &&
       {
         id: 'express_executed',
-        title: 'Express Execute',
+        title: 'Express Executed',
         chain_data: destination_chain_data,
         data: express_executed,
       },
@@ -1284,7 +1284,7 @@ export default () => {
         title:
           staging ?
             'Confirmed' :
-            'Confirmed',
+            'Confirmed on Axelar',
         chain_data: axelar_chain_data,
         data: confirm,
       },
@@ -1313,7 +1313,7 @@ export default () => {
       ) &&
       {
         id: 'refunded',
-        title: 'Gas Refunded',
+        title: 'Refunded',
         chain_data: source_chain_data,
         data: refunded,
       },
@@ -3566,7 +3566,7 @@ export default () => {
                                       'refunded',
                                     ]
                                     .includes(s.id) ?
-                                      'Gas Express' :
+                                      'Gas Used on Express' :
                                       'Gas Used'
                                   }
                                 </span>
@@ -3675,64 +3675,82 @@ export default () => {
                                       'refunded',
                                     ]
                                     .includes(s.id) ?
-                                      'Gas Execute' :
-                                      'Gas Used'
+                                      'Gas Used by Axelar Relayer' :
+                                      'Gas Used by Axelar Relayer'
                                   }
                                 </span>
                                 <div className="flex flex-wrap items-center">
-                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
-                                    {
-                                      destination_gas_data?.image &&
-                                      (
-                                        <Image
-                                          src={destination_gas_data.image}
-                                          className="w-5 h-5 rounded-full"
-                                        />
-                                      )
-                                    }
-                                    <span className="text-sm font-medium">
-                                      <span className="mr-1">
-                                        {number_format(
-                                          utils.formatUnits(
-                                            FixedNumber.fromString(
-                                              BigNumber.from(
-                                                gasUsed
-                                              )
-                                              .toString()
-                                            )
-                                            .mulUnsafe(
-                                              FixedNumber.fromString(
-                                                BigNumber.from(
-                                                  effectiveGasPrice
+                                  {
+                                    (
+                                      s.id === 'error' &&
+                                      is_error_from_relayer
+                                    ) ||
+                                    is_execute_from_relayer &&
+                                    (
+                                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                        {
+                                          destination_gas_data?.image &&
+                                          (
+                                            <Image
+                                              src={destination_gas_data.image}
+                                              className="w-5 h-5 rounded-full"
+                                            />
+                                          )
+                                        }
+                                        <span className="text-sm font-medium">
+                                          <span className="mr-1">
+                                            {number_format(
+                                              utils.formatUnits(
+                                                FixedNumber.fromString(
+                                                  BigNumber.from(
+                                                    gasUsed
+                                                  )
+                                                  .toString()
                                                 )
+                                                .mulUnsafe(
+                                                  FixedNumber.fromString(
+                                                    BigNumber.from(
+                                                      effectiveGasPrice
+                                                    )
+                                                    .toString()
+                                                  )
+                                                )
+                                                .round(0)
                                                 .toString()
-                                              )
-                                            )
-                                            .round(0)
-                                            .toString()
-                                            .replace(
-                                              '.0',
-                                              '',
-                                            ),
-                                            destination_gas_data.decimals,
-                                          ),
-                                          '0,0.00000000',
-                                          true,
-                                        )}
-                                      </span>
-                                      <span>
-                                        {ellipse(destination_gas_data.symbol)}
-                                      </span>
-                                    </span>
-                                  </div>
+                                                .replace(
+                                                  '.0',
+                                                  '',
+                                                ),
+                                                destination_gas_data.decimals,
+                                              ),
+                                              '0,0.00000000',
+                                              true,
+                                            )}
+                                          </span>
+                                          <span>
+                                            {ellipse(destination_gas_data.symbol)}
+                                          </span>
+                                        </span>
+                                      </div>
+                                    )
+                                  }
                                   {
                                     source_token?.token_price?.usd &&
                                     destination_native_token?.token_price?.usd &&
                                     (
                                       <>
-                                        <span className="text-sm font-medium mr-2">
-                                          =
-                                        </span>
+                                        {
+                                          (
+                                            s.id === 'error' &&
+                                            is_error_from_relayer
+                                          ) ||
+                                          is_execute_from_relayer &&
+                                          (
+                                            <span className="text-sm font-medium mr-2">
+                                              =
+                                            </span>
+                                          )
+                                        }
                                         <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
                                           {
                                             source_gas_data?.image &&
@@ -3813,7 +3831,7 @@ export default () => {
                             (
                               <div className={rowClassName}>
                                 <span className={rowTitleClassName}>
-                                  Gas Price
+                                  Gas Price Rate
                                 </span>
                                 <div className="flex items-center space-x-2">
                                   <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">

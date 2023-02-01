@@ -1214,7 +1214,7 @@ export default (
                       express_executed &&
                       {
                         id: 'express_executed',
-                        title: 'Express Execute',
+                        title: 'Express Executed',
                         chain_data: destination_chain_data,
                         data: express_executed,
                       },
@@ -1227,7 +1227,7 @@ export default (
                         title:
                           staging ?
                             'Confirmed' :
-                            'Confirmed',
+                            'Confirmed on Axelar',
                         chain_data: axelar_chain_data,
                         data: confirm,
                       },
@@ -1249,7 +1249,7 @@ export default (
                       refunded &&
                       {
                         id: 'refunded',
-                        title: 'Gas Refunded',
+                        title: 'Refunded',
                         chain_data: source_chain_data,
                         data: refunded,
                       },
