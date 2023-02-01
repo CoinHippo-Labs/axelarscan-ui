@@ -650,6 +650,7 @@ export default (
                                 'deposit_address',
                                 'send_token',
                                 'wrap',
+                                'unwrap',
                               ]
                               .includes(type) ?
                                 <span className="normal-case">
