@@ -877,37 +877,44 @@ export default (
                     asset_data?.image
 
                   if (
-                    (
-                      [
-                        'wrap',
-                        'unwrap',
-                      ]
-                      .includes(type) ||
-                      wrap ||
-                      unwrap
-                    ) &&
-                    symbol?.startsWith('W')
+                    [
+                      'wrap',
+                      'unwrap',
+                    ]
+                    .includes(type) ||
+                    wrap ||
+                    unwrap
                   ) {
-                    symbol =
-                      symbol
-                        .substring(
-                          1,
-                        )
-
-                    if (image) {
-                      image =
-                        image
-                          .split('/')
-                          .map(p =>
-                            p
-                              .substring(
-                                p?.includes('.') &&
-                                p.startsWith('w') ?
-                                  1 :
-                                  0,
-                              )
+                    if (
+                      [
+                        'W',
+                        'axlW',
+                      ]
+                      .findIndex(p =>
+                        symbol?.startsWith(p)
+                      ) > -1
+                    ) {
+                      symbol =
+                        symbol
+                          .substring(
+                            symbol.indexOf('W') + 1,
                           )
-                          .join('/')
+
+                      if (image) {
+                        image =
+                          image
+                            .split('/')
+                            .map(p =>
+                              p
+                                .substring(
+                                  p?.includes('.') &&
+                                  p.startsWith('w') ?
+                                    1 :
+                                    0,
+                                )
+                            )
+                            .join('/')
+                      }
                     }
                   }
 
