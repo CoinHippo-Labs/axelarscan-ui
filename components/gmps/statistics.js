@@ -9,6 +9,7 @@ import { HiArrowSmRight } from 'react-icons/hi'
 
 import BarChart from './charts/bar'
 import Image from '../image'
+import SelectChain from '../select/chains'
 import { ProgressBar } from '../progress-bars'
 import { search as searchGMP, stats, chart } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
@@ -71,6 +72,8 @@ export default () => {
   const [methods, setMethods] = useState(null)
   const [statuses, setStatuses] = useState(null)
   const [chainPairs, setChainPairs] = useState(null)
+  const [fromChainForPairs, setFromChainForPairs] = useState(null)
+  const [toChainForPairs, setToChainForPairs] = useState(null)
   const [contracts, setContracts] = useState(null)
   const [timeSpents, setTimeSpents] = useState(null)
   const [fetchTrigger, setFetchTrigger] = useState(null)
@@ -864,81 +867,132 @@ export default () => {
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
         <div className={`${metricClassName}`}>
-          <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-            Chain Pairs
+          <div className="flex items-center justify-between space-x-2">
+            <div className="whitespace-nowrap text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
+              Top Chain Pairs
+            </div>
+            <div className="flex flex-col sm:flex-row items-end sm:items-center space-y-1 sm:space-y-0 sm:space-x-2">
+              <div className="flex items-center space-x-1">
+                <span>
+                  From
+                </span>
+                <SelectChain
+                  value={fromChainForPairs}
+                  onSelect={
+                    c => setFromChainForPairs(c)
+                  }
+                />
+              </div>
+              <div className="flex items-center space-x-1">
+                <span>
+                  To
+                </span>
+                <SelectChain
+                  value={toChainForPairs}
+                  onSelect={
+                    c => setToChainForPairs(c)
+                  }
+                />
+              </div>
+            </div>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-y-1 gap-x-10">
+          <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-y-3 gap-x-10">
             {
               chainPairs &&
               statuses ?
-                chainPairs
-                  .map((p, i) => {
-                    const {
-                      source_chain,
-                      destination_chain,
-                      num_txs,
-                    } = { ...p }
+                _.slice(
+                  chainPairs
+                    .filter(p =>
+                      (
+                        !fromChainForPairs ||
+                        equals_ignore_case(
+                          p?.source_chain,
+                          fromChainForPairs,
+                        )
+                      ) &&
+                      (
+                        !toChainForPairs ||
+                        equals_ignore_case(
+                          p?.destination_chain,
+                          toChainForPairs,
+                        )
+                      )
+                    ),
+                  0,
+                  10,
+                )
+                .map((p, i) => {
+                  const {
+                    source_chain,
+                    destination_chain,
+                    num_txs,
+                  } = { ...p }
 
-                    const source_chain_data = getChain(
+                  const source_chain_data =
+                    getChain(
                       source_chain,
                       chains_data,
                     )
-                    const destination_chain_data = getChain(
+
+                  const destination_chain_data =
+                    getChain(
                       destination_chain,
                       chains_data,
                     )
 
-                    return (
-                      <div
-                        key={i}
-                        className="space-y-0"
-                      >
-                        <div className="flex items-center justify-between space-x-2">
-                          <div className="flex items-center space-x-2">
-                            <Image
-                              src={source_chain_data?.image}
-                              className="w-5 h-5 rounded-full"
-                            />
-                            <HiArrowSmRight size={20} />
-                            {destination_chain_data ?
-                              <Image
-                                src={destination_chain_data?.image}
-                                className="w-5 h-5 rounded-full"
-                              /> :
-                              <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                                {
-                                  ellipse(
-                                    destination_chain,
-                                    8,
-                                  ) ||
-                                  'Invalid Chain'
-                                }
-                              </span>
-                            }
-                          </div>
-                          <span className="font-bold">
-                            {number_format(
-                              num_txs,
-                              '0,0',
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between space-x-2">
-                          <ProgressBar
-                            width={num_txs * 100 / total}
-                            color={`${colors[i % colors.length]}`}
-                            className="h-1.5 rounded-lg"
+                  return (
+                    <div
+                      key={i}
+                      className="space-y-0"
+                    >
+                      <div className="flex items-center justify-between space-x-2">
+                        <div className="flex items-center space-x-2">
+                          <Image
+                            src={source_chain_data?.image}
+                            className="w-6 h-6 rounded-full"
                           />
-                          <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                            {number_format(
-                              num_txs * 100 / total,
-                              '0,0.000',
-                            )}%
-                          </span>
+                          <HiArrowSmRight
+                            size={20}
+                          />
+                          {destination_chain_data ?
+                            <Image
+                              src={destination_chain_data?.image}
+                              className="w-6 h-6 rounded-full"
+                            /> :
+                            <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                              {
+                                ellipse(
+                                  destination_chain,
+                                  8,
+                                ) ||
+                                'Invalid Chain'
+                              }
+                            </span>
+                          }
                         </div>
+                        <span className="font-bold">
+                          {number_format(
+                            num_txs,
+                            '0,0',
+                          )}
+                        </span>
                       </div>
-                    )
-                  }) :
+                      <div className="flex items-center justify-between space-x-2">
+                        <ProgressBar
+                          width={num_txs * 100 / total}
+                          color={`${colors[i % colors.length]}`}
+                          className="h-1.5 rounded-lg"
+                        />
+                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                          {number_format(
+                            num_txs * 100 / total,
+                            '0,0.000',
+                          )}%
+                        </span>
+                      </div>
+                    </div>
+                  )
+                }) :
                 <ProgressBarSpinner
                   borderColor={loader_color(theme)}
                   width="36"
