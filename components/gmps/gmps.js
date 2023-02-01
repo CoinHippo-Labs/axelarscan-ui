@@ -1227,7 +1227,7 @@ export default (
                         title:
                           staging ?
                             'Confirmed' :
-                            'Confirmed on Axelar',
+                            'Confirmed',
                         chain_data: axelar_chain_data,
                         data: confirm,
                       },
