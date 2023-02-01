@@ -547,8 +547,11 @@ export default () => {
     (
       [
         'wrap',
-      ].includes(type) ||
-      wrap
+        'unwrap',
+      ]
+      .includes(type) ||
+      wrap ||
+      unwrap
     ) &&
     symbol?.startsWith('W')
   ) {
@@ -817,12 +820,15 @@ export default () => {
                         'deposit_address',
                         'send_token',
                         'wrap',
-                      ].includes(type) ?
+                      ]
+                      .includes(type) ?
                         <span className="normal-case">
                           Transfer via {
                             [
                               'wrap',
-                            ].includes(type) ?
+                              'unwrap',
+                            ]
+                            .includes(type) ?
                               'Deposit Service' :
                               name(type)
                           }
