@@ -1284,7 +1284,7 @@ export default () => {
         title:
           staging ?
             'Confirmed' :
-            'Confirmed on Axelar',
+            'Confirmed',
         chain_data: axelar_chain_data,
         data: confirm,
       },
@@ -3660,7 +3660,6 @@ export default () => {
                             [
                               /*'approved', */
                               'executed',
-                              'error',
                               'refunded',
                             ]
                             .includes(s.id) &&
@@ -3682,10 +3681,10 @@ export default () => {
                                 <div className="flex flex-wrap items-center">
                                   {
                                     (
-                                      s.id === 'error' &&
-                                      is_error_from_relayer
-                                    ) ||
-                                    is_execute_from_relayer &&
+                                      success ?
+                                        is_execute_from_relayer :
+                                        is_error_from_relayer
+                                    ) &&
                                     (
                                       <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
                                         {
@@ -3741,10 +3740,10 @@ export default () => {
                                       <>
                                         {
                                           (
-                                            s.id === 'error' &&
-                                            is_error_from_relayer
-                                          ) ||
-                                          is_execute_from_relayer &&
+                                            success ?
+                                              is_execute_from_relayer :
+                                              is_error_from_relayer
+                                          ) &&
                                           (
                                             <span className="text-sm font-medium mr-2">
                                               =
