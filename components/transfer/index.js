@@ -260,6 +260,7 @@ export default () => {
 
           if (
             !(
+              source_chain &&
               destination_chain &&
               typeof amount === 'number' &&
               typeof value === 'number' &&
@@ -318,6 +319,22 @@ export default () => {
             (
               unwrap &&
               !unwrap.tx_hash_unwrap
+            ) ||
+            (
+              (evm_chains_data || [])
+                .findIndex(c =>
+                  equals_ignore_case(
+                    c?.id,
+                    source_chain,
+                  )
+                ) > -1 &&
+              !insufficient_fee &&
+              !vote &&
+              (
+                command ||
+                ibc_send ||
+                axelar_transfer
+              )
             )
           ) {
             await getTransfersStatus(
@@ -369,7 +386,13 @@ export default () => {
 
           const {
             send,
-          } = { ..._.head(response?.data) }
+          } = {
+            ...(
+              _.head(
+                response?.data
+              )
+            ),
+          }
           const {
             txhash,
           } = { ...send }
