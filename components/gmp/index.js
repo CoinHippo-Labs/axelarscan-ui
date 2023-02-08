@@ -1316,6 +1316,7 @@ export default () => {
         staging ||
         process.env.NEXT_PUBLIC_ENVIRONMENT === 'testnet'
       ) &&
+      call?.chain_type !== 'cosmos' &&
       {
         id: 'confirm',
         title:
