@@ -853,9 +853,9 @@ export default () => {
     gas,
     is_invalid_destination_chain,
     is_invalid_call,
-    is_insufficient_minimum_amount,
     is_insufficient_fee,
     is_call_from_relayer,
+    not_enough_gas_to_exeute,
   } = { ...data }
   let {
     is_not_enough_gas,
@@ -1023,7 +1023,6 @@ export default () => {
     !(
       is_invalid_destination_chain ||
       is_invalid_call ||
-      is_insufficient_minimum_amount ||
       is_insufficient_fee ||
       gas?.gas_remain_amount < 0.00001
     ) &&
@@ -1145,7 +1144,8 @@ export default () => {
         gas_paid_to_callback
       ) ||
       is_insufficient_fee ||
-      gas?.gas_remain_amount < 0.00001
+      gas?.gas_remain_amount < 0.00001 ||
+      not_enough_gas_to_exeute
     ) &&
     (
       <>
@@ -1214,7 +1214,6 @@ export default () => {
       is_executed ||
       is_invalid_destination_chain ||
       is_invalid_call ||
-      is_insufficient_minimum_amount ||
       is_insufficient_fee
     ) &&
     (
@@ -1227,7 +1226,6 @@ export default () => {
         .unix() ||
       is_invalid_destination_chain ||
       is_invalid_call ||
-      is_insufficient_minimum_amount ||
       is_insufficient_fee
     ) &&
     (
@@ -1376,7 +1374,6 @@ export default () => {
         (
           !is_invalid_destination_chain &&
           !is_invalid_call &&
-          !is_insufficient_minimum_amount &&
           !is_insufficient_fee &&
           (
             gas_paid ||
@@ -1660,14 +1657,6 @@ export default () => {
                                   {_symbol}
                                 </span>
                               </span>
-                            </div>
-                          )
-                        }
-                        {
-                          is_insufficient_minimum_amount &&
-                          (
-                            <div className="max-w-min bg-red-100 dark:bg-red-700 border border-red-500 dark:border-red-600 rounded-lg whitespace-nowrap text-xs lg:text-sm font-semibold py-0.5 px-2">
-                              Insufficient Amount
                             </div>
                           )
                         }
@@ -2282,6 +2271,14 @@ export default () => {
                             )
                           }
                           {
+                            not_enough_gas_to_exeute &&
+                            (
+                              <div className="w-fit bg-yellow-100 dark:bg-yellow-900 bg-opacity-75 dark:bg-opacity-75 border border-yellow-500 dark:border-yellow-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                                Not enough gas
+                              </div>
+                            )
+                          }
+                          {
                             express_execute_time_spent &&
                             (
                               <Tooltip
@@ -2362,8 +2359,8 @@ export default () => {
                       gas,
                       is_invalid_destination_chain,
                       is_invalid_call,
-                      is_insufficient_minimum_amount,
                       is_insufficient_fee,
+                      not_enough_gas_to_exeute,
                     } = { ...gmp.data }
 
                     const {
@@ -2976,8 +2973,8 @@ export default () => {
                                         !error &&
                                         !is_invalid_destination_chain &&
                                         !is_invalid_call &&
-                                        !is_insufficient_minimum_amount &&
                                         !is_insufficient_fee &&
+                                        !not_enough_gas_to_exeute &&
                                         (
                                           <ColorRing
                                             color={loader_color(theme)}
@@ -3349,8 +3346,8 @@ export default () => {
                                         </span> :
                                         !is_invalid_destination_chain &&
                                         !is_invalid_call &&
-                                        !is_insufficient_minimum_amount &&
                                         !is_insufficient_fee &&
+                                        !not_enough_gas_to_exeute &&
                                         (
                                           current_step === i ?
                                             <ColorRing
