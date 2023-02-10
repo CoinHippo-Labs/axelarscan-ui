@@ -53,8 +53,16 @@ export default () => {
       .flatMap(a =>
         (a?.contracts || [])
           .filter(c =>
-            !chain_id ||
-            c?.chain_id === chain_id
+            (
+              !chain_id ||
+              c?.chain_id === chain_id
+            ) &&
+            !(
+              evm_chains_data
+                .find(_c =>
+                  _c?.chain_id === c?.chain_id
+                )?.deprecated
+            )
           )
           .map(c => {
             return {
@@ -82,8 +90,8 @@ export default () => {
               data={
                 evm_chains_data
                   .filter(c =>
-                    !c?.no_inflation ||
-                    c?.deprecated
+                    !c?.no_inflation &&
+                    !c?.deprecated
                   )
               }
               placeholder="Select Chain"
