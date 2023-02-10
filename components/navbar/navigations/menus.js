@@ -63,7 +63,7 @@ export default [
         '/gmp/[tx]',
       ],
   },
-  process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' &&
+  process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' &&
   {
     id: 'tvl',
     title: 'TVL',
