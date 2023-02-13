@@ -270,8 +270,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           1 * 60 * 1000,
         )
 
@@ -370,9 +371,17 @@ export default () => {
                               (destination_chains || [])
                                 .map(d => {
                                   const {
-                                    key,
                                     num_txs,
                                   } = { ...d }
+                                  let {
+                                    key,
+                                  } = { ...d }
+
+                                  key =
+                                    (key || '')
+                                      .toLowerCase()
+                                      .split('"')
+                                      .join('')
 
                                   return {
                                     id: `${s.key}_${key}`,
@@ -410,8 +419,9 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () =>
+            getData(),
           1 * 60 * 1000,
         )
 
