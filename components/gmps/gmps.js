@@ -1157,7 +1157,7 @@ export default (
                     is_invalid_call,
                     is_insufficient_fee,
                     is_call_from_relayer,
-                    not_enough_gas_to_exeute,
+                    not_enough_gas_to_execute,
                   } = { ...props.row.original }
                   const {
                     chain,
@@ -1356,7 +1356,11 @@ export default (
                                   'call'
                               )
                           ) +
-                        1
+                        (
+                         not_enough_gas_to_execute ?
+                          0 :
+                          1
+                        )
                       break
                     case 'executed':
                     case 'error':
@@ -1637,7 +1641,7 @@ export default (
                         )
                       }
                       {
-                        not_enough_gas_to_exeute &&
+                        not_enough_gas_to_execute &&
                         (
                           <div className="w-fit bg-yellow-100 dark:bg-yellow-900 bg-opacity-75 dark:bg-opacity-75 border border-yellow-500 dark:border-yellow-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                             Not enough gas

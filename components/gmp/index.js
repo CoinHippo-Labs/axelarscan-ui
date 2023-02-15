@@ -855,7 +855,7 @@ export default () => {
     is_invalid_call,
     is_insufficient_fee,
     is_call_from_relayer,
-    not_enough_gas_to_exeute,
+    not_enough_gas_to_execute,
   } = { ...data }
   let {
     is_not_enough_gas,
@@ -1145,7 +1145,7 @@ export default () => {
       ) ||
       is_insufficient_fee ||
       gas?.gas_remain_amount < 0.00001 ||
-      not_enough_gas_to_exeute
+      not_enough_gas_to_execute
     ) &&
     (
       <>
@@ -1445,7 +1445,11 @@ export default () => {
                   'call'
               )
           ) +
-        1
+        (
+         not_enough_gas_to_execute ?
+          0 :
+          1
+        )
       break
     case 'executed':
     case 'error':
@@ -2271,7 +2275,7 @@ export default () => {
                             )
                           }
                           {
-                            not_enough_gas_to_exeute &&
+                            not_enough_gas_to_execute &&
                             (
                               <div className="w-fit bg-yellow-100 dark:bg-yellow-900 bg-opacity-75 dark:bg-opacity-75 border border-yellow-500 dark:border-yellow-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                                 Not enough gas
@@ -2360,7 +2364,7 @@ export default () => {
                       is_invalid_destination_chain,
                       is_invalid_call,
                       is_insufficient_fee,
-                      not_enough_gas_to_exeute,
+                      not_enough_gas_to_execute,
                     } = { ...gmp.data }
 
                     const {
@@ -2973,7 +2977,7 @@ export default () => {
                                         !is_invalid_destination_chain &&
                                         !is_invalid_call &&
                                         !is_insufficient_fee &&
-                                        !not_enough_gas_to_exeute &&
+                                        !not_enough_gas_to_execute &&
                                         (
                                           <ColorRing
                                             color={loader_color(theme)}
@@ -3346,7 +3350,7 @@ export default () => {
                                         !is_invalid_destination_chain &&
                                         !is_invalid_call &&
                                         !is_insufficient_fee &&
-                                        !not_enough_gas_to_exeute &&
+                                        !not_enough_gas_to_execute &&
                                         (
                                           current_step === i ?
                                             <ColorRing
