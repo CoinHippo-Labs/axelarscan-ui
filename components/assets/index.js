@@ -58,7 +58,7 @@ export default () => {
               c?.chain_id === chain_id
             ) &&
             !(
-              evm_chains_data
+              (evm_chains_data || [])
                 .find(_c =>
                   _c?.chain_id === c?.chain_id
                 )?.deprecated
