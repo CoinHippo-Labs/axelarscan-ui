@@ -336,6 +336,7 @@ export default () => {
     _data = [],
     is_after_search,
   ) => {
+
     const data =
       (_.cloneDeep(_data) || [])
         .filter(b =>
@@ -350,7 +351,8 @@ export default () => {
               .findIndex(c =>
                 !c?.executed
               ) > -1
-          )
+          ) ||
+          (b.commands || []).length < 1
         )
 
     if (data.length > 0) {
