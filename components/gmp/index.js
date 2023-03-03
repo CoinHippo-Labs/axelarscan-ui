@@ -278,12 +278,7 @@ export default () => {
 
         let _response
 
-        const method =
-          `execute${
-            symbol ?
-              'WithToken' :
-              ''
-          }`
+        const method = `execute${symbol ? 'WithToken' : ''}`
 
         switch (method) {
           case 'execute':
@@ -305,9 +300,7 @@ export default () => {
                   sourceAddress,
                   payload,
                   symbol,
-                  BigNumber.from(
-                    amount
-                  ),
+                  BigNumber.from(amount),
                 )
             break
           default:
@@ -1615,15 +1608,8 @@ export default () => {
                         Method
                       </div>
                       <div className="space-y-1.5">
-                        <div className="max-w-min text-base font-medium">
-                          {
-                            event === 'ContractCall' ?
-                              'callContract' :
-                              event === 'ContractCallWithToken' ?
-                                'callContractWithToken' :
-                                event ||
-                                '-'
-                          }
+                        <div className="max-w-min bg-slate-200 dark:bg-slate-700 rounded-lg whitespace-nowrap text-base font-medium py-0.5 px-1.5">
+                          {event === 'ContractCall' ? 'callContract' : event === 'ContractCallWithToken' ? 'callContractWithToken' : event || -'}
                         </div>
                         {
                           amount &&
@@ -1646,9 +1632,7 @@ export default () => {
                                     <span className="mr-1">
                                       {number_format(
                                         utils.formatUnits(
-                                          BigNumber.from(
-                                            amount,
-                                          ),
+                                          BigNumber.from(amount),
                                           decimals,
                                         ),
                                         '0,0.000',

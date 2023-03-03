@@ -709,15 +709,8 @@ export default (
 
                   return (
                     <div className="space-y-1.5">
-                      <div className="max-w-min text-sm font-medium">
-                        {
-                          value === 'ContractCall' ?
-                            'callContract' :
-                            value === 'ContractCallWithToken' ?
-                              'callContractWithToken' :
-                              value ||
-                              '-'
-                        }
+                      <div className="max-w-min bg-slate-200 dark:bg-slate-700 rounded-lg whitespace-nowrap text-sm font-medium py-0.5 px-1.5">
+                        {value === 'ContractCall' ? 'callContract' : value === 'ContractCallWithToken' ? 'callContractWithToken' : value || '-'}
                       </div>
                       {
                         amount &&
@@ -740,9 +733,7 @@ export default (
                                   <span className="mr-1">
                                     {number_format(
                                       utils.formatUnits(
-                                        BigNumber.from(
-                                          amount
-                                        ),
+                                        BigNumber.from(amount),
                                         decimals,
                                       ),
                                       '0,0.000',
