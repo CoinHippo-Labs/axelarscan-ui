@@ -854,7 +854,7 @@ export default (
                   } = { ...explorer }
 
                   return (
-                    <div className="flex flex-col space-y-2 mb-3">
+                    <div className="w-48 flex flex-col space-y-2 mb-3">
                       <div className="h-6 flex items-center space-x-2">
                         {
                           image &&
@@ -1009,7 +1009,7 @@ export default (
                   } = { ...explorer }
 
                   return (
-                    <div className="flex flex-col space-y-2 mb-3">
+                    <div className="w-48 flex flex-col space-y-2 mb-3">
                       {
                         !is_invalid_destination_chain &&
                         (
