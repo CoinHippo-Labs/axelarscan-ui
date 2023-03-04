@@ -1500,13 +1500,13 @@ export default () => {
 
   const explorer =
     notificationResponse &&
-      (
-        notificationResponse.is_axelar_transaction ?
-          axelar_chain_data :
-          executeResponse ?
-            destination_chain_data :
-            source_chain_data
-      )?.explorer
+    (
+      notificationResponse.is_axelar_transaction ?
+        axelar_chain_data :
+        executeResponse ?
+          destination_chain_data :
+          source_chain_data
+    )?.explorer
 
   const stepClassName = 'min-h-full bg-white dark:bg-slate-900 dark:bg-opacity-75 rounded-lg border border-slate-200 dark:border-slate-800 space-y-3 py-6 px-5'
   const titleClassName = 'w-fit bg-slate-100 dark:bg-slate-800 bg-opacity-75 dark:bg-opacity-75 rounded whitespace-nowrap uppercase text-base font-semibold py-1 px-2'
@@ -1609,7 +1609,7 @@ export default () => {
                       </div>
                       <div className="space-y-1.5">
                         <div className="max-w-min bg-slate-200 dark:bg-slate-700 rounded-lg whitespace-nowrap text-base font-medium py-0.5 px-1.5">
-                          {event === 'ContractCall' ? 'callContract' : event === 'ContractCallWithToken' ? 'callContractWithToken' : event || -'}
+                          {event === 'ContractCall' ? 'callContract' : event === 'ContractCallWithToken' ? 'callContractWithToken' : event || '-'}
                         </div>
                         {
                           amount &&
