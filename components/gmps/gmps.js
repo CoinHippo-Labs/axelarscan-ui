@@ -1517,7 +1517,8 @@ export default (
                             const link_id =
                               s.id === 'confirm' ?
                                 s.data?.poll_id :
-                                s.data?.transactionHash
+                                s.data?.transactionHash ||
+                                error?.transactionHash
 
                             const link_url =
                               link_id &&
