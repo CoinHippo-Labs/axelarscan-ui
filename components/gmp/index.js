@@ -1304,6 +1304,7 @@ export default () => {
         data: express_executed,
       },
       (
+        true ||
         staging ||
         process.env.NEXT_PUBLIC_ENVIRONMENT === 'testnet'
       ) &&
@@ -1317,6 +1318,7 @@ export default () => {
         chain_data: axelar_chain_data,
         data: confirm,
       },
+      call?.destination_chain_type !== 'cosmos' &&
       {
         id: 'approved',
         title:
