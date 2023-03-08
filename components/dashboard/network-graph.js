@@ -320,63 +320,67 @@ export default (
   let data =
     transfers &&
     gmps ?
-      Object.entries(
-        _.groupBy(
-          _.concat(
-            transfers,
-            gmps,
-          )
-          .flatMap(d => {
-            const {
-              source_chain,
-              destination_chain,
-            } = { ...d }
-
-            if (
-              axelarnet?.id &&
-              ![
+      _.orderBy(
+        Object.entries(
+          _.groupBy(
+            _.concat(
+              transfers,
+              gmps,
+            )
+            .flatMap(d => {
+              const {
                 source_chain,
                 destination_chain,
-              ].includes(axelarnet.id)
-            ) {
-              return [
-                {
-                  ...d,
-                  id: `${axelarnet.id}_${destination_chain}`,
-                  source_chain: axelarnet.id,
-                  source_chain_data: axelarnet,
-                },
-                {
-                  ...d,
-                  id: `${source_chain}_${axelarnet.id}`,
-                  destination_chain: axelarnet.id,
-                  destination_chain_data: axelarnet,
-                },
-              ]
-            }
-            else {
-              return d
-            }
-          }),
-          'id',
-        ),
-      )
-      .map(([k, v]) => {
-        return {
-          id: k,
-          ..._.head(v),
-          num_txs:
-            _.sumBy(
-              v,
-              'num_txs',
-            ),
-          volume:
-            _.sumBy(
-              v,
-              'volume',
-            ),
-        }
-      }) :
+              } = { ...d }
+
+              if (
+                axelarnet?.id &&
+                ![
+                  source_chain,
+                  destination_chain,
+                ].includes(axelarnet.id)
+              ) {
+                return [
+                  {
+                    ...d,
+                    id: `${axelarnet.id}_${destination_chain}`,
+                    source_chain: axelarnet.id,
+                    source_chain_data: axelarnet,
+                  },
+                  {
+                    ...d,
+                    id: `${source_chain}_${axelarnet.id}`,
+                    destination_chain: axelarnet.id,
+                    destination_chain_data: axelarnet,
+                  },
+                ]
+              }
+              else {
+                return d
+              }
+            }),
+            'id',
+          ),
+        )
+        .map(([k, v]) => {
+          return {
+            id: k,
+            ..._.head(v),
+            num_txs:
+              _.sumBy(
+                v,
+                'num_txs',
+              ),
+            volume:
+              _.sumBy(
+                v,
+                'volume',
+              ),
+          }
+        }),
+        ['num_txs'],
+        ['desc'],
+      ) :
       undefined
 
   if (
