@@ -24,7 +24,7 @@ import Notification from '../notifications'
 import Wallet from '../wallet'
 import parameters from '../../data/gmp/parameters'
 import { getChain } from '../../lib/object/chain'
-import { number_format, capitalize, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
+import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
 export default () => {
@@ -4671,10 +4671,7 @@ export default () => {
                   )
                 }
                 {
-                  (
-                    sourceChain ||
-                    chain
-                  ) &&
+                  (sourceChain || chain) &&
                   (
                     <div className="sm:col-span-4 space-y-2">
                       <span className="text-base font-medium">
@@ -4682,15 +4679,12 @@ export default () => {
                       </span>
                       <div className="flex items-start">
                         <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                          {sourceChain || capitalize(chain)}
+                          {sourceChain || getChain(chain, chains_data)?.chain_name || chain}
                         </div>
                         <div className="mt-4">
                           <Copy
                             size={20}
-                            value={
-                              sourceChain ||
-                              capitalize(chain)
-                            }
+                            value={sourceChain || getChain(chain, chains_data)?.chain_name || chain}
                           />
                         </div>
                       </div>
@@ -4761,7 +4755,7 @@ export default () => {
                   )
                 }
                 {
-                  approved?.returnValues?.amount &&
+                  (approved?.returnValues?.amount || call?.returnValues?.amount) &&
                   (
                     <div className="sm:col-span-4 space-y-2">
                       <span className="text-base font-medium">
@@ -4769,22 +4763,12 @@ export default () => {
                       </span>
                       <div className="flex items-start">
                         <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
-                          {
-                            BigNumber.from(
-                              approved.returnValues.amount
-                            )
-                            .toString()
-                          }
+                          {BigNumber.from(approved?.returnValues?.amount || call?.returnValues?.amount).toString()}
                         </div>
                         <div className="mt-4">
                           <Copy
                             size={20}
-                            value={
-                              BigNumber.from(
-                                approved.returnValues.amount
-                              )
-                              .toString()
-                            }
+                            value={BigNumber.from(approved?.returnValues?.amount || call?.returnValues?.amount).toString()}
                           />
                         </div>
                       </div>
