@@ -16,33 +16,32 @@ import { getChain } from '../../lib/object/chain'
 import { number_format, capitalize, ellipse, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const DEFAULT_TIMEFRAME_DAYS = 7
-const TIMEFRAME_OPTIONS =
-  [
-    {
-      title: 'All-Time',
-      n_day: null,
-    },
-    {
-      title: 'Last 90 days',
-      n_day: 90,
-    },
-    {
-      title: 'Last 30 days',
-      n_day: 30,
-    },
-    {
-      title: 'Last 7 days',
-      n_day: 7,
-    },
-  ]
+const TIMEFRAME_OPTIONS = [
+  {
+    title: 'All-Time',
+    n_day: null,
+  },
+  {
+    title: 'Last 90 days',
+    n_day: 90,
+  },
+  {
+    title: 'Last 30 days',
+    n_day: 30,
+  },
+  {
+    title: 'Last 7 days',
+    n_day: 7,
+  },
+]
 
 export default () => {
   const {
     preferences,
     evm_chains,
     cosmos_chains,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
@@ -81,25 +80,10 @@ export default () => {
 
   useEffect(
     () => {
-      if (
-        evm_chains_data &&
-        cosmos_chains_data &&
-        asPath
-      ) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath
-              .substring(
-                asPath.indexOf('?') + 1,
-              )
-          )
+      if (evm_chains_data && cosmos_chains_data && asPath) {
+        const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
-        const chains_data =
-          _.concat(
-            evm_chains_data,
-            cosmos_chains_data,
-          )
+        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
         const {
           txHash,
@@ -122,23 +106,14 @@ export default () => {
           setFilters(
             {
               txHash,
-              sourceChain:
-                getChain(
-                  sourceChain,
-                  chains_data,
-                )?._id ||
-                sourceChain,
-              destinationChain:
-                getChain(
-                  destinationChain,
-                  chains_data,
-                )?._id ||
-                destinationChain,
+              sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
+              destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
               method:
                 [
                   'callContract',
                   'callContractWithToken',
-                ].includes(method) ?
+                ]
+                .includes(method) ?
                   method :
                   undefined,
               status:
@@ -167,14 +142,8 @@ export default () => {
               time:
                 fromTime &&
                 [
-                  moment(
-                    Number(fromTime)
-                  ),
-                  toTime ?
-                    moment(
-                      Number(toTime)
-                    ) :
-                    moment(),
+                  moment(Number(fromTime)),
+                  toTime ? moment(Number(toTime)) : moment(),
                 ],
             }
           )
@@ -187,30 +156,17 @@ export default () => {
   useEffect(
     () => {
       const triggering = is_interval => {
-        setFetchTrigger(
-          is_interval ?
-            moment()
-              .valueOf() :
-            typeof fetchTrigger === 'number' ?
-              null :
-              0
-        )
+        setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
       }
 
-      if (
-        pathname &&
-        filters
-      ) {
+      if (pathname && filters) {
         triggering()
       }
 
       const interval =
-        setInterval(() =>
-          triggering(true),
-          (['/gmp/stats'].includes(pathname) ?
-            1 :
-            0.25
-          ) * 60 * 1000
+        setInterval(
+          () => triggering(true),
+          (['/gmp/stats'].includes(pathname) ? 1 : 0.25) * 60 * 1000
         )
 
       return () => clearInterval(interval)
@@ -220,19 +176,15 @@ export default () => {
 
   useEffect(
     () => {
-      if (
-        asPath &&
-        !timeframeSelected &&
-        filters
-      ) {
+      if (asPath && !timeframeSelected && filters) {
         if (!filters.time) {
           const qs = new URLSearchParams()
 
           Object.entries({ ...filters })
             .filter(([k, v]) => v)
             .forEach(([k, v]) => {
-              let key,
-                value
+              let key
+              let value
 
               switch (k) {
                 case 'time':
@@ -244,42 +196,16 @@ export default () => {
               }
 
               if (key) {
-                qs
-                  .append(
-                    key,
-                    value,
-                  )
+                qs.append(key, value)
               }
             })
 
-          qs
-            .append(
-              'fromTime',
-              moment()
-                .subtract(
-                  DEFAULT_TIMEFRAME_DAYS,
-                  'days',
-                )
-                .valueOf(),
-            )
-
-          qs
-            .append(
-              'toTime',
-              moment()
-                .valueOf(),
-            )
+          qs.append('fromTime', moment().subtract(DEFAULT_TIMEFRAME_DAYS, 'days', ).valueOf())
+          qs.append('toTime', moment().valueOf())
 
           const qs_string = qs.toString()
 
-          router
-            .push(
-              `${pathname}${
-                qs_string ?
-                  `?${qs_string}` :
-                  ''
-              }`
-            )
+          router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
         }
       }
     },
@@ -311,9 +237,9 @@ export default () => {
             time,
           } = { ...filters }
 
-          let event,
-            fromTime,
-            toTime
+          let event
+          let fromTime
+          let toTime
 
           switch (method) {
             case 'callContract':
@@ -328,14 +254,8 @@ export default () => {
           }
 
           if (time?.length > 0) {
-            fromTime =
-              time[0]
-                .unix()
-            toTime =
-              time[1]
-                .unix() ||
-              moment()
-                .unix()
+            fromTime =time[0].unix()
+            toTime = time[1].unix() || moment().unix()
           }
 
           const params = {
@@ -352,22 +272,9 @@ export default () => {
             toTime,
           }
 
-          setDailyStats(
-            await chart(
-              {
-                ...params,
-                granularity: timeframe,
-              }
-            )
-          )
+          setDailyStats(await chart({ ...params, granularity: timeframe }))
 
-          let response =
-            await stats(
-              {
-                ...params,
-                includes: 'status',
-              }
-            )
+          let response = await stats({ ...params, includes: 'status' })
 
           const {
             messages,
@@ -383,12 +290,7 @@ export default () => {
                 } = { ...m }
 
                 return {
-                  key:
-                    (key || '')
-                      .replace(
-                        'ContractCall',
-                        'callContract',
-                      ),
+                  key: (key || '').replace('ContractCall', 'callContract'),
                   num_txs,
                 }
               })
@@ -410,7 +312,8 @@ export default () => {
                             [
                               'approved',
                               'executing',
-                            ].includes(k) ?
+                            ]
+                            .includes(k) ?
                               'Wait for Execute' :
                               k === 'error' ?
                                 'Error Execution' :
@@ -425,7 +328,8 @@ export default () => {
                             [
                               'approved',
                               'executing',
-                            ].includes(k) ?
+                            ]
+                            .includes(k) ?
                               'bg-blue-500' :
                               k === 'executed' ?
                                 'bg-green-500' :
@@ -482,11 +386,7 @@ export default () => {
                 return {
                   key: k,
                   ..._.head(v),
-                  num_txs:
-                    _.sumBy(
-                      v,
-                      'num_txs',
-                    ),
+                  num_txs: _.sumBy(v, 'num_txs'),
                 }
               }),
               ['num_txs'],
@@ -540,16 +440,8 @@ export default () => {
               .map(([k, v]) => {
                 return {
                   key: k,
-                  num_contracts:
-                    _.uniqBy(
-                      v,
-                      'contract',
-                    ).length,
-                  num_txs:
-                    _.sumBy(
-                      v,
-                      'num_txs',
-                    ),
+                  num_contracts: _.uniqBy(v, 'contract').length,
+                  num_txs: _.sumBy(v, 'num_txs'),
                 }
               }),
               ['num_contracts'],
@@ -557,22 +449,13 @@ export default () => {
             )
           )
 
-          response =
-            await stats(
-              {
-                ...params,
-                avg_times: true,
-              }
-            )
+          response = await stats({ ...params, avg_times: true })
 
           const {
             time_spents,
           } = { ...response }
 
-          setTimeSpents(
-            time_spents ||
-            []
-          )
+          setTimeSpents(time_spents || [])
         }
       }
 
@@ -581,11 +464,7 @@ export default () => {
     [fetchTrigger],
   )
 
-  const chains_data =
-    _.concat(
-      evm_chains_data,
-      cosmos_chains_data,
-    )
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
   const total =
     _.sumBy(
@@ -596,37 +475,18 @@ export default () => {
       'num_txs',
     )
 
-  const diff_time_filter =
-    filters?.time?.length > 0 &&
-    Math.abs(
-      (
-        filters.time[1] ||
-        moment()
-      )
-      .diff(
-        filters.time[0],
-        'days',
-      )
-    )
+  const diff_time_filter = filters?.time?.length > 0 && Math.abs((filters.time[1] || moment()).diff(filters.time[0], 'days'))
 
-  const timeframe =
-    (
-      filters &&
-      !(filters.time?.length > 0)
-    ) ||
-    diff_time_filter > 90 ?
-      'month' :
-      'day'
+  const timeframe = (filters && !(filters.time?.length > 0)) || diff_time_filter > 90 ? 'month' : 'day'
 
   const metricClassName = 'bg-white dark:bg-zinc-900 shadow shadow-zinc-200 dark:shadow-zinc-700 rounded py-4 xl:py-3 px-5 xl:px-4'
 
-  const colors =
-    [
-      'bg-yellow-500',
-      'bg-blue-500',
-      'bg-green-500',
-      'bg-red-500',
-    ]
+  const colors = [
+    'bg-yellow-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-red-500',
+  ]
 
   return (
     <>
@@ -639,33 +499,11 @@ export default () => {
             } = { ...o }
 
             const selected =
-              (
-                !n_day &&
-                !(filters?.time?.length > 0)
-              ) ||
+              (!n_day && !(filters?.time?.length > 0)) ||
               (
                 filters?.time?.length > 0 &&
-                Math.abs(
-                  filters.time[0]
-                    .diff(
-                      moment()
-                        .subtract(
-                          n_day,
-                          'days',
-                        ),
-                      'minutes',
-                    )
-                ) < 30 &&
-                Math.abs(
-                  (
-                    filters.time[1] ||
-                    moment()
-                  )
-                  .diff(
-                    moment(),
-                    'minutes',
-                  )
-                ) < 30
+                Math.abs(filters.time[0].diff(moment().subtract(n_day, 'days'), 'minutes')) < 30 &&
+                Math.abs((filters.time[1] || moment()).diff(moment(), 'minutes')) < 30
               )
 
             const qs = new URLSearchParams()
@@ -673,8 +511,8 @@ export default () => {
             Object.entries({ ...filters })
               .filter(([k, v]) => v)
               .forEach(([k, v]) => {
-                let key,
-                  value
+                let key
+                let value
 
                 switch (k) {
                   case 'time':
@@ -686,10 +524,7 @@ export default () => {
                 }
 
                 if (key) {
-                  qs.append(
-                    key,
-                    value,
-                  )
+                  qs.append(key, value)
                 }
               })
 
@@ -697,20 +532,8 @@ export default () => {
               case null:
                 break
               default:
-                qs.append(
-                  'fromTime',
-                  moment()
-                    .subtract(
-                      n_day,
-                      'days',
-                    )
-                    .valueOf(),
-                )
-                qs.append(
-                  'toTime',
-                  moment()
-                    .valueOf(),
-                )
+                qs.append('fromTime', moment().subtract(n_day, 'days').valueOf())
+                qs.append('toTime', moment().valueOf())
                 break
             }
 
@@ -738,11 +561,7 @@ export default () => {
             id="total_gmp"
             title="Messages"
             description={`Number of messages passed by ${timeframe}`}
-            date_format={
-              timeframe === 'month' ?
-                'MMM YYYY' :
-                undefined
-            }
+            date_format={timeframe === 'month' ? 'MMM YYYY' : undefined}
             timeframe={timeframe}
             chart_data={dailyStats}
           />
@@ -753,10 +572,7 @@ export default () => {
           </span>
           <div className="text-3xl font-bold">
             {statuses ?
-              number_format(
-                total,
-                '0,0',
-              ) :
+              number_format(total, '0,0') :
               <ProgressBarSpinner
                 borderColor={loader_color(theme)}
                 width="36"
@@ -772,46 +588,38 @@ export default () => {
             Methods
           </span>
           <div className="space-y-1 mt-1">
-            {
-              methods &&
-              statuses ?
-                methods
-                  .map((m, i) => (
-                    <div
-                      key={i}
-                      className="space-y-0"
-                    >
-                      <div className="flex items-center justify-between space-x-2">
-                        <span className="text-base font-bold">
-                          {m?.key}
-                        </span>
-                        <span className="font-bold">
-                          {number_format(
-                            m?.num_txs,
-                            '0,0',
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between space-x-2">
-                        <ProgressBar
-                          width={m?.num_txs * 100 / total}
-                          color={`${colors[i % colors.length]}`}
-                          className="h-1.5 rounded-lg"
-                        />
-                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                          {number_format(
-                            m?.num_txs * 100 / total,
-                            '0,0.000',
-                          )}%
-                        </span>
-                      </div>
+            {methods && statuses ?
+              methods
+                .map((m, i) => (
+                  <div
+                    key={i}
+                    className="space-y-0"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <span className="text-base font-bold">
+                        {m?.key}
+                      </span>
+                      <span className="font-bold">
+                        {number_format(m?.num_txs, '0,0')}
+                      </span>
                     </div>
-                  )) :
-                <ProgressBarSpinner
-                  borderColor={loader_color(theme)}
-                  width="36"
-                  height="36"
-                />
+                    <div className="flex items-center justify-between space-x-2">
+                      <ProgressBar
+                        width={m?.num_txs * 100 / total}
+                        color={`${colors[i % colors.length]}`}
+                        className="h-1.5 rounded-lg"
+                      />
+                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                        {number_format(m?.num_txs * 100 / total, '0,0.000')}%
+                      </span>
+                    </div>
+                  </div>
+                )) :
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
         </div>
@@ -835,10 +643,7 @@ export default () => {
                         {m?.name}
                       </span>
                       <span className="font-bold">
-                        {number_format(
-                          m?.num_txs,
-                          '0,0',
-                        )}
+                        {number_format(m?.num_txs, '0,0')}
                       </span>
                     </div>
                     <div className="flex items-center justify-between space-x-2">
@@ -848,10 +653,7 @@ export default () => {
                         className="h-1.5 rounded-lg"
                       />
                       <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                        {number_format(
-                          m?.num_txs * 100 / total,
-                          '0,0.000',
-                        )}%
+                        {number_format(m?.num_txs * 100 / total, '0,0.000')}%
                       </span>
                     </div>
                   </div>
@@ -878,9 +680,7 @@ export default () => {
                 </span>
                 <SelectChain
                   value={fromChainForPairs}
-                  onSelect={
-                    c => setFromChainForPairs(c)
-                  }
+                  onSelect={c => setFromChainForPairs(c)}
                 />
               </div>
               <div className="flex items-center space-x-1">
@@ -889,115 +689,90 @@ export default () => {
                 </span>
                 <SelectChain
                   value={toChainForPairs}
-                  onSelect={
-                    c => setToChainForPairs(c)
-                  }
+                  onSelect={c => setToChainForPairs(c)}
                 />
               </div>
             </div>
           </div>
           <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-y-3 gap-x-10">
-            {
-              chainPairs &&
-              statuses ?
-                _.slice(
-                  chainPairs
-                    .filter(p =>
-                      (
-                        !fromChainForPairs ||
-                        equals_ignore_case(
-                          p?.source_chain,
-                          fromChainForPairs,
-                        )
-                      ) &&
-                      (
-                        !toChainForPairs ||
-                        equals_ignore_case(
-                          p?.destination_chain,
-                          toChainForPairs,
-                        )
+            {chainPairs && statuses ?
+              _.slice(
+                chainPairs
+                  .filter(p =>
+                    (
+                      !fromChainForPairs ||
+                      equals_ignore_case(
+                        p?.source_chain,
+                        fromChainForPairs,
                       )
-                    ),
-                  0,
-                  10,
-                )
-                .map((p, i) => {
-                  const {
-                    source_chain,
-                    destination_chain,
-                    num_txs,
-                  } = { ...p }
-
-                  const source_chain_data =
-                    getChain(
-                      source_chain,
-                      chains_data,
+                    ) &&
+                    (
+                      !toChainForPairs ||
+                      equals_ignore_case(
+                        p?.destination_chain,
+                        toChainForPairs,
+                      )
                     )
+                  ),
+                0,
+                10,
+              )
+              .map((p, i) => {
+                const {
+                  source_chain,
+                  destination_chain,
+                  num_txs,
+                } = { ...p }
 
-                  const destination_chain_data =
-                    getChain(
-                      destination_chain,
-                      chains_data,
-                    )
+                const source_chain_data = getChain(source_chain, chains_data)
+                const destination_chain_data = getChain(destination_chain, chains_data)
 
-                  return (
-                    <div
-                      key={i}
-                      className="space-y-0"
-                    >
-                      <div className="flex items-center justify-between space-x-2">
-                        <div className="flex items-center space-x-2">
-                          <Image
-                            src={source_chain_data?.image}
-                            className="w-6 h-6 rounded-full"
-                          />
-                          <HiArrowSmRight
-                            size={20}
-                          />
-                          {destination_chain_data ?
-                            <Image
-                              src={destination_chain_data?.image}
-                              className="w-6 h-6 rounded-full"
-                            /> :
-                            <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
-                              {
-                                ellipse(
-                                  destination_chain,
-                                  8,
-                                ) ||
-                                'Invalid Chain'
-                              }
-                            </span>
-                          }
-                        </div>
-                        <span className="font-bold">
-                          {number_format(
-                            num_txs,
-                            '0,0',
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between space-x-2">
-                        <ProgressBar
-                          width={num_txs * 100 / total}
-                          color={`${colors[i % colors.length]}`}
-                          className="h-1.5 rounded-lg"
+                return (
+                  <div
+                    key={i}
+                    className="space-y-0"
+                  >
+                    <div className="flex items-center justify-between space-x-2">
+                      <div className="flex items-center space-x-2">
+                        <Image
+                          src={source_chain_data?.image}
+                          className="w-6 h-6 rounded-full"
                         />
-                        <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                          {number_format(
-                            num_txs * 100 / total,
-                            '0,0.000',
-                          )}%
-                        </span>
+                        <HiArrowSmRight
+                          size={20}
+                        />
+                        {destination_chain_data ?
+                          <Image
+                            src={destination_chain_data?.image}
+                            className="w-6 h-6 rounded-full"
+                          /> :
+                          <span className="text-slate-400 dark:text-slate-600 text-xs font-semibold">
+                            {ellipse(destination_chain, 8) || 'Invalid Chain'}
+                          </span>
+                        }
                       </div>
+                      <span className="font-bold">
+                        {number_format(num_txs, '0,0')}
+                      </span>
                     </div>
-                  )
-                }) :
-                <ProgressBarSpinner
-                  borderColor={loader_color(theme)}
-                  width="36"
-                  height="36"
-                />
+                    <div className="flex items-center justify-between space-x-2">
+                      <ProgressBar
+                        width={num_txs * 100 / total}
+                        color={`${colors[i % colors.length]}`}
+                        className="h-1.5 rounded-lg"
+                      />
+                      <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                        {number_format(num_txs * 100 / total, '0,0.000')}%
+                      </span>
+                    </div>
+                  </div>
+                )
+              }) :
+              <ProgressBarSpinner
+                borderColor={loader_color(theme)}
+                width="36"
+                height="36"
+              />
             }
           </div>
         </div>
@@ -1014,20 +789,14 @@ export default () => {
                     num_contracts,
                   } = { ...c }
 
-                  const chain_data = getChain(
-                    key,
-                    chains_data,
-                  )
+                  const chain_data = getChain(key, chains_data)
 
                   const {
                     name,
                     image,
                   } = { ...chain_data }
 
-                  const total = _.sumBy(
-                    contracts,
-                    'num_contracts',
-                  )
+                  const total = _.sumBy(contracts, 'num_contracts')
 
                   return (
                     <div
@@ -1036,25 +805,21 @@ export default () => {
                     >
                       <div className="flex items-center justify-between space-x-2">
                         <div className="flex items-center space-x-2">
-                          {image && (
-                            <Image
-                              src={image}
-                              className="w-6 h-6 rounded-full"
-                            />
-                          )}
+                          {
+                            image &&
+                            (
+                              <Image
+                                src={image}
+                                className="w-6 h-6 rounded-full"
+                              />
+                            )
+                          }
                           <span className="text-base font-bold">
-                            {
-                              name ||
-                              key ||
-                              'Invalid Chain'
-                            }
+                            {name || key || 'Invalid Chain'}
                           </span>
                         </div>
                         <span className="font-bold">
-                          {number_format(
-                            num_contracts,
-                            '0,0',
-                          )}
+                          {number_format(num_contracts, '0,0')}
                         </span>
                       </div>
                       <div className="flex items-center justify-between space-x-2">
@@ -1064,10 +829,7 @@ export default () => {
                           className="h-1.5 rounded-lg"
                         />
                         <span className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-                          {number_format(
-                            num_contracts * 100 / total,
-                            '0,0.000',
-                          )}%
+                          {number_format(num_contracts * 100 / total, '0,0.000')}%
                         </span>
                       </div>
                     </div>
@@ -1087,86 +849,75 @@ export default () => {
           </div>
           <div className="space-y-2">
             {timeSpents ?
-              timeSpents.map((t, i) => {
-                const {
-                  key,
-                  approve,
-                  execute,
-                } = { ...t }
+              timeSpents
+                .map((t, i) => {
+                  const {
+                    key,
+                    approve,
+                    execute,
+                  } = { ...t }
 
-                const source_chain_data = getChain(
-                  key,
-                  chains_data,
-                )
+                  const source_chain_data = getChain(key, chains_data)
 
-                return (
-                  <div
-                    key={i}
-                    className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-3 gap-2 space-y-1 sm:space-y-0 p-3"
-                  >
-                    <div className="flex flex-col space-y-0.5">
-                      <span className="text-slate-400 dark:text-slate-500 text-xs">
-                        From chain
-                      </span>
-                      <div className="flex items-center space-x-1.5">
-                        {source_chain_data?.image && (
-                          <Image
-                            src={source_chain_data.image}
-                            className="w-5 h-5 rounded-full"
-                          />
-                        )}
-                        <span className="text-sm font-bold">
-                          {
-                            source_chain_data?.name ||
-                            key
-                          }
+                  return (
+                    <div
+                      key={i}
+                      className="bg-slate-50 dark:bg-slate-900 rounded-lg flex flex-col sm:grid grid-cols-3 gap-2 space-y-1 sm:space-y-0 p-3"
+                    >
+                      <div className="flex flex-col space-y-0.5">
+                        <span className="text-slate-400 dark:text-slate-500 text-xs">
+                          From chain
                         </span>
-                      </div>
-                    </div>
-                    <div className="col-span-2 flex flex-col space-y-1.5">
-                      <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
-                        Time spent
-                      </span>
-                      <div className="grid grid-cols-2 gap-y-1 gap-x-4">
-                        <div className="w-full col-span-2">
-                          <ProgressBar
-                            width={approve * 100 / (approve + execute)}
-                            color="bg-yellow-500"
-                            backgroundClassName="h-1.5 bg-green-500"
-                            className="h-1.5"
-                          />
-                        </div>
-                        <div className="whitespace-nowrap text-xs font-semibold text-left">
-                          Approve ({approve ?
-                            _total_time_string(approve) :
-                            '-'
-                          })
-                        </div>
-                        <div className="whitespace-nowrap text-xs font-semibold text-right">
-                          Execute ({execute ?
-                            _total_time_string(execute) :
-                            '-'
-                          })
-                        </div>
-                        <div className="col-span-2" />
-                        <div className="w-full col-span-2">
-                          <ProgressBar
-                            width={100}
-                            color="bg-blue-500"
-                            className="h-1.5"
-                          />
-                        </div>
-                        <div className="col-span-2 whitespace-nowrap text-xs font-semibold text-right">
-                          Total ({t?.total ?
-                            _total_time_string(t.total) :
-                            '-'
-                          })
+                        <div className="flex items-center space-x-1.5">
+                          {
+                            source_chain_data?.image &&
+                            (
+                              <Image
+                                src={source_chain_data.image}
+                                className="w-5 h-5 rounded-full"
+                              />
+                            )
+                          }
+                          <span className="text-sm font-bold">
+                            {source_chain_data?.name || key}
+                          </span>
                         </div>
                       </div>
+                      <div className="col-span-2 flex flex-col space-y-1.5">
+                        <span className="text-slate-400 dark:text-slate-500 text-xs sm:text-right">
+                          Time spent
+                        </span>
+                        <div className="grid grid-cols-2 gap-y-1 gap-x-4">
+                          <div className="w-full col-span-2">
+                            <ProgressBar
+                              width={approve * 100 / (approve + execute)}
+                              color="bg-yellow-500"
+                              backgroundClassName="h-1.5 bg-green-500"
+                              className="h-1.5"
+                            />
+                          </div>
+                          <div className="whitespace-nowrap text-xs font-semibold text-left">
+                            Approve ({approve ? _total_time_string(approve) : '-'})
+                          </div>
+                          <div className="whitespace-nowrap text-xs font-semibold text-right">
+                            Execute ({execute ? _total_time_string(execute) : '-'})
+                          </div>
+                          <div className="col-span-2" />
+                          <div className="w-full col-span-2">
+                            <ProgressBar
+                              width={100}
+                              color="bg-blue-500"
+                              className="h-1.5"
+                            />
+                          </div>
+                          <div className="col-span-2 whitespace-nowrap text-xs font-semibold text-right">
+                            Total ({t?.total ? _total_time_string(t.total) : '-'})
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )
-              }) :
+                  )
+                }) :
               <ProgressBarSpinner
                 borderColor={loader_color(theme)}
                 width="36"

@@ -2813,7 +2813,8 @@ export default () => {
                                   !executed &&
                                   (
                                     is_executed ||
-                                    error
+                                    error ||
+                                    not_enough_gas_to_execute
                                   ) ?
                                     'not_executed' :
                                     executed ?
