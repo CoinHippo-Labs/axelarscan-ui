@@ -407,8 +407,7 @@ export default () => {
 
       const interval =
         setInterval(
-          () =>
-            getData(),
+          () => getData(),
           0.5 * 60 * 1000,
         )
 
@@ -1130,7 +1129,9 @@ export default () => {
                             ]
                             .includes(title) ?
                               'Confirmed' :
-                              title
+                              s?.id === 'confirm' && !data ?
+                                'Waiting for Finality' :
+                                title
 
                           const id = data?.[id_field]
 
@@ -1176,13 +1177,7 @@ export default () => {
                                   'text-yellow-500 dark:text-yellow-400' :
                                   'text-slate-300 dark:text-slate-700'
 
-                          const hidden =
-                            [
-                              'confirm',
-                            ].includes(s?.id) &&
-                            [
-                              'vote',
-                            ].includes(steps[i + 1]?.id)
+                          const hidden = ['confirm'].includes(s?.id) && data && ['vote'].includes(steps[i + 1]?.id)
 
                           return (
                             !hidden &&
