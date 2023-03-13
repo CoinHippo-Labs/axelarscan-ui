@@ -757,7 +757,7 @@ export default (
                         (
                           <div className="flex flex-col">
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
-                              Base fees:
+                              Base Fees:
                             </span>
                             <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap my-0.5 py-0.5 px-1.5">
                               <span className="text-2xs font-semibold mr-1">

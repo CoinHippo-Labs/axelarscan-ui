@@ -1658,7 +1658,7 @@ export default () => {
                           (
                             <div className="flex items-center space-x-2">
                               <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
-                                Base fees:
+                                Base Fees:
                               </span>
                               <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
                                 <span className="text-xs font-semibold mr-1">
@@ -2331,6 +2331,7 @@ export default () => {
                     const {
                       callback,
                     } = { ...gmp }
+
                     const {
                       call,
                       gas_paid,
@@ -2353,6 +2354,10 @@ export default () => {
                       is_insufficient_fee,
                       not_enough_gas_to_execute,
                     } = { ...gmp.data }
+
+                    const {
+                      gas_express_fee_amount,
+                    } = { ...gas }
 
                     const {
                       title,
@@ -2521,6 +2526,7 @@ export default () => {
                         }
                       }
                     }
+
                     destination_gas_data = {
                       ...(
                         _.head(
@@ -3432,11 +3438,7 @@ export default () => {
                                       />
                                   }
                                   <span className="uppercase text-xs font-semibold">
-                                    {
-                                      success ?
-                                        'Success' :
-                                        'Error'
-                                    }
+                                    {success ? 'Success' : 'Error'}
                                   </span>
                                 </div>
                               </div>
@@ -3451,18 +3453,10 @@ export default () => {
                                 </span>
                                 <span className="flex flex-wrap text-slate-400 dark:text-slate-500 font-medium">
                                   <span className="whitespace-nowrap mr-0.5">
-                                    {
-                                      moment(block_timestamp * 1000)
-                                        .fromNow()
-                                    }
+                                    {moment(block_timestamp * 1000).fromNow()}
                                   </span>
                                   <span className="whitespace-nowrap">
-                                    (
-                                    {
-                                      moment(block_timestamp * 1000)
-                                        .format('MMM D, YYYY h:mm:ss A')
-                                    }
-                                    )
+                                    ({moment(block_timestamp * 1000).format('MMM D, YYYY h:mm:ss A')})
                                   </span>
                                 </span>
                               </div>
@@ -3585,73 +3579,110 @@ export default () => {
                             ) &&
                             destination_gas_data &&
                             (
-                              <div className={rowClassName}>
-                                <span className={rowTitleClassName}>
-                                  {
-                                    [
-                                      'refunded',
-                                    ]
-                                    .includes(s.id) ?
-                                      'Gas Used on Express' :
-                                      'Gas Used'
-                                  }
-                                </span>
-                                <div className="flex flex-wrap items-center">
-                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                              <>
+                                <div className={rowClassName}>
+                                  <span className={rowTitleClassName}>
                                     {
-                                      destination_gas_data?.image &&
-                                      (
-                                        <Image
-                                          src={destination_gas_data.image}
-                                          className="w-5 h-5 rounded-full"
-                                        />
-                                      )
+                                      [
+                                        'refunded',
+                                      ]
+                                      .includes(s.id) ?
+                                        'Gas Used on Express' :
+                                        'Gas Used'
                                     }
-                                    <span className="text-sm font-medium">
-                                      <span className="mr-1">
-                                        {number_format(
-                                          utils.formatUnits(
-                                            FixedNumber.fromString(
-                                              BigNumber.from(
-                                                express_executed.receipt.gasUsed
-                                              )
-                                              .toString()
-                                            )
-                                            .mulUnsafe(
+                                  </span>
+                                  <div className="flex flex-wrap items-center">
+                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                      {
+                                        destination_gas_data?.image &&
+                                        (
+                                          <Image
+                                            src={destination_gas_data.image}
+                                            className="w-5 h-5 rounded-full"
+                                          />
+                                        )
+                                      }
+                                      <span className="text-sm font-medium">
+                                        <span className="mr-1">
+                                          {number_format(
+                                            utils.formatUnits(
                                               FixedNumber.fromString(
                                                 BigNumber.from(
-                                                  express_executed.receipt.effectiveGasPrice ||
-                                                  express_executed.transaction.gasPrice
-                                                ).toString()
+                                                  express_executed.receipt.gasUsed
+                                                )
+                                                .toString()
                                               )
-                                            )
-                                            .round(0)
-                                            .toString()
-                                            .replace(
-                                              '.0',
-                                              '',
+                                              .mulUnsafe(
+                                                FixedNumber.fromString(
+                                                  BigNumber.from(
+                                                    express_executed.receipt.effectiveGasPrice ||
+                                                    express_executed.transaction.gasPrice
+                                                  ).toString()
+                                                )
+                                              )
+                                              .round(0)
+                                              .toString()
+                                              .replace(
+                                                '.0',
+                                                '',
+                                              ),
+                                              destination_gas_data.decimals,
                                             ),
-                                            destination_gas_data.decimals,
-                                          ),
-                                          '0,0.00000000',
-                                          true,
-                                        )}
-                                      </span>
-                                      <span>
-                                        {ellipse(destination_gas_data.symbol)}
-                                      </span>
-                                    </span>
-                                  </div>
-                                  {
-                                    (
-                                      express_gas_price_rate ||
-                                      gas_price_rate
-                                    ) &&
-                                    (
-                                      <>
-                                        <span className="text-sm font-medium mr-2">
-                                          =
+                                            '0,0.00000000',
+                                            true,
+                                          )}
                                         </span>
+                                        <span>
+                                          {ellipse(destination_gas_data.symbol)}
+                                        </span>
+                                      </span>
+                                    </div>
+                                    {
+                                      (
+                                        express_gas_price_rate ||
+                                        gas_price_rate
+                                      ) &&
+                                      (
+                                        <>
+                                          <span className="text-sm font-medium mr-2">
+                                            =
+                                          </span>
+                                          <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                            {
+                                              source_gas_data?.image &&
+                                              (
+                                                <Image
+                                                  src={source_gas_data.image}
+                                                  className="w-5 h-5 rounded-full"
+                                                />
+                                              )
+                                            }
+                                            <span className="text-sm font-medium">
+                                              <span className="mr-1">
+                                                {number_format(
+                                                  source_express_executed_gas_used,
+                                                  '0,0.00000000',
+                                                  true,
+                                                )}
+                                              </span>
+                                              <span>
+                                                {ellipse(source_gas_data?.symbol)}
+                                              </span>
+                                            </span>
+                                          </div>
+                                        </>
+                                      )
+                                    }
+                                  </div>
+                                </div>
+                                {
+                                  gas_express_fee_amount > 0 &&
+                                  (
+                                    <div className={rowClassName}>
+                                      <span className={rowTitleClassName}>
+                                        Express Fees
+                                      </span>
+                                      <div className="flex flex-wrap items-center">
                                         <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
                                           {
                                             source_gas_data?.image &&
@@ -3665,7 +3696,7 @@ export default () => {
                                           <span className="text-sm font-medium">
                                             <span className="mr-1">
                                               {number_format(
-                                                source_express_executed_gas_used,
+                                                gas_express_fee_amount,
                                                 '0,0.00000000',
                                                 true,
                                               )}
@@ -3675,16 +3706,16 @@ export default () => {
                                             </span>
                                           </span>
                                         </div>
-                                      </>
-                                    )
-                                  }
-                                </div>
-                              </div>
+                                      </div>
+                                    </div>
+                                  )
+                                }
+                              </>
                             )
                           }
                           {
                             [
-                              /*'approved', */
+                              /*'approved',*/
                               'executed',
                               'refunded',
                             ]
