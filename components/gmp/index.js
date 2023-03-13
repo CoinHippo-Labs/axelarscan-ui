@@ -849,15 +849,18 @@ export default () => {
     is_insufficient_fee,
     is_call_from_relayer,
     not_enough_gas_to_execute,
+    command_id,
   } = { ...data }
   let {
     is_not_enough_gas,
     no_gas_remain,
   } = { ...data }
+
   const {
     event,
     chain,
   } = { ...call }
+
   const {
     sender,
     destinationChain,
@@ -867,13 +870,19 @@ export default () => {
     symbol,
     amount,
   } = { ...call?.returnValues }
-  const {
-    commandId,
-    sourceChain,
-  } = { ...approved?.returnValues }
+
   const {
     from,
   } = { ...call?.transaction }
+
+  const {
+    sourceChain,
+  } = { ...approved?.returnValues }
+  let {
+    commandId,
+  } = { ...approved?.returnValues }
+
+  commandId = commandId || command_id
 
   const relayer = executed?.transaction?.from
 
@@ -2394,6 +2403,7 @@ export default () => {
 
                     const {
                       logIndex,
+                      _logIndex,
                       blockNumber,
                       block_timestamp,
                       contract_address,
@@ -3378,6 +3388,27 @@ export default () => {
                                       '0,0',
                                     )}
                                   </a>
+                                </div>
+                              </div>
+                            )
+                          }
+                          {
+                            ['call'].includes(s.id) && typeof _logIndex === 'number' &&
+                            (
+                              <div className={rowClassName}>
+                                <Tooltip
+                                  placement="right"
+                                  content="Index of the event within the tx"
+                                  className="z-50 bg-black bg-opacity-75 text-white text-xs"
+                                >
+                                  <span className={`w-fit ${rowTitleClassName}`}>
+                                    Event Index
+                                  </span>
+                                </Tooltip>
+                                <div className="flex items-center space-x-1">
+                                  <span className="font-medium">
+                                    {number_format(_logIndex, '0,0')}
+                                  </span>
                                 </div>
                               </div>
                             )
