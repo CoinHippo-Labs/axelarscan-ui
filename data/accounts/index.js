@@ -301,4 +301,10 @@ export default [
     image: '/logos/accounts/squid.svg',
     environment: 'mainnet',
   },
+  {
+    address: '0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44',
+    name: 'The Junkyard',
+    image: '/logos/accounts/junkyard.png',
+    environment: 'mainnet',
+  },
 ]
