@@ -307,4 +307,22 @@ export default [
     image: '/logos/accounts/junkyard.png',
     environment: 'mainnet',
   },
+  {
+    address: '0x4EFE356BEDeCC817cb89B4E9b796dB8bC188DC59',
+    name: 'The Junkyard',
+    image: '/logos/accounts/junkyard.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x05a8AA0ed1e1bc598C23B415F67Cd774B530546C',
+    name: 'The Junkyard',
+    image: '/logos/accounts/junkyard.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xEf6D4e4c75f86962385335127dF9a12ef6953b2c',
+    name: 'The Junkyard',
+    image: '/logos/accounts/junkyard.png',
+    environment: 'mainnet',
+  },
 ]
