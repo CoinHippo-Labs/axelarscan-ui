@@ -40,8 +40,8 @@ export default () => {
     tvl,
     validators,
     rpc_providers,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         evm_chains: state.evm_chains,
         cosmos_chains: state.cosmos_chains,
@@ -137,34 +137,21 @@ export default () => {
 
         if (assets_data) {
           // price
-          let updated_ids =
-            assets_data
-              .filter(a =>
-                // a?.id === native_asset_id ||
-                typeof a?.price === 'number'
-              )
-              .map(a => a.id)
+          let updated_ids = assets_data.filter(a => typeof a?.price === 'number').map(a => a.id)
 
           if (updated_ids.length < assets_data.length) {
             let updated = false
 
             const denoms =
               assets_data
-                .filter(a =>
-                  a?.id &&
-                  !updated_ids.includes(a.id)
-                )
+                .filter(a => a?.id && !updated_ids.includes(a.id))
                 .map(a => {
                   const {
                     id,
                     contracts,
                   } = { ...id }
 
-                  const chain =
-                    _.head(
-                      (contracts || [])
-                        .map(c => c?.chain)
-                    )
+                  const chain = _.head((contracts || []).map(c => c?.chain))
 
                   if (chain) {
                     return {
@@ -177,12 +164,7 @@ export default () => {
                 })
 
             if (denoms.length > 0) {
-              const response =
-                await getAssetsPrice(
-                  {
-                    denoms,
-                  },
-                )
+              const response = await getAssetsPrice({ denoms })
 
               if (Array.isArray(response)) {
                 response
@@ -192,35 +174,20 @@ export default () => {
                       price,
                     } = { ...a }
 
-                    const asset_index = assets_data
-                      .findIndex(_a =>
-                        equals_ignore_case(
-                          _a?.id,
-                          denom,
-                        )
-                      )
+                    const asset_index = assets_data.findIndex(_a => equals_ignore_case(_a?.id, denom))
 
                     if (asset_index > -1) {
                       const asset_data = assets_data[asset_index]
+
                       const {
                         id,
                       } = { ...asset_data }
 
-                      asset_data.price =
-                        (
-                          price ||
-                          asset_data.price ||
-                          0
-                        )
+                      asset_data.price = price || asset_data.price || 0
 
                       assets_data[asset_index] = asset_data
-                      updated_ids =
-                        _.uniq(
-                          _.concat(
-                            updated_ids,
-                            id,
-                          )
-                        )
+
+                      updated_ids = _.uniq(_.concat(updated_ids, id))
 
                       updated = true
                     }
@@ -249,16 +216,8 @@ export default () => {
   useEffect(
     () => {
       const getData = async is_interval => {
-        if (
-          !status_data ||
-          is_interval
-        ) {
-          const response =
-            await getStatus(
-              undefined,
-              is_interval &&
-              status_data,
-            )
+        if (!status_data || is_interval) {
+          const response = await getStatus(undefined, is_interval && status_data)
 
           if (response) {
             dispatch(
@@ -269,10 +228,7 @@ export default () => {
             )
 
             if (!is_interval) {
-              setValidatorsTrigger(
-                moment()
-                  .valueOf()
-              )
+              setValidatorsTrigger(moment().valueOf())
             }
           }
         }
@@ -281,8 +237,8 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(true),
+        setInterval(
+          () => getData(true),
           6 * 1000,
         )
 
@@ -295,15 +251,9 @@ export default () => {
   useEffect(
     () => {
       const getData = async is_interval => {
-        if (
-          cosmos_chains_data &&
-          assets_data
-        ) {
-          const chain_data =
-            getChain(
-              'axelarnet',
-              cosmos_chains_data,
-            )
+        if (cosmos_chains_data && assets_data) {
+          const chain_data = getChain('axelarnet', cosmos_chains_data)
+
           const {
             coingecko_id,
           } = { ...chain_data }
@@ -323,6 +273,7 @@ export default () => {
             const {
               params,
             } = { ...response }
+
             const {
               bond_denom,
             } = { ...params }
@@ -358,18 +309,7 @@ export default () => {
                           .map(([k, v]) =>
                             [
                               k,
-                              k === 'denom' ?
-                                assetManager
-                                  .symbol(
-                                    v,
-                                    assets_data,
-                                  ) :
-                                assetManager
-                                  .amount(
-                                    v,
-                                    denom,
-                                    assets_data,
-                                  ),
+                              k === 'denom' ? assetManager.symbol(v, assets_data) : assetManager.amount(v, denom, assets_data),
                             ]
                           )
                       ),
@@ -396,14 +336,9 @@ export default () => {
                         .map(([k, v]) =>
                           [
                             k,
-                            assetManager
-                              .amount(
-                                v,
-                                native_asset_id,
-                                assets_data,
-                              ),
+                            assetManager.amount(v, native_asset_id, assets_data),
                           ]
-                      )
+                        )
                     ),
                 },
               }
@@ -430,21 +365,10 @@ export default () => {
               )
             }
 
-            response =
-              await (
-                await fetch(
-                  process.env.NEXT_PUBLIC_RELEASES_URL,
-                )
-              )
-              .text()
+            response = await (await fetch(process.env.NEXT_PUBLIC_RELEASES_URL)).text()
 
             if (response?.includes('`axelar-core` version')) {
-              response =
-                response
-                  .split('\n')
-                  .filter(l =>
-                    l?.includes('`axelar-core` version')
-                  )
+              response = response.split('\n').filter(l => l?.includes('`axelar-core` version'))
 
               dispatch(
                 {
@@ -455,12 +379,7 @@ export default () => {
                         _.head(response)
                           .split('|')
                           .map(s =>
-                            (s || '')
-                              .trim()
-                              .split('`')
-                              .join('')
-                              .split(' ')
-                              .join('_')
+                            (s || '').trim().split('`').join('').split(' ').join('_')
                           )
                           .filter(s => s),
                       ]
@@ -473,41 +392,34 @@ export default () => {
               dispatch(
                 {
                   type: CHAIN_DATA,
-                  value: {
-                    'axelar-core_version': '-',
-                  },
+                  value: { 'axelar-core_version': '-' },
                 }
               )
             }
           }
 
-          /*if (coingecko_id) {
-            response =
-              await token(
-                coingecko_id,
-              )
+          /*
+          if (coingecko_id) {
+            response = await token(coingecko_id)
 
             if (response) {
               dispatch(
                 {
                   type: CHAIN_DATA,
-                  value: {
-                    token_data: {
-                      ...response,
-                    },
-                  },
+                  value: { token_data: { ...response } },
                 }
               )
             }
-          }*/
+          }
+          */
         }
       }
 
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(true),
+        setInterval(
+          () => getData(true),
           0.5 * 60 * 1000,
         )
 
@@ -520,10 +432,7 @@ export default () => {
   useEffect(
     () => {
       const init = async => {
-        if (
-          evm_chains_data &&
-          ['/tvl'].includes(pathname)
-        ) {
+        if (evm_chains_data && ['/tvl'].includes(pathname)) {
           const _rpcs = {}
 
           for (const chain_data of evm_chains_data) {
@@ -538,31 +447,24 @@ export default () => {
                 rpcUrls,
               } = { ..._.head(provider_params) }
    
-              const rpc_urls =
-                (rpcUrls || [])
-                  .filter(url => url)
+              const rpc_urls = (rpcUrls || []).filter(url => url)
 
               const provider =
-                rpc_urls.length === 1 ?
-                  new providers.StaticJsonRpcProvider(
-                    _.head(rpc_urls),
-                    chain_id,
-                  ) :
-                  new providers.FallbackProvider(
-                    rpc_urls
-                      .map((url, i) => {
-                        return {
-                          provider:
-                            new providers.StaticJsonRpcProvider(
-                              url,
-                              chain_id,
-                            ),
-                          priority: i + 1,
-                          stallTimeout: 1000,
-                        }
-                      }),
-                    rpc_urls.length / 3,
-                  )
+                rpc_urls.length > 0 ?
+                  rpc_urls.length === 1 ?
+                    new providers.StaticJsonRpcProvider(_.head(rpc_urls), chain_id) :
+                    new providers.FallbackProvider(
+                      rpc_urls
+                        .map((url, i) => {
+                          return {
+                            provider: new providers.StaticJsonRpcProvider(url, chain_id),
+                            priority: i + 1,
+                            stallTimeout: 1000,
+                          }
+                        }),
+                      rpc_urls.length / 3,
+                    ) :
+                  null
 
               _rpcs[chain_id] = provider
             }
@@ -589,12 +491,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (['evm_address'].includes(type(address))) {
-          const addresses =
-            [address]
-              .filter(a =>
-                a &&
-                !ens_data?.[a]
-              )
+          const addresses = [address].filter(a => a && !ens_data?.[a])
 
           const ens_data = await getEns(addresses)
 
@@ -651,12 +548,7 @@ export default () => {
           } = { ...asset_data }
 
           for (let i = 0; i < 3; i++) {
-            const response =
-              await getTVL(
-                {
-                  asset: id,
-                },
-              )
+            const response = await getTVL({ asset: id })
 
             const {
               data,
@@ -668,14 +560,10 @@ export default () => {
                 {
                   type: TVL_DATA,
                   value: {
-                    [id]: {
-                      ..._.head(data),
-                      updated_at,
-                    },
+                    [id]: { ..._.head(data), updated_at },
                   },
                 }
               )
-
               break
             }
           }
@@ -684,22 +572,10 @@ export default () => {
 
       const getData = is_interval => {
         if (assets_data) {
-          if (
-            [
-              '/tvl',
-            ].includes(pathname) &&
-            (
-              !tvl_data ||
-              is_interval
-            )
-          ) {
+          if (['/tvl'].includes(pathname) && (!tvl_data || is_interval)) {
             assets_data
               .filter(a =>
-                a &&
-                (
-                  !a.is_staging ||
-                  staging
-                )
+                a && (!a.is_staging || staging)
               )
               .forEach(a => getAssetData(a))
           }
@@ -709,8 +585,8 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(true),
+        setInterval(
+          () => getData(true),
           3 * 60 * 1000,
         )
 
@@ -724,8 +600,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (
-          assets_data &&
-          status_data &&
+          assets_data && status_data &&
           [
             '/address',
             '/transfer',
@@ -733,9 +608,7 @@ export default () => {
             '/gmp',
             '/batch',
             '/assets',
-          ].findIndex(p =>
-            pathname?.startsWith(p)
-          ) < 0
+          ].findIndex(p => pathname?.startsWith(p)) < 0
         ) {
           let response
 
@@ -760,11 +633,7 @@ export default () => {
                 await all_validators(
                   null,
                   validators_data,
-                  status ||
-                    (address ?
-                      null :
-                      'active'
-                    ),
+                  status || (address ? null : 'active'),
                   address,
                   latest_block_height,
                   assets_data,
@@ -780,36 +649,15 @@ export default () => {
                   )
                 }
 
-                if (
-                  ![
-                    '/participations',
-                  ].includes(pathname)
-                ) {
-                  response =
-                    await all_validators_broadcaster(
-                      response,
-                      null,
-                      assets_data,
-                    )
+                if (!['/participations'].includes(pathname)) {
+                  response = await all_validators_broadcaster(response, null, assets_data)
 
                   if (response?.length > 0) {
                     let _response = response
 
-                    if (
-                      [
-                        '/validators',
-                        '/validators/[status]',
-                        '/validator/[address]',
-                      ].includes(pathname)
-                    ) {
-                      const num_heartbeat_blocks =
-                        Number(
-                          process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS
-                        )
-                      const num_blocks_per_heartbeat =
-                        Number(
-                          process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT
-                        )
+                    if (['/validators', '/validators/[status]', '/validator/[address]'].includes(pathname)) {
+                      const num_heartbeat_blocks = Number(process.env.NEXT_PUBLIC_NUM_HEARTBEAT_BLOCKS)
+                      const num_blocks_per_heartbeat = Number(process.env.NEXT_PUBLIC_NUM_BLOCKS_PER_HEARTBEAT)
 
                       const first = firstHeartbeatBlock(latest_block_height - num_heartbeat_blocks)
                       const last = lastHeartbeatBlock(latest_block_height)
@@ -845,25 +693,12 @@ export default () => {
                           broadcaster_address,
                         } = { ...v }
 
-                        const total =
-                          Math.floor(
-                            (last - first) /
-                            num_blocks_per_heartbeat
-                          ) + 1
+                        const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
 
-                        const up =
-                          response?.data?.[broadcaster_address] ||
-                          0
+                        const up = response?.data?.[broadcaster_address] || 0
 
-                        let uptime =
-                          total > 0 ?
-                            up * 100 / total :
-                            0
-
-                        uptime =
-                          uptime > 100 ?
-                            100 :
-                            uptime
+                        let uptime = total > 0 ? up * 100 / total : 0
+                        uptime = uptime > 100 ? 100 : uptime
 
                         v.heartbeats_uptime = uptime
                         _response[i] = v
@@ -878,10 +713,7 @@ export default () => {
                         }
                       )
 
-                      const num_evm_votes_blocks =
-                        Number(
-                          process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS
-                        )
+                      const num_evm_votes_blocks = Number(process.env.NEXT_PUBLIC_NUM_EVM_VOTES_BLOCKS)
 
                       response =
                         await validators_evm_votes(
@@ -898,30 +730,20 @@ export default () => {
 
                       for (let i = 0; i < _response.length; i++) {
                         const v = _response[i]
+
                         const {
                           broadcaster_address,
                         } = { ...v }
 
-                        v.votes = {
-                          ...response?.data?.[broadcaster_address],
-                        }
+                        v.votes = { ...response?.data?.[broadcaster_address] }
 
-                        v.total_votes =
-                          v.votes.total ||
-                          0
+                        v.total_votes = v.votes.total || 0
 
                         const get_votes = vote =>
                           _.sum(
                             Object.entries({ ...v.votes?.chains })
                               .map(c =>
-                                Object.entries({ ...c[1]?.votes })
-                                  .find(_v =>
-                                    equals_ignore_case(
-                                      _v[0],
-                                      vote?.toString(),
-                                    )
-                                  )?.[1] ||
-                                0
+                                Object.entries({ ...c[1]?.votes }).find(_v => equals_ignore_case(_v[0], vote?.toString()))?.[1] || 0
                               )
                           )
 
@@ -951,9 +773,7 @@ export default () => {
             default:
               response =
                 await all_validators(
-                  ['/validators/tier'].includes(pathname) ?
-                    {} :
-                    null,
+                  ['/validators/tier'].includes(pathname) ? {} : null,
                   validators_data,
                   null,
                   null,
@@ -961,19 +781,13 @@ export default () => {
                   assets_data,
                 )
 
-                if (['/validators/tier'].includes(pathname)) {
-                  const {
-                    data,
-                  } = { ...response }
+              if (['/validators/tier'].includes(pathname)) {
+                const {
+                  data,
+                } = { ...response }
 
-                  response =
-                    await all_validators_broadcaster(
-                      data,
-                      null,
-                      assets_data,
-                    )
-                }
-
+                response = await all_validators_broadcaster(data, null, assets_data)
+              }
               break
           }
 
@@ -991,8 +805,8 @@ export default () => {
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () => getData(),
           5 * 60 * 1000,
         )
 
@@ -1008,11 +822,7 @@ export default () => {
         id,
         chains_data,
       ) => {
-        const response =
-          await chain_maintainer(
-            id,
-            chains_data,
-          )
+        const response = await chain_maintainer(id, chains_data)
 
         if (response) {
           dispatch(
@@ -1031,26 +841,17 @@ export default () => {
             '/validator',
             '/participations',
             '/proposals',
-          ].findIndex(p =>
-            pathname?.includes(p)
-          ) > -1
+          ].findIndex(p => pathname?.includes(p)) > -1
         ) {
-          evm_chains_data
-            .map(c => c?.id)
-            .forEach(id =>
-              getChainData(
-                id,
-                evm_chains_data,
-              )
-            )
+          evm_chains_data.map(c => c?.id).forEach(id => getChainData(id, evm_chains_data))
         }
       }
 
       getData()
 
       const interval =
-        setInterval(() =>
-          getData(),
+        setInterval(
+          () => getData(),
           5 * 60 * 1000,
         )
 
