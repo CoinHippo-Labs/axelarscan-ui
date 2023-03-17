@@ -24,8 +24,8 @@ export default () => {
     status,
     chain,
     validators,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
@@ -69,9 +69,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        setInflationData(
-          await getInflation()
-        )
+        setInflationData(await getInflation())
       }
 
       getData()
@@ -82,26 +80,26 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (
-          assets_data &&
-          status_data &&
-          chain_data
-        ) {
+        if (assets_data && status_data && chain_data) {
           const {
             staking_pool,
             voting_power,
             staking_params,
             bank_supply,
           } = { ...chain_data }
+
           const {
             bonded_tokens,
           } = { ...staking_pool }
+
           const {
             bond_denom,
           } = { ...staking_params }
+
           const {
             amount,
           } = { ...bank_supply }
+
           const {
             latest_block_height,
             latest_block_time,
@@ -111,39 +109,14 @@ export default () => {
           setCosmosMetrics(
             {
               latest_block_height,
-              latest_block_time:
-                moment(latest_block_time)
-                  .valueOf(),
+              latest_block_time: moment(latest_block_time).valueOf(),
               avg_block_time,
-              active_validators:
-                (validators_data || [])
-                  .filter(v =>
-                    [
-                      'BOND_STATUS_BONDED',
-                    ]
-                    .includes(v?.status)
-                  )
-                  .length,
+              active_validators: (validators_data || []).filter(v => ['BOND_STATUS_BONDED'].includes(v?.status)).length,
               total_validators: validators_data?.length,
-              denom:
-                assetManager
-                  .symbol(
-                    bond_denom,
-                    assets_data,
-                  ),
-              online_voting_power:
-                staking_pool &&
-                Math.floor(bonded_tokens),
-              online_voting_power_percentage:
-                staking_pool &&
-                amount &&
-                (
-                  Math.floor(bonded_tokens) * 100 /
-                  amount
-                ),
-              total_voting_power:
-                bank_supply &&
-                amount,
+              denom: assetManager.symbol(bond_denom, assets_data),
+              online_voting_power: staking_pool && Math.floor(bonded_tokens),
+              online_voting_power_percentage: staking_pool && amount && (Math.floor(bonded_tokens) * 100 / amount),
+              total_voting_power: bank_supply && amount,
               inflation_data: inflationData,
             }
           )
@@ -158,16 +131,8 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (
-          process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' &&
-          evm_chains_data &&
-          cosmos_chains_data
-        ) {
-          const chains_data =
-            _.concat(
-              evm_chains_data,
-              cosmos_chains_data,
-            )
+        if (process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && evm_chains_data && cosmos_chains_data) {
+          const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
           const response = await transfers_stats()
 
@@ -177,32 +142,15 @@ export default () => {
 
           setTransfers(
             {
-              num_txs:
-                _.sumBy(
-                  data,
-                  'num_txs',
-                ),
-              volume:
-                _.sumBy(
-                  data,
-                  'volume',
-                ),
-              num_chains:
-                chains_data
-                  .filter(c =>
-                    !c?.maintainer_id ||
-                    !c?.no_inflation ||
-                    c?.gateway_address
-                  )
-                  .length,
+              num_txs: _.sumBy(data, 'num_txs'),
+              volume: _.sumBy(data, 'volume'),
+              num_chains: chains_data.filter(c => !c?.maintainer_id || !c?.no_inflation || c?.gateway_address).length,
               network_graph_data:
                 _.orderBy(
                   Object.entries(
                     _.groupBy(
                       (data || [])
-                        .filter(d =>
-                          d?.id
-                        )
+                        .filter(d => d?.id)
                         .map(d => {
                           const {
                             id,
@@ -210,14 +158,7 @@ export default () => {
 
                           return {
                             ...d,
-                            _id:
-                              _.slice(
-                                id
-                                  .split('_'),
-                                0,
-                                -1,
-                              )
-                              .join('_'),
+                            _id: _.slice(id.split('_'), 0, -1).join('_'),
                           }
                         }),
                       '_id',
@@ -231,34 +172,15 @@ export default () => {
 
                     return {
                       id: k,
-                      num_txs:
-                        _.sumBy(
-                          v,
-                          'num_txs',
-                        ),
-                      volume:
-                        _.sumBy(
-                          v,
-                          'volume',
-                        ),
+                      num_txs: _.sumBy(v, 'num_txs'),
+                      volume: _.sumBy(v, 'volume'),
                       source_chain,
                       destination_chain,
-                      source_chain_data:
-                        getChain(
-                          source_chain,
-                          chains_data,
-                        ),
-                      destination_chain_data:
-                        getChain(
-                          destination_chain,
-                          chains_data,
-                        ),
+                      source_chain_data: getChain(source_chain, chains_data),
+                      destination_chain_data: getChain(destination_chain, chains_data),
                     }
                   })
-                  .filter(d =>
-                    d.source_chain_data &&
-                    d.destination_chain_data
-                  ),
+                  .filter(d => d.source_chain_data && d.destination_chain_data),
                   ['num_txs'],
                   ['desc'],
                 ),
@@ -271,8 +193,7 @@ export default () => {
 
       const interval =
         setInterval(
-          () =>
-            getData(),
+          () => getData(),
           1 * 60 * 1000,
         )
 
@@ -284,16 +205,8 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (
-          process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' &&
-          evm_chains_data &&
-          cosmos_chains_data
-        ) {
-          const chains_data =
-            _.concat(
-              evm_chains_data,
-              cosmos_chains_data,
-            )
+        if (process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && evm_chains_data && cosmos_chains_data) {
+          const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
           const response = await GMPStats()
 
@@ -303,11 +216,7 @@ export default () => {
 
           setGmps(
             {
-              num_txs:
-                _.sumBy(
-                  messages,
-                  'num_txs',
-                ),
+              num_txs: _.sumBy(messages, 'num_txs'),
               num_contracts:
                 _.uniqBy(
                   (messages || [])
@@ -388,22 +297,11 @@ export default () => {
                                     num_txs,
                                     source_chain: s.key,
                                     destination_chain: key,
-                                    source_chain_data:
-                                      getChain(
-                                        s.key,
-                                        chains_data,
-                                      ),
-                                    destination_chain_data:
-                                      getChain(
-                                        key,
-                                        chains_data,
-                                      ),
+                                    source_chain_data: getChain(s.key, chains_data),
+                                    destination_chain_data: getChain(key, chains_data),
                                   }
                                 })
-                                .filter(d =>
-                                  d.source_chain_data &&
-                                  d.destination_chain_data
-                                )
+                                .filter(d => d.source_chain_data && d.destination_chain_data)
                             )
                           })
                       )
@@ -420,8 +318,7 @@ export default () => {
 
       const interval =
         setInterval(
-          () =>
-            getData(),
+          () => getData(),
           1 * 60 * 1000,
         )
 
@@ -430,9 +327,7 @@ export default () => {
     [evm_chains_data, cosmos_chains_data],
   )
 
-  const support_cross_chain =
-    process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' ||
-    process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true'
+  const support_cross_chain = process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' ||  process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true'
 
   return (
     <div className="space-y-8 mb-2 mx-auto pb-12">

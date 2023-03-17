@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-// import G6 from '@antv/g6'
 import { ColorRing } from 'react-loader-spinner'
 
 import { getChain } from '../../lib/object/chain'
@@ -10,11 +9,7 @@ import { number_format, equals_ignore_case, loader_color } from '../../lib/utils
 
 export default (
   {
-    id =
-      `network-graph_${
-        moment()
-          .valueOf()
-      }`,
+    id = `network-graph_${moment().valueOf()}`,
     transfers,
     gmps,
   },
@@ -23,8 +18,8 @@ export default (
     preferences,
     evm_chains,
     cosmos_chains,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
@@ -50,10 +45,7 @@ export default (
     () => {
       import('@antv/g6')
         .then(G6 => {
-          if (
-            rendered &&
-            !graph
-          ) {
+          if (rendered && !graph) {
             setGraph(
               new G6.Graph(
                 {
@@ -61,13 +53,7 @@ export default (
                   width: 800,
                   height: 600,
                   fitView: true,
-                  fitViewPadding:
-                    [
-                      0,
-                      33,
-                      0,
-                      0,
-                    ],
+                  fitViewPadding: [0, 33, 0, 0],
                   fitCenter: true,
                   layout: {
                     type: 'concentric',
@@ -103,11 +89,7 @@ export default (
 
   useEffect(
     () => {
-      if (
-        transfers &&
-        gmps &&
-        graph
-      ) {
+      if (transfers && gmps && graph) {
         const nodes = []
         let edges = []
 
@@ -116,74 +98,43 @@ export default (
             fontFamily: 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
             fontSize: 16,
             fontWeight: 500,
-            fill:
-              theme === 'dark' ?
-                '#fff' :
-                '#000',
+            fill: theme === 'dark' ? '#fff' : '#000',
           },
         }
 
         data
           .forEach(d => {
-            const xs =
-              [
-                'source',
-                'destination',
-              ]
-
-            xs
+            ['source', 'destination']
               .forEach(x => {
-                const id = d[`${x}_chain`],
-                  chain_data = d[`${x}_chain_data`]
+                const id = d[`${x}_chain`]
+                const chain_data = d[`${x}_chain_data`]
 
-                if (
-                  id &&
-                  nodes.findIndex(n =>
-                    equals_ignore_case(
-                      n?.id,
-                      id,
-                    )
-                  ) < 0
-                ) {
+                if (id && nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0) {
                   const {
                     name,
                     image,
                   } = { ...chain_data }
 
-                  const is_axelarnet =
-                    equals_ignore_case(
-                      id,
-                      axelarnet.id,
-                    )
+                  const is_axelarnet = equals_ignore_case(id, axelarnet.id)
 
-                  nodes
-                    .push(
-                      {
-                        id,
-                        size:
-                          is_axelarnet ?
-                            80 :
-                            64,
-                        type: 'image',
-                        img: image,
-                        label: name,
-                        labelCfg,
-                        clipCfg: {
-                          show: true,
-                          type: 'circle',
-                          r:
-                            is_axelarnet ?
-                              40 :
-                              32,
-                        },
-                        style: {
-                          fill:
-                            theme === 'dark' ?
-                              '#000' :
-                              '#fff',
-                        },
-                      }
-                    )
+                  nodes.push(
+                    {
+                      id,
+                      size: is_axelarnet ? 80 : 64,
+                      type: 'image',
+                      img: image,
+                      label: name,
+                      labelCfg,
+                      clipCfg: {
+                        show: true,
+                        type: 'circle',
+                        r: is_axelarnet ? 40 : 32,
+                      },
+                      style: {
+                        fill: theme === 'dark' ? '#000' : '#fff',
+                      },
+                    }
+                  )
                 }
               })
 
@@ -194,39 +145,27 @@ export default (
               num_txs,
             } = { ...d }
 
-            edges
-              .push(
-                {
-                  d,
-                  id,
-                  source: source_chain,
-                  target: destination_chain,
-                  type: 'circle-running',
-                  label:
-                    `${
-                      number_format(
-                        num_txs,
-                        num_txs > 1000000 ?
-                          '0,0.00a' :
-                          '0,0',
-                      )
-                    }`,
-                  labelCfg: {
-                    style: {
-                      ...labelCfg.style,
-                      fontSize: 12,
-                      textBaseline: 'bottom',
-                    },
-                  },
-                  curveOffset: 36,
+            edges.push(
+              {
+                d,
+                id,
+                source: source_chain,
+                target: destination_chain,
+                type: 'circle-running',
+                label: `${number_format(num_txs, num_txs > 1000000 ? '0,0.00a' : '0,0')}`,
+                labelCfg: {
                   style: {
-                    stroke:
-                      theme === 'dark' ?
-                        '#333' :
-                        '#ddd',
+                    ...labelCfg.style,
+                    fontSize: 12,
+                    textBaseline: 'bottom',
                   },
-                }
-              )
+                },
+                curveOffset: 36,
+                style: {
+                  stroke: theme === 'dark' ? '#333' : '#ddd',
+                },
+              }
+            )
           })
 
         import('@antv/g6')
@@ -238,11 +177,9 @@ export default (
                   cfg,
                   group,
                 ) {
-                  const shape =
-                    _.head(
-                      group.get('children')
-                    )
+                  const shape = _.head(group.get('children'))
                   const start_point = shape.getPoint(0)
+
                   const {
                     x,
                     y,
@@ -259,18 +196,17 @@ export default (
                         attrs: {
                           x,
                           y,
-                          fill:
-                            color ||
-                            '#3b82f6',
+                          fill: color || '#3b82f6',
                           r: 3.5,
                         },
                         name: 'circle-shape',
                       },
                     )
 
-                  circle.animate(ratio =>
-                    {
+                  circle.animate(
+                    ratio => {
                       const tmp_point = shape.getPoint(ratio)
+
                       const {
                         x,
                         y,
@@ -305,60 +241,49 @@ export default (
     [theme, transfers, gmps, graph],
   )
 
-  const chains_data =
-    _.concat(
-      evm_chains_data,
-      cosmos_chains_data,
-    )
-
-  const axelarnet =
-    getChain(
-      'axelarnet',
-      chains_data,
-    )
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+  const axelarnet = getChain('axelarnet', chains_data)
 
   let data =
-    transfers &&
-    gmps ?
+    transfers && gmps ?
       _.orderBy(
         Object.entries(
           _.groupBy(
-            _.concat(
-              transfers,
-              gmps,
-            )
-            .flatMap(d => {
-              const {
-                source_chain,
-                destination_chain,
-              } = { ...d }
-
-              if (
-                axelarnet?.id &&
-                ![
+            _.concat(transfers, gmps)
+              .flatMap(d => {
+                let {
                   source_chain,
                   destination_chain,
-                ].includes(axelarnet.id)
-              ) {
-                return [
-                  {
-                    ...d,
-                    id: `${axelarnet.id}_${destination_chain}`,
-                    source_chain: axelarnet.id,
-                    source_chain_data: axelarnet,
-                  },
-                  {
-                    ...d,
-                    id: `${source_chain}_${axelarnet.id}`,
-                    destination_chain: axelarnet.id,
-                    destination_chain_data: axelarnet,
-                  },
-                ]
-              }
-              else {
-                return d
-              }
-            }),
+                } = { ...d }
+
+                if (['osmosis'].findIndex(c => source_chain?.startsWith(c)) > -1) {
+                  source_chain = _.head(source_chain.split('-'))
+                }
+
+                if (['osmosis'].findIndex(c => destination_chain?.startsWith(c)) > -1) {
+                  destination_chain = _.head(destination_chain.split('-'))
+                }
+
+                if (axelarnet?.id && ![source_chain, destination_chain].includes(axelarnet.id)) {
+                  return [
+                    {
+                      ...d,
+                      id: `${axelarnet.id}_${destination_chain}`,
+                      source_chain: axelarnet.id,
+                      source_chain_data: axelarnet,
+                    },
+                    {
+                      ...d,
+                      id: `${source_chain}_${axelarnet.id}`,
+                      destination_chain: axelarnet.id,
+                      destination_chain_data: axelarnet,
+                    },
+                  ]
+                }
+                else {
+                  return d
+                }
+              }),
             'id',
           ),
         )
@@ -366,16 +291,8 @@ export default (
           return {
             id: k,
             ..._.head(v),
-            num_txs:
-              _.sumBy(
-                v,
-                'num_txs',
-              ),
-            volume:
-              _.sumBy(
-                v,
-                'volume',
-              ),
+            num_txs: _.sumBy(v, 'num_txs'),
+            volume: _.sumBy(v, 'volume'),
           }
         }),
         ['num_txs'],
@@ -383,72 +300,36 @@ export default (
       ) :
       undefined
 
-  if (
-    data &&
-    axelarnet
-  ) {
+  if (data && axelarnet) {
     chains_data
       .filter(c =>
         c &&
-        (
-          !c.maintainer_id ||
-          !c.no_inflation
-        ) &&
-        !equals_ignore_case(
-          c.id,
-          axelarnet.id,
-        )
+        (!c.maintainer_id || !c.no_inflation) &&
+        !equals_ignore_case(c.id, axelarnet.id)
       )
       .forEach(c => {
         const {
           id,
         } = { ...c }
 
-        const ids =
-          [
-            `${id}_${axelarnet.id}`,
-            `${axelarnet.id}_${id}`,
-          ]
+        const ids = [`${id}_${axelarnet.id}`, `${axelarnet.id}_${id}`]
 
         ids
           .forEach((_id, i) => {
-            if (
-              data.findIndex(_d =>
-                equals_ignore_case(
-                  _d?.id,
-                  _id,
-                )
-              ) < 0
-            ) {
-              const source_chain =
-                i === 0 ?
-                  id :
-                  axelarnet.id
+            if (data.findIndex(_d => equals_ignore_case(_d?.id, _id)) < 0) {
+              const source_chain = i === 0 ? id : axelarnet.id
+              const destination_chain = i === 0 ? axelarnet.id : id
 
-              const destination_chain =
-                i === 0 ?
-                  axelarnet.id :
-                  id
-
-              data
-                .push(
-                  {
-                    id: _id,
-                    source_chain,
-                    source_chain_data:
-                      getChain(
-                        source_chain,
-                        chains_data,
-                      ),
-                    destination_chain,
-                    destination_chain_data:
-                      getChain(
-                        destination_chain,
-                        chains_data,
-                      ),
-                    num_txs: 0,
-                  }
-                )
+              data.push(
+                {
+                  id: _id,
+                  source_chain,
+                  source_chain_data: getChain(source_chain, chains_data),
+                  destination_chain,
+                  destination_chain_data: getChain(destination_chain, chains_data),
+                  num_txs: 0,
+                }
+              )
             }
           })
       })
@@ -458,13 +339,7 @@ export default (
     <div className="w-full min-h-full">
       <div
         id={id}
-        className={
-          `${
-            data?.length > 0 ?
-              'flex' :
-              'hidden'
-          } items-center justify-center`
-        }
+        className={`${data?.length > 0 ? 'flex' : 'hidden'} items-center justify-center`}
       />
       {
         !data &&
