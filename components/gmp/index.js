@@ -970,7 +970,7 @@ export default () => {
     call?.chain_type !== 'cosmos' &&
     {
       id: 'confirm',
-      title: staging ? 'Confirmed' : 'Confirmed',
+      title: 'Confirmed',
       chain_data: axelar_chain_data,
       data: confirm,
     },
@@ -1159,25 +1159,29 @@ export default () => {
                       {
                         (fees?.destination_base_fee || fees?.base_fee) >= 0 &&
                         (
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1.5">
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
-                              Base Fees:
+                              Gas:
                             </span>
-                            <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
-                              <span className="text-xs font-semibold mr-1">
-                                {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
-                              </span>
-                              <span className="text-xs font-semibold">
-                                {fees.destination_native_token?.symbol}
-                              </span>
-                            </div>
+                            {/*
+                              <div className="max-w-min whitespace-nowrap">
+                                <span className="text-xs font-semibold mr-1">
+                                  {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
+                                </span>
+                                <span className="text-xs font-semibold">
+                                  {fees.destination_native_token?.symbol}
+                                </span>
+                              </div>
+                            */}
                             {
                               typeof gas?.gas_base_fee_amount === 'number' &&
                               (
-                                <div className="max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg whitespace-nowrap py-0.5 px-1.5">
-                                  <span className="text-xs font-medium mr-1">
-                                    =
-                                  </span>
+                                <div className="max-w-min whitespace-nowrap">
+                                  {/*
+                                    <span className="text-xs font-medium mr-1">
+                                      =
+                                    </span>
+                                  */}
                                   <span className="text-xs font-semibold">
                                     <span className="mr-1">
                                       {number_format(gas.gas_base_fee_amount, '0,0.00000000', true)}
@@ -2508,7 +2512,7 @@ export default () => {
                         (
                           <div className={rowClassName}>
                             <span className={rowTitleClassName}>
-                              Gas Paid
+                              Gas Deposited
                             </span>
                             <div className="flex flex-wrap items-center">
                               <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1">
@@ -2571,7 +2575,7 @@ export default () => {
                           <>
                             <div className={rowClassName}>
                               <span className={rowTitleClassName}>
-                                {['refunded'].includes(s.id) ? 'Gas Used on Express' : 'Gas Used'}
+                                {['express_executed', 'refunded'].includes(s.id) ? 'Express Gas' : 'Gas Used'}
                               </span>
                               <div className="flex flex-wrap items-center">
                                 <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
@@ -2676,7 +2680,7 @@ export default () => {
                         (
                           <div className={rowClassName}>
                             <span className={rowTitleClassName}>
-                              Gas Used by Axelar Relayer
+                              Execute Gas
                             </span>
                             <div className="flex flex-wrap items-center">
                               {
@@ -2786,65 +2790,12 @@ export default () => {
                         )
                       }
                       {
-                        ['refunded'].includes(s.id) && source_token && destination_native_token &&
-                        (
-                          <div className={rowClassName}>
-                            <span className={rowTitleClassName}>
-                              Gas Price Rate
-                            </span>
-                            <div className="flex items-center space-x-2">
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
-                                {
-                                  destination_gas_data?.image &&
-                                  (
-                                    <Image
-                                      src={destination_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )
-                                }
-                                <span className="text-sm font-medium">
-                                  <span className="mr-1">
-                                    {number_format(source_token.token_price?.usd / destination_native_token.token_price?.usd, '0,0.00000000', true)}
-                                  </span>
-                                  <span>
-                                    {ellipse(destination_gas_data?.symbol)}
-                                  </span>
-                                </span>
-                              </div>
-                              <span className="text-sm font-medium">
-                                =
-                              </span>
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
-                                {
-                                  source_gas_data?.image &&
-                                  (
-                                    <Image
-                                      src={source_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )
-                                }
-                                <span className="text-sm font-medium">
-                                  <span className="mr-1">
-                                    1
-                                  </span>
-                                  <span>
-                                    {ellipse(source_gas_data?.symbol)}
-                                  </span>
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      }
-                      {
                         ['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 &&
                         (!(executed?.block_timestamp || error?.block_timestamp) || block_timestamp !== (executed?.block_timestamp || error?.block_timestamp)) &&
                         (
                           <div className={rowClassName}>
                             <span className={rowTitleClassName}>
-                              Refunded
+                              Gas Refunded
                             </span>
                             <div className="flex flex-wrap items-center">
                               <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2">
@@ -2894,6 +2845,59 @@ export default () => {
                                   )
                                 })
                               }
+                            </div>
+                          </div>
+                        )
+                      }
+                      {
+                        ['refunded'].includes(s.id) && source_token && destination_native_token &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Gas Price
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
+                                {
+                                  destination_gas_data?.image &&
+                                  (
+                                    <Image
+                                      src={destination_gas_data.image}
+                                      className="w-5 h-5 rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  <span className="mr-1">
+                                    {number_format(source_token.token_price?.usd / destination_native_token.token_price?.usd, '0,0.00000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(destination_gas_data?.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium">
+                                =
+                              </span>
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
+                                {
+                                  source_gas_data?.image &&
+                                  (
+                                    <Image
+                                      src={source_gas_data.image}
+                                      className="w-5 h-5 rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  <span className="mr-1">
+                                    1
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data?.symbol)}
+                                  </span>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         )
