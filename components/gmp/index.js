@@ -262,28 +262,30 @@ export default () => {
           execute_data = _response.data
         }
 
-        try {
-          const _response =
-            await isContractCallApproved(
-              {
-                method: 'isContractCallApproved',
-                destinationChain,
-                commandId,
-                sourceChain,
-                sourceAddress,
-                contractAddress,
-                payloadHash,
-                symbol: symbol || undefined,
-                amount: amount ? BigNumber.from(amount).toString() : undefined,
-              },
-            )
+        if (staging || editable) {
+          try {
+            const _response =
+              await isContractCallApproved(
+                {
+                  method: 'isContractCallApproved',
+                  destinationChain,
+                  commandId,
+                  sourceChain,
+                  sourceAddress,
+                  contractAddress,
+                  payloadHash,
+                  symbol: symbol || undefined,
+                  amount: amount ? BigNumber.from(amount).toString() : undefined,
+                },
+              )
 
-          const {
-            result,
-          } = { ..._response }
+            const {
+              result,
+            } = { ..._response }
 
-          is_approved = result       
-        } catch (error) {}
+            is_approved = result       
+          } catch (error) {}
+        }
       }
 
       const _gmp = {
@@ -822,7 +824,7 @@ export default () => {
   const wrong_source_chain = source_chain_data && chain_id !== source_chain_data.chain_id && !gasAdding
   const wrong_destination_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
 
-  const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
+  const staging = ['staging', 'localhost'].findIndex(s => process.env.NEXT_PUBLIC_SITE_URL?.includes(s)) > -1
 
   const editable = edit === 'true' && (staging || !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT))
 
