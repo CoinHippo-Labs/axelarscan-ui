@@ -171,13 +171,7 @@ export default () => {
             },
           )
 
-        origin = (_response || [])
-          .find(d =>
-            equals_ignore_case(
-              d?.executed?.transactionHash,
-              call.transactionHash,
-            )
-          )
+        origin = (_response || []).find(d => quals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
       }
 
       let execute_data
@@ -764,8 +758,7 @@ export default () => {
       Number(
         FixedNumber.fromString(BigNumber.from(error.receipt.gasUsed).toString())
           .divUnsafe(
-            FixedNumber.fromString(BigNumber.from(error.transaction.gasLimit).toString()
-            )
+            FixedNumber.fromString(BigNumber.from(error.transaction.gasLimit).toString())
           )
           .toString()
       ) > 0.95 :
@@ -802,9 +795,9 @@ export default () => {
   const editable = edit === 'true' && (staging || !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT))
 
   const approveButton =
-    call && confirm && !approved && !executed && !is_executed &&
+    call && (confirm || moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 5) && !approved && !executed && !is_executed &&
     !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || gas?.gas_remain_amount < 0.00001) &&
-    moment().diff(moment(confirm.block_timestamp * 1000), 'minutes') >= 1 &&
+    moment().diff(moment((confirm || call).block_timestamp * 1000), 'minutes') >= 1 &&
     (
       <div className="flex items-center space-x-2">
         <button
@@ -1163,16 +1156,19 @@ export default () => {
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
                               Gas:
                             </span>
-                            {/*
-                              <div className="max-w-min whitespace-nowrap">
-                                <span className="text-xs font-semibold mr-1">
-                                  {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
-                                </span>
-                                <span className="text-xs font-semibold">
-                                  {fees.destination_native_token?.symbol}
-                                </span>
-                              </div>
-                            */}
+                            {
+                              typeof gas?.gas_base_fee_amount !== 'number' &&
+                              (
+                                <div className="max-w-min whitespace-nowrap">
+                                  <span className="text-xs font-semibold mr-1">
+                                    {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
+                                  </span>
+                                  <span className="text-xs font-semibold">
+                                    {fees.destination_native_token?.symbol}
+                                  </span>
+                                </div>
+                              )
+                            }
                             {
                               typeof gas?.gas_base_fee_amount === 'number' &&
                               (
@@ -1529,7 +1525,7 @@ export default () => {
                               key={i}
                               className="min-w-max flex items-center space-x-1.5 pb-0.5"
                             >
-                              { step_finish ?
+                              {step_finish ?
                                 <BiCheckCircle
                                   size={18}
                                   className="text-green-500 dark:text-green-400"
@@ -1793,13 +1789,7 @@ export default () => {
                 if (gasFeeAmount) {
                   source_gas_data =
                     gasToken && gasToken !== constants.AddressZero ?
-                      (assets_data || [])
-                        .find(a =>
-                          (a?.contracts || [])
-                            .findIndex(c =>
-                              c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)
-                            ) > -1
-                        ) :
+                      (assets_data || []).find(a => (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
                       {
                         ..._.head(source_chain_data?.provider_params)?.nativeCurrency,
                         image: source_chain_data?.image,
@@ -2011,7 +2001,7 @@ export default () => {
                       {title}
                     </div>
                     <div className="flex flex-col space-y-3">
-                      {['executed'].includes(s.id) && (executeButton || (!data && is_executed)) ?
+                      {['executed'].includes(s.id) && (executeButton || refreshButton || (!data && is_executed)) ?
                         <div className={rowClassName}>
                           <span className={rowTitleClassName}>
                             Tx Hash
@@ -2072,68 +2062,57 @@ export default () => {
                                   />
                                 )
                             }
-                            {
-                              txHashEditing ?
-                                <>
-                                  <button
-                                    disabled={txHashEditUpdating}
-                                    onClick={
-                                      () =>
-                                        resetTxHashEdit()
-                                    }
-                                    className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
-                                  >
-                                    <RiCloseCircleFill
-                                      size={20}
-                                    />
-                                  </button>
-                                  <button
-                                    disabled={
-                                      !txHashEdit ||
-                                      txHashEditUpdating
-                                    }
-                                    onClick={
-                                      async () => {
-                                        setTxHashEditUpdating(true)
+                            {txHashEditing ?
+                              <>
+                                <button
+                                  disabled={txHashEditUpdating}
+                                  onClick={() => resetTxHashEdit()}
+                                  className="text-slate-300 hover:text-slate-400 dark:text-slate-600 dark:hover:text-slate-500"
+                                >
+                                  <RiCloseCircleFill
+                                    size={20}
+                                  />
+                                </button>
+                                <button
+                                  disabled={!txHashEdit || txHashEditUpdating}
+                                  onClick={
+                                    async () => {
+                                      setTxHashEditUpdating(true)
 
-                                        await saveGMP(
-                                          call?.transactionHash,
-                                          call?.transactionIndex,
-                                          call?.logIndex,
-                                          txHashEdit,
-                                          address,
-                                        )
-                                      }
+                                      await saveGMP(
+                                        call?.transactionHash,
+                                        call?.transactionIndex,
+                                        call?.logIndex,
+                                        txHashEdit,
+                                        address,
+                                      )
                                     }
-                                    className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
-                                  >
-                                    {
-                                      txHashEditUpdating ?
-                                        <TailSpin
-                                          color={loader_color(theme)}
-                                          width="16"
-                                          height="16"
-                                        /> :
-                                        <BiSave
-                                          size={20}
-                                        />
-                                    }
-                                  </button>
-                                </> :
-                                editable &&
-                                (
-                                  <button
-                                    onClick={
-                                      () =>
-                                        setTxHashEditing(true)
-                                    }
-                                    className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
-                                  >
-                                    <BiEditAlt
+                                  }
+                                  className="text-blue-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-white"
+                                >
+                                  {txHashEditUpdating ?
+                                    <TailSpin
+                                      color={loader_color(theme)}
+                                      width="16"
+                                      height="16"
+                                    /> :
+                                    <BiSave
                                       size={20}
                                     />
-                                  </button>
-                                )
+                                  }
+                                </button>
+                              </> :
+                              editable &&
+                              (
+                                <button
+                                  onClick={() => setTxHashEditing(true)}
+                                  className="text-white hover:text-slate-400 dark:text-slate-900 dark:hover:text-slate-400"
+                                >
+                                  <BiEditAlt
+                                    size={20}
+                                  />
+                                </button>
+                              )
                             }
                           </div>
                           {refreshButton}
@@ -2598,7 +2577,7 @@ export default () => {
                                             )
                                             .round(0)
                                             .toString()
-                                            .replace( '.0', ''),
+                                            .replace('.0', ''),
                                           destination_gas_data.decimals,
                                         ),
                                         '0,0.00000000',
@@ -3406,6 +3385,27 @@ export default () => {
                         <Copy
                           size={20}
                           value={sender}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+              {
+                destinationContractAddress &&
+                (
+                  <div className="sm:col-span-4 space-y-2">
+                    <span className="text-base font-medium">
+                      destinationContractAddress
+                    </span>
+                    <div className="flex items-start">
+                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                        {destinationContractAddress}
+                      </div>
+                      <div className="mt-4">
+                        <Copy
+                          size={20}
+                          value={destinationContractAddress}
                         />
                       </div>
                     </div>

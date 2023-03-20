@@ -531,16 +531,19 @@ export default (
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs font-medium">
                               Gas:
                             </span>
-                            {/*
-                              <div className="max-w-min whitespace-nowrap">
-                                <span className="text-2xs font-semibold">
-                                  {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
-                                </span>
-                                <span className="text-2xs font-semibold">
-                                  {fees.destination_native_token?.symbol}
-                                </span>
-                              </div>
-                            */}
+                            {
+                              typeof gas?.gas_base_fee_amount !== 'number' &&
+                              (
+                                <div className="max-w-min whitespace-nowrap">
+                                  <span className="text-2xs font-semibold">
+                                    {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
+                                  </span>
+                                  <span className="text-2xs font-semibold">
+                                    {fees.destination_native_token?.symbol}
+                                  </span>
+                                </div>
+                              )
+                            }
                             {
                               typeof gas?.gas_base_fee_amount === 'number' &&
                               (
