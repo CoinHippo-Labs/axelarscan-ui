@@ -23,6 +23,7 @@ import Copy from '../copy'
 import Notification from '../notifications'
 import Wallet from '../wallet'
 import parameters from '../../data/gmp/parameters'
+import { isContractCallApproved } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
@@ -175,6 +176,7 @@ export default () => {
       }
 
       let execute_data
+      let is_approved
 
       if (approved) {
         const {
@@ -187,6 +189,7 @@ export default () => {
           commandId,
           sourceChain,
           sourceAddress,
+          payloadHash,
           symbol,
           amount,
         } = { ...approved.returnValues }
@@ -258,17 +261,46 @@ export default () => {
         if (_response?.data) {
           execute_data = _response.data
         }
+
+        try {
+          const _response =
+            await isContractCallApproved(
+              {
+                method: 'isContractCallApproved',
+                destinationChain,
+                commandId,
+                sourceChain,
+                sourceAddress,
+                contractAddress,
+                payloadHash,
+                symbol: symbol || undefined,
+                amount: amount ? BigNumber.from(amount).toString() : undefined,
+              },
+            )
+
+          const {
+            result,
+          } = { ..._response }
+
+          is_approved = result       
+        } catch (error) {}
       }
 
-      setGmp(
-        {
-          data,
-          execute_data,
-          callback,
-          origin,
-          tx,
-        }
+      const _gmp = {
+        data,
+        execute_data,
+        is_approved,
+        callback,
+        origin,
+        tx,
+      }
+
+      console.log(
+        '[data]',
+        _gmp,
       )
+
+      setGmp(_gmp)
 
       return data
     }
