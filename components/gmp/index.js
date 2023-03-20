@@ -172,7 +172,7 @@ export default () => {
             },
           )
 
-        origin = (_response || []).find(d => quals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
+        origin = (_response || []).find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
       }
 
       let execute_data
