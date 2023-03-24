@@ -759,6 +759,7 @@ export default () => {
   const {
     event,
     chain,
+    destination_chain_type,
   } = { ...call }
 
   const {
@@ -829,7 +830,7 @@ export default () => {
   const editable = edit === 'true' && (staging || !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT))
 
   const approveButton =
-    call && (confirm || moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 5) && !approved && !executed && !is_executed &&
+    call && (confirm || moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 5) && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
     !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || gas?.gas_remain_amount < 0.00001) &&
     moment().diff(moment((confirm || call).block_timestamp * 1000), 'minutes') >= 1 &&
     (
