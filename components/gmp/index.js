@@ -3102,7 +3102,7 @@ export default () => {
                           </div>
                         )
                       }
-                      {
+                      {/*
                         ['express_executed', 'executed'].includes(s.id) && call?.transaction?.from &&
                         (
                           <div className={rowClassName}>
@@ -3158,7 +3158,7 @@ export default () => {
                             </div>
                           </div>
                         )
-                      }
+                      */}
                       {
                         ['executed'].includes(s.id) && !data && _data &&
                         (
