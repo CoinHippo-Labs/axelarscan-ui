@@ -2690,6 +2690,37 @@ export default () => {
                         )
                       }
                       {
+                        ['gas_paid', 'refunded'].includes(s.id) && typeof gas?.gas_base_fee_amount === 'number' && source_gas_data &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Base Fees
+                            </span>
+                            <div className="flex flex-wrap items-center">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1">
+                                {
+                                  source_gas_data.image &&
+                                  (
+                                    <Image
+                                      src={source_gas_data.image}
+                                      className="w-5 h-5 rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  <span className="mr-1">
+                                    {number_format(gas.gas_base_fee_amount, '0,0.00000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                      {
                         ['executed', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data &&
                         (
                           <div className={rowClassName}>
