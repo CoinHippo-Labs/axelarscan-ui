@@ -2660,7 +2660,7 @@ export default () => {
                               (
                                 <div className={rowClassName}>
                                   <span className={rowTitleClassName}>
-                                    Express Fees
+                                    Express Fee
                                   </span>
                                   <div className="flex flex-wrap items-center">
                                     <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
