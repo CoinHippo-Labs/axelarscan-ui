@@ -8,7 +8,7 @@ import Info from './info'
 import Votes from './votes'
 import { proposal as getProposal, all_proposal_votes } from '../../lib/api/lcd'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
-import { number_format, name, equals_ignore_case } from '../../lib/utils'
+import { number_format, name, equalsIgnoreCase } from '../../lib/utils'
 
 export default () => {
   const {
@@ -78,7 +78,7 @@ export default () => {
 
                         const validator_data = validators_data
                           .find(_v =>
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               _v?.delegator_address,
                               voter,
                             )

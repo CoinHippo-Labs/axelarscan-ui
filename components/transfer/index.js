@@ -18,7 +18,7 @@ import { transfers as getTransfers, transfers_status as getTransfersStatus } fro
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { type as getType } from '../../lib/object/id'
-import { number_format, name, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
+import { number_format, name, ellipse, equalsIgnoreCase, total_time_string, loader_color, sleep } from '../../lib/utils'
 
 export default () => {
   const {
@@ -105,7 +105,7 @@ export default () => {
           if (
             (
               !link?.recipient_address || !confirm ||
-              (!command?.executed && (evm_chains_data || []).findIndex(c => equals_ignore_case(c?.id, destination_chain)) > -1)
+              (!command?.executed && (evm_chains_data || []).findIndex(c => equalsIgnoreCase(c?.id, destination_chain)) > -1)
             ) &&
             (recipient_address?.length >= 65 || getType(recipient_address) === 'evm_address')
           ) {
@@ -155,7 +155,7 @@ export default () => {
             if (
               (
                 !link?.recipient_address ||
-                (!command?.executed && (evm_chains_data || []).findIndex(c => equals_ignore_case(c?.id, destination_chain)) > -1)
+                (!command?.executed && (evm_chains_data || []).findIndex(c => equalsIgnoreCase(c?.id, destination_chain)) > -1)
               ) &&
               confirm?.txhash
             ) {
@@ -176,7 +176,7 @@ export default () => {
 
             if (
               !command?.executed && vote?.txhash &&
-              (evm_chains_data || []).findIndex(c => equals_ignore_case(c?.id, destination_chain)) > -1
+              (evm_chains_data || []).findIndex(c => equalsIgnoreCase(c?.id, destination_chain)) > -1
             ) {
               _response = {
                 ..._response,
@@ -216,11 +216,11 @@ export default () => {
               typeof amount === 'number' && typeof value === 'number' && typeof fee === 'number'
             ) ||
             (
-              (evm_chains_data || []).findIndex(c => equals_ignore_case(c?.id, destination_chain)) > -1 &&
+              (evm_chains_data || []).findIndex(c => equalsIgnoreCase(c?.id, destination_chain)) > -1 &&
               !insufficient_fee && (vote || confirm) && !command?.executed
             ) ||
             (
-              (cosmos_chains_data || []).findIndex(c => equals_ignore_case(c?.id, destination_chain)) > -1 &&
+              (cosmos_chains_data || []).findIndex(c => equalsIgnoreCase(c?.id, destination_chain)) > -1 &&
               !['axelarnet'].includes(destination_chain) &&
               !insufficient_fee && (vote || confirm) &&
               !(ibc_send?.failed_txhash || ibc_send?.ack_txhash || ibc_send?.recv_txhash)
@@ -232,7 +232,7 @@ export default () => {
             !(vote?.transfer_id || confirm?.transfer_id) ||
             (unwrap && !unwrap.tx_hash_unwrap) ||
             (
-              (evm_chains_data || []).findIndex(c => equals_ignore_case(c?.id, source_chain)) > -1 &&
+              (evm_chains_data || []).findIndex(c => equalsIgnoreCase(c?.id, source_chain)) > -1 &&
               !insufficient_fee && !vote &&
               (command || ibc_send || axelar_transfer)
             )
@@ -515,7 +515,7 @@ export default () => {
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
-      {tx && equals_ignore_case(transfer?.tx, tx) ?
+      {tx && equalsIgnoreCase(transfer?.tx, tx) ?
         <div className="grid sm:grid-cols-6 gap-6">
           <div className={`${stepClassName} sm:col-span-6`}>
             {

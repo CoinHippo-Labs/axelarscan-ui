@@ -25,7 +25,7 @@ import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
-import { equals_ignore_case } from '../../lib/utils'
+import { equalsIgnoreCase } from '../../lib/utils'
 import { EVM_CHAINS_DATA, COSMOS_CHAINS_DATA, ASSETS_DATA, ENS_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, TVL_DATA, VALIDATORS_DATA, VALIDATORS_CHAINS_DATA, RPCS } from '../../reducers/types'
 
 export default () => {
@@ -174,7 +174,7 @@ export default () => {
                       price,
                     } = { ...a }
 
-                    const asset_index = assets_data.findIndex(_a => equals_ignore_case(_a?.id, denom))
+                    const asset_index = assets_data.findIndex(_a => equalsIgnoreCase(_a?.id, denom))
 
                     if (asset_index > -1) {
                       const asset_data = assets_data[asset_index]
@@ -743,7 +743,7 @@ export default () => {
                           _.sum(
                             Object.entries({ ...v.votes?.chains })
                               .map(c =>
-                                Object.entries({ ...c[1]?.votes }).find(_v => equals_ignore_case(_v[0], vote?.toString()))?.[1] || 0
+                                Object.entries({ ...c[1]?.votes }).find(_v => equalsIgnoreCase(_v[0], vote?.toString()))?.[1] || 0
                               )
                           )
 

@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import Image from '../../image'
 import Wallet from '../../wallet'
-import { equals_ignore_case } from '../../../lib/utils'
+import { equalsIgnoreCase } from '../../../lib/utils'
 
 export default (
   {
@@ -74,7 +74,7 @@ export default (
             } = { ...m }
 
             const selected =
-              equals_ignore_case(
+              equalsIgnoreCase(
                 id,
                 value,
               )

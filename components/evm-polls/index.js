@@ -16,7 +16,7 @@ import TimeAgo from '../time-ago'
 import { evm_polls } from '../../lib/api/evm-polls'
 import { getChain, chainName } from '../../lib/object/chain'
 import { getAsset, assetManager } from '../../lib/object/asset'
-import { number_format, name, ellipse, equals_ignore_case, params_to_obj, to_json, loader_color } from '../../lib/utils'
+import { number_format, name, ellipse, equalsIgnoreCase, params_to_obj, to_json, loader_color } from '../../lib/utils'
 
 const LIMIT = 25
 
@@ -521,7 +521,7 @@ export default () => {
                         filterTypes?.includes(k) ?
                           filterTypes
                             .filter(t =>
-                              !equals_ignore_case(
+                              !equalsIgnoreCase(
                                 t,
                                 k,
                               )

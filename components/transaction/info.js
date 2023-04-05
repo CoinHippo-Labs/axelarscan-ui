@@ -8,7 +8,7 @@ import { BiCheckCircle, BiXCircle } from 'react-icons/bi'
 import Copy from '../copy'
 import ValidatorProfile from '../validator-profile'
 import AccountProfile from '../account-profile'
-import { number_format, name, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, name, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default (
   {
@@ -52,7 +52,7 @@ export default (
     sender &&
     (validators_data || [])
       .find(v =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           v?.broadcaster_address,
           sender,
         )

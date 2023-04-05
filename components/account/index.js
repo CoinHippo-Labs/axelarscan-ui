@@ -12,7 +12,7 @@ import { type } from '../../lib/object/id'
 import { getChain } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
 import { hexToBech32, bech32ToBech32 } from '../../lib/object/key'
-import { remove_chars, equals_ignore_case } from '../../lib/utils'
+import { remove_chars, equalsIgnoreCase } from '../../lib/utils'
 
 export default () => {
   const {
@@ -93,7 +93,7 @@ export default () => {
           validators_data &&
           validators_data
             .findIndex(v =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v?.operator_address,
                 address,
               )
@@ -105,7 +105,7 @@ export default () => {
             ...(
               validators_data
                 .find(v =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v?.operator_address,
                     address,
                   )
@@ -124,7 +124,7 @@ export default () => {
           validators_data
             .findIndex(v =>
               v?.operator_address &&
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v.consensus_address,
                 address,
               )
@@ -137,7 +137,7 @@ export default () => {
               validators_data
                 .find(v =>
                   v?.operator_address &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v.consensus_address,
                     address,
                   )
@@ -162,7 +162,7 @@ export default () => {
           validators_data
             .findIndex(v =>
               v?.operator_address &&
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v.consensus_address,
                 hexToBech32(
                   address,
@@ -178,7 +178,7 @@ export default () => {
               validators_data
                 .find(v =>
                   v?.operator_address &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v.consensus_address,
                     hexToBech32(
                       address,
@@ -200,7 +200,7 @@ export default () => {
           validators_data
             .findIndex(v =>
               v?.operator_address &&
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v.consensus_address,
                 bech32ToBech32(
                   address,
@@ -216,7 +216,7 @@ export default () => {
               validators_data
                 .find(v =>
                   v?.operator_address &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v.consensus_address,
                     bech32ToBech32(
                       address,
@@ -359,7 +359,7 @@ export default () => {
                       ...(
                         validators_data
                           .find(v =>
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               v?.operator_address,
                               validator_address,
                             )
@@ -480,7 +480,7 @@ export default () => {
                           ...(
                             (validators_data || [])
                               .find(v =>
-                                equals_ignore_case(
+                                equalsIgnoreCase(
                                   v?.operator_address,
                                   validator_src_address,
                                 )
@@ -491,7 +491,7 @@ export default () => {
                           ...(
                             (validators_data || [])
                               .find(v =>
-                                equals_ignore_case(
+                                equalsIgnoreCase(
                                   v?.operator_address,
                                   validator_dst_address,
                                 )
@@ -628,7 +628,7 @@ export default () => {
                           ...(
                             (validators_data || [])
                               .find(v =>
-                                equals_ignore_case(
+                                equalsIgnoreCase(
                                   v?.operator_address,
                                   validator_address,
                                 )
@@ -859,7 +859,7 @@ export default () => {
         ) {
           const validator_data = validators_data
             .find(v =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v?.delegator_address,
                 address,
               )
@@ -978,7 +978,7 @@ export default () => {
                     source_chain_data:
                       evm_chains_data
                         .find(c =>
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             c?.id,
                             sender_chain,
                           )
@@ -994,7 +994,7 @@ export default () => {
                     destination_chain_data:
                       evm_chains_data
                         .find(c =>
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             c?.id,
                             recipient_chain,
                           )
@@ -1016,7 +1016,7 @@ export default () => {
                     asset_data:
                       assets_data
                         .find(a =>
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             a?.id,
                             denom,
                           )

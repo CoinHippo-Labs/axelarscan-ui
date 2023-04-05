@@ -12,7 +12,7 @@ import ValidatorProfile from '../validator-profile'
 import AccountProfile from '../account-profile'
 import { getChain } from '../../lib/object/chain'
 import { assetManager } from '../../lib/object/asset'
-import { number_format, name, ellipse, equals_ignore_case, to_json, to_hex, decode_base64, json_theme } from '../../lib/utils'
+import { number_format, name, ellipse, equalsIgnoreCase, to_json, to_hex, decode_base64, json_theme } from '../../lib/utils'
 
 const FORMATS =
   [
@@ -273,11 +273,11 @@ export default (
                     ) > -1 &&
                     (validators_data || [])
                       .find(v =>
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           v?.operator_address,
                           sender,
                         ) ||
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           v?.broadcaster_address,
                           sender,
                         )
@@ -292,11 +292,11 @@ export default (
                     ) > -1 &&
                       (validators_data || [])
                         .find(v =>
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             v?.operator_address,
                             recipient,
                           ) ||
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             v?.broadcaster_address,
                             recipient,
                           )

@@ -19,7 +19,7 @@ import TimeAgo from '../time-ago'
 import { transfers as getTransfers } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
-import { number_format, name, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, name, ellipse, equalsIgnoreCase, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 50
 

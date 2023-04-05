@@ -6,7 +6,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Navbar from '../../components/navbar'
 import Footer from '../../components/footer'
 import meta from '../../lib/meta'
-import { equals_ignore_case } from '../../lib/utils'
+import { equalsIgnoreCase } from '../../lib/utils'
 import { THEME } from '../../reducers/types'
 
 export default (
@@ -72,7 +72,7 @@ export default (
   ) {
     data = (validators_data || [])
       .find(v =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           v?.operator_address,
           address,
         )

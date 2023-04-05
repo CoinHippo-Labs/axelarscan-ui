@@ -25,7 +25,7 @@ import Wallet from '../wallet'
 import parameters from '../../data/gmp/parameters'
 import { isContractCallApproved } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, total_time_string, loader_color, sleep } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
 export default () => {
@@ -106,8 +106,22 @@ export default () => {
     [],
   )
 
+  useEffect(
+    () => {
+      const getData = () => getMessage()
+
+      if (!approving && !executing && !txHashEditing && !txHashRefundEditing) {
+        getData()
+      }
+
+      const interval = setInterval(() => getData(), 0.15 * 60 * 1000)
+      return () => clearInterval(interval)
+    },
+    [evm_chains_data, cosmos_chains_data, tx, api, approving, executing, txHashEditing, txHashRefundEditing],
+  )
+
   const getMessage = async () => {
-    if (evm_chains_data && tx && api) {
+    if (evm_chains_data && cosmos_chains_data && tx && api) {
       if (gmp) {
         await sleep(2 * 1000)
 
@@ -123,7 +137,7 @@ export default () => {
           {
             method: 'searchGMP',
             txHash: tx,
-          }
+          },
         )
 
       const data = _.head(response)
@@ -149,7 +163,7 @@ export default () => {
             },
           )
 
-        callback = (_response || []).find(d => equals_ignore_case(d?.call?.transactionHash, callback.transactionHash))
+        callback = (_response || []).find(d => equalsIgnoreCase(d?.call?.transactionHash, callback.transactionHash))
       }
 
       // origin data of 2-way call (query on 2nd call only)
@@ -172,7 +186,7 @@ export default () => {
             },
           )
 
-        origin = (_response || []).find(d => equals_ignore_case(d?.executed?.transactionHash, call.transactionHash))
+        origin = (_response || []).find(d => equalsIgnoreCase(d?.executed?.transactionHash, call.transactionHash))
       }
 
       let execute_data
@@ -195,7 +209,7 @@ export default () => {
         } = { ...approved.returnValues }
 
         // setup provider
-        const chain_data = getChain(destinationChain, evm_chains_data)
+        const chain_data = getChain(destinationChain, chains_data)
 
         const {
           chain_id,
@@ -212,27 +226,26 @@ export default () => {
           rpcs.length === 1 ?
             new providers.StaticJsonRpcProvider(_.head(rpcs), chain_id) :
             new providers.FallbackProvider(
-              rpcs
-                .map((url, i) => {
-                  return {
-                    provider: new providers.StaticJsonRpcProvider(url, chain_id),
-                    priority: i + 1,
-                    stallTimeout: 1000,
-                  }
-                }),
+              rpcs.map((url, i) => {
+                return {
+                  provider: new providers.StaticJsonRpcProvider(url, chain_id),
+                  priority: i + 1,
+                  stallTimeout: 1000,
+                }
+              }),
               rpcs.length / 3,
             )
 
-        const executable_contract = new Contract(contractAddress, IAxelarExecutable.abi, provider)
-
-        let _response
+        const contract = new Contract(contractAddress, IAxelarExecutable.abi, provider)
 
         const method = `execute${symbol ? 'WithToken' : ''}`
+
+        let _response
 
         switch (method) {
           case 'execute':
             _response =
-              await executable_contract
+              await contract
                 .populateTransaction
                 .execute(
                   commandId,
@@ -243,7 +256,7 @@ export default () => {
             break
           case 'executeWithToken':
             _response =
-              await executable_contract
+              await contract
                 .populateTransaction
                 .executeWithToken(
                   commandId,
@@ -310,25 +323,6 @@ export default () => {
     return null
   }
 
-  useEffect(
-    () => {
-      const getData = () => getMessage()
-
-      if (!approving && !executing && !txHashEditing && !txHashRefundEditing) {
-        getData()
-      }
-
-      const interval =
-        setInterval(
-          () => getData(),
-          0.15 * 60 * 1000,
-        )
-
-      return () => clearInterval(interval)
-    },
-    [evm_chains_data, tx, api, approving, executing, txHashEditing, txHashRefundEditing],
-  )
-
   const resetTxHashEdit = () => {
     setApproveResponse(null)
     setExecuteResponse(null)
@@ -362,17 +356,7 @@ export default () => {
       event,
     }
 
-    // request api
-    await fetch(
-      process.env.NEXT_PUBLIC_GMP_API_URL,
-      {
-        method: 'POST',
-        body: JSON.stringify(params),
-      },
-    )
-    .catch(error => {
-      return null
-    })
+    await fetch(process.env.NEXT_PUBLIC_GMP_API_URL, { method: 'POST', body: JSON.stringify(params) }).catch(error => { return null })
 
     getMessage()
     resetTxHashEdit()
@@ -407,9 +391,7 @@ export default () => {
 
         console.log(
           '[approve request]',
-          {
-            transactionHash,
-          },
+          { transactionHash },
         )
 
         const response = await api.manualRelayToDestChain(transactionHash)
@@ -665,20 +647,17 @@ export default () => {
           logIndex,
         } = { ...call }
 
-        const params =
-          {
-            method: 'saveGMP',
-            sourceTransactionHash: transactionHash,
-            sourceTransactionIndex: transactionIndex,
-            sourceTransactionLogIndex: logIndex,
-            event: 'to_refund',
-          }
+        const params = {
+          method: 'saveGMP',
+          sourceTransactionHash: transactionHash,
+          sourceTransactionIndex: transactionIndex,
+          sourceTransactionLogIndex: logIndex,
+          event: 'to_refund',
+        }
 
         console.log(
           '[refund request]',
-          {
-            ...params,
-          },
+          { ...params },
         )
 
         const _response = await api.execPost(process.env.NEXT_PUBLIC_GMP_API_URL, '', params)
@@ -810,10 +789,10 @@ export default () => {
 
   const asset_data = (assets_data || [])
     .find(a =>
-      equals_ignore_case(a?.symbol, symbol) ||
-      (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c.symbol, symbol)) > -1 ||
-      (a?.contracts || []).findIndex(c => equals_ignore_case(c.symbol, symbol)) > -1 ||
-      (a?.ibc || []).findIndex(c => equals_ignore_case(c.symbol, symbol)) > -1
+      equalsIgnoreCase(a?.symbol, symbol) ||
+      (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equalsIgnoreCase(c.symbol, symbol)) > -1 ||
+      (a?.contracts || []).findIndex(c => equalsIgnoreCase(c.symbol, symbol)) > -1 ||
+      (a?.ibc || []).findIndex(c => equalsIgnoreCase(c.symbol, symbol)) > -1
     )
 
   const source_contract_data = (asset_data?.contracts || []).find(c => c.chain_id === source_chain_data?.chain_id)
@@ -826,7 +805,6 @@ export default () => {
   const wrong_destination_chain = destination_chain_data && chain_id !== destination_chain_data.chain_id && !executing
 
   const staging = ['staging', 'localhost'].findIndex(s => process.env.NEXT_PUBLIC_SITE_URL?.includes(s)) > -1
-
   const editable = edit === 'true' && (staging || !['mainnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT))
 
   const approveButton =
@@ -1031,7 +1009,7 @@ export default () => {
     case 'called':
       current_step =
         steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) + 
-        (!is_invalid_destination_chain && !is_invalid_call && !is_insufficient_fee && (gas_paid || gas_paid_to_callback || equals_ignore_case(call?.transactionHash, gas_paid?.transactionHash)) ? 1 : 0) +
+        (!is_invalid_destination_chain && !is_invalid_call && !is_insufficient_fee && (gas_paid || gas_paid_to_callback || equalsIgnoreCase(call?.transactionHash, gas_paid?.transactionHash)) ? 1 : 0) +
         (confirm && steps.findIndex(s => s.id === 'confirm') > -1 ? 1 : 0)
       break
     case 'express_executed':
@@ -1070,7 +1048,7 @@ export default () => {
 
   return (
     <div className="space-y-4 mt-2 mb-6 mx-auto">
-      {tx && equals_ignore_case(gmp?.tx, tx) ?
+      {tx && equalsIgnoreCase(gmp?.tx, tx) ?
         <>
           {
             notificationResponse &&
@@ -1121,8 +1099,8 @@ export default () => {
                       notificationResponse.status === 'failed' && notificationResponse.message &&
                       (
                         <Copy
-                          value={notificationResponse.message}
                           size={20}
+                          value={notificationResponse.message}
                           className="cursor-pointer text-slate-200 hover:text-white"
                         />
                       )
@@ -1185,37 +1163,19 @@ export default () => {
                         )
                       }
                       {
-                        (fees?.destination_base_fee || fees?.base_fee) >= 0 &&
+                        gas &&
                         (
                           <div className="flex items-center space-x-1.5">
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 font-medium">
-                              Gas:
+                              {['executed'].includes(status) || refunded ? 'Total Gas Paid' : 'Gas Deposited'}:
                             </span>
                             {
-                              typeof gas?.gas_base_fee_amount !== 'number' &&
+                              typeof gas.gas_paid_amount === 'number' &&
                               (
                                 <div className="max-w-min whitespace-nowrap">
-                                  <span className="text-xs font-semibold mr-1">
-                                    {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
-                                  </span>
-                                  <span className="text-xs font-semibold">
-                                    {fees.destination_native_token?.symbol}
-                                  </span>
-                                </div>
-                              )
-                            }
-                            {
-                              typeof gas?.gas_base_fee_amount === 'number' &&
-                              (
-                                <div className="max-w-min whitespace-nowrap">
-                                  {/*
-                                    <span className="text-xs font-medium mr-1">
-                                      =
-                                    </span>
-                                  */}
                                   <span className="text-xs font-semibold">
                                     <span className="mr-1">
-                                      {number_format(gas.gas_base_fee_amount, '0,0.00000000', true)}
+                                      {number_format(gas.gas_paid_amount - (refunded?.amount || 0), '0,0.00000000', true)}
                                     </span>
                                     <span>
                                       {fees.source_token?.symbol || _.head(source_chain_data?.provider_params)?.nativeCurrency?.symbol}
@@ -1471,7 +1431,7 @@ export default () => {
                       )
                     }
                     {
-                      equals_ignore_case(status, 'executed') && relayer &&
+                      equalsIgnoreCase(status, 'executed') && relayer &&
                       (
                         <div className="flex flex-col">
                           <span className="text-slate-400 dark:text-slate-200 font-medium">
@@ -1515,9 +1475,7 @@ export default () => {
                     </div>
                     <div className="flex flex-col">
                       {steps
-                        .filter(s =>
-                          !['refunded'].includes(s.id) || s.data?.receipt?.status
-                        )
+                        .filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status)
                         .map((s, i) => {
                           const _error =
                             error && (error.block_timestamp || approved?.block_timestamp) ?
@@ -1778,8 +1736,8 @@ export default () => {
                 const source_chain = call?.chain
                 const destination_chain = call?.returnValues?.destinationChain
 
-                const source_chain_data = getChain( source_chain, evm_chains_data)
-                const destination_chain_data = getChain(destination_chain, evm_chains_data)
+                const source_chain_data = getChain(source_chain, chains_data)
+                const destination_chain_data = getChain(destination_chain, chains_data)
 
                 const {
                   gasToken,
@@ -1815,20 +1773,17 @@ export default () => {
                   }
                 }
 
-                let source_gas_data,
-                  destination_gas_data,
-                  source_gas_used,
-                  callback_gas_used,
-                  source_express_executed_gas_used
+                let source_gas_data
+                let destination_gas_data
+                let source_gas_used
+                let callback_gas_used
+                let source_express_executed_gas_used
 
                 if (gasFeeAmount) {
                   source_gas_data =
                     gasToken && gasToken !== constants.AddressZero ?
-                      (assets_data || []).find(a => (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equals_ignore_case(c?.contract_address, gasToken)) > -1) :
-                      {
-                        ..._.head(source_chain_data?.provider_params)?.nativeCurrency,
-                        image: source_chain_data?.image,
-                      }
+                      (assets_data || []).find(a => (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equalsIgnoreCase(c?.contract_address, gasToken)) > -1) :
+                      { ..._.head(source_chain_data?.provider_params)?.nativeCurrency, image: source_chain_data?.image }
 
                   if (source_gas_data?.contracts) {
                     source_gas_data = {
@@ -2592,6 +2547,35 @@ export default () => {
                                 {['express_executed', 'refunded'].includes(s.id) ? 'Express Gas' : 'Gas Used'}
                               </span>
                               <div className="flex flex-wrap items-center">
+                                {
+                                  (express_gas_price_rate || gas_price_rate) &&
+                                  (
+                                    <>
+                                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                        {
+                                          source_gas_data?.image &&
+                                          (
+                                            <Image
+                                              src={source_gas_data.image}
+                                              className="w-5 h-5 rounded-full"
+                                            />
+                                          )
+                                        }
+                                        <span className="text-sm font-medium">
+                                          <span className="mr-1">
+                                            {number_format(source_express_executed_gas_used, '0,0.00000000', true)}
+                                          </span>
+                                          <span>
+                                            {ellipse(source_gas_data?.symbol)}
+                                          </span>
+                                        </span>
+                                      </div>
+                                      <span className="text-sm font-medium mr-2">
+                                        =
+                                      </span>
+                                    </>
+                                  )
+                                }
                                 <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
                                   {
                                     destination_gas_data?.image &&
@@ -2624,35 +2608,6 @@ export default () => {
                                     </span>
                                   </span>
                                 </div>
-                                {
-                                  (express_gas_price_rate || gas_price_rate) &&
-                                  (
-                                    <>
-                                      <span className="text-sm font-medium mr-2">
-                                        =
-                                      </span>
-                                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
-                                        {
-                                          source_gas_data?.image &&
-                                          (
-                                            <Image
-                                              src={source_gas_data.image}
-                                              className="w-5 h-5 rounded-full"
-                                            />
-                                          )
-                                        }
-                                        <span className="text-sm font-medium">
-                                          <span className="mr-1">
-                                            {number_format(source_express_executed_gas_used, '0,0.00000000', true)}
-                                          </span>
-                                          <span>
-                                            {ellipse(source_gas_data?.symbol)}
-                                          </span>
-                                        </span>
-                                      </div>
-                                    </>
-                                  )
-                                }
                               </div>
                             </div>
                             {
@@ -2729,6 +2684,40 @@ export default () => {
                             </span>
                             <div className="flex flex-wrap items-center">
                               {
+                                source_token?.token_price?.usd && destination_native_token?.token_price?.usd &&
+                                (
+                                  <>
+                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                      {
+                                        source_gas_data?.image &&
+                                        (
+                                          <Image
+                                            src={source_gas_data.image}
+                                            className="w-5 h-5 rounded-full"
+                                          />
+                                        )
+                                      }
+                                      <span className="text-sm font-medium">
+                                        <span className="mr-1">
+                                          {number_format(source_gas_used, '0,0.00000000', true)}
+                                        </span>
+                                        <span>
+                                          {ellipse(source_gas_data?.symbol)}
+                                        </span>
+                                      </span>
+                                    </div>
+                                    {
+                                      (success ? is_execute_from_relayer : is_error_from_relayer) &&
+                                      (
+                                        <span className="text-sm font-medium mr-2">
+                                          =
+                                        </span>
+                                      )
+                                    }
+                                  </>
+                                )
+                              }
+                              {
                                 (success ? is_execute_from_relayer : is_error_from_relayer) &&
                                 (
                                   <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
@@ -2763,40 +2752,6 @@ export default () => {
                                       </span>
                                     </span>
                                   </div>
-                                )
-                              }
-                              {
-                                source_token?.token_price?.usd && destination_native_token?.token_price?.usd &&
-                                (
-                                  <>
-                                    {
-                                      (success ? is_execute_from_relayer : is_error_from_relayer) &&
-                                      (
-                                        <span className="text-sm font-medium mr-2">
-                                          =
-                                        </span>
-                                      )
-                                    }
-                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
-                                      {
-                                        source_gas_data?.image &&
-                                        (
-                                          <Image
-                                            src={source_gas_data.image}
-                                            className="w-5 h-5 rounded-full"
-                                          />
-                                        )
-                                      }
-                                      <span className="text-sm font-medium">
-                                        <span className="mr-1">
-                                          {number_format(source_gas_used, '0,0.00000000', true)}
-                                        </span>
-                                        <span>
-                                          {ellipse(source_gas_data?.symbol)}
-                                        </span>
-                                      </span>
-                                    </div>
-                                  </>
                                 )
                               }
                             </div>
@@ -2904,28 +2859,6 @@ export default () => {
                             <div className="flex items-center space-x-2">
                               <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
                                 {
-                                  destination_gas_data?.image &&
-                                  (
-                                    <Image
-                                      src={destination_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )
-                                }
-                                <span className="text-sm font-medium">
-                                  <span className="mr-1">
-                                    {number_format(source_token.token_price?.usd / destination_native_token.token_price?.usd, '0,0.00000000', true)}
-                                  </span>
-                                  <span>
-                                    {ellipse(destination_gas_data?.symbol)}
-                                  </span>
-                                </span>
-                              </div>
-                              <span className="text-sm font-medium">
-                                =
-                              </span>
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
-                                {
                                   source_gas_data?.image &&
                                   (
                                     <Image
@@ -2940,6 +2873,28 @@ export default () => {
                                   </span>
                                   <span>
                                     {ellipse(source_gas_data?.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                              <span className="text-sm font-medium">
+                                =
+                              </span>
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2">
+                                {
+                                  destination_gas_data?.image &&
+                                  (
+                                    <Image
+                                      src={destination_gas_data.image}
+                                      className="w-5 h-5 rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  <span className="mr-1">
+                                    {number_format(source_token.token_price?.usd / destination_native_token.token_price?.usd, '0,0.00000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(destination_gas_data?.symbol)}
                                   </span>
                                 </span>
                               </div>

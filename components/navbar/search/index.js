@@ -7,7 +7,7 @@ import { FiSearch } from 'react-icons/fi'
 import { ens as getEns, domainFromEns } from '../../../lib/api/ens'
 import { transfers, deposit_addresses } from '../../../lib/api/index'
 import { type } from '../../../lib/object/id'
-import { equals_ignore_case } from '../../../lib/utils'
+import { equalsIgnoreCase } from '../../../lib/utils'
 import { ENS_DATA } from '../../../reducers/types'
 
 export default () => {
@@ -50,7 +50,7 @@ export default () => {
       if (
         Object.values({ ...ens_data })
           .findIndex(v =>
-            equals_ignore_case(
+            equalsIgnoreCase(
               v?.name,
               input,
             )
@@ -62,7 +62,7 @@ export default () => {
           ...(
             Object.values(ens_data)
               .find(v =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   v?.name,
                   input,
                 )
@@ -230,7 +230,7 @@ export default () => {
     ]
     .filter(s => s)
     .findIndex(s =>
-      equals_ignore_case(
+      equalsIgnoreCase(
         s,
         inputSearch,
       )

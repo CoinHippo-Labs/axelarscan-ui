@@ -13,7 +13,7 @@ import SelectChain from '../select/chains'
 import { ProgressBar } from '../progress-bars'
 import { search as searchGMP, stats, chart } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, capitalize, ellipse, equals_ignore_case, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, capitalize, ellipse, equalsIgnoreCase, _total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const DEFAULT_TIMEFRAME_DAYS = 7
 const TIMEFRAME_OPTIONS = [
@@ -701,14 +701,14 @@ export default () => {
                   .filter(p =>
                     (
                       !fromChainForPairs ||
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         p?.source_chain,
                         fromChainForPairs,
                       )
                     ) &&
                     (
                       !toChainForPairs ||
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         p?.destination_chain,
                         toChainForPairs,
                       )

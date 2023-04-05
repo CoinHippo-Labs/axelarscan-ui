@@ -15,7 +15,7 @@ import Image from '../image'
 import Copy from '../copy'
 import { pending_commands } from '../../lib/api/lcd'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default (
   {
@@ -725,14 +725,14 @@ export default (
 
                       const asset_data = (assets_data || [])
                         .find(a =>
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             a?.symbol,
                             symbol,
                           ) ||
                           (a?.contracts || [])
                             .findIndex(c =>
                               c?.chain_id === chain_id &&
-                              equals_ignore_case(
+                              equalsIgnoreCase(
                                 c.symbol,
                                 symbol,
                               )

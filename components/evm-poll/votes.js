@@ -10,7 +10,7 @@ import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default (
   {
@@ -103,7 +103,7 @@ export default (
 
               const validator_data = validatorsData
                 .find(_v =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     _v?.broadcaster_address,
                     voter,
                   )
@@ -124,7 +124,7 @@ export default (
                 ) > -1 &&
               _votes
                 .findIndex(v =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v?.validator_data?.operator_address,
                     p,
                   )
@@ -133,7 +133,7 @@ export default (
             .map(p => {
               const validator_data = validatorsData
                 .find(_v =>
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     _v?.operator_address,
                     p,
                   )

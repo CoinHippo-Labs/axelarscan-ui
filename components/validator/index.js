@@ -20,7 +20,7 @@ import { chainManager } from '../../lib/object/chain'
 import { native_asset_id, getAsset, assetManager } from '../../lib/object/asset'
 import { hexToBech32, base64ToBech32, bech32ToBech32 } from '../../lib/object/key'
 import { lastHeartbeatBlock, firstHeartbeatBlock } from '../../lib/object/heartbeat'
-import { number_format, name, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, name, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 const num_uptime_blocks =
   Number(
@@ -147,7 +147,7 @@ export default () => {
           validators_data
             .findIndex(v =>
               v?.operator_address &&
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v.consensus_address,
                 address,
               )
@@ -160,7 +160,7 @@ export default () => {
               validators_data
                 .find(v =>
                   v?.operator_address &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v.consensus_address,
                     address,
                   )
@@ -185,7 +185,7 @@ export default () => {
           validators_data
             .findIndex(v =>
               v?.operator_address &&
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v.consensus_address,
                 hexToBech32(
                   address,
@@ -201,7 +201,7 @@ export default () => {
               validators_data
                 .find(v =>
                   v?.operator_address &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v.consensus_address,
                     hexToBech32(
                       address,
@@ -223,7 +223,7 @@ export default () => {
           validators_data
             .findIndex(v =>
               v?.operator_address &&
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v.consensus_address,
                 bech32ToBech32(
                   address,
@@ -239,7 +239,7 @@ export default () => {
               validators_data
                 .find(v =>
                   v?.operator_address &&
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     v.consensus_address,
                     bech32ToBech32(
                       address,
@@ -274,7 +274,7 @@ export default () => {
         ) {
           const validator_data = validators_data
             .find(v =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 v?.operator_address,
                 address,
               )
@@ -452,7 +452,7 @@ export default () => {
       const getData = async () => {
         if (
           address &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             validator?.address,
             address,
           ) &&
@@ -476,7 +476,7 @@ export default () => {
 
           const v = (validators || [])
             .find(_v =>
-              equals_ignore_case(
+              equalsIgnoreCase(
                 _v?.address,
                 consensus_address,
               )
@@ -511,7 +511,7 @@ export default () => {
       const getData = async () => {
         if (
           address &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             validator?.address,
             address,
           ) &&
@@ -549,7 +549,7 @@ export default () => {
                       return {
                         ...delegation,
                         self:
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             delegator_address,
                             validator.data?.delegator_address,
                           ),
@@ -611,7 +611,7 @@ export default () => {
       const getData = async () => {
         if (
           address &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             validator?.address,
             address,
           ) &&
@@ -696,7 +696,7 @@ export default () => {
       const getData = async () => {
         if (
           address &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             validator?.address,
             address,
           ) &&
@@ -752,7 +752,7 @@ export default () => {
       const getData = async () => {
         if (
           address &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             validator?.address,
             address,
           ) &&
@@ -819,7 +819,7 @@ export default () => {
                     ...h,
                     height,
                     up:
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         sender,
                         broadcaster_address,
                       ),
@@ -848,7 +848,7 @@ export default () => {
       const getData = async () => {
         if (
           address &&
-          equals_ignore_case(
+          equalsIgnoreCase(
             validator?.address,
             address,
           ) &&
@@ -885,13 +885,13 @@ export default () => {
                     Object.entries(p)
                       .filter(([k, v]) =>
                         !k?.startsWith(`${process.env.NEXT_PUBLIC_PREFIX_ACCOUNT}1`) ||
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           k,
                           broadcaster_address,
                         )
                       )
                       .flatMap(([k, v]) =>
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           k,
                           broadcaster_address,
                         ) ?
@@ -998,14 +998,14 @@ export default () => {
                             participated:
                               (snapshot_validators?.validators || [])
                                 .findIndex(v =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     v?.validator,
                                     address,
                                   )
                                 ) > -1 &&
                               (snapshot_non_participant_validators?.validators || [])
                                 .findIndex(v =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     v?.validator,
                                     address,
                                   )
@@ -1112,14 +1112,14 @@ export default () => {
                             participated:
                               (participants || [])
                                 .findIndex(a =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     a,
                                     address,
                                   )
                                 ) > -1 &&
                               (non_participants || [])
                                 .findIndex(a =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     a,
                                     address,
                                   )
@@ -1181,7 +1181,7 @@ export default () => {
                 .filter(([k, v]) =>
                   (v || [])
                     .findIndex(_v =>
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         _v,
                         address,
                       )

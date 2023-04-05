@@ -7,7 +7,7 @@ import Info from './info'
 import Participations from './participations'
 import { genesis } from '../../lib/api/rpc'
 import { keygens as getKeygens, sign_attempts as getSignAttempts } from '../../lib/api/index'
-import { number_format, equals_ignore_case } from '../../lib/utils'
+import { number_format, equalsIgnoreCase } from '../../lib/utils'
 
 const TABLES = ['keygens_success', 'keygens_failed', 'signs_success', 'signs_failed']
 
@@ -79,7 +79,7 @@ export default () => {
                 return {
                   ...v,
                   address,
-                  ...validators_data?.find(_v => equals_ignore_case(_v?.operator_address, address)),
+                  ...validators_data?.find(_v => equalsIgnoreCase(_v?.operator_address, address)),
                   share: weight || share_count,
                 }
               }),
@@ -100,7 +100,7 @@ export default () => {
                 return {
                   ...v,
                   address,
-                  ...validators_data?.find(_v => equals_ignore_case(_v?.operator_address, address)),
+                  ...validators_data?.find(_v => equalsIgnoreCase(_v?.operator_address, address)),
                   share: weight || share_count,
                 }
               }),
@@ -150,14 +150,14 @@ export default () => {
               validators: participants?.map((a, i) => {
                 return {
                   address: a,
-                  ...validators_data?.find(v => equals_ignore_case(v?.operator_address, a)),
+                  ...validators_data?.find(v => equalsIgnoreCase(v?.operator_address, a)),
                   share: participant_shares?.[i],
                 }
               }),
               non_participant_validators: non_participants?.map((a, i) => {
                 return {
                   address: a,
-                  ...validators_data?.find(v => equals_ignore_case(v?.operator_address, a)),
+                  ...validators_data?.find(v => equalsIgnoreCase(v?.operator_address, a)),
                   share: non_participant_shares?.[i],
                 }
               }),
@@ -230,7 +230,7 @@ export default () => {
                 } = { ...v }
                 return {
                   ...v,
-                  ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, address)),
+                  ...validators_data.find(_v => equalsIgnoreCase(_v?.operator_address, address)),
                 }
               }),
               non_participant_validators: non_participant_validators?.map(v => {
@@ -239,7 +239,7 @@ export default () => {
                 } = { ...v }
                 return {
                   ...v,
-                  ...validators_data.find(_v => equals_ignore_case(_v?.operator_address, address)),
+                  ...validators_data.find(_v => equalsIgnoreCase(_v?.operator_address, address)),
                 }
               }),
             }

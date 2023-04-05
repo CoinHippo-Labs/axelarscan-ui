@@ -7,7 +7,7 @@ import Popover from '../popover'
 import Image from '../image'
 import Copy from '../copy'
 import { chainManager } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, to_hex } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, to_hex } from '../../lib/utils'
 
 const num_evm_votes_polls =
   Number(
@@ -49,7 +49,7 @@ export default ({
 
             const chain_data = (evm_chains_data || [])
               .find(c =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   c?.id,
                   sender_chain,
                 )
@@ -65,7 +65,7 @@ export default ({
 
             const poll = (polls || [])
               .find(p =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   p?.id,
                   id,
                 )
@@ -73,7 +73,7 @@ export default ({
 
             const v = (votes || [])
               .find(v =>
-                equals_ignore_case(
+                equalsIgnoreCase(
                   v?.id,
                   id,
                 )

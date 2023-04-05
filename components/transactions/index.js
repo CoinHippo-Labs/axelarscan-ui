@@ -19,7 +19,7 @@ import { transactions_by_events, getTransaction } from '../../lib/api/lcd'
 import { transactions as getTransactions, deposit_addresses } from '../../lib/api/index'
 import { type } from '../../lib/object/id'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, name, remove_chars, ellipse, equals_ignore_case, sleep, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, name, remove_chars, ellipse, equalsIgnoreCase, sleep, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 100
 
@@ -241,7 +241,7 @@ export default (
                 } = { ..._.head(_response.data) }
 
                 if (
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     address,
                     deposit_address,
                   )
@@ -461,7 +461,7 @@ export default (
                             transfer:
                               (activities || [])
                                 .findIndex(a =>
-                                  equals_ignore_case(
+                                  equalsIgnoreCase(
                                     a?.sender,
                                     address,
                                   )
@@ -469,19 +469,19 @@ export default (
                                 'out' :
                                 (activities || [])
                                   .findIndex(a =>
-                                    equals_ignore_case(
+                                    equalsIgnoreCase(
                                       a?.receiver,
                                       address,
                                     ) ||
                                     (Array.isArray(a?.recipient) ?
                                       (a?.recipient || [])
                                         .findIndex(_a =>
-                                          equals_ignore_case(
+                                          equalsIgnoreCase(
                                             _a,
                                             address,
                                           )
                                         ) > -1 :
-                                      equals_ignore_case(
+                                      equalsIgnoreCase(
                                         a?.recipient,
                                         address,
                                       )
@@ -579,12 +579,12 @@ export default (
                       address ||
                       account
                     ) ||
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       a?.recipient,
                       address ||
                       account,
                     ) ||
-                    equals_ignore_case(
+                    equalsIgnoreCase(
                       a?.sender,
                       address ||
                       account,
@@ -688,7 +688,7 @@ export default (
             return d.amount
               .map(a => {
                 const multipier =
-                  equals_ignore_case(
+                  equalsIgnoreCase(
                     a.sender,
                     address ||
                     filters?.account,
@@ -727,7 +727,7 @@ export default (
                           address ||
                           filters?.account
                         ) &&
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           a.sender,
                           address ||
                           filters?.account,
@@ -840,7 +840,7 @@ export default (
                               filterTypes?.includes(k) ?
                                 filterTypes
                                   .filter(t =>
-                                    !equals_ignore_case(
+                                    !equalsIgnoreCase(
                                       t,
                                       k,
                                     )
@@ -1073,11 +1073,11 @@ export default (
 
                   const validator_data = (validators_data || [])
                     .find(v =>
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         v?.broadcaster_address,
                         value,
                       ) ||
-                      equals_ignore_case(
+                      equalsIgnoreCase(
                         v?.operator_address,
                         value,
                       )
@@ -1182,11 +1182,11 @@ export default (
                       .map((value, i) => {
                         const validator_data = (validators_data || [])
                           .find(v =>
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               v?.broadcaster_address,
                               value,
                             ) ||
-                            equals_ignore_case(
+                            equalsIgnoreCase(
                               v?.operator_address,
                               value,
                             )
@@ -1326,7 +1326,7 @@ export default (
                               return (
                                 <div
                                   key={i}
-                                  className={`h-5 flex items-center ${address || account ? equals_ignore_case(recipient, address || account) ? 'text-green-400 dark:text-green-300' : equals_ignore_case(sender, address || account) ? 'text-red-500 dark:text-red-400' : '' : ''} text-xs font-medium space-x-1`}
+                                  className={`h-5 flex items-center ${address || account ? equalsIgnoreCase(recipient, address || account) ? 'text-green-400 dark:text-green-300' : equalsIgnoreCase(sender, address || account) ? 'text-red-500 dark:text-red-400' : '' : ''} text-xs font-medium space-x-1`}
                                 >
                                   <span className="uppercase">
                                     {number_format(

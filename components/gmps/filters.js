@@ -14,8 +14,8 @@ export default () => {
   const {
     evm_chains,
     cosmos_chains,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         evm_chains: state.evm_chains,
         cosmos_chains: state.cosmos_chains,
@@ -43,25 +43,8 @@ export default () => {
 
   useEffect(
     () => {
-      if (
-        evm_chains_data &&
-        cosmos_chains_data &&
-        asPath
-      ) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath
-              .substring(
-                asPath.indexOf('?') + 1,
-              )
-          )
-
-        const chains_data =
-          _.concat(
-            evm_chains_data,
-            cosmos_chains_data,
-          )
+      if (evm_chains_data && cosmos_chains_data && asPath) {
+        const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
         const {
           txHash,
@@ -80,26 +63,9 @@ export default () => {
         setFilters(
           {
             txHash,
-            sourceChain:
-              getChain(
-                sourceChain,
-                chains_data,
-              )?._id ||
-              sourceChain,
-            destinationChain:
-              getChain(
-                destinationChain,
-                chains_data,
-              )?._id ||
-              destinationChain,
-            method:
-              [
-                'callContract',
-                'callContractWithToken',
-              ]
-              .includes(method) ?
-                method :
-                undefined,
+            sourceChain: getChain(sourceChain, chains_data)?._id || sourceChain,
+            destinationChain: getChain(destinationChain, chains_data)?._id || destinationChain,
+            method: ['callContract', 'callContractWithToken'].includes(method) ? method : undefined,
             status:
               [
                 'called',
@@ -114,26 +80,14 @@ export default () => {
                 'insufficient_fee',
                 'no_created_at',
               ]
-              .includes(
-                status?.toLowerCase()
-              ) ?
+              .includes(status?.toLowerCase()) ?
                 status.toLowerCase() :
                 undefined,
             senderAddress,
             sourceAddress,
             contractAddress,
             relayerAddress,
-            time:
-              fromTime &&
-              toTime &&
-              [
-                moment(
-                  Number(fromTime)
-                ),
-                moment(
-                  Number(toTime)
-                ),
-              ],
+            time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
           }
         )
       }
@@ -149,26 +103,18 @@ export default () => {
         Object.entries({ ...filters })
           .filter(([k, v]) => v)
           .forEach(([k, v]) => {
-            let key,
-              value
+            let key
+            let value
 
             switch (k) {
               case 'time':
                 key = 'fromTime'
-                value =
-                  moment(v[0])
-                    .valueOf()
+                value = moment(_.head(v)).valueOf()
 
-                qs
-                  .append(
-                    key,
-                    value,
-                  )
+                qs.append(key, value)
 
                 key = 'toTime'
-                value =
-                  moment(v[1])
-                    .valueOf()
+                value = moment(_.last(v)).valueOf()
                 break
               default:
                 key = k
@@ -176,29 +122,19 @@ export default () => {
                 break
             }
 
-            qs
-              .append(
-                key,
-                value,
-              )
+            qs.append(key, value)
           })
 
         const qs_string = qs.toString()
-
-        router
-          .push(
-            `${pathname}${
-              qs_string ?
-                `?${qs_string}` :
-                ''
-            }`
-          )
+        router.push(`${pathname}${qs_string ? `?${qs_string}` : ''}`)
 
         setHidden(true)
       }
     },
     [filterTrigger],
   )
+
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
   const fields = [
     {
@@ -213,66 +149,46 @@ export default () => {
       name: 'sourceChain',
       type: 'select',
       placeholder: 'Select source chain',
-      options: _.concat(
-        {
-          value: '',
-          title: 'Any',
-        },
-        _.orderBy(
-          evm_chains_data ||
-          [],
-          ['deprecated'],
-          ['desc'],
-        )
-        .filter(c =>
-          !c?.no_inflation ||
-          c?.deprecated
-        )
-        .map(c => {
-          const {
-            id,
-            name,
-          } = { ...c }
+      options:
+        _.concat(
+          { value: '', title: 'Any' },
+          _.orderBy(chains_data, ['deprecated'], ['desc'])
+            .filter(c => !c?.no_inflation || c?.deprecated)
+            .map(c => {
+              const {
+                id,
+                name,
+              } = { ...c }
 
-          return {
-            value: id,
-            title: name,
-          }
-        }),
-      ),
+              return {
+                value: id,
+                title: name,
+              }
+            }),
+        ),
     },
     {
       label: 'Destination Chain',
       name: 'destinationChain',
       type: 'select',
       placeholder: 'Select destination chain',
-      options: _.concat(
-        {
-          value: '',
-          title: 'Any',
-        },
-        _.orderBy(
-          evm_chains_data ||
-          [],
-          ['deprecated'],
-          ['desc'],
-        )
-        .filter(c =>
-          !c?.no_inflation ||
-          c?.deprecated
-        )
-        .map(c => {
-          const {
-            id,
-            name,
-          } = { ...c }
+      options:
+        _.concat(
+          { value: '', title: 'Any' },
+          _.orderBy(chains_data, ['deprecated'], ['desc'])
+            .filter(c => !c?.no_inflation || c?.deprecated)
+            .map(c => {
+              const {
+                id,
+                name,
+              } = { ...c }
 
-          return {
-            value: id,
-            title: name,
-          }
-        }),
-      ),
+              return {
+                value: id,
+                title: name,
+              }
+            }),
+        ),
     },
     {
       label: 'Method',
@@ -280,17 +196,9 @@ export default () => {
       type: 'select',
       placeholder: 'Select method',
       options: [
-        {
-          value: '',
-          title: 'Any' },
-        {
-          value: 'callContract',
-          title: 'callContract',
-        },
-        {
-          value: 'callContractWithToken',
-          title: 'callContractWithToken',
-        },
+        { value: '', title: 'Any' },
+        { value: 'callContract', title: 'callContract' },
+        { value: 'callContractWithToken', title: 'callContractWithToken' },
       ],
     },
     {
@@ -299,46 +207,16 @@ export default () => {
       type: 'select',
       placeholder: 'Select status',
       options: [
-        {
-          value: '',
-          title: 'Any',
-        },
-        {
-          value: 'called',
-          title: 'Called',
-        },
-        {
-          value: 'confirming',
-          title: 'Wait for Confirmation',
-        },
-        {
-          value: 'express_executed',
-          title: 'Express Executed',
-        },
-        {
-          value: 'approving',
-          title: 'Wait for Approval',
-        },
-        {
-          value: 'approved',
-          title: 'Approved',
-        },
-        {
-          value: 'executing',
-          title: 'Executing',
-        },
-        {
-          value: 'executed',
-          title: 'Executed',
-        },
-        {
-          value: 'error',
-          title: 'Error Execution',
-        },
-        {
-          value: 'insufficient_fee',
-          title: 'Insufficient Fee',
-        },
+        { value: '', title: 'Any' },
+        { value: 'called', title: 'Called' },
+        { value: 'confirming', title: 'Wait for Confirmation' },
+        { value: 'express_executed', title: 'Express Executed' },
+        { value: 'approving', title: 'Wait for Approval' },
+        { value: 'approved', title: 'Approved' },
+        { value: 'executing', title: 'Executing' },
+        { value: 'executed', title: 'Executed' },
+        { value: 'error', title: 'Error Execution' },
+        { value: 'insufficient_fee', title: 'Insufficient Fee' },
       ],
     },
     {
@@ -374,12 +252,7 @@ export default () => {
     },
   ]
 
-  const filtered =
-    (
-      !!filterTrigger ||
-      filterTrigger === undefined
-    ) &&
-    Object.keys({ ...query }).length > 0
+  const filtered = (!!filterTrigger || filterTrigger === undefined) && Object.keys({ ...query }).length > 0
 
   return (
     <Modal
@@ -388,137 +261,109 @@ export default () => {
       onClick={() => setHidden(false)}
       buttonTitle={`Filter${filtered ? 'ed' : ''}`}
       buttonClassName={`max-w-min ${filtered ? 'border-2 border-blue-500 dark:border-blue-500 text-blue-500 dark:text-blue-500 font-semibold' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 hover:bg-opacity-75 dark:hover:bg-opacity-75 font-normal'} rounded tracking-wider text-sm sm:text-base py-1 px-2.5`}
-      title={<div className="flex items-center justify-between">
-        <span>
-          Filter GMPs
-        </span>
-        <div
-          onClick={() => setHidden(true)}
-          className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
-        >
-          <BiX
-            size={18}
-          />
+      title={
+        <div className="flex items-center justify-between">
+          <span>
+            Filter GMPs
+          </span>
+          <div
+            onClick={() => setHidden(true)}
+            className="hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer rounded-full p-2"
+          >
+            <BiX
+              size={18}
+            />
+          </div>
         </div>
-      </div>}
-      body={<div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
-        {fields
-          .map((f, i) => {
-            const {
-              label,
-              name,
-              type,
-              placeholder,
-              options,
-              className,
-            } = { ...f }
+      }
+      body={
+        <div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
+          {fields
+            .map((f, i) => {
+              const {
+                label,
+                name,
+                type,
+                placeholder,
+                options,
+                className,
+              } = { ...f }
 
-            return (
-              <div
-                key={i}
-                className={`form-element ${className || ''}`}
-              >
-                {label && (
-                  <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
-                    {label}
-                  </div>
-                )}
-                {type === 'select' ?
-                  <select
-                    placeholder={placeholder}
-                    value={filters?.[name]}
-                    onChange={e =>
-                      setFilters({
-                        ...filters,
-                        [`${name}`]: e.target.value,
-                      })
-                    }
-                    className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
-                  >
-                    {(options || [])
-                      .map((o, i) => {
-                        const {
-                          title,
-                          value,
-                        } = { ...o }
-
-                        return (
-                          <option
-                            key={i}
-                            title={title}
-                            value={value}
-                          >
-                            {title}
-                          </option>
-                        )
-                      })
-                    }
-                  </select> :
-                  type === 'datetime-range' ?
-                    <DatePicker.RangePicker
-                      showTime
-                      format="YYYY/MM/DD HH:mm:ss"
-                      ranges={
-                        {
-                          Today:
-                            [
-                              moment()
-                                .startOf('day'),
-                              moment()
-                                .endOf('day'),
-                            ],
-                          'This Month':
-                            [
-                              moment()
-                                .startOf('month'),
-                              moment()
-                                .endOf('month'),
-                            ],
-                        }
-                      }
-                      value={filters?.[name]}
-                      onChange={v =>
-                        setFilters(
-                          {
-                            ...filters,
-                            [`${name}`]: v,
-                          }
-                        )
-                      }
-                      className="form-input border-0 focus:ring-0 rounded"
-                      style={
-                        {
-                          display: 'flex',
-                        }
-                      }
-                    /> :
-                    <input
-                      type={type}
+              return (
+                <div
+                  key={i}
+                  className={`form-element ${className || ''}`}
+                >
+                  {
+                    label &&
+                    (
+                      <div className="form-label text-slate-600 dark:text-slate-200 font-normal">
+                        {label}
+                      </div>
+                    )
+                  }
+                  {type === 'select' ?
+                    <select
                       placeholder={placeholder}
                       value={filters?.[name]}
-                      onChange={e =>
-                        setFilters({
-                          ...filters,
-                          [`${name}`]: e.target.value,
+                      onChange={e => setFilters({ ...filters, [name]: e.target.value })}
+                      className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
+                    >
+                      {(options || [])
+                        .map((o, i) => {
+                          const {
+                            title,
+                            value,
+                          } = { ...o }
+
+                          return (
+                            <option
+                              key={i}
+                              title={title}
+                              value={value}
+                            >
+                              {title}
+                            </option>
+                          )
                         })
                       }
-                      className="form-input border-0 focus:ring-0 rounded"
-                    />
-                }
-              </div>
-            )
-          })
-        }
-      </div>}
+                    </select> :
+                    type === 'datetime-range' ?
+                      <DatePicker.RangePicker
+                        showTime
+                        format="YYYY/MM/DD HH:mm:ss"
+                        ranges={
+                          {
+                            Today: [moment().startOf('day'), moment().endOf('day')],
+                            'This Month': [moment().startOf('month'), moment().endOf('month')],
+                          }
+                        }
+                        value={filters?.[name]}
+                        onChange={v => setFilters({ ...filters, [name]: v })}
+                        className="form-input border-0 focus:ring-0 rounded"
+                        style={{ display: 'flex' }}
+                      /> :
+                      <input
+                        type={type}
+                        placeholder={placeholder}
+                        value={filters?.[name]}
+                        onChange={e => setFilters({ ...filters, [name]: e.target.value })}
+                        className="form-input border-0 focus:ring-0 rounded"
+                      />
+                  }
+                </div>
+              )
+            })
+          }
+        </div>
+      }
       noCancelOnClickOutside={true}
-      onCancel={() => {
-        setFilters(null)
-        setFilterTrigger(
-          typeof filter === 'boolean' ?
-            null :
-            false
-        )
-      }}
+      onCancel={
+        () => {
+          setFilters(null)
+          setFilterTrigger(typeof filter === 'boolean' ? null : false)
+        }
+      }
       cancelButtonTitle="Reset"
       onConfirm={() => setFilterTrigger(moment().valueOf())}
       confirmButtonTitle="Search"

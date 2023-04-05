@@ -12,7 +12,7 @@ import Copy from '../copy'
 import { type } from '../../lib/object/id'
 import { assetManager } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
-import { number_format, remove_chars, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, remove_chars, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default (
   {
@@ -69,11 +69,11 @@ export default (
     !is_deposit_address &&
     (validators_data || [])
       .find(v =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           v?.delegator_address,
           address,
         ) ||
-        equals_ignore_case(
+        equalsIgnoreCase(
           v?.broadcaster_address,
           address,
         )
@@ -90,7 +90,7 @@ export default (
     !is_deposit_address &&
     (rewards?.rewards || [])
       .find(r =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           r?.denom,
           'axl',
         )
@@ -100,7 +100,7 @@ export default (
     !is_deposit_address &&
     (commissions || [])
       .find(c =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           c?.denom,
           'axl',
         )
@@ -496,7 +496,7 @@ export default (
             )
           }
           {
-            equals_ignore_case(
+            equalsIgnoreCase(
               validator_data?.delegator_address,
               address,
             ) &&
@@ -852,7 +852,7 @@ export default (
         {
           type(address) === 'account' &&
           validators_data &&
-          !equals_ignore_case(
+          !equalsIgnoreCase(
             validator_data?.broadcaster_address,
             address,
           ) &&

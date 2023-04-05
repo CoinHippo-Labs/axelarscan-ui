@@ -10,7 +10,7 @@ import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { blocks as getBlocks } from '../../lib/api/index'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 const LIMIT = 50
 
@@ -334,7 +334,7 @@ export default (
                   ...(
                     (validators_data || [])
                       .find(v =>
-                        equals_ignore_case(
+                        equalsIgnoreCase(
                           v?.consensus_address,
                           proposer_address,
                         )

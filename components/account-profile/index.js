@@ -4,7 +4,7 @@ import _ from 'lodash'
 
 import Image from '../image'
 import Copy from '../copy'
-import { ellipse, equals_ignore_case } from '../../lib/utils'
+import { ellipse, equalsIgnoreCase } from '../../lib/utils'
 import accounts from '../../data/accounts'
 import broadcasters from '../../data/broadcasters'
   
@@ -40,13 +40,13 @@ export default (
         [],
       )
       .find(a =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           a?.address,
           address,
         ) &&
         (
           !a?.environment ||
-          equals_ignore_case(
+          equalsIgnoreCase(
             a.environment,
             environment,
           )

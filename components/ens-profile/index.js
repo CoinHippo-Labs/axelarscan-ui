@@ -4,7 +4,7 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import Image from '../image'
 import Copy from '../copy'
 import { ens as getEns } from '../../lib/api/ens'
-import { equals_ignore_case, ellipse } from '../../lib/utils'
+import { equalsIgnoreCase, ellipse } from '../../lib/utils'
 import accounts from '../../data/accounts'
 import { ENS_DATA } from '../../reducers/types'
 
@@ -135,13 +135,13 @@ export default (
     !ens_name &&
     accounts
       .find(a =>
-        equals_ignore_case(
+        equalsIgnoreCase(
           a?.address,
           address,
         ) &&
         (
           !a?.environment ||
-          equals_ignore_case(
+          equalsIgnoreCase(
             a.environment,
             environment,
           )

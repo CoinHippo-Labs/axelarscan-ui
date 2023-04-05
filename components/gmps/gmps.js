@@ -20,7 +20,7 @@ import Copy from '../copy'
 import TimeAgo from '../time-ago'
 import { search as searchGMP } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, total_time_string, params_to_obj, loader_color } from '../../lib/utils'
 
 const LIMIT = 25
 
@@ -83,8 +83,6 @@ export default (
     () => {
       if (evm_chains_data && cosmos_chains_data && asPath) {
         const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
-
-        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
         const {
           txHash,
@@ -360,7 +358,7 @@ export default (
               .map(([k, v]) => (
                 <div
                   key={k}
-                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equals_ignore_case(t, k)) : _.concat(filterTypes || [], k)))}
+                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equalsIgnoreCase(t, k)) : _.concat(filterTypes || [], k)))}
                   className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'bg-slate-200 dark:bg-slate-800 font-bold' : 'hover:bg-slate-100 dark:hover:bg-slate-900 text-slate-600 dark:text-slate-400 font-medium'} rounded-lg cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1.5 ml-1 mb-1 py-0.5 px-1.5`}
                   style={{ textTransform: 'none' }}
                 >
@@ -460,6 +458,8 @@ export default (
                     call,
                     gas,
                     fees,
+                    refunded,
+                    status,
                   } = { ...props.row.original }
 
                   const {
@@ -476,8 +476,10 @@ export default (
 
                   const asset_data = (assets_data || [])
                     .find(a =>
-                      equals_ignore_case(a?.symbol, symbol) ||
-                      (a?.contracts || []).findIndex(c => c?.chain_id === chain_data?.chain_id && equals_ignore_case(c.symbol, symbol)) > -1
+                      equalsIgnoreCase(a?.symbol, symbol) ||
+                      (a?.contracts || []).findIndex(c => c?.chain_id === chain_data?.chain_id && equalsIgnoreCase(c.symbol, symbol)) > -1 ||
+                      (a?.contracts || []).findIndex(c => equalsIgnoreCase(c.symbol, symbol)) > -1 ||
+                      (a?.ibc || []).findIndex(c => equalsIgnoreCase(c.symbol, symbol)) > -1
                     )
 
                   const {
@@ -525,37 +527,19 @@ export default (
                         )
                       }
                       {
-                        (fees?.destination_base_fee || fees?.base_fee) >= 0 &&
+                        gas &&
                         (
                           <div className="flex items-center space-x-1">
                             <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs font-medium">
-                              Gas:
+                              {['executed'].includes(status) || refunded ? 'Total Gas Paid' : 'Gas Deposited'}:
                             </span>
                             {
-                              typeof gas?.gas_base_fee_amount !== 'number' &&
+                              typeof gas.gas_paid_amount === 'number' &&
                               (
                                 <div className="max-w-min whitespace-nowrap">
-                                  <span className="text-2xs font-semibold">
-                                    {number_format(fees?.destination_base_fee || fees?.base_fee, '0,0.000000')}
-                                  </span>
-                                  <span className="text-2xs font-semibold">
-                                    {fees.destination_native_token?.symbol}
-                                  </span>
-                                </div>
-                              )
-                            }
-                            {
-                              typeof gas?.gas_base_fee_amount === 'number' &&
-                              (
-                                <div className="max-w-min whitespace-nowrap">
-                                  {/*
-                                    <span className="text-2xs font-medium mr-1">
-                                      =
-                                    </span>
-                                  */}
                                   <span className="text-2xs font-semibold">
                                     <span className="mr-1">
-                                      {number_format(gas.gas_base_fee_amount, '0,0.00000000', true)}
+                                      {number_format(gas.gas_paid_amount - (refunded?.amount || 0), '0,0.00000000', true)}
                                     </span>
                                     <span>
                                       {fees.source_token?.symbol || _.head(chain_data?.provider_params)?.nativeCurrency?.symbol}
@@ -824,7 +808,7 @@ export default (
                         )
                       }
                       {
-                        equals_ignore_case(status, 'executed') && from &&
+                        equalsIgnoreCase(status, 'executed') && from &&
                         (
                           <div className="flex flex-col">
                             <span className="text-slate-400 dark:text-slate-200 font-medium">
@@ -959,8 +943,8 @@ export default (
                     case 'called':
                       current_step =
                         steps.findIndex(s => s.id === (gas_paid || gas_paid_to_callback ? 'gas_paid' : 'call')) +
-                        (!is_invalid_destination_chain && !is_invalid_call && !is_insufficient_fee && (gas_paid || gas_paid_to_callback || equals_ignore_case(call?.transactionHash, gas_paid?.transactionHash)) ? 1 : 0) -
-                        (data_filtered.filter(d => equals_ignore_case(d?.call?.transactionHash, call?.transactionHash)).length > 1 && data_filtered.filter(d => equals_ignore_case(d?.call?.transactionHash, call?.transactionHash) && !d?.gas_paid).length > 0 ? 1 : 0) +
+                        (!is_invalid_destination_chain && !is_invalid_call && !is_insufficient_fee && (gas_paid || gas_paid_to_callback || equalsIgnoreCase(call?.transactionHash, gas_paid?.transactionHash)) ? 1 : 0) -
+                        (data_filtered.filter(d => equalsIgnoreCase(d?.call?.transactionHash, call?.transactionHash)).length > 1 && data_filtered.filter(d => equalsIgnoreCase(d?.call?.transactionHash, call?.transactionHash) && !d?.gas_paid).length > 0 ? 1 : 0) +
                         (confirm && steps.findIndex(s => s.id === 'confirm') > -1 ? 1 : 0)
                       break
                     case 'express_executed':

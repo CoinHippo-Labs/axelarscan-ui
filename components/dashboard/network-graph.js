@@ -5,7 +5,7 @@ import moment from 'moment'
 import { ColorRing } from 'react-loader-spinner'
 
 import { getChain } from '../../lib/object/chain'
-import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default (
   {
@@ -109,13 +109,13 @@ export default (
                 const id = d[`${x}_chain`]
                 const chain_data = d[`${x}_chain_data`]
 
-                if (id && nodes.findIndex(n => equals_ignore_case(n?.id, id)) < 0) {
+                if (id && nodes.findIndex(n => equalsIgnoreCase(n?.id, id)) < 0) {
                   const {
                     name,
                     image,
                   } = { ...chain_data }
 
-                  const is_axelarnet = equals_ignore_case(id, axelarnet.id)
+                  const is_axelarnet = equalsIgnoreCase(id, axelarnet.id)
 
                   nodes.push(
                     {
@@ -305,7 +305,7 @@ export default (
       .filter(c =>
         c &&
         (!c.maintainer_id || !c.no_inflation) &&
-        !equals_ignore_case(c.id, axelarnet.id)
+        !equalsIgnoreCase(c.id, axelarnet.id)
       )
       .forEach(c => {
         const {
@@ -316,7 +316,7 @@ export default (
 
         ids
           .forEach((_id, i) => {
-            if (data.findIndex(_d => equals_ignore_case(_d?.id, _id)) < 0) {
+            if (data.findIndex(_d => equalsIgnoreCase(_d?.id, _id)) < 0) {
               const source_chain = i === 0 ? id : axelarnet.id
               const destination_chain = i === 0 ? axelarnet.id : id
 

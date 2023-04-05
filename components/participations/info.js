@@ -5,7 +5,7 @@ import { ThreeDots } from 'react-loader-spinner'
 import Image from '../image'
 import { chainManager } from '../../lib/object/chain'
 import { native_asset_id, assetManager } from '../../lib/object/asset'
-import { number_format, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default ({ data }) => {
   const { preferences, evm_chains, assets, validators, validators_chains } = useSelector(state => ({ preferences: state.preferences, evm_chains: state.evm_chains, assets: state.assets, validators: state.validators, validators_chains: state.validators_chains }), shallowEqual)
@@ -29,7 +29,7 @@ export default ({ data }) => {
   let evm_votes_thresholds = evm?.chains
   if (evm_votes_thresholds?.length > 0 && evm_chains_data) {
     evm_chains_data.forEach(c => {
-      if (evm_votes_thresholds.findIndex(_c => equals_ignore_case(_c?.params?.chain, c?.id)) < 0) {
+      if (evm_votes_thresholds.findIndex(_c => equalsIgnoreCase(_c?.params?.chain, c?.id)) < 0) {
         const template = _.head(evm_votes_thresholds)
         evm_votes_thresholds.push({
           ...template,

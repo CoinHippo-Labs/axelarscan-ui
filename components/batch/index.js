@@ -19,20 +19,22 @@ import Notification from '../notifications'
 import Wallet from '../wallet'
 import { batched_commands } from '../../lib/api/lcd'
 import { getChain } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 import IAxelarGateway from '../../data/contracts/interfaces/IAxelarGateway.json'
 
 export default () => {
   const {
     preferences,
     evm_chains,
+    cosmos_chains,
     assets,
     wallet,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
         assets: state.assets,
         wallet: state.wallet,
       }
@@ -45,6 +47,9 @@ export default () => {
   const {
     evm_chains_data,
   } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
   const {
     assets_data,
   } = { ...assets }
@@ -78,39 +83,16 @@ export default () => {
   useEffect(
     () => {
       const getData = async is_interval => {
-        if (
-          chain &&
-          id
-        ) {
-          const response =
-            await batched_commands(
-              chain,
-              id,
-            )
-
-          const data =
-            {
-              ...response,
-            }
-
-          setData(
-            {
-              data,
-              chain,
-              id,
-            }
-          )
+        if (chain && id) {
+          const response = await batched_commands(chain, id)
+          const data = { ...response }
+          setData({ data, chain, id })
         }
       }
 
       getData()
 
-      const interval =
-        setInterval(() =>
-          getData(true),
-          3 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 3 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [chain, id],
@@ -118,23 +100,16 @@ export default () => {
 
   useEffect(
     () => {
-      if (
-        id &&
-        data?.id === id
-      ) {
+      if (id && data?.id === id) {
         const {
           commands,
         } = { ...data.data }
 
         setTypes(
           _.countBy(
-            _.uniqBy(
-              commands ||
-              [],
-              'id',
-            )
-            .map(c => c?.type)
-            .filter(t => t)
+            _.uniqBy(commands || [], 'id')
+              .map(c => c?.type)
+              .filter(t => t)
           )
         )
       }
@@ -147,10 +122,7 @@ export default () => {
       execute_data,
     } = { ...data?.data }
 
-    if (
-      signer &&
-      execute_data
-    ) {
+    if (signer && execute_data) {
       try {
         setExecuting(true)
         setExecuteResponse(
@@ -160,14 +132,7 @@ export default () => {
           }
         )
 
-        const response =
-          await signer
-            .sendTransaction(
-              {
-                to: gateway_address,
-                data: `0x${execute_data}`,
-              },
-            )
+        const response = await signer.sendTransaction({ to: gateway_address, data: `0x${execute_data}` })
 
         const {
           hash,
@@ -178,14 +143,10 @@ export default () => {
             status: 'pending',
             message: 'Wait for Confirmation',
             txHash: hash,
-          },
+          }
         )
 
-        const receipt =
-          await signer.provider
-            .waitForTransaction(
-              hash,
-            )
+        const receipt = await signer.provider.waitForTransaction(hash)
 
         const {
           status,
@@ -194,14 +155,8 @@ export default () => {
         setExecuting(false)
         setExecuteResponse(
           {
-            status:
-              status ?
-                'success' :
-                'failed',
-            message:
-              status ?
-                'Execute successful' :
-                'Failed to execute',
+            status: status ? 'success' : 'failed',
+            message: status ? 'Execute successful' : 'Failed to execute',
             txHash: hash,
           }
         )
@@ -210,22 +165,17 @@ export default () => {
         setExecuteResponse(
           {
             status: 'failed',
-            message:
-              error?.reason ||
-              error?.data?.message ||
-              error?.data?.text ||
-              error?.message,
+            message: error?.reason || error?.data?.message || error?.data?.text || error?.message,
           }
         )
       }
     }
   }
 
-  const chain_data =
-    getChain(
-      chain,
-      evm_chains_data,
-    )
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+
+  const chain_data = getChain(chain, chains_data)
+
   const {
     chain_id,
     name,
@@ -233,6 +183,7 @@ export default () => {
     explorer,
     gateway_address,
   } = { ...chain_data }
+
   const {
     url,
     transaction_path,
@@ -249,53 +200,27 @@ export default () => {
     prev_batched_commands_id,
     proof,
   } = { ...data?.data }
+
   const {
     signatures,
   } = { ...proof }
 
-  const commands_filtered =
-    commands &&
-    commands
-    .filter(d =>
-      !(filterTypes?.length > 0) ||
-      filterTypes.includes(d?.type)
-    )
+  const commands_filtered = commands && commands.filter(d => !(filterTypes?.length > 0) || filterTypes.includes(d?.type))
 
-  const matched =
-    equals_ignore_case(
-      data?.id,
-      id,
-    )
+  const matched = equalsIgnoreCase(data?.id, id)
 
   const notificationResponse = executeResponse
 
-  const wrong_chain =
-    chain_data &&
-    wallet_chain_id !== chain_id &&
-    !executing
+  const wrong_chain = chain_data && wallet_chain_id !== chain_id && !executing
 
   const executeButton =
-    matched &&
-    data?.data?.execute_data &&
-    equals_ignore_case(
-      status,
-      'BATCHED_COMMANDS_STATUS_SIGNED',
-    ) &&
-    (commands || [])
-      .filter(c => c?.executed)
-      .length <
-    (commands || [])
-      .length &&
-    moment()
-      .diff(
-        moment(created_at?.ms),
-        'minutes',
-      ) >= 10 &&
+    matched && data?.data?.execute_data && equalsIgnoreCase(status, 'BATCHED_COMMANDS_STATUS_SIGNED') &&
+    (commands || []).filter(c => c?.executed).length < (commands || []).length &&
+    moment().diff(moment(created_at?.ms), 'minutes') >= 10 &&
     (
       <div className="flex items-center space-x-2">
         {
-          web3_provider &&
-          !wrong_chain &&
+          web3_provider && !wrong_chain &&
           (
             <button
               disabled={executing}
@@ -319,26 +244,12 @@ export default () => {
           )
         }
         <Wallet
-          connectChainId={
-            wrong_chain &&
-            (
-              chain_id ||
-              default_chain_id
-            )
-          }
+          connectChainId={wrong_chain && (chain_id || default_chain_id)}
         />
       </div>
     )
 
-  const executed = 
-    commands &&
-    commands
-      .length ===
-    commands
-      .filter(c =>
-        c?.executed
-      )
-      .length
+  const executed = commands && commands.length === commands.filter(c => c?.executed).length
 
   return (
     <div className="space-y-6 mt-2 mb-6">
@@ -373,8 +284,7 @@ export default () => {
                   {notificationResponse.message}
                 </span>
                 {
-                  url &&
-                  notificationResponse.txHash &&
+                  url && notificationResponse.txHash &&
                   (
                     <a
                       href={`${url}${transaction_path?.replace('{tx}', notificationResponse.txHash)}`}
@@ -389,12 +299,11 @@ export default () => {
                   )
                 }
                 {
-                  notificationResponse.status === 'failed' &&
-                  notificationResponse.message &&
+                  notificationResponse.status === 'failed' && notificationResponse.message &&
                   (
                     <Copy
-                      value={notificationResponse.message}
                       size={20}
+                      value={notificationResponse.message}
                       className="cursor-pointer text-slate-200 hover:text-white"
                     />
                   )
@@ -425,38 +334,20 @@ export default () => {
             status &&
             (
               <div className={`max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
-                {
-                  equals_ignore_case(
-                    status,
-                    'BATCHED_COMMANDS_STATUS_SIGNED',
-                  ) ||
-                  executed ?
-                    <BiCheckCircle
+                {equalsIgnoreCase(status, 'BATCHED_COMMANDS_STATUS_SIGNED') || executed ?
+                  <BiCheckCircle
+                    size={18}
+                  /> :
+                  equalsIgnoreCase(status, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
+                    <MdOutlineWatchLater
                       size={18}
                     /> :
-                    equals_ignore_case(
-                      status,
-                      'BATCHED_COMMANDS_STATUS_SIGNING',
-                    ) ?
-                      <MdOutlineWatchLater
-                        size={18}
-                      /> :
-                      <BiXCircle
-                        size={18}
-                      />
+                    <BiXCircle
+                      size={18}
+                    />
                 }
                 <span className="capitalize text-xs font-semibold">
-                  {
-                    (executed ?
-                      'Executed' :
-                      status
-                        .replace(
-                          'BATCHED_COMMANDS_STATUS_',
-                          '',
-                        )
-                    )
-                    .toLowerCase()
-                  }
+                  {(executed ? 'Executed' : status.replace('BATCHED_COMMANDS_STATUS_', '')).toLowerCase()}
                 </span>
               </div>
             )
@@ -469,10 +360,7 @@ export default () => {
                 size={20}
               />
               <span className="text-base font-medium">
-                {
-                  key_id ||
-                  'Unknown'
-                }
+                {key_id || 'Unknown'}
               </span>
             </div> :
             <ProgressBar
@@ -483,14 +371,11 @@ export default () => {
           }
           {matched ?
             created_at &&
-              (
-                <div className="text-slate-400 dark:text-slate-600 font-normal">
-                  {
-                    moment(created_at.ms)
-                      .format('MMM D, YYYY h:mm:ss A')
-                  }
-                </div>
-              ) :
+            (
+              <div className="text-slate-400 dark:text-slate-600 font-normal">
+                {moment(created_at.ms).format('MMM D, YYYY h:mm:ss A')}
+              </div>
+            ) :
             <ProgressBar
               borderColor={loader_color(theme)}
               width="32"
@@ -506,43 +391,15 @@ export default () => {
               .map(([k, v]) => (
                 <div
                   key={k}
-                  onClick={() =>
-                    setFilterTypes(
-                      _.uniq(
-                        filterTypes?.includes(k) ?
-                          filterTypes
-                            .filter(t =>
-                              !equals_ignore_case(
-                                t,
-                                k,
-                              )
-                            ) :
-                        _.concat(
-                          filterTypes ||
-                          [],
-                          k,
-                        )
-                      )
-                    )
-                  }
+                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equalsIgnoreCase(t, k)) : _.concat(filterTypes || [], k)))}
                   className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mb-1`}
-                  style={
-                    {
-                      textTransform: 'none',
-                    }
-                  }
+                  style={{ textTransform: 'none' }}
                 >
                   <span>
-                    {k === 'undefined' ?
-                      'Unknown' :
-                      k
-                    }
+                    {k === 'undefined' ? 'Unknown' : k}
                   </span>
                   <span className="text-blue-500 dark:text-white">
-                    {number_format(
-                      v,
-                      '0,0',
-                    )}
+                    {number_format(v, '0,0')}
                   </span>
                 </div>
               ))
@@ -559,32 +416,25 @@ export default () => {
                     const {
                       value,
                     } = { ...props }
+
                     const {
                       transactionHash,
                     } = { ...props.row.original }
 
                     return (
                       <div className="flex items-center space-x-1">
-                        {
-                          transactionHash &&
-                          url ?
-                            <a
-                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                            >
-                              {ellipse(
-                                value,
-                                8,
-                              )}
-                            </a> :
-                            <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                              {ellipse(
-                                value,
-                                8,
-                              )}
-                            </span>
+                        {transactionHash && url ?
+                          <a
+                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                          >
+                            {ellipse(value, 8)}
+                          </a> :
+                          <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+                            {ellipse(value, 8)}
+                          </span>
                         }
                         <Copy
                           value={value}
@@ -602,40 +452,34 @@ export default () => {
                     const {
                       value,
                     } = { ...props }
+
                     const {
                       transactionHash,
                       executed,
                     } = { ...props.row.original }
 
-                    const typeComponent =
-                      (
-                        <div
-                          title={
-                            executed ?
-                              'Executed' :
-                              ''
-                          }
-                          className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs`}
-                        >
-                          {value}
-                        </div>
-                      )
+                    const typeComponent = (
+                      <div
+                        title={executed ? 'Executed' : ''}
+                        className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs`}
+                      >
+                        {value}
+                      </div>
+                    )
 
                     return (
                       value ?
                         typeComponent &&
-                        (
-                          transactionHash &&
-                          url ?
-                            <a
-                              href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                            >
-                              {typeComponent}
-                            </a> :
-                            typeComponent
+                        (transactionHash && url ?
+                          <a
+                            href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                          >
+                            {typeComponent}
+                          </a> :
+                          typeComponent
                         ) :
                         <span className="text-slate-400 dark:text-slate-600">
                           Unknown
@@ -651,12 +495,14 @@ export default () => {
                     const {
                       value,
                     } = { ...props }
+
                     const {
                       id,
                       params,
                       type,
                       deposit_address,
                     } = { ...props.row.original }
+
                     const {
                       salt,
                       newOwners,
@@ -670,26 +516,15 @@ export default () => {
                       contractAddress,
                     } = { ...params }
 
-                    const source_chain_data =
-                      getChain(
-                        sourceChain,
-                        evm_chains_data,
-                      )
+                    const source_chain_data = getChain(sourceChain, chains_data)
 
-                    const transfer_id =
-                      parseInt(
-                        id,
-                        16,
-                      )
+                    const transfer_id = parseInt(id, 16)
 
                     return (
                       value ?
                         <div className="flex items-center space-x-1">
                           {
-                            [
-                              'mintToken',
-                            ].includes(type) &&
-                            typeof transfer_id === 'number' &&
+                            ['mintToken'].includes(type) && typeof transfer_id === 'number' &&
                             (
                               <div className="flex items-center space-x-1">
                                 <Link href={`/transfer?transfer_id=${transfer_id}`}>
@@ -714,16 +549,10 @@ export default () => {
                                   title={
                                     <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
                                       <span className="xl:hidden">
-                                        {ellipse(
-                                          value,
-                                          6,
-                                        )}
+                                        {ellipse(value, 6)}
                                       </span>
                                       <span className="hidden xl:block">
-                                        {ellipse(
-                                          value,
-                                          8,
-                                        )}
+                                        {ellipse(value, 8)}
                                       </span>
                                     </span>
                                   }
@@ -822,16 +651,10 @@ export default () => {
                                             title={
                                               <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
                                                 <span className="xl:hidden">
-                                                  {ellipse(
-                                                    contractAddress,
-                                                    6,
-                                                  )}
+                                                  {ellipse(contractAddress, 6)}
                                                 </span>
                                                 <span className="hidden xl:block">
-                                                  {ellipse(
-                                                    contractAddress,
-                                                    8,
-                                                  )}
+                                                  {ellipse(contractAddress, 8)}
                                                 </span>
                                               </span>
                                             }
@@ -870,10 +693,7 @@ export default () => {
                           salt ?
                             <div className="flex items-center space-x-1">
                               <span className="text-slate-400 dark:text-slate-600 font-medium">
-                                {deposit_address ?
-                                  'Deposit address' :
-                                  'Salt'
-                                }:
+                                {deposit_address ? 'Deposit address' : 'Salt'}:
                               </span>
                               {deposit_address ?
                                 <>
@@ -883,10 +703,7 @@ export default () => {
                                     rel="noopener noreferrer"
                                     className="text-slate-400 dark:text-slate-600 text-xs font-medium"
                                   >
-                                    {ellipse(
-                                      deposit_address,
-                                      8,
-                                    )}
+                                    {ellipse(deposit_address, 8)}
                                   </a>
                                   <Copy
                                     value={deposit_address}
@@ -896,17 +713,13 @@ export default () => {
                                   value={salt}
                                   title={
                                     <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                                      {ellipse(
-                                        salt,
-                                        8,
-                                      )}
+                                      {ellipse(salt, 8)}
                                     </span>
                                   }
                                 />
                               }
                             </div> :
-                            newOwners ||
-                            newOperators ?
+                            newOwners || newOperators ?
                               <>
                                 {
                                   newWeights &&
@@ -916,28 +729,13 @@ export default () => {
                                         Weight:
                                       </span>
                                       <span className="font-medium">
-                                        [
-                                        {number_format(
-                                          _.sum(
-                                            newWeights
-                                              .split(';')
-                                              .map(w =>
-                                                Number(w)
-                                              )
-                                          ),
-                                          '0,0',
-                                        )}
-                                        ]
+                                        [{number_format(_.sum(newWeights.split(';').map(w => Number(w))), '0,0')}]
                                       </span>
                                     </div>
                                   )
                                 }
                                 <div className="max-w-xl flex flex-wrap">
-                                  {
-                                    (
-                                      newOwners ||
-                                      newOperators
-                                    )
+                                  {(newOwners || newOperators)
                                     .split(';')
                                     .map((o, i) => (
                                       <div
@@ -954,16 +752,10 @@ export default () => {
                                                 title={
                                                   <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
                                                     <span className="xl:hidden">
-                                                      {ellipse(
-                                                        o,
-                                                        6,
-                                                      )}
+                                                      {ellipse(o, 6)}
                                                     </span>
                                                     <span className="hidden xl:block">
-                                                      {ellipse(
-                                                        o,
-                                                        8,
-                                                      )}
+                                                      {ellipse(o, 8)}
                                                     </span>
                                                   </span>
                                                 }
@@ -998,13 +790,7 @@ export default () => {
                                           newWeights &&
                                           (
                                             <span className="font-medium">
-                                              [
-                                              {number_format(
-                                                newWeights
-                                                  .split(';')[i],
-                                                '0,0',
-                                              )}
-                                              ]
+                                              [{number_format(newWeights.split(';')[i], '0,0')}]
                                             </span>
                                           )
                                         }
@@ -1026,10 +812,7 @@ export default () => {
                                             decimals:
                                           </span>
                                           <span>
-                                            {number_format(
-                                              decimals,
-                                              '0,0',
-                                            )}
+                                            {number_format(decimals, '0,0')}
                                           </span>
                                         </span>
                                       )
@@ -1042,10 +825,7 @@ export default () => {
                                             cap:
                                           </span>
                                           <span>
-                                            {number_format(
-                                              cap,
-                                              '0,0',
-                                            )}
+                                            {number_format(cap, '0,0')}
                                           </span>
                                         </span>
                                       )
@@ -1066,6 +846,7 @@ export default () => {
                     const {
                       params,
                     } = { ...props.row.original }
+
                     let {
                       symbol,
                       amount,
@@ -1074,68 +855,26 @@ export default () => {
 
                     const asset_data = (assets_data || [])
                       .find(a =>
-                        equals_ignore_case(
-                          a?.symbol,
-                          symbol,
-                        ) ||
-                        (a?.contracts || [])
-                          .findIndex(c =>
-                            c?.chain_id === chain_id &&
-                            equals_ignore_case(
-                              c.symbol,
-                              symbol,
-                            )
-                          ) > -1 ||
-                        (a?.contracts || [])
-                          .findIndex(c =>
-                            equals_ignore_case(
-                              c.symbol,
-                              symbol,
-                            )
-                          ) > -1 ||
-                        (a?.ibc || [])
-                          .findIndex(c =>
-                            equals_ignore_case(
-                              c.symbol,
-                              symbol,
-                            )
-                          ) > -1
+                        equalsIgnoreCase(a?.symbol, symbol) ||
+                        (a?.contracts || []).findIndex(c => c?.chain_id === chain_id && equalsIgnoreCase(c.symbol, symbol)) > -1 ||
+                        (a?.contracts || []).findIndex(c => equalsIgnoreCase(c.symbol, symbol)) > -1 ||
+                        (a?.ibc || []).findIndex(c => equalsIgnoreCase(c.symbol, symbol)) > -1
                       )
+
                     const {
                       contracts,
                     } = { ...asset_data }
 
-                    const contract_data = (contracts || [])
-                      .find(c =>
-                        c?.chain_id === chain_id
-                      )
+                    const contract_data = (contracts || []).find(c => c?.chain_id === chain_id)
 
                     let {
                       decimals,
                       image,
                     } = { ...contract_data }
 
-                    decimals =
-                      decimals ||
-                      asset_data?.decimals ||
-                      (
-                        [
-                          asset_data?.id,
-                        ].findIndex(s =>
-                          s?.includes('-wei')
-                        ) > -1 ?
-                          18 :
-                          6
-                      )
-
-                    symbol =
-                      contract_data?.symbol ||
-                      asset_data?.symbol ||
-                      symbol
-
-                    image =
-                      image ||
-                      asset_data?.image
+                    decimals = decimals || asset_data?.decimals || ([asset_data?.id].findIndex(s => s?.includes('-wei')) > -1 ? 18 : 6)
+                    symbol = contract_data?.symbol || asset_data?.symbol || symbol
+                    image = image || asset_data?.image
 
                     return (
                       <div className="flex items-center space-x-2">
@@ -1155,16 +894,7 @@ export default () => {
                                 amount > 0 &&
                                 (
                                   <span className="mr-1">
-                                    {number_format(
-                                      utils.formatUnits(
-                                        BigNumber.from(
-                                          amount
-                                        ),
-                                        decimals,
-                                      ),
-                                      '0,0.000000',
-                                      true,
-                                    )}
+                                    {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000000', true)}
                                   </span>
                                 )
                               }
@@ -1180,10 +910,7 @@ export default () => {
                                 Threshold:
                               </span>
                               <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">
-                                {number_format(
-                                  newThreshold,
-                                  '0,0',
-                                )}
+                                {number_format(newThreshold, '0,0')}
                               </span>
                             </div>
                           )
@@ -1198,11 +925,7 @@ export default () => {
                   disableSortBy: true,
                   Cell: props => (
                     <div className="font-medium text-right">
-                      {number_format(
-                        props.value,
-                        '0,0.00000000',
-                        true,
-                      )}
+                      {number_format(props.value, '0,0.00000000', true)}
                     </div>
                   ),
                   headerClassName: 'whitespace-nowrap justify-end text-right',
@@ -1283,14 +1006,9 @@ export default () => {
           Signature
         </span>
         {matched ?
-          signatures ||
-          signature ?
+          signatures || signature ?
             <div className="flex flex-col space-y-1.5">
-              {
-                (
-                  signatures ||
-                  signature
-                )
+              {(signatures || signature)
                 .map((s, i) => (
                   <div
                     key={i}
@@ -1301,10 +1019,7 @@ export default () => {
                       title={
                         <span className="cursor-pointer text-slate-600 dark:text-slate-400 text-xs font-medium">
                           <span className="lg:hidden">
-                            {ellipse(
-                              s,
-                              20,
-                            )}
+                            {ellipse(s, 20)}
                           </span>
                           <span className="hidden lg:block">
                             {s}
@@ -1327,8 +1042,7 @@ export default () => {
         }
       </div>
       {
-        matched &&
-        prev_batched_commands_id &&
+        matched && prev_batched_commands_id &&
         (
           <div>
             <Link href={`${pathname?.replace('[chain]', chain).replace('[id]', prev_batched_commands_id)}`}>
@@ -1346,10 +1060,7 @@ export default () => {
                 value={prev_batched_commands_id}
                 title={
                   <span className="cursor-pointer text-slate-400 dark:text-slate-600 font-medium">
-                    {ellipse(
-                      prev_batched_commands_id,
-                      8,
-                    )}
+                    {ellipse(prev_batched_commands_id, 8)}
                   </span>
                 }
               />

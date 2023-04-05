@@ -10,7 +10,7 @@ import { IoCaretUpCircle, IoCaretDownCircle } from 'react-icons/io5'
 import Datatable from '../datatable'
 import ValidatorProfile from '../validator-profile'
 import Copy from '../copy'
-import { number_format, name, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, name, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 const COLLAPSE_VALIDATORS_SIZE = 5
 
@@ -526,7 +526,7 @@ export default ({
               result : !failed,
             participated: typeof participated === 'boolean' ?
               participated :
-              validators?.findIndex(v => equals_ignore_case(v?.address, address)) > -1,
+              validators?.findIndex(v => equalsIgnoreCase(v?.address, address)) > -1,
           }
         })}
         noPagination={data.length <= 10}

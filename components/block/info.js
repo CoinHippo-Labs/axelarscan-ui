@@ -9,7 +9,7 @@ import Copy from '../copy'
 import ValidatorProfile from '../validator-profile'
 import Popover from '../popover'
 import { validator_sets } from '../../lib/api/lcd'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, loader_color } from '../../lib/utils'
 
 export default (
   {
@@ -67,7 +67,7 @@ export default (
                     ...(
                       validators_data
                         .find(_v =>
-                          equals_ignore_case(
+                          equalsIgnoreCase(
                             _v?.consensus_address,
                             address,
                           )
@@ -100,7 +100,7 @@ export default (
 
   const validator_data = (validators_data || [])
     .find(v =>
-      equals_ignore_case(
+      equalsIgnoreCase(
         v?.consensus_address,
         proposer_address,
       )

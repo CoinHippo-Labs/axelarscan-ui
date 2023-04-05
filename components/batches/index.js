@@ -19,7 +19,7 @@ import TimeAgo from '../time-ago'
 import { batched_commands } from '../../lib/api/lcd'
 import { batches as getBatches } from '../../lib/api/batches'
 import { getChain, chainManager } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
+import { number_format, ellipse, equalsIgnoreCase, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
 
 const LIMIT = 25
 
@@ -27,12 +27,14 @@ export default () => {
   const {
     preferences,
     evm_chains,
+    cosmos_chains,
     assets,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
+        cosmos_chains: state.cosmos_chains,
         assets: state.assets,
       }
     ),
@@ -44,6 +46,9 @@ export default () => {
   const {
     evm_chains_data,
   } = { ...evm_chains }
+  const {
+    cosmos_chains_data,
+  } = { ...cosmos_chains }
   const {
     assets_data,
   } = { ...assets }
@@ -66,14 +71,7 @@ export default () => {
   useEffect(
     () => {
       if (asPath) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath
-              .substring(
-                asPath.indexOf('?') + 1,
-              )
-          )
+        const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
         const {
           batchId,
@@ -100,20 +98,11 @@ export default () => {
                 'signed',
                 'signing',
                 'aborted',
-              ].includes(status?.toLowerCase()) ?
+              ]
+              .includes(status?.toLowerCase()) ?
                 status.toLowerCase() :
                 undefined,
-            time:
-              fromTime &&
-              toTime &&
-              [
-                moment(
-                  Number(fromTime)
-                ),
-                moment(
-                  Number(toTime)
-                ),
-              ],
+            time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
           }
         )
       }
@@ -123,31 +112,13 @@ export default () => {
 
   useEffect(
     () => {
-      const triggering = is_interval => {
-        setFetchTrigger(
-          is_interval ?
-            moment()
-              .valueOf() :
-            typeof fetchTrigger === 'number' ?
-              null :
-              0
-        )
-      }
+      const triggering = is_interval => setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
 
-      if (
-        evm_chains_data &&
-        pathname &&
-        filters
-      ) {
+      if (evm_chains_data && pathname && filters) {
         triggering()
       }
 
-      const interval =
-        setInterval(() =>
-          triggering(true),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => triggering(true), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [evm_chains_data, pathname, filters],
@@ -165,19 +136,9 @@ export default () => {
             setOffet(0)
           }
 
-          const _data =
-            !fetchTrigger ?
-              [] :
-              data ||
-              []
-
+          const _data = !fetchTrigger ? [] : data || []
           const size = LIMIT
-
-          const from =
-            fetchTrigger === true ||
-            fetchTrigger === 1 ?
-              _data.length :
-              0
+          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
 
           const {
             chain,
@@ -198,8 +159,8 @@ export default () => {
                 keyId,
                 type,
                 status,
-                fromTime: time?.[0]?.unix(),
-                toTime: time?.[1]?.unix(),
+                fromTime: _.head(time)?.unix(),
+                toTime: _.last(time)?.unix(),
                 from,
                 size,
               },
@@ -212,16 +173,8 @@ export default () => {
 
             setTotal(total)
 
-            if (
-              [
-                'signing',
-                'unexecuted',
-              ].includes(status)
-            ) {
-              updateSigningBatches(
-                response.data,
-                true,
-              )
+            if (['signing', 'unexecuted'].includes(status)) {
+              updateSigningBatches(response.data, true)
             }
 
             response =
@@ -241,39 +194,18 @@ export default () => {
                           ms,
                         } = { ...created_at }
 
-                          return {
-                            ...d,
-                            batch_id:
-                              Array.isArray(batch_id) ?
-                                _.last(batch_id) :
-                                batch_id,
-                            chain:
-                              Array.isArray(chain) ?
-                                _.last(chain) :
-                                chain,
-                            key_id:
-                              Array.isArray(key_id) ?
-                                _.last(key_id) :
-                                key_id,
-                            status:
-                              Array.isArray(status) ?
-                                _.last(status) :
-                                status,
-                            created_at: {
-                              ms:
-                                ms ?
-                                  ms :
-                                  Array.isArray(d?.['created_at.ms']) ?
-                                    _.last(d['created_at.ms']) :
-                                    d?.['created_at.ms'],
-                              ...(
-                                Array.isArray(created_at) ?
-                                  _.last(created_at) :
-                                  created_at
-                              ),
-                            },
-                          }
-                        }),
+                        return {
+                          ...d,
+                          batch_id: Array.isArray(batch_id) ? _.last(batch_id) : batch_id,
+                          chain: Array.isArray(chain) ? _.last(chain) : chain,
+                          key_id: Array.isArray(key_id) ? _.last(key_id) : key_id,
+                          status: Array.isArray(status) ? _.last(status) : status,
+                          created_at: {
+                            ms: ms ? ms : Array.isArray(d?.['created_at.ms']) ? _.last(d['created_at.ms']) : d?.['created_at.ms'],
+                            ...(Array.isArray(created_at) ? _.last(created_at) : created_at),
+                          },
+                        }
+                      }),
                     _data,
                   ),
                   'batch_id',
@@ -282,17 +214,8 @@ export default () => {
                 ['desc'],
               )
 
-            if (
-              ![
-                'signing',
-                'unexecuted',
-              ].includes(status)
-            ) {
-              response =
-                await updateSigningBatches(
-                  response,
-                  true,
-                )
+            if (!['signing', 'unexecuted'].includes(status)) {
+              response = await updateSigningBatches(response, true)
             }
 
             setData(response)
@@ -316,15 +239,9 @@ export default () => {
       if (data) {
         setTypes(
           _.countBy(
-            _.uniqBy(
-              data,
-              'batch_id',
-            )
-            .flatMap(b =>
-              (b?.commands || [])
-                .map(c => c?.type)
-            )
-            .filter(t => t)
+            _.uniqBy(data, 'batch_id')
+              .flatMap(b => (b?.commands || []).map(c => c?.type))
+              .filter(t => t)
           )
         )
       }
@@ -340,18 +257,8 @@ export default () => {
     const data =
       (_.cloneDeep(_data) || [])
         .filter(b =>
-          [
-            'BATCHED_COMMANDS_STATUS_SIGNING',
-          ].includes(b?.status) ||
-          (
-            [
-              'BATCHED_COMMANDS_STATUS_SIGNED',
-            ].includes(b?.status) &&
-            (b.commands || [])
-              .findIndex(c =>
-                !c?.executed
-              ) > -1
-          ) ||
+          ['BATCHED_COMMANDS_STATUS_SIGNING'].includes(b?.status) ||
+          (['BATCHED_COMMANDS_STATUS_SIGNED'].includes(b?.status) && (b.commands || []).findIndex(c => !c?.executed) > -1) ||
           (b.commands || []).length < 1
         )
 
@@ -366,6 +273,7 @@ export default () => {
           batch_id,
           created_at,
         } = { ...d }
+
         const {
           ms,
         } = { ...created_at }
@@ -374,27 +282,13 @@ export default () => {
           await batched_commands(
             chain,
             batch_id,
-            {
-              created_at:
-                ms ?
-                  Number(ms) / 1000 :
-                  undefined,
-            },
+            { created_at: ms ? Number(ms) / 1000 : undefined },
           )
 
-        const batch_data =
-          {
-            ...response,
-          }
+        const batch_data = { ...response }
 
         if (batch_data) {
-          const data_index = _data
-            .findIndex(b =>
-              equals_ignore_case(
-                b?.batch_id,
-                batch_id,
-              )
-            )
+          const data_index = _data.findIndex(b => equalsIgnoreCase(b?.batch_id, batch_id))
 
           if (data_index > -1) {
             _data[data_index] = batch_data
@@ -412,20 +306,15 @@ export default () => {
     return _data
   }
 
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
+
   const data_filtered =
     data &&
-    data
-      .filter(d =>
-        !(filterTypes?.length > 0) ||
-        (d?.commands || [])
-          .findIndex(c =>
-            filterTypes.includes(c?.type)
-          ) > -1 ||
-        (
-          filterTypes.includes('undefined') &&
-          !(d?.commands?.length > 0)
-        )
-      )
+    data.filter(d =>
+      !(filterTypes?.length > 0) ||
+      (d?.commands || []).findIndex(c => filterTypes.includes(c?.type)) > -1 ||
+      (filterTypes.includes('undefined') && !(d?.commands?.length > 0))
+    )
 
   return (
     data ?
@@ -437,10 +326,7 @@ export default () => {
               (
                 <div className="flex items-center space-x-1.5 sm:mb-1">
                   <span className="tracking-wider text-sm font-semibold">
-                    {number_format(
-                      total,
-                      '0,0',
-                    )}
+                    {number_format(total, '0,0')}
                   </span>
                   <span className="tracking-wider text-sm">
                     Results
@@ -450,18 +336,13 @@ export default () => {
             }
             <div className="flex flex-wrap items-center">
               {(evm_chains_data || [])
-                .filter(c =>
-                  !c?.no_inflation &&
-                  !c?.deprecated
-                )
+                .filter(c => !c?.no_inflation && !c?.deprecated)
                 .map((c, i) => (
                   <div
                     key={i}
                     className="mb-1 mr-1.5"
                   >
-                    <PendingCommands
-                      chain_data={c}
-                    />
+                    <PendingCommands chain_data={c} />
                   </div>
                 ))
               }
@@ -472,43 +353,15 @@ export default () => {
               .map(([k, v]) => (
                 <div
                   key={k}
-                  onClick={() =>
-                    setFilterTypes(
-                      _.uniq(
-                        filterTypes?.includes(k) ?
-                          filterTypes
-                            .filter(t =>
-                              !equals_ignore_case(
-                                t,
-                                k,
-                              )
-                            ) :
-                        _.concat(
-                          filterTypes ||
-                          [],
-                          k,
-                        )
-                      )
-                    )
-                  }
+                  onClick={() => setFilterTypes(_.uniq(filterTypes?.includes(k) ? filterTypes.filter(t => !equalsIgnoreCase(t, k)) : _.concat(filterTypes || [], k)))}
                   className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mt-1`}
-                  style={
-                    {
-                      textTransform: 'none',
-                    }
-                  }
+                  style={{ textTransform: 'none' }}
                 >
                   <span>
-                    {k === 'undefined' ?
-                      'Unknown' :
-                      k
-                    }
+                    {k === 'undefined' ? 'Unknown' : k}
                   </span>
                   <span className="text-blue-500 dark:text-white">
-                    {number_format(
-                      v,
-                      '0,0',
-                    )}
+                    {number_format(v, '0,0')}
                   </span>
                 </div>
               ))
@@ -526,6 +379,7 @@ export default () => {
                   const {
                     value,
                   } = { ...props }
+
                   const {
                     chain,
                     commands,
@@ -533,13 +387,9 @@ export default () => {
 
                   const _types =
                     _.countBy(
-                      _.uniqBy(
-                        commands ||
-                        [],
-                        'id',
-                      )
-                      .map(c => c?.type)
-                      .filter(t => t)
+                      _.uniqBy(commands || [], 'id')
+                        .map(c => c?.type)
+                        .filter(t => t)
                     )
 
                   return (
@@ -551,10 +401,7 @@ export default () => {
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
                           >
-                            {ellipse(
-                              value,
-                              10,
-                            )}
+                            {ellipse(value, 10)}
                           </a>
                         </Link>
                         <Copy
@@ -567,23 +414,13 @@ export default () => {
                             <div
                               key={k}
                               className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-3 mb-1"
-                              style={
-                                {
-                                  textTransform: 'none',
-                                }
-                              }
+                              style={{ textTransform: 'none' }}
                             >
                               <span>
-                                {k === 'undefined' ?
-                                  'Unknown' :
-                                  k
-                                }
+                                {k === 'undefined' ? 'Unknown' : k}
                               </span>
                               <span className="text-blue-500 dark:text-white">
-                                {number_format(
-                                  v,
-                                  '0,0',
-                                )}
+                                {number_format(v, '0,0')}
                               </span>
                             </div>
                           ))
@@ -603,19 +440,8 @@ export default () => {
                     value,
                   } = { ...props }
 
-                  const name =
-                    chainManager
-                      .name(
-                        value,
-                        evm_chains_data,
-                      )
-
-                  const image =
-                    chainManager
-                      .image(
-                        value,
-                        evm_chains_data,
-                      )
+                  const name = chainManager.name(value, chains_data)
+                  const image = chainManager.image(value, chains_data)
 
                   return (
                     image ?
@@ -642,10 +468,7 @@ export default () => {
                       value={props.value}
                       title={
                         <span className="cursor-pointer text-slate-400 dark:text-slate-600 text-xs font-medium">
-                          {ellipse(
-                            props.value,
-                            16,
-                          )}
+                          {ellipse(props.value, 16)}
                         </span>
                       }
                     />
@@ -661,16 +484,14 @@ export default () => {
                   const {
                     value,
                   } = { ...props }
+
                   const {
                     batch_id,
                     chain,
                   } = { ...props.row.original }
 
-                  const chain_data =
-                    getChain(
-                      chain,
-                      evm_chains_data,
-                    )
+                  const chain_data = getChain(chain, chains_data)
+
                   const {
                     chain_id,
                     explorer,
@@ -678,172 +499,181 @@ export default () => {
 
                   return (
                     assets_data &&
-                    (
-                      value?.length > 0 ?
-                        <div className="flex flex-col space-y-2.5 mb-4">
-                          {
-                            _.slice(
-                              value,
-                              0,
-                              10,
+                    (value?.length > 0 ?
+                      <div className="flex flex-col space-y-2.5 mb-4">
+                        {_.slice(value, 0, 10)
+                          .filter(c => c)
+                          .map((c, i) => {
+                            const {
+                              id,
+                              params,
+                              type,
+                              deposit_address,
+                              executed,
+                              transactionHash,
+                            } = { ...c }
+
+                            const {
+                              amount,
+                              name,
+                              cap,
+                              account,
+                              salt,
+                              newOwners,
+                              newOperators,
+                              newWeights,
+                              newThreshold,
+                              sourceChain,
+                              sourceTxHash,
+                              contractAddress,
+                            } = { ...params }
+                            let {
+                              symbol,
+                              decimals,
+                            } = { ...params }
+
+                            const asset_data = (assets_data || []).find(a => equalsIgnoreCase(a?.symbol, symbol) || (a?.contracts || []).findIndex(_c => _c?.chain_id === chain_id && equalsIgnoreCase(_c.symbol, symbol)) > -1)
+
+                            const {
+                              contracts,
+                            } = { ...asset_data }
+
+                            const contract_data = (contracts || []).find(_c => _c.chain_id === chain_id)
+
+                            let {
+                              image,
+                            } = { ...contract_data }
+
+                            decimals = contract_data?.decimals || asset_data?.decimals || decimals || 18
+                            symbol = contract_data?.symbol || asset_data?.symbol || symbol
+                            image = image || asset_data?.image
+
+                            const source_chain_data = getChain(sourceChain, chains_data)
+
+                            const transfer_id = parseInt(id, 16)
+
+                            const typeComponent = (
+                              <div
+                                title={executed ? 'Executed' : ''}
+                                className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
+                              >
+                                {type}
+                              </div>
                             )
-                            .filter(c => c)
-                            .map((c, i) => {
-                              const {
-                                id,
-                                params,
-                                type,
-                                deposit_address,
-                                executed,
-                                transactionHash,
-                              } = { ...c }
-                              const {
-                                amount,
-                                name,
-                                cap,
-                                account,
-                                salt,
-                                newOwners,
-                                newOperators,
-                                newWeights,
-                                newThreshold,
-                                sourceChain,
-                                sourceTxHash,
-                                contractAddress,
-                              } = { ...params }
-                              let {
-                                symbol,
-                                decimals,
-                              } = { ...params }
 
-                              const asset_data = (assets_data || [])
-                                .find(a =>
-                                  equals_ignore_case(
-                                    a?.symbol,
-                                    symbol,
-                                  ) ||
-                                  (a?.contracts || [])
-                                    .findIndex(_c =>
-                                      _c?.chain_id === chain_id &&
-                                      equals_ignore_case(
-                                        _c.symbol,
-                                        symbol,
-                                      )
-                                    ) > -1
-                                )
-                              const {
-                                contracts,
-                              } = { ...asset_data }
-
-                              const contract_data = (contracts || [])
-                                .find(_c =>
-                                  _c.chain_id === chain_id
-                                )
-
-                              let {
-                                image,
-                              } = { ...contract_data }
-
-                              decimals =
-                                contract_data?.decimals ||
-                                asset_data?.decimals ||
-                                decimals ||
-                                18
-
-                              symbol =
-                                contract_data?.symbol ||
-                                asset_data?.symbol ||
-                                symbol
-
-                              image =
-                                image ||
-                                asset_data?.image
-
-                              const source_chain_data =
-                                getChain(
-                                  sourceChain,
-                                  evm_chains_data,
-                                )
-
-                              const transfer_id =
-                                parseInt(
-                                  id,
-                                  16,
-                                )
-
-                              const typeComponent =
-                                (
-                                  <div
-                                    title={
-                                      executed ?
-                                        'Executed' :
-                                        ''
-                                    }
-                                    className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
-                                  >
-                                    {type}
-                                  </div>
-                                )
-
-                              return (
-                                <div
-                                  key={i}
-                                  className="flex flex-wrap items-center"
-                                >
-                                  {
-                                    typeComponent &&
-                                    (
-                                      transactionHash &&
-                                      explorer ?
-                                        <a
-                                          href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                        >
-                                          {typeComponent}
-                                        </a> :
-                                        typeComponent
-                                    )
-                                  }
-                                  {
-                                    source_chain_data &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        {source_chain_data.image ?
-                                          <Image
-                                            src={source_chain_data.image}
-                                            className="w-5 h-5 rounded-full"
-                                          /> :
-                                          <span className="font-medium">
-                                            {source_chain_data.name}
-                                          </span>
-                                        }
-                                        {
-                                          sourceTxHash &&
-                                          (
-                                            <div className="flex items-center space-x-1">
-                                              <Link href={`/gmp/${sourceTxHash}`}>
+                            return (
+                              <div
+                                key={i}
+                                className="flex flex-wrap items-center"
+                              >
+                                {
+                                  typeComponent &&
+                                  (
+                                    transactionHash && explorer ?
+                                      <a
+                                        href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                      >
+                                        {typeComponent}
+                                      </a> :
+                                      typeComponent
+                                  )
+                                }
+                                {
+                                  source_chain_data &&
+                                  (
+                                    <div className="flex items-center space-x-1 mb-1 mr-2">
+                                      {source_chain_data.image ?
+                                        <Image
+                                          src={source_chain_data.image}
+                                          className="w-5 h-5 rounded-full"
+                                        /> :
+                                        <span className="font-medium">
+                                          {source_chain_data.name}
+                                        </span>
+                                      }
+                                      {
+                                        sourceTxHash &&
+                                        (
+                                          <div className="flex items-center space-x-1">
+                                            <Link href={`/gmp/${sourceTxHash}`}>
+                                              <a
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                              >
+                                                GMP
+                                              </a>
+                                            </Link>
+                                            {
+                                              source_chain_data.explorer?.url &&
+                                              (
                                                 <a
+                                                  href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', sourceTxHash)}`}
                                                   target="_blank"
                                                   rel="noopener noreferrer"
-                                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                                  className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
                                                 >
-                                                  GMP
+                                                  {source_chain_data.explorer.icon ?
+                                                    <Image
+                                                      src={source_chain_data.explorer.icon}
+                                                      className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                                    /> :
+                                                    <TiArrowRight
+                                                      size={16}
+                                                      className="transform -rotate-45"
+                                                    />
+                                                  }
                                                 </a>
-                                              </Link>
+                                              )
+                                            }
+                                          </div>
+                                        )
+                                      }
+                                      {
+                                        contractAddress &&
+                                        (
+                                          <>
+                                            <BiRightArrowCircle
+                                              size={18}
+                                            />
+                                            <div className="flex items-center space-x-1">
+                                              <EnsProfile
+                                                address={contractAddress}
+                                                fallback={
+                                                  contractAddress &&
+                                                  (
+                                                    <Copy
+                                                      value={contractAddress}
+                                                      title={
+                                                        <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
+                                                          <span className="xl:hidden">
+                                                            {ellipse(contractAddress, 6)}
+                                                          </span>
+                                                          <span className="hidden xl:block">
+                                                            {ellipse(contractAddress, 8)}
+                                                          </span>
+                                                        </span>
+                                                      }
+                                                    />
+                                                  )
+                                                }
+                                                className="tracking-wider text-black dark:text-white text-sm font-medium"
+                                              />
                                               {
-                                                source_chain_data.explorer?.url &&
+                                                explorer?.url &&
                                                 (
                                                   <a
-                                                    href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', sourceTxHash)}`}
+                                                    href={`${explorer.url}${explorer.address_path?.replace('{address}', contractAddress)}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
                                                   >
-                                                    {source_chain_data.explorer.icon ?
+                                                    {explorer.icon ?
                                                       <Image
-                                                        src={source_chain_data.explorer.icon}
+                                                        src={explorer.icon}
                                                         className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                                       /> :
                                                       <TiArrowRight
@@ -855,373 +685,256 @@ export default () => {
                                                 )
                                               }
                                             </div>
-                                          )
-                                        }
-                                        {
-                                          contractAddress &&
-                                          (
-                                            <>
-                                              <BiRightArrowCircle
-                                                size={18}
-                                              />
-                                              <div className="flex items-center space-x-1">
-                                                <EnsProfile
-                                                  address={contractAddress}
-                                                  fallback={
-                                                    contractAddress &&
-                                                    (
-                                                      <Copy
-                                                        value={contractAddress}
-                                                        title={
-                                                          <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
-                                                            <span className="xl:hidden">
-                                                              {ellipse(
-                                                                contractAddress,
-                                                                6,
-                                                              )}
-                                                            </span>
-                                                            <span className="hidden xl:block">
-                                                              {ellipse(
-                                                                contractAddress,
-                                                                8,
-                                                              )}
-                                                            </span>
-                                                          </span>
-                                                        }
-                                                      />
-                                                    )
-                                                  }
-                                                  className="tracking-wider text-black dark:text-white text-sm font-medium"
-                                                />
-                                                {explorer?.url &&
-                                                  (
-                                                    <a
-                                                      href={`${explorer.url}${explorer.address_path?.replace('{address}', contractAddress)}`}
-                                                      target="_blank"
-                                                      rel="noopener noreferrer"
-                                                      className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                                                    >
-                                                      {explorer.icon ?
-                                                        <Image
-                                                          src={explorer.icon}
-                                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                                        /> :
-                                                        <TiArrowRight
-                                                          size={16}
-                                                          className="transform -rotate-45"
-                                                        />
-                                                      }
-                                                    </a>
-                                                  )
-                                                }
-                                              </div>
-                                            </>
-                                          )
-                                        }
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    symbol &&
-                                    (
-                                      <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2">
-                                        {
-                                          image &&
-                                          (
-                                            <Image
-                                              src={image}
-                                              className="w-5 h-5 rounded-full"
-                                            />
-                                          )
-                                        }
-                                        <span className="text-sm font-medium">
-                                          {
-                                            amount > 0 &&
-                                            (
-                                              <span className="mr-1">
-                                                {number_format(
-                                                  utils.formatUnits(
-                                                    BigNumber.from(amount),
-                                                    decimals,
-                                                  ),
-                                                  '0,0.000000',
-                                                  true,
-                                                )}
-                                              </span>
-                                            )
-                                          }
-                                          <span>
-                                            {symbol}
-                                          </span>
-                                        </span>
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    [
-                                      'mintToken',
-                                    ].includes(type) &&
-                                    typeof transfer_id === 'number' &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        <Link href={`/transfer?transfer_id=${transfer_id}`}>
-                                          <a
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                          >
-                                            Transfer
-                                          </a>
-                                        </Link>
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    name &&
-                                    (
-                                      <div className="flex flex-col mb-1 mr-2">
-                                        <span className="font-medium">
-                                          {name}
-                                        </span>
-                                        <div className="flex items-center space-x-1.5">
-                                          {
-                                            decimals &&
-                                            (
-                                              <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
-                                                <span className="font-medium">
-                                                  decimals:
-                                                </span>
-                                                <span>
-                                                  {number_format(
-                                                    decimals,
-                                                    '0,0',
-                                                  )}
-                                                </span>
-                                              </span>
-                                            )
-                                          }
-                                          {
-                                            cap &&
-                                            (
-                                              <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
-                                                <span className="font-medium">
-                                                  cap:
-                                                </span>
-                                                <span>
-                                                  {number_format(
-                                                    cap,
-                                                    '0,0',
-                                                  )}
-                                                </span>
-                                              </span>
-                                            )
-                                          }
-                                        </div>
-                                      </div>
-                                    )
-                                  }
-                                  {account ?
-                                    <div className="flex items-center space-x-1 mb-1 mr-2">
-                                      <BiRightArrowCircle
-                                        size={18}
-                                      />
-                                      <div className="flex items-center space-x-1">
-                                        <EnsProfile
-                                          address={account}
-                                          fallback={
-                                            account &&
-                                            (
-                                              <Copy
-                                                value={account}
-                                                title={
-                                                  <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-xs">
-                                                    <span className="xl:hidden">
-                                                      {ellipse(
-                                                        account,
-                                                        6,
-                                                      )}
-                                                    </span>
-                                                    <span className="hidden xl:block">
-                                                      {ellipse(
-                                                        account,
-                                                        8,
-                                                      )}
-                                                    </span>
-                                                  </span>
-                                                }
-                                              />
-                                            )
-                                          }
-                                          className="tracking-wider text-black dark:text-white text-sm font-medium"
-                                        />
-                                        {explorer?.url &&
-                                          (
-                                            <a
-                                              href={`${explorer.url}${explorer.address_path?.replace('{address}', account)}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                                            >
-                                              {explorer.icon ?
-                                                <Image
-                                                  src={explorer.icon}
-                                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                                /> :
-                                                <TiArrowRight
-                                                  size={16}
-                                                  className="transform -rotate-45"
-                                                />
-                                              }
-                                            </a>
-                                          )
-                                        }
-                                      </div>
-                                    </div> :
-                                    salt &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        <span className="text-slate-400 dark:text-slate-600 font-medium">
-                                          {deposit_address ?
-                                            'Deposit address' :
-                                            'Salt'
-                                          }:
-                                        </span>
-                                        {deposit_address ?
-                                          <>
-                                            <a
-                                              href={`/account/${deposit_address}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-slate-400 dark:text-slate-600 text-xs font-medium"
-                                            >
-                                              {ellipse(
-                                                deposit_address,
-                                                8,
-                                              )}
-                                            </a>
-                                            <Copy
-                                              value={deposit_address}
-                                            />
-                                          </> :
-                                          <Copy
-                                            value={salt}
-                                            title={
-                                              <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                                                {ellipse(
-                                                  salt,
-                                                  8,
-                                                )}
-                                              </span>
-                                            }
+                                          </>
+                                        )
+                                      }
+                                    </div>
+                                  )
+                                }
+                                {
+                                  symbol &&
+                                  (
+                                    <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2">
+                                      {
+                                        image &&
+                                        (
+                                          <Image
+                                            src={image}
+                                            className="w-5 h-5 rounded-full"
                                           />
-                                        }
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    newOwners &&
-                                    (
-                                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                        <span className="text-xs font-medium">
-                                          {number_format(
-                                            newOwners
-                                              .split(';')
-                                              .length,
-                                            '0,0',
-                                          )}
-                                        </span>
-                                        <span className="text-xs font-medium">
-                                          New Owners
-                                        </span>
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    newOperators &&
-                                    (
-                                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                        <span className="text-xs font-medium">
-                                          {number_format(
-                                            newOperators
-                                              .split(';')
-                                              .length,
-                                            '0,0',
-                                          )}
-                                        </span>
-                                        <span className="text-xs font-medium">
-                                          New Operators
-                                        </span>
+                                        )
+                                      }
+                                      <span className="text-sm font-medium">
                                         {
-                                          newWeights &&
+                                          amount > 0 &&
                                           (
-                                            <span className="text-xs font-medium">
-                                              [
-                                              {number_format(
-                                                _.sum(
-                                                  newWeights
-                                                    .split(';')
-                                                    .map(w =>
-                                                      Number(w)
-                                                    )
-                                                ),
-                                                '0,0',
-                                              )}
-                                              ]
+                                            <span className="mr-1">
+                                              {number_format(utils.formatUnits(BigNumber.from(amount), decimals), '0,0.000000', true)}
+                                            </span>
+                                          )
+                                        }
+                                        <span>
+                                          {symbol}
+                                        </span>
+                                      </span>
+                                    </div>
+                                  )
+                                }
+                                {
+                                  ['mintToken'].includes(type) && typeof transfer_id === 'number' &&
+                                  (
+                                    <div className="flex items-center space-x-1 mb-1 mr-2">
+                                      <Link href={`/transfer?transfer_id=${transfer_id}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                        >
+                                          Transfer
+                                        </a>
+                                      </Link>
+                                    </div>
+                                  )
+                                }
+                                {
+                                  name &&
+                                  (
+                                    <div className="flex flex-col mb-1 mr-2">
+                                      <span className="font-medium">
+                                        {name}
+                                      </span>
+                                      <div className="flex items-center space-x-1.5">
+                                        {
+                                          decimals &&
+                                          (
+                                            <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
+                                              <span className="font-medium">
+                                                decimals:
+                                              </span>
+                                              <span>
+                                                {number_format(decimals, '0,0')}
+                                              </span>
+                                            </span>
+                                          )
+                                        }
+                                        {
+                                          cap &&
+                                          (
+                                            <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
+                                              <span className="font-medium">
+                                                cap:
+                                              </span>
+                                              <span>
+                                                {number_format(cap, '0,0')}
+                                              </span>
                                             </span>
                                           )
                                         }
                                       </div>
-                                    )
-                                  }
-                                  {
-                                    newThreshold &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        <span className="text-xs font-medium">
-                                          Threshold:
-                                        </span>
-                                        <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">
-                                          {number_format(
-                                            newThreshold,
-                                            '0,0',
-                                          )}
-                                        </span>
-                                      </div>
-                                    )
-                                  }
-                                </div>
-                              )
-                            })
-                          }
-                          {
-                            value.length > 10 &&
-                            (
-                              <Link href={`/batch/${chain}/${batch_id}`}>
-                                <a
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="whitespace-nowrap text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium space-x-1 ml-1"
-                                >
-                                  <span>
-                                    and
-                                  </span>
-                                  <span>
-                                    {number_format(
-                                      value.length - 10,
-                                      '0,0',
-                                    )}
-                                  </span>
-                                  <span>
-                                    more
-                                  </span>
-                                </a>
-                              </Link>
+                                    </div>
+                                  )
+                                }
+                                {account ?
+                                  <div className="flex items-center space-x-1 mb-1 mr-2">
+                                    <BiRightArrowCircle
+                                      size={18}
+                                    />
+                                    <div className="flex items-center space-x-1">
+                                      <EnsProfile
+                                        address={account}
+                                        fallback={
+                                          account &&
+                                          (
+                                            <Copy
+                                              value={account}
+                                              title={
+                                                <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-xs">
+                                                  <span className="xl:hidden">
+                                                    {ellipse(account, 6)}
+                                                  </span>
+                                                  <span className="hidden xl:block">
+                                                    {ellipse(account, 8)}
+                                                  </span>
+                                                </span>
+                                              }
+                                            />
+                                          )
+                                        }
+                                        className="tracking-wider text-black dark:text-white text-sm font-medium"
+                                      />
+                                      {
+                                        explorer?.url &&
+                                        (
+                                          <a
+                                            href={`${explorer.url}${explorer.address_path?.replace('{address}', account)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
+                                          >
+                                            {explorer.icon ?
+                                              <Image
+                                                src={explorer.icon}
+                                                className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                              /> :
+                                              <TiArrowRight
+                                                size={16}
+                                                className="transform -rotate-45"
+                                              />
+                                            }
+                                          </a>
+                                        )
+                                      }
+                                    </div>
+                                  </div> :
+                                  salt &&
+                                  (
+                                    <div className="flex items-center space-x-1 mb-1 mr-2">
+                                      <span className="text-slate-400 dark:text-slate-600 font-medium">
+                                        {deposit_address ? 'Deposit address' : 'Salt'}:
+                                      </span>
+                                      {deposit_address ?
+                                        <>
+                                          <a
+                                            href={`/account/${deposit_address}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-slate-400 dark:text-slate-600 text-xs font-medium"
+                                          >
+                                            {ellipse(deposit_address, 8)}
+                                          </a>
+                                          <Copy
+                                            value={deposit_address}
+                                          />
+                                        </> :
+                                        <Copy
+                                          value={salt}
+                                          title={
+                                            <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
+                                              {ellipse(salt, 8)}
+                                            </span>
+                                          }
+                                        />
+                                      }
+                                    </div>
+                                  )
+                                }
+                                {
+                                  newOwners &&
+                                  (
+                                    <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
+                                      <span className="text-xs font-medium">
+                                        {number_format(newOwners.split(';').length, '0,0')}
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        New Owners
+                                      </span>
+                                    </div>
+                                  )
+                                }
+                                {
+                                  newOperators &&
+                                  (
+                                    <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
+                                      <span className="text-xs font-medium">
+                                        {number_format(newOperators.split(';').length, '0,0')}
+                                      </span>
+                                      <span className="text-xs font-medium">
+                                        New Operators
+                                      </span>
+                                      {
+                                        newWeights &&
+                                        (
+                                          <span className="text-xs font-medium">
+                                            [{number_format(_.sum(newWeights.split(';').map(w => Number(w))), '0,0')}]
+                                          </span>
+                                        )
+                                      }
+                                    </div>
+                                  )
+                                }
+                                {
+                                  newThreshold &&
+                                  (
+                                    <div className="flex items-center space-x-1 mb-1 mr-2">
+                                      <span className="text-xs font-medium">
+                                        Threshold:
+                                      </span>
+                                      <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">
+                                        {number_format(newThreshold, '0,0')}
+                                      </span>
+                                    </div>
+                                  )
+                                }
+                              </div>
                             )
-                          }
-                        </div> :
-                        <span>
-                          -
-                        </span>
+                          })
+                        }
+                        {
+                          value.length > 10 &&
+                          (
+                            <Link href={`/batch/${chain}/${batch_id}`}>
+                              <a
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="whitespace-nowrap text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium space-x-1 ml-1"
+                              >
+                                <span>
+                                  and
+                                </span>
+                                <span>
+                                  {number_format(value.length - 10, '0,0')}
+                                </span>
+                                <span>
+                                  more
+                                </span>
+                              </a>
+                            </Link>
+                          )
+                        }
+                      </div> :
+                      <span>
+                        -
+                      </span>
                     )
                   )
                 },
@@ -1234,56 +947,31 @@ export default () => {
                   const {
                     value,
                   } = { ...props }
+
                   const {
                     commands,
                   } = { ...props.row.original }
 
-                  const executed = 
-                    commands &&
-                    commands
-                      .length ===
-                    commands
-                      .filter(c =>
-                        c?.executed
-                      )
-                      .length
+                  const executed = commands && commands.length === commands.filter(c => c?.executed).length
 
                   return (
                     value &&
                     (
                       <div className={`max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
-                        {
-                          equals_ignore_case(
-                            value,
-                            'BATCHED_COMMANDS_STATUS_SIGNED',
-                          ) ||
-                          executed ?
-                            <BiCheckCircle
+                        {equalsIgnoreCase(value, 'BATCHED_COMMANDS_STATUS_SIGNED') || executed ?
+                          <BiCheckCircle
+                            size={18}
+                          /> :
+                          equalsIgnoreCase(value, 'BATCHED_COMMANDS_STATUS_SIGNING') ?
+                            <MdOutlineWatchLater
                               size={18}
                             /> :
-                            equals_ignore_case(
-                              value,
-                              'BATCHED_COMMANDS_STATUS_SIGNING',
-                            ) ?
-                              <MdOutlineWatchLater
-                                size={18}
-                              /> :
-                              <BiXCircle
-                                size={18}
-                              />
+                            <BiXCircle
+                              size={18}
+                            />
                         }
                         <span className="capitalize text-xs font-semibold">
-                          {
-                            (executed ?
-                              'Executed' :
-                              value
-                                .replace(
-                                  'BATCHED_COMMANDS_STATUS_',
-                                  '',
-                                )
-                            )
-                            .toLowerCase()
-                          }
+                          {(executed ? 'Executed' : value.replace('BATCHED_COMMANDS_STATUS_', '')).toLowerCase()}
                         </span>
                       </div>
                     )
@@ -1310,35 +998,28 @@ export default () => {
           className="min-h-full no-border"
         />
         {
-          data.length > 0 &&
-          (
-            typeof total !== 'number' ||
-            data.length < total
-          ) &&
-          (
-            !fetching ?
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
+          data.length > 0 && (typeof total !== 'number' || data.length < total) &&
+          (!fetching ?
+            <div className="flex justify-center">
+              <button
+                onClick={
+                  () => {
                     setOffet(data.length)
-                    setFetchTrigger(
-                      typeof fetchTrigger === 'number' ?
-                        true :
-                        1
-                    )
-                  }}
-                  className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
-                >
-                  Load more
-                </button>
-              </div> :
-              <div className="flex justify-center">
-                <ColorRing
-                  color={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              </div>
+                    setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
+                  }
+                }
+                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+              >
+                Load more
+              </button>
+            </div> :
+            <div className="flex justify-center">
+              <ColorRing
+                color={loader_color(theme)}
+                width="32"
+                height="32"
+              />
+            </div>
           )
         }
       </div> :
