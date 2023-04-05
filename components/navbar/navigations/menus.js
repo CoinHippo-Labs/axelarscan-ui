@@ -3,12 +3,11 @@ export default [
     id: 'validators',
     title: 'Validators',
     path: '/validators',
-    others_paths:
-      [
-        '/validators/[status]',
-        '/validators/tier',
-        '/validator/[address]',
-      ],
+    others_paths: [
+      '/validators/[status]',
+      '/validators/tier',
+      '/validator/[address]',
+    ],
   },
   {
     id: 'evm_polls',
@@ -19,49 +18,44 @@ export default [
     id: 'blocks',
     title: 'Blocks',
     path: '/blocks',
-    others_paths:
-      [
-        '/block/[height]',
-      ],
+    others_paths: ['/block/[height]'],
   },
   {
     id: 'transactions',
     title: 'Transactions',
     path: '/transactions/search',
-    others_paths:
-      [
-        '/transactions',
-        '/tx/[tx]',
-      ],
+    others_paths: [
+      '/transactions',
+      '/tx/[tx]',
+    ],
   },
-  /*{
-    id: 'participations',
-    title: 'Keygen',
-    path: '/participations',
-  },*/
-  process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' &&
+  [process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS, process.env.NEXT_PUBLIC_SUPPORT_GMP].includes('true') &&
+  {
+    id: 'interchain-transfers',
+    title: 'interchain Transfers',
+    path: '/interchain-transfers',
+  },
+  process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && false &&
   {
     id: 'transfers',
     title: 'Transfers',
     path: '/transfers',
-    others_paths:
-      [
-        '/transfers/search',
-        '/transfer/[tx]',
-      ],
+    others_paths: [
+      '/transfers/search',
+      '/transfer/[tx]',
+    ],
   },
-  process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' &&
+  process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true' && false &&
   {
     id: 'gmp',
     title: 'GMP',
     path: '/gmp/search',
-    others_paths:
-      [
-        '/gmp',
-        '/gmp/stats',
-        '/gmp/contracts',
-        '/gmp/[tx]',
-      ],
+    others_paths: [
+      '/gmp',
+      '/gmp/stats',
+      '/gmp/contracts',
+      '/gmp/[tx]',
+    ],
   },
   process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' &&
   {
@@ -69,23 +63,14 @@ export default [
     title: 'TVL',
     path: '/tvl',
   },
-  (
-    process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' ||
-    process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true'
-  ) &&
+  [process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS, process.env.NEXT_PUBLIC_SUPPORT_GMP].includes('true') &&
   {
     id: 'batches',
     title: 'Batches',
     path: '/batches',
-    others_paths:
-      [
-        '/batch/[chain]/[id]',
-      ],
+    others_paths: ['/batch/[chain]/[id]'],
   },
-  (
-    process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' ||
-    process.env.NEXT_PUBLIC_SUPPORT_GMP === 'true'
-  ) &&
+  [process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS, process.env.NEXT_PUBLIC_SUPPORT_GMP].includes('true') &&
   {
     id: 'assets',
     title: 'Assets',

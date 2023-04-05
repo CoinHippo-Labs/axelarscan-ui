@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
@@ -9,7 +8,6 @@ import LineChart from './charts/line'
 import BarChart from './charts/bar'
 import TopPath from './top/path'
 import TopChainPair from './top/chain-pair'
-import Transfers from './transfers'
 import { transfers_stats as getTransfersStats, transfers_chart as getTransfersChart, cumulative_volume as getCumulativeVolume } from '../../lib/api/transfer'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
@@ -23,8 +21,8 @@ export default () => {
     evm_chains,
     cosmos_chains,
     assets,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,
@@ -61,26 +59,10 @@ export default () => {
 
   useEffect(
     () => {
-      if (
-        evm_chains_data &&
-        cosmos_chains_data &&
-        assets_data &&
-        asPath
-      ) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath
-              .substring(
-                asPath.indexOf('?') + 1,
-              )
-          )
+      if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
+        const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
-        const chains_data =
-          _.concat(
-            evm_chains_data,
-            cosmos_chains_data,
-          )
+        const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
         const {
           type,
@@ -93,45 +75,12 @@ export default () => {
 
         setFilters(
           {
-            type:
-              [
-                'deposit_address',
-                'send_token',
-                'wrap',
-                'unwrap',
-              ].includes(type?.toLowerCase()) ?
-                type.toLowerCase() :
-                undefined,
-            sourceChain:
-              getChain(
-                sourceChain,
-                chains_data,
-              )?.id ||
-              sourceChain,
-            destinationChain:
-              getChain(
-                destinationChain,
-                chains_data,
-              )?.id ||
-              destinationChain,
-            asset:
-              getAsset(
-                asset,
-                assets_data,
-              )?.id ||
-              asset,
-            fromTime:
-              fromTime &&
-              moment(
-                Number(fromTime)
-              )
-              .unix(),
-            toTime:
-              toTime &&
-              moment(
-                Number(toTime)
-              )
-              .unix(),
+            type: ['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
+            sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
+            destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
+            asset: getAsset(asset, assets_data)?.id || asset,
+            fromTime: fromTime && moment(Number(fromTime)).unix(),
+            toTime: toTime && moment(Number(toTime)).unix(),
           }
         )
       }
@@ -144,19 +93,13 @@ export default () => {
       const getData = async () => {
         if (filters) {
           const response = await getCumulativeVolume(filters)
-
           setCumulativeStats(response)
         }
       }
 
       getData()
 
-      const interval =
-        setInterval(() =>
-          getData(),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [filters],
@@ -166,20 +109,13 @@ export default () => {
     () => {
       const getData = async () => {
         if (filters) {
-          setDailyStats(
-            await getTransfersChart(filters)
-          )
+          setDailyStats(await getTransfersChart(filters))
         }
       }
 
       getData()
 
-      const interval =
-        setInterval(() =>
-          getData(),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [filters],
@@ -189,11 +125,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (filters) {
-          const chains_data =
-            _.concat(
-              evm_chains_data,
-              cosmos_chains_data,
-            )
+          const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
           const {
             fromTime,
@@ -204,18 +136,8 @@ export default () => {
             await getTransfersStats(
               {
                 ...filters,
-                fromTime:
-                  fromTime ||
-                  moment()
-                    .subtract(
-                      NUM_STATS_DAYS,
-                      'days',
-                    )
-                    .unix(),
-                toTime:
-                  toTime ||
-                  moment()
-                    .unix(),
+                fromTime: fromTime || moment().subtract(NUM_STATS_DAYS, 'days').unix(),
+                toTime: toTime || moment().unix(),
               }
             )
 
@@ -233,19 +155,8 @@ export default () => {
                       destination_chain,
                     } = { ...d }
 
-                    source_chain =
-                      getChain(
-                        source_chain,
-                        chains_data,
-                      )?.id ||
-                      source_chain
-
-                    destination_chain =
-                      getChain(
-                        destination_chain,
-                        chains_data,
-                      )?.id ||
-                      destination_chain
+                    source_chain = getChain(source_chain, chains_data)?.id || source_chain
+                    destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
 
                     return {
                       ...d,
@@ -268,19 +179,8 @@ export default () => {
                       destination_chain,
                     } = { ...d }
 
-                    source_chain =
-                      getChain(
-                        source_chain,
-                        chains_data,
-                      )?.id ||
-                      source_chain
-
-                    destination_chain =
-                      getChain(
-                        destination_chain,
-                        chains_data,
-                      )?.id ||
-                      destination_chain
+                    source_chain = getChain(source_chain, chains_data)?.id || source_chain
+                    destination_chain = getChain(destination_chain, chains_data)?.id || destination_chain
 
                     return {
                       ...d,
@@ -296,12 +196,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(() =>
-          getData(),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [evm_chains_data, cosmos_chains_data, filters],
@@ -312,11 +207,7 @@ export default () => {
     toTime,
   } = { ...filters }
 
-  const time_filtered =
-    !!(
-      fromTime &&
-      toTime
-    )
+  const time_filtered = !!(fromTime && toTime)
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-2 pb-4">
@@ -345,78 +236,21 @@ export default () => {
       <div className="lg:col-span-2">
         <LineChart
           id="daily_volumes"
-          title={
-            `${
-              time_filtered ?
-                'Daily' :
-                `${
-                  number_format(
-                    NUM_STATS_DAYS,
-                    '0,0',
-                  )
-                }-Day`
-            } Volume`
-          }
-          description={
-            `Sum of volume transferred${
-              filters?.fromTime ||
-              filters?.toTime ?
-                '' :
-                ` in the past ${
-                  number_format(
-                    NUM_STATS_DAYS,
-                    '0,0',
-                  )
-                } days`
-            }`
-          }
+          title={`${time_filtered ? 'Daily' : `${number_format(NUM_STATS_DAYS, '0,0')}-Day`} Volume`}
+          description={`Sum of volume transferred${filters?.fromTime || filters?.toTime ? '' : ` in the past ${number_format(NUM_STATS_DAYS, '0,0')} days`}`}
           chart_data={dailyStats}
         />
       </div>
       <div className="lg:col-span-2">
         <BarChart
           id="daily_transfers"
-          title={
-            `${
-              time_filtered ?
-                'Daily' :
-                `${
-                  number_format(
-                    NUM_STATS_DAYS,
-                    '0,0',
-                  )
-                }-Day`
-            } Transfers`
-          }
-          description={
-            `The number of transfers${
-              filters?.fromTime ||
-              filters?.toTime ?
-                '' :
-                ` in the past ${
-                  number_format(
-                    NUM_STATS_DAYS,
-                    '0,0',
-                  )
-                } days`
-            }`
-          }
+          title={`${time_filtered ? 'Daily' : `${number_format(NUM_STATS_DAYS, '0,0')}-Day`} Transfers`}
+          description={`The number of transfers${filters?.fromTime || filters?.toTime ? '' : ` in the past ${number_format(NUM_STATS_DAYS, '0,0')} days`}`}
           chart_data={dailyStats}
         />
       </div>
       <TopPath
-        title={
-          `${
-            time_filtered ?
-              '' :
-              `${
-                number_format(
-                  NUM_STATS_DAYS,
-                  '0,0',
-                )
-              }-Day `
-          }Top Paths`
-        }
+        title={`${time_filtered ? '' : `${number_format(NUM_STATS_DAYS, '0,0')}-Day `}Top Paths`}
         description="Top transfer paths by volume"
         topData={topPaths}
         by="volume"
@@ -424,18 +258,7 @@ export default () => {
         filters={filters}
       />
       <TopChainPair
-        title={
-          `${
-            time_filtered ?
-              '' :
-              `${
-                number_format(
-                  NUM_STATS_DAYS,
-                  '0,0',
-                )
-              }-Day `
-          }Top Chain Pairs`
-        }
+        title={`${time_filtered ? '' : `${number_format(NUM_STATS_DAYS, '0,0')}-Day `}Top Chain Pairs`}
         description="Top transfer chain pairs by volume"
         topData={topChainPairs}
         by="volume"
@@ -443,18 +266,7 @@ export default () => {
         filters={filters}
       />
       <TopPath
-        title={
-          `${
-            time_filtered ?
-              '' :
-              `${
-                number_format(
-                  NUM_STATS_DAYS,
-                  '0,0',
-                )
-              }-Day `
-          }Top Paths`
-        }
+        title={`${time_filtered ? '' : `${number_format(NUM_STATS_DAYS, '0,0')}-Day `}Top Paths`}
         description="Top transfer paths by number of transfers"
         topData={topPaths}
         by="num_txs"
@@ -462,34 +274,13 @@ export default () => {
         filters={filters}
       />
       <TopChainPair
-        title={
-          `${
-            time_filtered ?
-              '' :
-              `${
-                number_format(
-                  NUM_STATS_DAYS,
-                  '0,0',
-                )
-              }-Day `
-          }Top Chain Pairs`
-        }
+        title={`${time_filtered ? '' : `${number_format(NUM_STATS_DAYS, '0,0')}-Day `}Top Chain Pairs`}
         description="Top transfer chain pairs by number of transfers"
         topData={topChainPairs}
         by="num_txs"
         num_days={NUM_STATS_DAYS}
         filters={filters}
       />
-      <div className="sm:col-span-2 lg:col-span-4 space-y-3 pt-1">
-        <Link href="/transfers/search">
-          <a className="uppercase font-semibold">
-            Latest transfers
-          </a>
-        </Link>
-        <Transfers
-          n={10}
-        />
-      </div>
     </div>
   )
 }

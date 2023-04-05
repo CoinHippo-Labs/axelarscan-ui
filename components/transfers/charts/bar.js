@@ -29,8 +29,8 @@ export default (
 ) => {
   const {
     preferences,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
       }
@@ -52,60 +52,26 @@ export default (
         } = { ...chart_data }
 
         setData(
-          data
-            .map((d, i) => {
-              const {
-                timestamp,
-              } = { ...d }
+          data.map((d, i) => {
+            const {
+              timestamp,
+            } = { ...d }
 
-              return {
-                ...d,
-                time_string:
-                  moment(timestamp)
-                    .utc()
-                    .format(date_format),
-              }
-            })
+            return {
+              ...d,
+              time_string: moment(timestamp).utc().format(date_format),
+            }
+          })
         )
       }
     },
     [chart_data],
   )
 
-  const d = (data || [])
-    .find(d =>
-      d.timestamp === xFocus
-    )
+  const d = (data || []).find(d => d.timestamp === xFocus)
 
-  const focus_value =
-    d ||
-    is_cumulative ?
-      (
-        d ||
-        _.last(data)
-      )?.[value_field] :
-      data ?
-        _.sumBy(
-          data,
-          value_field,
-        ) :
-        null
-
-  const focus_time_string =
-    d ||
-    is_cumulative ?
-      (
-        d ||
-        _.last(data)
-      )?.time_string :
-      data ?
-        _.concat(
-          _.head(data)?.time_string,
-          _.last(data)?.time_string,
-        )
-        .filter(s => s)
-        .join(' - ') :
-        null
+  const focus_value = d || is_cumulative ? (d || _.last(data))?.[value_field] : data ? _.sumBy(data, value_field) : null
+  const focus_time_string = d || is_cumulative ? (d || _.last(data))?.time_string : data ? _.concat(_.head(data)?.time_string, _.last(data)?.time_string).filter(s => s).join(' - ') : null
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-lg space-y-2 pt-4 pb-0 sm:pb-1 px-4">
@@ -123,12 +89,7 @@ export default (
           (
             <div className="flex flex-col items-end space-y-0.5">
               <span className="uppercase font-semibold">
-                {number_format(
-                  focus_value,
-                  focus_value > 1000000 ?
-                    '0,0.00a' :
-                    '0,0'
-                )}
+                {number_format(focus_value, focus_value > 1000000 ? '0,0.00a' : '0,0')}
               </span>
               <span className="leading-4 whitespace-nowrap text-slate-400 dark:text-slate-500 text-2xs sm:text-xs font-medium text-right">
                 {focus_time_string}
@@ -142,33 +103,22 @@ export default (
           <ResponsiveContainer>
             <BarChart
               data={data}
-              onMouseEnter={e => {
-                if (e) {
-                  setXFocus(
-                    _.head(
-                      e?.activePayload
-                    )?.payload?.timestamp
-                  )
-                }
-              }}
-              onMouseMove={e => {
-                if (e) {
-                  setXFocus(
-                    _.head(
-                      e?.activePayload
-                    )?.payload?.timestamp
-                  )
-                }
-              }}
-              onMouseLeave={() => setXFocus(null)}
-              margin={
-                {
-                  top: 10,
-                  right: 2,
-                  bottom: 4,
-                  left: 2,
+              onMouseEnter={
+                e => {
+                  if (e) {
+                    setXFocus(_.head(e.activePayload)?.payload?.timestamp)
+                  }
                 }
               }
+              onMouseMove={
+                e => {
+                  if (e) {
+                    setXFocus(_.head(e.activePayload)?.payload?.timestamp)
+                  }
+                }
+              }
+              onMouseLeave={() => setXFocus(null)}
+              margin={{ top: 10, right: 2, bottom: 4, left: 2 }}
               className="small-x"
             >
               <defs>
@@ -181,22 +131,12 @@ export default (
                 >
                   <stop
                     offset="50%"
-                    stopColor={
-                      chart_color(
-                        theme,
-                        timeframe,
-                      )
-                    }
+                    stopColor={chart_color(theme, timeframe)}
                     stopOpacity={0.66}
                   />
                   <stop
                     offset="100%"
-                    stopColor={
-                      chart_color(
-                        theme,
-                        timeframe,
-                      )
-                    }
+                    stopColor={chart_color(theme, timeframe)}
                     stopOpacity={0.33}
                   />
                 </linearGradient>
@@ -210,15 +150,14 @@ export default (
                 dataKey={value_field}
                 minPointSize={5}
               >
-                {
-                  data
-                    .map((entry, i) => (
-                      <Cell
-                        key={i}
-                        fillOpacity={1}
-                        fill={`url(#gradient-${id})`}
-                      />
-                    ))
+                {data
+                  .map((entry, i) => (
+                    <Cell
+                      key={i}
+                      fillOpacity={1}
+                      fill={`url(#gradient-${id})`}
+                    />
+                  ))
                 }
               </Bar>
             </BarChart>

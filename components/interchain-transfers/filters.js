@@ -54,42 +54,25 @@ export default () => {
 
         const {
           txHash,
-          type,
-          confirmed,
-          state,
           sourceChain,
           destinationChain,
           asset,
-          depositAddress,
-          senderAddress,
-          recipientAddress,
           fromTime,
           toTime,
-          sortBy,
         } = { ...params }
 
         setFilters(
-          ['/transfers'].includes(pathname) ?
+          ['/interchain-transfers'].includes(pathname) ?
             {
-              type: ['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
               sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
               destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
-              asset: getAsset(asset, assets_data)?.id || asset,
-              time: fromTime && toTime && [moment(Number(fromTime)).startOf('day'), moment(Number(toTime)).endOf('day')],
             } :
             {
               txHash,
-              type: ['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
-              confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
-              state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
               sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
               destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
               asset: getAsset(asset, assets_data)?.id || asset,
-              depositAddress,
-              senderAddress,
-              recipientAddress,
               time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
-              sortBy,
             }
         )
       }
@@ -147,19 +130,6 @@ export default () => {
       className: 'col-span-2',
     },
     {
-      label: 'Type',
-      name: 'type',
-      type: 'select',
-      placeholder: 'Select type',
-      options: [
-        { value: '', title: 'Any' },
-        { value: 'deposit_address', title: 'Deposit Address' },
-        { value: 'send_token', title: 'Send Token' },
-        { value: 'wrap', title: 'Wrap' },
-        { value: 'unwrap', title: 'Unwrap' },
-      ],
-    },
-    {
       label: 'Asset',
       name: 'asset',
       type: 'select',
@@ -180,28 +150,6 @@ export default () => {
               }
             }),
         ),
-    },
-    {
-      label: 'Confirmed',
-      name: 'confirmed',
-      type: 'select',
-      placeholder: 'Select confirmed',
-      options: [
-        { value: '', title: 'Any' },
-        { value: 'confirmed', title: 'Confirmed' },
-        { value: 'unconfirmed', title: 'Unconfirmed' },
-      ],
-    },
-    {
-      label: 'State',
-      name: 'state',
-      type: 'select',
-      placeholder: 'Select state',
-      options: [
-        { value: '', title: 'Any' },
-        { value: 'completed', title: 'Completed' },
-        { value: 'pending', title: 'Pending' },
-      ],
     },
     {
       label: 'Source Chain',
@@ -272,55 +220,16 @@ export default () => {
         ),
     },
     {
-      label: 'Deposit Address',
-      name: 'depositAddress',
-      type: 'text',
-      placeholder: 'Deposit address',
-      className: 'col-span-2',
-    },
-    {
-      label: 'Sender',
-      name: 'senderAddress',
-      type: 'text',
-      placeholder: 'Sender address',
-    },
-    {
-      label: 'Recipient',
-      name: 'recipientAddress',
-      type: 'text',
-      placeholder: 'Recipient address',
-    },
-    {
       label: 'Time',
       name: 'time',
       type: 'datetime-range',
       placeholder: 'Select transaction time',
       className: 'col-span-2',
     },
-    {
-      label: 'Sort By',
-      name: 'sortBy',
-      type: 'select',
-      placeholder: 'Select sort by',
-      options: [
-        { value: 'time', title: 'Transfer Time' },
-        { value: 'value', title: 'Transfer Value' },
-      ],
-    },
   ]
   .filter(f =>
-    !['/transfers'].includes(pathname) ||
-    ![
-      'txHash',
-      'type',
-      'confirmed',
-      'state',
-      'depositAddress',
-      'senderAddress',
-      'recipientAddress',
-      'sortBy',
-    ]
-    .includes(f?.name)
+    !['/interchain-transfers'].includes(pathname) ||
+    !['txHash', 'asset', 'time'].includes(f?.name)
   )
 
   const filtered = (!!filterTrigger || filterTrigger === undefined) && Object.keys({ ...query }).length > 0
@@ -335,7 +244,7 @@ export default () => {
       title={
         <div className="flex items-center justify-between">
           <span>
-            Filter Token Transfers
+            Filter Interchain Transfers
           </span>
           <div
             onClick={() => setHidden(true)}
@@ -401,8 +310,8 @@ export default () => {
                     </select> :
                     type === 'datetime-range' ?
                       <DatePicker.RangePicker
-                        showTime={!['/transfers'].includes(pathname)}
-                        format={`YYYY/MM/DD${!['/transfers'].includes(pathname) ? ' HH:mm:ss' : ''}`}
+                        showTime={!['/interchain-transfers'].includes(pathname)}
+                        format={`YYYY/MM/DD${!['/interchain-transfers'].includes(pathname) ? ' HH:mm:ss' : ''}`}
                         ranges={
                           {
                             Today: [moment().startOf('day'), moment().endOf('day')],

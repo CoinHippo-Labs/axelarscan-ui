@@ -4,7 +4,7 @@ export default (
       mainnet: {
         ethereum: 1.4,
         binance: 1.4,
-        polygon: 1.4,
+        polygon: 1.8,
         avalanche: 1.4,
         fantom: 1.4,
         moonbeam: 1.4,
