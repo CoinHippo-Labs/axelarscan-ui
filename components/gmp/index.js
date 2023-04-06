@@ -1682,6 +1682,7 @@ export default () => {
                   gas_price_rate,
                   is_execute_from_relayer,
                   is_error_from_relayer,
+                  fees,
                   status,
                   gas,
                   is_invalid_destination_chain,
@@ -1784,7 +1785,7 @@ export default () => {
                   source_gas_data =
                     gasToken && gasToken !== constants.AddressZero ?
                       (assets_data || []).find(a => (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equalsIgnoreCase(c?.contract_address, gasToken)) > -1) :
-                      { ..._.head(source_chain_data?.provider_params)?.nativeCurrency, image: source_chain_data?.image }
+                      { ..._.head(source_chain_data?.provider_params)?.nativeCurrency, ...fees?.source_token, image: source_chain_data?.image }
 
                   if (source_gas_data?.contracts) {
                     source_gas_data = {
@@ -1796,6 +1797,7 @@ export default () => {
 
                 destination_gas_data = {
                   ..._.head(destination_chain_data?.provider_params)?.nativeCurrency,
+                  ...fees?.destination_native_token,
                   image: destination_chain_data?.image,
                 }
 
