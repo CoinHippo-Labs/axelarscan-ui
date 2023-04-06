@@ -738,6 +738,7 @@ export default () => {
   const {
     event,
     chain,
+    chain_type,
     destination_chain_type,
   } = { ...call }
 
@@ -836,7 +837,7 @@ export default () => {
     )
 
   const executeButton =
-    payload && approved && !executed && !is_executed &&
+    payload && approved && !executed && !is_executed && destination_chain_type !== 'cosmos' &&
     (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) &&
     (
       <>
@@ -876,7 +877,7 @@ export default () => {
     )
 
   const gasAddButton =
-    !executed && !is_executed &&
+    !executed && !is_executed && chain_type !== 'cosmos' &&
     (is_not_enough_gas || !(gas_paid || gas_paid_to_callback) || is_insufficient_fee || gas?.gas_remain_amount < 0.00001 || not_enough_gas_to_execute) &&
     (
       <>
@@ -2551,7 +2552,7 @@ export default () => {
                                   (express_gas_price_rate || gas_price_rate) &&
                                   (
                                     <>
-                                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                      <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
                                         {
                                           source_gas_data?.image &&
                                           (
@@ -2576,7 +2577,7 @@ export default () => {
                                     </>
                                   )
                                 }
-                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
                                   {
                                     destination_gas_data?.image &&
                                     (
@@ -2687,7 +2688,7 @@ export default () => {
                                 source_token?.token_price?.usd && destination_native_token?.token_price?.usd &&
                                 (
                                   <>
-                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
+                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
                                       {
                                         source_gas_data?.image &&
                                         (
@@ -2720,7 +2721,7 @@ export default () => {
                               {
                                 (success ? is_execute_from_relayer : is_error_from_relayer) &&
                                 (
-                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                  <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 py-1 px-2">
                                     {
                                       destination_gas_data?.image &&
                                       (
