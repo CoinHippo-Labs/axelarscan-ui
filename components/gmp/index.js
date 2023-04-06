@@ -1752,25 +1752,30 @@ export default () => {
                   destination_native_token,
                 } = { ...gas_price_rate }
 
+                const receipt = s.id === 'approved' ? approved?.receipt : executed?.receipt || error?.receipt
+
                 const {
                   gasUsed,
-                } = { ...(s.id === 'approved' ? approved?.receipt : (executed?.receipt || error?.receipt)) }
-                let {
                   effectiveGasPrice,
-                } = { ...(s.id === 'approved' ? approved?.receipt : (executed?.receipt || error?.receipt)) }
+                } = { ...receipt }
+                let {
+                  gasPrice,
+                } = { ...receipt }
 
-                if (!effectiveGasPrice) {
+                gasPrice = gasPrice || effectiveGasPrice
+
+                if (!gasPrice) {
                   if (s.id === 'approved') {
                     if (approved) {
-                      effectiveGasPrice = approved.transaction?.gasPrice
+                      gasPrice = approved.transaction?.gasPrice
                     }
                   }
                   else {
                     if (executed) {
-                      effectiveGasPrice = executed.transaction?.gasPrice
+                      gasPrice = executed.transaction?.gasPrice
                     }
                     else if (error) {
-                      effectiveGasPrice = error.transaction?.gasPrice
+                      gasPrice = error.transaction?.gasPrice
                     }
                   }
                 }
@@ -1813,7 +1818,7 @@ export default () => {
                         utils.formatUnits(
                           FixedNumber.fromString(BigNumber.from(gasUsed).toString())
                             .mulUnsafe(
-                              FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())
+                              FixedNumber.fromString(BigNumber.from(gasPrice).toString())
                             )
                             .mulUnsafe(
                               FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toFixed(decimals))
@@ -1834,19 +1839,24 @@ export default () => {
                     callback_gas_used = gas.gas_callback_amount
                   }
                   else {
+                    const receipt = callback.executed?.receipt || callback.error?.receipt
+
                     const {
                       gasUsed,
-                    } = { ...(callback.executed?.receipt || callback.error?.receipt) }
-                    let {
                       effectiveGasPrice,
-                    } = { ...(callback.executed?.receipt || callback.error?.receipt) }
+                    } = { ...receipt }
+                    let {
+                      gasPrice,
+                    } = { ...receipt }
 
-                    if (!effectiveGasPrice) {
+                    gasPrice = gasPrice || effectiveGasPrice
+
+                    if (!gasPrice) {
                       if (callback.executed) {
-                        effectiveGasPrice = callback.executed.transaction?.gasPrice
+                        gasPrice = callback.executed.transaction?.gasPrice
                       }
                       else if (callback.error) {
-                        effectiveGasPrice = callback.error.transaction?.gasPrice
+                        gasPrice = callback.error.transaction?.gasPrice
                       }
                     }
 
@@ -1860,7 +1870,7 @@ export default () => {
                             utils.formatUnits(
                               FixedNumber.fromString(BigNumber.from(gasUsed || '0').toString())
                                 .mulUnsafe(
-                                  FixedNumber.fromString(BigNumber.from(effectiveGasPrice || '0').toString())
+                                  FixedNumber.fromString(BigNumber.from(gasPrice || '0').toString())
                                 )
                                 .round(0)
                                 .toString()
@@ -1881,7 +1891,7 @@ export default () => {
                       utils.formatUnits(
                         FixedNumber.fromString(BigNumber.from(express_executed?.receipt?.gasUsed || '0').toString())
                           .mulUnsafe(
-                            FixedNumber.fromString(BigNumber.from(express_executed?.receipt?.effectiveGasPrice || express_executed?.transaction?.gasPrice || '0').toString())
+                            FixedNumber.fromString(BigNumber.from(express_executed?.receipt?.gasPrice || express_executed?.receipt?.effectiveGasPrice || express_executed?.transaction?.gasPrice || '0').toString())
                           )
                           .mulUnsafe(
                             FixedNumber.fromString(
@@ -2542,7 +2552,7 @@ export default () => {
                         )
                       }
                       {
-                        ['express_executed', 'refunded'].includes(s.id) && express_executed?.receipt?.gasUsed && (express_executed.receipt.effectiveGasPrice || express_executed.transaction?.gasPrice) && destination_gas_data &&
+                        ['express_executed', 'refunded'].includes(s.id) && express_executed?.receipt?.gasUsed && (express_executed.receipt.gasPrice || express_executed.receipt.effectiveGasPrice || express_executed.transaction?.gasPrice) && destination_gas_data &&
                         (
                           <>
                             <div className={rowClassName}>
@@ -2595,7 +2605,7 @@ export default () => {
                                         utils.formatUnits(
                                           FixedNumber.fromString(BigNumber.from(express_executed.receipt.gasUsed).toString())
                                             .mulUnsafe(
-                                              FixedNumber.fromString(BigNumber.from(express_executed.receipt.effectiveGasPrice || express_executed.transaction.gasPrice).toString())
+                                              FixedNumber.fromString(BigNumber.from(express_executed.receipt.gasPrice || express_executed.receipt.effectiveGasPrice || express_executed.transaction.gasPrice).toString())
                                             )
                                             .round(0)
                                             .toString()
@@ -2679,7 +2689,7 @@ export default () => {
                         )
                       }
                       {
-                        ['executed', 'refunded'].includes(s.id) && gasUsed && effectiveGasPrice && destination_gas_data &&
+                        ['executed', 'refunded'].includes(s.id) && gasUsed && gasPrice && destination_gas_data &&
                         (
                           <div className={rowClassName}>
                             <span className={rowTitleClassName}>
@@ -2739,7 +2749,7 @@ export default () => {
                                           utils.formatUnits(
                                             FixedNumber.fromString(BigNumber.from(gasUsed).toString())
                                               .mulUnsafe(
-                                                FixedNumber.fromString(BigNumber.from(effectiveGasPrice).toString())
+                                                FixedNumber.fromString(BigNumber.from(gasPrice).toString())
                                               )
                                               .round(0)
                                               .toString()
