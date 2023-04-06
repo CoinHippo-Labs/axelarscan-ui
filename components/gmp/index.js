@@ -1752,15 +1752,15 @@ export default () => {
                   destination_native_token,
                 } = { ...gas_price_rate }
 
-                const receipt = s.id === 'approved' ? approved?.receipt : executed?.receipt || error?.receipt
+                const event_receipt = s.id === 'approved' ? approved?.receipt : executed?.receipt || error?.receipt
 
                 const {
                   gasUsed,
                   effectiveGasPrice,
-                } = { ...receipt }
+                } = { ...event_receipt }
                 let {
                   gasPrice,
-                } = { ...receipt }
+                } = { ...event_receipt }
 
                 gasPrice = gasPrice || effectiveGasPrice
 
