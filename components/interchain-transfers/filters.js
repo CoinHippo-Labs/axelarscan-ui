@@ -66,6 +66,7 @@ export default () => {
             {
               sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
               destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
+              time: fromTime && toTime && [moment(Number(fromTime)), moment(Number(toTime))],
             } :
             {
               txHash,
@@ -229,7 +230,7 @@ export default () => {
   ]
   .filter(f =>
     !['/interchain-transfers'].includes(pathname) ||
-    !['txHash', 'asset', 'time'].includes(f?.name)
+    !['txHash', 'asset'].includes(f?.name)
   )
 
   const filtered = (!!filterTrigger || filterTrigger === undefined) && Object.keys({ ...query }).length > 0
@@ -258,83 +259,81 @@ export default () => {
       }
       body={
         <div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
-          {fields
-            .map((f, i) => {
-              const {
-                label,
-                name,
-                type,
-                placeholder,
-                options,
-                className,
-              } = { ...f }
+          {fields.map((f, i) => {
+            const {
+              label,
+              name,
+              type,
+              placeholder,
+              options,
+              className,
+            } = { ...f }
 
-              return (
-                <div
-                  key={i}
-                  className={`form-element ${className || ''}`}
-                >
-                  {
-                    label &&
-                    (
-                      <div className="form-label text-slate-600 dark:text-slate-200">
-                        {label}
-                      </div>
-                    )
-                  }
-                  {type === 'select' ?
-                    <select
+            return (
+              <div
+                key={i}
+                className={`form-element ${className || ''}`}
+              >
+                {
+                  label &&
+                  (
+                    <div className="form-label text-slate-600 dark:text-slate-200">
+                      {label}
+                    </div>
+                  )
+                }
+                {type === 'select' ?
+                  <select
+                    placeholder={placeholder}
+                    value={filters?.[name]}
+                    onChange={e => setFilters({ ...filters, [name]: e.target.value })}
+                    className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
+                  >
+                    {(options || [])
+                      .map((o, i) => {
+                        const {
+                          title,
+                          value,
+                        } = { ...o }
+
+                        return (
+                          <option
+                            key={i}
+                            title={title}
+                            value={value}
+                          >
+                            {title}
+                          </option>
+                        )
+                      })
+                    }
+                  </select> :
+                  type === 'datetime-range' ?
+                    <DatePicker.RangePicker
+                      showTime={!['/interchain-transfers'].includes(pathname)}
+                      format={`YYYY/MM/DD${!['/interchain-transfers'].includes(pathname) ? ' HH:mm:ss' : ''}`}
+                      ranges={
+                        {
+                          Today: [moment().startOf('day'), moment().endOf('day')],
+                          'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        }
+                      }
+                      value={filters?.[name]}
+                      onChange={v => setFilters({ ...filters, [name]: v })}
+                      className="form-input border-0 focus:ring-0 rounded"
+                      style={{ display: 'flex' }}
+                    /> :
+                    <input
+                      type={type}
                       placeholder={placeholder}
                       value={filters?.[name]}
                       onChange={e => setFilters({ ...filters, [name]: e.target.value })}
-                      className="form-select bg-slate-50 border-0 focus:ring-0 rounded"
-                    >
-                      {(options || [])
-                        .map((o, i) => {
-                          const {
-                            title,
-                            value,
-                          } = { ...o }
-
-                          return (
-                            <option
-                              key={i}
-                              title={title}
-                              value={value}
-                            >
-                              {title}
-                            </option>
-                          )
-                        })
-                      }
-                    </select> :
-                    type === 'datetime-range' ?
-                      <DatePicker.RangePicker
-                        showTime={!['/interchain-transfers'].includes(pathname)}
-                        format={`YYYY/MM/DD${!['/interchain-transfers'].includes(pathname) ? ' HH:mm:ss' : ''}`}
-                        ranges={
-                          {
-                            Today: [moment().startOf('day'), moment().endOf('day')],
-                            'This Month': [moment().startOf('month'), moment().endOf('month')],
-                          }
-                        }
-                        value={filters?.[name]}
-                        onChange={v => setFilters({ ...filters, [name]: v })}
-                        className="form-input border-0 focus:ring-0 rounded"
-                        style={{ display: 'flex' }}
-                      /> :
-                      <input
-                        type={type}
-                        placeholder={placeholder}
-                        value={filters?.[name]}
-                        onChange={e => setFilters({ ...filters, [name]: e.target.value })}
-                        className="form-input border-0 focus:ring-0 rounded"
-                      />
-                  }
-                </div>
-              )
-            })
-          }
+                      className="form-input border-0 focus:ring-0 rounded"
+                    />
+                }
+              </div>
+            )
+          })}
         </div>
       }
       noCancelOnClickOutside={true}

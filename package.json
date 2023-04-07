@@ -8,9 +8,7 @@
     "dev-staging": "env-cmd -f .env.staging next dev",
     "build-staging": "env-cmd -f .env.staging next build",
     "dev-testnet": "env-cmd -f .env.testnet next dev",
-    "build-testnet": "env-cmd -f .env.testnet next build",
-    "dev-testnet-2": "env-cmd -f .env.testnet-2 next dev",
-    "build-testnet-2": "env-cmd -f .env.testnet-2 next build"
+    "build-testnet": "env-cmd -f .env.testnet next build"
   },
   "repository": {
     "type": "git",

@@ -11,10 +11,4 @@ export default [
     path: 'https://testnet.axelarscan.io',
     external: true,
   },
-  {
-    id: 'testnet-2',
-    title: 'axelar-testnet-casablanca-1',
-    path: 'https://testnet-2.axelarscan.io',
-    external: true,
-  },
 ]

@@ -259,8 +259,7 @@ export default () => {
                       )
                     }),
                   'id',
-                )
-                .length,
+                ).length,
               network_graph_data:
                 _.orderBy(
                   (messages || [])

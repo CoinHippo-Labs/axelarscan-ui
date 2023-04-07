@@ -80,7 +80,7 @@ export default () => {
   } = { ...market_data }
 
   const staging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging')
-  const show_token_data = staging || ['mainnet', 'testnet', 'testnet-2'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
+  const show_token_data = staging || ['mainnet', 'testnet'].includes(process.env.NEXT_PUBLIC_ENVIRONMENT)
 
   const token_component =
     token_data && show_token_data &&
