@@ -1935,6 +1935,8 @@ export default () => {
                   icon,
                 } = { ...explorer }
 
+                const from_address_explorer = (from?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? axelar_chain_data : chain_data)?.explorer
+
                 const refreshButton =
                   editable && ['executed', 'refunded'].includes(s.id) &&
                   (
@@ -2953,7 +2955,7 @@ export default () => {
                                     value={to}
                                   />
                                 </div> :
-                                <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={to}
                                     prefix={chain_data?.prefix_address}
@@ -3017,7 +3019,7 @@ export default () => {
                                     value={from}
                                   />
                                 </div> :
-                                <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={from}
                                     prefix={chain_data?.prefix_address}
@@ -3025,14 +3027,14 @@ export default () => {
                                 </div>
                               }
                               <a
-                                href={`${url}${address_path?.replace('{address}', from)}`}
+                                href={`${from_address_explorer?.url}${from_address_explorer?.address_path?.replace('{address}', from)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-500 dark:text-blue-500"
                               >
-                                {icon ?
+                                {from_address_explorer?.icon ?
                                   <Image
-                                    src={icon}
+                                    src={from_address_explorer.icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                   /> :
                                   <TiArrowRight
@@ -3074,7 +3076,7 @@ export default () => {
                                     value={sender}
                                   />
                                 </div> :
-                                <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={sender}
                                     prefix={chain_data?.prefix_address}
@@ -3131,7 +3133,7 @@ export default () => {
                                     value={call.transaction.from}
                                   />
                                 </div> :
-                                <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={call.transaction.from}
                                     prefix={chain_data?.prefix_address}

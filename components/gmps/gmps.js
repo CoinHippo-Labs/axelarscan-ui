@@ -639,7 +639,7 @@ export default (
                                   value={from}
                                 />
                               </div> :
-                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={from}
                                   ellipse_size={8}
@@ -678,7 +678,7 @@ export default (
                                   value={sender}
                                 />
                               </div> :
-                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={sender}
                                   ellipse_size={8}
@@ -796,7 +796,7 @@ export default (
                                   value={destinationContractAddress}
                                 />
                               </div> :
-                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={destinationContractAddress}
                                   ellipse_size={8}
@@ -835,7 +835,7 @@ export default (
                                   value={from}
                                 />
                               </div> :
-                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                              <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                 <AccountProfile
                                   address={from}
                                   ellipse_size={8}
