@@ -33,8 +33,8 @@ export default (
     evm_chains,
     cosmos_chains,
     assets,
-  } = useSelector(state =>
-    (
+  } = useSelector(
+    state => (
       {
         preferences: state.preferences,
         evm_chains: state.evm_chains,

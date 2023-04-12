@@ -4,25 +4,25 @@ import _ from 'lodash'
 import moment from 'moment'
 import {
   ResponsiveContainer,
-  BarChart,
+  AreaChart,
   linearGradient,
   stop,
   XAxis,
-  Bar,
-  Cell,
+  Area,
 } from 'recharts'
 import { ProgressBar } from 'react-loader-spinner'
 
+import { currency_symbol } from '../../../lib/object/currency'
 import { number_format, loader_color, chart_color } from '../../../lib/utils'
 
 export default (
   {
-    id = 'transfers',
+    id = 'volumes',
     title = '',
     description = '',
     date_format = 'D MMM',
     timeframe = 'day',
-    value_field = 'num_txs',
+    value_field = 'volume',
     is_cumulative = false,
     chart_data,
   },
@@ -71,7 +71,7 @@ export default (
   const d = (data || []).find(d => d.timestamp === xFocus)
 
   const focus_value = d || is_cumulative ? (d || _.last(data))?.[value_field] : data ? _.sumBy(data, value_field) : null
-  const focus_time_string = d || is_cumulative ? (d || _.last(data))?.time_string : data ? _.concat(_.head(data)?.time_string, _.last(data)?.time_string).filter(s => s).join(' - ') : null
+  const focus_time_string = d || is_cumulative && false ? (d || _.last(data))?.time_string : data ? _.concat(_.head(data)?.time_string, _.last(data)?.time_string).filter(s => s).join(' - ') : null
 
   return (
     <div className="bg-transparent rounded-lg space-y-2 -mb-4">
@@ -89,7 +89,8 @@ export default (
           (
             <div className="flex flex-col items-end space-y-0.5">
               <span className="uppercase font-semibold">
-                {number_format(focus_value, focus_value > 1000000 ? '0,0.00a' : '0,0')}
+                {currency_symbol}
+                {number_format(focus_value, focus_value > 10000000 ? '0,0.00a' : focus_value > 100000 ? '0,0' : '0,0.00')}
               </span>
               <span className="leading-4 whitespace-nowrap text-slate-400 dark:text-slate-500 text-2xs sm:text-xs font-medium text-right">
                 {focus_time_string}
@@ -101,7 +102,7 @@ export default (
       <div className="w-full h-56">
         {data ?
           <ResponsiveContainer>
-            <BarChart
+            <AreaChart
               data={data}
               onMouseEnter={
                 e => {
@@ -146,21 +147,14 @@ export default (
                 axisLine={false}
                 tickLine={false}
               />
-              <Bar
+              <Area
+                type="basis"
                 dataKey={value_field}
-                minPointSize={5}
-              >
-                {data
-                  .map((entry, i) => (
-                    <Cell
-                      key={i}
-                      fillOpacity={1}
-                      fill={`url(#gradient-${id})`}
-                    />
-                  ))
-                }
-              </Bar>
-            </BarChart>
+                stroke={chart_color(theme, timeframe)}
+                fillOpacity={1}
+                fill={`url(#gradient-${id})`}
+              />
+            </AreaChart>
           </ResponsiveContainer> :
           <div className="w-full h-4/5 flex items-center justify-center">
             <ProgressBar
