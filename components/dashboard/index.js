@@ -11,7 +11,7 @@ import Blocks from '../blocks'
 import Transactions from '../transactions'
 import { inflation as getInflation } from '../../lib/api/inflation'
 import { transfers_stats } from '../../lib/api/transfer'
-import { stats as GMPStats } from '../../lib/api/gmp'
+import { stats as GMPStats, cumulative_volume as GMPCumulativeVolume } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { assetManager } from '../../lib/object/asset'
 
@@ -62,7 +62,6 @@ export default () => {
 
   const [inflationData, setInflationData] = useState(null)
   const [cosmosMetrics, setCosmosMetrics] = useState(null)
-  const [crossChainMetrics, setCrossChainMetrics] = useState(null)
   const [transfers, setTransfers] = useState(null)
   const [gmps, setGmps] = useState(null)
 
@@ -191,12 +190,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          1 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [evm_chains_data, cosmos_chains_data],
@@ -214,9 +208,12 @@ export default () => {
             messages,
           } = { ...response }
 
+          const _response = await GMPCumulativeVolume()
+
           setGmps(
             {
               num_txs: _.sumBy(messages, 'num_txs'),
+              volume: _.last(_response?.data)?.cumulative_volume,
               num_contracts:
                 _.uniqBy(
                   (messages || [])
@@ -315,12 +312,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          1 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 1 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [evm_chains_data, cosmos_chains_data],

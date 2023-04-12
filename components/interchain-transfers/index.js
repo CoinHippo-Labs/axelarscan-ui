@@ -6,8 +6,8 @@ import moment from 'moment'
 import { ProgressBar } from 'react-loader-spinner'
 
 import BarChart from '../transfers/charts/bar'
-import { transfers_chart as getTransfersChart, cumulative_volume as getCumulativeVolume } from '../../lib/api/transfer'
-import { search as searchGMP, chart as getGMPChart, stats as getGMPStats } from '../../lib/api/gmp'
+import { transfers_chart as getTransfersChart, cumulative_volume as getTransferCumulativeVolume } from '../../lib/api/transfer'
+import { chart as getGMPChart, stats as getGMPStats, cumulative_volume as getGMPCumulativeVolume } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { getAsset } from '../../lib/object/asset'
 import { currency_symbol } from '../../lib/object/currency'
@@ -92,15 +92,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (filters) {
-          const response = await searchGMP({ ...filters, size: 0 })
-
-          const {
-            total,
-          } = { ...response }
-
-          if (typeof total === 'number' || gmpsCumulative === null) {
-            setGmpsCumulative(total || 0)
-          }
+          setGmpsCumulative(await getGMPCumulativeVolume({ ...filters }))
         }
       }
 
@@ -240,7 +232,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (filters) {
-          setTransfersCumulative(await getCumulativeVolume({ ...filters }))
+          setTransfersCumulative(await getTransferCumulativeVolume({ ...filters }))
         }
       }
 
@@ -262,7 +254,7 @@ export default () => {
 
           fromTime = fromTime || moment().subtract(NUM_STATS_MONTHS, 'months').utc().startOf('month').unix()
 
-          setTransfersMonthly(await getCumulativeVolume({ ...filters, fromTime }))
+          setTransfersMonthly(await getTransferCumulativeVolume({ ...filters, fromTime }))
         }
       }
 
@@ -303,8 +295,8 @@ export default () => {
 
   const time_filtered = !!(fromTime && toTime)
 
-  const gmpsCumulativeTransactions = gmpsCumulative
-  const gmpsCumulativeVolumes = 0
+  const gmpsCumulativeTransactions = _.sumBy(gmpsCumulative?.data, 'num_txs')
+  const gmpsCumulativeVolumes = _.last(gmpsCumulative?.data)?.cumulative_volume
   const transfersCumulativeTransactions = _.sumBy(transfersCumulative?.data, 'num_txs')
   const transfersCumulativeVolumes = _.last(transfersCumulative?.data)?.cumulative_volume
 
@@ -317,7 +309,7 @@ export default () => {
       loading: typeof gmpsCumulativeTransactions !== 'number' || !transfersCumulative?.data,
     },
     {
-      title: 'volumes in token transfers',
+      title: 'volumes',
       value: gmpsCumulativeVolumes + transfersCumulativeVolumes,
       prefix: currency_symbol,
       loading: typeof gmpsCumulativeVolumes !== 'number' || !transfersCumulative?.data,
@@ -384,7 +376,7 @@ export default () => {
                 <span className="text-slate-400 dark:text-slate-200 text-sm font-medium">
                   Total cumulative{time_filtered ? '' : ' lifetime'}:
                 </span>
-                {typeof gmpsCumulative === 'number' ?
+                {gmpsCumulative?.data ?
                   <span className="text-sm font-semibold">
                     {number_format(gmpsCumulativeTransactions, '0,0')}
                   </span> :
