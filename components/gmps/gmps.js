@@ -924,7 +924,7 @@ export default (
                     {
                       id: 'executed',
                       title: 'Executed',
-                      chain_data: destination_chain_data,
+                      chain_data: executed?.axelarTransactionHash && !executed.transactionHash ? axelar_chain_data : destination_chain_data,
                       data: executed,
                     },
                     refunded &&
@@ -977,9 +977,7 @@ export default (
                   return (
                     <div className="min-w-max flex flex-col mb-3">
                       {steps
-                        .filter(s =>
-                          !['refunded'].includes(s.id) || s.data?.receipt?.status
-                        )
+                        .filter(s => !['refunded'].includes(s.id) || s.data?.receipt?.status)
                         .map((s, i) => {
                           const _error =
                             error && (error.block_timestamp || approved?.block_timestamp) ?
@@ -1014,7 +1012,7 @@ export default (
                             icon,
                           } = { ...explorer }
 
-                          const link_id = s.id === 'confirm' ? s.data?.poll_id : s.data?.transactionHash || error?.transactionHash
+                          const link_id = s.id === 'confirm' ? s.data?.poll_id : s.data?.transactionHash || s.data?.axelarTransactionHash || error?.transactionHash
                           const link_url = link_id && (s.id === 'confirm' ? `${url}/evm-poll/${link_id}` : `${url}${transaction_path?.replace('{tx}', link_id)}`)
 
                           return (

@@ -991,7 +991,7 @@ export default () => {
     {
       id: 'executed',
       title: 'Executed',
-      chain_data: destination_chain_data,
+      chain_data: executed?.axelarTransactionHash && !executed.transactionHash ? axelar_chain_data : destination_chain_data,
       data: executed,
     },
     refunded && (refunded.receipt?.status || no_gas_remain === false) &&
@@ -1511,7 +1511,7 @@ export default () => {
                             icon,
                           } = { ...explorer }
 
-                          const link_id = s.id === 'confirm' ? s.data?.poll_id : s.data?.transactionHash || error?.transactionHash
+                          const link_id = s.id === 'confirm' ? s.data?.poll_id : s.data?.transactionHash || s.data?.axelarTransactionHash || error?.transactionHash
                           const link_url = link_id && (s.id === 'confirm' ? `${url}/evm-poll/${link_id}` : `${url}${transaction_path?.replace('{tx}', link_id)}`)
 
                           return (
@@ -1715,7 +1715,9 @@ export default () => {
                 const {
                   logIndex,
                   _logIndex,
+                  axelarTransactionHash,
                   blockNumber,
+                  axelarBlockNumber,
                   block_timestamp,
                   contract_address,
                   returnValues,
@@ -1935,6 +1937,8 @@ export default () => {
                   icon,
                 } = { ...explorer }
 
+                const destination_address_chain_data = to?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? axelar_chain_data : destination_chain_data
+                const destination_address_explorer = destination_address_chain_data?.explorer
                 const from_address_explorer = (from?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? axelar_chain_data : chain_data)?.explorer
 
                 const refreshButton =
@@ -2318,60 +2322,103 @@ export default () => {
                                   </a>
                                 </div>
                               </div> :
-                              ['gas_paid'].includes(s.id) && origin?.call ?
-                                <div className="space-y-1.5">
-                                  <Link href={`/gmp/${origin.call.transactionHash}`}>
+                              axelarTransactionHash ?
+                                <div className={rowClassName}>
+                                  <span className={rowTitleClassName}>
+                                    Tx Hash
+                                  </span>
+                                  <div className="flex items-center space-x-0.5">
                                     <a
+                                      href={`${url}${transaction_path?.replace('{tx}', axelarTransactionHash)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
+                                      className="text-blue-500 dark:text-blue-500 font-medium"
                                     >
-                                      <HiArrowSmLeft
-                                        size={16}
-                                      />
-                                      <span className="text-xs font-semibold hover:font-bold">
-                                        from 1st Call
-                                      </span>
+                                      <div>
+                                        <span className="xl:hidden">
+                                          {ellipse(axelarTransactionHash, 12)}
+                                        </span>
+                                        <span className="hidden xl:block">
+                                          {ellipse(axelarTransactionHash, 16)}
+                                        </span>
+                                      </div>
                                     </a>
-                                  </Link>
-                                  <div className="flex items-center space-x-0.5">
+                                    <Copy
+                                      value={axelarTransactionHash}
+                                    />
+                                    <a
+                                      href={`${url}${transaction_path?.replace('{tx}', axelarTransactionHash)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 dark:text-blue-500"
+                                    >
+                                      {icon ?
+                                        <Image
+                                          src={icon}
+                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                        /> :
+                                        <TiArrowRight
+                                          size={16}
+                                          className="transform -rotate-45"
+                                        />
+                                      }
+                                    </a>
+                                  </div>
+                                </div> :
+                                ['gas_paid'].includes(s.id) && origin?.call ?
+                                  <div className="space-y-1.5">
                                     <Link href={`/gmp/${origin.call.transactionHash}`}>
                                       <a
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        className="max-w-min bg-blue-50 hover:bg-blue-100 dark:bg-blue-400 dark:hover:bg-blue-500 border border-blue-500 rounded-lg cursor-pointer whitespace-nowrap flex items-center text-blue-600 dark:text-white space-x-0.5 py-0.5 pl-1 pr-2"
                                       >
-                                        <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                          <span className="xl:hidden">
-                                            {ellipse(origin.call.transactionHash, 8)}
-                                          </span>
-                                          <span className="hidden xl:block">
-                                            {ellipse(origin.call.transactionHash, 12)}
-                                          </span>
-                                        </div>
+                                        <HiArrowSmLeft
+                                          size={16}
+                                        />
+                                        <span className="text-xs font-semibold hover:font-bold">
+                                          from 1st Call
+                                        </span>
                                       </a>
                                     </Link>
-                                    <Copy
-                                      value={origin.call.transactionHash}
-                                    />
-                                  </div>
-                                </div> :
-                                ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
-                                  <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
-                                    No transaction
-                                  </span> :
-                                  !is_invalid_destination_chain && !is_invalid_call && !is_insufficient_fee && !not_enough_gas_to_execute &&
-                                  (current_step === i ?
-                                    <ColorRing
-                                      color={loader_color(theme)}
-                                      width="32"
-                                      height="32"
-                                    /> :
-                                    i < current_step ?
-                                      <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-sm font-medium">
-                                        The data will be updated shortly.
-                                      </span> :
-                                      null
-                                  )
+                                    <div className="flex items-center space-x-0.5">
+                                      <Link href={`/gmp/${origin.call.transactionHash}`}>
+                                        <a
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                        >
+                                          <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                            <span className="xl:hidden">
+                                              {ellipse(origin.call.transactionHash, 8)}
+                                            </span>
+                                            <span className="hidden xl:block">
+                                              {ellipse(origin.call.transactionHash, 12)}
+                                            </span>
+                                          </div>
+                                        </a>
+                                      </Link>
+                                      <Copy
+                                        value={origin.call.transactionHash}
+                                      />
+                                    </div>
+                                  </div> :
+                                  ['gas_paid'].includes(s.id) && ['executed', 'error'].includes(status) ?
+                                    <span className="text-slate-400 dark:text-slate-200 text-base font-medium">
+                                      No transaction
+                                    </span> :
+                                    !is_invalid_destination_chain && !is_invalid_call && !is_insufficient_fee && !not_enough_gas_to_execute &&
+                                    (current_step === i ?
+                                      <ColorRing
+                                        color={loader_color(theme)}
+                                        width="32"
+                                        height="32"
+                                      /> :
+                                      i < current_step ?
+                                        <span className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                          The data will be updated shortly.
+                                        </span> :
+                                        null
+                                    )
                       }
                       {
                         typeof logIndex === 'number' &&
@@ -2428,6 +2475,24 @@ export default () => {
                               className="text-blue-500 dark:text-blue-500 font-medium"
                             >
                               {number_format(blockNumber, '0,0')}
+                            </a>
+                          </div>
+                        )
+                      }
+                      {
+                        typeof axelarBlockNumber === 'number' &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Axelar Block
+                            </span>
+                            <a
+                              href={`${axelar_chain_data?.explorer?.url}${axelar_chain_data?.explorer?.block_path?.replace('{block}', axelarBlockNumber)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 dark:text-blue-500 font-medium"
+                            >
+                              {number_format(axelarBlockNumber, '0,0')}
                             </a>
                           </div>
                         )
@@ -2958,19 +3023,19 @@ export default () => {
                                 <div className="h-6 flex items-center text-blue-500 dark:text-blue-500 font-medium">
                                   <AccountProfile
                                     address={to}
-                                    prefix={chain_data?.prefix_address}
+                                    prefix={destination_address_chain_data?.prefix_address}
                                   />
                                 </div>
                               }
                               <a
-                                href={`${url}${address_path?.replace('{address}', to)}`}
+                                href={`${destination_address_explorer?.url}${destination_address_explorer?.address_path?.replace('{address}', to)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-500 dark:text-blue-500"
                               >
-                                {icon ?
+                                {destination_address_explorer?.icon ?
                                   <Image
-                                    src={icon}
+                                    src={destination_address_explorer.icon}
                                     className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
                                   /> :
                                   <TiArrowRight
