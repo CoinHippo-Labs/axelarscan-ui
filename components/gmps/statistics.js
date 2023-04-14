@@ -638,11 +638,11 @@ export default () => {
           <LineChart
             id="cumulative_volume"
             title="Cumulative Volume"
-            description={`Cumulative volume by ${timeframe}`}
+            description={`Volume by ${timeframe}`}
             date_format={timeframe === 'month' ? 'MMM YYYY' : undefined}
             timeframe={timeframe}
-            value_field="cumulative_volume"
-            is_cumulative={true}
+            value_field="volume"
+            is_cumulative={false}
             chart_data={cumulativeStats}
           />
         </div>
