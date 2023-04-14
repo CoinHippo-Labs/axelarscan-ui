@@ -636,8 +636,8 @@ export default () => {
         */}
         <div className={`sm:col-span-2 ${metricClassName}`}>
           <LineChart
-            id="cumulative_volume"
-            title="Cumulative Volume"
+            id="volume"
+            title="Volume (USD)"
             description={`Volume by ${timeframe}`}
             date_format={timeframe === 'month' ? 'MMM YYYY' : undefined}
             timeframe={timeframe}

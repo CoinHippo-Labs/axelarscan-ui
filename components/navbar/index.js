@@ -167,31 +167,28 @@ export default () => {
               const response = await getAssetsPrice({ denoms })
 
               if (Array.isArray(response)) {
-                response
-                  .forEach(a => {
+                response.forEach(a => {
+                  const {
+                    denom,
+                    price,
+                  } = { ...a }
+
+                  const asset_index = assets_data.findIndex(_a => equalsIgnoreCase(_a?.id, denom))
+
+                  if (asset_index > -1) {
+                    const asset_data = assets_data[asset_index]
+
                     const {
-                      denom,
-                      price,
-                    } = { ...a }
+                      id,
+                    } = { ...asset_data }
 
-                    const asset_index = assets_data.findIndex(_a => equalsIgnoreCase(_a?.id, denom))
+                    asset_data.price = price || asset_data.price || 0
+                    assets_data[asset_index] = asset_data
 
-                    if (asset_index > -1) {
-                      const asset_data = assets_data[asset_index]
-
-                      const {
-                        id,
-                      } = { ...asset_data }
-
-                      asset_data.price = price || asset_data.price || 0
-
-                      assets_data[asset_index] = asset_data
-
-                      updated_ids = _.uniq(_.concat(updated_ids, id))
-
-                      updated = true
-                    }
-                  })
+                    updated_ids = _.uniq(_.concat(updated_ids, id))
+                    updated = true
+                  }
+                })
               }
             }
 
@@ -236,12 +233,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(true),
-          6 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 6 * 1000)
       return () => clearInterval(interval)
     },
     [status_data],
@@ -417,12 +409,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(true),
-          0.5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 0.5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [cosmos_chains_data, assets_data],
@@ -454,14 +441,13 @@ export default () => {
                   rpc_urls.length === 1 ?
                     new providers.StaticJsonRpcProvider(_.head(rpc_urls), chain_id) :
                     new providers.FallbackProvider(
-                      rpc_urls
-                        .map((url, i) => {
-                          return {
-                            provider: new providers.StaticJsonRpcProvider(url, chain_id),
-                            priority: i + 1,
-                            stallTimeout: 1000,
-                          }
-                        }),
+                      rpc_urls.map((url, i) => {
+                        return {
+                          provider: new providers.StaticJsonRpcProvider(url, chain_id),
+                          priority: i + 1,
+                          stallTimeout: 1000,
+                        }
+                      }),
                       rpc_urls.length / 3,
                     ) :
                   null
@@ -573,23 +559,14 @@ export default () => {
       const getData = is_interval => {
         if (assets_data) {
           if (['/tvl'].includes(pathname) && (!tvl_data || is_interval)) {
-            assets_data
-              .filter(a =>
-                a && (!a.is_staging || staging)
-              )
-              .forEach(a => getAssetData(a))
+            assets_data.filter(a => a && !a.no_tvl && (!a.is_staging || staging)).forEach(a => getAssetData(a))
           }
         }
       }
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(true),
-          3 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(true), 3 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [assets_data, pathname],
@@ -608,7 +585,8 @@ export default () => {
             '/gmp',
             '/batch',
             '/assets',
-          ].findIndex(p => pathname?.startsWith(p)) < 0
+          ]
+          .findIndex(p => pathname?.startsWith(p)) < 0
         ) {
           let response
 
@@ -694,7 +672,6 @@ export default () => {
                         } = { ...v }
 
                         const total = Math.floor((last - first) / num_blocks_per_heartbeat) + 1
-
                         const up = response?.data?.[broadcaster_address] || 0
 
                         let uptime = total > 0 ? up * 100 / total : 0
@@ -736,7 +713,6 @@ export default () => {
                         } = { ...v }
 
                         v.votes = { ...response?.data?.[broadcaster_address] }
-
                         v.total_votes = v.votes.total || 0
 
                         const get_votes = vote =>
@@ -804,12 +780,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [assets_data, pathname, validatorsTrigger],
@@ -841,7 +812,8 @@ export default () => {
             '/validator',
             '/participations',
             '/proposals',
-          ].findIndex(p => pathname?.includes(p)) > -1
+          ]
+          .findIndex(p => pathname?.includes(p)) > -1
         ) {
           evm_chains_data.map(c => c?.id).forEach(id => getChainData(id, evm_chains_data))
         }
@@ -849,12 +821,7 @@ export default () => {
 
       getData()
 
-      const interval =
-        setInterval(
-          () => getData(),
-          5 * 60 * 1000,
-        )
-
+      const interval = setInterval(() => getData(), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
     [evm_chains_data, pathname],
