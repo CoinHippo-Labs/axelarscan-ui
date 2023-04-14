@@ -325,4 +325,10 @@ export default [
     image: '/logos/accounts/junkyard.png',
     environment: 'mainnet',
   },
+  {
+    address: '0x2E4B0F20bDb1cAa0886C531256efdaaB925dBE72',
+    name: 'The Junkyard',
+    image: '/logos/accounts/junkyard.png',
+    environment: 'mainnet',
+  },
 ]
