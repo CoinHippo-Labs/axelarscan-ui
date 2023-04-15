@@ -28,6 +28,8 @@ import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equalsIgnoreCase, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
+const MIN_GAS_REMAIN_AMOUNT = 0.00001
+
 export default () => {
   const {
     preferences,
@@ -780,7 +782,7 @@ export default () => {
       is_not_enough_gas
     )
 
-  no_gas_remain = gas?.gas_remain_amount < 0.001 || (typeof no_gas_remain === 'boolean' ? no_gas_remain : refunded && !refunded.receipt?.status)
+  no_gas_remain = gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT || (typeof no_gas_remain === 'boolean' ? no_gas_remain : refunded && !refunded.receipt?.status)
 
   const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
@@ -810,7 +812,7 @@ export default () => {
 
   const approveButton =
     call && (confirm || moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 5) && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
-    !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || gas?.gas_remain_amount < 0.00001) &&
+    !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) &&
     moment().diff(moment((confirm || call).block_timestamp * 1000), 'minutes') >= 1 &&
     (
       <div className="flex items-center space-x-2">
@@ -878,7 +880,7 @@ export default () => {
 
   const gasAddButton =
     !executed && !is_executed && chain_type !== 'cosmos' &&
-    (is_not_enough_gas || !(gas_paid || gas_paid_to_callback) || is_insufficient_fee || gas?.gas_remain_amount < 0.00001 || not_enough_gas_to_execute) &&
+    (is_not_enough_gas || !(gas_paid || gas_paid_to_callback) || is_insufficient_fee || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT || not_enough_gas_to_execute) &&
     (
       <>
         <span className="whitespace-nowrap text-slate-400 dark:text-slate-200 text-xs">
@@ -924,8 +926,8 @@ export default () => {
       editable ||
       (
         (
-          (gas?.gas_remain_amount >= 0.0001 && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
-          (gas?.gas_remain_amount >= 0.0001 && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
+          (gas?.gas_remain_amount >= MIN_GAS_REMAIN_AMOUNT && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * fees?.source_token?.token_price?.usd > 1)) ||
+          (gas?.gas_remain_amount >= MIN_GAS_REMAIN_AMOUNT && gas?.gas_paid_amount < gas?.gas_base_fee_amount && gas.gas_paid_amount * fees?.source_token?.token_price?.usd > 1 && is_insufficient_fee)
         ) &&
         (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp)
       )
