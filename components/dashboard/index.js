@@ -11,7 +11,7 @@ import Blocks from '../blocks'
 import Transactions from '../transactions'
 import { inflation as getInflation } from '../../lib/api/inflation'
 import { transfers_stats } from '../../lib/api/transfer'
-import { stats as GMPStats, cumulative_volume as GMPCumulativeVolume } from '../../lib/api/gmp'
+import { stats as GMPStats, total_volume as GMPTotalVolume } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { assetManager } from '../../lib/object/asset'
 
@@ -208,12 +208,12 @@ export default () => {
             messages,
           } = { ...response }
 
-          const _response = await GMPCumulativeVolume()
+          const _response = await GMPTotalVolume()
 
           setGmps(
             {
               num_txs: _.sumBy(messages, 'num_txs'),
-              volume: _.last(_response?.data)?.cumulative_volume,
+              volume: Number(_response?.data),
               num_contracts:
                 _.uniqBy(
                   (messages || [])
