@@ -213,7 +213,7 @@ export default () => {
           setGmps(
             {
               num_txs: _.sumBy(messages, 'num_txs'),
-              volume: Number(_response?.data),
+              volume: Number(_response),
               num_contracts:
                 _.uniqBy(
                   (messages || [])
