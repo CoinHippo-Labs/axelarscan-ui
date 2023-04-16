@@ -1793,7 +1793,7 @@ export default () => {
                 if (gasFeeAmount) {
                   source_gas_data =
                     gasToken && gasToken !== constants.AddressZero ?
-                      (assets_data || []).find(a => (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equalsIgnoreCase(c?.contract_address, gasToken)) > -1) :
+                      (assets_data || []).find(a => equalsIgnoreCase(a.symbol, gasToken) || (a?.contracts || []).findIndex(c => c?.chain_id === source_chain_data?.chain_id && equalsIgnoreCase(c?.contract_address, gasToken)) > -1) :
                       { ..._.head(source_chain_data?.provider_params)?.nativeCurrency, ...fees?.source_token, image: source_chain_data?.image }
 
                   if (source_gas_data?.contracts) {

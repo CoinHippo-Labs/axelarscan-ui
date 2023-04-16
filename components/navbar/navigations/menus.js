@@ -34,6 +34,16 @@ export default [
     id: 'interchain-transfers',
     title: 'interchain Transfers',
     path: '/interchain-transfers',
+    others_paths: [
+      '/transfers',
+      '/transfers/search',
+      '/transfer/[tx]',
+      '/gmp/search',
+      '/gmp',
+      '/gmp/stats',
+      '/gmp/contracts',
+      '/gmp/[tx]',
+    ],
   },
   process.env.NEXT_PUBLIC_SUPPORT_TRANSFERS === 'true' && false &&
   {
