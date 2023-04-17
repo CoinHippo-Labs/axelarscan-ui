@@ -920,7 +920,7 @@ export default () => {
 
   const refundButton =
     !approveButton && !executeButton && !no_gas_remain &&
-    (executed || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
+    ((executed && (!callback || moment().diff(moment((executed.block_timestamp) * 1000), 'minutes') >= 10)) || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     (
       editable ||
@@ -1802,6 +1802,9 @@ export default () => {
                       ...source_gas_data.contracts.find(c => c?.chain_id === source_chain_data?.chain_id),
                     }
                   }
+                }
+                else if (gas_paid_to_callback) {
+                  source_gas_data = { ..._.head(source_chain_data?.provider_params)?.nativeCurrency, ...fees?.source_token, image: source_chain_data?.image }
                 }
 
                 destination_gas_data = {
@@ -2727,7 +2730,7 @@ export default () => {
                         )
                       }
                       {
-                        ['gas_paid', 'refunded'].includes(s.id) && typeof gas?.gas_base_fee_amount === 'number' && source_gas_data &&
+                        ['gas_paid', 'refunded'].includes(s.id) && [typeof gas?.gas_base_fee_amount, typeof fees?.base_fee].includes('number') && source_gas_data &&
                         (
                           <div className={rowClassName}>
                             <span className={rowTitleClassName}>
@@ -2746,7 +2749,7 @@ export default () => {
                                 }
                                 <span className="text-sm font-medium">
                                   <span className="mr-1">
-                                    {number_format(gas.gas_base_fee_amount, '0,0.00000000', true)}
+                                    {number_format(gas?.gas_base_fee_amount || fees?.base_fee, '0,0.00000000', true)}
                                   </span>
                                   <span>
                                     {ellipse(source_gas_data.symbol)}
