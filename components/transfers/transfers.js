@@ -77,26 +77,8 @@ export default (
 
   useEffect(
     () => {
-      if (
-        evm_chains_data &&
-        cosmos_chains_data &&
-        assets_data &&
-        asPath
-      ) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath
-              .substring(
-                asPath.indexOf('?') + 1,
-              )
-          )
-
-        const chains_data =
-          _.concat(
-            evm_chains_data,
-            cosmos_chains_data,
-          )
+      if (evm_chains_data && cosmos_chains_data && assets_data && asPath) {
+        const params = params_to_obj(asPath.indexOf('?') > -1 && asPath.substring(asPath.indexOf('?') + 1))
 
         const {
           txHash,
@@ -117,62 +99,17 @@ export default (
         setFilters(
           {
             txHash,
-            type:
-              [
-                'deposit_address',
-                'send_token',
-                'wrap',
-                'unwrap',
-              ].includes(type?.toLowerCase()) ?
-                type.toLowerCase() :
-                undefined,
-            confirmed:
-              [
-                'confirmed',
-                'unconfirmed',
-              ].includes(confirmed?.toLowerCase()) ?
-                confirmed.toLowerCase() :
-                undefined,
-            state:
-              [
-                'completed',
-                'pending',
-              ].includes(state?.toLowerCase()) ?
-                state.toLowerCase() :
-                undefined,
-            sourceChain:
-              getChain(
-                sourceChain,
-                chains_data,
-              )?.id ||
-              sourceChain,
-            destinationChain:
-              getChain(
-                destinationChain,
-                chains_data,
-              )?.id ||
-              destinationChain,
-            asset:
-              getAsset(
-                asset,
-                assets_data,
-              )?.id ||
-              asset,
+            type: ['deposit_address', 'send_token', 'wrap', 'unwrap', 'erc20_transfer'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
+            confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
+            state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
+            sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
+            destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
+            asset: getAsset(asset, assets_data)?.id || asset,
             depositAddress,
             senderAddress,
             recipientAddress,
-            fromTime:
-              fromTime &&
-              moment(
-                Number(fromTime)
-              )
-              .unix(),
-            toTime:
-              toTime &&
-              moment(
-                Number(toTime)
-              )
-              .unix(),
+            fromTime: fromTime && moment(Number(fromTime)).unix(),
+            toTime: toTime && moment(Number(toTime)).unix(),
             sortBy,
           }
         )
@@ -184,36 +121,14 @@ export default (
   useEffect(
     () => {
       const triggering = is_interval => {
-        setFetchTrigger(
-          is_interval ?
-            moment()
-              .valueOf() :
-            typeof fetchTrigger === 'number' ?
-              null :
-              0
-        )
+        setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
       }
 
-      if (
-        pathname &&
-        filters
-      ) {
+      if (pathname && filters) {
         triggering()
       }
 
-      const interval =
-        setInterval(() =>
-          triggering(true),
-          (
-            address ||
-            [
-              '/transfers/search',
-            ].includes(pathname) ?
-              3 :
-              0.25
-          ) * 60 * 1000,
-        )
-
+      const interval = setInterval(() => triggering(true), (address || ['/transfers/search'].includes(pathname) ? 3 : 0.25) * 60 * 1000)
       return () => clearInterval(interval)
     },
     [pathname, address, filters],
@@ -222,16 +137,7 @@ export default (
   useEffect(
     () => {
       const getData = async () => {
-        if (
-          filters &&
-          (
-            !(
-              (pathname || '')
-                .includes('/[address]')
-            ) ||
-            address
-          )
-        ) {
+        if (filters && (!((pathname || '').includes('/[address]')) || address)) {
           setFetching(true)
 
           if (!fetchTrigger) {
@@ -241,21 +147,9 @@ export default (
             setOffet(0)
           }
 
-          const _data =
-            !fetchTrigger ?
-              [] :
-              data ||
-              []
-
-          const size =
-            n ||
-            LIMIT
-
-          const from =
-            fetchTrigger === true ||
-            fetchTrigger === 1 ?
-              _data.length :
-              0
+          const _data = !fetchTrigger ? [] : data || []
+          const size = n || LIMIT
+          const from = fetchTrigger === true || fetchTrigger === 1 ? _data.length : 0
 
           const {
             sortBy,
@@ -264,12 +158,13 @@ export default (
           let response
 
           if (address) {
-            const must = [],
-              should = [],
-              must_not = []
+            const must = []
+            const should = []
+            const must_not = []
 
             should.push({ match: { 'send.sender_address': address } })
             should.push({ match: { 'wrap.sender_address': address } })
+            should.push({ match: { 'erc20_transfer.recipient_address': address } })
             should.push({ match: { 'send.recipient_address': address } })
             should.push({ match: { 'unwrap.recipient_address': address } })
             should.push({ match: { 'link.recipient_address': address } })
@@ -281,10 +176,7 @@ export default (
                     bool: {
                       must,
                       should,
-                      minimum_should_match:
-                        should.length > 0 ?
-                          1 :
-                          0,
+                      minimum_should_match: should.length > 0 ? 1 : 0,
                       must_not,
                     },
                   },
@@ -303,10 +195,7 @@ export default (
                   from,
                   sort:
                     [
-                      [
-                        'value',
-                      ].includes(sortBy) &&
-                      { 'send.value': 'desc' },
+                      ['value'].includes(sortBy) && { 'send.value': 'desc' },
                       { 'send.created_at.ms': 'desc' },
                     ]
                     .filter(s => s),
@@ -337,17 +226,11 @@ export default (
                   'send.txhash',
                 ),
                 [
-                  [
-                    'value',
-                  ].includes(sortBy) &&
-                  'send.value',
+                  ['value'].includes(sortBy) && 'send.value',
                   'send.created_at.ms',
                 ].filter(s => s),
                 [
-                  [
-                    'value',
-                  ].includes(sortBy) &&
-                  'desc',
+                  ['value'].includes(sortBy) && 'desc',
                   'desc',
                 ].filter(o => o),
               )
@@ -382,82 +265,50 @@ export default (
             send,
             link,
           } = { ...d }
+
           const {
             source_chain,
             recipient_address,
             denom,
             created_at,
           } = { ...send }
+
           const {
             original_source_chain,
           } = { ...link }
 
-          const chain_data =
-            getChain(
-              recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ?
-                'axelarnet' :
-                original_source_chain ||
-                source_chain,
-              chains_data,
-            )
+          const chain_data = getChain(recipient_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_source_chain || source_chain, chains_data)
 
           const {
             id,
             chain_id,
           } = { ...chain_data }
 
-          const asset_data =
-            getAsset(
-              denom,
-              assets_data,
-            )
+          const asset_data = getAsset(denom, assets_data)
 
           const {
             contracts,
             ibc,
           } = { ...asset_data }
 
-          const contract_data = (contracts || [])
-            .find(c =>
-              c?.chain_id === chain_id
-            )
+          const contract_data = (contracts || []).find(c => c?.chain_id === chain_id)
+          const ibc_data = (ibc || []).find(c => c?.chain_id === id)
 
-          const ibc_data = (ibc || [])
-            .find(c =>
-              c?.chain_id === id
-            )
-
-          const symbol =
-            contract_data?.symbol ||
-            ibc_data?.symbol ||
-            asset_data?.symbol ||
-            denom
+          const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
 
           return {
             ...d,
             symbol,
-            timestamp_utc_string:
-              moment(created_at?.ms)
-                .format('DD-MM-YYYY HH:mm:ss A'),
+            timestamp_utc_string: moment(created_at?.ms).format('DD-MM-YYYY HH:mm:ss A'),
           }
         })
 
     return data
   }
 
-  const chains_data =
-    _.concat(
-      evm_chains_data,
-      cosmos_chains_data,
-    )
+  const chains_data = _.concat(evm_chains_data, cosmos_chains_data)
 
-  const data_filtered =
-    _.slice(
-      data,
-      0,
-      n ||
-      undefined,
-    )
+  const data_filtered = _.slice(data, 0, n || undefined)
 
   return (
     data ?
@@ -471,10 +322,7 @@ export default (
                 (
                   <div className="flex items-center space-x-1.5 sm:mb-1">
                     <span className="tracking-wider font-semibold">
-                      {number_format(
-                        total,
-                        '0,0',
-                      )}
+                      {number_format(total, '0,0')}
                     </span>
                     <span className="tracking-wider">
                       Results
@@ -510,23 +358,9 @@ export default (
                       `transfers${
                         Object.entries({ ...filters })
                           .filter(([k, v]) => v)
-                          .map(([k, v]) =>
-                            `_${
-                              k === 'time' ?
-                                v
-                                  .map(t =>
-                                    t.format('DD-MM-YYYY')
-                                  )
-                                  .join('_') :
-                                v
-                            }`
-                          )
+                          .map(([k, v]) => `_${k === 'time' ? v.map(t => t.format('DD-MM-YYYY')).join('_') : v}`)
                           .join('') ||
-                          (
-                            address ?
-                              `_${address}` :
-                              ''
-                          )
+                        (address ? `_${address}` : '')
                       }.csv`
                     }
                     className={`${fetching ? 'bg-slate-100 dark:bg-slate-800 pointer-events-none cursor-not-allowed text-slate-400 dark:text-slate-600' : 'bg-blue-50 hover:bg-blue-100 dark:bg-black dark:hover:bg-slate-900 cursor-pointer text-blue-400 hover:text-blue-500 dark:text-slate-200 dark:hover:text-white'} rounded-lg mb-1 py-1 px-2.5`}
@@ -551,40 +385,29 @@ export default (
                   let {
                     value,
                   } = { ...props }
+
                   const {
                     send,
                     link,
                     wrap,
                     unwrap,
+                    erc20_transfer,
                   } = { ...props.row.original }
                   let {
                     type,
                   } = { ...props.row.original }
 
-                  type =
-                    wrap ?
-                      'wrap' :
-                      unwrap ?
-                        'unwrap' :
-                        type ||
-                        'deposit_address'
+                  type = wrap ? 'wrap' : unwrap ? 'unwrap' : erc20_transfer ? 'erc20_transfer' : type || 'deposit_address'
 
                   const {
                     source_chain,
                   } = { ...send }
+
                   const {
                     original_source_chain,
                   } = { ...link }
 
-                  const chain_data =
-                    getChain(
-                      original_source_chain,
-                      chains_data,
-                    ) ||
-                    getChain(
-                      source_chain,
-                      chains_data,
-                    )
+                  const chain_data = getChain(original_source_chain, chains_data) || getChain(source_chain, chains_data)
 
                   const {
                     explorer,
@@ -596,9 +419,7 @@ export default (
                     icon,
                   } = { ...explorer }
 
-                  value =
-                    wrap?.txhash ||
-                    value
+                  value = wrap?.txhash || erc20_transfer?.txhash || value
 
                   return (
                     <div className="flex flex-col space-y-2 mb-3">
@@ -609,9 +430,7 @@ export default (
                             rel="noopener noreferrer"
                             className="text-blue-500 dark:text-blue-500 font-medium"
                           >
-                            {ellipse(
-                              value,
-                            )}
+                            {ellipse(value)}
                           </a>
                         </Link>
                         <Copy
@@ -626,16 +445,15 @@ export default (
                               rel="noopener noreferrer"
                               className="text-blue-500 dark:text-blue-500"
                             >
-                              {
-                                icon ?
-                                  <Image
-                                    src={icon}
-                                    className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                  /> :
-                                  <TiArrowRight
-                                    size={16}
-                                    className="transform -rotate-45"
-                                  />
+                              {icon ?
+                                <Image
+                                  src={icon}
+                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                /> :
+                                <TiArrowRight
+                                  size={16}
+                                  className="transform -rotate-45"
+                                />
                               }
                             </a>
                           )
@@ -645,26 +463,11 @@ export default (
                         type &&
                         (
                           <div className="w-fit bg-slate-200 dark:bg-slate-800 bg-opacity-75 dark:bg-opacity-75 rounded whitespace-nowrap uppercase text-xs font-semibold py-0.5 px-1.5">
-                            {
-                              [
-                                'deposit_address',
-                                'send_token',
-                                'wrap',
-                                'unwrap',
-                              ]
-                              .includes(type) ?
-                                <span className="normal-case">
-                                  via {
-                                    [
-                                      'wrap',
-                                      'unwrap',
-                                    ]
-                                    .includes(type) ?
-                                      'Deposit Service' :
-                                      name(type)
-                                  }
-                                </span> :
-                                type
+                            {['deposit_address', 'send_token', 'wrap', 'unwrap', 'erc20_transfer'].includes(type) ?
+                              <span className="normal-case">
+                                via {['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'Deposit Service' : name(type)}
+                              </span> :
+                              type
                             }
                           </div>
                         )
@@ -681,35 +484,26 @@ export default (
                   const {
                     value,
                   } = { ...props }
+
                   const {
                     send,
                     link,
                     wrap,
+                    erc20_transfer,
                   } = { ...props.row.original }
+
                   let {
                     sender_address,
                   } = { ...send }
+
                   let {
                     original_source_chain,
                   } = { ...link }
 
-                  sender_address =
-                    wrap?.sender_address ||
-                    sender_address
+                  sender_address = wrap?.sender_address || erc20_transfer?.sender_address || sender_address
+                  original_source_chain = send?.original_source_chain || original_source_chain
 
-                  original_source_chain =
-                    send?.original_source_chain ||
-                    original_source_chain
-
-                  const chain_data =
-                    getChain(
-                      original_source_chain,
-                      chains_data,
-                    ) ||
-                    getChain(
-                      value,
-                      chains_data,
-                    )
+                  const chain_data = getChain(original_source_chain, chains_data) || getChain(value, chains_data)
 
                   const {
                     name,
@@ -736,10 +530,7 @@ export default (
                           )
                         }
                         <span className="font-semibold">
-                          {
-                            name ||
-                            value
-                          }
+                          {name || value}
                         </span>
                       </div>
                       {
@@ -749,39 +540,34 @@ export default (
                             <span className="text-slate-400 dark:text-slate-200 font-medium">
                               Sender address
                             </span>
-                            {
-                              sender_address.startsWith('0x') ?
-                                <div className="flex items-center space-x-1">
-                                  <a
-                                    href={`${url}${address_path?.replace('{address}', sender_address)}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                  >
-                                    <EnsProfile
-                                      address={sender_address}
-                                      no_copy={true}
-                                      fallback={
-                                        <div className="h-5 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                          {ellipse(
-                                            sender_address,
-                                            8,
-                                            prefix_address,
-                                          )}
-                                        </div>
-                                      }
-                                    />
-                                  </a>
-                                  <Copy
-                                    value={sender_address}
-                                  />
-                                </div> :
-                                <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                  <AccountProfile
+                            {sender_address.startsWith('0x') ?
+                              <div className="flex items-center space-x-1">
+                                <a
+                                  href={`${url}${address_path?.replace('{address}', sender_address)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <EnsProfile
                                     address={sender_address}
-                                    ellipse_size={8}
-                                    prefix={prefix_address}
+                                    no_copy={true}
+                                    fallback={
+                                      <div className="h-5 flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                        {ellipse(sender_address, 8, prefix_address)}
+                                      </div>
+                                    }
                                   />
-                                </div>
+                                </a>
+                                <Copy
+                                  value={sender_address}
+                                />
+                              </div> :
+                              <div className="flex items-center text-blue-500 dark:text-blue-500 font-medium">
+                                <AccountProfile
+                                  address={sender_address}
+                                  ellipse_size={8}
+                                  prefix={prefix_address}
+                                />
+                              </div>
                             }
                           </div>
                         )
@@ -801,36 +587,25 @@ export default (
                     link,
                     wrap,
                     unwrap,
+                    erc20_transfer,
                   } = { ...props.row.original }
+
                   const {
                     source_chain,
                     denom,
                     amount,
                     fee,
                   } = { ...send }
+
                   let {
                     original_source_chain,
                     deposit_address,
                   } = { ...link }
 
-                  original_source_chain =
-                    send?.original_source_chain ||
-                    original_source_chain
+                  original_source_chain = send?.original_source_chain || original_source_chain
+                  deposit_address = wrap?.deposit_address || unwrap?.deposit_address_link || erc20_transfer?.deposit_address || send?.recipient_address || deposit_address
 
-                  deposit_address =
-                    wrap?.deposit_address ||
-                    unwrap?.deposit_address_link ||
-                    send?.recipient_address ||
-                    deposit_address
-
-                  const chain_data =
-                    getChain(
-                      deposit_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ?
-                        'axelarnet' :
-                        original_source_chain ||
-                        source_chain,
-                      chains_data,
-                    )
+                  const chain_data = getChain(deposit_address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? 'axelarnet' : original_source_chain || source_chain, chains_data)
 
                   const {
                     id,
@@ -844,76 +619,25 @@ export default (
                     address_path,
                   } = { ...explorer }
 
-                  const asset_data =
-                    getAsset(
-                    denom,
-                    assets_data,
-                  )
+                  const asset_data = getAsset(denom, assets_data)
 
                   const {
                     contracts,
                     ibc,
                   } = { ...asset_data }
 
-                  const contract_data = (contracts || [])
-                    .find(c =>
-                      c?.chain_id === chain_id
-                    )
+                  const contract_data = (contracts || []).find(c => c?.chain_id === chain_id)
+                  const ibc_data = (ibc || []).find(c => c?.chain_id === id)
 
-                  const ibc_data = (ibc || [])
-                    .find(c =>
-                      c?.chain_id === id
-                    )
+                  let symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
+                  let image = contract_data?.image || ibc_data?.image || asset_data?.image
 
-                  let symbol =
-                    contract_data?.symbol ||
-                    ibc_data?.symbol ||
-                    asset_data?.symbol ||
-                    denom
-
-                  let image =
-                    contract_data?.image ||
-                    ibc_data?.image ||
-                    asset_data?.image
-
-                  if (
-                    [
-                      'wrap',
-                      'unwrap',
-                    ]
-                    .includes(type) ||
-                    wrap ||
-                    unwrap
-                  ) {
-                    if (
-                      [
-                        'W',
-                        'axlW',
-                      ]
-                      .findIndex(p =>
-                        symbol?.startsWith(p)
-                      ) > -1
-                    ) {
-                      symbol =
-                        symbol
-                          .substring(
-                            symbol.indexOf('W') + 1,
-                          )
+                  if (['wrap', 'unwrap'].includes(type) || wrap || unwrap) {
+                    if (['W', 'axlW'].findIndex(p => symbol?.startsWith(p)) > -1) {
+                      symbol = symbol.substring(symbol.indexOf('W') + 1)
 
                       if (image) {
-                        image =
-                          image
-                            .split('/')
-                            .map(p =>
-                              p
-                                .substring(
-                                  p?.includes('.') &&
-                                  p.startsWith('w') ?
-                                    1 :
-                                    0,
-                                )
-                            )
-                            .join('/')
+                        image = image.split('/').map(p => p.substring(p?.includes('.') && p.startsWith('w') ? 1 : 0)).join('/')
                       }
                     }
                   }
@@ -936,11 +660,7 @@ export default (
                             <div className="flex flex-col space-y-0.5">
                               <span className="leading-3 text-xs font-semibold">
                                 <span className="mr-1">
-                                  {number_format(
-                                    amount,
-                                    '0,0.000',
-                                    true,
-                                  )}
+                                  {number_format(amount, '0,0.000', true)}
                                 </span>
                                 <span>
                                   {ellipse(symbol)}
@@ -955,11 +675,7 @@ export default (
                                       Fee:
                                     </span>
                                     <span>
-                                      {number_format(
-                                        fee,
-                                        '0,0.000000',
-                                        true,
-                                      )}
+                                      {number_format(fee, '0,0.000000', true)}
                                     </span>
                                     )
                                   </span>
@@ -971,17 +687,7 @@ export default (
                       }
                       <div className="flex flex-col">
                         <span className="text-slate-400 dark:text-slate-200 font-medium">
-                          {
-                            [
-                              'send_token',
-                            ].includes(type) ?
-                              'Gateway address' :
-                              [
-                                'wrap',
-                              ].includes(type) ?
-                                'Contract address' :
-                                'Deposit address'
-                          }
+                          {['send_token'].includes(type) ? 'Gateway address' : ['wrap', 'erc20_transfer'].includes(type) ? 'Contract address' : 'Deposit address'}
                         </span>
                         {deposit_address.startsWith('0x') ?
                           <div className="flex items-center space-x-1">
@@ -995,11 +701,7 @@ export default (
                                 no_copy={true}
                                 fallback={
                                   <div className="h-5 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                    {ellipse(
-                                      deposit_address,
-                                      8,
-                                      prefix_address,
-                                    )}
+                                    {ellipse(deposit_address, 8, prefix_address)}
                                   </div>
                                 }
                               />
@@ -1029,38 +731,23 @@ export default (
                   let {
                     value,
                   } = { ...props }
+
                   const {
                     send,
                     link,
                     unwrap,
                   } = { ...props.row.original }
+
                   let {
                     original_destination_chain,
                     recipient_address,
                   } = { ...link }
 
-                  value =
-                    unwrap?.destination_chain ||
-                    value ||
-                    link?.destination_chain
+                  value = unwrap?.destination_chain || value || link?.destination_chain
+                  original_destination_chain = send?.original_destination_chain || original_destination_chain
+                  recipient_address = unwrap?.recipient_address || recipient_address
 
-                  original_destination_chain =
-                    send?.original_destination_chain ||
-                    original_destination_chain
-
-                  recipient_address =
-                    unwrap?.recipient_address ||
-                    recipient_address
-
-                  const chain_data =
-                    getChain(
-                      original_destination_chain,
-                      chains_data,
-                    ) ||
-                    getChain(
-                      value,
-                      chains_data,
-                    )
+                  const chain_data = getChain(original_destination_chain, chains_data) || getChain(value, chains_data)
 
                   const {
                     name,
@@ -1087,10 +774,7 @@ export default (
                           )
                         }
                         <span className="font-semibold">
-                          {
-                            name ||
-                            value
-                          }
+                          {name || value}
                         </span>
                       </div>
                       {
@@ -1112,11 +796,7 @@ export default (
                                     no_copy={true}
                                     fallback={
                                       <div className="h-5 flex items-center text-blue-500 dark:text-blue-500 font-medium">
-                                        {ellipse(
-                                          recipient_address,
-                                          8,
-                                          prefix_address,
-                                        )}
+                                        {ellipse(recipient_address, 8, prefix_address)}
                                       </div>
                                     }
                                   />
@@ -1156,7 +836,9 @@ export default (
                     axelar_transfer,
                     wrap,
                     unwrap,
+                    erc20_transfer,
                   } = { ...props.row.original }
+
                   const {
                     source_chain,
                     denom,
@@ -1170,463 +852,307 @@ export default (
                     sender_address,
                   } = { ...send }
  
-                  destination_chain =
-                    unwrap?.destination_chain ||
-                    destination_chain ||
-                    link?.destination_chain
-
-                  sender_address =
-                    wrap?.sender_address ||
-                    sender_address
+                  destination_chain = unwrap?.destination_chain || destination_chain || link?.destination_chain
+                  sender_address = wrap?.sender_address || erc20_transfer?.sender_address || sender_address
 
                   let {
                     original_source_chain,
                     original_destination_chain,
                   } = { ...link }
 
-                  original_source_chain =
-                    send?.original_source_chain ||
-                    original_source_chain
+                  original_source_chain = send?.original_source_chain || original_source_chain
+                  original_destination_chain = send?.original_destination_chain || original_destination_chain
 
-                  original_destination_chain =
-                    send?.original_destination_chain ||
-                    original_destination_chain
-
-                  const source_chain_data =
-                    getChain(
-                      original_source_chain,
-                      chains_data,
-                    ) ||
-                    getChain(
-                      source_chain,
-                      chains_data,
-                    )
-
-                  const destination_chain_data =
-                    getChain(
-                      original_destination_chain,
-                      chains_data,
-                    ) ||
-                    getChain(
-                      destination_chain,
-                      chains_data,
-                    )
-
-                  const axelar_chain_data =
-                    getChain(
-                      'axelarnet',
-                      chains_data,
-                    )
-
-                  const asset_data =
-                    getAsset(
-                      denom,
-                      assets_data,
-                    )
+                  const source_chain_data = getChain(original_source_chain, chains_data) || getChain(source_chain, chains_data)
+                  const destination_chain_data = getChain(original_destination_chain, chains_data) || getChain(destination_chain, chains_data)
+                  const axelar_chain_data = getChain('axelarnet', chains_data)
+                  const asset_data = getAsset(denom, assets_data)
 
                   const {
                     contracts,
                     ibc,
                   } = { ...asset_data }
 
-                  const contract_data = (contracts || [])
-                    .find(c =>
-                      c?.chain_id === source_chain_data?.chain_id
-                    )
+                  const contract_data = (contracts || []).find(c => c?.chain_id === source_chain_data?.chain_id)
+                  const ibc_data = (ibc || []).find(c => c?.chain_id === source_chain_data?.id)
 
-                  const ibc_data = (ibc || [])
-                    .find(c =>
-                      c?.chain_id === source_chain_data?.id
-                    )
+                  const symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
 
-                  const symbol =
-                    contract_data?.symbol ||
-                    ibc_data?.symbol ||
-                    asset_data?.symbol ||
-                    denom
-
-                  const steps =
-                    [
-                      [
-                        'deposit_address',
-                      ].includes(type) &&
-                      {
-                        id: 'link',
-                        title: 'Linked',
-                        chain_data: axelar_chain_data,
-                        data: link,
-                        id_field: 'txhash',
-                      },
-                      {
-                        id: 'send',
-                        title: 'Sent',
-                        chain_data: source_chain_data,
-                        data:
-                          [
-                            'wrap',
-                          ].includes(type) ?
-                            wrap :
-                            send,
-                        id_field: 'txhash',
-                      },
-                      [
-                        'wrap',
-                      ].includes(type) &&
-                      {
-                        id: 'wrap',
-                        title: 'Wrapped',
-                        chain_data: source_chain_data,
-                        data: send,
-                        // id_field: 'tx_hash_wrap',
-                        id_field: 'txhash',
-                      },
-                      ![
-                        'send_token',
-                        'wrap',
-                      ].includes(type) &&
-                      {
-                        id: 'confirm',
-                        title: 'Confirmed',
-                        chain_data: axelar_chain_data,
-                        data: confirm,
-                        id_field: 'txhash',
-                      },
-                      (evm_chains_data || [])
-                        .findIndex(c =>
-                          c?.id === source_chain_data?.id
-                        ) > -1 &&
-                      {
-                        id: 'vote',
-                        title: 'Approved',
-                        chain_data: axelar_chain_data,
-                        data: vote,
-                        id_field: 'poll_id',
-                        path: '/evm-poll/{id}',
-                      },
-                      (evm_chains_data || [])
-                        .findIndex(c =>
-                          c?.id === destination_chain_data?.id
-                        ) > -1 &&
-                      {
-                        id: 'command',
-                        title: 'Received',
-                        data: command,
-                        ...(
-                          command?.transactionHash ?
-                            {
-                              chain_data: destination_chain_data,
-                              id_field: 'transactionHash',
-                            } :
-                            {
-                              chain_data: axelar_chain_data,
-                              id_field: 'batch_id',
-                              path: '/batch/{chain}/{id}',
-                              params: {
-                                chain: destination_chain_data?.id,
-                              },
+                  const steps = [
+                    ['deposit_address'].includes(type) &&
+                    {
+                      id: 'link',
+                      title: 'Linked',
+                      chain_data: axelar_chain_data,
+                      data: link,
+                      id_field: 'txhash',
+                    },
+                    {
+                      id: 'send',
+                      title: 'Sent',
+                      chain_data: source_chain_data,
+                      data: type === 'wrap' ? wrap : type === 'erc20_transfer' ? erc20_transfer : send,
+                      id_field: 'txhash',
+                    },
+                    ['wrap'].includes(type) &&
+                    {
+                      id: 'wrap',
+                      title: 'Wrapped',
+                      chain_data: source_chain_data,
+                      data: send,
+                      // id_field: 'tx_hash_wrap',
+                      id_field: 'txhash',
+                    },
+                    ['erc20_transfer'].includes(type) &&
+                    {
+                      id: 'erc20_transfer',
+                      title: 'ERC20Transferred',
+                      chain_data: source_chain_data,
+                      data: send,
+                      // id_field: 'tx_hash_transfer',
+                      id_field: 'txhash',
+                    },
+                    !['send_token', 'wrap', 'erc20_transfer'].includes(type) &&
+                    {
+                      id: 'confirm',
+                      title: 'Confirmed',
+                      chain_data: axelar_chain_data,
+                      data: confirm,
+                      id_field: 'txhash',
+                    },
+                    (evm_chains_data || []).findIndex(c => c?.id === source_chain_data?.id) > -1 &&
+                    {
+                      id: 'vote',
+                      title: 'Approved',
+                      chain_data: axelar_chain_data,
+                      data: vote,
+                      id_field: 'poll_id',
+                      path: '/evm-poll/{id}',
+                    },
+                    (evm_chains_data || []).findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
+                    {
+                      id: 'command',
+                      title: 'Received',
+                      data: command,
+                      ...(
+                        command?.transactionHash ?
+                          {
+                            chain_data: destination_chain_data,
+                            id_field: 'transactionHash',
+                          } :
+                          {
+                            chain_data: axelar_chain_data,
+                            id_field: 'batch_id',
+                            path: '/batch/{chain}/{id}',
+                            params: {
+                              chain: destination_chain_data?.id,
                             },
-                        ),
-                      },
-                      (cosmos_chains_data || [])
-                        .filter(c =>
-                          c?.id !== axelar_chain_data.id
-                        )
-                        .findIndex(c =>
-                          c?.id === destination_chain_data?.id ||
-                          destination_chain_data?.overrides?.[c?.id]
-                        ) > -1 &&
-                      {
-                        id: 'ibc_send',
-                        title: 'Received',
-                        chain_data:
-                          ibc_send?.recv_txhash ?
-                            destination_chain_data :
-                            axelar_chain_data,
-                        data: ibc_send,
-                        id_field:
-                          ibc_send?.recv_txhash ?
-                            'recv_txhash' :
-                            ibc_send?.ack_txhash ?
-                              'ack_txhash' :
-                              ibc_send?.failed_txhash ?
-                                'failed_txhash' :
-                                'txhash',
-                      },
-                      [axelar_chain_data]
-                        .findIndex(c =>
-                          c?.id === destination_chain_data?.id ||
-                          destination_chain_data?.overrides?.[c?.id]
-                        ) > -1 &&
-                      {
-                        id: 'axelar_transfer',
-                        title: 'Received',
-                        chain_data: axelar_chain_data,
-                        data: axelar_transfer,
-                        id_field: 'txhash',
-                      },
-                      [
-                        'unwrap',
-                      ].includes(type) &&
-                      {
-                        id: 'unwrap',
-                        title: 'Unwrapped',
-                        chain_data: destination_chain_data,
-                        data: unwrap,
-                        id_field: 'tx_hash_unwrap',
-                        // id_field: 'txhash',
-                      },
-                    ]
-                    .filter(s => s)
-                    .map((s, i) => {
-                      const {
-                        id,
-                        data,
-                      } = { ...s }
+                          },
+                      ),
+                    },
+                    (cosmos_chains_data || []).filter(c => c?.id !== axelar_chain_data.id).findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
+                    {
+                      id: 'ibc_send',
+                      title: 'Received',
+                      chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
+                      data: ibc_send,
+                      id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.ack_txhash ? 'ack_txhash' : ibc_send?.failed_txhash ? 'failed_txhash' : 'txhash',
+                    },
+                    [axelar_chain_data].findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
+                    {
+                      id: 'axelar_transfer',
+                      title: 'Received',
+                      chain_data: axelar_chain_data,
+                      data: axelar_transfer,
+                      id_field: 'txhash',
+                    },
+                    ['unwrap'].includes(type) &&
+                    {
+                      id: 'unwrap',
+                      title: 'Unwrapped',
+                      chain_data: destination_chain_data,
+                      data: unwrap,
+                      id_field: 'tx_hash_unwrap',
+                      // id_field: 'txhash',
+                    },
+                  ]
+                  .filter(s => s)
+                  .map((s, i) => {
+                    const {
+                      id,
+                      data,
+                    } = { ...s }
 
-                      return {
-                        ...s,
-                        i,
-                        finish:
-                          !!(
-                            id === 'command' ?
-                              data?.executed ||
-                              data?.transactionHash :
-                              id === 'ibc_send' ?
-                                data?.ack_txhash ||
-                                (
-                                  data?.recv_txhash &&
-                                  !data.failed_txhash
-                                ) :
-                                id === 'send' ?
-                                  status !== 'failed' :
-                                  id === 'unwrap' ?
-                                    data?.tx_hash_unwrap :
-                                    data
-                          ),
-                      }
-                    })
+                    return {
+                      ...s,
+                      i,
+                      finish:
+                        !!(id === 'command' ?
+                          data?.executed || data?.transactionHash :
+                          id === 'ibc_send' ?
+                            data?.ack_txhash || (data?.recv_txhash && !data.failed_txhash) :
+                            id === 'send' ?
+                              status !== 'failed' : id === 'unwrap' ?
+                                data?.tx_hash_unwrap :
+                                data
+                        ),
+                    }
+                  })
 
                   const current_step =
-                    steps
-                      .findIndex(s =>
-                        s.finish
-                      ) < 0 ?
+                    steps.findIndex(s => s.finish) < 0 ?
                       -1 :
-                      (
-                        _.maxBy(
-                          steps
-                            .filter(s =>
-                              s.finish
-                            ),
-                          'i',
-                        )?.i ||
-                        0
-                      ) +
-                      (
-
-                        !insufficient_fee &&
-                        status !== 'failed' &&
-                        (
-                          amount > fee ||
-                          !fee
-                        ) &&
-                        (
-                          ibc_send?.ack_txhash ||
-                          !ibc_send?.failed_txhash
-                        ) ?
-                          1 :
-                          0
-                      )
+                      (_.maxBy(steps.filter(s => s.finish), 'i')?.i || 0) +
+                      (!insufficient_fee && status !== 'failed' && (amount > fee || !fee) && (ibc_send?.ack_txhash || !ibc_send?.failed_txhash) ? 1 : 0)
 
                   const time_spent =
                     _.last(steps)?.finish &&
                     total_time_string(
-                      steps
-                        .find(s =>
-                          s?.id === 'send',
-                        )?.data?.created_at?.ms /
-                      1000,
-                      _.last(steps)?.data?.block_timestamp ||
-                      (
-                        _.last(steps)?.data?.received_at?.ms /
-                        1000
-                      ) ||
-                      (
-                        _.last(steps)?.data?.created_at?.ms /
-                        1000
-                      ),
+                      steps.find(s => s?.id === 'send')?.data?.created_at?.ms / 1000,
+                      _.last(steps)?.data?.block_timestamp || (_.last(steps)?.data?.received_at?.ms /  1000) || (_.last(steps)?.data?.created_at?.ms / 1000),
                     )
 
                   return (
                     <div className="min-w-max flex flex-col mb-3">
-                      {
-                        steps
-                          .map((s, i) => {
-                            const {
-                              chain_data,
-                              data,
-                              id_field,
-                              path,
-                              params,
-                              finish,
-                            } = { ...s }
-                            let {
-                              title,
-                            } = { ...s }
+                      {steps
+                        .map((s, i) => {
+                          const {
+                            chain_data,
+                            data,
+                            id_field,
+                            path,
+                            params,
+                            finish,
+                          } = { ...s }
+                          let {
+                            title,
+                          } = { ...s }
 
-                            title =
-                              [
-                                'Approved',
-                              ]
-                              .includes(title) ?
-                                'Confirmed' :
-                                s?.id === 'confirm' && !data ?
-                                  'Waiting for Finality' :
-                                  title
+                          title = ['Approved'].includes(title) ? 'Confirmed' : s?.id === 'confirm' && !data ? 'Waiting for Finality' : title
 
-                            const id = data?.[id_field]
+                          const id = data?.[id_field]
 
-                            const {
-                              explorer,
-                            } = { ...chain_data }
-                            const {
-                              url,
-                              transaction_path,
-                              icon,
-                            } = { ...explorer }
+                          const {
+                            explorer,
+                          } = { ...chain_data }
 
-                            let _path =
-                              (path || '')
-                                .replace(
-                                  '{id}',
-                                  id,
-                                ) ||
-                              (transaction_path || '')
-                                .replace(
-                                  '{tx}',
-                                  id,
-                                )
+                          const {
+                            url,
+                            transaction_path,
+                            icon,
+                          } = { ...explorer }
 
-                            if (_path) {
-                              Object.entries({ ...params })
-                                .forEach(([k, v]) => {
-                                  _path =
-                                    _path
-                                      .replace(
-                                        `{${k}}`,
-                                        v,
-                                      )
-                                })
-                            }
+                          let _path = (path || '').replace('{id}', id) || (transaction_path || '').replace('{tx}', id)
 
-                            const text_color =
-                              finish ?
-                                'text-green-500 dark:text-green-400' :
-                                data?.status === 'failed' ?
-                                  'text-red-500 dark:text-red-400' :
-                                  i === current_step ?
-                                    'text-yellow-500 dark:text-yellow-400' :
-                                    'text-slate-300 dark:text-slate-700'
+                          if (_path) {
+                            Object.entries({ ...params })
+                              .forEach(([k, v]) => {
+                                _path = _path.replace(`{${k}}`, v)
+                              })
+                          }
 
-                            const hidden = ['confirm'].includes(s?.id) && data && ['vote'].includes(steps[i + 1]?.id)
+                          const text_color =
+                            finish ?
+                              'text-green-500 dark:text-green-400' :
+                              data?.status === 'failed' ?
+                                'text-red-500 dark:text-red-400' :
+                                i === current_step ?
+                                  'text-yellow-500 dark:text-yellow-400' :
+                                  'text-slate-300 dark:text-slate-700'
 
-                            return (
-                              !hidden &&
-                              (
-                                <div
-                                  key={i}
-                                  className="flex items-center space-x-1 pb-0.5"
-                                >
-                                  {finish ?
-                                    <BiCheckCircle
+                          const hidden = ['confirm'].includes(s?.id) && data && ['vote'].includes(steps[i + 1]?.id)
+
+                          return (
+                            !hidden &&
+                            (
+                              <div
+                                key={i}
+                                className="flex items-center space-x-1 pb-0.5"
+                              >
+                                {finish ?
+                                  <BiCheckCircle
+                                    size={18}
+                                    className="text-green-500 dark:text-green-400"
+                                  /> :
+                                  data?.status === 'failed' ?
+                                    <BiXCircle
                                       size={18}
-                                      className="text-green-500 dark:text-green-400"
+                                      className="text-red-500 dark:text-red-400"
                                     /> :
-                                    data?.status === 'failed' ?
-                                      <BiXCircle
+                                    i === current_step ?
+                                      <ProgressBar
+                                        borderColor="#ca8a04"
+                                        barColor="#facc15"
+                                        width="18"
+                                        height="18"
+                                      /> :
+                                      <BiCircle
                                         size={18}
-                                        className="text-red-500 dark:text-red-400"
-                                      /> :
-                                      i === current_step ?
-                                        <ProgressBar
-                                          borderColor="#ca8a04"
-                                          barColor="#facc15"
-                                          width="18"
-                                          height="18"
-                                        /> :
-                                        <BiCircle
-                                          size={18}
-                                          className="text-slate-300 dark:text-slate-700"
-                                        />
+                                        className="text-slate-300 dark:text-slate-700"
+                                      />
+                                }
+                                <div className="flex items-center space-x-0.5">
+                                  {id ?
+                                    <Copy
+                                      value={id}
+                                      title={
+                                        <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
+                                          {title}
+                                        </span>
+                                      }
+                                    /> :
+                                    <span className={`uppercase ${text_color} text-xs font-medium`}>
+                                      {title}
+                                    </span>
                                   }
-                                  <div className="flex items-center space-x-0.5">
-                                    {id ?
-                                      <Copy
-                                        value={id}
-                                        title={
-                                          <span className={`cursor-pointer uppercase ${text_color} text-xs font-semibold`}>
-                                            {title}
-                                          </span>
+                                  {
+                                    id && url &&
+                                    (
+                                      <a
+                                        href={`${url}${_path}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 dark:text-blue-500"
+                                      >
+                                        {icon ?
+                                          <Image
+                                            src={icon}
+                                            className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
+                                          /> :
+                                          <TiArrowRight
+                                            size={16}
+                                            className="transform -rotate-45"
+                                          />
                                         }
-                                      /> :
-                                      <span className={`uppercase ${text_color} text-xs font-medium`}>
-                                        {title}
-                                      </span>
-                                    }
-                                    {
-                                      id &&
-                                      url &&
-                                      (
-                                        <a
-                                          href={`${url}${_path}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="text-blue-500 dark:text-blue-500"
-                                        >
-                                          {icon ?
-                                            <Image
-                                              src={icon}
-                                              className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                            /> :
-                                            <TiArrowRight
-                                              size={16}
-                                              className="transform -rotate-45"
-                                            />
-                                          }
-                                        </a>
-                                      )
-                                    }
-                                  </div>
+                                      </a>
+                                    )
+                                  }
                                 </div>
-                              )
+                              </div>
                             )
-                          })
-                          .filter(s => s)
+                          )
+                        })
+                        .filter(s => s)
                       }
                       {
                         insufficient_fee &&
-                        (
-                          [
-                            'deposit_address',
-                            'unwrap',
-                          ].includes(type) ?
-                            <Tooltip
-                              placement="top"
-                              content={`Send more ${ellipse(symbol)} to the same recipient to cover the min fee`}
-                              className="w-56 z-50 bg-black bg-opacity-75 text-white text-xs"
-                            >
-                              <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 cursor-pointer border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
-                                Insufficient Fee
-                              </div>
-                            </Tooltip> :
-                            <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                        (['deposit_address', 'unwrap'].includes(type) ?
+                          <Tooltip
+                            placement="top"
+                            content={`Send more ${ellipse(symbol)} to the same recipient to cover the min fee`}
+                            className="w-56 z-50 bg-black bg-opacity-75 text-white text-xs"
+                          >
+                            <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 cursor-pointer border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                               Insufficient Fee
                             </div>
+                          </Tooltip> :
+                          <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
+                            Insufficient Fee
+                          </div>
                         )
                       }
                       {
-                        ibc_send?.failed_txhash &&
-                        !ibc_send.ack_txhash &&
+                        ibc_send?.failed_txhash && !ibc_send.ack_txhash &&
                         (
                           <div className="w-fit bg-red-100 dark:bg-red-900 bg-opacity-75 dark:bg-opacity-75 border border-red-500 dark:border-red-500 rounded whitespace-nowrap text-xs font-medium mt-1 py-0.5 px-1.5">
                             Timeout
@@ -1673,54 +1199,31 @@ export default (
             ]
           }
           data={data_filtered}
-          noPagination={
-            data.length <= 10 ||
-            (
-              !n &&
-              !(
-                address ||
-                [
-                  '/transfers/search',
-                ].includes(pathname)
-              )
-            )
-          }
-          defaultPageSize={
-            n ?
-              10 :
-              25
-          }
+          noPagination={data.length <= 10 || (!n && !(address || ['/transfers/search'].includes(pathname)))}
+          defaultPageSize={n ? 10 : 25}
           className="min-h-full no-border"
         />
         {
-          data.length > 0 &&
-          !n &&
-          (
-            typeof total !== 'number' ||
-            data.length < total
-          ) &&
-          (
-            !fetching ?
-              <button
-                onClick={() => {
+          data.length > 0 && !n && (typeof total !== 'number' || data.length < total) &&
+          (!fetching ?
+            <button
+              onClick={
+                () => {
                   setOffet(data.length)
-                  setFetchTrigger(
-                    typeof fetchTrigger === 'number' ?
-                      true :
-                      1
-                  )
-                }}
-                className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
-              >
-                Load more
-              </button> :
-              <div className="flex justify-center">
-                <ColorRing
-                  color={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              </div>
+                  setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
+                }
+              }
+              className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
+            >
+              Load more
+            </button> :
+            <div className="flex justify-center">
+              <ColorRing
+                color={loader_color(theme)}
+                width="32"
+                height="32"
+              />
+            </div>
           )
         }
       </div> :

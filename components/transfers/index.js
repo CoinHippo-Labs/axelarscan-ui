@@ -75,7 +75,7 @@ export default () => {
 
         setFilters(
           {
-            type: ['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
+            type: ['deposit_address', 'send_token', 'wrap', 'unwrap', 'erc20_transfer'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
             sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
             destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
             asset: getAsset(asset, assets_data)?.id || asset,

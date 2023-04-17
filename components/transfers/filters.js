@@ -71,7 +71,7 @@ export default () => {
         setFilters(
           ['/transfers'].includes(pathname) ?
             {
-              type: ['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
+              type: ['deposit_address', 'send_token', 'wrap', 'unwrap', 'erc20_transfer'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
               sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
               destinationChain: getChain(destinationChain, chains_data)?.id || destinationChain,
               asset: getAsset(asset, assets_data)?.id || asset,
@@ -79,7 +79,7 @@ export default () => {
             } :
             {
               txHash,
-              type: ['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
+              type: ['deposit_address', 'send_token', 'wrap', 'unwrap', 'erc20_transfer'].includes(type?.toLowerCase()) ? type.toLowerCase() : undefined,
               confirmed: ['confirmed', 'unconfirmed'].includes(confirmed?.toLowerCase()) ? confirmed.toLowerCase() : undefined,
               state: ['completed', 'pending'].includes(state?.toLowerCase()) ? state.toLowerCase() : undefined,
               sourceChain: getChain(sourceChain, chains_data)?.id || sourceChain,
@@ -157,6 +157,7 @@ export default () => {
         { value: 'send_token', title: 'Send Token' },
         { value: 'wrap', title: 'Wrap' },
         { value: 'unwrap', title: 'Unwrap' },
+        { value: 'erc20_transfer', title: 'ERC20 Transfer' },
       ],
     },
     {

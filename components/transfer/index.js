@@ -318,12 +318,13 @@ export default () => {
     axelar_transfer,
     wrap,
     unwrap,
+    erc20_transfer,
   } = { ...data }
   let {
     type,
   } = { ...data }
 
-  type = data ? wrap ? 'wrap' : unwrap ? 'unwrap' : type || 'deposit_address' : type
+  type = data ? wrap ? 'wrap' : unwrap ? 'unwrap' : erc20_transfer ? 'erc20_transfer' : type || 'deposit_address' : type
 
   const {
     source_chain,
@@ -339,7 +340,7 @@ export default () => {
   } = { ...send }
 
   destination_chain = unwrap?.destination_chain || destination_chain || link?.destination_chain
-  sender_address = wrap?.sender_address || sender_address
+  sender_address = wrap?.sender_address || erc20_transfer?.sender_address || sender_address
 
   let {
     original_source_chain,
@@ -350,7 +351,7 @@ export default () => {
 
   original_source_chain = send?.original_source_chain || original_source_chain
   original_destination_chain = send?.original_destination_chain || original_destination_chain
-  deposit_address = wrap?.deposit_address || unwrap?.deposit_address_link || send?.recipient_address || deposit_address
+  deposit_address = wrap?.deposit_address || unwrap?.deposit_address_link || erc20_transfer?.deposit_address || send?.recipient_address || deposit_address
   recipient_address = unwrap?.recipient_address || recipient_address
 
   const source_chain_data = getChain(original_source_chain, chains_data) || getChain(source_chain, chains_data)
@@ -370,7 +371,7 @@ export default () => {
   let symbol = contract_data?.symbol || ibc_data?.symbol || asset_data?.symbol || denom
   let image = contract_data?.image || ibc_data?.image || asset_data?.image
 
-  if (['wrap', 'unwrap'].includes(type) ||  wrap || unwrap) {
+  if (['wrap', 'unwrap'].includes(type) || wrap || unwrap) {
     if (['W', 'axlW'].findIndex(p => symbol?.startsWith(p)) > -1) {
       symbol = symbol.substring(symbol.indexOf('W') + 1)
 
@@ -380,120 +381,128 @@ export default () => {
     }
   }
 
-  const steps =
-    [
-      ['deposit_address'].includes(type) &&
-      {
-        id: 'link',
-        title: 'Linked',
-        chain_data: axelar_chain_data,
-        data: link,
-        id_field: 'txhash',
-      },
-      {
-        id: 'send',
-        title: 'Sent',
-        chain_data: source_chain_data,
-        data: ['wrap'].includes(type) ? wrap : send,
-        id_field: 'txhash',
-      },
-      ['wrap'].includes(type) &&
-      {
-        id: 'wrap',
-        title: 'Wrapped',
-        chain_data: source_chain_data,
-        data: send,
-        // id_field: 'tx_hash_wrap',
-        id_field: 'txhash',
-      },
-      !['send_token', 'wrap'].includes(type) &&
-      {
-        id: 'confirm',
-        title: 'Confirmed',
-        chain_data: axelar_chain_data,
-        data: confirm,
-        id_field: 'txhash',
-      },
-      (evm_chains_data || []).findIndex(c => c?.id === source_chain_data?.id) > -1 &&
-      {
-        id: 'vote',
-        title: 'Approved',
-        chain_data: axelar_chain_data,
-        data: vote,
-        id_field: 'poll_id',
-        path: '/evm-poll/{id}',
-      },
-      (evm_chains_data || []).findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
-      {
-        id: 'command',
-        title: 'Received',
-        data: command,
-        ...(
-          command?.transactionHash ?
-            {
-              chain_data: destination_chain_data,
-              id_field: 'transactionHash',
-            } :
-            {
-              chain_data: axelar_chain_data,
-              id_field: 'batch_id',
-              path: '/batch/{chain}/{id}',
-              params: {
-                chain: destination_chain_data?.id,
-              },
+  const steps = [
+    ['deposit_address'].includes(type) &&
+    {
+      id: 'link',
+      title: 'Linked',
+      chain_data: axelar_chain_data,
+      data: link,
+      id_field: 'txhash',
+    },
+    {
+      id: 'send',
+      title: 'Sent',
+      chain_data: source_chain_data,
+      data: type === 'wrap' ? wrap : type === 'erc20_transfer' ? erc20_transfer : send,
+      id_field: 'txhash',
+    },
+    ['wrap'].includes(type) &&
+    {
+      id: 'wrap',
+      title: 'Wrapped',
+      chain_data: source_chain_data,
+      data: send,
+      // id_field: 'tx_hash_wrap',
+      id_field: 'txhash',
+    },
+    ['erc20_transfer'].includes(type) &&
+    {
+      id: 'erc20_transfer',
+      title: 'ERC20Transferred',
+      chain_data: source_chain_data,
+      data: send,
+      // id_field: 'tx_hash_transfer',
+      id_field: 'txhash',
+    },
+    !['send_token', 'wrap', 'erc20_transfer'].includes(type) &&
+    {
+      id: 'confirm',
+      title: 'Confirmed',
+      chain_data: axelar_chain_data,
+      data: confirm,
+      id_field: 'txhash',
+    },
+    (evm_chains_data || []).findIndex(c => c?.id === source_chain_data?.id) > -1 &&
+    {
+      id: 'vote',
+      title: 'Approved',
+      chain_data: axelar_chain_data,
+      data: vote,
+      id_field: 'poll_id',
+      path: '/evm-poll/{id}',
+    },
+    (evm_chains_data || []).findIndex(c => c?.id === destination_chain_data?.id) > -1 &&
+    {
+      id: 'command',
+      title: 'Received',
+      data: command,
+      ...(
+        command?.transactionHash ?
+          {
+            chain_data: destination_chain_data,
+            id_field: 'transactionHash',
+          } :
+          {
+            chain_data: axelar_chain_data,
+            id_field: 'batch_id',
+            path: '/batch/{chain}/{id}',
+            params: {
+              chain: destination_chain_data?.id,
             },
-        ),
-      },
-      (cosmos_chains_data || []).filter(c => c?.id !== axelar_chain_data.id).findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
-      {
-        id: 'ibc_send',
-        title: 'Received',
-        chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
-        data: ibc_send,
-        id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.ack_txhash ? 'ack_txhash' : ibc_send?.failed_txhash ? 'failed_txhash' : 'txhash',
-      },
-      [axelar_chain_data].findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
-      {
-        id: 'axelar_transfer',
-        title: 'Received',
-        chain_data: axelar_chain_data,
-        data: axelar_transfer,
-        id_field: 'txhash',
-      },
-      ['unwrap'].includes(type) &&
-      {
-        id: 'unwrap',
-        title: 'Unwrapped',
-        chain_data: destination_chain_data,
-        data: unwrap,
-        id_field: 'tx_hash_unwrap',
-        // id_field: 'txhash',
-      },
-    ]
-    .filter(s => s)
-    .map((s, i) => {
-      const {
-        id,
-        data,
-      } = { ...s }
+          },
+      ),
+    },
+    (cosmos_chains_data || []).filter(c => c?.id !== axelar_chain_data.id).findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
+    {
+      id: 'ibc_send',
+      title: 'Received',
+      chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
+      data: ibc_send,
+      id_field: ibc_send?.recv_txhash ? 'recv_txhash' : ibc_send?.ack_txhash ? 'ack_txhash' : ibc_send?.failed_txhash ? 'failed_txhash' : 'txhash',
+    },
+    [axelar_chain_data].findIndex(c => c?.id === destination_chain_data?.id || destination_chain_data?.overrides?.[c?.id]) > -1 &&
+    {
+      id: 'axelar_transfer',
+      title: 'Received',
+      chain_data: axelar_chain_data,
+      data: axelar_transfer,
+      id_field: 'txhash',
+    },
+    ['unwrap'].includes(type) &&
+    {
+      id: 'unwrap',
+      title: 'Unwrapped',
+      chain_data: destination_chain_data,
+      data: unwrap,
+      id_field: 'tx_hash_unwrap',
+      // id_field: 'txhash',
+    },
+  ]
+  .filter(s => s)
+  .map((s, i) => {
+    const {
+      id,
+      data,
+    } = { ...s }
 
-      return {
-        ...s,
-        i,
-        finish:
-          !!(
-            id === 'command' ?
-              data?.executed || data?.transactionHash :
-              id === 'ibc_send' ?
-                data?.ack_txhash || (data?.recv_txhash && !data.failed_txhash) :
-                id === 'send' ?
-                  status !== 'failed' :
-                  id === 'unwrap' ?
-                    data?.tx_hash_unwrap :
-                    data
-          ),
-      }
-    })
+    return {
+      ...s,
+      i,
+      finish:
+        !!(
+          id === 'command' ?
+            data?.executed || data?.transactionHash :
+            id === 'ibc_send' ?
+              data?.ack_txhash || (data?.recv_txhash && !data.failed_txhash) :
+              id === 'send' ?
+                status !== 'failed' :
+                id === 'unwrap' ?
+                  data?.tx_hash_unwrap :
+                  data
+        ),
+    }
+  })
 
   const current_step =
     steps.findIndex(s => s.finish) < 0 ?
@@ -522,9 +531,9 @@ export default () => {
               type &&
               (
                 <div className={`${titleClassName}`}>
-                  {['deposit_address', 'send_token', 'wrap', 'unwrap'].includes(type) ?
+                  {['deposit_address', 'send_token', 'wrap', 'unwrap', 'erc20_transfer'].includes(type) ?
                     <span className="normal-case">
-                      Transfer via {['wrap', 'unwrap'].includes(type) ? 'Deposit Service' : name(type)}
+                      Transfer via {['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'Deposit Service' : name(type)}
                     </span> :
                     type
                   }
@@ -640,7 +649,7 @@ export default () => {
                     (
                       <div className="flex flex-col">
                         <span className="text-slate-400 dark:text-slate-200 font-medium">
-                          {['send_token'].includes(type) ? 'Gateway address' : ['wrap'].includes(type) ? 'Contract address' : 'Deposit address'}
+                          {['send_token'].includes(type) ? 'Gateway address' : ['wrap', 'erc20_transfer'].includes(type) ? 'Contract address' : 'Deposit address'}
                         </span>
                         {deposit_address.startsWith('0x') ?
                           <div className="flex items-center space-x-1">

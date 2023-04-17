@@ -167,14 +167,16 @@ export default () => {
             {
               query: {
                 bool: {
-                  should:
-                    [
-                      { match: { 'send.txhash': input } },
-                      { match: { 'wrap.txhash': input } },
-                      { match: { 'command.transactionHash': input } },
-                      { match: { 'unwrap.txhash': input } },
-                      { match: { 'unwrap.tx_hash_unwrap': input } },
-                    ],
+                  should: [
+                    { match: { 'send.txhash': input } },
+                    { match: { 'wrap.txhash': input } },
+                    { match: { 'wrap.tx_hash_wrap': input } },
+                    { match: { 'command.transactionHash': input } },
+                    { match: { 'unwrap.txhash': input } },
+                    { match: { 'unwrap.tx_hash_unwrap': input } },
+                    { match: { 'erc20_transfer.txhash': input } },
+                    { match: { 'erc20_transfer.tx_hash_transfer': input } },
+                  ],
                   minimum_should_match: 1,
                 },
               },
