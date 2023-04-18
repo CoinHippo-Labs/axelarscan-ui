@@ -906,7 +906,7 @@ export default (
                     ['erc20_transfer'].includes(type) &&
                     {
                       id: 'erc20_transfer',
-                      title: 'ERC20Transferred',
+                      title: 'ERC20 Transferred',
                       chain_data: source_chain_data,
                       data: send,
                       // id_field: 'tx_hash_transfer',
