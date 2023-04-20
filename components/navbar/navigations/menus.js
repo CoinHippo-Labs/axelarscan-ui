@@ -5,7 +5,6 @@ export default [
     path: '/validators',
     others_paths: [
       '/validators/[status]',
-      '/validators/tier',
       '/validator/[address]',
     ],
   },

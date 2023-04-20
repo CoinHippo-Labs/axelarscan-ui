@@ -749,21 +749,13 @@ export default () => {
             default:
               response =
                 await all_validators(
-                  ['/validators/tier'].includes(pathname) ? {} : null,
+                  null,
                   validators_data,
                   null,
                   null,
                   null,
                   assets_data,
                 )
-
-              if (['/validators/tier'].includes(pathname)) {
-                const {
-                  data,
-                } = { ...response }
-
-                response = await all_validators_broadcaster(data, null, assets_data)
-              }
               break
           }
 
