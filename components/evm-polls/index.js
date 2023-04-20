@@ -855,7 +855,7 @@ export default () => {
                         {url ?
                           <>
                             <a
-                              href={`${url}/${transaction_path?.replace('{tx}', value)}`}
+                              href={`${url}${transaction_path?.replace('{tx}', value)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"

@@ -845,6 +845,16 @@ export default () => {
         </div>
       </div>
       {
+        process.env.NEXT_PUBLIC_STATUS_MESSAGE &&
+        (
+          <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 overflow-auto flex items-center justify-center">
+            <span className="whitespace-nowrap text-slate-500 dark:text-slate-300">
+              {process.env.NEXT_PUBLIC_STATUS_MESSAGE}
+            </span>
+          </div>
+        )
+      }
+      {
         process.env.NEXT_PUBLIC_REINDEXING === 'true' &&
         (
           <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 overflow-auto flex items-center justify-center">
