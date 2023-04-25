@@ -28,7 +28,7 @@ import { getChain } from '../../lib/object/chain'
 import { number_format, ellipse, equalsIgnoreCase, total_time_string, loader_color, sleep } from '../../lib/utils'
 import IAxelarExecutable from '../../data/contracts/interfaces/IAxelarExecutable.json'
 
-const MIN_GAS_REMAIN_AMOUNT = 0.00001
+const MIN_GAS_REMAIN_AMOUNT = 0.000001
 
 export default () => {
   const {
@@ -812,7 +812,7 @@ export default () => {
 
   const approveButton =
     call && (confirm || moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 5) && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
-    !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) &&
+    !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || !gas?.gas_remain_amount) &&
     moment().diff(moment((confirm || call).block_timestamp * 1000), 'minutes') >= 1 &&
     (
       <div className="flex items-center space-x-2">
