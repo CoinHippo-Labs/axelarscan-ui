@@ -542,7 +542,7 @@ export default (
                                       {number_format(gas.gas_paid_amount - (refunded?.amount || 0), '0,0.00000000', true)}
                                     </span>
                                     <span>
-                                      {fees.source_token?.symbol || _.head(chain_data?.provider_params)?.nativeCurrency?.symbol}
+                                      {fees?.source_token?.symbol || _.head(chain_data?.provider_params)?.nativeCurrency?.symbol}
                                     </span>
                                   </span>
                                 </div>
