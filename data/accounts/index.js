@@ -340,7 +340,7 @@ export default [
   {
     address: '0xC19d317c84e43F93fFeBa146f4f116A6F2B04663',
     name: 'Stake DAO Ethereum State Sender',
-    image: '/logos/accounts/stakedao.svg',
+    image: '/logos/accounts/stakeDAO.svg',
     environment: 'mainnet',
   },
 ]
