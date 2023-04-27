@@ -1695,6 +1695,7 @@ export default () => {
 
                 const {
                   gas_express_fee_amount,
+                  gas_remain_amount,
                 } = { ...gas }
 
                 const {
@@ -2878,60 +2879,93 @@ export default () => {
                         ['refunded'].includes(s.id) && receipt?.status === 1 && source_token?.token_price?.usd && destination_native_token?.token_price?.usd && refunded_amount > 0 &&
                         (!(executed?.block_timestamp || error?.block_timestamp) || block_timestamp !== (executed?.block_timestamp || error?.block_timestamp)) &&
                         (
-                          <div className={rowClassName}>
-                            <span className={rowTitleClassName}>
-                              Gas Refunded
-                            </span>
-                            <div className="flex flex-wrap items-center">
-                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2">
-                                {
-                                  source_gas_data?.image &&
-                                  (
-                                    <Image
-                                      src={source_gas_data.image}
-                                      className="w-5 h-5 rounded-full"
-                                    />
-                                  )
-                                }
-                                <span className="text-sm font-medium">
-                                  <span className="mr-1">
-                                    {number_format(refunded_amount, '0,0.00000000', true)}
+                          <>
+                            {
+                              gas_remain_amount > refunded_amount &&
+                              (
+                                <div className={rowClassName}>
+                                  <span className={rowTitleClassName}>
+                                    Refund Tx Gas Estimate
                                   </span>
-                                  <span>
-                                    {ellipse(source_gas_data?.symbol)}
-                                  </span>
-                                </span>
-                              </div>
-                              {(refunded_more_transactions || [])
-                                .filter(r => r?.amount > 0)
-                                .map((r, j) => {
-                                  const {
-                                    transactionHash,
-                                    amount,
-                                  } = { ...r }
-
-                                  return (
-                                    <a
-                                      key={j}
-                                      href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1"
-                                    >
-                                      <span className="text-2xs font-medium">
+                                  <div className="flex flex-wrap items-center">
+                                    <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2">
+                                      {
+                                        source_gas_data?.image &&
+                                        (
+                                          <Image
+                                            src={source_gas_data.image}
+                                            className="w-5 h-5 rounded-full"
+                                          />
+                                        )
+                                      }
+                                      <span className="text-sm font-medium">
                                         <span className="mr-1">
-                                          {number_format(amount, '+0,0.00000000', true)}
+                                          {number_format(gas_remain_amount - refunded_amount, '0,0.00000000', true)}
                                         </span>
                                         <span>
-                                          {ellipse(source_gas_data.symbol)}
+                                          {ellipse(source_gas_data?.symbol)}
                                         </span>
                                       </span>
-                                    </a>
-                                  )
-                                })
-                              }
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            <div className={rowClassName}>
+                              <span className={rowTitleClassName}>
+                                Gas Refunded
+                              </span>
+                              <div className="flex flex-wrap items-center">
+                                <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 mr-1 py-1 px-2">
+                                  {
+                                    source_gas_data?.image &&
+                                    (
+                                      <Image
+                                        src={source_gas_data.image}
+                                        className="w-5 h-5 rounded-full"
+                                      />
+                                    )
+                                  }
+                                  <span className="text-sm font-medium">
+                                    <span className="mr-1">
+                                      {number_format(refunded_amount, '0,0.00000000', true)}
+                                    </span>
+                                    <span>
+                                      {ellipse(source_gas_data?.symbol)}
+                                    </span>
+                                  </span>
+                                </div>
+                                {(refunded_more_transactions || [])
+                                  .filter(r => r?.amount > 0)
+                                  .map((r, j) => {
+                                    const {
+                                      transactionHash,
+                                      amount,
+                                    } = { ...r }
+
+                                    return (
+                                      <a
+                                        key={j}
+                                        href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1"
+                                      >
+                                        <span className="text-2xs font-medium">
+                                          <span className="mr-1">
+                                            {number_format(amount, '+0,0.00000000', true)}
+                                          </span>
+                                          <span>
+                                            {ellipse(source_gas_data.symbol)}
+                                          </span>
+                                        </span>
+                                      </a>
+                                    )
+                                  })
+                                }
+                              </div>
                             </div>
-                          </div>
+                          </>
                         )
                       }
                       {
