@@ -3289,7 +3289,7 @@ export default () => {
                                         >
                                           {ellipse(e.value, 256)}
                                           <a
-                                            href="https://docs.axelar.dev/dev/monitor-recover/recovery"
+                                            href="https://docs.axelar.dev/dev/general-message-passing/recovery"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="text-blue-400 dark:text-blue-500 text-xs font-normal ml-1"
