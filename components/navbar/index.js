@@ -842,7 +842,7 @@ export default () => {
         process.env.NEXT_PUBLIC_STATUS_MESSAGE &&
         (
           <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 overflow-auto flex items-center justify-center">
-            <span className="whitespace-nowrap text-slate-500 dark:text-slate-300">
+            <span className="status-message whitespace-nowrap text-slate-500 dark:text-slate-300">
               <Linkify>
                 {parse(process.env.NEXT_PUBLIC_STATUS_MESSAGE)}
               </Linkify>
