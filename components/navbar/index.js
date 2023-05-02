@@ -4,6 +4,8 @@ import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
 import { BigNumber, Contract, constants, providers, utils } from 'ethers'
+import Linkify from 'react-linkify'
+import parse from 'html-react-parser'
 
 import Logo from './logo'
 import DropdownNavigations from './navigations/dropdown'
@@ -841,7 +843,9 @@ export default () => {
         (
           <div className="w-full h-8 bg-slate-100 dark:bg-zinc-900 overflow-auto flex items-center justify-center">
             <span className="whitespace-nowrap text-slate-500 dark:text-slate-300">
-              {process.env.NEXT_PUBLIC_STATUS_MESSAGE}
+              <Linkify>
+                {parse(process.env.NEXT_PUBLIC_STATUS_MESSAGE)}
+              </Linkify>
             </span>
           </div>
         )
