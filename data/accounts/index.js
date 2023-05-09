@@ -334,7 +334,7 @@ export default [
   {
     address: '0x41FdF36Ae744c47097CE253A3CBb327640bf4fa7',
     name: 'Hibiki.finance Bridge',
-    image: '/logos/accounts/hibikifinance.png',
+    image: '/logos/accounts/hibikifinance.svg',
     environment: 'mainnet',
   },
   {
