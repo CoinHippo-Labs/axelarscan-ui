@@ -1921,9 +1921,7 @@ export default () => {
                 }
 
                 const refunded_amount = gasFeeAmount && refunded?.amount
-
                 const from = receipt?.from || transaction?.from
-
                 const to =
                   !['executed', 'refunded'].includes(s.id) ?
                     contract_address :
@@ -1943,7 +1941,7 @@ export default () => {
                   icon,
                 } = { ...explorer }
 
-                const destination_address_chain_data = to?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? axelar_chain_data : destination_chain_data
+                const destination_address_chain_data = to?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? axelar_chain_data : ['call', 'gas_paid', 'express_executed'].includes(s.id) ? source_chain_data : destination_chain_data
                 const destination_address_explorer = destination_address_chain_data?.explorer
                 const from_address_explorer = (from?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) ? axelar_chain_data : chain_data)?.explorer
 
