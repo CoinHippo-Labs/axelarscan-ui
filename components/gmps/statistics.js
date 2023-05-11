@@ -121,6 +121,7 @@ export default () => {
                   'executed',
                   'error',
                   'insufficient_fee',
+                  'not_enough_gas_to_execute',
                   'no_created_at',
                 ]
                 .includes(status?.toLowerCase()) ?

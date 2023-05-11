@@ -78,6 +78,7 @@ export default () => {
                 'executed',
                 'error',
                 'insufficient_fee',
+                'not_enough_gas_to_execute',
                 'no_created_at',
               ]
               .includes(status?.toLowerCase()) ?
@@ -217,6 +218,7 @@ export default () => {
         { value: 'executed', title: 'Executed' },
         { value: 'error', title: 'Error Execution' },
         { value: 'insufficient_fee', title: 'Insufficient Fee' },
+        { value: 'not_enough_gas_to_execute', title: 'Not Enough Gas' },
       ],
     },
     {
