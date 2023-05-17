@@ -10,7 +10,7 @@ import CrossChainMetrics from './cross-chain-metrics'
 import Blocks from '../blocks'
 import Transactions from '../transactions'
 import { inflation as getInflation } from '../../lib/api/inflation'
-import { transfers_stats } from '../../lib/api/transfer'
+import { transfers_stats, cumulative_volume } from '../../lib/api/transfer'
 import { stats as GMPStats, total_volume as GMPTotalVolume } from '../../lib/api/gmp'
 import { getChain } from '../../lib/object/chain'
 import { assetManager } from '../../lib/object/asset'
@@ -139,10 +139,12 @@ export default () => {
             data,
           } = { ...response }
 
+          const _response = await cumulative_volume()
+
           setTransfers(
             {
-              num_txs: _.sumBy(data, 'num_txs'),
-              volume: _.sumBy(data, 'volume'),
+              num_txs: _.sumBy(_response?.data || data, 'num_txs'),
+              volume: _.sumBy(_response?.data || data, 'volume'),
               num_chains: chains_data.filter(c => !c?.maintainer_id || !c?.no_inflation || c?.gateway_address).length,
               network_graph_data:
                 _.orderBy(
