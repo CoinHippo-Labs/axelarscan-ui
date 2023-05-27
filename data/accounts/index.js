@@ -343,4 +343,10 @@ export default [
     image: '/logos/accounts/stakeDAO.svg',
     environment: 'mainnet',
   },
+  {
+    address: '0xa7E953CeF9F49Ed383F4438787232B7A09B2ace1',
+    name: 'MintDAO Spaceship',
+    image: '/logos/accounts/MintDAOSpaceship.svg',
+    environment: 'mainnet',
+  },
 ]
