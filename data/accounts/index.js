@@ -343,4 +343,28 @@ export default [
     image: '/logos/accounts/stakeDAO.svg',
     environment: 'mainnet',
   },
+  {
+    address: '0xB8D85A5e0c5e3354d35d576818B57AEd0300dE16',
+    name: 'Prime Protocol',
+    image: '/logos/accounts/prime.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xbe54BaFC56B468d4D20D609F0Cf17fFc56b99913',
+    name: 'Prime Protocol Arbitrum',
+    image: '/logos/accounts/Prime_Logo_Blue_SVG_NEWBLUE.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x0cD070285380cabfc3be55176928dc8A55e6d2A7',
+    name: 'Prime Protocol Avalanche',
+    image: '/logos/accounts/Prime_Logo_Blue_SVG_NEWBLUE.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xfb3330531E3f98671296f905cd82CC407d90CE97',
+    name: 'Prime Protocol Ethereum',
+    image: '/logos/accounts/Prime_Logo_Blue_SVG_NEWBLUE.svg',
+    environment: 'mainnet',
+  },
 ]
