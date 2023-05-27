@@ -343,4 +343,46 @@ export default [
     image: '/logos/accounts/stakeDAO.svg',
     environment: 'mainnet',
   },
+  {
+    address: '0xc1248efE4CeE8e2341Bc736Fcc634067c64A55A6',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x8201ADAcd11243d1D420DddDF2778b57aEE8A36c',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xDc9B12DCe8297411d67FF4091Ac0E8574B5D5Adc',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xF3BdDcb3719Cd02F574C5837D93ebFD2E90cf31C',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x29C4dE1AF44f1a0Cae73b67646f30bF1Dd92A884',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xD0FFD6fE14b2037897Ad8cD072F6d6DE30CF8e56',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x385549FdaC3460c45D7aB2A12b416916119a93Fb',
+    name: 'MintDAO Bridge',
+    image: '/logos/accounts/MintDAOBridge.svg',
+    environment: 'mainnet',
+  },
 ]
