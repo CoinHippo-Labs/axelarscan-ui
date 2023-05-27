@@ -345,7 +345,7 @@ export default [
   },
   {
     address: '0xB8D85A5e0c5e3354d35d576818B57AEd0300dE16',
-    name: 'Prime Protocol Moonbeam',
+    name: 'Prime Protocol',
     image: '/logos/accounts/Prime_Logo_Blue_SVG_NEWBLUE.svg',
     environment: 'mainnet',
   },
