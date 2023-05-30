@@ -878,7 +878,7 @@ export default () => {
       </>
     )
 
-  const gasAddButton = (is_insufficient_fee || !(gas_paid || gas_paid_to_callback)) &&
+  const gasAddButton = (is_insufficient_fee/* || !(gas_paid || gas_paid_to_callback)*/) &&
     !executed && !is_executed && chain_type !== 'cosmos' &&
     (is_not_enough_gas || !(gas_paid || gas_paid_to_callback) || is_insufficient_fee || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT || not_enough_gas_to_execute) &&
     (
