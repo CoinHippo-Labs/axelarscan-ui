@@ -1695,6 +1695,7 @@ export default () => {
 
                 const {
                   gas_express_fee_amount,
+                  gas_approve_amount,
                   gas_remain_amount,
                 } = { ...gas }
 
@@ -1762,6 +1763,7 @@ export default () => {
                 const {
                   gasUsed,
                   effectiveGasPrice,
+                  l1Fee,
                 } = { ...event_receipt }
                 let {
                   gasPrice,
@@ -1828,6 +1830,9 @@ export default () => {
                             .mulUnsafe(
                               FixedNumber.fromString(BigNumber.from(gasPrice).toString())
                             )
+                            .addUnsafe(
+                              FixedNumber.fromString((l1Fee || '0').toString())
+                            )
                             .mulUnsafe(
                               FixedNumber.fromString((destination_native_token.token_price.usd / source_token.token_price.usd).toFixed(decimals))
                             )
@@ -1852,6 +1857,7 @@ export default () => {
                     const {
                       gasUsed,
                       effectiveGasPrice,
+                      l1Fee,
                     } = { ...receipt }
                     let {
                       gasPrice,
@@ -1880,6 +1886,9 @@ export default () => {
                                 .mulUnsafe(
                                   FixedNumber.fromString(BigNumber.from(gasPrice || '0').toString())
                                 )
+                                .addUnsafe(
+                                  FixedNumber.fromString((l1Fee || '0').toString())
+                                )
                                 .round(0)
                                 .toString()
                                 .replace('.0', ''),
@@ -1900,6 +1909,9 @@ export default () => {
                         FixedNumber.fromString(BigNumber.from(express_executed?.receipt?.gasUsed || '0').toString())
                           .mulUnsafe(
                             FixedNumber.fromString(BigNumber.from(express_executed?.receipt?.gasPrice || express_executed?.receipt?.effectiveGasPrice || express_executed?.transaction?.gasPrice || '0').toString())
+                          )
+                          .addUnsafe(
+                            FixedNumber.fromString((express_executed?.receipt?.l1Fee || '0').toString())
                           )
                           .mulUnsafe(
                             FixedNumber.fromString(
@@ -2729,7 +2741,7 @@ export default () => {
                         )
                       }
                       {
-                        ['gas_paid', 'refunded'].includes(s.id) && [typeof gas?.gas_base_fee_amount, typeof fees?.base_fee].includes('number') && source_gas_data &&
+                        ['gas_paid', 'refunded'].includes(s.id) && [typeof gas?.gas_base_fee_amount, typeof fees?.base_fee].includes('number') && source_gas_data && (s.id !== 'refunded' || !gas_approve_amount) &&
                         (
                           <div className={rowClassName}>
                             <span className={rowTitleClassName}>
@@ -2749,6 +2761,37 @@ export default () => {
                                 <span className="text-sm font-medium">
                                   <span className="mr-1">
                                     {number_format(gas?.gas_base_fee_amount || fees?.base_fee, '0,0.00000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                      {
+                        ['approved', 'refunded'].includes(s.id) && gas_approve_amount > 0 && source_gas_data &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Approve Gas
+                            </span>
+                            <div className="flex flex-wrap items-center">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 my-0.5 mr-2 py-1 px-2">
+                                {
+                                  source_gas_data.image &&
+                                  (
+                                    <Image
+                                      src={source_gas_data.image}
+                                      className="w-5 h-5 rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  <span className="mr-1">
+                                    {number_format(gas_approve_amount, '0,0.00000000', true)}
                                   </span>
                                   <span>
                                     {ellipse(source_gas_data.symbol)}

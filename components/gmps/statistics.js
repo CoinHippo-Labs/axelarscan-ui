@@ -805,7 +805,7 @@ export default () => {
         </div>
         <div className={`${metricClassName}`}>
           <div className="text-slate-500 dark:text-slate-300 text-base font-semibold pb-1.5">
-            The Median Time Spent
+            Median Time Spent
           </div>
           <div className="space-y-2">
             {timeSpents ?

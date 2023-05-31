@@ -485,7 +485,7 @@ export default () => {
       break
     case '/tvl':
       title = 'Total Value Locked'
-      subtitle = 'Total assets on Axelar Network'
+      subtitle = 'Total assets on Axelar network'
       right = <TotalTVL />
       break
     case '/batches':

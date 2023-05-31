@@ -309,7 +309,7 @@ export default () => {
       loading: typeof gmpsCumulativeTransactions !== 'number' || !transfersCumulative?.data,
     },
     {
-      title: 'volumes',
+      title: 'volume',
       value: gmpsCumulativeVolumes + transfersCumulativeVolumes,
       prefix: currency_symbol,
       loading: typeof gmpsCumulativeVolumes !== 'number' || !transfersCumulative?.data,

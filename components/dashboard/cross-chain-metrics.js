@@ -149,7 +149,7 @@ export default (
             }
           </div>
           <span className={subtitleClassName}>
-            total transfer token volume
+            total token transfer volume
           </span>
         </a>
       </Link>
@@ -189,7 +189,7 @@ export default (
             }
           </div>
           <span className={subtitleClassName}>
-            # of cross-chain contracts
+            # of interchain contracts
           </span>
         </a>
       </Link>

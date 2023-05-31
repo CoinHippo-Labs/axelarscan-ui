@@ -335,7 +335,7 @@ export default () => {
               <Link href="/transfers">
                 <a>
                   <h2 className="text-black dark:text-white uppercase tracking-wider text-base font-medium">
-                    Axelar Cross-Chain Activities
+                    Axelar Cross-Chain Activity
                   </h2>
                 </a>
               </Link>
