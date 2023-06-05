@@ -63,10 +63,25 @@ export default () => {
   const [balances, setBalances] = useState(null)
   const [delegations, setDelegations] = useState(null)
   const [redelegations, setRedelegations] = useState(null)
-  const [unbondings, setunbondings] = useState(null)
+  const [unbondings, setUnbondings] = useState(null)
   const [rewards, setRewards] = useState(null)
   const [commissions, setCommissions] = useState(null)
   const [depositAddresses, setDepositAddresses] = useState(null)
+
+  useEffect(
+    () => {
+      if (address) {
+        setBalances(null)
+        setDelegations(null)
+        setRedelegations(null)
+        setUnbondings(null)
+        setRewards(null)
+        setCommissions(null)
+        setDepositAddresses(null)
+      }
+    },
+    [address],
+  )
 
   useEffect(
     () => {
@@ -607,7 +622,7 @@ export default () => {
             data,
           } = { ...response }
 
-          setunbondings(
+          setUnbondings(
             Array.isArray(data) ?
               data
                 .flatMap(u =>
