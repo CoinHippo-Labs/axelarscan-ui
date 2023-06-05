@@ -249,11 +249,7 @@ export default () => {
         }
         else if (
           address?.startsWith(process.env.NEXT_PUBLIC_PREFIX_ACCOUNT) &&
-          assets_data &&
-          (
-            !validators_data ||
-            !balances
-          )
+          assets_data && validators_data && !balances
         ) {
           const response =
             await all_bank_balances(
@@ -324,7 +320,7 @@ export default () => {
 
       getData()
     },
-    [address, assets_data, validators_data],
+    [address, assets_data, validators_data, balances],
   )
 
   useEffect(
