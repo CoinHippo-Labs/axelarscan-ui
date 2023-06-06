@@ -392,6 +392,9 @@ export default (
 
                   const {
                     chain,
+                    chain_type,
+                    logIndex,
+                    receipt,
                   } = { ...call }
 
                   const chain_data = getChain(chain, chains_data)
@@ -408,7 +411,7 @@ export default (
 
                   return (
                     <div className="min-w-max flex items-center space-x-1">
-                      <Link href={`/gmp/${call?.transactionHash}:${call?.logIndex}`}>
+                      <Link href={`/gmp/${call?.transactionHash}${chain_type === 'evm' && receipt && typeof logIndex === 'number' ? `:${logIndex}` : ''}`}>
                         <a
                           target="_blank"
                           rel="noopener noreferrer"
