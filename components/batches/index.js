@@ -692,7 +692,7 @@ export default () => {
                                   )
                                 }
                                 {
-                                  symbol &&
+                                  symbol && !['approveContractCall'].includes(type) &&
                                   (
                                     <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2">
                                       {

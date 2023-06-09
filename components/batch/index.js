@@ -845,6 +845,7 @@ export default () => {
                   Cell: props => {
                     const {
                       params,
+                      type,
                     } = { ...props.row.original }
 
                     let {
@@ -878,7 +879,7 @@ export default () => {
 
                     return (
                       <div className="flex items-center space-x-2">
-                        {symbol ?
+                        {symbol && !['approveContractCall'].includes(type) ?
                           <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5">
                             {
                               image &&
