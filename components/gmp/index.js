@@ -919,8 +919,8 @@ export default () => {
     )
 
   const refundButton =
-    !approveButton && !executeButton && !no_gas_remain &&
-    ((executed && call?.chain_type !== 'cosmos' && (!callback || moment().diff(moment((executed.block_timestamp) * 1000), 'minutes') >= 10)) || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
+    !approveButton && !executeButton && !no_gas_remain && call?.chain_type !== 'cosmos' &&
+    ((executed && (!callback || moment().diff(moment((executed.block_timestamp) * 1000), 'minutes') >= 10)) || error || is_executed || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     (
       editable ||
