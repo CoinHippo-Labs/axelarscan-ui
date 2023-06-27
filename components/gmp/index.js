@@ -2690,6 +2690,9 @@ export default () => {
                                             .mulUnsafe(
                                               FixedNumber.fromString(BigNumber.from(express_executed.receipt.gasPrice || express_executed.receipt.effectiveGasPrice || express_executed.transaction.gasPrice).toString())
                                             )
+                                            .addUnsafe(
+                                              FixedNumber.fromString((l1Fee || '0').toString())
+                                            )
                                             .round(0)
                                             .toString()
                                             .replace('.0', ''),
