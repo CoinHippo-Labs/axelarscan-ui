@@ -2775,6 +2775,37 @@ export default () => {
                         )
                       }
                       {
+                        ['gas_paid'].includes(s.id) && [typeof fees?.express_fee].includes('number') && source_gas_data && fees.express_fee > 0 &&
+                        (
+                          <div className={rowClassName}>
+                            <span className={rowTitleClassName}>
+                              Express Fee
+                            </span>
+                            <div className="flex flex-wrap items-center">
+                              <div className="min-w-max max-w-min bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center sm:justify-end space-x-1.5 py-1 px-2 mb-0.5 mr-1">
+                                {
+                                  source_gas_data.image &&
+                                  (
+                                    <Image
+                                      src={source_gas_data.image}
+                                      className="w-5 h-5 rounded-full"
+                                    />
+                                  )
+                                }
+                                <span className="text-sm font-medium">
+                                  <span className="mr-1">
+                                    {number_format(fees.express_fee, '0,0.00000000', true)}
+                                  </span>
+                                  <span>
+                                    {ellipse(source_gas_data.symbol)}
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      }
+                      {
                         ['approved', 'refunded'].includes(s.id) && gas_approve_amount > 0 && source_gas_data &&
                         (
                           <div className={rowClassName}>
