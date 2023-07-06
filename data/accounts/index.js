@@ -302,6 +302,12 @@ export default [
     environment: 'testnet',
   },
   {
+    address: '0x481A2AAE41cd34832dDCF5A79404538bb2c02bC8',
+    name: 'Squid Router',
+    image: '/logos/accounts/squid.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xce16F69375520ab01377ce7B88f5BA8C48F8D666',
     name: 'Squid Router',
     image: '/logos/accounts/squid.svg',
