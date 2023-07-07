@@ -752,6 +752,7 @@ export default () => {
     payload,
     symbol,
     amount,
+    messageId,
   } = { ...call?.returnValues }
 
   const {
@@ -3504,6 +3505,27 @@ export default () => {
                 (
                   <div className="w-fit bg-slate-100 dark:bg-slate-900 rounded-lg text-slate-400 dark:text-slate-200 text-base font-medium p-3">
                     No refund for this GMP call.
+                  </div>
+                )
+              }
+              {
+                messageId &&
+                (
+                  <div className="sm:col-span-4 space-y-2">
+                    <span className="text-base font-medium">
+                      messageId
+                    </span>
+                    <div className="flex items-start">
+                      <div className="w-full bg-slate-100 dark:bg-slate-900 break-all rounded-lg text-slate-400 dark:text-slate-600 text-xs lg:text-sm mr-2 p-4">
+                        {messageId}
+                      </div>
+                      <div className="mt-4">
+                        <Copy
+                          size={20}
+                          value={messageId}
+                        />
+                      </div>
+                    </div>
                   </div>
                 )
               }
