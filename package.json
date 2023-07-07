@@ -67,6 +67,7 @@
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",
     "postcss-color-function": "^4.1.0",
+    "strip-ansi": "^7.1.0",
     "tailwindcss": "^3.2.4"
   }
 }
