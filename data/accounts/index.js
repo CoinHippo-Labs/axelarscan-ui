@@ -20,6 +20,211 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: '0x98a9f66B504656849E917FcB451b67B0B073B807',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xCF6b36411e781bdf8C1dfc4feb9A13B917125418',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x976655e6AB266BE605A5A7f078183fce20fc05d8',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x1c55A08B1EA01e38Fc1298DC15B633512D5dc4d3',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xF448aEbCfcAF592fFa552439A079F2c9cFB18c0f',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xACFfbAB9457dF8FbAf677e37FCBa46d828b094fa',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x7EFD573fC5f053929c37D97A9C6904c34BDe2401',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x03A1964EB788F7b92d4860E11cFbD3453CF6dd6b',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xf2178D315A4abfBE226bB8B11ebCc8015DEFbbc0',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xF2CA2af571d129DA1839Bf85999D38dE3d835f05',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x644C8E4e37c5572195B6B2959a3990e358233fb5',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x915ab0f6a107248A7290b85F3CC1A756b6273D9a',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xAc291fa43507Ec5a90a201FB7744Eb264e43780d',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x5e7005086dBD8C5A39e467Aa18797fc12f362749',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x6c2E15d4aF1E131221B0997D919e7eB2765D8BE6',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x21b79D638924087041CdCE1C32625F6484E72782',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x89fdd396Ea058Cf481084A47140468DF8bAd4515',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xbEB4A8682123336B8E397eAdf74c0B81525Dd603',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xceA795Cf6742FaDC6E5D5Aa42B40B1545808EA73',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x345662ABfE0E257E23552A434D02Ef274cCb6A90',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xB8Cd93C83A974649D76B1c19f311f639e62272BC',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xE743a49F04F2f77eB2D3b753aE3AD599dE8CEA84',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x026369E9Cb73968eB1D1E592F2471A4270ab0298',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x0678148255C0F9625281F67A507Cf60C04569c63',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x0944a864d27E080714799D93348cE267226E2842',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x145579b05203ed17Cff187968934aa49E0277065',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x9fAf6AFD108Af77A99eEa2Fb660eC4c313D94B8E',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x03a190f83469D12738ABd73000B36ebB1105436F',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xeA3361F69bDc6d22c0f34d85C2441f86CEC5aE61',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x7e2599073136445eD8601d099Fa0f40E16918057',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x276D13405a48aD705bfe037E50C2c0d8156E3295',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xeA28A09C163894a063F7eAB78d8a54510dBc9C11',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x5d8e4976fF32c03dCd7Af09c399b77105EE8ADe6',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x994F2973C7a0530AeBA1fF66D146E506855c6424',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x88c6bb276d718e2C799De831f8277Edd0BcE71B2',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xb1110AaeF7BcfB66F203865915C5Afd99773109C',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xD2492ED9055757248415F827193Fb9A97B37E2ff',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xF36a528095303a46A6CBd4bB6BE091539fA6fea8',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x0b8e92fa7636077A4e47B1407012e55cb3511f08',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xb0a66fbC9E7ddF63dc14D90807127012f3E3E9F2',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x42f2a71077dc3DcA6E8D370c282502E3aE1A4FD4',
+    name: 'Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: 'axelar19s8q4zh3jyg9h5pe3al8ahul0e4e7xp68jrpvr',
     name: 'Imperator: IBC Relayer',
     environment: 'mainnet',
@@ -290,7 +495,19 @@ export default [
     environment: 'testnet',
   },
   {
+    address: '0xce16F69375520ab01377ce7B88f5BA8C48F8D666',
+    name: 'Squid Router',
+    image: '/logos/accounts/squid.svg',
+    environment: 'mainnet',
+  },
+  {
     address: '0xc3468a191fe51815b26535ed1f82c1f79e6ec37d',
+    name: 'Squid Router',
+    image: '/logos/accounts/squid.svg',
+    environment: 'testnet',
+  },
+  {
+    address: '0xe25e5ae59592bFbA3b5359000fb72E6c21D3228E',
     name: 'Squid Router',
     image: '/logos/accounts/squid.svg',
     environment: 'testnet',
@@ -306,12 +523,6 @@ export default [
     name: 'Squid Router',
     image: '/logos/accounts/squid.svg',
     environment: 'testnet',
-  },
-  {
-    address: '0xce16F69375520ab01377ce7B88f5BA8C48F8D666',
-    name: 'Squid Router',
-    image: '/logos/accounts/squid.svg',
-    environment: 'mainnet',
   },
   {
     address: '0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44',

@@ -47,3 +47,20 @@
     }
   }
 }
+
+.children {
+  @apply bg-white dark:bg-black;
+  min-height: calc(100vh - 184px);
+  .loading {
+    @apply w-full flex items-center justify-center;
+    min-height: calc(100vh - 184px);
+  }
+  .loading-in-tab {
+    @apply w-full flex items-center justify-center;
+    min-height: calc(100vh - 296px);
+  }
+  .loading-in-network-graph {
+    @apply w-full flex items-center justify-center;
+    min-height: 520px;
+  }
+}
