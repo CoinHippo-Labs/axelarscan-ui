@@ -7,7 +7,7 @@ import { toArray } from '../../../../lib/utils'
 export default (
   {
     data,
-    title = 'Average GMP Time',
+    title = 'GMP Time Spent',
     description = 'The median time spent of General Message Passing from each chain',
   },
 ) => {
