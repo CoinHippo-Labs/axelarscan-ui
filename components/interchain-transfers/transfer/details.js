@@ -251,7 +251,7 @@ export default ({ data }) => {
             )
 
             return value && (
-              <div className="flex flex-col space-y-1 mb-6">
+              <div className="flex flex-col space-y-1 mt-2 mb-4">
                 <div className="h-6 flex items-center space-x-1">
                   {_url ?
                     <Link href={_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 dark:text-blue-500">
@@ -329,7 +329,7 @@ export default ({ data }) => {
             )
 
             return value && (
-              <div className="h-6 flex items-center">
+              <div className="h-6 flex items-center mt-2">
                 {_url ?
                   <Link href={_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 dark:text-blue-500">
                     {component}
@@ -347,7 +347,7 @@ export default ({ data }) => {
           Cell: props => {
             const { value } = { ...props }
             return value && (
-              <div className="h-6 flex items-center">
+              <div className="h-6 flex items-center mt-2">
                 <Chip
                   color={value === 'success' ? 'green' : 'red'}
                   value={value}
@@ -383,7 +383,7 @@ export default ({ data }) => {
             }
 
             return (
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-1 mt-2">
                 {deposit_address && (
                   <Tooltip placement="top-start" content="Deposit Address">
                     <div className="h-6 flex items-center space-x-1">
@@ -435,7 +435,7 @@ export default ({ data }) => {
             const { created_at, received_at } = { ...data }
             value = value ? value * 1000 : received_at?.ms || created_at?.ms
             return value && (
-              <div className="h-6 flex items-center justify-end">
+              <div className="h-6 flex items-center justify-end mt-2">
                 <TimeAgo time={value / 1000} className="text-slate-400 dark:text-slate-500 text-xs font-medium" />
               </div>
             )

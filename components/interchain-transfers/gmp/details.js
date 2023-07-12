@@ -243,7 +243,7 @@ export default ({ data }) => {
             )
 
             return (
-              <div className="flex flex-col space-y-1 mb-6">
+              <div className="flex flex-col space-y-1 mt-2 mb-4">
                 {value && (
                   <div className="flex flex-col">
                     <div className="h-6 flex items-center space-x-1">
@@ -402,7 +402,7 @@ export default ({ data }) => {
             ])
 
             return components.length > 0 && (
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-1 mt-2">
                 {components}
               </div>
             )
@@ -423,7 +423,7 @@ export default ({ data }) => {
             const to_address = !['execute', 'refund'].includes(id) ? contract_address : id === 'refund' ? to || refundAddress : destinationContractAddress
 
             return (
-              <div className="flex flex-col space-y-1">
+              <div className="flex flex-col space-y-1 mt-2">
                 {value && (
                   <Tooltip placement="top-start" content={`${['express', 'approve', 'execute'].includes(id) ? 'Relayer' : id === 'refund' ? 'Refunder' : 'Sender'}`}>
                     <div className="h-6 flex items-center space-x-1">
@@ -451,7 +451,7 @@ export default ({ data }) => {
           Cell: props => {
             const { value } = { ...props }
             return value && (
-              <div className="h-6 flex items-center">
+              <div className="h-6 flex items-center mt-2">
                 <Chip
                   color={value === 'success' ? 'green' : 'red'}
                   value={value}
@@ -648,7 +648,7 @@ export default ({ data }) => {
             }
 
             return (
-              <div className="flex flex-col">
+              <div className="flex flex-col mt-2">
                 {component && (
                   <div className="h-6 flex items-center">
                     {component}
@@ -679,7 +679,7 @@ export default ({ data }) => {
             const { created_at } = { ...data }
             value = value ? value * 1000 : created_at?.ms
             return value && (
-              <div className="h-6 flex items-center justify-end">
+              <div className="h-6 flex items-center justify-end mt-2">
                 <TimeAgo time={value / 1000} className="text-slate-400 dark:text-slate-500 text-xs font-medium" />
               </div>
             )
