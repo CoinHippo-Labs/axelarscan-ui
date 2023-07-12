@@ -127,7 +127,7 @@ export default ({ data }) => {
           Cell: props => {
             const { value } = { ...props }
             return value && (
-              <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
+              <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium mt-2 py-1 px-2">
                 {value}
               </div>
             )
