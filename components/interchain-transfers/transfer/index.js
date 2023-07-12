@@ -53,7 +53,7 @@ export default () => {
   return (
     <div className="children px-3">
       {data && matched ?
-        <div className="max-w-6xl space-y-4 sm:space-y-6 pt-6 sm:pt-8 mx-auto">
+        <div className="max-w-6xl space-y-8 sm:space-y-12 pt-6 sm:pt-8 mx-auto">
           {!tx ?
             <span className="text-slate-400 dark:text-slate-500 text-base">
               Transaction not found

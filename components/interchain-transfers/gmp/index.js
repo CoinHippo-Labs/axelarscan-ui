@@ -619,49 +619,51 @@ export default () => {
   return (
     <div className="children px-3">
       {data && (matched || notFound) ?
-        <div className="max-w-6xl space-y-4 sm:space-y-6 pt-6 sm:pt-8 mx-auto">
+        <div className="max-w-6xl space-y-8 sm:space-y-12 pt-6 sm:pt-8 mx-auto">
           {notFound ?
             <span className="text-slate-400 dark:text-slate-500 text-base">
               Transaction not found
             </span> :
             <>
-              <Info
-                data={data}
-                buttons={
-                  Object.fromEntries(
-                    toArray([
-                      addGasButton && ['pay_gas', addGasButton],
-                      approveButton && [chain_type !== 'cosmos' && !confirm ? 'confirm' : 'approve', approveButton],
-                      (executeButton || reExecuteButton || refundButton || setExecutedButton) && ['execute', toArray([executeButton, reExecuteButton, refundButton, setExecutedButton])],
-                      setRefundedButton && ['refund', setRefundedButton],
-                    ])
-                  )
-                }
-              />
-              {response && (
-                <Alert
-                  show={!!response}
-                  color={status === 'success' ? 'green' : status === 'failed' ? 'red' : 'blue'}
-                  icon={status === 'success' ? <IoCheckmarkCircleOutline size={26} /> : status === 'failed' ? <IoCloseCircleOutline size={26} /> : <IoTimeOutline size={26} />}
-                  animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
-                  onClose={() => setResponse(null)}
-                  className="alert-box flex"
-                >
-                  <div className="flex flex-col text-base">
-                    <span>{message}</span>
-                    {hash && (
-                      <ExplorerLink
-                        value={hash}
-                        explorer={explorer}
-                        width={18}
-                        height={18}
-                        iconOnly={false}
-                        viewOnClassName="font-semibold pr-0.5"
-                      />
-                    )}
-                  </div>
-                </Alert>
-              )}
+              <div className="space-y-4 sm:space-y-6">
+                <Info
+                  data={data}
+                  buttons={
+                    Object.fromEntries(
+                      toArray([
+                        addGasButton && ['pay_gas', addGasButton],
+                        approveButton && [chain_type !== 'cosmos' && !confirm ? 'confirm' : 'approve', approveButton],
+                        (executeButton || reExecuteButton || refundButton || setExecutedButton) && ['execute', toArray([executeButton, reExecuteButton, refundButton, setExecutedButton])],
+                        setRefundedButton && ['refund', setRefundedButton],
+                      ])
+                    )
+                  }
+                />
+                {response && (
+                  <Alert
+                    show={!!response}
+                    color={status === 'success' ? 'green' : status === 'failed' ? 'red' : 'blue'}
+                    icon={status === 'success' ? <IoCheckmarkCircleOutline size={26} /> : status === 'failed' ? <IoCloseCircleOutline size={26} /> : <IoTimeOutline size={26} />}
+                    animate={{ mount: { y: 0 }, unmount: { y: 32 } }}
+                    onClose={() => setResponse(null)}
+                    className="alert-box flex"
+                  >
+                    <div className="flex flex-col text-base">
+                      <span>{message}</span>
+                      {hash && (
+                        <ExplorerLink
+                          value={hash}
+                          explorer={explorer}
+                          width={18}
+                          height={18}
+                          iconOnly={false}
+                          viewOnClassName="font-semibold pr-0.5"
+                        />
+                      )}
+                    </div>
+                  </Alert>
+                )}
+              </div>
               <Details data={data} />
               <Arguments data={data} />
             </>
