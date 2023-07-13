@@ -1,82 +1,112 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import HeadShake from 'react-reveal/HeadShake'
-import { FaHandPointLeft } from 'react-icons/fa'
+import { useState } from 'react'
+import { Menu, MenuHandler, MenuList } from '@material-tailwind/react'
 
-import menus from './menus'
+import routes from './routes'
+import { toArray, getTitle } from '../../../lib/utils'
 
-export default () => {
-  const router = useRouter()
-  const {
-    pathname,
-  } = { ...router }
+const Group = ({ title, items, pathname, className = '' }) => {
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="hidden xl:flex items-center xl:space-x-6 mx-auto">
-      {menus
-        .map(m => {
-          const {
-            id,
-            disabled,
-            emphasize,
-            title,
-            path,
-            others_paths,
-            external,
-          } = { ...m }
-
-          const selected =
-            !external &&
-            (
-              pathname === path ||
-              others_paths?.includes(pathname)
-            )
-
-          const item =
-            (
+    <Menu
+      open={isOpen}
+      handler={setIsOpen}
+      placement="bottom"
+      allowHover={true}
+      offset={{ mainAxis: 12 }}
+    >
+      <MenuHandler>
+        <div className={className}>
+          <span className="whitespace-nowrap tracking-wider">
+            {title}
+          </span>
+        </div>
+      </MenuHandler>
+      <MenuList className="w-56 bg-light dark:bg-slate-900 p-4">
+        <div className="flex flex-col space-y-4">
+          {toArray(items).map((d, i) => {
+            const { disabled, title, path, others_paths } = { ...d }
+            const external = !path?.startsWith('/')
+            const selected = !external && (pathname === path || toArray(others_paths).includes(pathname))
+            const item = (
               <span className="whitespace-nowrap tracking-wider">
                 {title}
               </span>
             )
-
-          const right_icon =
-            emphasize ?
-              <HeadShake
-                duration={1500}
-                forever
-              >
-                <FaHandPointLeft
-                  size={18}
-                />
-              </HeadShake> :
-              undefined
-
-          const className = `${disabled ? 'cursor-not-allowed' : ''} flex items-center uppercase ${selected ? 'text-blue-500 dark:text-blue-500 text-sm font-bold' : 'text-slate-600 hover:text-blue-400 dark:text-slate-300 dark:hover:text-blue-400 text-sm font-normal'} space-x-1`
-
-          return (
-            external ?
-              <a
-                key={id}
-                href={path}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={className}
-              >
-                {item}
-                {right_icon}
-              </a> :
-              <Link
-                key={id}
-                href={path}
-              >
-                <a className={className}>
+            const className = `${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} flex items-center uppercase custom-font ${selected ? 'text-blue-600 dark:text-white text-sm font-extrabold' : 'text-slate-700 hover:text-blue-400 dark:text-slate-200 dark:hover:text-slate-100 text-sm font-medium'} space-x-1.5`
+            return (
+              external ?
+                <a
+                  key={i}
+                  href={path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={className}
+                >
                   {item}
-                  {right_icon}
-                </a>
-              </Link>
-          )
-        })
-      }
+                </a> :
+                <Link key={i} href={path}>
+                  <div className={className}>
+                    {item}
+                  </div>
+                </Link>
+            )
+          })}
+        </div>
+      </MenuList>
+    </Menu>
+  )
+}
+
+export default () => {
+  const router = useRouter()
+  const { pathname } = { ...router }
+
+  return (
+    <div className="hidden xl:flex items-center xl:space-x-6 mx-auto">
+      {routes.map((r, i) => {
+        const { disabled, title, path, others_paths, group } = { ...r }
+        const is_group = group && i === routes.findIndex(r => r.group === group)
+        const external = !path?.startsWith('/')
+        const items = routes.filter(r => r.group === group)
+        const selected = (!external && (pathname === path || toArray(others_paths).includes(pathname))) || (is_group && items.findIndex(r => pathname === r.path || toArray(r.others_paths).includes(pathname)) > -1)
+        const item = (
+          <span className="whitespace-nowrap tracking-wider">
+            {title}
+          </span>
+        )
+        const className = `${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} flex items-center uppercase ${selected ? 'text-blue-600 dark:text-white text-sm font-extrabold' : 'text-slate-700 hover:text-blue-400 dark:text-slate-200 dark:hover:text-slate-100 text-sm font-medium'} space-x-1.5`
+        const component = (
+          external ?
+            <a
+              key={i}
+              href={path}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={className}
+            >
+              {item}
+            </a> :
+            <Link key={i} href={path}>
+              <div className={className}>
+                {item}
+              </div>
+            </Link>
+        )
+        return (!group || is_group) && (
+          is_group ?
+            <Group
+              key={i}
+              title={getTitle(group)}
+              items={items}
+              pathname={pathname}
+              className={className}
+            /> :
+            component
+        )
+      })}
     </div>
   )
 }

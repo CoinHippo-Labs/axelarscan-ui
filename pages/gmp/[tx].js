@@ -1,9 +1,5 @@
-import Gmp from '../../components/gmp'
+import GMP from '../../components/interchain-transfers/gmp'
 
 export default () => {
-  return (
-    <div className="max-w-6xl mx-auto">
-      <Gmp />
-    </div>
-  )
+  return <GMP />
 }

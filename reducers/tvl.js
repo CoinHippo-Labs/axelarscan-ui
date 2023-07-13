@@ -2,7 +2,7 @@ import { TVL_DATA } from './types'
 
 export default (
   state = {
-    [`${TVL_DATA}`]: null,
+    [TVL_DATA]: null,
   },
   action,
 ) => {
@@ -10,13 +10,7 @@ export default (
     case TVL_DATA:
       return {
         ...state,
-        [`${TVL_DATA}`]:
-          action.value ?
-            {
-              ...state[`${TVL_DATA}`],
-              ...action.value,
-            } :
-            {},
+        [TVL_DATA]: action.value ? { ...state[TVL_DATA], ...action.value } : {},
       }
     default:
       return state
