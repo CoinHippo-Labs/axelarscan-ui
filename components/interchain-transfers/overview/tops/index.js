@@ -170,21 +170,21 @@ export default ({ data, types }) => {
               data={getTopData(chainPairs, 'volume')}
               field="volume"
               title="Top Paths"
-              description="Top chain pairs by volumes"
+              description="Top chain pairs by volume"
               prefix="$"
             />
             <Top
               data={getTopData(sourceChains, 'volume')}
               field="volume"
               title="Top Sources"
-              description="Top sources by volumes"
+              description="Top sources by volume"
               prefix="$"
             />
             <Top
               data={getTopData(destionationChains, 'volume')}
               field="volume"
               title="Top Destinations"
-              description="Top destinations by volumes"
+              description="Top destinations by volume"
               prefix="$"
             />
           </div>
@@ -205,7 +205,7 @@ export default ({ data, types }) => {
               tab="token_transfers"
               field="volume"
               title="Top Users"
-              description="Top users by token transfers volumes"
+              description="Top users by token transfers volume"
               prefix="$"
             />
             {hasGMP && (
@@ -228,7 +228,7 @@ export default ({ data, types }) => {
                   type="contract"
                   field="volume"
                   title="Top Contracts"
-                  description="Top destination contracts by GMP volumes"
+                  description="Top destination contracts by GMP volume"
                   prefix="$"
                 />*/}
               </>

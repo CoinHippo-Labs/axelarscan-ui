@@ -79,7 +79,7 @@ export default ({ data }) => {
         gmp = GMPTotalVolume || 0
         transfers = transfersTotalVolume || 0
         total_transfers = gmp + transfers
-        title = 'Volumes'
+        title = 'Volume'
         url = '/interchain-transfers'
         loading = !(typeof GMPTotalVolume === 'number' || typeof transfersTotalVolume === 'number')
         tooltip = (
