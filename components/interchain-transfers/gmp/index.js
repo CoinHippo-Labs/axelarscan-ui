@@ -571,10 +571,9 @@ export default () => {
         </button>
       </div>
     )
-console.log({EDITABLE})
+
   const setExecutedButton =
-    EDITABLE && approved && !executed && (is_executed || error) &&
-    moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2 && (
+    EDITABLE && approved && !executed && moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2 && (
       <div key="set_executed" className="flex items-center space-x-1">
         <input
           placeholder="Tx Hash"
