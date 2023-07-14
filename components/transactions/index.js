@@ -28,7 +28,8 @@ import { toArray, includesStringList, ellipse, equalsIgnoreCase, getQueryParams,
 const PAGE_SIZE = 100
 
 export default ({ n }) => {
-  const { assets, validators } = useSelector(state => ({ assets: state.assets, validators: state.validators }), shallowEqual)
+  const { chains, assets, validators } = useSelector(state => ({ chains: state.chains, assets: state.assets, validators: state.validators }), shallowEqual)
+  const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { validators_data } = { ...validators }
 
@@ -97,13 +98,13 @@ export default ({ n }) => {
             transactions_data = toArray(tx_responses)
             total_data = pagination?.total
           }
-          else if (address?.length >= 65 || getKeyType(address) === 'evmAddress') {
+          else if (address?.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') {
             const { data } = { ...await searchDepositAddresses({ depositAddress: address }, { size: 10, sort: [{ height: 'desc' }] }) }
-            if (toArray(data).length > 0 || getKeyType(address) === 'evmAddress') {
+            if (toArray(data).length > 0 || getKeyType(address, chains_data) === 'evmAddress') {
               const { deposit_address } = { ..._.head(data) }
               address = equalsIgnoreCase(address, deposit_address) ? deposit_address : address
               let response
-              switch (getKeyType(address)) {
+              switch (getKeyType(address, chains_data)) {
                 case 'axelarAddress':
                   response = await getTransactions({ index: true, events: `transfer.sender='${address}'` })
                   transactions_data = _.concat(toArray(response?.tx_responses), toArray(transactions_data))

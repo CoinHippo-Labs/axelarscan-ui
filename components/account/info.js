@@ -27,7 +27,8 @@ const STAKING_FIELDS = [
 ]
 
 export default ({ address, data }) => {
-  const { assets, validators } = useSelector(state => ({ assets: state.assets, validators: state.validators }), shallowEqual )
+  const { chains, assets, validators } = useSelector(state => ({ chains: state.chains, assets: state.assets, validators: state.validators }), shallowEqual )
+  const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { validators_data } = { ...validators }
 
@@ -56,7 +57,7 @@ export default ({ address, data }) => {
   } = { ...depositAddressData }
   const { txhash } = { ...transfer_data?.send }
 
-  const isDepositAddress = (address && (address.length >= 65 || getKeyType(address) === 'evmAddress')) || depositAddressData
+  const isDepositAddress = (address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress')) || depositAddressData
   const reward = !isDepositAddress && toArray(rewards?.rewards).find(d => equalsIgnoreCase(d.denom, 'uaxl'))
   const commission = !isDepositAddress && toArray(commissions).find(d => equalsIgnoreCase(d.denom, 'uaxl'))
   const validator_data = !isDepositAddress && toArray(validators_data).find(v => includesStringList(address, toArray([v.broadcaster_address, v.delegator_address], 'lower')))
@@ -466,7 +467,7 @@ export default ({ address, data }) => {
                   value={sender_address}
                   title={
                     <span className="cursor-pointer text-slate-600 dark:text-slate-200 text-sm lg:text-base font-medium">
-                      {ellipse(sender_address, 8, getKeyType(sender_address) === 'evmAddress' ? '0x' : 'axelar')}
+                      {ellipse(sender_address, 8, getKeyType(sender_address, chains_data) === 'evmAddress' ? '0x' : 'axelar')}
                     </span>
                   }
                 /> :
@@ -504,7 +505,7 @@ export default ({ address, data }) => {
                   value={recipient_address}
                   title={
                     <span className="cursor-pointer text-slate-600 dark:text-slate-200 text-sm lg:text-base font-medium">
-                      {ellipse(recipient_address, 8, getKeyType(recipient_address) === 'evmAddress' ? '0x' : 'axelar')}
+                      {ellipse(recipient_address, 8, getKeyType(recipient_address, chains_data) === 'evmAddress' ? '0x' : 'axelar')}
                     </span>
                   }
                 /> :
@@ -634,7 +635,7 @@ export default ({ address, data }) => {
               </div>
             </div>
           )}
-          {getKeyType(address) === 'axelarAddress' && (
+          {getKeyType(address, chains_data) === 'axelarAddress' && (
             <>
               <div className={rowClassName}>
                 <span className={titleClassName}>Rewards:</span>

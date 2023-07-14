@@ -208,7 +208,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address && (address.length >= 65 || getKeyType(address) === 'evmAddress') && chains_data && assets_data) {
+        if (address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') && chains_data && assets_data) {
           let response = await searchDepositAddresses({ depositAddress: address })
           const desposit_address_data = _.head(response?.data)
           response = await searchTransfers({ depositAddress: address })
@@ -232,7 +232,7 @@ export default () => {
   )
 
   const data =
-    address && (address.length >= 65 || getKeyType(address) === 'evmAddress') ?
+    address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') ?
       depositAddressData && { depositAddressData } :
       (balances || delegations || redelegations || unbondings || rewards || commissions) && {
         balances,
