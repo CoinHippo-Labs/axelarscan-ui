@@ -571,7 +571,7 @@ export default () => {
         </button>
       </div>
     )
-
+console.log({EDITABLE})
   const setExecutedButton =
     EDITABLE && approved && !executed && (is_executed || error) &&
     moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2 && (
