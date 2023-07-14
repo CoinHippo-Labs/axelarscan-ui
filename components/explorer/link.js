@@ -1,3 +1,4 @@
+import { useSelector, shallowEqual } from 'react-redux'
 import { constants } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
 
@@ -18,6 +19,9 @@ export default (
     className = 'rounded-full opacity-60 hover:opacity-100',
   },
 ) => {
+  const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
+  const { chains_data } = { ...chains }
+
   const {
     url,
     name,
@@ -31,7 +35,7 @@ export default (
   let path
   let field
   if (type === 'tx') {
-    if (getKeyType(value) === 'evmAddress') {
+    if (getKeyType(value, chains_data) === 'evmAddress') {
       type = 'address'
     }
   }

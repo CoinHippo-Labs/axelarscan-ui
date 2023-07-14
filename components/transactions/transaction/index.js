@@ -18,7 +18,7 @@ export default () => {
     () => {
       const getData = async () => {
         if (tx) {
-          setData(await getTransaction(tx))
+          setData(await getTransaction(tx, { index: true }))
         }
       }
       getData()

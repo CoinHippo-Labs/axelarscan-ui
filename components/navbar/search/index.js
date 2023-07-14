@@ -14,7 +14,8 @@ import { ENS_DATA } from '../../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
-  const { ens } = useSelector(state => ({ ens: state.ens }), shallowEqual)
+  const { chains, ens } = useSelector(state => ({ chains: state.chains, ens: state.ens }), shallowEqual)
+  const { chains_data } = { ...chains }
   const { ens_data } = { ...ens }
 
   const router = useRouter()
@@ -29,7 +30,7 @@ export default () => {
 
   const onSubmit = async () => {
     let input = inputSearch
-    let input_type = getKeyType(input)
+    let input_type = getKeyType(input, chains_data)
 
     if (input_type) {
       setSearching(true)
