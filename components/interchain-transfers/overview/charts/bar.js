@@ -82,7 +82,7 @@ export default (
                   value={value}
                   format={numberFormat}
                   prefix={prefix}
-                  noToolip={true}
+                  noTooltip={true}
                   className="text-xs font-medium"
                 />
               </div>
