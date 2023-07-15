@@ -17,10 +17,11 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'aurora', ...aurora },
       { _id: 'arbitrum', ...arbitrum },
       { _id: 'optimism', ...optimism },
-      // { _id: 'base', id: 8453, network: 'base', name: 'Base', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: [''] } }, blockExplorers: { default: { name: 'Basescan', url: 'https://basescan.org' } } },
+      { _id: 'base', id: 8453, network: 'base', name: 'Base', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://developer-access-mainnet.base.org'] } }, blockExplorers: { default: { name: 'Basescan', url: 'https://basescan.org' } } },
       { _id: 'celo', ...celo },
       { _id: 'kava', id: 2222, network: 'kava', name: 'Kava', nativeCurrency: { name: 'Kava', symbol: 'KAVA', decimals: 18 }, rpcUrls: { default: { http: ['https://evm.data.axelar.kava.io', 'https://evm.kava.io', 'https://evm2.kava.io'] } }, blockExplorers: { default: { name: 'Kava', url: 'https://explorer.kava.io' } } },
       { _id: 'filecoin', ...filecoin },
+      { _id: 'linea', id: 59144, network: 'linea', name: 'Linea', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://linea-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'] } }, blockExplorers: { default: { name: 'Linea', url: 'https://explorer.linea.build' } } },
     ] :
     [
       { _id: 'goerli', ...goerli },
@@ -32,7 +33,7 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'aurora', ...auroraTestnet },
       { _id: 'arbitrum', ...arbitrumGoerli },
       { _id: 'optimism', ...optimismGoerli },
-      { _id: 'base', id: 84531, network: 'base', name: 'Base', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://goerli.base.org'] } }, blockExplorers: { default: { name: 'Basescan', url: 'https://goerli.basescan.org' } } },
+      { _id: 'base', ...baseGoerli },
       { _id: 'celo', ...celoAlfajores },
       { _id: 'kava', id: 2221, network: 'kava', name: 'Kava', nativeCurrency: { name: 'Kava', symbol: 'KAVA', decimals: 18 }, rpcUrls: { default: { http: ['https://evm.testnet.kava.io'] } }, blockExplorers: { default: { name: 'Kava', url: 'https://explorer.testnet.kava.io' } } },
       { _id: 'filecoin', ...filecoinHyperspace },
