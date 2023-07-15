@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { configureChains, createClient } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { EthereumClient, w3mConnectors } from '@web3modal/ethereum'
-import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, celo, celoAlfajores, filecoin, filecoinHyperspace, lineaTestnet } from '@wagmi/chains'
+import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, baseGoerli, celo, celoAlfajores, filecoin, filecoinHyperspace, lineaTestnet } from '@wagmi/chains'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 export const EVM_CHAIN_CONFIGS =
