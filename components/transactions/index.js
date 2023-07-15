@@ -41,7 +41,7 @@ export default ({ n }) => {
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
-  const [offset, setOffet] = useState(0)
+  const [offset, setOffset] = useState(0)
   const [filters, setFilters] = useState(null)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -84,7 +84,7 @@ export default ({ n }) => {
           if (!fetchTrigger) {
             setData(null)
             setTotal(null)
-            setOffet(0)
+            setOffset(0)
           }
 
           const _data = toArray(fetchTrigger && data)
@@ -460,7 +460,7 @@ export default ({ n }) => {
                       <button
                         onClick={
                           () => {
-                            setOffet(data.length)
+                            setOffset(data.length)
                             setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
                           }
                         }
