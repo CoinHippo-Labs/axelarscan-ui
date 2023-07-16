@@ -221,7 +221,7 @@ export default () => {
                   }
 
                   return (
-                    <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-1 mb-6">
+                    <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
                         {getTitle(normalizeType(value))}
                       </div>
@@ -256,7 +256,7 @@ export default () => {
                   sender_address = wrap?.sender_address || erc20_transfer?.sender_address || sender_address
                   const { name, image, explorer } = { ...getChainData(value, chains_data) }
                   return (
-                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-1 mb-6">
+                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="h-6 flex items-center space-x-2">
                         {image && (
                           <Image
@@ -288,7 +288,7 @@ export default () => {
                   recipient_address = unwrap?.recipient_address || recipient_address
                   const { name, image, explorer } = { ...getChainData(value, chains_data) }
                   return (
-                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-1 mb-6">
+                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="h-6 flex items-center space-x-2">
                         {image && (
                           <Image
@@ -357,7 +357,7 @@ export default () => {
                       break
                     case 'approved':
                     default:
-                      color = 'text-blue-400 dark:text-blue-500'
+                      color = 'text-orange-400 dark:text-orange-500'
                       if (!extra && insufficient_fee) {
                         extra = (
                           <Tooltip placement="top-start" content="Insufficient transfer fee">
@@ -369,7 +369,7 @@ export default () => {
                         )
                       }
                       if (!extra) {
-                        icon = <Spinner name="Rings" />
+                        icon = <Spinner name="Rings" color="#f97316" />
                       }
                       break
                   }
