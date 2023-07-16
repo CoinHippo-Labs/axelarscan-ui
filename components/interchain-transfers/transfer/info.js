@@ -272,7 +272,7 @@ export default ({ data }) => {
                 />
               )}
             </div>
-            {typeof amount === 'number' && (
+            {typeof amount === 'number' && (typeof fee === 'number' || insufficient_fee) && (
               <div className="h-6 flex items-center space-x-2">
                 <span className="text-slate-400 dark:text-slate-500 font-medium">
                   Transfer Fee:
