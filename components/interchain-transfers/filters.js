@@ -280,6 +280,8 @@ export default () => {
                       showTime
                       format="YYYY/MM/DD HH:mm:ss"
                       presets={[
+                        { label: 'Today', value: [moment().startOf('day'), moment().endOf('day')] },
+                        { label: 'Last 24 Hours', value: [moment().subtract(24, 'hours'), moment().endOf('hour')] },
                         { label: 'Last 7 Days', value: [moment().subtract(7, 'days').startOf('day'), moment().endOf('day')] },
                         { label: 'This Month', value: [moment().startOf('month'), moment().endOf('month')] },
                         { label: 'Last Month', value: [moment().subtract(1, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')] },
@@ -289,6 +291,7 @@ export default () => {
                         { label: 'Last 365 Days', value: [moment().subtract(365, 'days').startOf('day'), moment().endOf('day')] },
                         { label: 'This Year', value: [moment().startOf('year'), moment().endOf('year')] },
                         { label: 'Last Year', value: [moment().subtract(1, 'years').startOf('year'), moment().subtract(1, 'years').endOf('year')] },
+                        { label: 'All Time', value: [] },
                       ]}
                       value={filters?.fromTime && filters.toTime ? [createDayJSFromUnixtime(filters.fromTime), createDayJSFromUnixtime(filters.toTime)] : undefined}
                       onChange={v => setFilters({ ...filters, fromTime: _.head(v) && moment(_.head(v).valueOf()).unix(), toTime: _.last(v) && moment(_.last(v).valueOf()).unix() })}

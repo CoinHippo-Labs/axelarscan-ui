@@ -119,7 +119,7 @@ export default ({ data, buttons }) => {
         if (express_executed) {
           timeSpent = (
             <Tooltip key="express_executed" placement="top-start" content="Express">
-              <div className="w-fit h-6 flex items-center text-blue-500 dark:text-yellow-500 space-x-1">
+              <div className="w-fit h-6 flex items-center text-green-400 dark:text-green-500 space-x-1">
                 <RiTimerFlashLine size={18} />
                 <TimeSpent
                   fromTime={call.block_timestamp}

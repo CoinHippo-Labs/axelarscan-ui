@@ -192,7 +192,7 @@ export default () => {
                   const { symbol } = { ...call?.returnValues }
                   const { image } = { ...getAssetData(symbol, assets_data) }
                   return (
-                    <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-1 mb-6">
+                    <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
                         {getTitle(normalizeEvent(value))}
                       </div>
@@ -226,7 +226,7 @@ export default () => {
                   const { from } = { ...call?.transaction }
                   const { name, image, explorer } = { ...getChainData(value, chains_data) }
                   return (
-                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-1 mb-6">
+                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="h-6 flex items-center space-x-2">
                         {image && (
                           <Image
@@ -257,7 +257,7 @@ export default () => {
                   const { destinationContractAddress } = { ...call?.returnValues }
                   const { name, image, explorer } = { ...getChainData(value, chains_data) }
                   return (
-                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-1 mb-6">
+                    <div className="w-60 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="h-6 flex items-center space-x-2">
                         {image && (
                           <Image
@@ -328,7 +328,7 @@ export default () => {
                         if (express_executed) {
                           timeSpent = (
                             <Tooltip placement="top-start" content="Express">
-                              <div className="h-6 flex items-center text-blue-500 dark:text-yellow-500 space-x-1 -ml-0.5">
+                              <div className="h-6 flex items-center text-green-400 dark:text-green-500 space-x-1 -ml-0.5">
                                 <RiTimerFlashLine size={18} />
                                 <TimeSpent
                                   fromTime={call.block_timestamp}
@@ -369,7 +369,7 @@ export default () => {
                         )
                       }
                     default:
-                      color = 'text-blue-400 dark:text-blue-500'
+                      color = 'text-orange-400 dark:text-orange-500'
                       if (!extra && is_insufficient_fee && !approved) {
                         extra = (
                           <Tooltip placement="top-start" content="Insufficient base fee">
@@ -381,7 +381,7 @@ export default () => {
                         )
                       }
                       if (!extra) {
-                        icon = <Spinner name="Rings" />
+                        icon = <Spinner name="Rings" color="#f97316" />
                       }
                       break
                   }
@@ -493,9 +493,9 @@ export default () => {
                               break
                             default:
                               if (steps.findIndex(s => s.status === 'pending') === i && steps.findIndex((s, _i) => _i > i && s.status !== 'pending') < 0) {
-                                color = 'text-blue-400 dark:text-blue-500'
+                                color = 'text-orange-400 dark:text-orange-500'
                                 if (!extra) {
-                                  icon = <Spinner name="Rings" />
+                                  icon = <Spinner name="Rings" color="#f97316" />
                                 }
                               }
                               else {
