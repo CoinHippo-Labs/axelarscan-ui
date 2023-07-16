@@ -153,7 +153,7 @@ export default () => {
       case 'apr':
         title = 'Staking APR'
         url = 'https://wallet.keplr.app/chains/axelar'
-        loading = !(token_data && inflation)
+        loading = !(token_data && inflation && staked)
         tooltip = 'Annual Percentage Rate (APR): % inflation * total supply * (1 - community tax) * (1 - commission rate) / staked tokens'
         component = (
           <div>
