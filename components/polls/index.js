@@ -398,7 +398,7 @@ export default () => {
                   disableSortBy: true,
                   Cell: props => {
                     const { value, row } = { ...props }
-                    const { confirmation_vote } = { ...row.original }
+                    const { initiated_txhash, confirmation_vote } = { ...row.original }
                     const { id } = { ...confirmation_vote }
                     return value && (
                       <div>
@@ -408,10 +408,7 @@ export default () => {
                           rel="noopener noreferrer"
                           className="text-blue-400 dark:text-blue-500 font-medium"
                         >
-                          <NumberDisplay
-                            value={value}
-                            format="0,0"
-                          />
+                          <NumberDisplay value={value} format="0,0" />
                         </Link>
                         {id && (
                           <Link
@@ -423,6 +420,19 @@ export default () => {
                             <IoCheckmarkCircle size={18} className="text-green-400 dark:text-green-500" />
                             <span className="text-slate-400 dark:text-slate-500">
                               Confirmation
+                            </span>
+                          </Link>
+                        )}
+                        {initiated_txhash && (
+                          <Link
+                            href={`/tx/${initiated_txhash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center space-x-1"
+                          >
+                            <IoCheckmarkCircle size={18} className="text-green-400 dark:text-green-500" />
+                            <span className="text-slate-400 dark:text-slate-500">
+                              Initiated
                             </span>
                           </Link>
                         )}

@@ -3,6 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Chip, Tooltip } from '@material-tailwind/react'
 import _ from 'lodash'
 import moment from 'moment'
+import { BsArrowRightShort } from 'react-icons/bs'
 
 import Datatable from '../../datatable'
 import NumberDisplay from '../../number'
@@ -11,7 +12,7 @@ import AccountProfile from '../../profile/account'
 import ExplorerLink from '../../explorer/link'
 import TimeAgo from '../../time/timeAgo'
 import { getChainData } from '../../../lib/config'
-import { split, toArray, ellipse } from '../../../lib/utils'
+import { split, toArray, ellipse, equalsIgnoreCase } from '../../../lib/utils'
 
 export default ({ data }) => {
   const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
@@ -38,6 +39,7 @@ export default ({ data }) => {
   const { chain, chain_type, destination_chain_type } = { ...call }
   const { destinationChain, destinationContractAddress } = { ...call?.returnValues }
   const { refundAddress } = { ...gas_paid?.returnValues }
+  const { commandId } = { ...approved?.returnValues }
   const { source_token, destination_native_token, axelar_token, source_confirm_fee, destination_confirm_fee, express_supported, express_fee } = { ...fees }
   const { gas_paid_amount, gas_base_fee_amount, gas_express_amount, gas_express_fee_amount, gas_approve_amount, gas_execute_amount, gas_callback_base_fee_amount, gas_callback_approve_amount, gas_callback_amount } = { ...gas }
 
@@ -70,21 +72,21 @@ export default ({ data }) => {
     },
     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: confirm ? 'Confirmed' : 'Confirm',
+      title: confirm ? 'Confirmed' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
       status: confirm ? 'success' : 'pending',
       data: confirm,
       chain_data: axelar_chain_data,
     },
     destination_chain_type !== 'cosmos' && {
       id: 'approve',
-      title: approved ? 'Approved' : 'Approve',
+      title: approved ? 'Approved' : confirm ? 'Approving' : 'Approve',
       status: approved ? 'success' : 'pending',
       data: approved,
       chain_data: destination_chain_data,
     },
     {
       id: 'execute',
-      title: executed || is_executed ? 'Received' : errored ? 'Error' : 'Receive',
+      title: executed || is_executed ? 'Received' : errored ? 'Error' : 'Execute',
       status: executed || is_executed ? 'success' : errored ? 'failed' : 'pending',
       data: executed || is_executed || error,
       chain_data: executed?.axelarTransactionHash && !executed.transactionHash ? axelar_chain_data : destination_chain_data,
@@ -282,6 +284,14 @@ export default ({ data }) => {
                             }
                           </div>
                         )}
+                        {id === 'approve' && commandId && (
+                          <Link href={`/evm-batches?commandId=${commandId}`} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-400 dark:text-blue-500">
+                            <span className="text-xs font-semibold">
+                              Batch
+                            </span>
+                            <BsArrowRightShort size={16} />
+                          </Link>
+                        )}
                       </div>
                     )}
                   </div>
@@ -433,7 +443,7 @@ export default ({ data }) => {
                   </Tooltip>
                 )}
                 {to_address && (
-                  <Tooltip placement="top-start" content={`${['send', 'approve', 'callback'].includes(id) ? 'Gateway' : id === 'pay_gas' ? 'Gas Service' : id === 'express' ? 'Express Service' : id === 'refund' ? 'Receiver' : 'Destination'}`}>
+                  <Tooltip placement="top-start" content={`${['send', 'approve', 'callback'].includes(id) ? 'Gateway' : id === 'pay_gas' ? 'Gas Service' : id === 'express' && !equalsIgnoreCase(to_address, destinationContractAddress) ? 'Express Service' : id === 'refund' ? 'Receiver' : 'Destination'}`}>
                     <div className="h-6 flex items-center space-x-1">
                       <AccountProfile address={to_address} noCopy={true} explorer={explorer} />
                       <ExplorerLink value={to_address} type="address" explorer={explorer} />
@@ -479,7 +489,7 @@ export default ({ data }) => {
               case 'pay_gas':
                 component = (
                   <NumberDisplay
-                    value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
+                    value={gas_paid ? gas?.gas_paid_amount : gas_paid_to_callback * gas_price}
                     format="0,0.00"
                     suffix={source_token && ` ${source_token.symbol}`}
                     noTooltip={true}

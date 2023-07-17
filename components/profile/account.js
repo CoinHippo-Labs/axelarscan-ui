@@ -27,14 +27,16 @@ export default (
     className = 'cursor-pointer font-medium',
   },
 ) => {
-  const { _accounts, validators, profiles } = useSelector(state => ({ _accounts: state.accounts, validators: state.validators, profiles: state.profiles }), shallowEqual)
+  const { chains, _accounts, validators, profiles } = useSelector(state => ({ chains: state.chains, _accounts: state.accounts, validators: state.validators, profiles: state.profiles }), shallowEqual)
+  const { chains_data } = { ...chains }
   const { accounts_data } = { ..._accounts }
   const { validators_data } = { ...validators }
   const { profiles_data } = { ...profiles }
 
   address = Array.isArray(address) ? toHex(address) : address
   prefix = address ? address.startsWith('axelar') ? 'axelar' : address.startsWith('0x') ? '0x' : _.head(split(address, 'normal', '').filter(c => !isNaN(c))) === '1' ? address.substring(0, address.indexOf('1')) : prefix : prefix
-  let { name, image } = { ...toArray(_.concat(accounts, accounts_data)).find(a => equalsIgnoreCase(a.address, address) && (!a.environment || equalsIgnoreCase(a.environment, ENVIRONMENT))) || (broadcasters[ENVIRONMENT]?.[address?.toLowerCase()] && { name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' }), address }
+  const gateways_data = toArray(chains_data).filter(c => c.gateway_address).map(c => { return { ...c, address: c.gateway_address, name: 'Axelar Gateway' } })
+  let { name, image } = { ...toArray(_.concat(accounts, gateways_data, accounts_data)).find(a => equalsIgnoreCase(a.address, address) && (!a.environment || equalsIgnoreCase(a.environment, ENVIRONMENT))) || (broadcasters[ENVIRONMENT]?.[address?.toLowerCase()] && { name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' }), address }
 
   let validator_description
   if (address && !noValidator && !name && validators_data) {

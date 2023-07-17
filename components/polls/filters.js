@@ -70,7 +70,7 @@ export default () => {
       placeholder: 'Select chain',
       options: _.concat(
         // { value: '', title: 'Any' },
-        _.orderBy(toArray(chains_data).filter(c => c.chain_type === 'evm' && (!c.no_inflation || c.deprecated)), ['deprecated'], ['desc']).map(c => {
+        _.orderBy(toArray(chains_data).map(c => { return { ...c, i: ['ethereum', 'ethereum-2'].includes(c.id) ? 0 : 1, _name: c.name?.toLowerCase() } }).filter(c => c.chain_type === 'evm' && (!c.no_inflation || c.deprecated)), ['deprecated', 'i', '_name'], ['desc', 'asc', 'asc']).map(c => {
           const { id, name } = { ...c }
           return {
             value: id,

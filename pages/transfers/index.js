@@ -1,5 +1,5 @@
-import InterchainTransfers from '../../components/interchain-transfers'
+import Interchain from '../../components/interchain'
 
 export default () => {
-  return <InterchainTransfers />
+  return <Interchain />
 }

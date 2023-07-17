@@ -54,7 +54,7 @@ export default () => {
   const filter = by => {
     switch (by) {
       case 'chains':
-        return toArray(chains_data).filter(c => !c.no_inflation).filter(c => !inputSearch || includesStringList(_.uniq(toArray(['id', 'chain_name', 'name'].map(f => c[f]), 'lower')), split(inputSearch, 'lower', ' ')))
+        return toArray(chains_data).filter(c => !c.no_inflation || c.deprecated).filter(c => !inputSearch || includesStringList(_.uniq(toArray(['id', 'chain_name', 'name'].map(f => c[f]), 'lower')), split(inputSearch, 'lower', ' ')))
       case 'assets':
         return toArray(assets_data).filter(c => !inputSearch || includesStringList(_.uniq(toArray(_.concat(['denom', 'name', 'symbol'].map(f => c[f]), c.denoms, Object.values({ ...c.addresses }).flatMap(a => toArray([!equalsIgnoreCase(inputSearch, 'axl') && a.symbol, a.address, a.ibc_denom]))), 'lower')), split(inputSearch, 'lower', ' ')))
       default:

@@ -45,7 +45,7 @@ export default ({ data }) => {
         transfers = transfersStats?.total || 0
         total_transfers = gmp + transfers
         title = 'Transactions'
-        url = '/interchain-transfers'
+        url = '/interchain'
         loading = !GMPStats
         tooltip = (
           <div className="grid grid-cols-2 gap-4">
@@ -80,7 +80,7 @@ export default ({ data }) => {
         transfers = transfersTotalVolume || 0
         total_transfers = gmp + transfers
         title = 'Volume'
-        url = '/interchain-transfers'
+        url = '/interchain'
         loading = !(typeof GMPTotalVolume === 'number' || typeof transfersTotalVolume === 'number')
         tooltip = (
           <div className="grid grid-cols-2 gap-4">
@@ -149,7 +149,7 @@ export default ({ data }) => {
             }
           })
         title = 'Interchain Contracts'
-        url = '/interchain-transfers'
+        url = '/interchain'
         loading = !GMPStats
         tooltip = 'Total Interchain Contracts'
         component = (
@@ -165,7 +165,7 @@ export default ({ data }) => {
       case 'chains':
         const chains = toArray(chains_data).filter(c => !c.deprecated && (!c.maintainer_id || !c.no_inflation || c.gateway_address))
         title = 'Connected Chains'
-        url = '/interchain-transfers'
+        url = '/interchain'
         loading = !chains_data
         tooltip = chains.length > 0 && (
           <div className="w-64 flex flex-wrap items-center mt-1">
@@ -230,7 +230,7 @@ export default ({ data }) => {
       <div className="sm:mt-4 space-y-4 sm:space-y-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <span className="uppercase text-base font-semibold">
-            Interchain Transfers
+            Interchain
           </span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-1 gap-4">

@@ -2,6 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Card, CardBody, CardFooter, Chip, Tooltip } from '@material-tailwind/react'
 import _ from 'lodash'
 import { TbFileSearch } from 'react-icons/tb'
+import { GoDotFill } from 'react-icons/go'
 
 import Image from '../image'
 import AddMetamask from '../metamask/add-button'
@@ -17,6 +18,7 @@ export default ({ data }) => {
     id,
     chain_id,
     chain_name,
+    deprecated,
     endpoints,
     name,
     image,
@@ -56,19 +58,18 @@ export default ({ data }) => {
             {chain_type === 'evm' && (
               <AddMetamask chain={id} />
             )}
+            <Tooltip content={deprecated ? 'Deactivated' : 'Active'}>
+              <div>
+                <GoDotFill size={18} className={`${deprecated ? 'text-red-500 dark:text-red-500' : 'text-green-500 dark:text-green-500'}`} />
+              </div>
+            </Tooltip>
           </div>
         </div>
-        <div className="title flex items-center space-x-2">
-          <span>
-            {name}
-          </span>
-          <Tooltip content="Chain Name">
-            <span>
-              ({chain_name})
-            </span>
-          </Tooltip>
+        <div className="title flex items-center space-x-1">
+          <span>{name}</span>
         </div>
         <div className="description">
+          {chain_name && <ValueBox title="Chain Name" value={chain_name} />}
           {gateway_address && (
             <ValueBox
               url={url && `${url}${address_path?.replace('{address}', gateway_address)}`}
@@ -101,7 +102,7 @@ export default ({ data }) => {
           )}
           {prefix_address && (
             <ValueBox
-              title="Prefix"
+              title="Address Prefix"
               value={prefix_address}
             />
           )}
@@ -117,7 +118,7 @@ export default ({ data }) => {
           {chain_id && (
             <Chip
               color="teal"
-              value={`ID: ${chain_id}`}
+              value={`Chain ID: ${chain_id}`}
               className="chip font-medium"
             />
           )}

@@ -8,7 +8,7 @@ import GMP from './gmps'
 import Transfers from './transfers'
 import { getTitle } from '../../lib/utils'
 
-const MENUS = ['overview', 'gmp_transfers', 'token_transfers']
+const MENUS = ['overview', 'general_message_passing', 'token_transfers']
 
 export default () => {
   const router = useRouter()
@@ -20,12 +20,14 @@ export default () => {
     () => {
       switch (pathname) {
         case '/interchain-transfers':
+          router.push('/interchain')
+        case '/interchain':
           setMenu('overview')
           break
         case '/gmp':
           router.push('/gmp/search')
         case '/gmp/search':
-          setMenu('gmp_transfers')
+          setMenu('general_message_passing')
           break
         case '/transfers':
           router.push('/transfers/search')
@@ -44,9 +46,9 @@ export default () => {
       let path
       switch (menu) {
         case 'overview':
-          path = '/interchain-transfers'
+          path = '/interchain'
           break
-        case 'gmp_transfers':
+        case 'general_message_passing':
           path = '/gmp/search'
           break
         case 'token_transfers':
@@ -67,7 +69,7 @@ export default () => {
     switch (menu) {
       case 'overview':
         return <Overview />
-      case 'gmp_transfers':
+      case 'general_message_passing':
         return <GMP />
       case 'token_transfers':
         return <Transfers />
@@ -79,7 +81,7 @@ export default () => {
   return menu && (
     <Tabs value={menu} className="children tabs pt-8 px-2 sm:px-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 sm:space-x-2">
-        <TabsHeader className="max-w-md">
+        <TabsHeader className="max-w-lg">
           {MENUS.map(m => (
             <Tab
               key={m}

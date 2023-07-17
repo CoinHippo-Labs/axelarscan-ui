@@ -24,7 +24,7 @@ const Group = ({ title, items, pathname, className = '' }) => {
           </span>
         </div>
       </MenuHandler>
-      <MenuList className="w-56 bg-light dark:bg-slate-900 p-4">
+      <MenuList className="w-60 bg-light dark:bg-slate-900 p-4">
         <div className="flex flex-col space-y-4">
           {toArray(items).map((d, i) => {
             const { disabled, title, path, others_paths } = { ...d }

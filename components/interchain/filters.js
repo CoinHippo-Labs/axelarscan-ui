@@ -51,7 +51,7 @@ export default () => {
       placeholder: 'Transaction Hash',
       className: 'col-span-2',
     },
-    pathname.startsWith('/interchain-transfers') && {
+    pathname.startsWith('/interchain') && {
       label: 'Transfers Type',
       name: 'transfersType',
       type: 'select',
@@ -70,7 +70,7 @@ export default () => {
       placeholder: 'Select source chain',
       options: _.concat(
         // { value: '', title: 'Any' },
-        _.orderBy(toArray(chains_data).filter(c => !c.no_inflation || c.deprecated), ['deprecated'], ['desc']).map(c => {
+        _.orderBy(toArray(chains_data).map(c => { return { ...c, i: ['ethereum', 'ethereum-2'].includes(c.id) ? 0 : 1, _name: c.name?.toLowerCase() } }).filter(c => !c.no_inflation || c.deprecated), ['deprecated', 'i', '_name'], ['desc', 'asc', 'asc']).map(c => {
           const { id, name } = { ...c }
           return {
             value: id,
@@ -88,7 +88,7 @@ export default () => {
       placeholder: 'Select destination chain',
       options: _.concat(
         // { value: '', title: 'Any' },
-        _.orderBy(toArray(chains_data).filter(c => !c.no_inflation || c.deprecated), ['deprecated'], ['desc']).map(c => {
+        _.orderBy(toArray(chains_data).map(c => { return { ...c, i: ['ethereum', 'ethereum-2'].includes(c.id) ? 0 : 1, _name: c.name?.toLowerCase() } }).filter(c => !c.no_inflation || c.deprecated), ['deprecated', 'i', '_name'], ['desc', 'asc', 'asc']).map(c => {
           const { id, name } = { ...c }
           return {
             value: id,
@@ -159,12 +159,12 @@ export default () => {
       type: 'text',
       placeholder: 'Sender address',
     },
-    ['/interchain-transfers', '/gmp'].findIndex(s => pathname.startsWith(s)) > -1 && {
+    ['/interchain', '/gmp'].findIndex(s => pathname.startsWith(s)) > -1 && {
       label: 'Contract',
       name: 'contractAddress',
       type: 'text',
       placeholder: 'Contract address',
-      className: pathname.startsWith('/interchain-transfers') ? 'col-span-2' : '',
+      className: pathname.startsWith('/interchain') ? 'col-span-2' : '',
     },
     pathname.startsWith('/transfers') && {
       label: 'Recipient',
@@ -179,7 +179,7 @@ export default () => {
       placeholder: 'Select asset',
       options: _.concat(
         // { value: '', title: 'Any' },
-        toArray(assets_data).map(a => {
+        _.orderBy(toArray(assets_data).map(a => { return { ...a, i: ['uusdc'].includes(a.id) ? 0 : 1, _symbol: a.symbol?.toLowerCase() } }), ['i', '_symbol'], ['asc', 'asc']).map(a => {
           const { denom, symbol } = { ...a }
           return {
             value: denom,
@@ -196,6 +196,16 @@ export default () => {
       type: 'datetime-range',
       placeholder: 'Select transaction time',
       className: 'col-span-2',
+    },
+    pathname.startsWith('/gmp') && {
+      label: 'Sort By',
+      name: 'sortBy',
+      type: 'select',
+      placeholder: 'Select sort by',
+      options: [
+        { value: 'time', title: 'Contract Call Time' },
+        { value: 'value', title: 'Token Value' },
+      ],
     },
   ])
 

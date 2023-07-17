@@ -511,7 +511,7 @@ export default () => {
           className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
         >
           <span className="font-medium">
-            Approve
+            {chain_type !== 'cosmos' && !confirm ? 'Confirm' : 'Approve'}
           </span>
         </button>
       </div>

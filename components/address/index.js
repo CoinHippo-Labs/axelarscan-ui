@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react'
 import { Tabs, TabsHeader, TabsBody, Tab, TabPanel } from '@material-tailwind/react'
 import _ from 'lodash'
 
-import GMP from '../interchain-transfers/gmps'
-import Transfers from '../interchain-transfers/transfers'
+import GMP from '../interchain/gmps'
+import Transfers from '../interchain/transfers'
 import { getTitle } from '../../lib/utils'
 
-const MENUS = ['gmp_transfers', 'token_transfers']
+const MENUS = ['general_message_passing', 'token_transfers']
 
 export default () => {
   const router = useRouter()
@@ -44,7 +44,7 @@ export default () => {
 
   const render = menu => {
     switch (menu) {
-      case 'gmp_transfers':
+      case 'general_message_passing':
         return <GMP />
       case 'token_transfers':
         return <Transfers />
