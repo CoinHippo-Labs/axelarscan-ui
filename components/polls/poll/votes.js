@@ -44,7 +44,7 @@ export default ({ data }) => {
               }
             })
 
-        setVotes(_.concat(_votes, unsubmitted_votes))
+        setVotes(_.concat(_.orderBy(_votes.map(v => { return { ...v, _confirmed: v.confirmed ? 1 : 0 } }), ['_confirmed'], ['desc']), unsubmitted_votes))
       }
     },
     [data, validators_data],
@@ -198,10 +198,7 @@ export default ({ data }) => {
                   rel="noopener noreferrer"
                   className="text-blue-400 dark:text-blue-500 font-medium"
                 >
-                  <NumberDisplay
-                    value={value}
-                    format="0,0"
-                  />
+                  <NumberDisplay value={value} format="0,0" />
                 </Link>
               )
             },

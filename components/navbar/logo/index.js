@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import Environment from '../environment'
 import Image from '../../image'
 
 export default () => {
@@ -28,11 +29,7 @@ export default () => {
           <Link href="/" className="uppercase text-base 3xl:text-lg font-extrabold">
             {process.env.NEXT_PUBLIC_APP_NAME}
           </Link>
-          {process.env.NEXT_PUBLIC_ENVIRONMENT && (
-            <div className="capitalize text-slate-400 dark:text-slate-500 text-sm 3xl:text-base">
-              {process.env.NEXT_PUBLIC_ENVIRONMENT}
-            </div>
-          )}
+          <Environment />
         </div>
       </div>
     </div>

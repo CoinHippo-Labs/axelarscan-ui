@@ -1,4 +1,4 @@
-import GMP from '../../components/interchain-transfers/gmp'
+import GMP from '../../components/interchain/gmp'
 
 export default () => {
   return <GMP />

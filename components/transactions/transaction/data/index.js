@@ -174,7 +174,7 @@ export default ({ data }) => {
                                   href={`/validator/${sender_validator_data.operator_address}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-slate-400 dark:text-slate-500"
+                                  className="text-slate-400 dark:text-slate-500 font-medium"
                                 >
                                   {ellipse(sender_validator_data.operator_address, 10, 'axelarvaloper')}
                                 </Link>
@@ -204,7 +204,7 @@ export default ({ data }) => {
                       className="chip text-xs font-medium py-1 px-2"
                     />
                     {status && (
-                      <div className="text-center">
+                      <div className="text-left">
                         <Chip
                           color={status === 'STATUS_COMPLETED' ? 'green' : 'red'}
                           value={status.replace('STATUS_', '')}
@@ -387,7 +387,7 @@ export default ({ data }) => {
                           {event && (
                             <Chip
                               value={split(getTitle(event), 'normal', ' ').join('')}
-                              className="chip text-xs font-medium py-1 px-2"
+                              className="chip normal-case text-xs font-medium py-1 px-2"
                             />
                           )}
                           {Object.entries({ ...e }).filter(([k, v]) => !['event'].includes(k)).map(([k, v], i) => (
@@ -500,7 +500,7 @@ export default ({ data }) => {
                         {type && (
                           <Chip
                             value={split(getTitle(type), 'normal', ' ').join('')}
-                            className="chip text-xs font-medium py-1 px-2"
+                            className="chip normal-case text-xs font-medium py-1 px-2"
                           />
                         )}
                         {attributes.filter(([k, v]) => typeof v !== 'undefined').map(([k, v], i) => {

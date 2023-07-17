@@ -24,14 +24,12 @@ const SD = (data, field = DEFAULT_FIELD) => {
   if (data.length < 1) return 0
   return Math.sqrt(_.sum(data.map(d => Math.pow((d[field] || 0) - mean, 2))) / data.length)
 }
-const N_SD = 0.5
+const N_SD = 0.15
 const THRESHOLD = (data, n_sd = N_SD, field = DEFAULT_FIELD) => typeof n_sd !== 'number' ? 0 : MEAN(data, field) + (n_sd * SD(data, field))
 const TIERS = [
-  { id: 0, n_sd: N_SD, size: 56 },
-  { id: 1, n_sd: 0, size: 44 },
-  { id: 2, n_sd: -0.45, size: 32 },
-  { id: 3, n_sd: -0.5, size: 24 },
-  { id: 4, n_sd: null, size: 18 },
+  { id: 1, n_sd: N_SD, size: 44 },
+  { id: 2, n_sd: -0.475, size: 32 },
+  { id: 3, n_sd: null, size: 18 },
 ]
 const ZOOM_MIN_VALUE = 4.33
 const ZOOM_MAX_VALUE = 4.33
@@ -353,7 +351,7 @@ export default ({ id = 'network', data }) => {
       case 'tier_list':
         return (
           graphData ?
-            <div className="flex items-center justify-between mt-2">
+            <div className="flex items-start justify-between mt-2">
               <Card className="card card-transparent">
                 <CardBody className="p-0">
                   <div className="space-y-2 sm:space-y-4 px-4 xl:px-6">
@@ -364,7 +362,7 @@ export default ({ id = 'network', data }) => {
                       {TIERS.filter(t => nodes.filter(d => d.tier === t.id).length > 0).map((t, i) => (
                         <div key={i} className="flex flex-col space-y-2">
                           <div className="w-fit bg-blue-500 dark:bg-blue-600 rounded uppercase text-white text-xs font-medium py-1 px-2">
-                            Tier: {i}
+                            Tier: {t.id}
                           </div>
                           <div className="flex flex-wrap">
                             {nodes.filter(d => d.tier === t.id).map((d, j) => {

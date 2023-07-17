@@ -20,6 +20,7 @@ export default ({ data }) => {
 
   const {
     id,
+    initiated_txhash,
     sender_chain,
     transaction_id,
     transfer_id,
@@ -183,6 +184,22 @@ export default ({ data }) => {
           <Spinner name="ProgressBar" />
         }
       </div>
+      {initiated_txhash && (
+        <div className={rowClassName}>
+          <span className={titleClassName}>Initiated TxHash:</span>
+          <div className="flex items-center space-x-1">
+            <Link
+              href={`/tx/${initiated_txhash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 dark:text-blue-500 font-semibold"
+            >
+              {ellipse(initiated_txhash, 12)}
+            </Link>
+            <Copy size={20} value={initiated_txhash} />
+          </div>
+        </div>
+      )}
       <div className={rowClassName}>
         <span className={titleClassName}>Transaction ID:</span>
         {data ?

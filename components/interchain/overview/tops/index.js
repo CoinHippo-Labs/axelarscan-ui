@@ -152,40 +152,46 @@ export default ({ data, types }) => {
         return (
           <div key={id} className={`grid grid-cols-2 sm:grid-cols-3 ${hasGMP ? 'lg:grid-cols-6' : ''} gap-4`}>
             <Top
-              data={getTopData(chainPairs)}
+              data={getTopData(chainPairs, 'num_txs', 100)}
               title="Top Paths"
               description="Top chain pairs by transactions"
+              className="h-48"
             />
             <Top
-              data={getTopData(sourceChains)}
+              data={getTopData(sourceChains, 'num_txs', 100)}
               title="Top Sources"
               description="Top sources by transactions"
+              className="h-48"
             />
             <Top
-              data={getTopData(destionationChains)}
+              data={getTopData(destionationChains, 'num_txs', 100)}
               title="Top Destinations"
               description="Top destinations by transactions"
+              className="h-48"
             />
             <Top
-              data={getTopData(chainPairs, 'volume')}
+              data={getTopData(chainPairs, 'volume', 100)}
               field="volume"
               title="Top Paths"
               description="Top chain pairs by volume"
               prefix="$"
+              className="h-48"
             />
             <Top
-              data={getTopData(sourceChains, 'volume')}
+              data={getTopData(sourceChains, 'volume', 100)}
               field="volume"
               title="Top Sources"
               description="Top sources by volume"
               prefix="$"
+              className="h-48"
             />
             <Top
-              data={getTopData(destionationChains, 'volume')}
+              data={getTopData(destionationChains, 'volume', 100)}
               field="volume"
               title="Top Destinations"
               description="Top destinations by volume"
               prefix="$"
+              className="h-48"
             />
           </div>
         )
@@ -219,7 +225,7 @@ export default ({ data, types }) => {
                 <Top
                   data={getTopData(GMPUsers, 'num_txs', 10)}
                   type="address"
-                  tab="gmp_transfers"
+                  tab="general_message_passing"
                   title="Top GMP Users"
                   description="Top users by GMP transactions"
                 />
