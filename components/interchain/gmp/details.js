@@ -205,7 +205,7 @@ export default ({ data }) => {
             const errorBody = error?.body?.replaceAll('"""', '')
 
             const errorComponent = id === 'execute' && status === 'failed' && (
-              <div className="w-64 flex flex-col space-y-1 mt-1">
+              <div className="w-64 flex flex-col space-y-1.5 mt-1">
                 {errorMessage && (
                   <div>
                     <div className="whitespace-pre-wrap text-red-400 text-xs font-medium mr-1">
@@ -237,7 +237,7 @@ export default ({ data }) => {
                   </a>
                 )}
                 {errorBody && (
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded break-all text-xs p-2">
+                  <div className="bg-slate-50 dark:bg-slate-900 rounded whitespace-pre-wrap break-all text-xs p-2">
                     {ellipse(errorBody, 256)}
                   </div>
                 )}
