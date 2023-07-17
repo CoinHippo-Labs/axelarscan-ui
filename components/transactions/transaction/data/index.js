@@ -201,14 +201,14 @@ export default ({ data }) => {
                     )}
                     <Chip
                       value={split(activities.length > 1 ? a.type : type, 'normal', ' ').join('')}
-                      className="chip text-xs font-medium py-1 px-2"
+                      className="chip normal-case text-xs font-medium py-1 px-2"
                     />
                     {status && (
                       <div className="text-left">
                         <Chip
                           color={status === 'STATUS_COMPLETED' ? 'green' : 'red'}
                           value={status.replace('STATUS_', '')}
-                          className="chip text-2xs font-medium py-0.5 px-1.5"
+                          className="chip normal-case text-2xs font-medium py-0.5 px-1.5"
                         />
                         <div className="text-xs font-medium">
                           Status
@@ -423,7 +423,7 @@ export default ({ data }) => {
                   <div className="w-fit bg-slate-100 dark:bg-slate-800 rounded space-y-2 py-5 px-4">
                     <Chip
                       value="Packet"
-                      className="chip text-xs font-medium py-1 px-2"
+                      className="chip normal-case text-xs font-medium py-1 px-2"
                     />
                     {Object.entries({ ...packet }).map(([k, v], i) => (
                       <div key={i} className="flex items-start space-x-4">

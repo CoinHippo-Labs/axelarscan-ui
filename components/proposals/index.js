@@ -87,7 +87,7 @@ export default () => {
                 props.value ?
                   <Chip
                     value={props.value}
-                    className="chip font-medium"
+                    className="chip normal-case font-medium"
                   /> :
                   '-'
               ),

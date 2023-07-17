@@ -181,7 +181,7 @@ export default (
                 <Chip
                   color="amber"
                   value={d}
-                  className="chip font-medium"
+                  className="chip normal-case font-medium"
                 />
               </Tooltip>
             </div>
@@ -190,7 +190,7 @@ export default (
             <Chip
               color="teal"
               value={`Decimals: ${decimals}`}
-              className="chip font-medium mt-2 mr-2"
+              className="chip normal-case font-medium mt-2 mr-2"
             />
           )}
         </div>

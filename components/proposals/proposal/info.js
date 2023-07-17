@@ -67,7 +67,7 @@ export default ({ data }) => {
           {data ?
             <Chip
               value={getTitle(type)}
-              className="chip font-medium"
+              className="chip normal-case font-medium"
             /> :
             <Spinner name="ProgressBar" />
           }
@@ -116,14 +116,14 @@ export default ({ data }) => {
                   <Chip
                     color="amber"
                     value={getTitle(key)}
-                    className="chip font-medium"
+                    className="chip normal-case font-medium"
                   />
                   <JSONView value={value} />
                 </div> :
                 <Chip
                   color="cyan"
                   value={`${getTitle(key)} = ${value}`}
-                  className="chip font-medium"
+                  className="chip normal-case font-medium"
                 />
               }
             </div>

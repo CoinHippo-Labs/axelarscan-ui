@@ -113,13 +113,13 @@ export default ({ data }) => {
           <Chip
             color="amber"
             value={getTitle(chain_type)}
-            className="chip font-medium"
+            className="chip normal-case font-medium"
           />
           {chain_id && (
             <Chip
               color="teal"
               value={`Chain ID: ${chain_id}`}
-              className="chip font-medium"
+              className="chip normal-case font-medium"
             />
           )}
         </div>

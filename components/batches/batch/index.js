@@ -147,7 +147,7 @@ export default () => {
               <Chip
                 color={executed ? 'green' : equalsIgnoreCase(status, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'teal' : equalsIgnoreCase(status, 'BATCHED_COMMANDS_STATUS_SIGNING') ? 'blue' : 'red'}
                 value={executed ? 'Executed' : status.replace('BATCHED_COMMANDS_STATUS_', '')}
-                className="chip font-medium"
+                className="chip normal-case font-medium"
               />
             )}
           </div>
@@ -242,7 +242,7 @@ export default () => {
                         <Chip
                           color={executed ? 'green' : 'cyan'}
                           value={value}
-                          className="chip text-xs font-medium mr-2 py-1 px-2.5"
+                          className="chip normal-case text-xs font-medium mr-2 py-1 px-2.5"
                         />
                       </Tooltip>
                     )
