@@ -486,7 +486,7 @@ export default ({ data }) => {
                   />
                 )
                 extra = !(gas_approve_amount > 0) && (
-                  <div className="flex flex-col mt-2.5 space-y-0.5">
+                  <div className={`flex flex-col ${express_supported && express_fee > 0 ? 'mt-2.5' : ''} space-y-0.5`}>
                     <NumberDisplay
                       value={gas_base_fee_amount}
                       format="0,0.00"
