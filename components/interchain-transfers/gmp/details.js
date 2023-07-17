@@ -593,7 +593,7 @@ export default ({ data }) => {
                 try {
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
                 } catch (error) {}
-                if (rate) {
+                if (gas_execute_amount && rate) {
                   component = (
                     <NumberDisplay
                       value={(gas_execute_amount * rate) || origin_data?.gas?.gas_callback_amount}
@@ -603,15 +603,17 @@ export default ({ data }) => {
                     />
                   )
                 }
-                convertedComponent = (
-                  <NumberDisplay
-                    value={gas_execute_amount}
-                    format="0,0.00"
-                    suffix={source_token && ` ${source_token.symbol}`}
-                    noTooltip={true}
-                    className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs"
-                  />
-                )
+                if (gas_execute_amount) {
+                  convertedComponent = (
+                    <NumberDisplay
+                      value={gas_execute_amount}
+                      format="0,0.00"
+                      suffix={source_token && ` ${source_token.symbol}`}
+                      noTooltip={true}
+                      className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs"
+                    />
+                  )
+                }
                 break
               case 'callback':
                 component = (
