@@ -63,7 +63,7 @@ export default (
       </span>
     </>
   )
-console.log(contracts_data)
+
   return address && (
     name ?
       <div className={`min-w-max flex ${noCopy ? 'items-center' : 'items-start'} space-x-2 ${className}`}>
