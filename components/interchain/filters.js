@@ -221,7 +221,7 @@ export default () => {
       title={
         <div className="flex items-center justify-between">
           <span>
-            Filter {pathname?.startsWith('/gmp') ? 'GMP' : pathname?.startsWith('/transfers') ? 'Token' : 'Interchain'} Transfers
+            Filter {pathname?.startsWith('/gmp') ? 'GMP' : pathname?.startsWith('/transfers') ? 'Token Transfers' : 'Interchain'}
           </span>
           <div
             onClick={
