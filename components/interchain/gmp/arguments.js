@@ -45,7 +45,8 @@ export default ({ data }) => {
     { title: 'destinationContractAddress', value: destinationContractAddress },
     { title: 'payloadHash', value: payloadHash, className: 'sm:col-span-2' },
     { title: 'payload', value: payload, className: 'sm:col-span-2' },
-    { title: 'symbol', value: symbol },
+    { title: 'sourceSymbol', value: symbol },
+    { title: 'destinationSymbol', value: approved?.returnValues?.symbol },
     { title: 'amount', value: amount },
     { title: 'Execute Data', value: execute_data, className: 'sm:col-span-2' },
   ]
