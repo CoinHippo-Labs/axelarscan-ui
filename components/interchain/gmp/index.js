@@ -16,7 +16,7 @@ import ExplorerLink from '../../explorer/link'
 import Wallet from '../../wallet'
 import { searchGMP, saveGMP, isContractCallApproved } from '../../../lib/api/gmp'
 import { getProvider } from '../../../lib/chain/evm'
-import { getChainData } from '../../../lib/config'
+import { getChainData, getAssetData } from '../../../lib/config'
 import { toBigNumber } from '../../../lib/number'
 import { split, toArray, equalsIgnoreCase, sleep, parseError } from '../../../lib/utils'
 
@@ -54,8 +54,9 @@ const getTransactionKey = tx => {
 }
 
 export default () => {
-  const { chains, wallet } = useSelector(state => ({ chains: state.chains, wallet: state.wallet }), shallowEqual)
+  const { chains, assets, wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
   const { chain_id, signer, address } = { ...wallet_data }
 
@@ -127,7 +128,7 @@ export default () => {
       const _data = _.head(response?.data)
 
       if (_data) {
-        const { call, gas_paid, gas_paid_to_callback, approved, callback, is_call_from_relayer } = { ..._data }
+        const { call, gas_paid, gas_paid_to_callback, approved, callback, is_call_from_relayer, command_id } = { ..._data }
 
         // callback
         if (callback?.transactionHash) {
@@ -149,9 +150,17 @@ export default () => {
           }
         }
 
-        if (call && approved) {
-          const { destinationChain, payload } = { ...call.returnValues }
-          const { contractAddress, commandId, sourceChain, sourceAddress, payloadHash, symbol, amount } = { ...approved.returnValues }
+        if (call) {
+          const { sender, destinationContractAddress, destinationChain, payload } = { ...call.returnValues }
+          let { contractAddress, commandId, sourceChain, sourceAddress, payloadHash, symbol, amount } = { ...approved?.returnValues }
+          contractAddress = contractAddress || destinationContractAddress
+          commandId = commandId || command_id
+          sourceChain = sourceChain || getChainData(call.chain, chains_data)?.chain_name
+          sourceAddress = sourceAddress || sender
+          payloadHash = payloadHash || call.returnValues?.payloadHash
+          const { addresses } = { ...getAssetData(call.returnValues?.symbol, assets_data) }
+          symbol = symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || call.returnValues?.symbol
+          amount = amount || call.returnValues?.amount
 
           if (STAGING || EDITABLE) {
             try {

@@ -1,12 +1,13 @@
 import { useSelector, shallowEqual } from 'react-redux'
 
 import Copy from '../../copy'
-import { getChainData } from '../../../lib/config'
+import { getChainData, getAssetData } from '../../../lib/config'
 import { ellipse } from '../../../lib/utils'
 
 export default ({ data }) => {
-  const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
+  const { chains, assets } = useSelector(state => ({ chains: state.chains, assets: state.assets }), shallowEqual)
   const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
 
   const { call, approved, command_id, execute_data } = { ...data }
   const { chain } = { ...call }
@@ -17,6 +18,8 @@ export default ({ data }) => {
   sourceChain = sourceChain || getChainData(chain, chains_data)?.chain_name || chain
   destinationChain = destinationChain || getChainData(approved?.chain, chains_data)?.chain_name || approved?.chain
   amount = amount || call?.returnValues?.amount
+  const { addresses } = { ...getAssetData(symbol, assets_data) }
+  const destinationSymbol = approved?.returnValues?.symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || symbol
 
   const render = ({ key, title, value, className = '' }) => (
     <div key={key} className={`space-y-2 ${className}`}>
@@ -46,7 +49,7 @@ export default ({ data }) => {
     { title: 'payloadHash', value: payloadHash, className: 'sm:col-span-2' },
     { title: 'payload', value: payload, className: 'sm:col-span-2' },
     { title: 'sourceSymbol', value: symbol },
-    { title: 'destinationSymbol', value: approved?.returnValues?.symbol },
+    { title: 'destinationSymbol', value: destinationSymbol },
     { title: 'amount', value: amount },
     { title: 'Execute Data', value: execute_data, className: 'sm:col-span-2' },
   ]
