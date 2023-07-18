@@ -38,6 +38,7 @@ export default ({ data }) => {
   const { name, image, explorer } = { ...getChainData(sender_chain, chains_data) }
   const { url, transaction_path } = { ...explorer }
 
+  const confirmation_txhash = toArray(votes).find(v => v.confirmed)?.id
   const status = success ? 'completed' : failed ? 'failed' : confirmation || toArray(votes).findIndex(v => v.confirmed) > -1 ? 'confirmed' : 'pending'
   const _url = includesStringList(event, ['operator', 'token_deployed']) ? `${url}${transaction_path?.replace('{tx}', transaction_id)}` : `/${includesStringList(event, ['contract_call']) || !(includesStringList(event, ['transfer']) || deposit_address) ? 'gmp' : 'transfer'}/${transaction_id ? transaction_id : transfer_id ? `?transfer_id=${transfer_id}` : ''}`
 
@@ -184,27 +185,11 @@ export default ({ data }) => {
           <Spinner name="ProgressBar" />
         }
       </div>
-      {initiated_txhash && (
-        <div className={rowClassName}>
-          <span className={titleClassName}>Initiated TxHash:</span>
-          <div className="flex items-center space-x-1">
-            <Link
-              href={`/tx/${initiated_txhash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 dark:text-blue-500 font-semibold"
-            >
-              {ellipse(initiated_txhash, 12)}
-            </Link>
-            <Copy size={20} value={initiated_txhash} />
-          </div>
-        </div>
-      )}
       <div className={rowClassName}>
         <span className={titleClassName}>Transaction ID:</span>
         {data ?
           url ?
-            <div className="flex items-center space-x-1">
+            <div className="h-6 flex items-center space-x-1">
               <a
                 href={`${url}${transaction_path?.replace('{tx}', transaction_id)}`}
                 target="_blank"
@@ -227,10 +212,42 @@ export default ({ data }) => {
           <Spinner name="ProgressBar" />
         }
       </div>
+      {initiated_txhash && (
+        <div className={rowClassName}>
+          <span className={titleClassName}>Initiated TxHash:</span>
+          <div className="h-6 flex items-center space-x-1">
+            <Link
+              href={`/tx/${initiated_txhash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 dark:text-blue-500 font-semibold"
+            >
+              {ellipse(initiated_txhash, 12)}
+            </Link>
+            <Copy size={20} value={initiated_txhash} />
+          </div>
+        </div>
+      )}
+      {confirmation_txhash && (
+        <div className={rowClassName}>
+          <span className={titleClassName}>Confirmation TxHash:</span>
+          <div className="h-6 flex items-center space-x-1">
+            <Link
+              href={`/tx/${confirmation_txhash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 dark:text-blue-500 font-semibold"
+            >
+              {ellipse(confirmation_txhash, 12)}
+            </Link>
+            <Copy size={20} value={confirmation_txhash} />
+          </div>
+        </div>
+      )}
       {transfer_id && (
         <div className={rowClassName}>
           <span className={titleClassName}>Transfer ID:</span>
-          <div className="flex items-center space-x-1">
+          <div className="h-6 flex items-center space-x-1">
             <a
               href={_url}
               target="_blank"
@@ -246,7 +263,7 @@ export default ({ data }) => {
       {deposit_address && (
         <div className={rowClassName}>
           <span className={titleClassName}>Deposit Address:</span>
-          <div className="flex items-center space-x-1">
+          <div className="h-6 flex items-center space-x-1">
             <Link
               href={`/account/${deposit_address}`}
               target="_blank"
