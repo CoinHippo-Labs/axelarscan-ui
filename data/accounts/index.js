@@ -15,6 +15,12 @@ export default [
     environment: 'testnet',
   },
   {
+    address: '0xF786e21509A9D50a9aFD033B5940A2b7D872C208',
+    name: 'Interchain Token Service',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xb28837949e7A3F1AC862036e8a0aE392c9fF9BB4',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
