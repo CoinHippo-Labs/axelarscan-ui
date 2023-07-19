@@ -35,6 +35,8 @@ export default ({ data }) => {
     gas,
     callback_data,
     origin_data,
+    token_sent,
+    amount,
   } = { ...data }
   const { chain, chain_type, destination_chain_type } = { ...call }
   const { destinationChain, destinationContractAddress } = { ...call?.returnValues }
@@ -42,6 +44,7 @@ export default ({ data }) => {
   const { commandId } = { ...approved?.returnValues }
   const { source_token, destination_native_token, axelar_token, source_confirm_fee, destination_confirm_fee, express_supported, express_fee } = { ...fees }
   const { gas_paid_amount, gas_base_fee_amount, gas_express_amount, gas_express_fee_amount, gas_approve_amount, gas_execute_amount, gas_callback_base_fee_amount, gas_callback_approve_amount, gas_callback_amount } = { ...gas }
+  const { destinationAddress } = { ...token_sent }
 
   const source_chain_data = getChainData(chain, chains_data)
   const destination_chain_data = getChainData(destinationChain, chains_data)
@@ -294,6 +297,17 @@ export default ({ data }) => {
                         )}
                       </div>
                     )}
+                    {id === 'send' && token_sent && (
+                      <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                        <NumberDisplay
+                          value={amount}
+                          format="0,0.00"
+                          prefix="TokenSent: "
+                          suffix={` ${token_sent.symbol}`}
+                          className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2"
+                        />
+                      </Link>
+                    )}
                   </div>
                 )}
                 {toArray((id === 'pay_gas' && gas_added_transactions) || (id === 'refund' && refunded_more_transactions)).map(d => {
@@ -447,6 +461,14 @@ export default ({ data }) => {
                     <div className="h-6 flex items-center space-x-1">
                       <AccountProfile address={to_address} noCopy={true} explorer={explorer} />
                       <ExplorerLink value={to_address} type="address" explorer={explorer} />
+                    </div>
+                  </Tooltip>
+                )}
+                {id === 'send' && destinationAddress && (
+                  <Tooltip placement="top-start" content="SendToken Destination">
+                    <div className="h-6 flex items-center space-x-1">
+                      <AccountProfile address={destinationAddress} noCopy={true} explorer={explorer} />
+                      <ExplorerLink value={destinationAddress} type="address" explorer={explorer} />
                     </div>
                   </Tooltip>
                 )}
