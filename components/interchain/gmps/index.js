@@ -189,29 +189,40 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => {
                   const { value, row } = { ...props }
-                  const { call, amount } = { ...row.original }
+                  const { call, amount, token_sent } = { ...row.original }
                   const { symbol } = { ...call?.returnValues }
                   const { image } = { ...getAssetData(symbol, assets_data) }
                   return (
                     <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
-                        {getTitle(normalizeEvent(value))}
+                        {token_sent ? 'sendToken via ITS' : getTitle(normalizeEvent(value))}
                       </div>
                       <div className="h-6 flex items-center space-x-2">
-                        {image && (
-                          <Image
-                            src={image}
-                            width={24}
-                            height={24}
-                          />
-                        )}
-                        {typeof amount === 'number' && (
-                          <NumberDisplay
-                            value={amount}
-                            format="0,0.00"
-                            suffix={` ${symbol}`}
-                          />
-                        )}
+                        {token_sent ?
+                          typeof amount === 'number' && (
+                            <NumberDisplay
+                              value={amount}
+                              format="0,0.00"
+                              suffix={` ${token_sent.symbol}`}
+                            />
+                          ) :
+                          <>
+                            {image && (
+                              <Image
+                                src={image}
+                                width={24}
+                                height={24}
+                              />
+                            )}
+                            {typeof amount === 'number' && (
+                              <NumberDisplay
+                                value={amount}
+                                format="0,0.00"
+                                suffix={` ${symbol}`}
+                              />
+                            )}
+                          </>
+                        }
                       </div>
                     </div>
                   )

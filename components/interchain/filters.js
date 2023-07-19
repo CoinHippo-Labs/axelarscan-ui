@@ -58,7 +58,7 @@ export default () => {
       placeholder: 'Select transfers type',
       options: [
         { value: '', title: 'Any' },
-        { value: 'gmp', title: 'GMP' },
+        { value: 'gmp', title: 'General Message Passing' },
         { value: 'token_transfers', title: 'Token Transfers' },
       ],
       className: 'col-span-2',
@@ -108,6 +108,7 @@ export default () => {
         { value: '', title: 'Any' },
         { value: 'callContract', title: 'CallContract' },
         { value: 'callContractWithToken', title: 'CallContractWithToken' },
+        { value: 'sendToken', title: 'SendToken via ITS' },
       ],
     },
     pathname.startsWith('/transfers') && {

@@ -42,6 +42,7 @@ export default ({ data, buttons }) => {
     simplified_status,
     callback_data,
     origin_data,
+    token_sent,
   } = { ...data }
   const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp } = { ...call }
   const { destinationChain, destinationContractAddress, symbol, amount } = { ...call?.returnValues }
@@ -235,7 +236,7 @@ export default ({ data, buttons }) => {
             <div className="flex items-center space-x-1">
               <Tooltip content="Method">
                 <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
-                  {getTitle(normalizeEvent(event))}
+                  {token_sent ? 'sendToken via ITS' : getTitle(normalizeEvent(event))}
                 </div>
               </Tooltip>
               {callback_data?.call?.transactionHash && (
@@ -261,25 +262,35 @@ export default ({ data, buttons }) => {
                 </Link>
               )}
             </div>
-            {symbol && (
-              <div className="h-6 flex items-center space-x-2">
-                {image && (
-                  <Image
-                    src={image}
-                    width={24}
-                    height={24}
-                    className="w-6 h-6"
-                  />
-                )}
-                {amount && (
+            {token_sent ?
+              typeof data.amount === 'number' && (
+                <div className="h-6 flex items-center">
                   <NumberDisplay
-                    value={formatUnits(amount, decimals)}
+                    value={data.amount}
                     format="0,0.00"
-                    suffix={` ${symbol}`}
+                    suffix={` ${token_sent.symbol}`}
                   />
-                )}
-              </div>
-            )}
+                </div>
+              ) :
+              symbol && (
+                <div className="h-6 flex items-center space-x-2">
+                  {image && (
+                    <Image
+                      src={image}
+                      width={24}
+                      height={24}
+                    />
+                  )}
+                  {amount && (
+                    <NumberDisplay
+                      value={formatUnits(amount, decimals)}
+                      format="0,0.00"
+                      suffix={` ${symbol}`}
+                    />
+                  )}
+                </div>
+              )
+            }
           </div>
           <div className="order-3 lg:order-2 sm:col-span-2 lg:col-span-3 bg-slate-50 dark:bg-slate-800 rounded sm:rounded-lg flex flex-col justify-center space-y-1 p-2 sm:p-3">
             <div className="flex items-center justify-between space-x-3">
