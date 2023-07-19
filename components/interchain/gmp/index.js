@@ -470,6 +470,7 @@ export default () => {
     is_not_enough_gas,
     not_enough_gas_to_execute,
     no_gas_remain,
+    not_to_refund,
     callback_data,
   } = { ...data }
   const { chain, chain_type, destination_chain_type } = { ...call }
@@ -565,7 +566,7 @@ export default () => {
     !approveButton && !executeButton && !no_gas_remain && call?.chain_type !== 'cosmos' && (approved?.block_timestamp < moment().subtract(3, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     ((executed && (!callback_data || moment().diff(moment((executed.block_timestamp) * 1000), 'minutes') >= 10)) || is_executed || error || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     (EDITABLE || (
-      gas?.gas_remain_amount >= MIN_GAS_REMAIN_AMOUNT && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * usd > 1 || (is_insufficient_fee && gas.gas_paid_amount < gas.gas_base_fee_amount && gas.gas_paid_amount * usd > 1)) &&
+      !not_to_refund && gas?.gas_remain_amount >= MIN_GAS_REMAIN_AMOUNT && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * usd > 1 || (is_insufficient_fee && gas.gas_paid_amount < gas.gas_base_fee_amount && gas.gas_paid_amount * usd > 1)) &&
       (!refunded || refunded.error || refunded.block_timestamp < gas_paid?.block_timestamp)
     )) && (
       <div key="refund" className="flex items-center space-x-1">
