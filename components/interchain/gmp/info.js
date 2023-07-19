@@ -95,7 +95,7 @@ export default ({ data, buttons }) => {
     },
     {
       id: 'execute',
-      title: executed || is_executed ? 'Received' : errored ? 'Error' : 'Execute',
+      title: executed || is_executed ? 'Executed' : errored ? 'Error' : 'Execute',
       status: executed || is_executed ? 'success' : errored ? 'failed' : 'pending',
       data: executed || is_executed || error,
       chain_data: executed?.axelarTransactionHash && !executed.transactionHash ? axelar_chain_data : destination_chain_data,
