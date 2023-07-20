@@ -115,7 +115,7 @@ export default () => {
             className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${executing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
           >
             {executing && <Spinner width={14} height={14} color="white" />}
-            <span className="font-semibold">
+            <span className="font-medium">
               Execute
             </span>
           </button>
