@@ -195,7 +195,7 @@ export default () => {
                   return (
                     <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
-                        {token_sent ? 'sendToken via ITS' : getTitle(normalizeEvent(value))}
+                        {token_sent ? 'Interchain Transfer' : getTitle(normalizeEvent(value))}
                       </div>
                       <div className="h-6 flex items-center space-x-2">
                         {token_sent ?
