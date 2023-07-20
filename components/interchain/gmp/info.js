@@ -236,7 +236,7 @@ export default ({ data, buttons }) => {
             <div className="flex items-center space-x-1">
               <Tooltip content="Method">
                 <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
-                  {token_sent ? 'sendToken via ITS' : getTitle(normalizeEvent(event))}
+                  {token_sent ? 'Interchain Transfer' : getTitle(normalizeEvent(event))}
                 </div>
               </Tooltip>
               {callback_data?.call?.transactionHash && (

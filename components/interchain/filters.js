@@ -108,7 +108,7 @@ export default () => {
         { value: '', title: 'Any' },
         { value: 'callContract', title: 'CallContract' },
         { value: 'callContractWithToken', title: 'CallContractWithToken' },
-        { value: 'sendToken', title: 'SendToken via ITS' },
+        { value: 'sendToken', title: 'Interchain Transfer' },
       ],
     },
     pathname.startsWith('/transfers') && {
