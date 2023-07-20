@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { configureChains, createClient } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { EthereumClient, w3mConnectors } from '@web3modal/ethereum'
-import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, baseGoerli, celo, celoAlfajores, filecoin, filecoinHyperspace, lineaTestnet } from '@wagmi/chains'
+import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, baseGoerli, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, lineaTestnet } from '@wagmi/chains'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 export const EVM_CHAIN_CONFIGS =
@@ -11,6 +11,7 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'ethereum', ...mainnet },
       { _id: 'binance', ...bsc },
       { _id: 'polygon', ...polygon },
+      { _id: 'polygon-zkevm', ...polygonZkEvm },
       { _id: 'avalanche', ...avalanche },
       { _id: 'fantom', ...fantom },
       { _id: 'moonbeam', ...moonbeam },
@@ -27,6 +28,7 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'goerli', ...goerli },
       { _id: 'binance', ...bscTestnet },
       { _id: 'polygon', ...polygonMumbai },
+      { _id: 'polygon-zkevm', ...polygonZkEvmTestnet },
       { _id: 'avalanche', ...avalancheFuji },
       { _id: 'fantom', ...fantomTestnet },
       { _id: 'moonbeam', ...moonbaseAlpha },
@@ -37,6 +39,7 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'celo', ...celoAlfajores },
       { _id: 'kava', id: 2221, network: 'kava', name: 'Kava', nativeCurrency: { name: 'Kava', symbol: 'KAVA', decimals: 18 }, rpcUrls: { default: { http: ['https://evm.testnet.kava.io'] } }, blockExplorers: { default: { name: 'Kava', url: 'https://explorer.testnet.kava.io' } } },
       { _id: 'filecoin', ...filecoinHyperspace },
+      { _id: 'filecoin-2', ...filecoinCalibration },
       { _id: 'linea', ...lineaTestnet },
     ]
 
