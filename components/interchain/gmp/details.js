@@ -310,8 +310,8 @@ export default ({ data }) => {
                     )}
                   </div>
                 )}
-                {toArray((id === 'pay_gas' && gas_added_transactions) || (id === 'refund' && refunded_more_transactions)).map(d => {
-                  const { transactionHash } = { ...data }
+                {toArray((id === 'pay_gas' && gas_added_transactions) || (id === 'refund' && refunded_more_transactions)).map((d, i) => {
+                  const { transactionHash } = { ...d }
 
                   let _url
                   if (url && transaction_path) {
@@ -327,7 +327,7 @@ export default ({ data }) => {
                   )
 
                   return (
-                    <div className="h-6 flex items-center space-x-1">
+                    <div key={i} className="h-6 flex items-center space-x-1">
                       {_url ?
                         <Link href={_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 dark:text-blue-500">
                           {component}
