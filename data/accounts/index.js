@@ -260,12 +260,12 @@ export default [
   },
   {
     address: '0x345662ABfE0E257E23552A434D02Ef274cCb6A90',
-    name: 'Express Relayer',
+    name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
   },
   {
     address: '0xB8Cd93C83A974649D76B1c19f311f639e62272BC',
-    name: 'Express Relayer',
+    name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
   },
   {
