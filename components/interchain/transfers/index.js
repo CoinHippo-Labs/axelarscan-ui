@@ -46,7 +46,9 @@ export default () => {
   useEffect(
     () => {
       if (asPath) {
-        setFilters({ ...getQueryParams(asPath), senderAddress: address })
+        const filters = { ...getQueryParams(asPath) }
+        const { senderAddress } = { ...filters }
+        setFilters({ ...filters, senderAddress: address || senderAddress })
       }
     },
     [asPath, address],
