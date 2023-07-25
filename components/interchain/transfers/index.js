@@ -273,7 +273,7 @@ export default () => {
                         </span>
                       </div>
                       <div className="h-6 flex items-center">
-                        <AccountProfile address={sender_address} noCopy={true} explorer={explorer} />
+                        <AccountProfile address={sender_address} noCopy={true} explorer={explorer} chain={value} />
                       </div>
                     </div>
                   )
@@ -305,7 +305,7 @@ export default () => {
                         </span>
                       </div>
                       <div className="h-6 flex items-center">
-                        <AccountProfile address={recipient_address} noCopy={true} explorer={explorer} />
+                        <AccountProfile address={recipient_address} noCopy={true} explorer={explorer} chain={value} />
                       </div>
                     </div>
                   )

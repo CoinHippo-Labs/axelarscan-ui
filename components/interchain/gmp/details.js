@@ -451,7 +451,7 @@ export default ({ data }) => {
                 {value && (
                   <Tooltip placement="top-start" content={`${['express', 'approve', 'execute'].includes(id) ? 'Relayer' : id === 'refund' ? 'Refunder' : 'Sender'}`}>
                     <div className="h-6 flex items-center space-x-1">
-                      <AccountProfile address={value} noCopy={true} explorer={explorer} />
+                      <AccountProfile address={value} noCopy={true} explorer={explorer} chain={chain_data?.id} />
                       <ExplorerLink value={value} type="address" explorer={explorer} />
                     </div>
                   </Tooltip>
@@ -459,7 +459,7 @@ export default ({ data }) => {
                 {to_address && (
                   <Tooltip placement="top-start" content={`${['send', 'approve', 'callback'].includes(id) ? 'Gateway' : id === 'pay_gas' ? 'Gas Service' : id === 'express' && !equalsIgnoreCase(to_address, destinationContractAddress) ? 'Express Service' : id === 'refund' ? 'Receiver' : 'Destination'}`}>
                     <div className="h-6 flex items-center space-x-1">
-                      <AccountProfile address={to_address} noCopy={true} explorer={explorer} />
+                      <AccountProfile address={to_address} noCopy={true} explorer={explorer} chain={chain_data?.id} />
                       <ExplorerLink value={to_address} type="address" explorer={explorer} />
                     </div>
                   </Tooltip>
@@ -467,7 +467,7 @@ export default ({ data }) => {
                 {id === 'send' && destinationAddress && (
                   <Tooltip placement="top-start" content="SendToken Destination">
                     <div className="h-6 flex items-center space-x-1">
-                      <AccountProfile address={destinationAddress} noCopy={true} explorer={explorer} />
+                      <AccountProfile address={destinationAddress} noCopy={true} explorer={explorer} chain={chain_data?.id} />
                       <ExplorerLink value={destinationAddress} type="address" explorer={explorer} />
                     </div>
                   </Tooltip>

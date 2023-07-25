@@ -387,7 +387,7 @@ export default ({ data }) => {
                 {deposit_address && (
                   <Tooltip placement="top-start" content="Deposit Address">
                     <div className="h-6 flex items-center space-x-1">
-                      <AccountProfile address={deposit_address} noCopy={true} explorer={explorer} />
+                      <AccountProfile address={deposit_address} noCopy={true} explorer={explorer} chain={deposit_chain_data?.id} />
                       <ExplorerLink value={deposit_address} type="address" explorer={explorer} />
                     </div>
                   </Tooltip>

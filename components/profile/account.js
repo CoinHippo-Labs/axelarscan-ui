@@ -4,6 +4,9 @@ import _ from 'lodash'
 
 import ValidatorProfile from './validator'
 import ENSProfile from './ens'
+import LENSProfile from './lens'
+import SPACEIDProfile from './spaceid'
+import UNSTOPPABLEProfile from './unstoppable'
 import Image from '../image'
 import Copy from '../copy'
 import { split, toArray, includesStringList, ellipse, equalsIgnoreCase, toHex } from '../../lib/utils'
@@ -24,6 +27,7 @@ export default (
     noValidator = false,
     explorer,
     url,
+    chain,
     className = 'cursor-pointer font-medium',
   },
 ) => {
@@ -64,6 +68,26 @@ export default (
       </span>
     </>
   )
+
+  let Profile
+  chain = chain?.toLowerCase()
+  switch (chain) {
+    case 'binance':
+    case 'arbitrum':
+      Profile = SPACEIDProfile
+      break
+    case 'polygon':
+      Profile = LENSProfile
+      break
+    default:
+      if (!chain?.includes('ethereum')) {
+        Profile = UNSTOPPABLEProfile
+      }
+      else {
+        Profile = ENSProfile
+      }
+      break
+  }
 
   return address && (
     name ?
@@ -117,12 +141,13 @@ export default (
         </div>
       </div> :
       address?.startsWith('0x') ?
-        <ENSProfile
+        <Profile
           address={address}
           copyAddress={copyAddress}
           width={width}
           height={height}
           url={url}
+          chain={chain}
           className={className}
         /> :
         url ?

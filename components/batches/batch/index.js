@@ -48,7 +48,9 @@ export default () => {
     () => {
       const getData = async is_interval => {
         if (chain && id) {
-          setData(await batchedCommands(chain, id, { index: true }))
+          const data = await batchedCommands(chain, id, { index: true })
+          console.log('[data]', data)
+          setData(data)
         }
       }
 
@@ -304,7 +306,7 @@ export default () => {
                           <div className="flex items-center space-x-1">
                             <BsArrowRightShort size={18} />
                             <div className="flex items-center space-x-1">
-                              <AccountProfile address={value} explorer={explorer} />
+                              <AccountProfile address={value} explorer={explorer} chain={chain} />
                               <ExplorerLink value={value} explorer={explorer} />
                             </div>
                           </div>
@@ -338,7 +340,7 @@ export default () => {
                               <>
                                 <BsArrowRightShort size={18} />
                                 <div className="flex items-center space-x-1">
-                                  <AccountProfile address={contractAddress} explorer={explorer} />
+                                  <AccountProfile address={contractAddress} explorer={explorer} chain={chain} />
                                   <ExplorerLink value={contractAddress} explorer={explorer} />
                                 </div>
                               </>
@@ -383,7 +385,7 @@ export default () => {
                                 <div className="max-w-xl flex flex-wrap">
                                   {split(newOwners || newOperators, 'normal', ';').map((a, i) => (
                                     <div key={i} className="flex items-center space-x-1 mb-1 mr-2">
-                                      <AccountProfile address={a} explorer={explorer} />
+                                      <AccountProfile address={a} explorer={explorer} chain={chain} />
                                       <ExplorerLink value={a} explorer={explorer} />
                                       {newWeights && (
                                         <NumberDisplay

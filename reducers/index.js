@@ -5,6 +5,9 @@ import chains from './chains'
 import assets from './assets'
 import contracts from './contracts'
 import ens from './ens'
+import lens from './lens'
+import spaceid from './spaceid'
+import unstoppable from './unstoppable'
 import accounts from './accounts'
 import chain from './chain'
 import status from './status'
@@ -21,6 +24,9 @@ export default combineReducers({
   assets,
   contracts,
   ens,
+  lens,
+  spaceid,
+  unstoppable,
   accounts,
   chain,
   status,

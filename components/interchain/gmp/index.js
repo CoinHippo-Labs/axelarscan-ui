@@ -23,6 +23,7 @@ import { split, toArray, equalsIgnoreCase, sleep, parseError } from '../../../li
 import IAxelarExecutable from '../../../data/contracts/interfaces/IAxelarExecutable.json'
 import parameters from '../../../data/gmp/parameters'
 
+const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 const MIN_GAS_REMAIN_AMOUNT = 0.000001
 
 const getTransactionKey = tx => {
@@ -75,7 +76,7 @@ export default () => {
   useEffect(
     () => {
       if (!api) {
-        setAPI(new AxelarGMPRecoveryAPI({ environment: process.env.NEXT_PUBLIC_ENVIRONMENT, axelarRpcUrl: process.env.NEXT_PUBLIC_RPC_URL, axelarLcdUrl: process.env.NEXT_PUBLIC_LCD_URL }))
+        setAPI(new AxelarGMPRecoveryAPI({ environment: ENVIRONMENT, axelarRpcUrl: process.env.NEXT_PUBLIC_RPC_URL, axelarLcdUrl: process.env.NEXT_PUBLIC_LCD_URL }))
       }
     },
     [],
@@ -207,7 +208,7 @@ export default () => {
         const { chain, transactionHash, transactionIndex, logIndex, returnValues } = { ...call }
         const { destinationChain } = { ...returnValues }
         const { gas_add_adjustment } = { ...parameters }
-        const gasMultipler = gas_add_adjustment[process.env.NEXT_PUBLIC_ENVIRONMENT]?.[destinationChain?.toLowerCase()] || gas_add_adjustment[process.env.NEXT_PUBLIC_ENVIRONMENT]?.default
+        const gasMultipler = gas_add_adjustment[ENVIRONMENT]?.[destinationChain?.toLowerCase()] || gas_add_adjustment[ENVIRONMENT]?.default
 
         console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler })
         const response = await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
@@ -284,7 +285,7 @@ export default () => {
         const { transactionHash, transactionIndex, logIndex } = { ...call }
         const { chain } = { ...approved }
         const { execute_gas_limit_buffer } = { ...parameters }
-        const gasLimitBuffer = execute_gas_limit_buffer[process.env.NEXT_PUBLIC_ENVIRONMENT]?.[chain] || execute_gas_limit_buffer[process.env.NEXT_PUBLIC_ENVIRONMENT]?.default
+        const gasLimitBuffer = execute_gas_limit_buffer[ENVIRONMENT]?.[chain] || execute_gas_limit_buffer[ENVIRONMENT]?.default
 
         console.log('[execute request]', { transactionHash, logIndex, gasLimitBuffer })
         const response = await api.execute(transactionHash, logIndex, { useWindowEthereum: true, gasLimitBuffer })
@@ -484,7 +485,7 @@ export default () => {
   const matched = equalsIgnoreCase(txHash, data?.call?.transactionHash) && (typeof txIndex !== 'number' || txIndex === data.call.transactionIndex) && (typeof txLogIndex !== 'number' || txLogIndex === data.call.logIndex)
   const notFound = data && Object.keys(data).length < 1
   const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
-  const EDITABLE = edit === 'true' && (process.env.NEXT_PUBLIC_ENVIRONMENT !== 'mainnet' || STAGING)
+  const EDITABLE = edit === 'true' && (ENVIRONMENT !== 'mainnet' || STAGING)
   const wrongSourceChain = source_chain_data && source_chain_data.chain_id !== chain_id
   const wrongDestinationChain = destination_chain_data && destination_chain_data.chain_id !== chain_id
   const { status, message, hash } = { ...response }
