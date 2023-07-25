@@ -355,6 +355,7 @@ export default ({ data, buttons }) => {
                   ellipseLength={8}
                   noCopy={true}
                   explorer={source_chain_data?.explorer}
+                  chain={source_chain_data?.id}
                 />
               </div>
               <div className="h-6 flex items-center">
@@ -363,6 +364,7 @@ export default ({ data, buttons }) => {
                   ellipseLength={8}
                   noCopy={true}
                   explorer={destination_chain_data?.explorer}
+                  chain={destination_chain_data?.id}
                 />
               </div>
             </div>

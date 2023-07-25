@@ -9,6 +9,9 @@ export const CONTRACTS_DATA = 'contracts_data'
 
 // naming
 export const ENS_DATA = 'ens_data'
+export const LENS_DATA = 'lens_data'
+export const SPACEID_DATA = 'spaceid_data'
+export const UNSTOPPABLE_DATA = 'unstoppable_data'
 export const ACCOUNTS_DATA = 'accounts_data'
 
 // chain

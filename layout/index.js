@@ -12,6 +12,9 @@ import { getChains, getAssets } from '../lib/api/config'
 import { getTokensPrice } from '../lib/api/tokens'
 import { getContracts } from '../lib/api/gmp'
 import { getENS } from '../lib/api/ens'
+import { getLENS } from '../lib/api/lens'
+import { getSPACEID } from '../lib/api/spaceid'
+import { getUNSTOPPABLE } from '../lib/api/unstoppable'
 import { getChainMaintainers, getEscrowAddresses } from '../lib/api/axelar'
 import { stakingParams, bankSupply, stakingPool, slashingParams } from '../lib/api/lcd'
 import { getStatus } from '../lib/api/rpc'
@@ -21,34 +24,18 @@ import { getKeyType } from '../lib/key'
 import { NUM_BLOCKS_PER_HEARTBEAT, startBlock, endBlock } from '../lib/heartbeat'
 import { formatUnits } from '../lib/number'
 import { toArray, equalsIgnoreCase } from '../lib/utils'
-import { THEME, PAGE_VISIBLE, CHAINS_DATA, ASSETS_DATA, CONTRACTS_DATA, ENS_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, MAINTAINERS_DATA, TVL_DATA, VALIDATORS_DATA } from '../reducers/types'
+import { THEME, PAGE_VISIBLE, CHAINS_DATA, ASSETS_DATA, CONTRACTS_DATA, ENS_DATA, LENS_DATA, SPACEID_DATA, UNSTOPPABLE_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, MAINTAINERS_DATA, TVL_DATA, VALIDATORS_DATA } from '../reducers/types'
 
 export default ({ children }) => {
   const dispatch = useDispatch()
-  const {
-    preferences,
-    chains,
-    assets,
-    ens,
-    status,
-    validators,
-  } = useSelector(
-    state => (
-      {
-        preferences: state.preferences,
-        chains: state.chains,
-        assets: state.assets,
-        ens: state.ens,
-        status: state.status,
-        validators: state.validators,
-      }
-    ),
-    shallowEqual,
-  )
+  const { preferences, chains, assets, ens, lens, spaceid, unstoppable, status, validators } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, lens: state.lens, spaceid: state.spaceid, unstoppable: state.unstoppable, status: state.status, validators: state.validators }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { ens_data } = { ...ens }
+  const { lens_data } = { ...lens }
+  const { spaceid_data } = { ...spaceid }
+  const { unstoppable_data } = { ...unstoppable }
   const { status_data } = { ...status }
   const { validators_data } = { ...validators }
 
@@ -104,14 +91,34 @@ export default ({ children }) => {
     [],
   )
 
-  // ens
+  // ns
   useEffect(
     () => {
       const getData = async () => {
-        if (address && chains_data && getKeyType(address, chains_data) === 'evmAddress' && !ens_data?.[address]) {
-          const data = await getENS(address)
-          if (data) {
-            dispatch({ type: ENS_DATA, value: data })
+        if (address && chains_data && getKeyType(address, chains_data) === 'evmAddress') {
+          if (!ens_data?.[address]) {
+            const data = await getENS(address)
+            if (data) {
+              dispatch({ type: ENS_DATA, value: data })
+            }
+          }
+          if (!lens_data?.[address]) {
+            const data = await getLENS(address)
+            if (data) {
+              dispatch({ type: LENS_DATA, value: data })
+            }
+          }
+          if (!spaceid_data?.[address]) {
+            const data = await getSPACEID(address, undefined, chains_data)
+            if (data) {
+              dispatch({ type: SPACEID_DATA, value: data })
+            }
+          }
+          if (!unstoppable_data?.[address]) {
+            const data = await getUNSTOPPABLE(address)
+            if (data) {
+              dispatch({ type: UNSTOPPABLE_DATA, value: data })
+            }
           }
         }
       }

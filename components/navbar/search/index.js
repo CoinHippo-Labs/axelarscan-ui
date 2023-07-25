@@ -2,21 +2,29 @@ import { useRouter } from 'next/router'
 import { useState, useRef } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useForm } from 'react-hook-form'
+import { RedefinedResolver } from '@redefined/name-resolver-js'
+import _ from 'lodash'
 import { FiSearch } from 'react-icons/fi'
 
 import Spinner from '../../spinner'
-import { getENS, domainFromENS } from '../../../lib/api/ens'
+import { getENS } from '../../../lib/api/ens'
+import { getLENS } from '../../../lib/api/lens'
+import { getSPACEID } from '../../../lib/api/spaceid'
+import { getUNSTOPPABLE } from '../../../lib/api/unstoppable'
 import { searchTransfers, searchDepositAddresses } from '../../../lib/api/transfers'
 import { searchGMP } from '../../../lib/api/gmp'
 import { getKeyType } from '../../../lib/key'
-import { split, toArray, equalsIgnoreCase } from '../../../lib/utils'
-import { ENS_DATA } from '../../../reducers/types'
+import { split, toArray, equalsIgnoreCase, sleep } from '../../../lib/utils'
+import { ENS_DATA, LENS_DATA, SPACEID_DATA, UNSTOPPABLE_DATA } from '../../../reducers/types'
 
 export default () => {
   const dispatch = useDispatch()
-  const { chains, ens } = useSelector(state => ({ chains: state.chains, ens: state.ens }), shallowEqual)
+  const { chains, ens, lens, spaceid, unstoppable } = useSelector(state => ({ chains: state.chains, ens: state.ens, lens: state.lens, spaceid: state.spaceid, unstoppable: state.unstoppable }), shallowEqual)
   const { chains_data } = { ...chains }
   const { ens_data } = { ...ens }
+  const { lens_data } = { ...lens }
+  const { spaceid_data } = { ...spaceid }
+  const { unstoppable_data } = { ...unstoppable }
 
   const router = useRouter()
   const { query } = { ...router }
@@ -35,19 +43,35 @@ export default () => {
     if (input_type) {
       setSearching(true)
       const { resolvedAddress } = { ...Object.values({ ...ens_data }).find(v => equalsIgnoreCase(v.name, input)) }
+      const { ownedBy } = { ...Object.values({ ...lens_data }).find(v => equalsIgnoreCase(v.handle, input)) }
+      const spaceid_domain = Object.values({ ...spaceid_data }).find(v => equalsIgnoreCase(v.name, input))
+      const { owner } = { ...Object.values({ ...unstoppable_data }).find(v => equalsIgnoreCase(v.name, input)) }
 
       if (resolvedAddress) {
         const { id } = { ...resolvedAddress }
         input = id
         input_type = 'address'
       }
-      else if (input_type === 'ens') {
-        const domain = await domainFromENS(input, ens_data)
-        const { resolvedAddress } = { ...domain }
-        const { id } = { ...resolvedAddress }
-        if (id) {
-          input = id
-          dispatch({ type: ENS_DATA, value: { [input.toLowerCase()]: domain } })
+      else if (ownedBy) {
+        input = ownedBy
+        input_type = 'address'
+      }
+      else if (spaceid_domain) {
+        const { address } = { ...spaceid_domain }
+        input = address
+        input_type = 'address'
+      }
+      else if (owner) {
+        const { id } = { ...owner }
+        input = id
+        input_type = 'address'
+      }
+      else if (input_type === 'ns') {
+        const resolver = new RedefinedResolver()
+        const { response } = { ...await resolver.resolve(input) }
+        const { address } = { ..._.head(response) }
+        if (address) {
+          input = address
         }
         input_type = 'address'
       }
@@ -89,11 +113,43 @@ export default () => {
       }
 
       if (input && input_type === 'address') {
-        const addresses = toArray(input, 'lower').filter(a => !ens_data?.[a])
-        const data = await getENS(addresses)
-        if (data) {
-          dispatch({ type: ENS_DATA, value: data })
+        const getName = async (provider = 'ens') => {
+          let addresses
+          let data
+          let type
+
+          switch (provider) {
+            case 'ens':
+              addresses = toArray(input, 'lower').filter(a => !ens_data?.[a])
+              data = await getENS(addresses)
+              type = ENS_DATA
+              break
+            case 'lens':
+              addresses = toArray(input, 'lower').filter(a => !lens_data?.[a])
+              data = await getLENS(addresses)
+              type = LENS_DATA
+              break
+            case 'spaceid':
+              addresses = toArray(input, 'lower').filter(a => !spaceid_data?.[a])
+              data = await getSPACEID(addresses, undefined, chains_data)
+              type = SPACEID_DATA
+              break
+            case 'unstoppable':
+              addresses = toArray(input, 'lower').filter(a => !unstoppable_data?.[a])
+              data = await getUNSTOPPABLE(addresses)
+              type = UNSTOPPABLE_DATA
+              break
+            default:
+              break
+          }
+
+          if (data) {
+            dispatch({ type, value: data })
+          }
         }
+
+        ['ens', 'lens', 'spaceid', 'unstoppable'].forEach(d => getName(d))
+        await sleep(1 * 1000)
       }
 
       router.push(`/${input_type}/${input}`)

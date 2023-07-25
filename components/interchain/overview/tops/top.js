@@ -51,7 +51,7 @@ export default (
                         switch (type) {
                           case 'contract':
                           case 'address':
-                            const { explorer } = { ...toArray(d.chain).length > 0 && getChainData(_.head(toArray(d.chain)), chains_data) }
+                            const { id, explorer } = { ...toArray(d.chain).length > 0 && getChainData(_.head(toArray(d.chain)), chains_data) }
                             return (
                               <AccountProfile
                                 key={j}
@@ -63,6 +63,7 @@ export default (
                                 noCopy={true}
                                 explorer={explorer}
                                 url={type === 'address' && `/address/${k}${tab ? `?tab=${tab}` : ''}`}
+                                chain={id}
                                 className="normal-case text-xs font-medium"
                               />
                             )

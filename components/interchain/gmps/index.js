@@ -255,7 +255,7 @@ export default () => {
                         </span>
                       </div>
                       <div className="h-6 flex items-center">
-                        <AccountProfile address={from} noCopy={true} explorer={explorer} />
+                        <AccountProfile address={from} noCopy={true} explorer={explorer} chain={value} />
                       </div>
                     </div>
                   )
@@ -286,7 +286,7 @@ export default () => {
                         </span>
                       </div>
                       <div className="h-6 flex items-center">
-                        <AccountProfile address={destinationContractAddress} noCopy={true} explorer={explorer} />
+                        <AccountProfile address={destinationContractAddress} noCopy={true} explorer={explorer} chain={value} />
                       </div>
                     </div>
                   )

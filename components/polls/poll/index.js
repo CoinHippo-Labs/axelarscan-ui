@@ -27,7 +27,7 @@ export default () => {
       const getData = async () => {
         if (id) {
           const { data } = { ...await searchPolls({ pollId: id }) }
-          const _d = {}
+          let _d = {}
           const votes = []
 
           Object.entries({ ..._.head(data) }).forEach(([k, v]) => {
@@ -41,7 +41,9 @@ export default () => {
             }
           })
 
-          setData({ ..._d, votes: _.orderBy(votes, ['height', 'created_at'], ['desc', 'desc']) })
+          _d = { ..._d, votes: _.orderBy(votes, ['height', 'created_at'], ['desc', 'desc']) }
+          console.log('[data]', _d)
+          setData(_d)
 
           const { event, height, participants } = { ..._d }
           const confirmation_vote = votes.find(v => v.confirmed)
