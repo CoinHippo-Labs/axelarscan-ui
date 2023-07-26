@@ -19,7 +19,8 @@ export default (
   const { chains_data } = { ...chains }
 
   const { key, num_txs, express_execute, confirm, approve, total } = { ...data }
-  const { name, image } = { ...getChainData(key, chains_data) }
+  const chain_data = getChainData(key, chains_data)
+  const { name, image } = { ...chain_data }
 
   const Point = ({ title, name, noTooltip = false }) => {
     const point = (
@@ -39,7 +40,6 @@ export default (
         point
     )
   }
-    
 
   let points = toArray([
     express_execute && { id: 'express_execute', title: 'X', name: 'Express', time_spent: express_execute },
@@ -60,7 +60,7 @@ export default (
     })
   }
 
-  return (
+  return chain_data && (
     <div className="bg-slate-50 dark:bg-slate-800 bg-opacity-50 dark:bg-opacity-50 rounded flex flex-col sm:flex-row sm:justify-between space-y-2 sm:space-y-0 sm:space-x-2 p-3">
       <div className="w-40 space-y-0.5">
         <div className="flex items-center space-x-2">

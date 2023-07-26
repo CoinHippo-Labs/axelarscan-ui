@@ -3,7 +3,8 @@ import _ from 'lodash'
 
 import Top from './top'
 import { getChainData } from '../../../../lib/config'
-import { toArray } from '../../../../lib/utils'
+import { toArray, equalsIgnoreCase } from '../../../../lib/utils'
+import accounts from '../../../../data/accounts'
 
 const TOPS = ['chains', 'addresses']
 const TOP_N = 5
@@ -15,8 +16,8 @@ export default ({ data, types }) => {
   const { GMPStats, GMPTopUsers, transfersStats, transfersTopUsers, transfersTopUsersByVolume } = { ...data }
   const { messages } = { ...GMPStats }
 
-  const groupData = data =>
-    Object.entries(_.groupBy(toArray(data), 'key')).map(([k, v]) => {
+  const groupData = (data, groupBy = 'key') =>
+    Object.entries(_.groupBy(toArray(data), groupBy)).map(([k, v]) => {
       return {
         key: k,
         num_txs: _.sumBy(v, 'num_txs'),
@@ -103,22 +104,28 @@ export default ({ data, types }) => {
     const transfersUsers = groupData(
       toArray(transfersTopUsers?.data).map(d => {
         const { key, num_txs, volume } = { ...d }
+        const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, key)) }
         return {
           key,
+          _key: name || key,
           num_txs,
           volume,
         }
-      })
+      }),
+      '_key',
     )
     const transfersUsersByVolume = groupData(
       toArray(transfersTopUsersByVolume?.data).map(d => {
         const { key, num_txs, volume } = { ...d }
+        const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, key)) }
         return {
           key,
+          _key: name || key,
           num_txs,
           volume,
         }
-      })
+      }),
+      '_key',
     )
     const contracts = groupData(
       toArray(messages).flatMap(m =>
@@ -126,8 +133,10 @@ export default ({ data, types }) => {
           toArray(s.destination_chains).flatMap(d =>
             toArray(d.contracts).map(c => {
               const { key, num_txs, volume } = { ...c }
+              const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, key)) }
               return {
                 key: key?.toLowerCase(),
+                _key: name || key?.toLowerCase(),
                 num_txs,
                 volume,
                 chain: d.key,
@@ -136,15 +145,19 @@ export default ({ data, types }) => {
           )
         )
       ),
+      '_key',
     )
     const GMPUsers = groupData(
       toArray(GMPTopUsers?.data).map(d => {
         const { key, num_txs } = { ...d }
+        const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, key)) }
         return {
           key: key?.toLowerCase(),
+          _key: name || key?.toLowerCase(),
           num_txs,
         }
-      })
+      }),
+      '_key',
     )
 
     switch (id) {

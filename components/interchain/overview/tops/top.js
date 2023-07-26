@@ -42,9 +42,9 @@ export default (
         <div className="w-full">
           {data ?
             <div className={`overflow-y-auto space-y-1 ${className}`}>
-              {toArray(data).map((d, i) => {
+              {toArray(data).filter(d => type !== 'chain' || split(d.key, 'normal', '_').filter(k => !getChainData(k, chains_data)).length < 1).map((d, i) => {
                 const keys = split(d.key, 'normal', '_')
-                return (
+                return keys.length > 0 && (
                   <div key={i} className="flex items-center justify-between space-x-2">
                     <div className={`${['contract', 'address'].includes(type) ? 'h-8' : 'h-6'} flex items-center space-x-1`}>
                       {keys.map((k, j) => {
@@ -83,17 +83,22 @@ export default (
                                     {name}
                                   </span>
                                 )}
+                                {keys.length > 1 && (
+                                  <span className="hidden 3xl:block text-slate-600 dark:text-slate-200 text-xs font-medium">
+                                    {name}
+                                  </span>
+                                )}
                               </div>
                             )
                             return (
                               keys.length > 1 ?
-                              <Tooltip key={j} content={name}>
-                                <div className="flex items-center space-x-1">
-                                  {j > 0 && <BsArrowRightShort size={16} className="text-slate-600 dark:text-slate-200" />}
-                                  {component}
-                                </div>
-                              </Tooltip> :
-                              component
+                                <Tooltip key={j} content={name}>
+                                  <div className="flex items-center space-x-1">
+                                    {j > 0 && <BsArrowRightShort size={16} className="text-slate-600 dark:text-slate-200" />}
+                                    {component}
+                                  </div>
+                                </Tooltip> :
+                                component
                             ) 
                         }
                       })}

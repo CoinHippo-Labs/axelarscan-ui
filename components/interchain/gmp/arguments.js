@@ -44,7 +44,7 @@ export default ({ data }) => {
     { title: 'commandId', value: commandId, className: 'sm:col-span-2' },
     { title: 'sourceChain', value: sourceChain },
     { title: 'destinationChain', value: destinationChain },
-    { title: 'sender', value: sender },
+    { title: 'sourceAddress', value: sender },
     { title: 'destinationContractAddress', value: destinationContractAddress },
     { title: 'payloadHash', value: payloadHash, className: 'sm:col-span-2' },
     { title: 'payload', value: payload, className: 'sm:col-span-2' },

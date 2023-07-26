@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Menu, MenuHandler, MenuList } from '@material-tailwind/react'
+import _ from 'lodash'
 
 import routes from './routes'
 import { toArray, getTitle } from '../../../lib/utils'
@@ -18,11 +19,11 @@ const Group = ({ title, items, pathname, className = '' }) => {
       offset={{ mainAxis: 12 }}
     >
       <MenuHandler>
-        <div className={className}>
+        <Link href={_.head(items)?.path || pathname} className={className}>
           <span className="whitespace-nowrap tracking-wider">
             {title}
           </span>
-        </div>
+        </Link>
       </MenuHandler>
       <MenuList className="w-60 bg-light dark:bg-slate-900 p-4">
         <div className="flex flex-col space-y-4">

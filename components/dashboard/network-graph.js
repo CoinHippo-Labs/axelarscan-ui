@@ -400,6 +400,7 @@ export default ({ id = 'network', data }) => {
             {/*graphData && <div id={id} className={`${toArray(data).length > 0 ? 'flex sm:hidden items-center justify-center mt-2' : 'hidden'}`} />*/}
             {loaded ?
               <>
+                <div className="hidden 2.5xl:block" />
                 <div className="hidden sm:block">
                   <ForceGraph2D
                     ref={graphRef}
@@ -422,7 +423,7 @@ export default ({ id = 'network', data }) => {
                     enableNodeDrag={false}
                   />
                 </div>
-                <div className="mt-2">
+                <div className="mt-2 mr-0.5">
                   {details}
                 </div>
               </> :
@@ -435,7 +436,7 @@ export default ({ id = 'network', data }) => {
 
   return (
     <Tabs value={menu} className="tabs hidden sm:block">
-      <TabsHeader className="max-w-xs sm:max-w-sm ml-auto mr-auto sm:mr-0">
+      <TabsHeader className="max-w-xs ml-auto mr-auto sm:mr-0">
         {MENUS.map(m => (
           <Tab
             key={m}
