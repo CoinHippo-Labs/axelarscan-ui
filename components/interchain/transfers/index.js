@@ -363,7 +363,7 @@ export default () => {
                       if (!extra && insufficient_fee) {
                         extra = (
                           <Tooltip placement="top-start" content="Insufficient transfer fee">
-                            <div className="w-fit flex items-center text-slate-300 dark:text-slate-600 font-medium space-x-1">
+                            <div className="w-fit flex items-center text-red-500 dark:text-red-600 font-medium space-x-1">
                               <span>Transfer Fee</span>
                               <RiErrorWarningLine size={18} />
                             </div>

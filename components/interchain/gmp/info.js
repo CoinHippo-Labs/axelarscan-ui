@@ -187,7 +187,7 @@ export default ({ data, buttons }) => {
         extra = toArray([
           extra,
           <Tooltip key="not_enough_gas_to_execute" placement="top-start" content="Not enough gas to execute">
-            <div className="w-fit flex items-center text-slate-300 dark:text-slate-600 font-medium space-x-1">
+            <div className="w-fit flex items-center text-red-500 dark:text-red-600 font-medium space-x-1">
               <TbGasStationOff size={18} className="ml-0.5 -mr-0.5" />
               <span>Execute Gas</span>
             </div>
@@ -198,7 +198,7 @@ export default ({ data, buttons }) => {
         extra = toArray([
           extra,
           <Tooltip key="is_insufficient_fee" placement="top-start" content="Insufficient base fee">
-            <div className="w-fit flex items-center text-slate-300 dark:text-slate-600 font-medium space-x-1">
+            <div className="w-fit flex items-center text-red-500 dark:text-red-600 font-medium space-x-1">
               <RiErrorWarningLine size={18} />
               <span>Base Fee</span>
             </div>

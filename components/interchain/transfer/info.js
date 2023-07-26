@@ -289,7 +289,7 @@ export default ({ data }) => {
                 {insufficient_fee && (
                   <Tooltip content="Insufficient transfer fee">
                     <div>
-                      <RiErrorWarningLine size={18} className="text-red-400 dark:text-red-500" />
+                      <RiErrorWarningLine size={18} className="text-red-500 dark:text-red-600" />
                     </div>
                   </Tooltip>
                 )}

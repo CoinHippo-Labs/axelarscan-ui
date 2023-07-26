@@ -375,7 +375,7 @@ export default () => {
                       if (not_enough_gas_to_execute) {
                         extra = (
                           <Tooltip placement="top-start" content="Not enough gas to execute">
-                            <div className="w-fit flex items-center text-slate-300 dark:text-slate-600 font-medium space-x-1">
+                            <div className="w-fit flex items-center text-red-500 dark:text-red-600 font-medium space-x-1">
                               <span>Execute Gas</span>
                               <TbGasStationOff size={18} />
                             </div>
@@ -387,7 +387,7 @@ export default () => {
                       if (!extra && is_insufficient_fee && !approved) {
                         extra = (
                           <Tooltip placement="top-start" content="Insufficient base fee">
-                            <div className="w-fit flex items-center text-slate-300 dark:text-slate-600 font-medium space-x-1">
+                            <div className="w-fit flex items-center text-red-500 dark:text-red-600 font-medium space-x-1">
                               <span>Base Fee</span>
                               <RiErrorWarningLine size={18} />
                             </div>
