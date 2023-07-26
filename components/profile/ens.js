@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
+import UNSTOPPABLEProfile from './unstoppable'
 import Image from '../image'
 import Copy from '../copy'
 import { getENS } from '../../lib/api/ens'
@@ -18,6 +19,7 @@ export default (
     noImage = false,
     url,
     fallback,
+    from,
     className = '',
   },
 ) => {
@@ -131,29 +133,42 @@ export default (
             />
         }
       </div> :
-      url ?
-        <div className="flex items-center space-x-1">
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-400 dark:text-blue-500 font-medium"
-          >
-            {addressComponent}
-          </a>
-          {!noCopy && (
+      from !== 'unstoppable' ?
+        <UNSTOPPABLEProfile
+          address={address}
+          copySize={copySize}
+          copyAddress={copyAddress}
+          width={width}
+          height={height}
+          noCopy={noCopy}
+          noImage={noImage}
+          url={url}
+          fallback={fallback}
+          className={className}
+        /> :
+        url ?
+          <div className="flex items-center space-x-1">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 dark:text-blue-500 font-medium"
+            >
+              {addressComponent}
+            </a>
+            {!noCopy && (
+              <Copy
+                size={copySize}
+                value={address}
+              />
+            )}
+          </div> :
+          noCopy ?
+            addressComponent :
             <Copy
               size={copySize}
               value={address}
+              title={addressComponent}
             />
-          )}
-        </div> :
-        noCopy ?
-          addressComponent :
-          <Copy
-            size={copySize}
-            value={address}
-            title={addressComponent}
-          />
   )
 }
