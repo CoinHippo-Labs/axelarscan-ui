@@ -20,7 +20,7 @@ export default (
     address,
     ellipseLength = 10,
     prefix = 'axelar',
-    copyAddress = false,
+    copyAddress = true,
     width = 24,
     height = 24,
     noCopy = false,

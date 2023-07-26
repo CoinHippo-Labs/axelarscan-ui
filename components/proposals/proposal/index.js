@@ -66,7 +66,7 @@ export default () => {
 
   return (
     <div className="children px-3">
-      {data && proposal_id == id ?
+      {data && proposal_id === id ?
         <div className="max-w-6xl space-y-4 sm:space-y-6 pt-6 sm:pt-8 mx-auto">
           <Info data={data} />
           <div className="space-y-3">

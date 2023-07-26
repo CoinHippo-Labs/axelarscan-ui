@@ -63,7 +63,7 @@ export default (
 
   return (_url || (value && url)) && (
     <a
-      href={_url || `${url}${path?.replace(`{${field}}`, value)}${type == 'tx' && hasEventLog ? '#eventlog' : ''}`}
+      href={_url || `${url}${path?.replace(`{${field}}`, value)}${type === 'tx' && hasEventLog ? '#eventlog' : ''}`}
       target="_blank"
       rel="noopener noreferrer"
       className="min-w-max flex items-center space-x-1"
