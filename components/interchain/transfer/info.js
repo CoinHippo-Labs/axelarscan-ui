@@ -332,7 +332,10 @@ export default ({ data }) => {
                       }
                       break
                     case 'vote':
-                      if (poll_id) {
+                      if (txhash) {
+                        _url = `/tx/${txhash}`
+                      }
+                      else if (poll_id) {
                         _url = `/evm-poll/${poll_id}`
                       }
                       break

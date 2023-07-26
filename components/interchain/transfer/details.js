@@ -163,7 +163,11 @@ export default ({ data }) => {
                   }
                   break
                 case 'vote':
-                  if (poll_id) {
+                  if (txhash) {
+                    value = txhash
+                    _url = `/tx/${txhash}`
+                  }
+                  else if (poll_id) {
                     value = poll_id
                     _url = `/evm-poll/${poll_id}`
                   }
@@ -349,7 +353,7 @@ export default ({ data }) => {
             return value && (
               <div className="h-6 flex items-center mt-2">
                 <Chip
-                  color={value === 'success' ? 'green' : 'red'}
+                  color={value === 'success' ? 'green' : value === 'pending' ? 'blue' : 'red'}
                   value={value}
                   className="chip font-medium py-1 px-2"
                 />
@@ -443,7 +447,7 @@ export default ({ data }) => {
           headerClassName: 'justify-end text-right',
         },
       ]}
-      data={steps.filter(s => s.status !== 'pending')}
+      data={steps.filter(s => s.status !== 'pending' || (s.id === 'ibc_send' && ibc_send))}
       defaultPageSize={10}
       noPagination={true}
       className="no-border no-shadow"

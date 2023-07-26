@@ -135,7 +135,7 @@ export default ({ data }) => {
             let { value } = { ...props }
             const { id, status, data, chain_data } = { ...row.original }
             const _data = id === 'pay_gas' && typeof data === 'string' ? origin_data?.gas_paid : data
-            const { chain_type, logIndex, _logIndex, poll_id, axelarTransactionHash, receipt, error } = { ..._data }
+            const { chain_type, logIndex, _logIndex, confirmation_txhash, poll_id, axelarTransactionHash, receipt, error } = { ..._data }
             let { transactionHash } = { ..._data }
             const { explorer } = { ...chain_data }
             const { url, transaction_path } = { ...explorer }
@@ -148,7 +148,11 @@ export default ({ data }) => {
             if (url && transaction_path) {
               switch (id) {
                 case 'confirm':
-                  if (poll_id) {
+                  if (confirmation_txhash) {
+                    value = confirmation_txhash
+                    _url = `/tx/${confirmation_txhash}`
+                  }
+                  else if (poll_id) {
                     value = poll_id
                     _url = `/evm-poll/${poll_id}`
                   }
@@ -485,7 +489,7 @@ export default ({ data }) => {
             return value && (
               <div className="h-6 flex items-center mt-2">
                 <Chip
-                  color={value === 'success' ? 'green' : 'red'}
+                  color={value === 'success' ? 'green' : value === 'pending' ? 'blue' : 'red'}
                   value={value}
                   className="chip font-medium py-1 px-2"
                 />

@@ -395,7 +395,7 @@ export default ({ data, buttons }) => {
             <Stepper activeStep={-1} className="stepper">
               {steps.map((s, i) => {
                 const { id, title, status, data, chain_data } = { ...s }
-                const { poll_id, axelarTransactionHash, receipt } = { ...data }
+                const { confirmation_txhash, poll_id, axelarTransactionHash, receipt } = { ...data }
                 let { transactionHash } = { ...data }
                 const { explorer } = { ...chain_data }
                 const { url, transaction_path } = { ...explorer }
@@ -410,7 +410,10 @@ export default ({ data, buttons }) => {
                       }
                       break
                     case 'confirm':
-                      if (poll_id) {
+                      if (confirmation_txhash) {
+                        _url = `/tx/${confirmation_txhash}`
+                      }
+                      else if (poll_id) {
                         _url = `/evm-poll/${poll_id}`
                       }
                       break
