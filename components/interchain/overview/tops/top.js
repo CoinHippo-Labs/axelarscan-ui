@@ -84,7 +84,7 @@ export default (
                                   </span>
                                 )}
                                 {keys.length > 1 && (
-                                  <span className="hidden 3xl:block text-slate-600 dark:text-slate-200 text-xs font-medium">
+                                  <span className="hidden 2.5xl:block text-slate-600 dark:text-slate-200 text-xs font-medium">
                                     {name}
                                   </span>
                                 )}
