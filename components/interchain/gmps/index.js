@@ -57,7 +57,7 @@ export default () => {
   useEffect(
     () => {
       const trigger = is_interval => {
-        if (pathname && assets_data && filters) {
+        if (pathname && assets_data && filters && (!is_interval || !fetching)) {
           setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
         }
       }
