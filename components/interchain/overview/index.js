@@ -9,8 +9,8 @@ import Charts from './charts'
 import Tops from './tops'
 import TimeSpents from './time-spents'
 import Spinner from '../../spinner'
-import { GMPStats, GMPChart, GMPTotalVolume, GMPTopUsers } from '../../../lib/api/gmp'
-import { transfersStats, transfersChart, transfersTotalVolume, transfersTopUsers } from '../../../lib/api/transfers'
+import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '../../../lib/api/gmp'
+import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '../../../lib/api/transfers'
 import { getAssetData } from '../../../lib/config'
 import { toArray, getQueryParams, createMomentFromUnixtime } from '../../../lib/utils'
 
@@ -68,7 +68,7 @@ export default () => {
 
   useEffect(
     () => {
-      const metrics = ['GMPStats', 'GMPStatsAVGTimes', 'GMPChart', 'GMPTotalVolume', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTopUsers', 'transfersTopUsersByVolume']
+      const metrics = ['GMPStats', 'GMPStatsAVGTimes', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
 
       const getData = async () => {
         if (filters) {
@@ -101,6 +101,12 @@ export default () => {
                           case 'GMPTotalVolume':
                             resolve([m, types.includes('gmp') && await GMPTotalVolume({ ...filters, symbol })])
                             break
+                          case 'GMPTotalFee':
+                            resolve([m, types.includes('gmp') && await GMPTotalFee({ ...filters, symbol })])
+                            break
+                          case 'GMPTotalActiveUsers':
+                            resolve([m, types.includes('gmp') && await GMPTotalActiveUsers({ ...filters, symbol })])
+                            break
                           case 'GMPTopUsers':
                             resolve([m, types.includes('gmp') && await GMPTopUsers({ ...filters, symbol })])
                             break
@@ -112,6 +118,12 @@ export default () => {
                             break
                           case 'transfersTotalVolume':
                             resolve([m, types.includes('token_transfers') && await transfersTotalVolume({ ...filters })])
+                            break
+                          case 'transfersTotalFee':
+                            resolve([m, types.includes('token_transfers') && await transfersTotalFee({ ...filters })])
+                            break
+                          case 'transfersTotalActiveUsers':
+                            resolve([m, types.includes('token_transfers') && await transfersTotalActiveUsers({ ...filters })])
                             break
                           case 'transfersTopUsers':
                             resolve([m, types.includes('token_transfers') && await transfersTopUsers({ ...filters })])

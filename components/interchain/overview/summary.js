@@ -31,12 +31,7 @@ export default ({ data, filters }) => {
 
   const [seeMoreChain, setSeeMoreChain] = useState(false)
 
-  const {
-    GMPStats,
-    GMPTotalVolume,
-    transfersStats,
-    transfersTotalVolume,
-  } = { ...data }
+  const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
   const { contractAddress, asset, fromTime, toTime } = { ...filters }
   const { messages } = { ...GMPStats }
   const { types } = { ...transfersStats }
