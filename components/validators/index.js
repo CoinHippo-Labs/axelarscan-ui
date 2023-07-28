@@ -20,22 +20,7 @@ const PAGE_SIZE = 100
 const STATUSES = ['active', 'inactive']
 
 export default () => {
-  const {
-    chains,
-    chain,
-    maintainers,
-    validators,
-  } = useSelector(
-    state => (
-      {
-        chains: state.chains,
-        chain: state.chain,
-        maintainers: state.maintainers,
-        validators: state.validators,
-      }
-    ),
-    shallowEqual,
-  )
+  const { chains, chain, maintainers, validators } = useSelector(state => ({ chains: state.chains, chain: state.chain, maintainers: state.maintainers, validators: state.validators }), shallowEqual)
   const { chains_data } = { ...chains }
   const { chain_data } = { ...chain }
   const { maintainers_data } = { ...maintainers }
@@ -77,18 +62,10 @@ export default () => {
   useEffect(
     () => {
       const { staking_pool, bank_supply } = { ...chain_data }
-
-      if (validators_data && maintainers_data && staking_pool && bank_supply && inflationData) {
+      if (validators_data && staking_pool && bank_supply && inflationData && chains_data && maintainers_data && chains_data.filter(c => c.chain_type === 'evm' && !c.deprecated).length <= Object.keys(maintainers_data).length) {
         const { bonded_tokens } = { ...staking_pool }
         const total_supply = bank_supply.amount;
-
-        const {
-          tendermintInflationRate,
-          keyMgmtRelativeInflationRate,
-          externalChainVotingInflationRate,
-          communityTax,
-        } = { ...inflationData }
-
+        const { tendermintInflationRate, keyMgmtRelativeInflationRate, externalChainVotingInflationRate, communityTax } = { ...inflationData }
         setData(
           _.orderBy(
             validators_data.map(v => {
@@ -130,7 +107,7 @@ export default () => {
         )
       }
     },
-    [validators_data, maintainers_data, inflationData],
+    [chains_data, maintainers_data, validators_data, inflationData],
   )
 
   const { staking_params, slashing_params } = { ...chain_data }
