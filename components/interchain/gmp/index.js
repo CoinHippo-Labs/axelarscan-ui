@@ -70,6 +70,7 @@ export default () => {
 
   const [processing, setProcessing] = useState(null)
   const [response, setResponse] = useState(null)
+  const [txHashExpress, setTxHashExpress] = useState('')
   const [txHashExecuted, setTxHashExecuted] = useState('')
   const [txHashRefunded, setTxHashRefunded] = useState('')
 
@@ -101,6 +102,7 @@ export default () => {
   )
 
   const resetTxHashEdit = () => {
+    setTxHashExpress('')
     setTxHashExecuted('')
     setTxHashRefunded('')
   }
@@ -378,6 +380,43 @@ export default () => {
     }
   }
 
+  const setExpress = async data => {
+    if (data) {
+      setProcessing(true)
+      try {
+        setResponse({ status: 'pending', message: 'Editing' })
+
+        const { call, approved } = { ...data }
+        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { chain } = { ...approved }
+        const params = {
+          event: 'callWithToken',
+          sourceTransactionHash: transactionHash,
+          sourceTransactionIndex: transactionIndex,
+          sourceTransactionLogIndex: logIndex,
+          transactionHash: txHashExpress,
+        }
+
+        console.log('[setExpress request]', { ...params })
+        const response = await save(params)
+        console.log('[setExpress response]', response)
+        const { result } = { ...response }
+        const success = result === 'updated'
+
+        setResponse({
+          status: success ? 'success' : 'failed',
+          message: success ? 'Edit express successful' : 'Failed to edit express',
+          hash: txHashExpress,
+          chain,
+        })
+      } catch (error) {
+        setResponse({ status: 'failed', ...parseError(error) })
+      }
+      setProcessing(false)
+      resetTxHashEdit()
+    }
+  }
+
   const setExecuted = async data => {
     if (data) {
       setProcessing(true)
@@ -456,6 +495,7 @@ export default () => {
     call,
     gas_paid,
     gas_paid_to_callback,
+    express_executed,
     confirm,
     approved,
     executed,
@@ -583,6 +623,27 @@ export default () => {
       </div>
     )
 
+  const setExpressButton =
+    EDITABLE && fees?.express_supported && call && !express_executed && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 2 && (
+      <div key="set_express" className="flex items-center space-x-1">
+        <input
+          placeholder="Tx Hash"
+          value={txHashExpress}
+          onChange={e => setTxHashExpress(split(e.target.value, 'normal', ' ').join(''))}
+          className="w-32 bg-slate-100 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2"
+        />
+        <button
+          disabled={processing || !txHashExpress}
+          onClick={() => setExpress(data)}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
+        >
+          <span className="font-medium">
+            Save
+          </span>
+        </button>
+      </div>
+    )
+
   const setExecutedButton =
     EDITABLE && approved && !executed && moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2 && (
       <div key="set_executed" className="flex items-center space-x-1">
@@ -642,6 +703,7 @@ export default () => {
                     Object.fromEntries(
                       toArray([
                         addGasButton && ['pay_gas', addGasButton],
+                        setExpressButton && ['express', setExpressButton],
                         approveButton && [chain_type !== 'cosmos' && !confirm ? 'confirm' : 'approve', approveButton],
                         (executeButton || reExecuteButton || refundButton || setExecutedButton) && ['execute', toArray([executeButton, reExecuteButton, refundButton, setExecutedButton])],
                         setRefundedButton && ['refund', setRefundedButton],

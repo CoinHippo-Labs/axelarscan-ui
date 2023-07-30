@@ -73,10 +73,10 @@ export default ({ data, buttons }) => {
       data: gas_paid || gas_paid_to_callback,
       chain_data: gas_paid_to_callback ? destination_chain_data : source_chain_data,
     },
-    express_executed && {
+    (express_executed || buttons?.express) && {
       id: 'express',
       title: 'Express',
-      status: 'success',
+      status: express_executed ? 'success' : 'pending',
       data: express_executed,
       chain_data: destination_chain_data,
     },
