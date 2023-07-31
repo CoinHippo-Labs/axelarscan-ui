@@ -57,7 +57,7 @@ export default () => {
   useEffect(
     () => {
       const trigger = is_interval => {
-        if (pathname && assets_data && filters && (!is_interval || !fetching)) {
+        if (pathname && assets_data && filters && (!is_interval || (!fetching && Object.keys(filters).length < 1))) {
           setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
         }
       }
@@ -72,7 +72,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (filters) {
+        if (filters && (!fetching || typeof fetchTrigger !== 'number')) {
           setFetching(true)
 
           if (!fetchTrigger) {
@@ -88,7 +88,6 @@ export default () => {
           const symbol = _.uniq(toArray(toArray(asset).map(a => getAssetData(a, assets_data))).flatMap(a => _.uniq(toArray(_.concat(a.symbol, Object.values({ ...a.addresses }).map(_a => _a.symbol))))))
           const sort = sortBy === 'value' ? { 'value': 'desc' } : undefined
           const response = await searchGMP({ ...filters, symbol, size, from, sort })
-
           try {
             const { total } = { ...response }
             let { data } = { ...response }
