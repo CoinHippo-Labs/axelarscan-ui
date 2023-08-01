@@ -86,6 +86,7 @@ export default ({ data, buttons }) => {
       status: confirm ? 'success' : 'pending',
       data: confirm,
       chain_data: axelar_chain_data,
+      tooltip: !confirm && (gas_paid || gas_paid_to_callback || express_executed) ? 'Cross-chain transactions need to be finalized on the source chain before they can be settled. This requires Axelar to wait for an approval and can take ~30 mins depending on the chain (e.g. Ethereum, Base, Arbitrum etc.)' : null,
     },
     destination_chain_type !== 'cosmos' && {
       id: 'approve',
@@ -394,7 +395,7 @@ export default ({ data, buttons }) => {
             </div>
             <Stepper activeStep={-1} className="stepper">
               {steps.map((s, i) => {
-                const { id, title, status, data, chain_data } = { ...s }
+                const { id, title, status, data, chain_data, tooltip } = { ...s }
                 const { confirmation_txhash, poll_id, axelarTransactionHash, receipt } = { ...data }
                 let { transactionHash } = { ...data }
                 const { explorer } = { ...chain_data }
@@ -448,21 +449,28 @@ export default ({ data, buttons }) => {
                 }
 
                 const button = buttons?.[id]
-                const component = (
-                  <>
+                let component = (
+                  <div className="flex flex-col items-center">
                     <span className="text-white mt-0.5">
                       {i + 1}
                     </span>
                     <div className={`w-max whitespace-nowrap ${color} text-xs font-medium mt-1`}>
                       {title}
                     </div>
-                  </>
+                  </div>
                 )
+                if (tooltip) {
+                  component = (
+                    <Tooltip content={tooltip} className="w-48">
+                      {component}
+                    </Tooltip>
+                  )
+                }
 
                 return (
                   <Step key={i} className={`w-6 h-6 ${bgColor} flex flex-col items-center`}>
                     {_url ?
-                      <Link href={_url} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+                      <Link href={_url} target="_blank" rel="noopener noreferrer">
                         {component}
                       </Link> :
                       component
