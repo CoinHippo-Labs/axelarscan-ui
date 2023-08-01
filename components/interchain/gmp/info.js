@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import { Card, CardBody, CardFooter, Stepper, Step, Tooltip } from '@material-tailwind/react'
 import moment from 'moment'
 import { TbGasStation, TbGasStationOff } from 'react-icons/tb'
-import { RiErrorWarningLine, RiTimerFlashLine, RiTimerLine, RiArrowLeftFill, RiArrowRightFill } from 'react-icons/ri'
+import { RiErrorWarningLine, RiTimerFlashLine, RiTimerLine, RiArrowLeftFill, RiArrowRightFill, RiInformationLine } from 'react-icons/ri'
 
 import NumberDisplay from '../../number'
 import Image from '../../image'
@@ -454,8 +454,9 @@ export default ({ data, buttons }) => {
                     <span className="text-white mt-0.5">
                       {i + 1}
                     </span>
-                    <div className={`w-max whitespace-nowrap ${color} text-xs font-medium mt-1`}>
-                      {title}
+                    <div className={`w-max flex items-center whitespace-nowrap ${color} text-xs font-medium space-x-0.5 mt-1`}>
+                      <span>{title}</span>
+                      {tooltip && <RiInformationLine size={14} />}
                     </div>
                   </div>
                 )
