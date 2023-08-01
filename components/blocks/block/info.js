@@ -122,7 +122,7 @@ export default ({ data }) => {
 
   return (
     <div className="bg-slate-50 dark:bg-slate-900 w-fit flex flex-col rounded-lg space-y-4 p-6">
-      <div className={`${rowClassName} items-center`}>
+      <div className={`${rowClassName} sm:items-center`}>
         <span className={titleClassName}>Height:</span>
         {data ?
           height && (
