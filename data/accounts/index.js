@@ -21,6 +21,18 @@ export default [
     environment: 'testnet',
   },
   {
+    address: 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5',
+    name: 'Axelar GMP Account',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'mainnet',
+  }, 
+  {
+    address: 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5',
+    name: 'Axelar GMP Account',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xb28837949e7A3F1AC862036e8a0aE392c9fF9BB4',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
