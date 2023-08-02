@@ -2,7 +2,7 @@ import { QueryClient } from '@tanstack/react-query'
 import { configureChains, createClient } from 'wagmi'
 import { publicProvider } from 'wagmi/providers/public'
 import { EthereumClient, w3mConnectors } from '@web3modal/ethereum'
-import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, baseGoerli, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, lineaTestnet } from '@wagmi/chains'
+import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, base, baseGoerli, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet } from '@wagmi/chains'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 export const EVM_CHAIN_CONFIGS =
@@ -18,11 +18,12 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'aurora', ...aurora },
       { _id: 'arbitrum', ...arbitrum },
       { _id: 'optimism', ...optimism },
-      { _id: 'base', id: 8453, network: 'base', name: 'Base', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://developer-access-mainnet.base.org'] } }, blockExplorers: { default: { name: 'Basescan', url: 'https://basescan.org' } } },
+      { _id: 'base', ...base },
       { _id: 'celo', ...celo },
       { _id: 'kava', id: 2222, network: 'kava', name: 'Kava', nativeCurrency: { name: 'Kava', symbol: 'KAVA', decimals: 18 }, rpcUrls: { default: { http: ['https://evm.data.axelar.kava.io', 'https://evm.kava.io', 'https://evm2.kava.io'] } }, blockExplorers: { default: { name: 'Kava', url: 'https://explorer.kava.io' } } },
       { _id: 'filecoin', ...filecoin },
-      { _id: 'linea', id: 59144, network: 'linea', name: 'Linea', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://linea-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'] } }, blockExplorers: { default: { name: 'Linea', url: 'https://explorer.linea.build' } } },
+      // { _id: 'linea', ...linea },
+      { _id: 'linea', id: 59144, network: 'linea', name: 'Linea', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://linea-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'] } }, blockExplorers: { default: { name: 'Linea', url: 'https://lineascan.build' } } },
     ] :
     [
       { _id: 'goerli', ...goerli },

@@ -21,7 +21,7 @@ import { toBigNumber } from '../../../lib/number'
 import { split, toArray, equalsIgnoreCase, sleep, parseError } from '../../../lib/utils'
 
 import IAxelarExecutable from '../../../data/contracts/interfaces/IAxelarExecutable.json'
-import parameters from '../../../data/gmp/parameters'
+import parameters from '../../../config/gmp/parameters'
 
 const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 const MIN_GAS_REMAIN_AMOUNT = 0.000001
