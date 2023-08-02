@@ -68,10 +68,11 @@ export default ({ data, buttons }) => {
     },
     {
       id: 'pay_gas',
-      title: gas_paid || gas_paid_to_callback ? 'Gas Paid' : 'Pay Gas',
-      status: gas_paid || gas_paid_to_callback ? 'success' : 'pending',
+      title: (gas_paid || gas_paid_to_callback) && !is_insufficient_fee ? 'Gas Paid' : 'Pay Gas',
+      status: gas_paid || gas_paid_to_callback ? is_insufficient_fee ? 'failed' : 'success' : 'pending',
       data: gas_paid || gas_paid_to_callback,
       chain_data: gas_paid_to_callback ? destination_chain_data : source_chain_data,
+      tooltip: is_insufficient_fee ? 'Insufficient Base Fee. Please add more gas.' : '',
     },
     (express_executed || buttons?.express) && {
       id: 'express',
