@@ -1,9 +1,5 @@
-import Validator from '../../components/validator'
+import Validator from '../../components/validators/validator'
 
 export default () => {
-  return (
-    <div className="max-w-8xl mx-auto">
-      <Validator />
-    </div>
-  )
+  return <Validator />
 }

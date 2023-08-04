@@ -1,9 +1,5 @@
-import Gmps from '../../components/gmps/gmps'
+import Interchain from '../../components/interchain'
 
 export default () => {
-  return (
-    <div className="max-w-8xl mt-0 mb-6 mx-auto">
-      <Gmps />
-    </div>
-  )
+  return <Interchain />
 }

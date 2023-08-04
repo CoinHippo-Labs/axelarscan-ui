@@ -11,7 +11,7 @@
     @apply border-0 border-none;
   }
   thead tr th {
-    @apply px-3 py-2 border-b text-xs leading-4 font-medium uppercase tracking-wider;
+    @apply px-3 py-2 border-b uppercase tracking-widest leading-4 text-xs font-semibold;
   }
   tbody tr td {
     @apply px-3 py-2 border-b whitespace-nowrap align-top;
@@ -42,6 +42,9 @@
 
 .table {
   @apply shadow text-left;
+  &.no-shadow {
+    @apply shadow-none
+  }
   thead tr th,
   tbody tr td {
     @apply text-left;
@@ -59,8 +62,8 @@
     thead tr th {
       @apply border-slate-200;
       @apply text-slate-500;
-      background: color(theme('colors.slate.100') tint(3%));
-      border-color: color(theme('colors.slate.100') tint(3%));
+      background: color(theme('colors.slate.50') tint(3%));
+      border-color: color(theme('colors.slate.50') tint(3%));
     }
     tbody tr td {
       border-color: color(#fff shade(6%));
