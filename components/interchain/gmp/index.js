@@ -79,7 +79,9 @@ export default () => {
       if (!api) {
         try {
           setAPI(new AxelarGMPRecoveryAPI({ environment: ENVIRONMENT, axelarRpcUrl: process.env.NEXT_PUBLIC_RPC_URL, axelarLcdUrl: process.env.NEXT_PUBLIC_LCD_URL }))
-        } catch (error) {}
+        } catch (error) {
+          setAPI(undefined)
+        }
       }
     },
     [],
@@ -121,7 +123,7 @@ export default () => {
         setData({})
       }
     }
-    else if (tx && chains_data && api && !processing && !(matched && data && ['received', 'failed'].includes(data.simplified_status) && (data.executed || data.error) && (data.express_executed || !fees?.express_supported || !EDITABLE) && (data.executed || !EDITABLE) && (data.refunded || data.not_to_refund))) {
+    else if (tx && chains_data && (api || api === undefined) && !processing && !(matched && data && ['received', 'failed'].includes(data.simplified_status) && (data.executed || data.error) && (data.express_executed || !fees?.express_supported || !EDITABLE) && (data.executed || !EDITABLE) && (data.refunded || data.not_to_refund))) {
       if (data) {
         await sleep(3 * 1000)
         if (!matched) {
