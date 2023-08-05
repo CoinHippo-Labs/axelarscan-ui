@@ -124,7 +124,7 @@ export default {
       base: 2400,
       celo: 300,
       filecoin: 3600,
-      linea: 4200,
+      linea: 4800,
       default: 600,
     },
     testnet: {
@@ -142,7 +142,7 @@ export default {
       celo: 300,
       filecoin: 3600,
       'filecoin-2': 3600,
-      linea: 4200,
+      linea: 4800,
       default: 600,
     },
     stagenet: {
@@ -160,7 +160,7 @@ export default {
       celo: 300,
       filecoin: 3600,
       'filecoin-2': 3600,
-      linea: 4200,
+      linea: 4800,
       default: 600,
     },
   },
