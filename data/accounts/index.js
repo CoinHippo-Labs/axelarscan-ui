@@ -638,34 +638,16 @@ export default [
     environment: 'testnet',
   },
   {
+    address: '0xc3468a191fe51815b26535ed1f82c1f79e6ec37d',
+    name: 'Squid',
+    image: '/logos/accounts/squid.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xce16F69375520ab01377ce7B88f5BA8C48F8D666',
-    name: 'Squid Router',
+    name: 'Squid',
     image: '/logos/accounts/squid.svg',
     environment: 'mainnet',
-  },
-  {
-    address: '0xc3468a191fe51815b26535ed1f82c1f79e6ec37d',
-    name: 'Squid Router',
-    image: '/logos/accounts/squid.svg',
-    environment: 'testnet',
-  },
-  {
-    address: '0xe25e5ae59592bFbA3b5359000fb72E6c21D3228E',
-    name: 'Squid Router',
-    image: '/logos/accounts/squid.svg',
-    environment: 'testnet',
-  },
-  {
-    address: '0x9bEb991eDdF92528E6342Ec5f7B0846C24cbaB58',
-    name: 'Squid Router',
-    image: '/logos/accounts/squid.svg',
-    environment: 'testnet',
-  },
-  {
-    address: '0x481A2AAE41cd34832dDCF5A79404538bb2c02bC8',
-    name: 'Squid Router',
-    image: '/logos/accounts/squid.svg',
-    environment: 'testnet',
   },
   {
     address: '0x66423a1b45e14EaB8B132665FebC7Ec86BfcBF44',
