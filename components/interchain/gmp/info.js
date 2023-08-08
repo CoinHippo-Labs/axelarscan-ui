@@ -306,7 +306,7 @@ export default ({ data, buttons }) => {
                   />
                 )}
                 <span className="font-semibold">
-                  {source_chain_data?.name || getTitle(original_source_chain)}
+                  {source_chain_data?.name || getTitle(chain)}
                 </span>
               </div>
               <div className="w-full h-6 flex items-center space-x-3">
@@ -346,7 +346,7 @@ export default ({ data, buttons }) => {
                   />
                 )}
                 <span className="font-semibold">
-                  {destination_chain_data?.name || getTitle(original_destination_chain)}
+                  {destination_chain_data?.name || getTitle(destinationChain)}
                 </span>
               </div>
             </div>
