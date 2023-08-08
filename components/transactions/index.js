@@ -100,7 +100,7 @@ export default ({ n }) => {
           }
           else if (address?.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') {
             const { data } = { ...await searchDepositAddresses({ depositAddress: address }, { size: 10, sort: [{ height: 'desc' }] }) }
-            if (toArray(data).length > 0 || getKeyType(address, chains_data) === 'evmAddress') {
+            if (toArray(data).filter(d => !equalsIgnoreCase(d.id, d.deposit_address)).length > 0 || getKeyType(address, chains_data) === 'evmAddress') {
               const { deposit_address } = { ..._.head(data) }
               address = equalsIgnoreCase(address, deposit_address) ? deposit_address : address
               let response
