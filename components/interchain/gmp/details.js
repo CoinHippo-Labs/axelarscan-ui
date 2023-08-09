@@ -36,6 +36,8 @@ export default ({ data }) => {
     callback_data,
     origin_data,
     token_sent,
+    token_deployment_initialized,
+    token_deployed,
     amount,
   } = { ...data }
   const { chain, chain_type, destination_chain_type } = { ...call }
@@ -301,16 +303,34 @@ export default ({ data }) => {
                         )}
                       </div>
                     )}
-                    {id === 'send' && token_sent && (
-                      <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
-                        <NumberDisplay
-                          value={amount}
-                          format="0,0.00"
-                          prefix="TokenSent: "
-                          suffix={` ${token_sent.symbol}`}
-                          className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2"
-                        />
-                      </Link>
+                    {id === 'send' && (
+                      <>
+                        {token_sent && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <NumberDisplay
+                              value={amount}
+                              format="0,0.00"
+                              prefix="TokenSent: "
+                              suffix={` ${token_sent.symbol}`}
+                              className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2"
+                            />
+                          </Link>
+                        )}
+                        {token_deployment_initialized?.tokenSymbol && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
+                              TokenDeploymentInitialized: {token_deployment_initialized.tokenSymbol}
+                            </div>
+                          </Link>
+                        )}
+                        {token_deployed?.symbol && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
+                              TokenDeployed: {token_deployed.symbol}
+                            </div>
+                          </Link>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
