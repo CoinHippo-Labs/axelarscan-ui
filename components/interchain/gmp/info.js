@@ -43,6 +43,8 @@ export default ({ data, buttons }) => {
     callback_data,
     origin_data,
     token_sent,
+    token_deployment_initialized,
+    token_deployed,
   } = { ...data }
   const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp } = { ...call }
   const { destinationChain, destinationContractAddress, symbol, amount } = { ...call?.returnValues }
@@ -238,7 +240,7 @@ export default ({ data, buttons }) => {
             <div className="flex items-center space-x-1">
               <Tooltip content="Method">
                 <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
-                  {token_sent ? 'Interchain Transfer' : getTitle(normalizeEvent(event))}
+                  {token_sent ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : getTitle(normalizeEvent(event))}
                 </div>
               </Tooltip>
               {callback_data?.call?.transactionHash && (
@@ -274,24 +276,40 @@ export default ({ data, buttons }) => {
                   />
                 </div>
               ) :
-              symbol && (
-                <div className="h-6 flex items-center space-x-2">
-                  {image && (
-                    <Image
-                      src={image}
-                      width={24}
-                      height={24}
-                    />
-                  )}
-                  {amount && (
-                    <NumberDisplay
-                      value={formatUnits(amount, decimals)}
-                      format="0,0.00"
-                      suffix={` ${symbol}`}
-                    />
-                  )}
-                </div>
-              )
+              token_deployment_initialized ?
+                token_deployment_initialized.tokenSymbol && (
+                  <div className="h-6 flex items-center">
+                    <span className="whitespace-nowrap text-sm font-semibold">
+                      {token_deployment_initialized.tokenSymbol}
+                    </span>
+                  </div>
+                ) :
+                token_deployed ?
+                  token_deployed.symbol && (
+                    <div className="h-6 flex items-center">
+                      <span className="whitespace-nowrap text-sm font-semibold">
+                        {token_deployed.symbol}
+                      </span>
+                    </div>
+                  ) :
+                  symbol && (
+                    <div className="h-6 flex items-center space-x-2">
+                      {image && (
+                        <Image
+                          src={image}
+                          width={24}
+                          height={24}
+                        />
+                      )}
+                      {amount && (
+                        <NumberDisplay
+                          value={formatUnits(amount, decimals)}
+                          format="0,0.00"
+                          suffix={` ${symbol}`}
+                        />
+                      )}
+                    </div>
+                  )
             }
           </div>
           <div className="order-3 lg:order-2 sm:col-span-2 lg:col-span-3 bg-slate-50 dark:bg-slate-800 rounded sm:rounded-lg flex flex-col justify-center space-y-1 p-2 sm:p-3">
