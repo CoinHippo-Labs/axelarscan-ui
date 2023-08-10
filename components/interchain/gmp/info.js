@@ -5,15 +5,17 @@ import moment from 'moment'
 import { TbGasStation, TbGasStationOff } from 'react-icons/tb'
 import { RiErrorWarningLine, RiTimerFlashLine, RiTimerLine, RiArrowLeftFill, RiArrowRightFill, RiInformationLine } from 'react-icons/ri'
 
+import Spinner from '../../spinner'
 import NumberDisplay from '../../number'
 import Image from '../../image'
 import Copy from '../../copy'
 import AccountProfile from '../../profile/account'
 import ExplorerLink from '../../explorer/link'
 import TimeSpent from '../../time/timeSpent'
+import TimeUntil from '../../time/timeUntil'
 import { getChainData, getAssetData } from '../../../lib/config'
 import { formatUnits } from '../../../lib/number'
-import { toArray, getTitle, ellipse } from '../../../lib/utils'
+import { toArray, getTitle, ellipse, totalTimeString } from '../../../lib/utils'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A'
 const normalizeEvent = event => event?.replace('ContractCall', 'callContract')
@@ -45,6 +47,7 @@ export default ({ data, buttons }) => {
     token_sent,
     token_deployment_initialized,
     token_deployed,
+    estimated_time_spent,
   } = { ...data }
   const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp } = { ...call }
   const { destinationChain, destinationContractAddress, symbol, amount } = { ...call?.returnValues }
@@ -89,7 +92,7 @@ export default ({ data, buttons }) => {
       status: confirm ? 'success' : 'pending',
       data: confirm,
       chain_data: axelar_chain_data,
-      tooltip: !confirm && (gas_paid || gas_paid_to_callback || express_executed) ? 'Cross-chain transactions need to be finalized on the source chain before they can be settled. This requires Axelar to wait for an approval and can take ~30 mins depending on the chain (e.g. Ethereum, Base, Arbitrum etc.)' : null,
+      tooltip: !confirm && (gas_paid || gas_paid_to_callback || express_executed) ? `Cross-chain transactions need to be finalized on the source chain before they can be settled. This requires Axelar to wait for an approval and can take ${estimated_time_spent?.confirm ? `~${totalTimeString(0, estimated_time_spent.confirm)} on ${source_chain_data?.name || chain}` : '~30 mins depending on the chain (e.g. Ethereum, Base, Arbitrum etc.)'}` : null,
     },
     destination_chain_type !== 'cosmos' && {
       id: 'approve',
@@ -117,6 +120,7 @@ export default ({ data, buttons }) => {
   const logDisplay = chain_type === 'evm' && typeof logIndex === 'number' ? `:${logIndex}` : ''
   let extra
   let timeSpent
+  let estimatedTimeSpent
 
   switch (simplified_status) {
     case 'received':
@@ -171,7 +175,7 @@ export default ({ data, buttons }) => {
       break
     default:
       if ((gas_paid && gas?.gas_paid_amount > 0) || gas_paid_to_callback) {
-        const { source_token } = { ...fees }
+        const { express_supported, source_token } = { ...fees }
         const { symbol, gas_price } = { ...source_token }
         extra = (
           <Tooltip key="gas_paid" placement="top-start" content="Gas Deposited">
@@ -186,6 +190,53 @@ export default ({ data, buttons }) => {
             </div>
           </Tooltip>
         )
+        if (estimated_time_spent && !(is_insufficient_fee || not_enough_gas_to_execute) && !error) {
+          estimatedTimeSpent = (
+            <Tooltip key="time_spent" placement="top-start" content="Time spent">
+              <div className="w-fit h-6 flex items-center text-blue-400 dark:text-white space-x-1.5 ml-0.5">
+                <Spinner name="Watch" width={14} height={14} />
+                <TimeSpent
+                  fromTime={call.block_timestamp}
+                  noTooltip={true}
+                  className="font-medium"
+                />
+              </div>
+            </Tooltip>
+          )
+          estimatedTimeSpent = (
+            <div className="flex flex-col">
+              {estimatedTimeSpent}
+              {toArray([
+                express_supported && !(confirm || approved) && (
+                  <Tooltip key="expected_express" placement="top-start" content="Expected time to express">
+                    <div className="w-fit h-6 flex items-center text-slate-300 dark:text-slate-600 space-x-1">
+                      ~
+                      <RiTimerFlashLine size={18} />
+                      <TimeSpent
+                        fromTime={0}
+                        toTime={estimated_time_spent.express_execute}
+                        noTooltip={true}
+                        className="font-medium"
+                      />
+                    </div>
+                  </Tooltip>
+                ),
+                <Tooltip key="expected_execute" placement="top-start" content="Expected time to execute">
+                  <div className="w-fit h-6 flex items-center text-slate-300 dark:text-slate-600 space-x-1">
+                    ~
+                    <RiTimerLine size={18} />
+                    <TimeSpent
+                      fromTime={0}
+                      toTime={estimated_time_spent.total}
+                      noTooltip={true}
+                      className="font-medium"
+                    />
+                  </div>
+                </Tooltip>,
+              ])}
+            </div>
+          )
+        }
       }
       if (not_enough_gas_to_execute) {
         extra = toArray([
@@ -396,10 +447,11 @@ export default ({ data, buttons }) => {
                 {timeSpent}
               </div>
             )}
+            {estimatedTimeSpent}
           </div>
         </div>
       </CardBody>
-      <CardFooter className="card-footer">
+      <CardFooter className="card-footer mb-4">
         <div className="grid sm:grid-cols-3 lg:grid-cols-5 gap-4">
           <div className="flex flex-col justify-end space-y-1">
             {block_timestamp > 0 && (
@@ -477,6 +529,15 @@ export default ({ data, buttons }) => {
                       <span>{title}</span>
                       {tooltip && <RiInformationLine size={14} />}
                     </div>
+                    {id === 'confirm' && tooltip && estimated_time_spent && (
+                      <div className={`flex flex-wrap whitespace-nowrap ${color} text-xs font-medium`}>
+                        (<TimeUntil
+                          time={call.block_timestamp + estimated_time_spent.confirm}
+                          noTooltip={true}
+                          className="font-medium"
+                        />)
+                      </div>
+                    )}
                   </div>
                 )
                 if (tooltip) {

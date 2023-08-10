@@ -14,7 +14,7 @@ import Arguments from './arguments'
 import Spinner from '../../spinner'
 import ExplorerLink from '../../explorer/link'
 import Wallet from '../../wallet'
-import { searchGMP, saveGMP, isContractCallApproved } from '../../../lib/api/gmp'
+import { searchGMP, saveGMP, isContractCallApproved, estimateTimeSpent } from '../../../lib/api/gmp'
 import { getProvider } from '../../../lib/chain/evm'
 import { getChainData, getAssetData } from '../../../lib/config'
 import { toBigNumber } from '../../../lib/number'
@@ -169,6 +169,11 @@ export default () => {
           symbol = symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || call.returnValues?.symbol
           amount = amount || call.returnValues?.amount
 
+          if (call.chain) {
+            const response = await estimateTimeSpent({ sourceChain: call.chain })
+            _data.estimated_time_spent = toArray(response).find(d => d.key === call.chain)
+          }
+
           if (STAGING || EDITABLE) {
             try {
               const { result } = { ...await isContractCallApproved({ destinationChain, commandId, sourceChain, sourceAddress, contractAddress, payloadHash, symbol, amount }) }
@@ -249,7 +254,7 @@ export default () => {
       resetTxHashEdit()
       try {
         if (!afterPayGas) {
-          setResponse({ status: 'pending', message: 'Approving' })
+          setResponse({ status: 'pending', message: chain_type !== 'cosmos' && !confirm ? 'Confirming' : 'Approving' })
         }
 
         const { call } = { ...data }
@@ -517,6 +522,7 @@ export default () => {
     no_gas_remain,
     not_to_refund,
     callback_data,
+    estimated_time_spent,
   } = { ...data }
   const { chain, chain_type, destination_chain_type } = { ...call }
   const { destinationChain, payload, symbol } = { ...call?.returnValues }
@@ -555,7 +561,7 @@ export default () => {
     )
 
   const { finality } = { ...parameters }
-  const finalityTime = finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
+  const finalityTime = estimated_time_spent?.confirm ? estimated_time_spent.confirm + 60 : finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
   const approveButton =
     call && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
     !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer)) &&
