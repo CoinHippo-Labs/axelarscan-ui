@@ -267,7 +267,7 @@ export default () => {
         }
         if (!afterPayGas || success) {
           setResponse({
-            status: success ? 'success' : 'failed',
+            status: success || !error ? 'success' : 'failed',
             message: message || error || 'Approve successful',
             hash,
             chain: 'axelarnet',
