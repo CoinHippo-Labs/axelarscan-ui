@@ -561,7 +561,7 @@ export default () => {
     )
 
   const { finality } = { ...parameters }
-  const finalityTime = estimated_time_spent?.confirm ? estimated_time_spent.confirm + 60 : finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
+  const finalityTime = estimated_time_spent?.confirm ? estimated_time_spent.confirm + 15 : finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
   const approveButton =
     call && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
     !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer)) &&
