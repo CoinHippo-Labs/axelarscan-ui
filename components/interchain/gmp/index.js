@@ -67,6 +67,7 @@ export default () => {
 
   const [api, setAPI] = useState(null)
   const [data, setData] = useState(null)
+  const [estimatedTimeSpent, setEstimatedTimeSpent] = useState(null)
 
   const [processing, setProcessing] = useState(null)
   const [response, setResponse] = useState(null)
@@ -89,6 +90,7 @@ export default () => {
 
   useEffect(
     () => {
+      setEstimatedTimeSpent(null)
       setProcessing(null)
       setResponse(null)
       resetTxHashEdit()
@@ -169,9 +171,9 @@ export default () => {
           symbol = symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || call.returnValues?.symbol
           amount = amount || call.returnValues?.amount
 
-          if (call.chain) {
+          if (call.chain && !estimatedTimeSpent) {
             const response = await estimateTimeSpent({ sourceChain: call.chain })
-            _data.estimated_time_spent = toArray(response).find(d => d.key === call.chain)
+            setEstimatedTimeSpent(toArray(response).find(d => d.key === call.chain))
           }
 
           if (STAGING || EDITABLE) {
@@ -522,7 +524,6 @@ export default () => {
     no_gas_remain,
     not_to_refund,
     callback_data,
-    estimated_time_spent,
   } = { ...data }
   const { chain, chain_type, destination_chain_type } = { ...call }
   const { destinationChain, payload, symbol } = { ...call?.returnValues }
@@ -561,7 +562,7 @@ export default () => {
     )
 
   const { finality } = { ...parameters }
-  const finalityTime = estimated_time_spent?.confirm ? estimated_time_spent.confirm + 15 : finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
+  const finalityTime = estimatedTimeSpent?.confirm ? estimatedTimeSpent.confirm + 15 : finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
   const approveButton =
     call && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
     !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer)) &&
@@ -710,7 +711,7 @@ export default () => {
             <>
               <div className="space-y-4 sm:space-y-6">
                 <Info
-                  data={data}
+                  data={{ ...data, estimated_time_spent: estimatedTimeSpent }}
                   buttons={
                     Object.fromEntries(
                       toArray([

@@ -529,7 +529,7 @@ export default ({ data, buttons }) => {
                       <span>{title}</span>
                       {tooltip && <RiInformationLine size={14} />}
                     </div>
-                    {id === 'confirm' && tooltip && estimated_time_spent && createMomentFromUnixtime(call.block_timestamp + estimated_time_spent.confirm).diff(moment()) > 0 && (
+                    {id === 'confirm' && tooltip && !express_executed && estimated_time_spent && createMomentFromUnixtime(call.block_timestamp + estimated_time_spent.confirm).diff(moment()) > 0 && (
                       <div className={`flex flex-wrap whitespace-nowrap ${color} text-xs font-medium`}>
                         (<TimeUntil
                           time={call.block_timestamp + estimated_time_spent.confirm}
