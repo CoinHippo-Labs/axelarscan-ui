@@ -168,7 +168,7 @@ export default () => {
                   const { chain, chain_type, logIndex, receipt } = { ...call }
                   const { explorer } = { ...getChainData(chain, chains_data) }
                   return value && (
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1 mb-40">
                       <Link
                         href={`/gmp/${value}${chain_type === 'evm' && receipt && typeof logIndex === 'number' ? `:${logIndex}` : ''}`}
                         target="_blank"
