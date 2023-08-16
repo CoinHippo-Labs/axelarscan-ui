@@ -140,7 +140,11 @@ export default (
             {id && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between space-x-2">
-                  <Chip value={id} className="chip font-medium" />
+                  <Chip
+                    color="blue"
+                    value={id}
+                    className="chip font-medium"
+                  />
                   {chain_type === 'evm' && (
                     <AddMetamask chain={id} asset={denom} />
                   )}

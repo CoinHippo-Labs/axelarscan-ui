@@ -86,6 +86,7 @@ export default () => {
               Cell: props => (
                 props.value ?
                   <Chip
+                    color="blue"
                     value={props.value}
                     className="chip normal-case font-medium"
                   /> :

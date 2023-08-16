@@ -200,6 +200,7 @@ export default ({ data }) => {
                       </div>
                     )}
                     <Chip
+                      color="blue"
                       value={split(activities.length > 1 ? a.type : type, 'normal', ' ').join('')}
                       className="chip normal-case text-xs font-medium py-1 px-2"
                     />
@@ -386,6 +387,7 @@ export default ({ data }) => {
                         <div key={j} className="w-fit bg-slate-100 dark:bg-slate-800 rounded space-y-2 py-5 px-4">
                           {event && (
                             <Chip
+                              color="blue"
                               value={split(getTitle(event), 'normal', ' ').join('')}
                               className="chip normal-case text-xs font-medium py-1 px-2"
                             />
@@ -422,6 +424,7 @@ export default ({ data }) => {
                 {packet && (
                   <div className="w-fit bg-slate-100 dark:bg-slate-800 rounded space-y-2 py-5 px-4">
                     <Chip
+                      color="blue"
                       value="Packet"
                       className="chip normal-case text-xs font-medium py-1 px-2"
                     />
@@ -499,6 +502,7 @@ export default ({ data }) => {
                       <div key={j} className="min-w-max bg-slate-100 dark:bg-slate-800 rounded space-y-2 py-5 px-4">
                         {type && (
                           <Chip
+                            color="blue"
                             value={split(getTitle(type), 'normal', ' ').join('')}
                             className="chip normal-case text-xs font-medium py-1 px-2"
                           />

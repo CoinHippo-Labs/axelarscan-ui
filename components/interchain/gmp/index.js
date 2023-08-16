@@ -401,7 +401,7 @@ export default () => {
         const { transactionHash, transactionIndex, logIndex } = { ...call }
         const { chain } = { ...approved }
         const params = {
-          event: 'callWithToken',
+          event: 'expressExecuteWithToken',
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
           sourceTransactionLogIndex: logIndex,

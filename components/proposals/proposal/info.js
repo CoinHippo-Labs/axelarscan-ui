@@ -66,6 +66,7 @@ export default ({ data }) => {
           <span className={titleClassName}>Type:</span>
           {data ?
             <Chip
+              color="blue"
               value={getTitle(type)}
               className="chip normal-case font-medium"
             /> :

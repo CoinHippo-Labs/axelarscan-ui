@@ -21,6 +21,7 @@ export default ({ data }) => {
       {FIELDS.map((f, i) => (
         <div key={i} className="space-y-3">
           <Chip
+            color="blue"
             value={split(f, 'normal', '_').join(' ')}
             className="chip text-2xs font-medium py-0.5 px-2"
           />
