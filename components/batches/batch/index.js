@@ -415,7 +415,7 @@ export default () => {
                                     )}
                                     {cap && (
                                       <NumberDisplay
-                                        value={decimals}
+                                        value={cap}
                                         format="0,0"
                                         prefix="Cap: "
                                         className="text-slate-600 dark:text-slate-200 text-xs font-medium"
