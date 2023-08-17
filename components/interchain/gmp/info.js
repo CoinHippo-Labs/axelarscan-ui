@@ -49,8 +49,9 @@ export default ({ data, buttons }) => {
     token_deployed,
     estimated_time_spent,
   } = { ...data }
-  const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp } = { ...call }
-  const { destinationChain, destinationContractAddress, symbol, amount } = { ...call?.returnValues }
+  let { amount } = { ...data }
+  const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp, returnValues } = { ...call }
+  const { destinationChain, destinationContractAddress, symbol } = { ...returnValues }
   const { from } = { ...call?.transaction }
 
   const source_chain_data = getChainData(chain, chains_data)
@@ -61,6 +62,7 @@ export default ({ data, buttons }) => {
   let { decimals, image } = { ...addresses?.[chain] } 
   decimals = decimals || asset_data?.decimals || 18
   image = image || asset_data?.image
+  amount = amount || returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined
 
   const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'seconds') > 120
   const steps = toArray([
@@ -318,10 +320,10 @@ export default ({ data, buttons }) => {
               )}
             </div>
             {token_sent ?
-              typeof data.amount === 'number' && (
+              typeof amount === 'number' && (
                 <div className="h-6 flex items-center">
                   <NumberDisplay
-                    value={data.amount}
+                    value={amount}
                     format="0,0.00"
                     suffix={` ${token_sent.symbol}`}
                   />
@@ -352,9 +354,9 @@ export default ({ data, buttons }) => {
                           height={24}
                         />
                       )}
-                      {amount && (
+                      {typeof amount === 'number' && (
                         <NumberDisplay
-                          value={formatUnits(amount, decimals)}
+                          value={amount}
                           format="0,0.00"
                           suffix={` ${symbol}`}
                         />
