@@ -75,7 +75,7 @@ export default ({ data, buttons }) => {
     },
     {
       id: 'pay_gas',
-      title: (gas_paid || gas_paid_to_callback) && !is_insufficient_fee ? 'Gas Paid' : moment().diff(moment(call?.block_timestamp * 1000), 'seconds') < 30 ? 'Checking Gas Paid' : 'Pay Gas',
+      title: (gas_paid || gas_paid_to_callback) && !is_insufficient_fee ? 'Gas Paid' : moment().diff(moment(block_timestamp * 1000), 'seconds') < 30 ? 'Checking Gas Paid' : 'Pay Gas',
       status: gas_paid || gas_paid_to_callback ? is_insufficient_fee ? 'failed' : 'success' : 'pending',
       data: gas_paid || gas_paid_to_callback,
       chain_data: gas_paid_to_callback ? destination_chain_data : source_chain_data,
@@ -133,7 +133,7 @@ export default ({ data, buttons }) => {
               <div className="w-fit h-6 flex items-center text-green-400 dark:text-green-500 space-x-1">
                 <RiTimerFlashLine size={18} />
                 <TimeSpent
-                  fromTime={call.block_timestamp}
+                  fromTime={block_timestamp}
                   toTime={express_executed.block_timestamp}
                   noTooltip={true}
                   className="font-medium"
@@ -164,7 +164,7 @@ export default ({ data, buttons }) => {
               <div className="w-fit h-6 flex items-center text-slate-300 dark:text-slate-600 space-x-1">
                 <RiTimerLine size={18} />
                 <TimeSpent
-                  fromTime={call.block_timestamp}
+                  fromTime={block_timestamp}
                   toTime={executed.block_timestamp}
                   noTooltip={true}
                   className="font-medium"
@@ -198,7 +198,7 @@ export default ({ data, buttons }) => {
               <div className="w-fit h-6 flex items-center text-blue-400 dark:text-white space-x-1.5 ml-0.5">
                 <Spinner name="Watch" width={14} height={14} />
                 <TimeSpent
-                  fromTime={call.block_timestamp}
+                  fromTime={block_timestamp}
                   noTooltip={true}
                   className="font-medium"
                 />
@@ -209,7 +209,7 @@ export default ({ data, buttons }) => {
             <div className="flex flex-col">
               {estimatedTimeSpent}
               {toArray([
-                express_supported && !(confirm || approved) && (
+                express_supported && !(confirm || approved) && estimated_time_spent.express_execute > 0 && moment().diff(moment(block_timestamp * 1000), 'seconds') < estimated_time_spent.express_execute && (
                   <Tooltip key="expected_express" placement="top-start" content="Expected time to express">
                     <div className="w-fit h-6 flex items-center text-slate-300 dark:text-slate-600 space-x-1">
                       ~
@@ -223,18 +223,20 @@ export default ({ data, buttons }) => {
                     </div>
                   </Tooltip>
                 ),
-                <Tooltip key="expected_execute" placement="top-start" content="Expected time to execute">
-                  <div className="w-fit h-6 flex items-center text-slate-300 dark:text-slate-600 space-x-1">
-                    ~
-                    <RiTimerLine size={18} />
-                    <TimeSpent
-                      fromTime={0}
-                      toTime={estimated_time_spent.total}
-                      noTooltip={true}
-                      className="font-medium"
-                    />
-                  </div>
-                </Tooltip>,
+                estimated_time_spent.total > 0 && (
+                  <Tooltip key="expected_execute" placement="top-start" content="Expected time to execute">
+                    <div className="w-fit h-6 flex items-center text-slate-300 dark:text-slate-600 space-x-1">
+                      ~
+                      <RiTimerLine size={18} />
+                      <TimeSpent
+                        fromTime={0}
+                        toTime={estimated_time_spent.total}
+                        noTooltip={true}
+                        className="font-medium"
+                      />
+                    </div>
+                  </Tooltip>
+                ),
               ])}
             </div>
           )
@@ -531,10 +533,10 @@ export default ({ data, buttons }) => {
                       <span>{title}</span>
                       {tooltip && <RiInformationLine size={14} />}
                     </div>
-                    {id === 'confirm' && tooltip && !express_executed && estimated_time_spent && createMomentFromUnixtime(call.block_timestamp + estimated_time_spent.confirm).diff(moment()) > 0 && (
+                    {id === 'confirm' && tooltip && !express_executed && estimated_time_spent && createMomentFromUnixtime(block_timestamp + estimated_time_spent.confirm).diff(moment()) > 0 && (
                       <div className={`flex flex-wrap whitespace-nowrap ${color} text-xs font-medium`}>
                         (<TimeUntil
-                          time={call.block_timestamp + estimated_time_spent.confirm}
+                          time={block_timestamp + estimated_time_spent.confirm}
                           noTooltip={true}
                           className="font-medium"
                         />)
