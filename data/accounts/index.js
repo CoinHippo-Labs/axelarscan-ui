@@ -638,13 +638,31 @@ export default [
     environment: 'testnet',
   },
   {
+    address: '0x481A2AAE41cd34832dDCF5A79404538bb2c02bC8',
+    name: 'Squid',
+    image: '/logos/accounts/squid.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xc3468a191fe51815b26535ed1f82c1f79e6ec37d',
     name: 'Squid',
     image: '/logos/accounts/squid.svg',
     environment: 'testnet',
   },
   {
+    address: 'osmo1zl9ztmwe2wcdvv9std8xn06mdaqaqm789rutmazfh3z869zcax4sv0ctqw',
+    name: 'Squid',
+    image: '/logos/accounts/squid.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xce16F69375520ab01377ce7B88f5BA8C48F8D666',
+    name: 'Squid',
+    image: '/logos/accounts/squid.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: 'osmo15jw7xccxaxk30lf4xgag8f7aeg53pgkh74e39rv00xfnymldjaas2fk627',
     name: 'Squid',
     image: '/logos/accounts/squid.svg',
     environment: 'mainnet',
