@@ -178,8 +178,8 @@ export default ({ children }) => {
       }
 
       getData()
-      const interval = setInterval(() => getData(true), (include_paths.findIndex(p => pathname === p) > -1 ? 5 * 60 : 30) * 1000)
-      return () => clearInterval(interval)
+      // const interval = setInterval(() => getData(true), (include_paths.findIndex(p => pathname === p) > -1 ? 5 * 60 : 30) * 1000)
+      // return () => clearInterval(interval)
     },
     [chains_data, assets_data],
   )
@@ -222,8 +222,8 @@ export default ({ children }) => {
       }
 
       getData()
-      const interval = setInterval(() => getData(), 5 * 60 * 1000)
-      return () => clearInterval(interval)
+      // const interval = setInterval(() => getData(), 5 * 60 * 1000)
+      // return () => clearInterval(interval)
     },
     [pathname, chains_data],
   )

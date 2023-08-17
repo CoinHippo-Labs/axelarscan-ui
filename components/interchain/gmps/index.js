@@ -21,6 +21,7 @@ import TimeSpent from '../../time/timeSpent'
 import TimeAgo from '../../time/timeAgo'
 import { searchGMP } from '../../../lib/api/gmp'
 import { getChainData, getAssetData } from '../../../lib/config'
+import { formatUnits } from '../../../lib/number'
 import { toArray, getTitle, ellipse, equalsIgnoreCase, getQueryParams } from '../../../lib/utils'
 
 const PAGE_SIZE = 25
@@ -190,9 +191,18 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => {
                   const { value, row } = { ...props }
-                  const { call, amount, token_sent, token_deployment_initialized, token_deployed } = { ...row.original }
-                  const { symbol } = { ...call?.returnValues }
-                  const { image } = { ...getAssetData(symbol, assets_data) }
+                  const { call, token_sent, token_deployment_initialized, token_deployed } = { ...row.original }
+                  let { amount } = { ...row.original }
+                  const { chain, returnValues } = { ...call }
+                  const { symbol } = { ...returnValues }
+
+                  const asset_data = getAssetData(symbol, assets_data)
+                  const { addresses } = { ...asset_data }
+                  let { decimals, image } = { ...addresses?.[chain] } 
+                  decimals = decimals || asset_data?.decimals || 18
+                  image = image || asset_data?.image
+                  amount = amount || returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined
+
                   return (
                     <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
