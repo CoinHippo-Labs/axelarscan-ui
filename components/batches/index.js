@@ -571,6 +571,7 @@ export default () => {
                   </div>
                 )
               }
+              offset={offset}
               className="no-border no-shadow"
             />
           </div>

@@ -40,6 +40,7 @@ export default (
     noPagination = false,
     noRecordPerPage = false,
     extra,
+    offset,
     className = '',
     style,
   },
@@ -97,6 +98,15 @@ export default (
       }
     },
     [pageIndex, pageCount],
+  )
+
+  useEffect(
+    () => {
+      if (offset && pageCount) {
+        gotoPage(Math.ceil(offset / pageSize))
+      }
+    },
+    [offset, pageCount],
   )
 
   const loading = toArray(data).findIndex(d => d.skeleton) > -1

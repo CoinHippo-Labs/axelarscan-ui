@@ -476,6 +476,7 @@ export default ({ n }) => {
                   </div>
                 )
               }
+              offset={offset}
               className="no-border no-shadow"
             />
           </div>
