@@ -2,6 +2,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 
 import Copy from '../../copy'
 import { getChainData, getAssetData } from '../../../lib/config'
+import { toBigNumber } from '../../../lib/number'
 import { ellipse } from '../../../lib/utils'
 
 export default ({ data }) => {
@@ -10,7 +11,7 @@ export default ({ data }) => {
   const { assets_data } = { ...assets }
 
   const { call, approved, command_id, execute_data } = { ...data }
-  const { chain } = { ...call }
+  const { chain, destination_chain_type } = { ...call }
   const { sender, destinationContractAddress, payloadHash, payload, symbol, messageId } = { ...call?.returnValues }
   let { destinationChain } = { ...call?.returnValues }
   let { commandId, sourceChain, amount } = { ...approved?.returnValues }
@@ -20,6 +21,7 @@ export default ({ data }) => {
   amount = amount || call?.returnValues?.amount
   const { addresses } = { ...getAssetData(symbol, assets_data) }
   const destinationSymbol = approved?.returnValues?.symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || symbol
+  const version = destination_chain_type === 'cosmos' && payload ? toBigNumber(payload.substring(0, 10)) : undefined
 
   const render = ({ key, title, value, className = '' }) => (
     <div key={key} className={`space-y-2 ${className}`}>
@@ -47,7 +49,7 @@ export default ({ data }) => {
     { title: 'sourceAddress', value: sender },
     { title: 'destinationContractAddress', value: destinationContractAddress },
     { title: 'payloadHash', value: payloadHash, className: 'sm:col-span-2' },
-    { title: 'payload', value: payload, className: 'sm:col-span-2' },
+    { title: `payload${version ? ` (Version: ${version})` : ''}`, value: payload, className: 'sm:col-span-2' },
     { title: 'sourceSymbol', value: symbol },
     { title: 'destinationSymbol', value: destinationSymbol },
     { title: 'amount', value: amount },
