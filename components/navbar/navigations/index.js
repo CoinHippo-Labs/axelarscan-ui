@@ -3,7 +3,6 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Menu, MenuHandler, MenuList } from '@material-tailwind/react'
 import _ from 'lodash'
-import { PiStarBold } from 'react-icons/pi'
 
 import routes from './routes'
 import { toArray, getTitle } from '../../../lib/utils'
@@ -20,8 +19,7 @@ const Group = ({ title, items, pathname, className = '', notable = false }) => {
       offset={{ mainAxis: 12 }}
     >
       <MenuHandler>
-        <Link href={_.head(items)?.path || pathname} className={className}>
-          {notable && <PiStarBold size={20} />}
+        <Link href={_.head(items)?.path || pathname} className={`${className} ${notable ? 'border-b-2 border-blue-600 dark:border-white' : ''}`}>
           <span className="whitespace-nowrap tracking-wider">
             {title}
           </span>
