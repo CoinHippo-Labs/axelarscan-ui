@@ -435,7 +435,7 @@ export default ({ data, buttons }) => {
               </div>
               <div className="h-6 flex items-center">
                 <AccountProfile
-                  address={destinationContractAddress}
+                  address={token_sent?.destinationAddress || destinationContractAddress}
                   ellipseLength={8}
                   noCopy={true}
                   explorer={destination_chain_data?.explorer}
