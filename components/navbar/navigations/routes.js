@@ -5,19 +5,20 @@ export default toArray([
     title: 'Overview',
     path: '/interchain',
     others_paths: ['/interchain-transfers'],
-    group: 'interchain',
+    group: 'interchain_transactions',
+    notable: true,
   },
   {
     title: 'General Message Passing',
     path: '/gmp/search',
     others_paths: ['/gmp', '/gmp/[tx]'],
-    group: 'interchain',
+    group: 'interchain_transactions',
   },
   {
     title: 'Token Transfers',
     path: '/transfers/search',
     others_paths: ['/transfers', '/transfer/[tx]', '/transfers/[tx]'],
-    group: 'interchain',
+    group: 'interchain_transactions',
   },
   {
     title: 'Validators',

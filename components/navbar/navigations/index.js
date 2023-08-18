@@ -3,11 +3,12 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { Menu, MenuHandler, MenuList } from '@material-tailwind/react'
 import _ from 'lodash'
+import { PiStarBold } from 'react-icons/pi'
 
 import routes from './routes'
 import { toArray, getTitle } from '../../../lib/utils'
 
-const Group = ({ title, items, pathname, className = '' }) => {
+const Group = ({ title, items, pathname, className = '', notable = false }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -20,6 +21,7 @@ const Group = ({ title, items, pathname, className = '' }) => {
     >
       <MenuHandler>
         <Link href={_.head(items)?.path || pathname} className={className}>
+          {notable && <PiStarBold size={20} />}
           <span className="whitespace-nowrap tracking-wider">
             {title}
           </span>
@@ -68,7 +70,7 @@ export default () => {
   return (
     <div className="hidden xl:flex items-center xl:space-x-6 mx-auto">
       {routes.map((r, i) => {
-        const { disabled, title, path, others_paths, group } = { ...r }
+        const { disabled, title, path, others_paths, group, notable } = { ...r }
         const is_group = group && i === routes.findIndex(r => r.group === group)
         const external = !path?.startsWith('/')
         const items = routes.filter(r => r.group === group)
@@ -104,6 +106,7 @@ export default () => {
               items={items}
               pathname={pathname}
               className={className}
+              notable={notable}
             /> :
             component
         )
