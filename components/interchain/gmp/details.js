@@ -488,11 +488,11 @@ export default ({ data }) => {
                     </div>
                   </Tooltip>
                 )}
-                {id === 'send' && destinationAddress && (
+                {['send', 'execute'].includes(id) && destinationAddress && (
                   <Tooltip placement="top-start" content="SendToken Destination">
                     <div className="h-6 flex items-center space-x-1">
-                      <AccountProfile address={destinationAddress} noCopy={true} explorer={explorer} chain={chain_data?.id} />
-                      <ExplorerLink value={destinationAddress} type="address" explorer={explorer} />
+                      <AccountProfile address={destinationAddress} noCopy={true} explorer={destination_chain_data?.explorer} chain={chain_data?.id} />
+                      <ExplorerLink value={destinationAddress} type="address" explorer={destination_chain_data?.explorer} />
                     </div>
                   </Tooltip>
                 )}
