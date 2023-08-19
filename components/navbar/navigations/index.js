@@ -19,7 +19,7 @@ const Group = ({ title, items, pathname, className = '', notable = false }) => {
       offset={{ mainAxis: 12 }}
     >
       <MenuHandler>
-        <Link href={_.head(items)?.path || pathname} className={`${className} ${notable ? 'border-r-2 border-blue-600 dark:border-white pr-6' : ''}`}>
+        <Link href={_.head(items)?.path || pathname} className={`${className} ${notable ? 'border-r border-slate-400 dark:border-slate-200 pr-6' : ''}`}>
           <span className="whitespace-nowrap tracking-wider">
             {title}
           </span>
