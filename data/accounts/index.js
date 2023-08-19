@@ -640,6 +640,7 @@ export default [
     address: 'axelar1p4557mdpc2qk8vcemeqgrcg55gs2uyznqcp9vp',
     name: 'Cosmos Rescue: IBC Relayer',
     environment: 'mainnet',
+  }
   {
     address: 'axelar16dc379m0qj64g4pr4nkl7ewak52qy2srd5shys',
     name: 'Delegate Notional: IBC Relayer',
