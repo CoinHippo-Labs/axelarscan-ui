@@ -368,6 +368,10 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: 'axelar1ggfhcn9e8kye4susvd9d30kdw3zhcsl8gxysv3',
+    name: 'Imperator: IBC Relayer',
+  },
+  {
     address: 'axelar19s8q4zh3jyg9h5pe3al8ahul0e4e7xp68jrpvr',
     name: 'Imperator: IBC Relayer',
     environment: 'mainnet',
@@ -579,7 +583,7 @@ export default [
   },
   {
     address: 'axelar1r7445s2hrny8p4yr707s62g4g4q90a0vxcn8wk',
-    name: 'Tovi: IBC Relayer',
+    name: 'Secret team: IBC Relayer',
     environment: 'testnet',
   },
   {
@@ -632,6 +636,10 @@ export default [
     name: 'Polkachu: IBC Relayer',
     environment: 'testnet',
   },
+  {
+    address: 'axelar1p4557mdpc2qk8vcemeqgrcg55gs2uyznqcp9vp',
+    name: 'Cosmos Rescue: IBC Relayer',
+    environment: 'mainnet',
   {
     address: 'axelar16dc379m0qj64g4pr4nkl7ewak52qy2srd5shys',
     name: 'Delegate Notional: IBC Relayer',
