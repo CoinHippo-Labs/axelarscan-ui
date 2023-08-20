@@ -546,16 +546,26 @@ export default ({ address, data }) => {
           <span className={titleClassName}>Transfer:</span>
           {data ?
             txhash ?
-              <div className="flex items-center space-x-1">
+              <div className="flex flex-col space-y-0.5">
+                <div className="flex items-center space-x-1">
+                  <Link
+                    href={`/transfer/${txhash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 dark:text-blue-500 text-sm lg:text-base font-medium"
+                  >
+                    {ellipse(txhash, 16)}
+                  </Link>
+                  <Copy value={txhash} />
+                </div>
                 <Link
                   href={`/transfer/${txhash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-400 dark:text-blue-500 text-sm lg:text-base font-medium"
+                  className="underline text-blue-400 dark:text-blue-500 text-xs font-medium"
                 >
-                  {ellipse(txhash, 16)}
+                  Track the cross-chain transfer
                 </Link>
-                <Copy value={txhash} />
               </div> :
               '-' :
             <Spinner name="ProgressBar" />
