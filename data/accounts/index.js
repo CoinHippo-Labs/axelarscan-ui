@@ -370,35 +370,42 @@ export default [
   {
     address: 'axelar1ggfhcn9e8kye4susvd9d30kdw3zhcsl8gxysv3',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
   },
   {
     address: 'axelar19s8q4zh3jyg9h5pe3al8ahul0e4e7xp68jrpvr',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
     environment: 'mainnet',
   },
   {
     address: 'terra148euq27wv05cgs5s5fwt227gvzppa2ghjxrd9d',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
     environment: 'mainnet',
   },
   {
     address: 'cosmos1t0khldzm22mk4wvcadw789drmkzawe9ah69upp',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
     environment: 'mainnet',
   },
   {
     address: 'inj1wq62pg8prdg4jnz2r90za0352cdg8tu59zkjuf',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
     environment: 'mainnet',
   },
   {
     address: 'emoney16e702d3n4hnq8asqzlpnpvd4gj7p6f6gthpvjr',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
     environment: 'mainnet',
   },
   {
     address: 'cre1faj5xcmfwv9e77zl7ht7yn2e9wlk9rp87lafg0',
     name: 'Imperator: IBC Relayer',
+    image: '/logos/accounts/imperator.svg',
     environment: 'mainnet',
   },
   {
