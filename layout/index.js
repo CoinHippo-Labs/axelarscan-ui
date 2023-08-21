@@ -24,11 +24,11 @@ import { getKeyType } from '../lib/key'
 import { NUM_BLOCKS_PER_HEARTBEAT, startBlock, endBlock } from '../lib/heartbeat'
 import { formatUnits } from '../lib/number'
 import { toArray, equalsIgnoreCase } from '../lib/utils'
-import { THEME, PAGE_VISIBLE, CHAINS_DATA, ASSETS_DATA, CONTRACTS_DATA, ENS_DATA, LENS_DATA, SPACEID_DATA, UNSTOPPABLE_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, MAINTAINERS_DATA, TVL_DATA, VALIDATORS_DATA } from '../reducers/types'
+import { THEME, PAGE_VISIBLE, CHAINS_DATA, ASSETS_DATA, CONTRACTS_DATA, ENS_DATA, LENS_DATA, SPACEID_DATA, UNSTOPPABLE_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, MAINTAINERS_DATA, TVL_DATA, VALIDATORS_DATA, PROFILES_DATA } from '../reducers/types'
 
 export default ({ children }) => {
   const dispatch = useDispatch()
-  const { preferences, chains, assets, ens, lens, spaceid, unstoppable, status, validators } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, lens: state.lens, spaceid: state.spaceid, unstoppable: state.unstoppable, status: state.status, validators: state.validators }), shallowEqual)
+  const { preferences, chains, assets, ens, lens, spaceid, unstoppable, status, validators, profiles } = useSelector(state => ({ preferences: state.preferences, chains: state.chains, assets: state.assets, ens: state.ens, lens: state.lens, spaceid: state.spaceid, unstoppable: state.unstoppable, status: state.status, validators: state.validators, profiles: state.profiles }), shallowEqual)
   const { theme } = { ...preferences }
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -38,6 +38,7 @@ export default ({ children }) => {
   const { unstoppable_data } = { ...unstoppable }
   const { status_data } = { ...status }
   const { validators_data } = { ...validators }
+  const { profiles_data } = { ...profiles }
 
   const router = useRouter()
   const { pathname, asPath, query } = { ...router }
@@ -53,6 +54,20 @@ export default ({ children }) => {
       }
     },
     [theme],
+  )
+
+  useEffect(
+    () => {
+      if (typeof window !== 'undefined' && !profiles_data) {
+        try {
+          const _profiles_data = localStorage.getItem(PROFILES_DATA)
+          if (_profiles_data) {
+            dispatch({ type: PROFILES_DATA, value: JSON.parse(_profiles_data) })
+          }
+        } catch (error) {}
+      }
+    },
+    [profiles_data],
   )
 
   // chains

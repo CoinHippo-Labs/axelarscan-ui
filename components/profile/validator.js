@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import _ from 'lodash'
+import moment from 'moment'
 
 import Spinner from '../spinner'
 import Image from '../image'
 import { getProfile } from '../../lib/api/keybase'
-import { split, randImage } from '../../lib/utils'
+import { split, createMomentFromUnixtime, randImage } from '../../lib/utils'
 import { PROFILES_DATA } from '../../reducers/types'
 
 export default (
@@ -33,28 +34,37 @@ export default (
         if (description) {
           const { moniker, identity } = { ...description }
           const key = getKey()
-          let _image
+          let value = profiles_data?.[key]
+          let { image, updated_at } = { ...value }
 
-          if (profiles_data?.[key]) {
-            _image = profiles_data[key]
+          if (image && updated_at && moment().diff(createMomentFromUnixtime(updated_at), 'seconds') < 30 * 60) {
+            value = null
           }
           else if (identity) {
             const response = await getProfile({ key_suffix: identity })
             const { url } = { ..._.head(response?.them)?.pictures?.primary }
-            _image = url
+            image = url
+            updated_at = moment().unix()
+            value = { image, updated_at }
           }
 
-          if (!_image) {
+          if (!image) {
             if (moniker?.toLowerCase().startsWith('axelar-core-')) {
-              _image = '/logos/chains/axelarnet.svg'
+              image = '/logos/chains/axelarnet.svg'
             }
             else if (!identity) {
-              _image = randImage()
+              image = randImage()
+            }
+            if (image) {
+              updated_at = moment().unix()
+              value = { image, updated_at }
             }
           }
 
-          setImage(_image)
-          dispatch({ type: PROFILES_DATA, value: { [key]: _image } })
+          setImage(image)
+          if (value) {
+            dispatch({ type: PROFILES_DATA, value: { [key]: value } })
+          }
         }
       }
       getData()
@@ -62,7 +72,7 @@ export default (
     [description],
   )
 
-  const _image = profiles_data?.[getKey()] || image
+  const _image = profiles_data?.[getKey()]?.image || image
 
   return (
     _image ?
