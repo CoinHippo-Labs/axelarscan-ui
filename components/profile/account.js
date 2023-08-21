@@ -52,7 +52,7 @@ export default (
     const { moniker, identity } = { ...description }
     validator_description = description
     name = moniker ? `${moniker}${equalsIgnoreCase(address, broadcaster_address) ? `: Proxy` : ''}` : null
-    image = profiles_data?.[identity]
+    image = profiles_data?.[identity]?.image
   }
 
   const { address_path } = { ...explorer }
