@@ -99,6 +99,24 @@ export default () => {
       multiple: true,
       className: 'col-span-2',
     },
+    {
+      label: 'From/To Chain',
+      name: 'chain',
+      type: 'select',
+      placeholder: 'Select chain',
+      options: _.concat(
+        // { value: '', title: 'Any' },
+        _.orderBy(toArray(chains_data).map(c => { return { ...c, i: ['ethereum', 'ethereum-2'].includes(c.id) ? 0 : 1, _name: c.name?.toLowerCase() } }).filter(c => !c.no_inflation || c.deprecated), ['deprecated', 'i', '_name'], ['desc', 'asc', 'asc']).map(c => {
+          const { id, name } = { ...c }
+          return {
+            value: id,
+            title: name,
+          }
+        }),
+      ),
+      multiple: true,
+      className: 'col-span-2',
+    },
     pathname.startsWith('/gmp') && {
       label: 'Method',
       name: 'contractMethod',
