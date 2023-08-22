@@ -85,6 +85,7 @@ export default ({ data, granularity }) => {
             data={_data}
             totalValue={total}
             field="volume"
+            scale="log"
             title="Volume"
             description={`Transfer volume by ${granularity}`}
             dateFormat={dateFormat}
