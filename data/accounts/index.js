@@ -163,6 +163,11 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: '0x0cD05Bf64DD177e39273BF70919E7e880707Aeaa',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: '0x98a9f66B504656849E917FcB451b67B0B073B807',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
@@ -264,6 +269,11 @@ export default [
   },
   {
     address: '0xB8Cd93C83A974649D76B1c19f311f639e62272BC',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x1aDb54D2Ec646B514e591864a44910d7e9cB2DaE',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
   },
