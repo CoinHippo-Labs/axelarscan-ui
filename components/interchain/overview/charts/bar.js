@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { ResponsiveContainer, BarChart, XAxis, Bar, Tooltip } from 'recharts'
+import { ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Tooltip } from 'recharts'
 import { Card, CardBody } from '@material-tailwind/react'
 import _ from 'lodash'
 import moment from 'moment'
 
 import Spinner from '../../../spinner'
 import NumberDisplay from '../../../number'
-import { split, toArray, getTitle } from '../../../../lib/utils'
+import { split, toArray, _numberFormat, getTitle } from '../../../../lib/utils'
 
 export default (
   {
@@ -16,6 +16,7 @@ export default (
     field = 'num_txs',
     stacks = ['gmp', 'transfers'],
     colors = { gmp: '#ff7d20', transfers: '#009ef7' },
+    scale = '',
     title = '',
     description = '',
     dateFormat = 'D MMM',
@@ -52,7 +53,7 @@ export default (
               time_string,
               focus_time_string,
             }
-          })
+          }).filter(d => scale !== 'log' || field !== 'volume' || d[field] > 100)
         )
       }
     },
@@ -137,9 +138,20 @@ export default (
                 onMouseEnter={e => setX(_.head(e?.activePayload)?.payload?.timestamp)}
                 onMouseMove={e => setX(_.head(e?.activePayload)?.payload?.timestamp)}
                 onMouseLeave={() => setX(null)}
-                margin={{ top: 12, right: 0, bottom: 0, left: 0 }}
+                margin={{ top: 12, right: 0, bottom: 0, left: scale ? -24 : 0 }}
               >
                 <XAxis dataKey="time_string" axisLine={false} tickLine={false} />
+                {scale && (
+                  <YAxis
+                    dataKey={field}
+                    scale={scale}
+                    domain={['dataMin', 'dataMax']}
+                    allowDecimals={false}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={v => _numberFormat(v, '0,0a')}
+                  />
+                )}
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
                 {_.reverse(_.cloneDeep(stacks)).map((s, i) => (
                   <Bar
@@ -147,6 +159,7 @@ export default (
                     stackId={id}
                     dataKey={`${s}_${field}`}
                     fill={colors[s]}
+                    minPointSize={scale && i === 0 ? 10 : 0}
                   />
                 ))}
               </BarChart>
