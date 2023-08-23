@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Chip, Tooltip } from '@material-tailwind/react'
+import { HiCheckCircle, HiXCircle } from 'react-icons/hi'
 
 import Datatable from '../../datatable'
 import NumberDisplay from '../../number'
@@ -141,11 +142,12 @@ export default ({ data }) => {
             const { row } = { ...props }
             let { value } = { ...props }
             const { id, data, chain_data } = { ...row.original }
-            const { txhash, poll_id, batch_id, transactionHash, recv_txhash, ack_txhash, failed_txhash, tx_hash_unwrap } = { ...data }
+            const { txhash, poll_id, batch_id, transactionHash, recv_txhash, ack_txhash, failed_txhash, tx_hash_unwrap, success, failed } = { ...data }
             const { explorer } = { ...chain_data }
             const { url, transaction_path } = { ...explorer }
 
             let _url
+            let poll_url
             let batch_url
             let ack_url
             let send_url
@@ -166,6 +168,7 @@ export default ({ data }) => {
                   if (txhash) {
                     value = txhash
                     _url = `/tx/${txhash}`
+                    poll_url = `/evm-poll/${poll_id}`
                   }
                   else if (poll_id) {
                     value = poll_id
@@ -230,6 +233,17 @@ export default ({ data }) => {
               </div>
             )
 
+            const pollComponent = poll_id && (
+              <Tooltip content="EVM Poll">
+                <div className="flex items-center space-x-1">
+                  {success && !failed ? <HiCheckCircle size={16} className="text-green-500" /> : failed && !success ? <HiXCircle size={16} className="text-red-500" /> : null}
+                  <span className="text-sm font-semibold">
+                    {ellipse(poll_id, 10)}
+                  </span>
+                </div>
+              </Tooltip>
+            )
+
             const batchComponent = batch_id && (
               <Tooltip content="EVM Batch">
                 <div className="text-sm font-semibold">
@@ -266,6 +280,15 @@ export default ({ data }) => {
                   <Copy value={value} />
                   <ExplorerLink explorer={explorer} _url={_url} />
                 </div>
+                {poll_url && pollComponent && (
+                  <div className="h-6 flex items-center space-x-1">
+                    <Link href={poll_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 dark:text-blue-500">
+                      {pollComponent}
+                    </Link>
+                    <Copy value={poll_url} />
+                    <ExplorerLink explorer={axelar_chain_data.explorer} _url={poll_url} />
+                  </div>
+                )}
                 {transactionHash && batchComponent && (
                   <div className="h-6 flex items-center space-x-1">
                     {batch_url ?
