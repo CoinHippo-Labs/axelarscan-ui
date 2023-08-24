@@ -62,7 +62,7 @@ export default ({ data, buttons }) => {
   let { decimals, image } = { ...addresses?.[chain] } 
   decimals = decimals || asset_data?.decimals || 18
   image = image || asset_data?.image
-  amount = amount || returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined
+  amount = amount || (returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined)
 
   const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'seconds') > 120
   const steps = toArray([

@@ -201,7 +201,7 @@ export default () => {
                   let { decimals, image } = { ...addresses?.[chain] } 
                   decimals = decimals || asset_data?.decimals || 18
                   image = image || asset_data?.image
-                  amount = amount || returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined
+                  amount = amount || (returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined)
 
                   return (
                     <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
