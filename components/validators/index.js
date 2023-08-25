@@ -62,7 +62,7 @@ export default () => {
   useEffect(
     () => {
       const { staking_pool, bank_supply } = { ...chain_data }
-      if (validators_data && staking_pool && bank_supply && inflationData && chains_data && maintainers_data && chains_data.filter(c => c.chain_type === 'evm' && !c.deprecated).length <= Object.keys(maintainers_data).length) {
+      if (validators_data && staking_pool && bank_supply && inflationData && chains_data && maintainers_data && chains_data.filter(c => c.chain_type === 'evm' && !c.deprecated && !c.no_inflation).length <= Object.keys(maintainers_data).length) {
         const { bonded_tokens } = { ...staking_pool }
         const total_supply = bank_supply.amount;
         const { tendermintInflationRate, keyMgmtRelativeInflationRate, externalChainVotingInflationRate, communityTax } = { ...inflationData }
