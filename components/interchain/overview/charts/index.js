@@ -78,6 +78,7 @@ export default ({ data, granularity }) => {
         )
       case 'volumes':
         total = (GMPTotalVolume || 0) + (transfersTotalVolume || 0)
+        const maxPerMean = _.maxBy(_data, 'volume')?.volume / (_.meanBy(_data, 'volume') || 1)
         return (
           <Bar
             key={id}
@@ -85,7 +86,8 @@ export default ({ data, granularity }) => {
             data={_data}
             totalValue={total}
             field="volume"
-            scale={_.maxBy(_data, 'volume')?.volume / (_.meanBy(_data, 'volume') || 1) > 5 ? 'log' : undefined}
+            scale={maxPerMean > 5 ? 'log' : undefined}
+            useStack={maxPerMean <= 5 || maxPerMean > 10}
             title="Volume"
             description={`Transfer volume by ${granularity}`}
             dateFormat={dateFormat}

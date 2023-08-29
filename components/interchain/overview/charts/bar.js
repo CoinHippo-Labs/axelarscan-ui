@@ -17,6 +17,7 @@ export default (
     stacks = ['gmp', 'transfers'],
     colors = { gmp: '#ff7d20', transfers: '#009ef7' },
     scale = '',
+    useStack = true,
     title = '',
     description = '',
     dateFormat = 'D MMM',
@@ -145,7 +146,7 @@ export default (
                   <YAxis
                     dataKey={field}
                     scale={scale}
-                    domain={['dataMin', 'dataMax']}
+                    domain={[_.min(stacks.map(s => _.minBy(chartData, `${s}_${field}`)?.[`${s}_${field}`])), 'dataMax']}
                     allowDecimals={false}
                     axisLine={false}
                     tickLine={false}
@@ -156,7 +157,7 @@ export default (
                 {_.reverse(_.cloneDeep(stacks)).map((s, i) => (
                   <Bar
                     key={i}
-                    stackId={id}
+                    stackId={useStack ? id : undefined}
                     dataKey={`${s}_${field}`}
                     fill={colors[s]}
                     minPointSize={scale && i === 0 ? 10 : 0}
