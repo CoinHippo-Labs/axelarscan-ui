@@ -168,6 +168,11 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: '0x44e5a17d5f2073cd898a4e9d8db1181a198493a5',
+    name: 'Axelar Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: '0x98a9f66B504656849E917FcB451b67B0B073B807',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
