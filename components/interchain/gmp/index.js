@@ -137,12 +137,20 @@ export default () => {
       const _data = _.head(response?.data)
 
       if (_data) {
-        const { call, gas_paid, gas_paid_to_callback, approved, callback, is_call_from_relayer, command_id } = { ..._data }
+        const { call, gas_paid, gas_paid_to_callback, approved, executed, callback, is_call_from_relayer, command_id } = { ..._data }
 
         // callback
         if (callback?.transactionHash) {
           const { transactionHash, transactionIndex, logIndex } = { ...callback }
           const response = await searchGMP({ txHash: transactionHash, txIndex: transactionIndex, txLogIndex: logIndex })
+          const callback_data = toArray(response?.data).find(d => equalsIgnoreCase(d.call?.transactionHash, transactionHash))
+          if (callback_data) {
+            _data.callback_data = callback_data
+          }
+        }
+        else if (executed?.transactionHash) {
+          const { transactionHash } = { ...executed }
+          const response = await searchGMP({ txHash: transactionHash })
           const callback_data = toArray(response?.data).find(d => equalsIgnoreCase(d.call?.transactionHash, transactionHash))
           if (callback_data) {
             _data.callback_data = callback_data
