@@ -591,7 +591,7 @@ export default ({ data }) => {
                   <NumberDisplay
                     value={gas_express_fee_amount}
                     format="0,0.00"
-                    prefix="Fee: "
+                    prefix="Relayer Fee: "
                     suffix={source_token && ` ${source_token.symbol}`}
                     noTooltip={true}
                     className="whitespace-nowrap text-slate-600 dark:text-slate-200 text-xs font-medium"
