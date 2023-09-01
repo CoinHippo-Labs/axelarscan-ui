@@ -544,7 +544,7 @@ export default ({ data }) => {
                 extra = (true || !(gas_approve_amount > 0)) && (
                   <div className={`flex flex-col ${express_supported && express_fee > 0 ? 'mt-2.5' : ''} space-y-0.5`}>
                     <NumberDisplay
-                      value={gas_base_fee_amount}
+                      value={gas_base_fee_amount || fees?.source_base_fee}
                       format="0,0.00"
                       prefix="Base Fee: "
                       suffix={source_token && ` ${source_token.symbol}`}
@@ -624,11 +624,14 @@ export default ({ data }) => {
               case 'approve':
                 try {
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
+                  if (!gas_approve_amount && origin_data) {
+                    rate = origin_data?.fees?.source_token?.token_price?.usd / destination_native_token?.token_price?.usd
+                  }
                 } catch (error) {}
                 if (rate) {
                   component = (
                     <NumberDisplay
-                      value={((gas_approve_amount - source_confirm_fee) * rate) || (origin_data?.gas?.gas_callback_approve_amount - destination_confirm_fee)}
+                      value={((gas_approve_amount - source_confirm_fee) * rate) || ((origin_data?.gas?.gas_callback_approve_amount * rate) - destination_confirm_fee)}
                       format="0,0.00"
                       suffix={destination_native_token && ` ${destination_native_token.symbol}`}
                       noTooltip={true}
@@ -648,11 +651,14 @@ export default ({ data }) => {
               case 'execute':
                 try {
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
+                  if (!gas_execute_amount && origin_data) {
+                    rate = origin_data?.fees?.source_token?.token_price?.usd / destination_native_token?.token_price?.usd
+                  }
                 } catch (error) {}
                 if ((gas_execute_amount && rate) || origin_data?.gas?.gas_callback_amount) {
                   component = (
                     <NumberDisplay
-                      value={(gas_execute_amount * rate) || origin_data?.gas?.gas_callback_amount}
+                      value={(gas_execute_amount * rate) || (origin_data?.gas?.gas_callback_amount * rate)}
                       format="0,0.00"
                       suffix={destination_native_token && ` ${destination_native_token.symbol}`}
                       noTooltip={true}
