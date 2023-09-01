@@ -62,5 +62,5 @@
 }
 
 .chip {
-  @apply w-fit opacity-100 rounded custom-font !important;
+  @apply w-fit opacity-100 rounded select-auto custom-font !important;
 }
