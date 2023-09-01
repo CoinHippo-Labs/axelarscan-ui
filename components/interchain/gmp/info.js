@@ -127,24 +127,24 @@ export default ({ data, buttons }) => {
   switch (simplified_status) {
     case 'received':
       if (call) {
-        if ((gas_paid && gas?.gas_paid_amount > 0) || gas_paid_to_callback) {
-          const { source_token } = { ...fees }
-          const { symbol, gas_price } = { ...source_token }
-          extra = (
-            <div key="gas_paid" className="w-fit h-6 flex items-center font-medium space-x-3">
-              <div className="flex items-center space-x-1">
-                <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
-                <span>Paid</span>
-              </div>
-              <NumberDisplay
-                value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
-                format="0,0.00"
-                suffix={` ${symbol}`}
-                noTooltip={true}
-              />
-            </div>
-          )
-        }
+        // if ((gas_paid && gas?.gas_paid_amount > 0) || gas_paid_to_callback) {
+        //   const { source_token } = { ...fees }
+        //   const { symbol, gas_price } = { ...source_token }
+        //   extra = (
+        //     <div key="gas_paid" className="w-fit h-6 flex items-center font-medium space-x-3">
+        //       <div className="flex items-center space-x-1">
+        //         <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
+        //         <span>Paid</span>
+        //       </div>
+        //       <NumberDisplay
+        //         value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
+        //         format="0,0.00"
+        //         suffix={` ${symbol}`}
+        //         noTooltip={true}
+        //       />
+        //     </div>
+        //   )
+        // }
         if (express_executed) {
           timeSpent = (
             <Tooltip key="express_executed" placement="top-start" content="Express">
