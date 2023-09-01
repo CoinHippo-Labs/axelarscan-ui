@@ -649,7 +649,7 @@ export default ({ data }) => {
                 try {
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
                 } catch (error) {}
-                if (gas_execute_amount && rate) {
+                if ((gas_execute_amount && rate) || origin_data?.gas?.gas_callback_amount) {
                   component = (
                     <NumberDisplay
                       value={(gas_execute_amount * rate) || origin_data?.gas?.gas_callback_amount}
