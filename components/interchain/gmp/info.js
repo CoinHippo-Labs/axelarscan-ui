@@ -127,6 +127,24 @@ export default ({ data, buttons }) => {
   switch (simplified_status) {
     case 'received':
       if (call) {
+        if ((gas_paid && gas?.gas_paid_amount > 0) || gas_paid_to_callback) {
+          const { source_token } = { ...fees }
+          const { symbol, gas_price } = { ...source_token }
+          extra = (
+            <div key="gas_paid" className="w-fit h-6 flex items-center font-medium space-x-3">
+              <div className="flex items-center space-x-1">
+                <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
+                <span>Paid</span>
+              </div>
+              <NumberDisplay
+                value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
+                format="0,0.00"
+                suffix={` ${symbol}`}
+                noTooltip={true}
+              />
+            </div>
+          )
+        }
         if (express_executed) {
           timeSpent = (
             <Tooltip key="express_executed" placement="top-start" content="Express">
@@ -145,10 +163,14 @@ export default ({ data, buttons }) => {
         if (executed) {
           const { source_token } = { ...fees }
           const { symbol } = { ...source_token }
-          extra = gas?.gas_paid_amount > 0 && typeof gas.gas_remain_amount === 'number' && (
-            <Tooltip placement="top-start" content="Gas Used">
-              <div className="w-fit h-6 flex items-center font-medium space-x-1">
-                <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
+          extra = toArray([
+            extra,
+            gas?.gas_paid_amount > 0 && typeof gas.gas_remain_amount === 'number' && (
+              <div key="gas_used" className="w-fit h-6 flex items-center font-medium space-x-2">
+                <div className="flex items-center space-x-1">
+                  <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
+                  <span>Used</span>
+                </div>
                 <NumberDisplay
                   value={gas.gas_paid_amount - gas.gas_remain_amount}
                   format="0,0.00"
@@ -156,8 +178,8 @@ export default ({ data, buttons }) => {
                   noTooltip={true}
                 />
               </div>
-            </Tooltip>
-          )
+            ),
+          ])
           timeSpent = toArray([
             timeSpent,
             <Tooltip key="executed" placement="top-start" content="Total time spent">
@@ -180,17 +202,18 @@ export default ({ data, buttons }) => {
         const { express_supported, source_token } = { ...fees }
         const { symbol, gas_price } = { ...source_token }
         extra = (
-          <Tooltip key="gas_paid" placement="top-start" content="Gas Deposited">
-            <div className="w-fit h-6 flex items-center font-medium space-x-1">
+          <div key="gas_paid" className="w-fit h-6 flex items-center font-medium space-x-3">
+            <div className="flex items-center space-x-1">
               <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
-              <NumberDisplay
-                value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
-                format="0,0.00"
-                suffix={` ${symbol}`}
-                noTooltip={true}
-              />
+              <span>Paid</span>
             </div>
-          </Tooltip>
+            <NumberDisplay
+              value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
+              format="0,0.00"
+              suffix={` ${symbol}`}
+              noTooltip={true}
+            />
+          </div>
         )
         if (estimated_time_spent && !(is_insufficient_fee || not_enough_gas_to_execute) && !error) {
           estimatedTimeSpent = (
