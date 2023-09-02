@@ -166,13 +166,31 @@ export default ({ data, buttons }) => {
           extra = toArray([
             extra,
             typeof gas?.gas_used_amount === 'number' && (
-              <div key="gas_used" className="w-fit h-6 flex items-center font-medium space-x-2">
+              <div key="gas_used" className="w-fit h-6 flex items-center font-medium space-x-8">
                 <div className="flex items-center space-x-1">
                   <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
-                  <span>Used</span>
+                  <span className="text-xs">
+                    Used
+                  </span>
                 </div>
                 <NumberDisplay
                   value={gas.gas_used_amount}
+                  format="0,0.00"
+                  suffix={` ${symbol}`}
+                  noTooltip={true}
+                />
+              </div>
+            ),
+            (refunded?.receipt?.status || ((executed || is_executed || error) && moment().diff(moment((executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'minutes') >= 5)) && typeof gas?.gas_paid_amount === 'number' && typeof gas.gas_remain_amount === 'number' && (
+              <div key="gas_charged" className="w-fit h-6 flex items-center font-medium space-x-2">
+                <div className="flex items-center space-x-1">
+                  <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
+                  <span className="text-xs">
+                    Charged
+                  </span>
+                </div>
+                <NumberDisplay
+                  value={gas.gas_paid_amount - (refunded?.receipt?.status ? typeof refunded.amount === 'number' ? refunded.amount : gas.gas_remain_amount : 0)}
                   format="0,0.00"
                   suffix={` ${symbol}`}
                   noTooltip={true}
@@ -205,7 +223,9 @@ export default ({ data, buttons }) => {
           <div key="gas_paid" className="w-fit h-6 flex items-center font-medium space-x-3">
             <div className="flex items-center space-x-1">
               <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
-              <span>Paid</span>
+              <span className="text-xs">
+                Paid
+              </span>
             </div>
             <NumberDisplay
               value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * gas_price}
