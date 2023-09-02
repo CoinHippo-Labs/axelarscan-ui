@@ -165,14 +165,14 @@ export default ({ data, buttons }) => {
           const { symbol } = { ...source_token }
           extra = toArray([
             extra,
-            gas?.gas_paid_amount > 0 && typeof gas.gas_remain_amount === 'number' && (
+            typeof gas?.gas_used_amount === 'number' && (
               <div key="gas_used" className="w-fit h-6 flex items-center font-medium space-x-2">
                 <div className="flex items-center space-x-1">
                   <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
                   <span>Used</span>
                 </div>
                 <NumberDisplay
-                  value={gas.gas_paid_amount - gas.gas_remain_amount}
+                  value={gas.gas_used_amount}
                   format="0,0.00"
                   suffix={` ${symbol}`}
                   noTooltip={true}
