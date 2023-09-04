@@ -406,10 +406,12 @@ export default () => {
         setResponse({ status: 'pending', message: 'Editing' })
 
         const { call, approved } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, returnValues } = { ...call }
+        const { symbol, amount } = { ...returnValues }
         const { chain } = { ...approved }
+        const isWithToken = !!(symbol && amount)
         const params = {
-          event: 'expressExecuteWithToken',
+          event: isWithToken ? 'expressExecuteWithToken' : 'expressExecute',
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
           sourceTransactionLogIndex: logIndex,

@@ -25,6 +25,7 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'filecoin', ...filecoin },
       // { _id: 'linea', ...linea },
       { _id: 'linea', id: 59144, network: 'linea', name: 'Linea', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://linea-mainnet.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161'] } }, blockExplorers: { default: { name: 'Linea', url: 'https://lineascan.build' } } },
+      // { _id: 'centrifuge', id: 2031, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Algol', symbol: 'ALGL', decimals: 18 }, rpcUrls: { default: { http: [] } }, blockExplorers: { default: { name: 'Centrifuge', url: '' } } },
     ] :
     [
       { _id: 'goerli', ...goerli },
@@ -44,6 +45,7 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'filecoin', ...filecoinHyperspace },
       { _id: 'filecoin-2', ...filecoinCalibration },
       { _id: 'linea', ...lineaTestnet },
+      { _id: 'centrifuge', id: 2089, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Algol', symbol: 'ALGL', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.algol.cntrfg.com/rpc'] } }, blockExplorers: { default: { name: 'Centrifuge', url: 'https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Ffullnode.algol.cntrfg.com%2Fpublic-ws#/explorer' } } },
     ]
 
 const { webSocketProvider, provider } = configureChains(EVM_CHAIN_CONFIGS, [publicProvider()])
