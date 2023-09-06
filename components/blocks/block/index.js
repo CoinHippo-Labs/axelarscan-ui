@@ -57,7 +57,7 @@ export default () => {
       {data && matched ?
         <div className="max-w-6xl space-y-4 sm:space-y-6 pt-6 sm:pt-8 mx-auto">
           <Info data={data} />
-          <Transactions />
+          {toArray(data.block?.data?.txs).length > 0 && <Transactions />}
           <Events data={data} />
         </div> :
         <div className="loading">
