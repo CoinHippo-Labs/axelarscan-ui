@@ -435,7 +435,7 @@ export default () => {
                       title: gas_paid || gas_paid_to_callback ? 'Gas Paid' : moment().diff(moment(call?.block_timestamp * 1000), 'seconds') < 30 ? 'Checking Gas Paid' : 'Pay Gas',
                       status: gas_paid || gas_paid_to_callback ? 'success' : 'pending',
                       data: gas_paid || gas_paid_to_callback,
-                      chain_data: source_chain_data,
+                      chain_data: gas_paid_to_callback ? destination_chain_data : source_chain_data,
                     },
                     express_executed && {
                       id: 'express',
