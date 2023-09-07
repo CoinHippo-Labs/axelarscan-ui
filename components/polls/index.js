@@ -463,7 +463,7 @@ export default () => {
                   Cell: props => {
                     const { value, row } = { ...props }
                     const { id, participants, created_at } = { ...row.original }
-                    const total_participants_power = _.sumBy(toArray(validators_data).filter(d => toArray(participants).includes(d.operator_address)), 'quadratic_voting_power')
+                    const total_participants_power = _.sumBy(toArray(validators_data).filter(d => true || toArray(participants).includes(d.operator_address)), 'quadratic_voting_power')
                     const is_show_power = moment().diff(moment(created_at?.ms), 'days') < 3
                     return value && (
                       <Link
