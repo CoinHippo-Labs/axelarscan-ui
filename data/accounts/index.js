@@ -20,6 +20,11 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: '0x1f8A4d195B647647c7dD45650CBd553FD33cCAA6',
+    name: 'Interchain Proposal Sender',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: '0xb28837949e7A3F1AC862036e8a0aE392c9fF9BB4',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
