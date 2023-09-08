@@ -591,7 +591,20 @@ export default () => {
       </div>
     )
 
-  const executeButton =
+  const executeButton = destination_chain_type === 'cosmos' ?
+    payload && !executed && !is_executed && (error || moment().diff(moment((chain_type === 'evm' ? confirm?.created_at?.ms / 1000 : call?.block_timestamp) * 1000), 'minutes') >= 5) && (
+      <div key="execute" className="flex items-center space-x-1">
+        <button
+          disabled={processing}
+          onClick={() => approve(data)}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
+        >
+          <span className="font-medium">
+            Execute
+          </span>
+        </button>
+      </div>
+    ) :
     payload && approved && !executed && !is_executed && destination_chain_type !== 'cosmos' &&
     (error || moment().diff(moment(approved.block_timestamp * 1000), 'minutes') >= 2) && (
       <div key="execute" className="flex items-center space-x-1">
