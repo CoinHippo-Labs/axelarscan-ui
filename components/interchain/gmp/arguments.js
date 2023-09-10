@@ -12,9 +12,10 @@ export default ({ data }) => {
 
   const { call, approved, command_id, execute_data } = { ...data }
   const { chain, destination_chain_type } = { ...call }
-  const { sender, destinationContractAddress, payloadHash, payload, symbol, messageId } = { ...call?.returnValues }
-  let { destinationChain } = { ...call?.returnValues }
+  const { sender, destinationContractAddress, payloadHash, payload, symbol } = { ...call?.returnValues }
+  let { destinationChain, messageId } = { ...call?.returnValues }
   let { commandId, sourceChain, amount } = { ...approved?.returnValues }
+  messageId = messageId || (call?.transactionHash && typeof call._logIndex === 'number' ? `${call.transactionHash}-${call._logIndex}` : null)
   commandId = commandId || command_id
   sourceChain = sourceChain || getChainData(chain, chains_data)?.chain_name || chain
   destinationChain = destinationChain || getChainData(approved?.chain, chains_data)?.chain_name || approved?.chain
