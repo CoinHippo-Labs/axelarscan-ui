@@ -16,6 +16,7 @@ import tvl from './tvl'
 import validators from './validators'
 import profiles from './profiles'
 import wallet from './wallet'
+import cosmos_wallet from './cosmos-wallet'
 import web3 from './web3'
 
 export default combineReducers({
@@ -35,5 +36,6 @@ export default combineReducers({
   validators,
   profiles,
   wallet,
+  cosmos_wallet,
   web3,
 })

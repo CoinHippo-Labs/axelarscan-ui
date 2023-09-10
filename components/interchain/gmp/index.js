@@ -13,7 +13,8 @@ import Details from './details'
 import Arguments from './arguments'
 import Spinner from '../../spinner'
 import ExplorerLink from '../../explorer/link'
-import Wallet from '../../wallet'
+import EVMWallet from '../../wallet/evm'
+import COSMOSWallet from '../../wallet/cosmos'
 import { searchGMP, saveGMP, isContractCallApproved, estimateTimeSpent } from '../../../lib/api/gmp'
 import { getProvider } from '../../../lib/chain/evm'
 import { getChainData, getAssetData } from '../../../lib/config'
@@ -55,10 +56,11 @@ const getTransactionKey = tx => {
 }
 
 export default () => {
-  const { chains, assets, wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
+  const { chains, assets, wallet, cosmos_wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet, cosmos_wallet: state.cosmos_wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
+  const { cosmos_wallet_data } = { ...cosmos_wallet }
   const { chain_id, signer, address } = { ...wallet_data }
 
   const router = useRouter()
@@ -232,7 +234,7 @@ export default () => {
         const gasMultipler = gas_add_adjustment[ENVIRONMENT]?.[destinationChain?.toLowerCase()] || gas_add_adjustment[ENVIRONMENT]?.default
 
         console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler })
-        const response = await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
+        const response = chain_type === 'cosmos' ? null : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
         console.log('[addGas response]', response)
         const { success, error, transaction } = { ...response }
         const { message } = { ...error }
@@ -547,12 +549,29 @@ export default () => {
   const notFound = data && Object.keys(data).length < 1
   const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
   const EDITABLE = edit === 'true' && (ENVIRONMENT !== 'mainnet' || STAGING)
-  const wrongSourceChain = source_chain_data && source_chain_data.chain_id !== chain_id
-  const wrongDestinationChain = destination_chain_data && destination_chain_data.chain_id !== chain_id
+  const wrongSourceChain = source_chain_data && source_chain_data.chain_id !== (chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)
+  const wrongDestinationChain = destination_chain_data && destination_chain_data.chain_id !== (chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)
   const { status, message, hash } = { ...response }
   const { explorer } = { ...getChainData(response?.chain, chains_data) }
 
-  const addGasButton =
+  const addGasButton = chain_type === 'cosmos' ?
+    (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed &&
+    (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || is_not_enough_gas || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
+      <div key="pay_gas" className="flex items-center space-x-1">
+        {signer && !wrongSourceChain && (
+          <button
+            disabled={processing}
+            onClick={() => addGas(data)}
+            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
+          >
+            <span className="whitespace-nowrap font-medium">
+              {gas_paid ? 'Add' : 'Pay'} gas
+            </span>
+          </button>
+        )}
+        <COSMOSWallet connectChainId={source_chain_data?.chain_id} />
+      </div>
+    ) :
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed && chain_type !== 'cosmos' &&
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || is_not_enough_gas || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
       <div key="pay_gas" className="flex items-center space-x-1">
@@ -567,7 +586,7 @@ export default () => {
             </span>
           </button>
         )}
-        <Wallet connectChainId={source_chain_data?.chain_id} />
+        <EVMWallet connectChainId={source_chain_data?.chain_id} />
       </div>
     )
 
@@ -619,7 +638,7 @@ export default () => {
             </span>
           </button>
         )}
-        <Wallet connectChainId={destination_chain_data?.chain_id} />
+        <EVMWallet connectChainId={destination_chain_data?.chain_id} />
       </div>
     )
 

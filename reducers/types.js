@@ -27,4 +27,6 @@ export const PROFILES_DATA = 'profiles_data'
 // wallet
 export const WALLET_DATA = 'wallet_data'
 export const WALLET_RESET = 'wallet_reset'
+export const COSMOS_WALLET_DATA = 'cosmos_wallet_data'
+export const COSMOS_WALLET_RESET = 'cosmos_wallet_reset'
 export const WEB3_CHAIN_ID = 'web3_chain_id'

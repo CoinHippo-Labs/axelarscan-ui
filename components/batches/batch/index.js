@@ -15,7 +15,7 @@ import Image from '../../image'
 import Copy from '../../copy'
 import AccountProfile from '../../profile/account'
 import ExplorerLink from '../../explorer/link'
-import Wallet from '../../wallet'
+import EVMWallet from '../../wallet/evm'
 import { batchedCommands } from '../../../lib/api/lcd'
 import { getChainData, getAssetData } from '../../../lib/config'
 import { formatUnits } from '../../../lib/number'
@@ -122,7 +122,7 @@ export default () => {
             </span>
           </button>
         )}
-        <Wallet connectChainId={chain_id} />
+        <EVMWallet connectChainId={chain_id} />
       </div>
     )
 
