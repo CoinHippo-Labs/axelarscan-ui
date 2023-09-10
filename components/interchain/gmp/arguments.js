@@ -10,7 +10,7 @@ export default ({ data }) => {
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
 
-  const { call, approved, command_id, execute_data } = { ...data }
+  const { call, approved, is_invalid_destination_chain, is_invalid_source_address, is_invalid_contract_address, is_invalid_payload_hash, is_invalid_symbol, is_invalid_amount, command_id, execute_data } = { ...data }
   const { chain, destination_chain_type } = { ...call }
   const { sender, destinationContractAddress, payloadHash, payload, symbol } = { ...call?.returnValues }
   let { destinationChain, messageId } = { ...call?.returnValues }
@@ -24,11 +24,18 @@ export default ({ data }) => {
   const destinationSymbol = approved?.returnValues?.symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || symbol
   const version = destination_chain_type === 'cosmos' && payload ? toBigNumber(payload.substring(0, 10)) : undefined
 
-  const render = ({ key, title, value, className = '' }) => (
+  const render = ({ key, title, value, invalid, className = '' }) => (
     <div key={key} className={`space-y-2 ${className}`}>
-      <span className="text-base font-semibold">
-        {title}
-      </span>
+      <div className="flex items-center">
+        <span className="text-base font-semibold mr-2">
+          {title}
+        </span>
+        {invalid && (
+          <span className="text-red-400 dark:text-red-500 font-medium">
+            (invalid)
+          </span>
+        )}
+      </div>
       <div className="text-xs lg:text-base">
         <div className="flex items-start">
           <div className="w-full bg-slate-50 dark:bg-slate-900 break-all rounded text-slate-400 dark:text-slate-500 mr-2 py-3 px-4">
@@ -46,14 +53,14 @@ export default ({ data }) => {
     { title: 'messageId', value: messageId, className: 'sm:col-span-2' },
     { title: 'commandId', value: commandId, className: 'sm:col-span-2' },
     { title: 'sourceChain', value: sourceChain },
-    { title: 'destinationChain', value: destinationChain },
-    { title: 'sourceAddress', value: sender },
-    { title: 'destinationContractAddress', value: destinationContractAddress },
-    { title: 'payloadHash', value: payloadHash, className: 'sm:col-span-2' },
+    { title: 'destinationChain', value: destinationChain, invalid: is_invalid_destination_chain },
+    { title: 'sourceAddress', value: sender, invalid: is_invalid_source_address },
+    { title: 'destinationContractAddress', value: destinationContractAddress, invalid: is_invalid_contract_address },
+    { title: 'payloadHash', value: payloadHash, invalid: is_invalid_payload_hash, className: 'sm:col-span-2' },
     { title: `payload${version ? ` (Version: ${version})` : ''}`, value: payload, className: 'sm:col-span-2' },
-    { title: 'sourceSymbol', value: symbol },
+    { title: 'sourceSymbol', value: symbol, invalid: is_invalid_symbol },
     { title: 'destinationSymbol', value: destinationSymbol },
-    { title: 'amount', value: amount },
+    { title: 'amount', value: amount, invalid: is_invalid_amount },
     { title: 'Execute Data', value: execute_data, className: 'sm:col-span-2' },
   ]
 

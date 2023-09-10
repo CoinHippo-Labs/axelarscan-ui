@@ -31,6 +31,7 @@ export default ({ data, buttons }) => {
     gas_paid_to_callback,
     express_executed,
     confirm,
+    confirm_failed,
     approved,
     executed,
     is_executed,
@@ -41,6 +42,9 @@ export default ({ data, buttons }) => {
     is_insufficient_fee,
     not_enough_gas_to_execute,
     no_gas_remain,
+    is_invalid_call,
+    is_invalid_destination_chain,
+    is_invalid_contract_address,
     simplified_status,
     callback_data,
     origin_data,
@@ -90,8 +94,8 @@ export default ({ data, buttons }) => {
     },
     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: confirm ? 'Confirmed' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
-      status: confirm ? 'success' : 'pending',
+      title: confirm ? 'Confirmed' : confirm_failed || is_invalid_call ? 'Invalid Call' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+      status: confirm ? 'success' : confirm_failed || is_invalid_call ? 'failed' : 'pending',
       data: confirm,
       chain_data: axelar_chain_data,
       tooltip: !confirm && (gas_paid || gas_paid_to_callback || express_executed) ? `Cross-chain transactions need to be finalized on the source chain before they can be settled. This requires Axelar to wait for an approval and can take ${estimated_time_spent?.confirm ? `~${totalTimeString(0, estimated_time_spent.confirm)} on ${source_chain_data?.name || chain}` : '~30 mins depending on the chain (e.g. Ethereum, Base, Arbitrum etc.)'}` : null,
@@ -464,6 +468,11 @@ export default ({ data, buttons }) => {
                 <span className="font-semibold">
                   {destination_chain_data?.name || getTitle(destinationChain)}
                 </span>
+                {is_invalid_destination_chain && (
+                  <span className="text-red-400 dark:text-red-500 text-xs font-medium">
+                    (invalid)
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-slate-600 dark:text-slate-200 text-sm sm:space-x-3">
@@ -484,6 +493,11 @@ export default ({ data, buttons }) => {
                   explorer={destination_chain_data?.explorer}
                   chain={destination_chain_data?.id}
                 />
+                {is_invalid_contract_address && (
+                  <span className="text-red-400 dark:text-red-500 text-xs font-medium">
+                    (invalid)
+                  </span>
+                )}
               </div>
             </div>
           </div>

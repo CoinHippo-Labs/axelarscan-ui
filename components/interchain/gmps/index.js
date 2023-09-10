@@ -325,6 +325,7 @@ export default () => {
                     gas_paid_to_callback,
                     express_executed,
                     confirm,
+                    confirm_failed,
                     approved,
                     executed,
                     is_executed,
@@ -332,6 +333,7 @@ export default () => {
                     refunded,
                     is_insufficient_fee,
                     not_enough_gas_to_execute,
+                    is_invalid_call,
                   } = { ...row.original }
                   const { chain, chain_type, destination_chain_type } = { ...call }
                   const { destinationChain } = { ...call?.returnValues }
@@ -446,8 +448,8 @@ export default () => {
                     },
                     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
                       id: 'confirm',
-                      title: confirm ? 'Confirmed' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
-                      status: confirm ? 'success' : 'pending',
+                      title: confirm ? 'Confirmed' : confirm_failed || is_invalid_call ? 'Invalid Call' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+                      status: confirm ? 'success' : confirm_failed || is_invalid_call ? 'failed' : 'pending',
                       data: confirm,
                       chain_data: axelar_chain_data,
                     },
