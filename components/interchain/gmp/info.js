@@ -98,7 +98,7 @@ export default ({ data, buttons }) => {
       status: confirm ? 'success' : confirm_failed || is_invalid_call ? 'failed' : 'pending',
       data: confirm,
       chain_data: axelar_chain_data,
-      tooltip: !confirm && (gas_paid || gas_paid_to_callback || express_executed) ? `Cross-chain transactions need to be finalized on the source chain before they can be settled. This requires Axelar to wait for an approval and can take ${estimated_time_spent?.confirm ? `~${totalTimeString(0, estimated_time_spent.confirm)} on ${source_chain_data?.name || chain}` : '~30 mins depending on the chain (e.g. Ethereum, Base, Arbitrum etc.)'}` : null,
+      tooltip: !confirm && !confirm_failed && !is_invalid_call && (gas_paid || gas_paid_to_callback || express_executed) ? `Cross-chain transactions need to be finalized on the source chain before they can be settled. This requires Axelar to wait for an approval and can take ${estimated_time_spent?.confirm ? `~${totalTimeString(0, estimated_time_spent.confirm)} on ${source_chain_data?.name || chain}` : '~30 mins depending on the chain (e.g. Ethereum, Base, Arbitrum etc.)'}` : null,
     },
     destination_chain_type !== 'cosmos' && {
       id: 'approve',
