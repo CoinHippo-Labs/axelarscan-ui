@@ -25,7 +25,7 @@ import { getType, getSender, getRecipient } from '../../lib/transaction'
 import { formatUnits } from '../../lib/number'
 import { toArray, includesStringList, ellipse, equalsIgnoreCase, getQueryParams, normalizeQuote } from '../../lib/utils'
 
-const PAGE_SIZE = 100
+const PAGE_SIZE = 25
 
 export default ({ n }) => {
   const { chains, assets, validators } = useSelector(state => ({ chains: state.chains, assets: state.assets, validators: state.validators }), shallowEqual)
