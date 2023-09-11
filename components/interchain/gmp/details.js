@@ -25,6 +25,8 @@ export default ({ data }) => {
     gas_added_transactions,
     express_executed,
     confirm,
+    confirm_failed,
+    confirm_failed_event,
     approved,
     executed,
     is_executed,
@@ -77,9 +79,9 @@ export default ({ data }) => {
     },
     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: confirm ? 'Confirmed' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
-      status: confirm ? 'success' : 'pending',
-      data: confirm,
+      title: confirm ? 'Confirmed' : confirm_failed_event ? 'Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+      status: confirm ? 'success' : confirm_failed ? 'failed' : 'pending',
+      data: confirm || confirm_failed_event,
       chain_data: axelar_chain_data,
     },
     destination_chain_type !== 'cosmos' && {
@@ -610,27 +612,29 @@ export default ({ data }) => {
                 )
                 break
               case 'confirm':
-                try {
-                  rate = source_token?.token_price?.usd / axelar_token?.token_price?.usd
-                } catch (error) {}
-                component = (
-                  <NumberDisplay
-                    value={source_confirm_fee * (rate || 1)}
-                    format="0,0.00"
-                    maxDecimals={rate ? 1 : undefined}
-                    suffix={rate ? axelar_token && ` ${axelar_token.symbol}` : source_token && ` ${source_token.symbol}`}
-                    noTooltip={true}
-                  />
-                )
-                convertedComponent = (
-                  <NumberDisplay
-                    value={source_confirm_fee}
-                    format="0,0.00"
-                    suffix={source_token && ` ${source_token.symbol}`}
-                    noTooltip={true}
-                    className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs"
-                  />
-                )
+                if (confirm) {
+                  try {
+                    rate = source_token?.token_price?.usd / axelar_token?.token_price?.usd
+                  } catch (error) {}
+                  component = (
+                    <NumberDisplay
+                      value={source_confirm_fee * (rate || 1)}
+                      format="0,0.00"
+                      maxDecimals={rate ? 1 : undefined}
+                      suffix={rate ? axelar_token && ` ${axelar_token.symbol}` : source_token && ` ${source_token.symbol}`}
+                      noTooltip={true}
+                    />
+                  )
+                  convertedComponent = (
+                    <NumberDisplay
+                      value={source_confirm_fee}
+                      format="0,0.00"
+                      suffix={source_token && ` ${source_token.symbol}`}
+                      noTooltip={true}
+                      className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs"
+                    />
+                  )
+                }
                 break
               case 'approve':
                 try {
