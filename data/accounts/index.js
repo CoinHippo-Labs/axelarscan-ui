@@ -25,6 +25,23 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: 'axelar10d07y265gmmuvt4z0w9aw880jnsr700j7v9daj',
+    name: 'Axelar Governance',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: 'axelar1aythygn6z5thymj6tmzfwekzh05ewg3l7d6y89',
+    name: 'Axelar Gas Collector',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar1zl3rxpp70lmte2xr6c4lgske2fyuj3hupcsvcd',
+    name: 'Axelar Gas Collector',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'testnet',
+  },
+  {
     address: '0xb28837949e7A3F1AC862036e8a0aE392c9fF9BB4',
     name: 'Axelar Relayer',
     image: '/logos/accounts/axelarnet.svg',
