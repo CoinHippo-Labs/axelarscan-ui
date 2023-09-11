@@ -180,7 +180,7 @@ export default ({ n }) => {
   const isTransactionsPage = includesStringList(pathname, ['/transactions', '/txs'])
 
   return (
-    <div className="children">
+    <div className={`${data ? '' : 'children'}`}>
       {data ?
         <div className="space-y-2 sm:space-y-4 mt-4 sm:mt-6 mx-auto">
           {!n && (
