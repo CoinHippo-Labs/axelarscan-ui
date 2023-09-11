@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
+import { Chip } from '@material-tailwind/react'
 import _ from 'lodash'
 
 import Datatable from '../../datatable'
