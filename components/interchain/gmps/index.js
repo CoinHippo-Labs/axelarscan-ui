@@ -288,7 +288,7 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => {
                   const { value, row } = { ...props }
-                  const { call } = { ...row.original }
+                  const { call, is_invalid_destination_chain, is_invalid_contract_address } = { ...row.original }
                   const { destinationContractAddress } = { ...call?.returnValues }
                   const { name, image, explorer } = { ...getChainData(value, chains_data) }
                   return (
@@ -305,9 +305,19 @@ export default () => {
                         <span className="font-semibold">
                           {name || getTitle(value)}
                         </span>
+                        {is_invalid_destination_chain && (
+                          <span className="text-red-400 dark:text-red-500 text-xs font-medium">
+                            (invalid)
+                          </span>
+                        )}
                       </div>
                       <div className="h-6 flex items-center">
                         <AccountProfile address={destinationContractAddress} noCopy={true} explorer={explorer} chain={value} />
+                        {is_invalid_contract_address && (
+                          <span className="text-red-400 dark:text-red-500 text-xs font-medium">
+                            (invalid)
+                          </span>
+                        )}
                       </div>
                     </div>
                   )
