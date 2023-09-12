@@ -146,7 +146,7 @@ export default (
                   <YAxis
                     dataKey={field}
                     scale={scale}
-                    domain={[useStack ? 'dataMin' : _.min(stacks.map(s => _.minBy(chartData, `${s}_${field}`)?.[`${s}_${field}`])), 'dataMax']}
+                    domain={[useStack ? 'dataMin' : _.min(stacks.map(s => _.minBy(chartData, `${s}_${field}`)?.[`${s}_${field}`])), useStack ? 'dataMax' : _.max(stacks.map(s => _.maxBy(chartData, `${s}_${field}`)?.[`${s}_${field}`]))]}
                     allowDecimals={false}
                     axisLine={false}
                     tickLine={false}
