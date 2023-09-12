@@ -89,7 +89,7 @@ export default ({ data, granularity }) => {
             data={_data}
             totalValue={total}
             field="volume"
-            colors={scale === 'log' && useStack && STAGING ? { gmp: '#8b8c82', transfers: '#8b8c82' } : undefined}
+            colors={scale === 'log' && useStack && STAGING ? { gmp: '#33B700', transfers: '#33B700' } : undefined}
             scale={scale}
             useStack={useStack}
             title="Volume"
