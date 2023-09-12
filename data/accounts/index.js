@@ -907,4 +907,28 @@ export default [
     image: '/logos/accounts/crosnest.png',
     environment: 'mainnet',
   },
+  {
+    address: 'axelar14awanvwztk4rnspjqtukq4m5lv98umw6atjnw6',
+    name: 'Qubelabs IBC relayer',
+    image: '/logos/accounts/qubelabs.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: 'evmos1w4tereqw45m2lqa3aea764la4ycnqrvvcndf0j',
+    name: 'Qubelabs IBC relayer',
+    image: '/logos/accounts/qubelabs.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: 'agoric1yjjvxayecreq4ds4ggm08jxnzlese7smhwakle',
+    name: 'Qubelabs IBC relayer',
+    image: '/logos/accounts/qubelabs.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: 'umee1rqaetvk3mx2cnn6guectun8a9k22mmgthhp02h',
+    name: 'Qubelabs IBC relayer',
+    image: '/logos/accounts/qubelabs.svg',
+    environment: 'mainnet',
+  },
 ]
