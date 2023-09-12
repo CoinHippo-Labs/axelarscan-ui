@@ -79,6 +79,9 @@ export default ({ data, granularity }) => {
       case 'volumes':
         total = (GMPTotalVolume || 0) + (transfersTotalVolume || 0)
         const maxPerMean = _.maxBy(_data, 'volume')?.volume / (_.meanBy(_data, 'volume') || 1)
+        const scale = maxPerMean > 5 ? 'log' : undefined
+        const useStack = maxPerMean <= 5 || maxPerMean > 10
+        const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
         return (
           <Bar
             key={id}
@@ -86,8 +89,9 @@ export default ({ data, granularity }) => {
             data={_data}
             totalValue={total}
             field="volume"
-            scale={maxPerMean > 5 ? 'log' : undefined}
-            useStack={maxPerMean <= 5 || maxPerMean > 10}
+            colors={scale === 'log' && useStack && STAGING ? { gmp: '#8b8c82', transfers: '#8b8c82' } : undefined}
+            scale={scale}
+            useStack={useStack}
             title="Volume"
             description={`Transfer volume by ${granularity}`}
             dateFormat={dateFormat}
