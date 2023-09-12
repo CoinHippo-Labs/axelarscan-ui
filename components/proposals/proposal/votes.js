@@ -104,19 +104,19 @@ export default ({ data }) => {
         },
         {
           Header: 'Voting Power',
-          accessor: 'validator_data.tokens',
-          sortType: (a, b) => a.original.validator_data?.tokens > b.original.validator_data?.tokens ? 1 : -1,
+          accessor: 'voting_power',
+          sortType: (a, b) => a.original.voting_power > b.original.voting_power ? 1 : -1,
           Cell: props => {
             const { value } = { ...props }
             const total_voting_power = _.sumBy(toArray(validators_data).filter(v => !v.jailed && v.status === 'BOND_STATUS_BONDED'), 'tokens')
-            return (
+            return value > 0 && (
               <div className="flex flex-col items-start sm:items-end text-left sm:text-right">
                 <NumberDisplay
                   value={value}
                   format="0,0.00a"
                   noTooltip={true}
                 />
-                {value > 0 && total_voting_power > 0 && (
+                {total_voting_power > 0 && (
                   <NumberDisplay
                     value={value * 100 / total_voting_power}
                     format="0,0.000000"
