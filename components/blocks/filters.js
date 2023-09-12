@@ -81,7 +81,7 @@ export default () => {
         </div>
       }
       body={
-        <div className="form grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
+        <div className="form form-filters grid sm:grid-cols-2 gap-x-4 mt-2 -mb-3">
           {fields.map((f, i) => {
             const {
               label,

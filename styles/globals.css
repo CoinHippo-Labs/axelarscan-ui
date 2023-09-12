@@ -173,3 +173,8 @@ input[type=number] {
     min-height: calc(100% - 48px);
   }
 }
+
+.form-filters {
+  @apply overflow-y-auto;
+  max-height: 75vh;
+}
