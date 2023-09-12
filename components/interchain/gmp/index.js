@@ -221,7 +221,7 @@ export default () => {
   }
 
   const addGas = async data => {
-    if (signer && api && data) {
+    if ((chain_type === 'cosmos' ? cosmos_wallet_data?.signer || true : signer) && api && data) {
       setProcessing(true)
       resetTxHashEdit()
       try {
@@ -558,19 +558,17 @@ export default () => {
   const addGasButton = chain_type === 'cosmos' ?
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed &&
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || is_not_enough_gas || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
-      <div key="pay_gas" className="flex items-center space-x-1">
-        {signer && !wrongSourceChain && (
-          <button
-            disabled={processing}
-            onClick={() => addGas(data)}
-            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
-          >
-            <span className="whitespace-nowrap font-medium">
-              {gas_paid ? 'Add' : 'Pay'} gas
-            </span>
-          </button>
-        )}
-        <COSMOSWallet connectChainId={source_chain_data?.chain_id} />
+      null && <div key="pay_gas" className="flex items-center space-x-1">
+        <button
+          disabled={processing}
+          onClick={() => addGas(data)}
+          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
+        >
+          <span className="whitespace-nowrap font-medium">
+            {gas_paid ? 'Add' : 'Pay'} gas
+          </span>
+        </button>
+        {/*(!cosmos_wallet_data?.signer || wrongSourceChain) && <COSMOSWallet connectChainId={source_chain_data?.chain_id} />*/}
       </div>
     ) :
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed && chain_type !== 'cosmos' &&

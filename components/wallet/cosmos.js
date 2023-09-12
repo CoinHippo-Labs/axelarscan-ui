@@ -32,7 +32,11 @@ export default (
   const getSigner = async (chainId = connectChainId) => {
     if (!chainId) return
     await connect(chainId)
-    return await window?.keplr?.getOfflineSignerAuto(chainId)
+    try {
+      return await window?.keplr?.getOfflineSignerAuto(chainId)
+    } catch (error) {
+      return null
+    }
   }
 
   const getAddress = async (chainId = connectChainId) => {
@@ -65,7 +69,7 @@ export default (
       }
       getData()
     },
-    [chainId],
+    [chainId, window?.keplr],
   )
 
   return !hidden && (
