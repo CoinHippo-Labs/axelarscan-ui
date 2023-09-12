@@ -839,5 +839,5 @@ export default [
     name: 'Crosnest IBC relayer',
     image: '/logos/accounts/crosnest.png',
     environment: 'mainnet',
-  }
+  },
 ]
