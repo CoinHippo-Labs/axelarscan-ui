@@ -828,4 +828,16 @@ export default [
     image: '/logos/accounts/mintdao-bridge.svg',
     environment: 'mainnet',
   },
+  {
+    address: 'axelar1l267dmlmprhu4p5aqslf50f495vjqlg3e6uve2',
+    name: 'Crosnest IBC relayer',
+    image: '/logos/accounts/crosnest.png',
+    environment: 'mainnet',
+  },
+  {
+    address: 'axelar19kzuzfmmy9wjr3cl0ss8wjzjup9g49hqzxn3p9',
+    name: 'Crosnest IBC relayer',
+    image: '/logos/accounts/crosnest.png',
+    environment: 'mainnet',
+  },
 ]
