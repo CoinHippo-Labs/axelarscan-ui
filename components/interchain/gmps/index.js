@@ -433,7 +433,7 @@ export default () => {
                       break
                   }
 
-                  const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'seconds') > 120
+                  const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000), 'seconds') > 120
                   const steps = toArray([
                     {
                       id: 'send',

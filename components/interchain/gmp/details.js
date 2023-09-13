@@ -54,7 +54,7 @@ export default ({ data }) => {
   const destination_chain_data = getChainData(destinationChain, chains_data)
   const axelar_chain_data = getChainData('axelarnet', chains_data)
 
-  const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'seconds') > 120
+  const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000), 'seconds') > 120
   const steps = toArray([
     {
       id: 'send',

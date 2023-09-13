@@ -68,7 +68,7 @@ export default ({ data, buttons }) => {
   image = image || asset_data?.image
   amount = amount || (returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined)
 
-  const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'seconds') > 120
+  const errored = error && moment().diff(moment((error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000), 'seconds') > 120
   const steps = toArray([
     {
       id: 'send',
@@ -185,7 +185,7 @@ export default ({ data, buttons }) => {
                 />
               </div>
             ),
-            (refunded?.receipt?.status || ((executed || is_executed || error) && moment().diff(moment((executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'minutes') >= 5)) && typeof gas?.gas_paid_amount === 'number' && typeof gas.gas_remain_amount === 'number' && (
+            (refunded?.receipt?.status || ((executed || is_executed || error) && moment().diff(moment((executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000), 'minutes') >= 5)) && typeof gas?.gas_paid_amount === 'number' && typeof gas.gas_remain_amount === 'number' && (
               <div key="gas_charged" className="w-fit h-6 flex items-center font-medium space-x-2">
                 <div className="flex items-center space-x-1">
                   <TbGasStation size={18} className="ml-0.5 -mr-0.5" />
