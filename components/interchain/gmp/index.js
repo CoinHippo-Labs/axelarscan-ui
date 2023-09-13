@@ -551,7 +551,7 @@ export default () => {
   const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
   const EDITABLE = edit === 'true' && (ENVIRONMENT !== 'mainnet' || STAGING)
   const wrongSourceChain = source_chain_data && source_chain_data.chain_id !== (chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)
-  const wrongDestinationChain = destination_chain_data && destination_chain_data.chain_id !== (chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)
+  const wrongDestinationChain = destination_chain_data && destination_chain_data.chain_id !== (destination_chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)
   const { status, message, hash } = { ...response }
   const { explorer } = { ...getChainData(response?.chain, chains_data) }
 
