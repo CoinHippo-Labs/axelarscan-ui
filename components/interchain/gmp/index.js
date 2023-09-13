@@ -610,7 +610,7 @@ export default () => {
     )
 
   const executeButton = destination_chain_type === 'cosmos' ?
-    payload && (chain_type !== 'evm' || confirm) && !executed && !is_executed && (error || moment().diff(moment((chain_type === 'evm' ? confirm.created_at?.ms / 1000 : call.block_timestamp) * 1000), 'minutes') >= 5) && (
+    payload && (chain_type !== 'evm' || confirm) && !executed && !is_executed && (error || moment().diff(moment((confirm?.block_timestamp || call.block_timestamp) * 1000), 'minutes') >= 5) && (
       <div key="execute" className="flex items-center space-x-1">
         <button
           disabled={processing}
@@ -721,7 +721,7 @@ export default () => {
 
   const setRefundedButton =
     EDITABLE && (executed || is_executed || error) &&
-    moment().diff(moment((executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || (confirm?.created_at?.ms / 1000)) * 1000), 'minutes') >= 10 && (
+    moment().diff(moment((executed?.block_timestamp || error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000), 'minutes') >= 10 && (
       <div key="set_refunded" className="flex items-center space-x-1">
         <input
           placeholder="Tx Hash"
