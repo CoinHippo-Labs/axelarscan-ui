@@ -275,9 +275,8 @@ export default () => {
         console.log('[approve request]', { transactionHash })
         const response = await api.manualRelayToDestChain(transactionHash)
         console.log('[approve response]', response)
-        const { success, error, signCommandTx } = { ...response }
+        const { success, error, confirmTx, signCommandTx, routeMessageTx } = { ...response }
         const { message } = { ...error }
-        const { txhash } = { ...signCommandTx }
 
         if (success) {
           await sleep(15 * 1000)
@@ -286,8 +285,8 @@ export default () => {
           setResponse({
             status: success || !error ? 'success' : 'failed',
             message: message || error || `${destination_chain_type === 'cosmos' ? 'Execute' : 'Approve'} successful`,
-            hash: txhash,
-            chain: 'axelarnet',
+            hash: routeMessageTx?.transactionHash || signCommandTx?.transactionHash || signCommandTx?.txhash || confirmTx?.transactionHash,
+            chain: !routeMessageTx && signCommandTx ? destinationChain : 'axelarnet',
           })
         }
       } catch (error) {
