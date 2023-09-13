@@ -266,7 +266,7 @@ export default () => {
       resetTxHashEdit()
       try {
         if (!afterPayGas) {
-          setResponse({ status: 'pending', message: chain_type !== 'cosmos' && !confirm ? 'Confirming' : 'Approving' })
+          setResponse({ status: 'pending', message: chain_type !== 'cosmos' && !confirm ? 'Confirming' : destination_chain_type === 'cosmos' ? 'Executing' : 'Approving' })
         }
 
         const { call } = { ...data }
@@ -285,8 +285,8 @@ export default () => {
         if (!afterPayGas || success) {
           setResponse({
             status: success || !error ? 'success' : 'failed',
-            message: message || error || 'Approve successful',
-            hash,
+            message: message || error || `${destination_chain_type === 'cosmos' ? 'Execute' : 'Approve'} successful`,
+            hash: txhash,
             chain: 'axelarnet',
           })
         }
