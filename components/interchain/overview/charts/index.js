@@ -81,7 +81,6 @@ export default ({ data, granularity }) => {
         const maxPerMean = _.maxBy(_data, 'volume')?.volume / (_.meanBy(_data, 'volume') || 1)
         const scale = maxPerMean > 5 ? 'log' : undefined
         const useStack = maxPerMean <= 5 || maxPerMean > 10
-        const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
         return (
           <Bar
             key={id}
@@ -89,7 +88,7 @@ export default ({ data, granularity }) => {
             data={_data}
             totalValue={total}
             field="volume"
-            colors={scale === 'log' && useStack && STAGING ? { gmp: '#33B700', transfers: '#33B700' } : undefined}
+            colors={scale === 'log' && useStack ? { gmp: '#33B700', transfers: '#33B700' } : undefined}
             scale={scale}
             useStack={useStack}
             title="Volume"
