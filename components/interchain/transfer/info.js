@@ -16,7 +16,7 @@ const WRAP_PREFIXES = ['w', 'axl']
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A'
 const normalizeType = type => ['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'deposit_service' : type || 'deposit_address'
 
-export default ({ data }) => {
+export default ({ data, buttons }) => {
   const { chains, assets } = useSelector(state => ({ chains: state.chains, assets: state.assets }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
@@ -126,7 +126,7 @@ export default ({ data }) => {
     },
     getChainData(destination_chain_data?.id, chains_data)?.chain_type === 'cosmos' && destination_chain_data.id !== 'axelarnet' && {
       id: 'ibc_send',
-      title: ibc_send?.ack_txhash || (ibc_send?.recv_txhash && !ibc_send.failed_txhash) ? 'Received' : 'Execute',
+      title: ibc_send?.ack_txhash || (ibc_send?.recv_txhash && !ibc_send.failed_txhash) ? 'Received' : ibc_send?.failed_txhash ? 'Error' : 'Execute',
       status: ibc_send?.ack_txhash || (ibc_send?.recv_txhash && !ibc_send.failed_txhash) ? 'success' : ibc_send?.failed_txhash ? 'failed' : 'pending',
       data: ibc_send,
       chain_data: ibc_send?.recv_txhash ? destination_chain_data : axelar_chain_data,
@@ -385,23 +385,32 @@ export default ({ data }) => {
                     break
                 }
 
+                const button = buttons?.[id]
                 const component = (
-                  <Step key={i} className={`w-6 h-6 ${bgColor} flex flex-col items-center`}>
+                  <div className="flex flex-col items-center">
                     <span className="text-white mt-0.5">
                       {i + 1}
                     </span>
                     <div className={`w-max whitespace-nowrap ${color} text-xs font-medium mt-1`}>
                       {title}
                     </div>
-                  </Step>
+                  </div>
                 )
 
                 return (
-                  _url ?
-                    <Link key={i} href={_url} target="_blank" rel="noopener noreferrer">
-                      {component}
-                    </Link> :
-                    component
+                  <Step key={i} className={`w-6 h-6 ${bgColor} flex flex-col items-center`}>
+                    {_url ?
+                      <Link href={_url} target="_blank" rel="noopener noreferrer">
+                        {component}
+                      </Link> :
+                      component
+                    }
+                    {button && (
+                      <div className="w-max flex flex-col items-center text-xs font-medium space-y-1 mt-0.5">
+                        {button}
+                      </div>
+                    )}
+                  </Step>
                 )
               })}
             </Stepper>
