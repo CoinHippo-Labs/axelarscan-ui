@@ -82,7 +82,7 @@ export default ({ data, buttons }) => {
       title: (gas_paid || gas_paid_to_callback) && !is_insufficient_fee ? 'Gas Paid' : moment().diff(moment(block_timestamp * 1000), 'seconds') < 30 ? 'Checking Gas Paid' : 'Pay Gas',
       status: gas_paid || gas_paid_to_callback ? is_insufficient_fee ? 'failed' : 'success' : 'pending',
       data: gas_paid || gas_paid_to_callback,
-      chain_data: gas_paid_to_callback ? getChainData(origin_data?.call?.chain, chains_data) || destination_chain_data : source_chain_data,
+      chain_data: gas_paid ? source_chain_data : gas_paid_to_callback ? getChainData(origin_data?.call?.chain, chains_data) || destination_chain_data : source_chain_data,
       tooltip: is_insufficient_fee ? 'Insufficient Base Fee. Please add more gas.' : '',
     },
     (express_executed || buttons?.express) && {
