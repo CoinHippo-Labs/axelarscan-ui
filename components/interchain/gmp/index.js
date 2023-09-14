@@ -270,11 +270,15 @@ export default () => {
         }
 
         const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, returnValues } = { ...call }
+        const { messageId } = { ...returnValues }
+        const transactionId = chain_type === 'cosmos' ? messageId : transactionHash
+        const theLogIndex = chain_type === 'cosmos' ? undefined : logIndex
+        const escapeAfterConfirm = false
 
-        console.log('[approve request]', { transactionHash })
-        const response = await api.manualRelayToDestChain(transactionHash, logIndex, undefined, false)
-        console.log('[approve response]', response)
+        console.log('[manualRelayToDestChain request]', { transactionHash: transactionId, logIndex: theLogIndex, escapeAfterConfirm })
+        const response = await api.manualRelayToDestChain(transactionId, theLogIndex, undefined, escapeAfterConfirm)
+        console.log('[manualRelayToDestChain response]', response)
         const { success, error, confirmTx, signCommandTx, routeMessageTx } = { ...response }
         const { message } = { ...error }
 
