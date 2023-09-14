@@ -160,7 +160,7 @@ export default () => {
         }
 
         // origin
-        if (call && !gas_paid && (gas_paid_to_callback || is_call_from_relayer)) {
+        if (call && (gas_paid_to_callback || is_call_from_relayer)) {
           const { transactionHash } = { ...call }
           const response = await searchGMP({ txHash: transactionHash })
           const origin_data = toArray(response?.data).find(d => equalsIgnoreCase(d.executed?.transactionHash, transactionHash))
