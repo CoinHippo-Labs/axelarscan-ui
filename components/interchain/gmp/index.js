@@ -568,7 +568,7 @@ export default () => {
             {gas_paid ? 'Add' : 'Pay'} gas
           </span>
         </button>
-        {/*(!cosmos_wallet_data?.signer || wrongSourceChain) && <COSMOSWallet connectChainId={source_chain_data?.chain_id} />*/}
+        <COSMOSWallet connectChainId={source_chain_data?.chain_id} />
       </div>
     ) :
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed && chain_type !== 'cosmos' &&

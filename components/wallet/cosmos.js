@@ -1,8 +1,10 @@
-import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
 import Image from '../image'
+import { toArray } from '../../lib/utils'
 import { COSMOS_WALLET_DATA, COSMOS_WALLET_RESET } from '../../reducers/types'
+
+const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 
 export default (
   {
@@ -20,21 +22,31 @@ export default (
 
   const chainId = connectChainId
 
-  const connect = async (chainId = connectChainId) => {
+  const enable = async (chainId = connectChainId) => {
     try {
       if (chainId) {
         await window.keplr.enable(chainId)
       }
-    } catch (error) {}
-  }
+    } catch (error) {
+      const message = error?.toString()
+      if (!message?.includes('Request rejected')) {
+        try {
+          const response = await fetch(`https://${ENVIRONMENT !== 'mainnet' ? 'testnet.' : ''}api.0xsquid.com/v1/chains`).catch(error => { return null })
+          const { chains } = { ...await response.json() }
+          const chain_data = toArray(chains).find(d => d.chainId === chainId)
 
-  const disconnect = () => dispatch({ type: COSMOS_WALLET_RESET })
+          await window.keplr.experimentalSuggestChain(chain_data)
+          await window.keplr.enable(chainId)
+        } catch (error) {}
+      }
+    }
+  }
 
   const getSigner = async (chainId = connectChainId) => {
     if (!chainId) return
-    await connect(chainId)
+    await enable(chainId)
     try {
-      return await window?.keplr?.getOfflineSignerAuto(chainId)
+      return await window.keplr.getOfflineSignerAuto(chainId)
     } catch (error) {
       return null
     }
@@ -48,30 +60,26 @@ export default (
     return account.address
   }
 
-  useEffect(
-    () => {
-      const getData = async () => {
-        const signer = await getSigner(chainId)
-        const address = await getAddress(chainId)
-        if (chainId && signer && address) {
-          dispatch({
-            type: COSMOS_WALLET_DATA,
-            value: {
-              chain_id: chainId,
-              provider: window?.keplr,
-              signer,
-              address,
-            },
-          })
-        }
-        else {
-          dispatch({ type: COSMOS_WALLET_RESET })
-        }
-      }
-      getData()
-    },
-    [chainId, window?.keplr],
-  )
+  const connect = async (chainId = connectChainId) => {
+    const signer = await getSigner(chainId)
+    const address = signer && await getAddress(chainId)
+    if (chainId && signer && address) {
+      dispatch({
+        type: COSMOS_WALLET_DATA,
+        value: {
+          chain_id: chainId,
+          provider: window?.keplr,
+          signer,
+          address,
+        },
+      })
+    }
+    else {
+      dispatch({ type: COSMOS_WALLET_RESET })
+    }
+  }
+
+  const disconnect = () => dispatch({ type: COSMOS_WALLET_RESET })
 
   return !hidden && (
     <>
@@ -79,7 +87,7 @@ export default (
         connectChainId && connectChainId !== chain_id ?
           <button
             disabled={disabled}
-            onClick={connect}
+            onClick={() => connect(chainId)}
             className={className}
           >
             {children || (
@@ -101,7 +109,7 @@ export default (
           </button> :
         <button
           disabled={disabled}
-          onClick={connect}
+          onClick={() => connect(chainId)}
           className={className}
         >
           {children || (
