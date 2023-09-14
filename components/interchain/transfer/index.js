@@ -120,7 +120,7 @@ export default () => {
   const { status, message, hash } = { ...response }
   const { explorer } = { ...getChainData(response?.chain, chains_data) }
 
-  const executeButton = !ibc_send?.ack_txhash && ibc_send?.failed_txhash && (
+  const executeButton = null && !ibc_send?.ack_txhash && ibc_send?.failed_txhash && (
     <div key="execute" className="flex items-center space-x-1">
       <button
         disabled={processing}
