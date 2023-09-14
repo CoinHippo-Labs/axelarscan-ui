@@ -270,14 +270,11 @@ export default () => {
         }
 
         const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex, returnValues } = { ...call }
-        const { messageId } = { ...returnValues }
-        const transactionId = chain_type === 'cosmos' ? messageId : transactionHash
-        const theLogIndex = chain_type === 'cosmos' ? undefined : logIndex
+        const { transactionHash, transactionIndex, logIndex } = { ...call }
         const escapeAfterConfirm = false
 
-        console.log('[manualRelayToDestChain request]', { transactionHash: transactionId, logIndex: theLogIndex, escapeAfterConfirm })
-        const response = await api.manualRelayToDestChain(transactionId, theLogIndex, undefined, escapeAfterConfirm)
+        console.log('[manualRelayToDestChain request]', { transactionHash, logIndex, escapeAfterConfirm })
+        const response = await api.manualRelayToDestChain(transactionHash, logIndex, undefined, escapeAfterConfirm)
         console.log('[manualRelayToDestChain response]', response)
         const { success, error, confirmTx, signCommandTx, routeMessageTx } = { ...response }
         const { message } = { ...error }
@@ -571,7 +568,7 @@ export default () => {
             {gas_paid ? 'Add' : 'Pay'} gas
           </span>
         </button>
-        {/*(!cosmos_wallet_data?.signer || wrongSourceChain) && <COSMOSWallet connectChainId={source_chain_data?.chain_id} />*/}
+        {(!cosmos_wallet_data?.signer || wrongSourceChain) && <COSMOSWallet connectChainId={source_chain_data?.chain_id} />}
       </div>
     ) :
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed && chain_type !== 'cosmos' &&

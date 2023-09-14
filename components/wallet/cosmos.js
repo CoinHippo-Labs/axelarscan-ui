@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 
+import Image from '../image'
 import { COSMOS_WALLET_DATA, COSMOS_WALLET_RESET } from '../../reducers/types'
 
 export default (
@@ -104,8 +105,13 @@ export default (
           className={className}
         >
           {children || (
-            <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded whitespace-nowrap text-white py-1 px-2">
-              Connect
+            <div className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 rounded flex items-center whitespace-nowrap text-white space-x-1.5 py-1 px-2">
+              <span>Connect</span>
+              <Image
+                src="/logos/wallets/keplr.png"
+                width={16}
+                height={16}
+              />
             </div>
           )}
         </button>
