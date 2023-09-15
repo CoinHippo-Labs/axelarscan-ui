@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import { Alert } from '@material-tailwind/react'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
-import { addGas } from '@axelarjs/transaction-recovery/addGas/index'
 import { Contract } from 'ethers'
 import _ from 'lodash'
 import moment from 'moment'
@@ -247,7 +246,7 @@ export default () => {
         }
 
         console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler, token, sendOptions })
-        const response = chain_type === 'cosmos' ? await addGas({ txHash: transactionHash, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
+        const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
         console.log('[addGas response]', response)
         const { success, error, transaction } = { ...response }
         const { message } = { ...error }
