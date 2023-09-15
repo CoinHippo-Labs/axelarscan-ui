@@ -221,7 +221,7 @@ export default () => {
   }
 
   const addGas = async data => {
-    if ((chain_type === 'cosmos' ? cosmos_wallet_data?.signer || true : signer) && api && data) {
+    if ((chain_type === 'cosmos' ? cosmos_wallet_data?.signer : signer) && api && data) {
       setProcessing(true)
       resetTxHashEdit()
       try {
@@ -233,10 +233,22 @@ export default () => {
         const { gas_add_adjustment } = { ...parameters }
         const gasMultipler = gas_add_adjustment[ENVIRONMENT]?.[destinationChain?.toLowerCase()] || gas_add_adjustment[ENVIRONMENT]?.default
 
-        console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler })
-        const response = chain_type === 'cosmos' ? null : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
+        const token = 'autocalculate'
+        const { native_token } = { ...getChainData(chain, chains_data) }
+        const { denom } = { ...native_token }
+        const sendOptions = chain_type === 'cosmos' && {
+          environment: ENVIRONMENT,
+          offlineSigner: cosmos_wallet_data.signer,
+          txFee: {
+            gas: '250000',
+            amount: [{ denom, amount: '30000' }],
+          },
+        }
+
+        console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler, token, sendOptions })
+        const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
         console.log('[addGas response]', response)
-        const { success, error, transaction } = { ...response }
+        const { success, error, transaction, broadcastResult } = { ...response }
         const { message } = { ...error }
 
         if (success) {
@@ -246,7 +258,7 @@ export default () => {
         setResponse({
           status: success ? 'success' : 'failed',
           message: message || error || 'Pay gas successful',
-          hash: transaction?.transactionHash,
+          hash: (chain_type === 'cosmos' ? broadcastResult : transaction)?.transactionHash,
           chain,
         })
 
@@ -558,16 +570,18 @@ export default () => {
   const addGasButton = chain_type === 'cosmos' ?
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed &&
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || is_not_enough_gas || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
-      null && <div key="pay_gas" className="flex items-center space-x-1">
-        <button
-          disabled={processing}
-          onClick={() => addGas(data)}
-          className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
-        >
-          <span className="whitespace-nowrap font-medium">
-            {gas_paid ? 'Add' : 'Pay'} gas
-          </span>
-        </button>
+      <div key="pay_gas" className="flex items-center space-x-1">
+        {cosmos_wallet_data?.signer && !wrongSourceChain && (
+          <button
+            disabled={processing}
+            onClick={() => addGas(data)}
+            className={`bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500 ${processing ? 'pointer-events-none' : ''} rounded flex items-center text-white py-1 px-2`}
+          >
+            <span className="whitespace-nowrap font-medium">
+              {gas_paid ? 'Add' : 'Pay'} gas
+            </span>
+          </button>
+        )}
         <COSMOSWallet connectChainId={source_chain_data?.chain_id} />
       </div>
     ) :
