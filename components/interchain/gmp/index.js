@@ -248,7 +248,7 @@ export default () => {
         console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler, token, sendOptions })
         const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
         console.log('[addGas response]', response)
-        const { success, error, transaction } = { ...response }
+        const { success, error, transaction, broadcastResult } = { ...response }
         const { message } = { ...error }
 
         if (success) {
@@ -258,7 +258,7 @@ export default () => {
         setResponse({
           status: success ? 'success' : 'failed',
           message: message || error || 'Pay gas successful',
-          hash: transaction?.transactionHash,
+          hash: (chain_type === 'cosmos' ? broadcastResult : transaction)?.transactionHash,
           chain,
         })
 
