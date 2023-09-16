@@ -262,7 +262,7 @@ export default () => {
           chain,
         })
 
-        if (success && !broadcastResult?.code && _data && (destination_chain_type === 'cosmos' ? !executed && !_data.executed : !approved && !_data.approved)) {
+        if (success && !broadcastResult?.code && _data && (destination_chain_type === 'cosmos' ? !executed && !_data.executed : !approved && !_data.approved) && !_data.is_insufficient_fee) {
           approve(_data, true)
         }
       } catch (error) {
