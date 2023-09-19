@@ -186,7 +186,7 @@ export default () => {
             setEstimatedTimeSpent(toArray(response).find(d => d.key === call.chain))
           }
 
-          if (STAGING || EDITABLE) {
+          if ((STAGING || EDITABLE) && destination_chain_type === 'evm') {
             try {
               const { result } = { ...await isContractCallApproved({ destinationChain, commandId, sourceChain, sourceAddress, contractAddress, payloadHash, symbol, amount }) }
               _data.is_approved = result       
