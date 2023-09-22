@@ -391,7 +391,7 @@ export default ({ data, buttons }) => {
                     <span className="text-white mt-0.5">
                       {i + 1}
                     </span>
-                    <div className={`w-max whitespace-nowrap ${color} text-xs font-medium mt-1`}>
+                    <div className={`w-max whitespace-nowrap ${color} text-2xs sm:text-xs font-medium mt-1`}>
                       {title}
                     </div>
                   </div>

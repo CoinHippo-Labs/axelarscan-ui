@@ -31,9 +31,10 @@ export default (
     className = 'cursor-pointer font-medium',
   },
 ) => {
-  const { chains, contracts, _accounts, validators, profiles } = useSelector(state => ({ chains: state.chains, contracts: state.contracts, _accounts: state.accounts, validators: state.validators, profiles: state.profiles }), shallowEqual)
+  const { chains, contracts, gmp_configurations, _accounts, validators, profiles } = useSelector(state => ({ chains: state.chains, contracts: state.contracts, gmp_configurations: state.gmp_configurations, _accounts: state.accounts, validators: state.validators, profiles: state.profiles }), shallowEqual)
   const { chains_data } = { ...chains }
   const { contracts_data } = { ...contracts }
+  const { gmp_configurations_data } = { ...gmp_configurations }
   const { accounts_data } = { ..._accounts }
   const { validators_data } = { ...validators }
   const { profiles_data } = { ...profiles }
@@ -44,7 +45,10 @@ export default (
   const { interchain_token_service_contract, gas_service_contracts } = { ...contracts_data }
   const gas_services = Object.values({ ...gas_service_contracts }).filter(v => v.address).map(v => { return { ...v, name: 'Axelar Gas Service', image: '/logos/accounts/axelarnet.svg' } })
   const interchain_token_service = interchain_token_service_contract?.address && { ...interchain_token_service_contract, name: 'Interchain Token Service', image: '/logos/accounts/axelarnet.svg' }
-  let { name, image } = { ...toArray(_.concat(accounts, gateways, gas_services, interchain_token_service, accounts_data)).find(a => equalsIgnoreCase(a.address, address) && (!a.environment || equalsIgnoreCase(a.environment, ENVIRONMENT))) || (broadcasters[ENVIRONMENT]?.[address?.toLowerCase()] && { name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' }), address }
+  const { relayers, express_relayers, refunders } = { ...gmp_configurations_data }
+  const _relayers = _.uniq(toArray(_.concat(relayers, refunders))).map(a => { return { address: a, name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' } })
+  const _express_relayers = _.uniq(toArray(express_relayers)).map(a => { return { address: a, name: 'Axelar Express Relayer', image: '/logos/accounts/axelarnet.svg' } })
+  let { name, image } = { ...toArray(_.concat(accounts, gateways, gas_services, interchain_token_service, _relayers, _express_relayers, accounts_data)).find(a => equalsIgnoreCase(a.address, address) && (!a.environment || equalsIgnoreCase(a.environment, ENVIRONMENT))) || (broadcasters[ENVIRONMENT]?.[address?.toLowerCase()] && { name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' }), address }
 
   let validator_description
   if (address && !noValidator && !name && validators_data) {

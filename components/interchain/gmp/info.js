@@ -586,7 +586,7 @@ export default ({ data, buttons }) => {
                     <span className="text-white mt-0.5">
                       {i + 1}
                     </span>
-                    <div className={`w-max flex items-center whitespace-nowrap ${color} text-xs font-medium space-x-0.5 mt-1`}>
+                    <div className={`w-max flex items-center whitespace-nowrap ${color} ${steps.length > 6 ? 'text-3xs' : 'text-2xs'} sm:text-xs font-medium space-x-0.5 mt-1`}>
                       <span>{title}</span>
                       {tooltip && <RiInformationLine size={14} />}
                     </div>

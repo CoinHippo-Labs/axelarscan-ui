@@ -4,6 +4,7 @@ import preferences from './preferences'
 import chains from './chains'
 import assets from './assets'
 import contracts from './contracts'
+import gmp_configurations from './gmp-configurations'
 import ens from './ens'
 import lens from './lens'
 import spaceid from './spaceid'
@@ -24,6 +25,7 @@ export default combineReducers({
   chains,
   assets,
   contracts,
+  gmp_configurations,
   ens,
   lens,
   spaceid,
