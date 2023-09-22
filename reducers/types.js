@@ -6,6 +6,7 @@ export const PAGE_VISIBLE = 'page_visible'
 export const CHAINS_DATA = 'chains_data'
 export const ASSETS_DATA = 'assets_data'
 export const CONTRACTS_DATA = 'contracts_data'
+export const GMP_CONFIGURATIONS_DATA = 'configurations_data'
 
 // naming
 export const ENS_DATA = 'ens_data'

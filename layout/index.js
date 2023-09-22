@@ -10,7 +10,7 @@ import Footer from '../components/footer'
 import meta from '../lib/meta'
 import { getChains, getAssets } from '../lib/api/config'
 import { getTokensPrice } from '../lib/api/tokens'
-import { getContracts } from '../lib/api/gmp'
+import { getContracts, getConfigurations } from '../lib/api/gmp'
 import { getENS } from '../lib/api/ens'
 import { getLENS } from '../lib/api/lens'
 import { getSPACEID } from '../lib/api/spaceid'
@@ -24,7 +24,7 @@ import { getKeyType } from '../lib/key'
 import { NUM_BLOCKS_PER_HEARTBEAT, startBlock, endBlock } from '../lib/heartbeat'
 import { formatUnits } from '../lib/number'
 import { toArray, equalsIgnoreCase } from '../lib/utils'
-import { THEME, PAGE_VISIBLE, CHAINS_DATA, ASSETS_DATA, CONTRACTS_DATA, ENS_DATA, LENS_DATA, SPACEID_DATA, UNSTOPPABLE_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, MAINTAINERS_DATA, TVL_DATA, VALIDATORS_DATA, PROFILES_DATA } from '../reducers/types'
+import { THEME, PAGE_VISIBLE, CHAINS_DATA, ASSETS_DATA, CONTRACTS_DATA, GMP_CONFIGURATIONS_DATA, ENS_DATA, LENS_DATA, SPACEID_DATA, UNSTOPPABLE_DATA, ACCOUNTS_DATA, CHAIN_DATA, STATUS_DATA, MAINTAINERS_DATA, TVL_DATA, VALIDATORS_DATA, PROFILES_DATA } from '../reducers/types'
 
 export default ({ children }) => {
   const dispatch = useDispatch()
@@ -101,6 +101,15 @@ export default ({ children }) => {
   useEffect(
     () => {
       const getData = async () => dispatch({ type: CONTRACTS_DATA, value: await getContracts() })
+      getData()
+    },
+    [],
+  )
+
+  // gmp configurations
+  useEffect(
+    () => {
+      const getData = async () => dispatch({ type: GMP_CONFIGURATIONS_DATA, value: await getConfigurations() })
       getData()
     },
     [],
