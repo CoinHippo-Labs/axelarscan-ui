@@ -212,6 +212,9 @@ export default ({ data }) => {
                   if (ack_txhash) {
                     ack_url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', ack_txhash)}`
                   }
+                  else if (failed_txhash) {
+                    ack_url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', failed_txhash)}`
+                  }
                   if (txhash) {
                     send_url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', txhash)}`
                   }
@@ -252,10 +255,10 @@ export default ({ data }) => {
               </Tooltip>
             )
 
-            const ackComponent = ack_txhash && (
+            const ackComponent = (ack_txhash || failed_txhash) && (
               <Tooltip content="Acknowledgement Transaction">
                 <div className="text-sm font-semibold">
-                  {ellipse(ack_txhash, 10)}
+                  {ellipse(ack_txhash || failed_txhash, 10)}
                 </div>
               </Tooltip>
             )
