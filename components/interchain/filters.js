@@ -145,6 +145,17 @@ export default () => {
         { value: 'erc20_transfer', title: 'ERC20 Transfer' },
       ],
     },
+    pathname.startsWith('/transfers') && {
+      label: 'Status',
+      name: 'status',
+      type: 'select',
+      placeholder: 'Select status',
+      options: [
+        { value: '', title: 'Any' },
+        { value: 'executed', title: 'Executed' },
+        { value: 'failed', title: 'Failed' },
+      ],
+    },
     pathname.startsWith('/gmp') && {
       label: 'Status',
       name: 'status',
@@ -162,16 +173,6 @@ export default () => {
         { value: 'error', title: 'Error Execution' },
         { value: 'insufficient_fee', title: 'Insufficient Fee' },
         { value: 'not_enough_gas_to_execute', title: 'Not Enough Gas' },
-      ],
-    },
-    pathname.startsWith('/transfers') && {
-      label: 'Sort By',
-      name: 'sortBy',
-      type: 'select',
-      placeholder: 'Select sort by',
-      options: [
-        { value: 'time', title: 'Transfer Time' },
-        { value: 'value', title: 'Transfer Value' },
       ],
     },
     ['/gmp', '/transfers'].findIndex(s => pathname.startsWith(s)) > -1 && {
@@ -217,6 +218,16 @@ export default () => {
       type: 'datetime-range',
       placeholder: 'Select transaction time',
       className: 'col-span-2',
+    },
+    pathname.startsWith('/transfers') && {
+      label: 'Sort By',
+      name: 'sortBy',
+      type: 'select',
+      placeholder: 'Select sort by',
+      options: [
+        { value: 'time', title: 'Transfer Time' },
+        { value: 'value', title: 'Transfer Value' },
+      ],
     },
     pathname.startsWith('/gmp') && {
       label: 'Sort By',
