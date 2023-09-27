@@ -564,7 +564,7 @@ export default ({ data }) => {
                       noTooltip={true}
                       className="whitespace-nowrap text-slate-600 dark:text-slate-200 text-xs font-medium"
                     />
-                    {express_supported && express_fee > 0 && (
+                    {express_supported && express_fee > 0 && chain_type !== 'cosmos' && (
                       <NumberDisplay
                         value={express_fee}
                         format="0,0.00"
@@ -600,7 +600,7 @@ export default ({ data }) => {
                     className="whitespace-nowrap text-slate-400 dark:text-slate-500 text-xs"
                   />
                 )
-                extra = (
+                extra = chain_type !== 'cosmos' && (
                   <NumberDisplay
                     value={gas_express_fee_amount}
                     format="0,0.00"
@@ -693,24 +693,26 @@ export default ({ data }) => {
                 }
                 break
               case 'callback':
-                component = (
-                  <NumberDisplay
-                    value={gas_callback_amount}
-                    format="0,0.00"
-                    suffix={source_token && ` ${source_token.symbol}`}
-                    noTooltip={true}
-                  />
-                )
-                extra = (
-                  <NumberDisplay
-                    value={gas_callback_approve_amount || gas_callback_base_fee_amount}
-                    format="0,0.00"
-                    prefix={`${gas_callback_approve_amount ? 'Approve Cost' : 'Base Fee'}: `}
-                    suffix={source_token && ` ${source_token.symbol}`}
-                    noTooltip={true}
-                    className="whitespace-nowrap text-slate-600 dark:text-slate-200 text-xs font-medium"
-                  />
-                )
+                if (!callback_data?.gas_paid) {
+                  component = gas_callback_amount > 0 && (
+                    <NumberDisplay
+                      value={gas_callback_amount}
+                      format="0,0.00"
+                      suffix={source_token && ` ${source_token.symbol}`}
+                      noTooltip={true}
+                    />
+                  )
+                  extra = (
+                    <NumberDisplay
+                      value={gas_callback_approve_amount || gas_callback_base_fee_amount}
+                      format="0,0.00"
+                      prefix={`${gas_callback_approve_amount ? 'Approve Cost' : 'Base Fee'}: `}
+                      suffix={source_token && ` ${source_token.symbol}`}
+                      noTooltip={true}
+                      className="whitespace-nowrap text-slate-600 dark:text-slate-200 text-xs font-medium"
+                    />
+                  )
+                }
                 break
               case 'refund':
                 component = (
