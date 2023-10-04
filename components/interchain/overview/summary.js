@@ -7,7 +7,8 @@ import NumberDisplay from '../../number'
 import Image from '../../image'
 import AccountProfile from '../../profile/account'
 import { getChainData, getAssetData } from '../../../lib/config'
-import { toArray, getTitle, createMomentFromUnixtime } from '../../../lib/utils'
+import { toArray, equalsIgnoreCase, getTitle, createMomentFromUnixtime } from '../../../lib/utils'
+import accounts from '../../../data/accounts'
 
 const TIME_FORMAT = 'MMM D, YYYY'
 const METRICS = ['transactions', 'volumes', 'methods', 'contracts']
@@ -185,20 +186,21 @@ export default ({ data, filters }) => {
                 toArray(m.source_chains).flatMap(s =>
                   toArray(s.destination_chains).flatMap(d =>
                     toArray(d.contracts).map(c => {
+                      const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, c.key)) }
                       return {
+                        key: name || c.key.toLowerCase(),
                         chain: d.key,
-                        address: c.key.toLowerCase(),
                       }
                     })
                   )
                 )
               ),
-              'address',
+              'key',
             )
           )
           .map(([k, v]) => {
             return {
-              address: k,
+              key: k,
               chains: _.uniq(v.map(_v => _v.chain)),
             }
           })
