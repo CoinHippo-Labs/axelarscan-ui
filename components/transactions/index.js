@@ -113,6 +113,8 @@ export default ({ n }) => {
                   break
                 case 'evmAddress':
                   address = getAddress(address)
+                  const { data } = { ...await searchTransactions({ ...filters, address, size, from }) }
+                  transactions_data = data
                   break
                 default:
                   break
