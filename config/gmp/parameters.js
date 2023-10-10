@@ -17,6 +17,7 @@ export default {
       filecoin: 1.1,
       linea: 1.1,
       centrifuge: 1.1,
+      scroll: 1.1,
       default: 1.2,
     },
     testnet: {
@@ -78,6 +79,7 @@ export default {
       filecoin: '4000000',
       linea: '200000',
       centrifuge: '200000',
+      scroll: '200000',
       default: '200000',
     },
     testnet: {
@@ -139,6 +141,7 @@ export default {
       filecoin: 3600,
       linea: 4800,
       centrifuge: 300,
+      scroll: 600,
       default: 600,
     },
     testnet: {
