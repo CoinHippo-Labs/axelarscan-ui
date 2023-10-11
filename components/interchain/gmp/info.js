@@ -54,7 +54,7 @@ export default ({ data, buttons }) => {
     estimated_time_spent,
   } = { ...data }
   let { amount } = { ...data }
-  const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp, returnValues } = { ...call }
+  const { event, chain, chain_type, destination_chain_type, transactionHash, logIndex, block_timestamp, returnValues, proposal_id } = { ...call }
   const { destinationChain, destinationContractAddress, symbol } = { ...returnValues }
   const { from } = { ...call?.transaction }
 
@@ -337,7 +337,7 @@ export default ({ data, buttons }) => {
                 </span>
               </Tooltip>
               {transactionHash && <Copy value={transactionHash} />}
-              <ExplorerLink value={transactionHash} explorer={source_chain_data?.explorer} hasEventLog={logDisplay} />
+              {!proposal_id && <ExplorerLink value={transactionHash} explorer={source_chain_data?.explorer} hasEventLog={logDisplay} />}
             </div>
             <div className="flex items-center space-x-1">
               <Tooltip content="Method">
@@ -528,7 +528,7 @@ export default ({ data, buttons }) => {
             <Stepper activeStep={-1} className="stepper">
               {steps.map((s, i) => {
                 const { id, title, status, data, chain_data, tooltip } = { ...s }
-                const { confirmation_txhash, poll_id, axelarTransactionHash, receipt } = { ...data }
+                const { confirmation_txhash, poll_id, proposal_id, axelarTransactionHash, receipt } = { ...data }
                 let { transactionHash } = { ...data }
                 const { explorer } = { ...chain_data }
                 const { url, transaction_path } = { ...explorer }
@@ -556,7 +556,10 @@ export default ({ data, buttons }) => {
                       }
                       break
                     default:
-                      if (transactionHash) {
+                      if (proposal_id) {
+                        _url = `/proposal/${proposal_id}`
+                      }
+                      else if (transactionHash) {
                         _url = `${url}${transaction_path.replace('{tx}', transactionHash)}`
                       }
                       break

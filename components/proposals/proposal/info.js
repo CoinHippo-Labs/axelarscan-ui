@@ -1,16 +1,24 @@
-import { Chip } from '@material-tailwind/react'
+import Link from 'next/link'
+import { useSelector, shallowEqual } from 'react-redux'
 import Linkify from 'react-linkify'
+import { Chip, Tooltip } from '@material-tailwind/react'
 import moment from 'moment'
 
 import Spinner from '../../spinner'
 import JSONView from '../../json-view'
 import NumberDisplay from '../../number'
+import Image from '../../image'
+import { getChainData } from '../../../lib/config'
 import { toArray, getTitle, toJson } from '../../../lib/utils'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A'
 
 export default ({ data }) => {
+  const { chains } = useSelector(state => ({ chains: state.chains }), shallowEqual)
+  const { chains_data } = { ...chains }
+
   const {
+    proposal_id,
     type,
     content,
     status,
@@ -20,7 +28,7 @@ export default ({ data }) => {
     voting_end_time,
     total_deposit,
   } = { ...data }
-  const { plan, title, description, changes } = { ...content }
+  const { plan, title, description, changes, contract_calls } = { ...content }
   const { height, info } = { ...plan }
 
   const rowClassName = 'flex flex-col md:flex-row items-start space-y-2 md:space-y-0 space-x-0 md:space-x-2'
@@ -131,6 +139,59 @@ export default ({ data }) => {
           </div>
         )
       })}
+      {toArray(contract_calls).length > 0 && (
+        <div className={rowClassName}>
+          <span className={titleClassName}>GMPs:</span>
+          <Link
+            href={`/gmp/search?proposalId=${proposal_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="h-6 flex items-center space-x-2"
+          >
+            <div className="w-fit flex items-center mt-0.5">
+              <div className="min-w-max">
+                <div className="block dark:hidden">
+                  <Image
+                    src="/logos/logo.png"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                </div>
+                <div className="hidden dark:block">
+                  <Image
+                    src="/logos/logo_white.png"
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="w-4 h-1 border-t-2 border-dashed border-slate-300 dark:border-slate-600 mt-0.5" />
+            <div className="max-w-fit flex flex-wrap items-center">
+              {toArray(contract_calls).map((d, i) => {
+                const { chain } = { ...d }
+                const { name, image } = { ...getChainData(chain, chains_data) }
+                return (
+                  <div key={i} className="mt-0.5 mr-0.5">
+                    <Tooltip content={name}>
+                      <div className="w-fit">
+                        <Image
+                          src={image}
+                          width={20}
+                          height={20}
+                          className="rounded-full"
+                        />
+                      </div>
+                    </Tooltip>
+                  </div>
+                )
+              })}
+            </div>
+          </Link>
+        </div>
+      )}
       <div className={rowClassName}>
         <span className={titleClassName}>Submit Time:</span>
         {data ?

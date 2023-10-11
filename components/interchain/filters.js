@@ -239,6 +239,12 @@ export default () => {
         { value: 'value', title: 'Token Value' },
       ],
     },
+    pathname.startsWith('/gmp') && {
+      label: 'Proposal ID',
+      name: 'proposalId',
+      type: 'text',
+      placeholder: 'Proposal ID',
+    },
   ])
 
   const timeFilterShortcuts = [
