@@ -42,7 +42,7 @@ export default ({ data }) => {
     token_deployed,
     amount,
   } = { ...data }
-  const { chain, chain_type, destination_chain_type } = { ...call }
+  const { chain, chain_type, destination_chain_type, proposal_id } = { ...call }
   const { destinationChain, destinationContractAddress } = { ...call?.returnValues }
   const { refundAddress } = { ...gas_paid?.returnValues }
   const { commandId } = { ...approved?.returnValues }
@@ -139,7 +139,7 @@ export default ({ data }) => {
             let { value } = { ...props }
             const { id, status, data, chain_data } = { ...row.original }
             const _data = id === 'pay_gas' && typeof data === 'string' ? origin_data?.gas_paid : data
-            const { chain_type, logIndex, _logIndex, confirmation_txhash, poll_id, axelarTransactionHash, receipt, error } = { ..._data }
+            const { chain_type, logIndex, _logIndex, confirmation_txhash, poll_id, proposal_id, axelarTransactionHash, receipt, error, returnValues } = { ..._data }
             let { transactionHash } = { ..._data }
             const { explorer } = { ...chain_data }
             const { url, transaction_path } = { ...explorer }
@@ -169,16 +169,21 @@ export default ({ data }) => {
                   }
                   break
                 default:
-                  if (transactionHash) {
-                    value = transactionHash
-                    _url = `${url}${transaction_path.replace('{tx}', transactionHash)}`
+                  if (proposal_id) {
+                    value = returnValues?.messageId || transactionHash
                   }
-                  else if (axelarTransactionHash) {
-                    value = axelarTransactionHash
-                    _url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', axelarTransactionHash)}`
-                  }
-                  if (axelarTransactionHash) {
-                    axelar_url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', axelarTransactionHash)}`
+                  else {
+                    if (transactionHash) {
+                      value = transactionHash
+                      _url = `${url}${transaction_path.replace('{tx}', transactionHash)}`
+                    }
+                    else if (axelarTransactionHash) {
+                      value = axelarTransactionHash
+                      _url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', axelarTransactionHash)}`
+                    }
+                    if (axelarTransactionHash) {
+                      axelar_url = `${axelar_chain_data.explorer.url}${axelar_chain_data.explorer.transaction_path.replace('{tx}', axelarTransactionHash)}`
+                    }
                   }
                   break
               }
@@ -202,7 +207,7 @@ export default ({ data }) => {
               </div>
             )
 
-            const axelarComponent = axelarTransactionHash && (
+            const axelarComponent = axelarTransactionHash && !proposal_id && (
               <Tooltip content="Axelar Transaction">
                 <div className="text-sm font-semibold">
                   {ellipse(axelarTransactionHash, 10)}
@@ -477,7 +482,7 @@ export default ({ data }) => {
 
             return (
               <div className="flex flex-col space-y-1 mt-2">
-                {value && (
+                {value && !proposal_id && (
                   <Tooltip placement="top-start" content={`${['express', 'approve', 'execute'].includes(id) ? 'Relayer' : id === 'refund' ? 'Refunder' : 'User'}`}>
                     <div className="h-6 flex items-center space-x-1">
                       <AccountProfile address={value} noCopy={true} explorer={explorer} chain={chain_data?.id} />

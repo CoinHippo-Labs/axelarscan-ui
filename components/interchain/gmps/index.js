@@ -166,12 +166,12 @@ export default () => {
                 Cell: props => {
                   const { value, row } = { ...props }
                   const { call } = { ...row.original }
-                  const { chain, chain_type, logIndex, receipt } = { ...call }
+                  const { chain, chain_type, logIndex, messageIdIndex, receipt, proposal_id } = { ...call }
                   const { explorer } = { ...getChainData(chain, chains_data) }
                   return value && (
                     <div className="flex items-center space-x-1 mb-40">
                       <Link
-                        href={`/gmp/${value}${chain_type === 'evm' && receipt && typeof logIndex === 'number' ? `:${logIndex}` : ''}`}
+                        href={`/gmp/${value}${chain_type === 'evm' && receipt && typeof logIndex === 'number' ? `:${logIndex}` : chain_type === 'cosmos' && proposal_id && typeof messageIdIndex === 'number' ? `:${messageIdIndex}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 dark:text-blue-500 text-sm font-semibold"
@@ -179,7 +179,7 @@ export default () => {
                         {ellipse(value, 10)}
                       </Link>
                       <Copy value={value} />
-                      <ExplorerLink value={value} explorer={explorer} />
+                      <ExplorerLink value={value} explorer={explorer} _url={proposal_id ? `/proposal/${proposal_id}` : undefined} />
                     </div>
                   )
                 },
@@ -498,7 +498,7 @@ export default () => {
                       <div className="flex flex-col">
                         {steps.map((s, i) => {
                           const { id, title, status, data, chain_data } = { ...s }
-                          const { poll_id, axelarTransactionHash, receipt } = { ...data }
+                          const { poll_id, proposal_id, axelarTransactionHash, receipt, returnValues } = { ...data }
                           let { transactionHash } = { ...data }
                           const { explorer } = { ...chain_data }
                           const { url, transaction_path } = { ...explorer }
@@ -521,7 +521,11 @@ export default () => {
                                 }
                                 break
                               default:
-                                if (transactionHash) {
+                                if (proposal_id) {
+                                  value = returnValues?.messageId || transactionHash
+                                  _url = `/proposal/${proposal_id}`
+                                }
+                                else if (transactionHash) {
                                   value = transactionHash
                                   _url = `${url}${transaction_path.replace('{tx}', transactionHash)}`
                                 }
