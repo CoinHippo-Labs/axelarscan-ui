@@ -179,7 +179,7 @@ export default () => {
                         {ellipse(value, 10)}
                       </Link>
                       <Copy value={value} />
-                      <ExplorerLink value={value} explorer={explorer} _url={proposal_id ? `/proposal/${proposal_id}` : undefined} />
+                      {!proposal_id && <ExplorerLink value={value} explorer={explorer} _url={proposal_id ? `/proposal/${proposal_id}` : undefined} />}
                     </div>
                   )
                 },

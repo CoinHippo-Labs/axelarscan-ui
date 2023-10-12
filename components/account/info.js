@@ -18,6 +18,7 @@ import TimeAgo from '../time/timeAgo'
 import { getAssetData } from '../../lib/config'
 import { getKeyType } from '../../lib/key'
 import { toArray, includesStringList, ellipse, equalsIgnoreCase } from '../../lib/utils'
+import accounts from '../../data/accounts'
 
 const PAGE_SIZE = 10
 const STAKING_FIELDS = [
@@ -57,7 +58,7 @@ export default ({ address, data }) => {
   } = { ...depositAddressData }
   const { txhash } = { ...transfer_data?.send }
 
-  const isDepositAddress = (address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress')) || depositAddressData
+  const isDepositAddress = (address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') && accounts.findIndex(a => equalsIgnoreCase(a.address, address)) < 0) || depositAddressData
   const reward = !isDepositAddress && toArray(rewards?.rewards).find(d => equalsIgnoreCase(d.denom, 'uaxl'))
   const commission = !isDepositAddress && toArray(commissions).find(d => equalsIgnoreCase(d.denom, 'uaxl'))
   const validator_data = !isDepositAddress && toArray(validators_data).find(v => includesStringList(address, toArray([v.broadcaster_address, v.delegator_address], 'lower')))

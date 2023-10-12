@@ -13,6 +13,7 @@ import { getChainData, getAssetData } from '../../lib/config'
 import { getKeyType } from '../../lib/key'
 import { formatUnits } from '../../lib/number'
 import { toArray, includesStringList, equalsIgnoreCase, normalizeQuote } from '../../lib/utils'
+import accounts from '../../data/accounts'
 
 export default () => {
   const { chains, assets, validators } = useSelector(state => ({ chains: state.chains, assets: state.assets, validators: state.validators }), shallowEqual)
@@ -82,7 +83,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address?.startsWith('axelar1') && address.length < 65 && validators_data) {
+        if (address?.startsWith('axelar1') && (address.length < 65 || isCustomAddress) && validators_data) {
           const { data } = { ...await getDelegations({ address }) }
           setDelegations(toArray(data).map(d => { return { ...d, validator_data: validators_data.find(v => equalsIgnoreCase(v.operator_address, d.validator_address)) } }))
         }
@@ -95,7 +96,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address?.startsWith('axelar1') && address.length < 65 && validators_data) {
+        if (address?.startsWith('axelar1') && (address.length < 65 || isCustomAddress) && validators_data) {
           const { data } = { ...await getRedelegations({ address }) }
           setRedelegations(toArray(data).map(d => { return { ...d, source_validator_data: validators_data.find(v => equalsIgnoreCase(v.operator_address, d.validator_src_address)), destination_validator_data: validators_data.find(v => equalsIgnoreCase(v.operator_address, d.validator_dst_address)) } }))
         }
@@ -108,7 +109,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address?.startsWith('axelar1') && address.length < 65 && validators_data) {
+        if (address?.startsWith('axelar1') && (address.length < 65 || isCustomAddress) && validators_data) {
           const { data } = { ...await getUnbondings({ address }) }
           setUnbondings(toArray(data).map(d => { return { ...d, validator_data: validators_data.find(v => equalsIgnoreCase(v.operator_address, d.validator_address)) } }))
         }
@@ -121,7 +122,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address?.startsWith('axelar1') && address.length < 65 && assets_data) {
+        if (address?.startsWith('axelar1') && (address.length < 65 || isCustomAddress) && assets_data) {
           const { rewards, total } = { ...await distributionRewards(address) }
           setRewards({
             rewards:
@@ -181,7 +182,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address?.startsWith('axelar1') && address.length < 65 && assets_data && validators_data) {
+        if (address?.startsWith('axelar1') && (address.length < 65 || isCustomAddress) && assets_data && validators_data) {
           const { operator_address } = { ...validators_data.find(v => equalsIgnoreCase(v.delegator_address, address)) }
           if (operator_address) {
             const { commission } = { ...await distributionCommissions(operator_address) }
@@ -208,7 +209,7 @@ export default () => {
   useEffect(
     () => {
       const getData = async () => {
-        if (address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') && chains_data && assets_data) {
+        if (address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') && !isCustomAddress && chains_data && assets_data) {
           let response = await searchDepositAddresses({ depositAddress: address })
           const desposit_address_data = _.head(response?.data)
           response = await searchTransfers({ depositAddress: address })
@@ -231,17 +232,17 @@ export default () => {
     [address, chains_data, assets_data],
   )
 
-  const data =
-    address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') ?
-      depositAddressData && { depositAddressData } :
-      (balances || delegations || redelegations || unbondings || rewards || commissions) && {
-        balances,
-        delegations,
-        redelegations,
-        unbondings,
-        rewards,
-        commissions,
-      }
+  const isCustomAddress = accounts.findIndex(a => equalsIgnoreCase(a.address, address)) > -1
+  const data = address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') && !isCustomAddress ?
+    depositAddressData && { depositAddressData } :
+    (balances || delegations || redelegations || unbondings || rewards || commissions) && {
+      balances,
+      delegations,
+      redelegations,
+      unbondings,
+      rewards,
+      commissions,
+    }
 
   return (
     <div className="children px-3">
