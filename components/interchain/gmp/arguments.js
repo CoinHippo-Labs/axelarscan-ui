@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux'
 import Copy from '../../copy'
 import { getChainData, getAssetData } from '../../../lib/config'
 import { toBigNumber } from '../../../lib/number'
-import { ellipse } from '../../../lib/utils'
+import { toArray, ellipse } from '../../../lib/utils'
 
 export default ({ data }) => {
   const { chains, assets } = useSelector(state => ({ chains: state.chains, assets: state.assets }), shallowEqual)
@@ -49,7 +49,7 @@ export default ({ data }) => {
     </div>
   )
 
-  const values = [
+  const values = toArray([
     { title: 'messageId', value: messageId, className: 'sm:col-span-2' },
     { title: 'commandId', value: commandId, className: 'sm:col-span-2' },
     { title: 'sourceChain', value: sourceChain },
@@ -61,8 +61,8 @@ export default ({ data }) => {
     { title: 'sourceSymbol', value: symbol, invalid: is_invalid_symbol },
     { title: 'destinationSymbol', value: destinationSymbol },
     { title: 'amount', value: amount, invalid: is_invalid_amount },
-    { title: 'Execute Data', value: execute_data, className: 'sm:col-span-2' },
-  ]
+    approved && { title: 'Execute Data', value: execute_data, className: 'sm:col-span-2' },
+  ])
 
   return data && (
     <div className="max-w-6xl grid sm:grid-cols-2 gap-2 sm:gap-4 mt-4 sm:mt-6 mx-auto">
