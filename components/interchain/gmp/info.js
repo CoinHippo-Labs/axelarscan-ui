@@ -77,7 +77,7 @@ export default ({ data, buttons }) => {
       data: call,
       chain_data: source_chain_data,
     },
-    {
+    (!proposal_id || (gas_paid || gas_paid_to_callback)) && {
       id: 'pay_gas',
       title: (gas_paid || gas_paid_to_callback) && !is_insufficient_fee ? 'Gas Paid' : moment().diff(moment(block_timestamp * 1000), 'seconds') < 30 ? 'Checking Gas Paid' : 'Pay Gas',
       status: gas_paid || gas_paid_to_callback ? is_insufficient_fee ? 'failed' : 'success' : 'pending',

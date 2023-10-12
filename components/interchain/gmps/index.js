@@ -345,7 +345,7 @@ export default () => {
                     not_enough_gas_to_execute,
                     is_invalid_call,
                   } = { ...row.original }
-                  const { chain, chain_type, destination_chain_type } = { ...call }
+                  const { chain, chain_type, destination_chain_type, proposal_id } = { ...call }
                   const { destinationChain } = { ...call?.returnValues }
 
                   const source_chain_data = getChainData(chain, chains_data)
@@ -442,7 +442,7 @@ export default () => {
                       data: call,
                       chain_data: source_chain_data,
                     },
-                    {
+                    (!proposal_id || (gas_paid || gas_paid_to_callback)) && {
                       id: 'pay_gas',
                       title: gas_paid || gas_paid_to_callback ? 'Gas Paid' : moment().diff(moment(call?.block_timestamp * 1000), 'seconds') < 30 ? 'Checking Gas Paid' : 'Pay Gas',
                       status: gas_paid || gas_paid_to_callback ? 'success' : 'pending',
