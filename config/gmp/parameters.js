@@ -38,6 +38,7 @@ export default {
       'filecoin-2': 1.1,
       linea: 1.1,
       centrifuge: 1.1,
+      scroll: 1.1,
       default: 1.2,
     },
     stagenet: {
@@ -58,6 +59,7 @@ export default {
       'filecoin-2': 1.1,
       linea: 1.1,
       centrifuge: 1.1,
+      scroll: 1.1,
       default: 1.2,
     },
   },
@@ -100,6 +102,7 @@ export default {
       'filecoin-2': '4000000',
       linea: '200000',
       centrifuge: '200000',
+      scroll: '200000',
       default: '200000',
     },
     stagenet: {
@@ -120,6 +123,7 @@ export default {
       'filecoin-2': '4000000',
       linea: '200000',
       centrifuge: '200000',
+      scroll: '200000',
       default: '200000',
     },
   },
@@ -162,6 +166,7 @@ export default {
       'filecoin-2': 3600,
       linea: 4800,
       centrifuge: 300,
+      scroll: 600,
       default: 600,
     },
     stagenet: {
@@ -182,6 +187,7 @@ export default {
       'filecoin-2': 3600,
       linea: 4800,
       centrifuge: 300,
+      scroll: 600,
       default: 600,
     },
   },
