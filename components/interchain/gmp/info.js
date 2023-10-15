@@ -578,7 +578,7 @@ export default ({ data, buttons }) => {
                     color = 'text-red-400 dark:text-red-500'
                     break
                   default:
-                    bgColor = `bg-blue-400 dark:bg-blue-500 ${steps.findIndex(s => s.status === 'pending') === i ? 'ring-4 ring-blue-100 dark:ring-blue-900' : ''}`
+                    bgColor = `bg-blue-400 dark:bg-blue-500 ${steps.findIndex(s => s.status === 'pending') === i && steps.findIndex((s, _i) => _i < i && s.status !== 'success') < 0 ? 'ring-4 ring-blue-100 dark:ring-blue-900' : ''}`
                     color = 'text-blue-400 dark:text-blue-500'
                     break
                 }

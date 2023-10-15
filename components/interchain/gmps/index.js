@@ -543,7 +543,7 @@ export default () => {
                               color = 'text-red-400 dark:text-red-500'
                               break
                             default:
-                              if (steps.findIndex(s => s.status === 'pending') === i && steps.findIndex((s, _i) => _i > i && s.status !== 'pending') < 0) {
+                              if (steps.findIndex(s => s.status === 'pending') === i && steps.findIndex((s, _i) => _i > i && s.status !== 'pending') < 0 && steps.findIndex((s, _i) => _i < i && s.status !== 'success') < 0) {
                                 color = 'text-orange-400 dark:text-orange-500'
                                 if (!extra) {
                                   icon = <Spinner name="Rings" color="#f97316" />
