@@ -179,15 +179,16 @@ export default ({ data, filters }) => {
           </Card>
         )
       case 'contracts':
-        const contracts =
+        const contracts = _.orderBy(
           Object.entries(
             _.groupBy(
               toArray(messages).flatMap(m =>
                 toArray(m.source_chains).flatMap(s =>
                   toArray(s.destination_chains).flatMap(d =>
-                    toArray(d.contracts).map(c => {
+                    toArray(d.contracts).filter(c => !c.key.includes('_')).map(c => {
                       const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, c.key)) }
                       return {
+                        ...c,
                         key: name || c.key.toLowerCase(),
                         chain: d.key,
                       }
@@ -202,9 +203,14 @@ export default ({ data, filters }) => {
             return {
               key: k,
               chains: _.uniq(v.map(_v => _v.chain)),
+              num_txs: _.sumBy(v, 'num_txs'),
+              volume: _.sumBy(v, 'volume'),
             }
-          })
+          }),
+          ['num_txs', 'volumes', 'key'], ['desc', 'desc', 'asc'],
+        )
         const chains = _.uniq(contracts.flatMap(d => d.chains))
+        console.log('[destinationContracts]', contracts.map(c => c.key))
 
         return (
           <Card key={metric} className="card">
