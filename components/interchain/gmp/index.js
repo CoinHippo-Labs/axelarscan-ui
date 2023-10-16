@@ -606,7 +606,7 @@ export default () => {
   const { finality } = { ...parameters }
   const finalityTime = estimatedTimeSpent?.confirm ? estimatedTimeSpent.confirm + 15 : finality[ENVIRONMENT]?.[chain] || finality[ENVIRONMENT]?.default
   const approveButton =
-    call && !confirm_failed && !(destination_chain_type === 'cosmos' ? confirm : approved) && !executed && !is_executed &&
+    call && !confirm_failed && !(destination_chain_type === 'cosmos' ? confirm : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed &&
     !(is_invalid_destination_chain || is_invalid_call || (is_insufficient_fee && !EDITABLE) || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) &&
     (confirm || moment().diff(moment(call.block_timestamp * 1000), 'seconds') >= finalityTime) &&
     moment().diff(moment((confirm || call).block_timestamp * 1000), 'minutes') >= 1 && (
