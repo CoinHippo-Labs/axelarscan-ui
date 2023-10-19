@@ -85,41 +85,49 @@ export default [
   {
     address: 'axelar1cq45k0l2jchymj9z3z0e7mstr8a3f3dgekmzmd',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'terra10k73hutvsuu2hds9lmt6ltns78mvxgdcrzrc65',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'cosmos1rw0n4xn4uaa42hg8eu4guequw83da5hy6dhunt',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'osmo12uuuxy7mwlv8dgu8dg66s30lfrdlctgas0ffha',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'juno1k36qxz8ps37845gaua2vuejyc0dzx5jwf6qrkf',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'inj1r6ldghj8pkmzxq8d0th03862wjaazdk6kz8uru',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'emoney1yqtdqpwu4nkudyu3tygdj59vc9mce4u7d496c4',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
     address: 'cre1k354s0qgj22k8zxqu0nlwcep607zm6m6lk7828',
     name: 'Enigma: IBC Relayer',
+    image: '/logos/accounts/enigma.svg',
     environment: 'mainnet',
   },
   {
