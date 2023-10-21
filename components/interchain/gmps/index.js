@@ -336,6 +336,7 @@ export default () => {
                     express_executed,
                     confirm,
                     confirm_failed,
+                    confirm_failed_event,
                     approved,
                     executed,
                     is_executed,
@@ -458,9 +459,9 @@ export default () => {
                     },
                     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
                       id: 'confirm',
-                      title: confirm ? 'Confirmed' : confirm_failed || is_invalid_call ? 'Invalid Call' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
-                      status: confirm ? 'success' : confirm_failed || is_invalid_call ? 'failed' : 'pending',
-                      data: confirm,
+                      title: confirm || approved || executed || is_executed || error ? 'Confirmed' : confirm_failed || is_invalid_call ? 'Invalid Call' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+                      status: confirm || approved || executed || is_executed || error ? 'success' : confirm_failed || is_invalid_call ? 'failed' : 'pending',
+                      data: confirm || confirm_failed_event,
                       chain_data: axelar_chain_data,
                     },
                     destination_chain_type !== 'cosmos' && {
@@ -498,7 +499,7 @@ export default () => {
                       <div className="flex flex-col">
                         {steps.map((s, i) => {
                           const { id, title, status, data, chain_data } = { ...s }
-                          const { poll_id, proposal_id, axelarTransactionHash, receipt, returnValues } = { ...data }
+                          const { confirmation_txhash, poll_id, proposal_id, axelarTransactionHash, receipt, returnValues } = { ...data }
                           let { transactionHash } = { ...data }
                           const { explorer } = { ...chain_data }
                           const { url, transaction_path } = { ...explorer }
@@ -509,7 +510,11 @@ export default () => {
                           if (url && transaction_path) {
                             switch (id) {
                               case 'confirm':
-                                if (poll_id) {
+                                if (confirmation_txhash) {
+                                  value = confirmation_txhash
+                                  _url = `/tx/${confirmation_txhash}`
+                                }
+                                else if (poll_id) {
                                   value = poll_id
                                   _url = `/evm-poll/${poll_id}`
                                 }
