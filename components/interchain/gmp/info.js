@@ -95,7 +95,7 @@ export default ({ data, buttons }) => {
     },
     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: confirm || approved || executed || is_executed || error ? 'Confirmed' : confirm_failed || is_invalid_call ? 'Invalid Call' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+      title: confirm || approved || executed || is_executed || error ? 'Confirmed' : is_invalid_call ? 'Invalid Call' : confirm_failed ? 'Fail to Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
       status: confirm || approved || executed || is_executed || error ? 'success' : confirm_failed || is_invalid_call ? 'failed' : 'pending',
       data: confirm || confirm_failed_event,
       chain_data: axelar_chain_data,
