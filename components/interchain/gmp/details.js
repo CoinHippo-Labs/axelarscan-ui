@@ -79,8 +79,8 @@ export default ({ data }) => {
     },
     chain_type !== 'cosmos' && (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: confirm ? 'Confirmed' : confirm_failed_event ? 'Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
-      status: confirm ? 'success' : confirm_failed ? 'failed' : 'pending',
+      title: confirm || approved || executed || is_executed || error ? 'Confirmed' : confirm_failed_event ? 'Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+      status: confirm || approved || executed || is_executed || error ? 'success' : confirm_failed ? 'failed' : 'pending',
       data: confirm || confirm_failed_event,
       chain_data: axelar_chain_data,
     },
@@ -498,7 +498,7 @@ export default ({ data }) => {
                     </div>
                   </Tooltip>
                 )}
-                {sourceAddress && (
+                {sourceAddress && id !== 'execute' && (
                   <Tooltip placement="top-start" content="Source Address">
                     <div className="h-6 flex items-center space-x-1">
                       <AccountProfile address={sourceAddress} noCopy={true} explorer={source_chain_data?.explorer} chain={chain_data?.id} />
