@@ -136,7 +136,7 @@ export default () => {
           <div className={valueClassName}>
             <NumberDisplay
               value={staked}
-              format="0,0a"
+              format="0,0.00a"
               noTooltip={true}
               className={valueClassName}
             />
