@@ -136,14 +136,14 @@ export default () => {
           <div className={valueClassName}>
             <NumberDisplay
               value={staked}
-              format="0,0.00a"
+              format="0,0a"
               noTooltip={true}
               className={valueClassName}
             />
             /
             <NumberDisplay
               value={total_supply}
-              format="0,0a"
+              format="0,0.00a"
               noTooltip={true}
               className={valueClassName}
             />
