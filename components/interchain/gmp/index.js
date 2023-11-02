@@ -569,6 +569,7 @@ export default () => {
 
   const addGasButton = chain_type === 'cosmos' ?
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee) && !executed && !is_executed &&
+    call && moment().diff(moment(call.block_timestamp * 1000), 'minutes') >= 1 &&
     (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || is_not_enough_gas || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
       <div key="pay_gas" className="flex items-center space-x-1">
         {cosmos_wallet_data?.signer && !wrongSourceChain && (
