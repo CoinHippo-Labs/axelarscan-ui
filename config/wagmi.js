@@ -1,8 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
-import { configureChains, createClient } from 'wagmi'
-import { publicProvider } from 'wagmi/providers/public'
-import { EthereumClient, w3mConnectors } from '@web3modal/ethereum'
-import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, base, baseGoerli, mantle, mantleTestnet, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scrollSepolia } from '@wagmi/chains'
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
+import { mainnet, goerli, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, optimism, optimismGoerli, base, baseGoerli, mantle, mantleTestnet, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scrollSepolia } from 'wagmi/chains'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 export const EVM_CHAIN_CONFIGS =
@@ -50,15 +48,24 @@ export const EVM_CHAIN_CONFIGS =
       { _id: 'scroll', ...scrollSepolia },
     ]
 
-const { webSocketProvider, provider } = configureChains(EVM_CHAIN_CONFIGS, [publicProvider()])
 export const queryClient = new QueryClient()
-export const wagmiClient = createClient(
-  {
-    autoConnect: true,
-    provider,
-    webSocketProvider,
-    connectors: w3mConnectors({ chains: EVM_CHAIN_CONFIGS, projectId: WALLETCONNECT_PROJECT_ID, version: 2 }),
-    queryClient,
-  }
-)
-export const ethereumClient = new EthereumClient(wagmiClient, EVM_CHAIN_CONFIGS)
+export const wagmiConfig = defaultWagmiConfig({
+  chains: EVM_CHAIN_CONFIGS,
+  projectId: WALLETCONNECT_PROJECT_ID,
+  metadata: {
+    name: process.env.NEXT_PUBLIC_APP_NAME,
+    description: process.env.NEXT_PUBLIC_DEFAULT_TITLE,
+    icons: ['/icons/favicon-32x32.png'],
+  },
+})
+export const WEB3MODAL = createWeb3Modal({
+  wagmiConfig,
+  projectId: WALLETCONNECT_PROJECT_ID,
+  chains: EVM_CHAIN_CONFIGS,
+  themeVariables: {
+    '--w3m-font-family': 'Poppins, sans-serif',
+    '--w3m-background-color': '#1f1f1f',
+    '--w3m-logo-image-url': `${process.env.NEXT_PUBLIC_APP_URL}/logos/logo_white.png`,
+  },
+  defaultChain: EVM_CHAIN_CONFIGS[0],
+})

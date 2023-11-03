@@ -6,12 +6,12 @@ import { Provider } from 'react-redux'
 import NProgress from 'nprogress'
 import TagManager from 'react-gtm-module'
 import { Hydrate, QueryClientProvider } from '@tanstack/react-query'
-import { Web3Modal } from '@web3modal/react'
+import { Web3Modal } from '@web3modal/wagmi/react'
 
 import Layout from '../layout'
 import { useStore } from '../store'
 import * as ga from '../lib/ga'
-import { WALLETCONNECT_PROJECT_ID, queryClient as wagmiQueryClient, ethereumClient } from '../config/wagmi'
+import { WALLETCONNECT_PROJECT_ID, queryClient as wagmiQueryClient/*, ethereumClient*/ } from '../config/wagmi'
 import WagmiConfigProvider from '../lib/provider/WagmiConfigProvider'
 import '../styles/globals.css'
 import '../styles/animate.css'
@@ -120,7 +120,7 @@ export default ({ Component, pageProps }) => {
               <Layout>
                 <div id="portal" />
                 <Component { ...pageProps } />
-                {rendered && (
+                {/*rendered && (
                   <Web3Modal
                     projectId={WALLETCONNECT_PROJECT_ID}
                     ethereumClient={ethereumClient}
@@ -132,7 +132,7 @@ export default ({ Component, pageProps }) => {
                       '--w3m-logo-image-url': `${process.env.NEXT_PUBLIC_APP_URL}/logos/logo_white.png`,
                     }}
                   />
-                )}
+                )*/}
               </Layout>
             </WagmiConfigProvider>
           </Hydrate>
