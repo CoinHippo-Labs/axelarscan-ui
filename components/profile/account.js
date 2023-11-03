@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { useSelector, shallowEqual } from 'react-redux'
+import { utils } from 'ethers'
+const { getAddress } = { ...utils }
 import _ from 'lodash'
 
 import ValidatorProfile from './validator'
@@ -58,6 +60,7 @@ export default (
     name = moniker ? `${moniker}${equalsIgnoreCase(address, broadcaster_address) ? `: Proxy` : ''}` : null
     image = profiles_data?.[identity]?.image
   }
+  address = address?.startsWith('0x') ? getAddress(address) : address
 
   const { address_path } = { ...explorer }
   url = !url && explorer ? `${explorer.url}${address_path?.replace('{address}', address)}` : url
