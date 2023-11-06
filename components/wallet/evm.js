@@ -2,8 +2,43 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect } from 'wagmi'
+// import { BrowserProvider, FallbackProvider, JsonRpcProvider, JsonRpcSigner } from 'ethers'
+import { providers } from 'ethers'
 
 import { WALLET_DATA, WALLET_RESET } from '../../reducers/types'
+
+const publicClientToProvider = publicClient => {
+  const { chain, transport } = { ...publicClient }
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  }
+  // if (transport.type === 'fallback') {
+  //   const providers = transport.transports.map(({ value }) => new JsonRpcProvider(value?.url, network))
+  //   if (providers.length === 1) return providers[0]
+  //   return new FallbackProvider(providers)
+  // }
+  // return new JsonRpcProvider(transport.url, network)
+  if (transport.type === 'fallback') {
+    return new providers.FallbackProvider(transport.transports.map(({ value }) => new providers.JsonRpcProvider(value?.url, network)))
+  }
+  return new providers.JsonRpcProvider(transport.url, network)
+}
+
+const walletClientToSigner = walletClient => {
+  const { account, chain, transport } = { ...walletClient }
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  }
+  // const provider = new BrowserProvider(transport, network)
+  // const signer = new JsonRpcSigner(provider, account.address)
+  const provider = new providers.Web3Provider(transport, network)
+  const signer = provider.getSigner(account.address)
+  return signer
+}
 
 export default (
   {
@@ -36,9 +71,9 @@ export default (
           type: WALLET_DATA,
           value: {
             chain_id: chainId,
-            provider: _provider,
+            provider: publicClientToProvider(_provider),
             ethereum_provider: window?.ethereum,
-            signer,
+            signer: walletClientToSigner(signer),
             address,
           },
         })
