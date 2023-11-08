@@ -182,7 +182,7 @@ export default () => {
           amount = amount || call.returnValues?.amount
 
           if (call.chain && !estimatedTimeSpent) {
-            const response = await estimateTimeSpent({ sourceChain: call.chain })
+            const response = await estimateTimeSpent({ sourceChain: call.chain, destinationChain })
             setEstimatedTimeSpent(toArray(response).find(d => d.key === call.chain))
           }
 
