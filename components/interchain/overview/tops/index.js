@@ -22,7 +22,7 @@ export default ({ data, types }) => {
         key: _.head(v)?.key || k,
         num_txs: _.sumBy(v, 'num_txs'),
         volume: _.sumBy(v, 'volume'),
-        chain: _.orderBy(_.uniq(toArray(groupBy === '_key' ? _.head(v)?.chain : v.map(_v => _v.chain))).map(c => getChainData(c, chains_data)), ['i'], ['asc']).map(c => c.id),
+        chain: _.orderBy(toArray(_.uniq(toArray(groupBy === '_key' ? _.head(v)?.chain : v.map(_v => _v.chain))).map(c => getChainData(c, chains_data))), ['i'], ['asc']).map(c => c.id),
       }
     })
 
