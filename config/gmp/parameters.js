@@ -22,6 +22,7 @@ export default {
     },
     testnet: {
       'ethereum-2': 1.1,
+      'ethereum-sepolia': 1.1,
       binance: 1.1,
       polygon: 1.1,
       'polygon-zkevm': 1.1,
@@ -45,6 +46,7 @@ export default {
     },
     stagenet: {
       'ethereum-2': 1.1,
+      'ethereum-sepolia': 1.1,
       binance: 1.1,
       polygon: 1.1,
       'polygon-zkevm': 1.1,
@@ -91,6 +93,7 @@ export default {
     },
     testnet: {
       'ethereum-2': '200000',
+      'ethereum-sepolia': '200000',
       binance: '200000',
       polygon: '200000',
       'polygon-zkevm': '200000',
@@ -114,6 +117,7 @@ export default {
     },
     stagenet: {
       'ethereum-2': '200000',
+      'ethereum-sepolia': '200000',
       binance: '200000',
       polygon: '200000',
       'polygon-zkevm': '200000',
@@ -160,6 +164,7 @@ export default {
     },
     testnet: {
       'ethereum-2': 1200,
+      'ethereum-sepolia': 1200,
       binance: 300,
       polygon: 600,
       'polygon-zkevm': 600,
@@ -183,6 +188,7 @@ export default {
     },
     stagenet: {
       'ethereum-2': 1200,
+      'ethereum-sepolia': 1200,
       binance: 300,
       polygon: 600,
       'polygon-zkevm': 600,
