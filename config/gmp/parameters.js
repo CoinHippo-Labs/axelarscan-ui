@@ -18,6 +18,7 @@ export default {
       linea: 1.1,
       centrifuge: 1.1,
       scroll: 1.1,
+      immutable: 1.1,
       default: 1.2,
     },
     testnet: {
@@ -42,6 +43,7 @@ export default {
       centrifuge: 1.1,
       'centrifuge-2': 1.1,
       scroll: 1.1,
+      immutable: 1.1,
       default: 1.2,
     },
     stagenet: {
@@ -89,6 +91,7 @@ export default {
       linea: '200000',
       centrifuge: '200000',
       scroll: '200000',
+      immutable: '200000',
       default: '200000',
     },
     testnet: {
@@ -113,6 +116,7 @@ export default {
       centrifuge: '200000',
       'centrifuge-2': '200000',
       scroll: '200000',
+      immutable: '200000',
       default: '200000',
     },
     stagenet: {
@@ -160,6 +164,7 @@ export default {
       linea: 4800,
       centrifuge: 300,
       scroll: 600,
+      immutable: 600,
       default: 600,
     },
     testnet: {
@@ -184,6 +189,7 @@ export default {
       centrifuge: 300,
       'centrifuge-2': 300,
       scroll: 600,
+      immutable: 600,
       default: 600,
     },
     stagenet: {
