@@ -288,7 +288,7 @@ export default ({ data }) => {
                     <Link href={poll_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 dark:text-blue-500">
                       {pollComponent}
                     </Link>
-                    <Copy value={poll_url} />
+                    <Copy value={poll_id} />
                     <ExplorerLink explorer={axelar_chain_data.explorer} _url={poll_url} />
                   </div>
                 )}
