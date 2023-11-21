@@ -6,7 +6,8 @@ import NetworkGraph from './network-graph'
 import Spinner from '../spinner'
 import NumberDisplay from '../number'
 import Image from '../image'
-import { toArray } from '../../lib/utils'
+import { toArray, equalsIgnoreCase } from '../../lib/utils'
+import accounts from '../../data/accounts'
 
 const METRICS = ['transactions', 'volumes', 'contracts', 'chains']
 
@@ -124,30 +125,36 @@ export default ({ data }) => {
         )
         break
       case 'contracts':
-        const contracts =
+        const contracts = _.orderBy(
           Object.entries(
             _.groupBy(
               toArray(messages).flatMap(m =>
                 toArray(m.source_chains).flatMap(s =>
                   toArray(s.destination_chains).flatMap(d =>
-                    toArray(d.contracts).map(c => {
+                    toArray(d.contracts).filter(c => !c.key.includes('_')).map(c => {
+                      const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, c.key)) }
                       return {
+                        ...c,
+                        key: name || c.key.toLowerCase(),
                         chain: d.key,
-                        address: c.key.toLowerCase(),
                       }
                     })
                   )
                 )
               ),
-              'address',
+              'key',
             )
           )
           .map(([k, v]) => {
             return {
-              address: k,
+              key: k,
               chains: _.uniq(v.map(_v => _v.chain)),
+              num_txs: _.sumBy(v, 'num_txs'),
+              volume: _.sumBy(v, 'volume'),
             }
-          })
+          }),
+          ['num_txs', 'volumes', 'key'], ['desc', 'desc', 'asc'],
+        )
         title = 'Interchain Contracts'
         url = '/interchain'
         loading = !GMPStats

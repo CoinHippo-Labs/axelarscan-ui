@@ -15,22 +15,7 @@ const METRICS = ['block', 'avg_block_time', 'validators', 'staked', 'apr', 'infl
 const DATE_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
 export default () => {
-  const {
-    chains,
-    chain,
-    status,
-    validators,
-  } = useSelector(
-    state => (
-      {
-        chains: state.chains,
-        chain: state.chain,
-        status: state.status,
-        validators: state.validators,
-      }
-    ),
-    shallowEqual,
-  )
+  const { chains, chain, status, validators } = useSelector(state => ({ chains: state.chains, chain: state.chain, status: state.status, validators: state.validators }), shallowEqual)
   const { chains_data } = { ...chains }
   const { chain_data } = { ...chain }
   const { status_data } = { ...status }
