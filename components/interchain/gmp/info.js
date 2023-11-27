@@ -52,6 +52,10 @@ export default ({ data, buttons }) => {
     token_sent,
     token_deployment_initialized,
     token_deployed,
+    interchain_transfer,
+    interchain_transfer_with_data,
+    token_manager_deployment_started,
+    interchain_token_deployment_started,
     estimated_time_spent,
   } = { ...data }
   let { amount } = { ...data }
@@ -343,7 +347,7 @@ export default ({ data, buttons }) => {
             <div className="flex items-center space-x-1">
               <Tooltip content="Method">
                 <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
-                  {token_sent ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : getTitle(normalizeEvent(event))}
+                  {token_sent || interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TokenManagerDeploymentStarted' : interchain_token_deployment_started ? 'InterchainTokenDeploymentStarted' : getTitle(normalizeEvent(event))}
                 </div>
               </Tooltip>
               {callback_data?.call?.transactionHash && (
@@ -369,13 +373,13 @@ export default ({ data, buttons }) => {
                 </Link>
               )}
             </div>
-            {token_sent ?
+            {token_sent || interchain_transfer || interchain_transfer_with_data ?
               typeof amount === 'number' && (
                 <div className="h-6 flex items-center">
                   <NumberDisplay
                     value={amount}
                     format="0,0.00"
-                    suffix={` ${token_sent.symbol}`}
+                    suffix={` ${(token_sent || interchain_transfer || interchain_transfer_with_data).symbol}`}
                   />
                 </div>
               ) :
@@ -395,24 +399,40 @@ export default ({ data, buttons }) => {
                       </span>
                     </div>
                   ) :
-                  symbol && (
-                    <div className="h-6 flex items-center space-x-2">
-                      {image && (
-                        <Image
-                          src={image}
-                          width={24}
-                          height={24}
-                        />
-                      )}
-                      {typeof amount === 'number' && (
-                        <NumberDisplay
-                          value={amount}
-                          format="0,0.00"
-                          suffix={` ${symbol}`}
-                        />
-                      )}
-                    </div>
-                  )
+                  token_manager_deployment_started ?
+                    token_manager_deployment_started.tokenId && (
+                      <div className="h-6 flex items-center">
+                        <span className="whitespace-nowrap text-sm font-semibold">
+                          {ellipse(token_manager_deployment_started.tokenId, 8)}
+                        </span>
+                      </div>
+                    ) :
+                    interchain_token_deployment_started ?
+                      interchain_token_deployment_started.tokenSymbol && (
+                        <div className="h-6 flex items-center">
+                          <span className="whitespace-nowrap text-sm font-semibold">
+                            {interchain_token_deployment_started.tokenSymbol}
+                          </span>
+                        </div>
+                      ) :
+                      symbol && (
+                        <div className="h-6 flex items-center space-x-2">
+                          {image && (
+                            <Image
+                              src={image}
+                              width={24}
+                              height={24}
+                            />
+                          )}
+                          {typeof amount === 'number' && (
+                            <NumberDisplay
+                              value={amount}
+                              format="0,0.00"
+                              suffix={` ${symbol}`}
+                            />
+                          )}
+                        </div>
+                      )
             }
           </div>
           <div className="order-3 lg:order-2 sm:col-span-2 lg:col-span-3 bg-slate-50 dark:bg-slate-800 rounded sm:rounded-lg flex flex-col justify-center space-y-1 p-2 sm:p-3">
