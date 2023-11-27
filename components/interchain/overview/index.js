@@ -81,8 +81,9 @@ export default () => {
           const { asset } = { ...filters }
           const symbol = _.uniq(toArray(toArray(asset).map(a => getAssetData(a, assets_data))).flatMap(a => _.uniq(toArray(_.concat(a.symbol, Object.values({ ...a.addresses }).map(_a => _a.symbol))))))
 
-          setData(
-            Object.fromEntries(
+          setData({
+            ...data,
+            [generateFiltersKey(filters)]: Object.fromEntries(
               await Promise.all(
                 toArray(
                   metrics.map(m =>
@@ -140,8 +141,8 @@ export default () => {
                   )
                 )
               )
-            )
-          )
+            ),
+          })
           setFetching(false)
         }
       }
@@ -150,18 +151,21 @@ export default () => {
     [fetchTrigger],
   )
 
+  const generateFiltersKey = filters => JSON.stringify(filters)
+
   const { transfersType, fromTime, toTime } = { ...filters }
   const types = toArray(transfersType || ['gmp', 'token_transfers'])
   const granularity = getGranularity(fromTime, toTime)
+  const _data = data?.[generateFiltersKey(filters)]
 
   return (
     <div>
-      {data ?
+      {_data ?
         <div className="space-y-6">
-          <Summary data={data} filters={filters} />
-          <Charts data={data} granularity={granularity} />
-          <Tops data={data} types={types} />
-          {types.includes('gmp') && <TimeSpents data={data} />}
+          <Summary data={_data} filters={filters} />
+          <Charts data={_data} granularity={granularity} />
+          <Tops data={_data} types={types} />
+          {types.includes('gmp') && <TimeSpents data={_data} />}
         </div> :
         <div className="loading-in-tab">
           <Spinner name="Blocks" />
