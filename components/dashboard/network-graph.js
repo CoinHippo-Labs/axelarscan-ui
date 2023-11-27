@@ -51,7 +51,7 @@ export default ({ id = 'network', data }) => {
   const { nodes, edges } = { ...graphData }
   const imagesUrl = useMemo(() => toArray(nodes).map(d => d.img), [nodes])
   const images = useImagePreloader(toArray(imagesUrl))
-  const imagesLoaded = chains_data && Object.keys({ ...images }).length / chains_data.length >= 0.9
+  const imagesLoaded = chains_data && Object.keys({ ...images }).length / chains_data.length >= 0.75
   const nodeCanvasObject = useNodeCanvasObject(selectedNode, edges, images, theme)
   const linkCanvasObject = useLinkCanvasObject(selectedNode, theme)
 
