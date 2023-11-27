@@ -40,6 +40,10 @@ export default ({ data }) => {
     token_sent,
     token_deployment_initialized,
     token_deployed,
+    interchain_transfer,
+    interchain_transfer_with_data,
+    token_manager_deployment_started,
+    interchain_token_deployment_started,
     amount,
   } = { ...data }
   const { chain, chain_type, destination_chain_type, proposal_id } = { ...call }
@@ -323,6 +327,28 @@ export default ({ data }) => {
                             />
                           </Link>
                         )}
+                        {interchain_transfer && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <NumberDisplay
+                              value={amount}
+                              format="0,0.00"
+                              prefix="InterchainTransfer: "
+                              suffix={` ${interchain_transfer.symbol}`}
+                              className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2"
+                            />
+                          </Link>
+                        )}
+                        {interchain_transfer_with_data && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <NumberDisplay
+                              value={amount}
+                              format="0,0.00"
+                              prefix="InterchainTransferWithData: "
+                              suffix={` ${interchain_transfer_with_data.symbol}`}
+                              className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2"
+                            />
+                          </Link>
+                        )}
                         {token_deployment_initialized?.tokenSymbol && (
                           <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
                             <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
@@ -334,6 +360,21 @@ export default ({ data }) => {
                           <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
                             <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
                               TokenDeployed: {token_deployed.symbol}
+                            </div>
+                          </Link>
+                        )}
+                        {token_manager_deployment_started?.tokenId && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
+                              <span className="mr-1">TokenManagerDeploymentStarted:</span>
+                              <Copy value={token_manager_deployment_started.tokenId} />
+                            </div>
+                          </Link>
+                        )}
+                        {interchain_token_deployment_started?.tokenSymbol && (
+                          <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
+                            <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
+                              InterchainTokenDeploymentStarted: {interchain_token_deployment_started.tokenSymbol}
                             </div>
                           </Link>
                         )}

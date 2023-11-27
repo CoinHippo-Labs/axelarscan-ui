@@ -191,7 +191,7 @@ export default () => {
                 disableSortBy: true,
                 Cell: props => {
                   const { value, row } = { ...props }
-                  const { call, token_sent, token_deployment_initialized, token_deployed } = { ...row.original }
+                  const { call, token_sent, token_deployment_initialized, token_deployed, interchain_transfer, interchain_transfer_with_data, token_manager_deployment_started, interchain_token_deployment_started } = { ...row.original }
                   let { amount } = { ...row.original }
                   const { chain, returnValues } = { ...call }
                   const { symbol } = { ...returnValues }
@@ -206,15 +206,15 @@ export default () => {
                   return (
                     <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
-                        {token_sent ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : getTitle(normalizeEvent(value))}
+                        {token_sent || interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TokenManagerDeploymentStarted' : interchain_token_deployment_started ? 'InterchainTokenDeploymentStarted' : getTitle(normalizeEvent(event))}
                       </div>
                       <div className="h-6 flex items-center space-x-2">
-                        {token_sent ?
+                        {token_sent || interchain_transfer || interchain_transfer_with_data ?
                           typeof amount === 'number' && (
                             <NumberDisplay
                               value={amount}
                               format="0,0.00"
-                              suffix={` ${token_sent.symbol}`}
+                              suffix={` ${(token_sent || interchain_transfer || interchain_transfer_with_data).symbol}`}
                             />
                           ) :
                           token_deployment_initialized ?
@@ -229,22 +229,34 @@ export default () => {
                                   {token_deployed.symbol}
                                 </span>
                               ) :
-                              <>
-                                {image && (
-                                  <Image
-                                    src={image}
-                                    width={24}
-                                    height={24}
-                                  />
-                                )}
-                                {typeof amount === 'number' && (
-                                  <NumberDisplay
-                                    value={amount}
-                                    format="0,0.00"
-                                    suffix={` ${symbol}`}
-                                  />
-                                )}
-                              </>
+                              token_manager_deployment_started ?
+                                token_manager_deployment_started.tokenId && (
+                                  <span className="whitespace-nowrap text-sm font-semibold">
+                                    {ellipse(token_manager_deployment_started.tokenId, 8)}
+                                  </span>
+                                ) :
+                                interchain_token_deployment_started ?
+                                  interchain_token_deployment_started.tokenSymbol && (
+                                    <span className="whitespace-nowrap text-sm font-semibold">
+                                      {interchain_token_deployment_started.tokenSymbol}
+                                    </span>
+                                  ) :
+                                  <>
+                                    {image && (
+                                      <Image
+                                        src={image}
+                                        width={24}
+                                        height={24}
+                                      />
+                                    )}
+                                    {typeof amount === 'number' && (
+                                      <NumberDisplay
+                                        value={amount}
+                                        format="0,0.00"
+                                        suffix={` ${symbol}`}
+                                      />
+                                    )}
+                                  </>
                         }
                       </div>
                     </div>
