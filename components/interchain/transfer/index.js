@@ -134,7 +134,16 @@ export default () => {
     </div>
   )
 
-  const matched = toArray([data?.send?.txhash, data?.wrap?.txhash, data?.erc20_transfer?.txhash]).findIndex(h => equalsIgnoreCase(tx, h)) > -1
+  const matched = toArray([
+    data?.send?.txhash,
+    data?.wrap?.txhash,
+    data?.wrap?.tx_hash_wrap,
+    data?.command?.transactionHash,
+    data?.unwrap?.txhash,
+    data?.unwrap?.tx_hash_wrap,
+    data?.erc20_transfer?.txhash,
+    data?.erc20_transfer?.tx_hash_transfer,
+  ]).findIndex(h => equalsIgnoreCase(tx, h)) > -1
 
   return (
     <div className="children px-3">
