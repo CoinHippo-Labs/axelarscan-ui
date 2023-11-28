@@ -6,7 +6,7 @@ import { toArray } from '../../../../lib/utils'
 const CHARTS = ['transactions', 'volumes', 'active_users', 'fees']
 
 export default ({ data, granularity }) => {
-  const { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers } = { ...data }
+  const { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, transfersStats, transfersChart, transfersAirdropChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers } = { ...data }
   const { messages } = { ...GMPStats }
   const dateFormat = granularity === 'month' ? 'MMM' : undefined
 
@@ -35,6 +35,16 @@ export default ({ data, granularity }) => {
                 transfers_users: users,
               }
             }),
+            toArray(transfersAirdropChart?.data).map(d => {
+              const { num_txs, volume, fee, users } = { ...d }
+              return {
+                ...d,
+                transfers_airdrop_num_txs: num_txs,
+                transfers_airdrop_volume: volume,
+                transfers_airdrop_fee: fee,
+                transfers_airdrop_users: users,
+              }
+            }),
           ),
           'timestamp',
         )
@@ -54,6 +64,17 @@ export default ({ data, granularity }) => {
           transfers_volume: _.sumBy(v.filter(_v => _v.transfers_volume > 0), 'transfers_volume'),
           transfers_fee: _.sumBy(v.filter(_v => _v.transfers_fee > 0), 'transfers_fee'),
           transfers_users: _.sumBy(v.filter(_v => _v.transfers_users > 0), 'transfers_users'),
+          transfers_airdrop_num_txs: _.sumBy(v.filter(_v => _v.transfers_airdrop_num_txs > 0), 'transfers_airdrop_num_txs'),
+          transfers_airdrop_volume: _.sumBy(v.filter(_v => _v.transfers_airdrop_volume > 0), 'transfers_airdrop_volume'),
+          transfers_airdrop_fee: _.sumBy(v.filter(_v => _v.transfers_airdrop_fee > 0), 'transfers_airdrop_fee'),
+          transfers_airdrop_users: _.sumBy(v.filter(_v => _v.transfers_airdrop_users > 0), 'transfers_airdrop_users'),
+        }
+      })
+      .map(d => {
+        const { gmp_volume, transfers_volume, transfers_airdrop_volume } = { ...d }
+        return {
+          ...d,
+          transfers_airdrop_volume_value: transfers_airdrop_volume > 0 ? transfers_airdrop_volume > 100000 ? _.mean([gmp_volume, transfers_volume]) : transfers_airdrop_volume : 0,
         }
       }),
       ['timestamp'], ['asc'],
@@ -79,8 +100,9 @@ export default ({ data, granularity }) => {
       case 'volumes':
         total = (GMPTotalVolume || 0) + (transfersTotalVolume || 0)
         const maxPerMean = _.maxBy(_data, 'volume')?.volume / (_.meanBy(_data, 'volume') || 1)
-        const scale = maxPerMean > 5 ? 'log' : undefined
-        const useStack = maxPerMean <= 5 || maxPerMean > 10
+        const hasAirdropActivities = _data.find(d => d.transfers_airdrop_volume > 0)
+        const scale = maxPerMean > 5 && !hasAirdropActivities ? 'log' : undefined
+        const useStack = maxPerMean <= 5 || maxPerMean > 10 || hasAirdropActivities
         return (
           <Bar
             key={id}
@@ -88,7 +110,8 @@ export default ({ data, granularity }) => {
             data={_data}
             totalValue={total}
             field="volume"
-            colors={scale === 'log' && useStack ? { gmp: '#33B700', transfers: '#33B700' } : undefined}
+            stacks={['transfers_airdrop', 'gmp', 'transfers']}
+            colors={scale === 'log' && useStack ? { gmp: '#33b700', transfers: '#33b700', transfers_airdrop: '#33b700' } : undefined}
             scale={scale}
             useStack={useStack}
             title="Volume"

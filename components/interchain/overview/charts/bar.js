@@ -15,7 +15,7 @@ export default (
     totalValue,
     field = 'num_txs',
     stacks = ['gmp', 'transfers'],
-    colors = { gmp: '#ff7d20', transfers: '#009ef7' },
+    colors = { gmp: '#ff7d20', transfers: '#009ef7', transfers_airdrop: '#33b700' },
     scale = '',
     useStack = true,
     title = '',
@@ -70,6 +70,8 @@ export default (
           value: data?.[`${s !== 'total' ? `${s}_` : ''}${field}`],
         }
       })
+      .filter(v => field !== 'volume' || !v.key.includes('airdrop') || v.value > 100)
+      .map(v => { return { ...v, key: v.key === 'transfers_airdrop' ? 'airdrop_participations' : v.key } })
 
       return (
         <div className="bg-slate-50 dark:bg-black bg-opacity-75 dark:bg-opacity-75 rounded flex flex-col space-y-1 p-2">
@@ -158,7 +160,7 @@ export default (
                   <Bar
                     key={i}
                     stackId={useStack ? id : undefined}
-                    dataKey={`${s}_${field}`}
+                    dataKey={`${s}_${field}${s.includes('airdrop') ? '_value' : ''}`}
                     fill={colors[s]}
                     minPointSize={scale && i === 0 ? 10 : 0}
                   />
