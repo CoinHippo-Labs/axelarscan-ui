@@ -48,7 +48,7 @@ export default () => {
       if (asPath) {
         const filters = { ...getQueryParams(asPath) }
         const { senderAddress } = { ...filters }
-        setFilters({ ...filters, senderAddress: address || senderAddress })
+        setFilters({ ...filters, senderAddress, address })
       }
     },
     [asPath, address],
@@ -57,7 +57,7 @@ export default () => {
   useEffect(
     () => {
       if (address) {
-        setFilters({ ...filters, senderAddress: address })
+        setFilters({ ...filters, address })
       }
     },
     [address],
