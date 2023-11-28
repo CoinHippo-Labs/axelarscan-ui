@@ -14,6 +14,8 @@ import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee
 import { getAssetData } from '../../../lib/config'
 import { toArray, getQueryParams, createMomentFromUnixtime } from '../../../lib/utils'
 
+const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
+
 const getGranularity = (fromTime, toTime) => {
   if (fromTime) {
     const diff = createMomentFromUnixtime(toTime).diff(createMomentFromUnixtime(fromTime), 'days')
@@ -84,7 +86,7 @@ export default () => {
           setData({
             ...data,
             [generateFiltersKey(filters)]: Object.fromEntries(
-              await Promise.all(
+              (await Promise.all(
                 toArray(
                   metrics.map(m =>
                     new Promise(
@@ -115,7 +117,37 @@ export default () => {
                             resolve([m, types.includes('token_transfers') && await transfersStats({ ...filters })])
                             break
                           case 'transfersChart':
-                            resolve([m, types.includes('token_transfers') && await transfersChart({ ...filters, granularity })])
+                            let value = types.includes('token_transfers') && await transfersChart({ ...filters, granularity })
+                            const values = [[m, value]]
+                            if (value?.data && granularity === 'month') {
+                              const airdrops = [
+                                { date: '08-01-2023', fromTime: undefined, toTime: undefined, chain: 'sei', environment: 'mainnet' },
+                              ]
+
+                              for (const airdrop of airdrops) {
+                                const { date, chain, environment } = { ...airdrop }
+                                let { fromTime, toTime } = { ...airdrop }
+                                fromTime = fromTime || moment(date).startOf('month').unix()
+                                toTime = toTime || moment(date).endOf('month').unix()
+
+                                if (STAGING && ENVIRONMENT === environment && (!filters?.fromTime || Number(filters.fromTime) < fromTime) && (!filters?.toTime || Number(filters.toTime) > toTime)) {
+                                  const _value = await transfersChart({ ...filters, chain, fromTime, toTime, granularity })
+                                  if (toArray(_value?.data).length > 0) {
+                                    for (const v of _value.data) {
+                                      const { timestamp, volume } = { ...v }
+                                      if (timestamp && volume > 0) {
+                                        const index = value.data.findIndex(_v => _v.timestamp === timestamp)
+                                        if (index > -1 && value.data[index].volume >= volume) {
+                                          value.data[index] = { ...value.data[index], volume: value.data[index].volume - volume }
+                                        }
+                                      }
+                                    }
+                                    values.push([m.replace('transfers', 'transfersAirdrop'), _value])
+                                  }
+                                }
+                              }
+                            }
+                            resolve(values)
                             break
                           case 'transfersTotalVolume':
                             resolve([m, types.includes('token_transfers') && await transfersTotalVolume({ ...filters })])
@@ -140,7 +172,16 @@ export default () => {
                     )
                   )
                 )
-              )
+              ))
+              .map(d => {
+                if (Array.isArray(d)) {
+                  if (Array.isArray(_.head(d))) {
+                    return d
+                  }
+                }
+                return [d]
+              })
+              .flatMap(d => d)
             ),
           })
           setFetching(false)
@@ -153,6 +194,7 @@ export default () => {
 
   const generateFiltersKey = filters => JSON.stringify(filters)
 
+  const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
   const { transfersType, fromTime, toTime } = { ...filters }
   const types = toArray(transfersType || ['gmp', 'token_transfers'])
   const granularity = getGranularity(fromTime, toTime)
