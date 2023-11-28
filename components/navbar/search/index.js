@@ -85,7 +85,7 @@ export default () => {
             input_type = 'address'
           }
           else {
-            response = await searchGMP({ senderAddress: input, size: 0 })
+            response = await searchGMP({ address: input, size: 0 })
             if (response?.total) {
               input_type = 'address'
             }
