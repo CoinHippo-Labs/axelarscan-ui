@@ -141,7 +141,7 @@ export default () => {
                                 fromTime = fromTime || moment(date).startOf('month').unix()
                                 toTime = toTime || moment(date).endOf('month').unix()
 
-                                if (STAGING && ENVIRONMENT === environment && (!filters?.fromTime || Number(filters.fromTime) < fromTime) && (!filters?.toTime || Number(filters.toTime) > toTime)) {
+                                if (ENVIRONMENT === environment && (!filters?.fromTime || Number(filters.fromTime) < fromTime) && (!filters?.toTime || Number(filters.toTime) > toTime)) {
                                   const _value = await transfersChart({ ...filters, chain, fromTime, toTime, granularity })
                                   if (toArray(_value?.data).length > 0) {
                                     for (const v of _value.data) {
@@ -205,7 +205,6 @@ export default () => {
 
   const generateFiltersKey = filters => JSON.stringify(filters)
 
-  const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
   const { transfersType, fromTime, toTime } = { ...filters }
   const types = toArray(transfersType || ['gmp', 'token_transfers'])
   const granularity = getGranularity(fromTime, toTime)
