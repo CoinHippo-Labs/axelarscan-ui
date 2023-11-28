@@ -40,6 +40,7 @@ export default () => {
   const { asPath } = { ...router }
 
   const [data, setData] = useState(null)
+  const [timeSpentData, setTimeSpentData] = useState(null)
   const [filters, setFilters] = useState(null)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
@@ -70,7 +71,15 @@ export default () => {
 
   useEffect(
     () => {
-      const metrics = ['GMPStats', 'GMPStatsAVGTimes', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
+      const metrics = ['GMPStats'/*, 'GMPStatsAVGTimes'*/, 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
+
+      const getGMPStatsAVGTimes = async params => {
+        const { filters, symbol } = { ...params }
+        setTimeSpentData({
+          ...timeSpentData,
+          [generateFiltersKey(filters)]: { GMPStatsAVGTimes: types.includes('gmp') && await GMPStats({ ...filters, symbol, avg_times: true }) },
+        })
+      }
 
       const getData = async () => {
         if (filters) {
@@ -78,11 +87,13 @@ export default () => {
 
           if (!fetchTrigger) {
             setData(null)
+            setTimeSpentData(null)
           }
 
           const { asset } = { ...filters }
           const symbol = _.uniq(toArray(toArray(asset).map(a => getAssetData(a, assets_data))).flatMap(a => _.uniq(toArray(_.concat(a.symbol, Object.values({ ...a.addresses }).map(_a => _a.symbol))))))
 
+          getGMPStatsAVGTimes({ filters, symbol })
           setData({
             ...data,
             [generateFiltersKey(filters)]: Object.fromEntries(
@@ -199,6 +210,7 @@ export default () => {
   const types = toArray(transfersType || ['gmp', 'token_transfers'])
   const granularity = getGranularity(fromTime, toTime)
   const _data = data?.[generateFiltersKey(filters)]
+  const _timeSpentData = timeSpentData?.[generateFiltersKey(filters)]
 
   return (
     <div>
@@ -207,7 +219,7 @@ export default () => {
           <Summary data={_data} filters={filters} />
           <Charts data={_data} granularity={granularity} />
           <Tops data={_data} types={types} />
-          {types.includes('gmp') && <TimeSpents data={_data} />}
+          {types.includes('gmp') && <TimeSpents data={_timeSpentData} />}
         </div> :
         <div className="loading-in-tab">
           <Spinner name="Blocks" />
