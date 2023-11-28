@@ -559,7 +559,7 @@ export default () => {
   const destination_chain_data = getChainData(destinationChain, chains_data)
 
   const [txHash, txIndex, txLogIndex] = getTransactionKey(tx)
-  const matched = (equalsIgnoreCase(txHash, data?.call?.transactionHash) || equalsIgnoreCase(txHash.substring(txHash?.startsWith('0x') ? 2 : 0), data?.call?.axelarTransactionHash) || data?.id?.startsWith(txHash?.toLowerCase())) && (typeof txIndex !== 'number' || txIndex === data.call.transactionIndex) && (typeof txLogIndex !== 'number' || txLogIndex === data.call.logIndex || txLogIndex === data.call.messageIdIndex)
+  const matched = ((equalsIgnoreCase(txHash, data?.call?.transactionHash) || equalsIgnoreCase(txHash.substring(txHash?.startsWith('0x') ? 2 : 0), data?.call?.axelarTransactionHash) || data?.id?.startsWith(txHash?.toLowerCase())) && (typeof txIndex !== 'number' || txIndex === data.call.transactionIndex) && (typeof txLogIndex !== 'number' || txLogIndex === data.call.logIndex || txLogIndex === data.call.messageIdIndex)) || (txHash && Object.values({ ...data }).filter(d => typeof d === 'object').findIndex(d => equalsIgnoreCase(txHash, d?.transactionHash) || equalsIgnoreCase(txHash, d?.axelarTransactionHash)) > -1)
   const notFound = data && Object.keys(data).length < 1
   const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
   const EDITABLE = edit === 'true' && (ENVIRONMENT !== 'mainnet' || STAGING)
