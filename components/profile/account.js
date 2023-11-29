@@ -46,11 +46,11 @@ export default (
   const gateways = toArray(chains_data).filter(c => c.gateway_address).map(c => { return { ...c, address: c.gateway_address, name: 'Axelar Gateway', image: '/logos/accounts/axelarnet.svg' } })
   const { interchain_token_service_contract, gas_service_contracts } = { ...contracts_data }
   const gas_services = Object.values({ ...gas_service_contracts }).filter(v => v.address).map(v => { return { ...v, name: 'Axelar Gas Service', image: '/logos/accounts/axelarnet.svg' } })
-  const interchain_token_service = interchain_token_service_contract?.address && { ...interchain_token_service_contract, name: 'Interchain Token Service', image: '/logos/accounts/axelarnet.svg' }
+  const interchain_token_services = toArray(interchain_token_service_contract?.addresses).length > 0 && toArray(interchain_token_service_contract?.addresses).map(a => { return { address: a, name: 'Interchain Token Service', image: '/logos/accounts/axelarnet.svg' } })
   const { relayers, express_relayers, refunders } = { ...gmp_configurations_data }
   const _relayers = _.uniq(toArray(_.concat(relayers, refunders))).map(a => { return { address: a, name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' } })
   const _express_relayers = _.uniq(toArray(express_relayers)).map(a => { return { address: a, name: 'Axelar Express Relayer', image: '/logos/accounts/axelarnet.svg' } })
-  let { name, image } = { ...toArray(_.concat(accounts, gateways, gas_services, interchain_token_service, _relayers, _express_relayers, accounts_data)).find(a => equalsIgnoreCase(a.address, address) && (!a.environment || equalsIgnoreCase(a.environment, ENVIRONMENT))) || (broadcasters[ENVIRONMENT]?.[address?.toLowerCase()] && { name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' }), address }
+  let { name, image } = { ...toArray(_.concat(accounts, gateways, gas_services, interchain_token_services, _relayers, _express_relayers, accounts_data)).find(a => equalsIgnoreCase(a.address, address) && (!a.environment || equalsIgnoreCase(a.environment, ENVIRONMENT))) || (broadcasters[ENVIRONMENT]?.[address?.toLowerCase()] && { name: 'Axelar Relayer', image: '/logos/accounts/axelarnet.svg' }), address }
 
   let validator_description
   if (address && !noValidator && !name && validators_data) {
