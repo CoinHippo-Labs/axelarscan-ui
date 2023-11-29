@@ -347,7 +347,7 @@ export default ({ data, buttons }) => {
             <div className="flex items-center space-x-1">
               <Tooltip content="Method">
                 <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
-                  {token_sent || interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TokenManagerDeploymentStarted' : interchain_token_deployment_started ? 'InterchainTokenDeploymentStarted' : getTitle(normalizeEvent(event))}
+                  {token_sent || interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TMDeploymentStarted' : interchain_token_deployment_started ? 'ITDeploymentStarted' : getTitle(normalizeEvent(event))}
                 </div>
               </Tooltip>
               {callback_data?.call?.transactionHash && (
