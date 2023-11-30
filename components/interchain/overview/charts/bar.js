@@ -15,7 +15,7 @@ export default (
     totalValue,
     field = 'num_txs',
     stacks = ['gmp', 'transfers'],
-    colors = { gmp: '#ff7d20', transfers: '#009ef7', transfers_airdrop: '#33b700' },
+    colors = { gmp: '#ff7d20', transfers: '#009ef7', transfers_airdrop: '#de3163' },
     scale = '',
     useStack = true,
     title = '',
