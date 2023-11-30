@@ -466,7 +466,7 @@ export default ({ data }) => {
         <div className="text-sm lg:text-base font-medium">
           {toJson(_data) ?
             <div className="max-w-4xl bg-slate-50 dark:bg-slate-900 p-4">
-              <JSONView value={_data} />
+              <JSONView value={_data} useJSONView={true} />
             </div> :
             _data
           }
@@ -548,7 +548,7 @@ export default ({ data }) => {
         <div className="text-sm lg:text-base font-medium">
           {toJson(raw_log) ?
             <div className="max-w-4xl bg-slate-50 dark:bg-slate-900 p-4">
-              <JSONView value={raw_log} />
+              <JSONView value={raw_log} useJSONView={true} />
             </div> :
             raw_log
           }

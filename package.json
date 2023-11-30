@@ -48,6 +48,7 @@
     "react-gtm-module": "^2.0.11",
     "react-hook-form": "^7.46.2",
     "react-icons": "^4.10.1",
+    "react-json-view": "^1.21.3",
     "react-linkify": "^1.0.0-alpha",
     "react-loader-spinner": "^5.3.4",
     "react-page-visibility": "^7.0.0",
