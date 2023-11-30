@@ -461,13 +461,14 @@ export default ({ data }) => {
       )
     }
     else {
+      const _data = format === 'json' ? data : (messages || tx)
       return (
         <div className="text-sm lg:text-base font-medium">
-          {toJson(messages || tx) ?
+          {toJson(_data) ?
             <div className="max-w-4xl bg-slate-50 dark:bg-slate-900 p-4">
-              <JSONView value={messages || tx} />
+              <JSONView value={_data} />
             </div> :
-            messages || tx
+            _data
           }
         </div>
       )
