@@ -205,7 +205,7 @@ export default () => {
                   return (
                     <div className="w-44 flex flex-col text-slate-600 dark:text-slate-200 text-sm space-y-2 mb-6">
                       <div className="w-fit h-6 bg-slate-50 dark:bg-slate-900 rounded flex items-center font-medium py-1 px-2">
-                        {token_sent ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TMDeploymentStarted' : interchain_token_deployment_started ? 'ITDeploymentStarted' : interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : getTitle(normalizeEvent(value))}
+                        {token_sent ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TokenManagerDeployment' : interchain_token_deployment_started ? 'InterchainTokenDeployment' : interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : getTitle(normalizeEvent(value))}
                       </div>
                       <div className="h-6 flex items-center space-x-2">
                         {token_sent || interchain_transfer || interchain_transfer_with_data ?
