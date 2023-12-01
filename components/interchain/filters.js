@@ -130,8 +130,8 @@ export default () => {
         { value: 'RemoteStandardizedTokenAndManagerDeploymentInitialized', title: 'TokenDeploymentInitialized' },
         { value: 'InterchainTransfer', title: 'InterchainTransfer' },
         { value: 'InterchainTransferWithData', title: 'InterchainTransferWithData' },
-        { value: 'TokenManagerDeploymentStarted', title: 'TokenManagerDeploymentStarted' },
-        { value: 'InterchainTokenDeploymentStarted', title: 'InterchainTokenDeploymentStarted' },
+        { value: 'TokenManagerDeployment', title: 'TokenManagerDeployment' },
+        { value: 'InterchainTokenDeployment', title: 'InterchainTokenDeployment' },
       ],
     },
     pathname.startsWith('/transfers') && {

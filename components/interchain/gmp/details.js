@@ -366,7 +366,7 @@ export default ({ data }) => {
                         {token_manager_deployment_started?.tokenId && (
                           <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
                             <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
-                              <span className="mr-1">TokenManagerDeploymentStarted:</span>
+                              <span className="mr-1">TokenManagerDeployment:</span>
                               <Copy value={token_manager_deployment_started.tokenId} />
                             </div>
                           </Link>
@@ -374,7 +374,7 @@ export default ({ data }) => {
                         {interchain_token_deployment_started?.tokenSymbol && (
                           <Link href={`${_url}#eventlog`} target="_blank" rel="noopener noreferrer" className="mt-4">
                             <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded text-slate-600 dark:text-slate-200 text-xs font-medium py-1 px-2">
-                              InterchainTokenDeploymentStarted: {interchain_token_deployment_started.tokenSymbol}
+                              InterchainTokenDeployment: {interchain_token_deployment_started.tokenSymbol}
                             </div>
                           </Link>
                         )}
