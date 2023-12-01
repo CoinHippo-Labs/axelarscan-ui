@@ -349,11 +349,11 @@ export default () => {
         setResponse({ status: 'pending', message: 'Re-Executing' })
 
         const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, messageIdIndex } = { ...call }
         const params = {
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
-          sourceTransactionLogIndex: logIndex,
+          sourceTransactionLogIndex: messageIdIndex || logIndex,
           event: 'not_executed',
         }
 
@@ -385,11 +385,11 @@ export default () => {
         setResponse({ status: 'pending', message: 'Refunding' })
 
         const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, messageIdIndex } = { ...call }
         const params = {
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
-          sourceTransactionLogIndex: logIndex,
+          sourceTransactionLogIndex: messageIdIndex || logIndex,
           event: 'to_refund',
         }
 
@@ -420,7 +420,7 @@ export default () => {
         setResponse({ status: 'pending', message: 'Editing' })
 
         const { call, approved } = { ...data }
-        const { transactionHash, transactionIndex, logIndex, returnValues } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, messageIdIndex, returnValues } = { ...call }
         const { symbol, amount } = { ...returnValues }
         const { chain } = { ...approved }
         const isWithToken = !!(symbol && amount)
@@ -428,7 +428,7 @@ export default () => {
           event: isWithToken ? 'expressExecuteWithToken' : 'expressExecute',
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
-          sourceTransactionLogIndex: logIndex,
+          sourceTransactionLogIndex: messageIdIndex || logIndex,
           transactionHash: txHashExpress,
         }
 
@@ -459,12 +459,12 @@ export default () => {
         setResponse({ status: 'pending', message: 'Editing' })
 
         const { call, approved } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, messageIdIndex } = { ...call }
         const { chain } = { ...approved }
         const params = {
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
-          sourceTransactionLogIndex: logIndex,
+          sourceTransactionLogIndex: messageIdIndex || logIndex,
           transactionHash: txHashExecuted,
           relayerAddress: address,
         }
@@ -496,11 +496,11 @@ export default () => {
         setResponse({ status: 'pending', message: 'Editing' })
 
         const { call } = { ...data }
-        const { chain, transactionHash, transactionIndex, logIndex } = { ...call }
+        const { chain, transactionHash, transactionIndex, logIndex, messageIdIndex } = { ...call }
         const params = {
           sourceTransactionHash: transactionHash,
           sourceTransactionIndex: transactionIndex,
-          sourceTransactionLogIndex: logIndex,
+          sourceTransactionLogIndex: messageIdIndex || logIndex,
           transactionHash: txHashRefunded,
           relayerAddress: address,
           event: 'refunded',
