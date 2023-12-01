@@ -750,7 +750,7 @@ export default ({ data }) => {
                   )
                   extra = (
                     <NumberDisplay
-                      value={gas_callback_approve_amount || gas_callback_base_fee_amount}
+                      value={gas_callback_approve_amount && gas_callback_approve_amount < gas_callback_base_fee_amount ? gas_callback_approve_amount : gas_callback_base_fee_amount}
                       format="0,0.00"
                       prefix={`${gas_callback_approve_amount ? 'Approve Cost' : 'Base Fee'}: `}
                       suffix={source_token && ` ${source_token.symbol}`}
