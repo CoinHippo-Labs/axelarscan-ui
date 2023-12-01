@@ -115,9 +115,9 @@ export default ({ data }) => {
             deposit_address = toHex(deposit_address)
             burner_address = toHex(burner_address)
             tx_id = toHex(tx_id)
-            sender_chain = sender_chain || toArray(chains_data).find(c => sender?.startsWith(c.prefix_address))?.id
-            recipient_chain = recipient_chain || toArray(chains_data).find(c => recipient?.startsWith(c.prefix_address))?.id
-            deposit_address_chain = deposit_address_chain || toArray(chains_data).find(c => deposit_address?.startsWith(c.prefix_address))?.id
+            sender_chain = sender_chain || toArray(chains_data).find(c => typeof sender === 'string' && sender.startsWith(c.prefix_address))?.id
+            recipient_chain = recipient_chain || toArray(chains_data).find(c => typeof recipient === 'string' && recipient.startsWith(c.prefix_address))?.id
+            deposit_address_chain = deposit_address_chain || toArray(chains_data).find(c => typeof deposit_address === 'string' && deposit_address.startsWith(c.prefix_address))?.id
 
             const chain_data = getChainData(chain, chains_data)
             const sender_chain_data = getChainData(sender_chain, chains_data)
