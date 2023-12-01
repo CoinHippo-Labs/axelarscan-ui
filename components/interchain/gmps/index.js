@@ -170,7 +170,7 @@ export default () => {
                   return value && (
                     <div className="flex items-center space-x-1 mb-40">
                       <Link
-                        href={`/gmp/${value}${chain_type === 'evm' && receipt && typeof logIndex === 'number' ? `:${logIndex}` : chain_type === 'cosmos' && proposal_id && typeof messageIdIndex === 'number' ? `:${messageIdIndex}` : ''}`}
+                        href={`/gmp/${value}${chain_type === 'evm' && receipt && typeof logIndex === 'number' ? `:${logIndex}` : chain_type === 'cosmos' && typeof messageIdIndex === 'number' ? `:${messageIdIndex}` : ''}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-400 dark:text-blue-500 text-sm font-semibold"
