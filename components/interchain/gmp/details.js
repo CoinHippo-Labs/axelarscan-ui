@@ -76,7 +76,7 @@ export default ({ data }) => {
     },
     express_executed && {
       id: 'express',
-      title: 'Express',
+      title: 'Express Executed',
       status: 'success',
       data: express_executed,
       chain_data: destination_chain_data,

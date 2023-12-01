@@ -92,7 +92,7 @@ export default ({ data, buttons }) => {
     },
     (express_executed || buttons?.express) && {
       id: 'express',
-      title: 'Express',
+      title: express_executed ? 'Express Executed' : 'Express Executing',
       status: express_executed ? 'success' : 'pending',
       data: express_executed,
       chain_data: destination_chain_data,

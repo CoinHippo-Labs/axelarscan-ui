@@ -42,7 +42,7 @@ export default (
   }
 
   let points = toArray([
-    express_execute && { id: 'express_execute', title: 'X', name: 'Express', time_spent: express_execute },
+    express_execute && { id: 'express_execute', title: 'X', name: 'Express Execute', time_spent: express_execute },
     confirm && { id: 'confirm', title: 'C', name: 'Confirm', time_spent: confirm },
     approve && { id: 'approve', title: 'A', name: 'Approve', time_spent: approve },
     total && { id: 'execute', title: 'E', name: 'Execute', label: 'Total', time_spent: total },
