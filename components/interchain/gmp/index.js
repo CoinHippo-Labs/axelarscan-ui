@@ -189,7 +189,7 @@ export default () => {
           if ((STAGING || EDITABLE) && call.destination_chain_type === 'evm') {
             try {
               const { result } = { ...await isContractCallApproved({ destinationChain, commandId, sourceChain, sourceAddress, contractAddress, payloadHash, symbol, amount }) }
-              _data.is_approved = result       
+              _data.is_approved = result
             } catch (error) {}
           }
 
@@ -674,7 +674,7 @@ export default () => {
     )
 
   const refundButton =
-    !approveButton && !executeButton && !no_gas_remain && call?.chain_type !== 'cosmos' && (approved?.block_timestamp < moment().subtract(5, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
+    EDITABLE && !approveButton && !executeButton && !no_gas_remain && call?.chain_type !== 'cosmos' && gas_paid && (approved?.block_timestamp < moment().subtract(5, 'minutes').unix() || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     ((executed && (!callback_data || moment().diff(moment((executed.block_timestamp) * 1000), 'minutes') >= 10)) || is_executed || error || is_invalid_destination_chain || is_invalid_call || is_insufficient_fee) &&
     (EDITABLE || (
       !not_to_refund && gas?.gas_remain_amount >= MIN_GAS_REMAIN_AMOUNT && (gas.gas_remain_amount / gas.gas_paid_amount > 0.1 || gas.gas_remain_amount * usd > 1 || (is_insufficient_fee && gas.gas_paid_amount < gas.gas_base_fee_amount && gas.gas_paid_amount * usd > 1)) &&

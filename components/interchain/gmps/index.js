@@ -197,7 +197,7 @@ export default () => {
 
                   const asset_data = getAssetData(symbol, assets_data)
                   const { addresses } = { ...asset_data }
-                  let { decimals, image } = { ...addresses?.[chain] } 
+                  let { decimals, image } = { ...addresses?.[chain] }
                   decimals = decimals || asset_data?.decimals || 18
                   image = image || asset_data?.image
                   amount = amount || (returnValues?.amount ? formatUnits(returnValues.amount, decimals) : undefined)

@@ -99,7 +99,7 @@ export default (
                                   </div>
                                 </Tooltip> :
                                 component
-                            ) 
+                            )
                         }
                       })}
                     </div>
