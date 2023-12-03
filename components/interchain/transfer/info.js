@@ -50,7 +50,7 @@ export default ({ data, buttons }) => {
   const deposit_chain_data = getChainData(deposit_address?.startsWith('axelar') ? 'axelarnet' : original_source_chain || source_chain, chains_data)
   const asset_data = getAssetData(denom, assets_data)
   const { addresses } = { ...asset_data }
-  let { symbol, image } = { ...addresses?.[source_chain_data?.id] } 
+  let { symbol, image } = { ...addresses?.[source_chain_data?.id] }
   symbol = symbol || asset_data?.symbol || denom
   image = image || asset_data?.image
   if (symbol && (['wrap', 'unwrap'].includes(type) || wrap || unwrap)) {
