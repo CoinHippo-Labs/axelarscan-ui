@@ -1,7 +1,7 @@
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
-import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect } from 'wagmi'
+import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect, useSignMessage } from 'wagmi'
 // import { BrowserProvider, FallbackProvider, JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { providers } from 'ethers'
 
@@ -63,6 +63,31 @@ export default (
   const { address } = useAccount()
   const { disconnect } = useDisconnect()
   const chainId = chain?.id
+  const message = process.env.NEXT_PUBLIC_APP_NAME
+  const { data: signature, signMessage } = useSignMessage({ message })
+
+  const [signatureValid, setSignatureValid] = useState()
+
+  const validateSignature = async () => {
+    try {
+      const isContract = !!(await _provider.getBytecode({ address }))
+      if (isContract) {
+        const response = await _provider.readContract({
+          address,
+          abi: [parseAbiItem('function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)')],
+          functionName: 'isValidSignature',
+          args: [hashMessage(message), signature],
+        })
+        // https://eips.ethereum.org/EIPS/eip-1271
+        const isValid = response === '0x1626ba7e'
+        setSignatureValid(isValid)
+      }
+      else {
+        const isValid = await verifyMessage({ address, message, signature })
+        setSignatureValid(isValid)
+      }
+    } catch (error) {}
+  }
 
   useEffect(
     () => {
@@ -83,6 +108,15 @@ export default (
       }
     },
     [chainId, signer, address],
+  )
+
+  useEffect(
+    () => {
+      if (_provider && !signatureValid) {
+        validateSignature()
+      }
+    },
+    [_provider, signatureValid],
   )
 
   return !hidden && (
