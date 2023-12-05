@@ -344,9 +344,9 @@ export default ({ data, buttons }) => {
               {transactionHash && <Copy value={transactionHash} />}
               {!proposal_id && <ExplorerLink value={transactionHash} explorer={source_chain_data?.explorer} hasEventLog={logDisplay} />}
             </div>
-            <div className="flex items-center space-x-1">
+            <div className="flex flex-wrap items-center">
               <Tooltip content="Method">
-                <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium py-1 px-2">
+                <div className="w-fit h-6 bg-slate-50 dark:bg-slate-800 rounded flex items-center text-slate-600 dark:text-slate-200 font-medium mb-1 mr-1 py-1 px-2">
                   {token_sent ? 'InterchainTransfer' : token_deployment_initialized ? 'TokenDeploymentInitialized' : token_deployed ? 'TokenDeployed' : token_manager_deployment_started ? 'TokenManagerDeployment' : interchain_token_deployment_started ? 'InterchainTokenDeployment' : interchain_transfer || interchain_transfer_with_data ? 'InterchainTransfer' : getTitle(normalizeEvent(event))}
                 </div>
               </Tooltip>
@@ -355,7 +355,7 @@ export default ({ data, buttons }) => {
                   href={`/gmp/${callback_data.call.transactionHash}${callback_data.call.chain_type === 'evm' && typeof callback_data.call.logIndex === 'number' ? `:${callback_data.call.logIndex}` : ''}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-6 bg-blue-400 dark:bg-blue-600 rounded flex items-center text-white font-medium py-1 px-2"
+                  className="h-6 bg-blue-400 dark:bg-blue-600 rounded flex items-center text-white font-medium mb-1 mr-1 py-1 px-2"
                 >
                   <span>Callback</span>
                   <RiArrowRightFill size={14} className="ml-0.5 -mr-0.5" />
@@ -366,7 +366,7 @@ export default ({ data, buttons }) => {
                   href={`/gmp/${origin_data.call.transactionHash}${origin_data.call.chain_type === 'evm' && typeof origin_data.call.logIndex === 'number' ? `:${origin_data.call.logIndex}` : ''}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="h-6 bg-blue-400 dark:bg-blue-600 rounded flex items-center text-white font-medium py-1 px-2"
+                  className="h-6 bg-blue-400 dark:bg-blue-600 rounded flex items-center text-white font-medium mb-1 mr-1 py-1 px-2"
                 >
                   <RiArrowLeftFill size={14} className="-ml-0.5 mr-0.5" />
                   <span>Origin</span>
