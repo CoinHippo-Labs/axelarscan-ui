@@ -814,7 +814,7 @@ export default ({ data }) => {
           headerClassName: 'justify-end text-right',
         },
       ]}
-      data={steps.filter(s => s.status !== 'pending')}
+      data={steps.filter(s => s.status !== 'pending' || s.data)}
       defaultPageSize={10}
       noPagination={true}
       className="no-border no-shadow"
