@@ -122,7 +122,7 @@ export default () => {
                             resolve([m, types.includes('gmp') && await GMPTotalActiveUsers({ ...filters, symbol })])
                             break
                           case 'GMPTopUsers':
-                            resolve([m, types.includes('gmp') && await GMPTopUsers({ ...filters, symbol })])
+                            resolve([m, types.includes('gmp') && await GMPTopUsers({ ...filters, symbol, size: 100 })])
                             break
                           case 'transfersStats':
                             resolve([m, types.includes('token_transfers') && await transfersStats({ ...filters })])
@@ -170,10 +170,10 @@ export default () => {
                             resolve([m, types.includes('token_transfers') && await transfersTotalActiveUsers({ ...filters })])
                             break
                           case 'transfersTopUsers':
-                            resolve([m, types.includes('token_transfers') && await transfersTopUsers({ ...filters })])
+                            resolve([m, types.includes('token_transfers') && await transfersTopUsers({ ...filters, size: 100 })])
                             break
                           case 'transfersTopUsersByVolume':
-                            resolve([m, types.includes('token_transfers') && await transfersTopUsers({ ...filters, orderBy: 'volume' })])
+                            resolve([m, types.includes('token_transfers') && await transfersTopUsers({ ...filters, orderBy: 'volume', size: 100 })])
                             break
                           default:
                             resolve()
