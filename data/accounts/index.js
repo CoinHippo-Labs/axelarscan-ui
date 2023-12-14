@@ -20,6 +20,16 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: '0xfDF36A30070ea0241d69052ea85ff44Ad0476a66',
+    name: 'Interchain Gateway Governance',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0xE39Dd1830B1d7FF5E3267bf7bf21e56A163402E2',
+    name: 'Interchain Token Factory',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: '0x1f8A4d195B647647c7dD45650CBd553FD33cCAA6',
     name: 'Interchain Proposal Sender',
     image: '/logos/accounts/axelarnet.svg',
