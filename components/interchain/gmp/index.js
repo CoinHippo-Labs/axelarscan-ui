@@ -229,7 +229,7 @@ export default () => {
 
         const { call, approved } = { ...data }
         const { chain, transactionHash, transactionIndex, logIndex, returnValues } = { ...call }
-        const { destinationChain } = { ...returnValues }
+        const { destinationChain, messageId } = { ...returnValues }
         const { gas_add_adjustment } = { ...parameters }
         const gasMultipler = gas_add_adjustment[ENVIRONMENT]?.[destinationChain?.toLowerCase()] || gas_add_adjustment[ENVIRONMENT]?.default
 
@@ -245,8 +245,8 @@ export default () => {
           },
         }
 
-        console.log('[addGas request]', { chain, transactionHash, refundAddress: address, gasMultipler, token, sendOptions })
-        const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, { useWindowEthereum: true, refundAddress: address, gasMultipler })
+        console.log('[addGas request]', { chain, transactionHash, logIndex, messageId, refundAddress: address, gasMultipler, token, sendOptions })
+        const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, messageId, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash/*, logIndex*/, { useWindowEthereum: true, signer, refundAddress: address, gasMultipler })
         console.log('[addGas response]', response)
         const { success, error, transaction, broadcastResult } = { ...response }
         const { message } = { ...error }
@@ -282,11 +282,14 @@ export default () => {
         }
 
         const { call } = { ...data }
-        const { transactionHash, transactionIndex, logIndex } = { ...call }
+        const { transactionHash, transactionIndex, logIndex, _logIndex, returnValues } = { ...call }
+        let { messageId } = { ...returnValues }
+        const eventIndex = _logIndex
+        messageId = messageId || (transactionHash && typeof _logIndex === 'number' ? `${transactionHash}-${_logIndex}` : null)
         const escapeAfterConfirm = false
 
-        console.log('[manualRelayToDestChain request]', { transactionHash, logIndex, escapeAfterConfirm })
-        const response = await api.manualRelayToDestChain(transactionHash, logIndex, undefined, escapeAfterConfirm)
+        console.log('[manualRelayToDestChain request]', { transactionHash, logIndex, eventIndex, escapeAfterConfirm, messageId })
+        const response = await api.manualRelayToDestChain(transactionHash, logIndex, eventIndex, { useWindowEthereum: true, signer }, escapeAfterConfirm, messageId)
         console.log('[manualRelayToDestChain response]', response)
         const { success, error, confirmTx, signCommandTx, routeMessageTx } = { ...response }
         const { message } = { ...error }
@@ -323,7 +326,7 @@ export default () => {
         const gasLimitBuffer = execute_gas_limit_buffer[ENVIRONMENT]?.[chain] || execute_gas_limit_buffer[ENVIRONMENT]?.default
 
         console.log('[execute request]', { transactionHash, logIndex, gasLimitBuffer })
-        const response = await api.execute(transactionHash, logIndex, { useWindowEthereum: true, gasLimitBuffer })
+        const response = await api.execute(transactionHash, logIndex, { useWindowEthereum: true, gasLimitBuffer, gasLimit })
         console.log('[execute response]', response)
         const { success, error, transaction } = { ...response }
         const { message } = { ...error }
