@@ -326,7 +326,7 @@ export default () => {
         const gasLimitBuffer = execute_gas_limit_buffer[ENVIRONMENT]?.[chain] || execute_gas_limit_buffer[ENVIRONMENT]?.default
 
         console.log('[execute request]', { transactionHash, logIndex, gasLimitBuffer })
-        const response = await api.execute(transactionHash, logIndex, { useWindowEthereum: true, gasLimitBuffer, gasLimit })
+        const response = await api.execute(transactionHash, logIndex, { useWindowEthereum: true, signer, gasLimitBuffer })
         console.log('[execute response]', response)
         const { success, error, transaction } = { ...response }
         const { message } = { ...error }
