@@ -40,7 +40,7 @@ export default (
             let focus_time_string
             switch (granularity) {
               case 'month':
-                focus_time_string = time.format('MMM YY')
+                focus_time_string = time.format('MMM YYYY')
                 break
               case 'week':
                 focus_time_string = [time.format(dateFormat), moment(time).add(7, 'days').format(dateFormat)].join(' - ')
