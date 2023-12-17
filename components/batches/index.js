@@ -2,120 +2,51 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import { Chip, Tooltip } from '@material-tailwind/react'
 import _ from 'lodash'
 import moment from 'moment'
-import { BigNumber, utils } from 'ethers'
-import { ProgressBar, ColorRing } from 'react-loader-spinner'
-import { BiRightArrowCircle, BiCheckCircle, BiXCircle } from 'react-icons/bi'
-import { MdOutlineWatchLater } from 'react-icons/md'
-import { TiArrowRight } from 'react-icons/ti'
+import { BsArrowRightShort } from 'react-icons/bs'
 
-import PendingCommands from './pending-commands'
+import Filters from './filters'
+import Spinner from '../spinner'
 import Datatable from '../datatable'
-import EnsProfile from '../ens-profile'
+import NumberDisplay from '../number'
 import Image from '../image'
 import Copy from '../copy'
-import TimeAgo from '../time-ago'
-import { batched_commands } from '../../lib/api/lcd'
-import { batches as getBatches } from '../../lib/api/batches'
-import { getChain, chainManager } from '../../lib/object/chain'
-import { number_format, ellipse, equals_ignore_case, to_json, params_to_obj, loader_color, sleep } from '../../lib/utils'
+import AccountProfile from '../profile/account'
+import ExplorerLink from '../explorer/link'
+import TimeAgo from '../time/timeAgo'
+import { searchBatches } from '../../lib/api/batches'
+import { batchedCommands } from '../../lib/api/lcd'
+import { getChainData, getAssetData } from '../../lib/config'
+import { formatUnits } from '../../lib/number'
+import { split, toArray, ellipse, equalsIgnoreCase, getQueryParams, sleep } from '../../lib/utils'
 
-const LIMIT = 25
+const PAGE_SIZE = 25
+const PENDING_STATUSES = ['signing', 'unexecuted']
+const NUM_COMMANDS_TRUNCATE = 10
 
 export default () => {
-  const {
-    preferences,
-    evm_chains,
-    assets,
-  } = useSelector(state =>
-    (
-      {
-        preferences: state.preferences,
-        evm_chains: state.evm_chains,
-        assets: state.assets,
-      }
-    ),
-    shallowEqual,
-  )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    evm_chains_data,
-  } = { ...evm_chains }
-  const {
-    assets_data,
-  } = { ...assets }
+  const { chains, assets } = useSelector(state => ({ chains: state.chains, assets: state.assets }), shallowEqual)
+  const { chains_data } = { ...chains }
+  const { assets_data } = { ...assets }
 
   const router = useRouter()
-  const {
-    pathname,
-    asPath,
-  } = { ...router }
+  const { pathname, asPath } = { ...router }
 
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
-  const [offset, setOffet] = useState(0)
+  const [offset, setOffset] = useState(0)
+  const [filters, setFilters] = useState(null)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
-  const [filters, setFilters] = useState(null)
   const [types, setTypes] = useState(null)
-  const [filterTypes, setFilterTypes] = useState(null)
+  const [typesFiltered, setTypesFiltered] = useState(null)
 
   useEffect(
     () => {
       if (asPath) {
-        const params =
-          params_to_obj(
-            asPath.indexOf('?') > -1 &&
-            asPath
-              .substring(
-                asPath.indexOf('?') + 1,
-              )
-          )
-
-        const {
-          batchId,
-          commandId,
-          chain,
-          keyId,
-          type,
-          status,
-          fromTime,
-          toTime,
-        } = { ...params }
-
-        setFilters(
-          {
-            batchId,
-            commandId,
-            chain,
-            keyId,
-            type,
-            status:
-              [
-                'executed',
-                'unexecuted',
-                'signed',
-                'signing',
-                'aborted',
-              ].includes(status?.toLowerCase()) ?
-                status.toLowerCase() :
-                undefined,
-            time:
-              fromTime &&
-              toTime &&
-              [
-                moment(
-                  Number(fromTime)
-                ),
-                moment(
-                  Number(toTime)
-                ),
-              ],
-          }
-        )
+        setFilters({ ...getQueryParams(asPath) })
       }
     },
     [asPath],
@@ -123,34 +54,17 @@ export default () => {
 
   useEffect(
     () => {
-      const triggering = is_interval => {
-        setFetchTrigger(
-          is_interval ?
-            moment()
-              .valueOf() :
-            typeof fetchTrigger === 'number' ?
-              null :
-              0
-        )
+      const trigger = is_interval => {
+        if (pathname && chains_data && filters && (!is_interval || !fetching)) {
+          setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+        }
       }
 
-      if (
-        evm_chains_data &&
-        pathname &&
-        filters
-      ) {
-        triggering()
-      }
-
-      const interval =
-        setInterval(() =>
-          triggering(true),
-          5 * 60 * 1000,
-        )
-
+      trigger()
+      const interval = setInterval(() => trigger(true), 5 * 60 * 1000)
       return () => clearInterval(interval)
     },
-    [evm_chains_data, pathname, filters],
+    [pathname, chains_data, filters],
   )
 
   useEffect(
@@ -160,152 +74,38 @@ export default () => {
           setFetching(true)
 
           if (!fetchTrigger) {
-            setTotal(null)
             setData(null)
-            setOffet(0)
+            setTotal(null)
+            setOffset(0)
           }
 
-          const _data =
-            !fetchTrigger ?
-              [] :
-              data ||
-              []
-
-          const size = LIMIT
-
-          const from =
-            fetchTrigger === true ||
-            fetchTrigger === 1 ?
-              _data.length :
-              0
-
-          const {
-            chain,
-            batchId,
-            commandId,
-            keyId,
-            type,
-            status,
-            time,
-          } = { ...filters }
-
-          let response =
-            await getBatches(
-              {
-                chain,
-                batchId,
-                commandId,
-                keyId,
-                type,
-                status,
-                fromTime: time?.[0]?.unix(),
-                toTime: time?.[1]?.unix(),
-                from,
-                size,
-              },
-            )
+          const _data = toArray(fetchTrigger && data)
+          const size = PAGE_SIZE
+          const from = [true, 1].includes(fetchTrigger) ? _data.length : 0
+          const { status } = { ...filters }
+          const response = await searchBatches({ ...filters, size, from })
 
           if (response) {
-            const {
-              total,
-            } = { ...response }
-
+            const { total } = { ...response }
+            let { data } = { ...response }
             setTotal(total)
-
-            if (
-              [
-                'signing',
-                'unexecuted',
-              ].includes(status)
-            ) {
-              updateSigningBatches(
-                response.data,
-                true,
-              )
+            if (PENDING_STATUSES.includes(status)) {
+              updateBatches(data)
             }
-
-            response =
-              _.orderBy(
-                _.uniqBy(
-                  _.concat(
-                    (response.data || [])
-                      .map(d => {
-                        const {
-                          batch_id,
-                          chain,
-                          key_id,
-                          status,
-                          created_at,
-                        } = { ...d }
-                        const {
-                          ms,
-                        } = { ...created_at }
-
-                          return {
-                            ...d,
-                            batch_id:
-                              Array.isArray(batch_id) ?
-                                _.last(batch_id) :
-                                batch_id,
-                            chain:
-                              Array.isArray(chain) ?
-                                _.last(chain) :
-                                chain,
-                            key_id:
-                              Array.isArray(key_id) ?
-                                _.last(key_id) :
-                                key_id,
-                            status:
-                              Array.isArray(status) ?
-                                _.last(status) :
-                                status,
-                            created_at: {
-                              ms:
-                                ms ?
-                                  ms :
-                                  Array.isArray(d?.['created_at.ms']) ?
-                                    _.last(d['created_at.ms']) :
-                                    d?.['created_at.ms'],
-                              ...(
-                                Array.isArray(created_at) ?
-                                  _.last(created_at) :
-                                  created_at
-                              ),
-                            },
-                          }
-                        }),
-                    _data,
-                  ),
-                  'batch_id',
-                ),
-                ['created_at.ms'],
-                ['desc'],
-              )
-
-            if (
-              ![
-                'signing',
-                'unexecuted',
-              ].includes(status)
-            ) {
-              response =
-                await updateSigningBatches(
-                  response,
-                  true,
-                )
+            data = _.orderBy(_.uniqBy(_.concat(toArray(data), _data), 'batch_id'), ['created_at.ms'], ['desc'])
+            if (!PENDING_STATUSES.includes(status)) {
+              data = await updateBatches(data)
             }
-
-            setData(response)
+            setData(data)
           }
           else if (!fetchTrigger) {
-            setTotal(0)
             setData([])
+            setTotal(0)
           }
 
           setFetching(false)
         }
       }
-
       getData()
     },
     [fetchTrigger],
@@ -314,1036 +114,472 @@ export default () => {
   useEffect(
     () => {
       if (data) {
-        setTypes(
-          _.countBy(
-            _.uniqBy(
-              data,
-              'batch_id',
-            )
-            .flatMap(b =>
-              (b?.commands || [])
-                .map(c => c?.type)
-            )
-            .filter(t => t)
-          )
-        )
+        setTypes(_.countBy(toArray(_.uniqBy(data, 'batch_id').flatMap(d => toArray(d.commands).map(c => c.type)))))
       }
     },
     [data],
   )
 
-  const updateSigningBatches = async (
-    _data = [],
-    is_after_search,
-  ) => {
-    const data =
-      (_.cloneDeep(_data) || [])
-        .filter(b =>
-          [
-            'BATCHED_COMMANDS_STATUS_SIGNING',
-          ].includes(b?.status) ||
-          (
-            [
-              'BATCHED_COMMANDS_STATUS_SIGNED',
-            ].includes(b?.status) &&
-            (b.commands || [])
-              .findIndex(c =>
-                !c?.executed
-              ) > -1
-          )
-        )
+  const updateBatches = async data => {
+    const _data = _.cloneDeep(toArray(data)).filter(d => d.status === 'BATCHED_COMMANDS_STATUS_SIGNING' || (d.status === 'BATCHED_COMMANDS_STATUS_SIGNED' && toArray(d.commands).findIndex(c => !c.executed) > -1) || toArray(d.commands).length < 1)
 
-    if (data.length > 0) {
-      if (is_after_search) {
-        await sleep(0.5 * 1000)
-      }
+    for (const d of _data) {
+      const { batch_id, chain, created_at } = { ...d }
+      const { ms } = { ...created_at }
+      await sleep(0.5 * 1000)
+      const response = await batchedCommands(chain, batch_id, { index: true, created_at: ms ? Number(ms) / 1000 : undefined })
 
-      for (const d of data) {
-        const {
-          chain,
-          batch_id,
-          created_at,
-        } = { ...d }
-        const {
-          ms,
-        } = { ...created_at }
-
-        const response =
-          await batched_commands(
-            chain,
-            batch_id,
-            {
-              created_at:
-                ms ?
-                  Number(ms) / 1000 :
-                  undefined,
-            },
-          )
-
-        const batch_data =
-          {
-            ...response,
-          }
-
-        if (batch_data) {
-          const data_index = _data
-            .findIndex(b =>
-              equals_ignore_case(
-                b?.batch_id,
-                batch_id,
-              )
-            )
-
-          if (data_index > -1) {
-            _data[data_index] = batch_data
-          }
+      if (response) {
+        const index = data.findIndex(d => equalsIgnoreCase(d.batch_id, batch_id))
+        if (index > -1) {
+          data[index] = response
         }
-
-        await sleep(0.5 * 1000)
-      }
-
-      if (!is_after_search) {
-        await sleep(0.5 * 1000)
       }
     }
 
-    return _data
+    return data
   }
 
-  const data_filtered =
-    data &&
-    data
-      .filter(d =>
-        !(filterTypes?.length > 0) ||
-        (d?.commands || [])
-          .findIndex(c =>
-            filterTypes.includes(c?.type)
-          ) > -1 ||
-        (
-          filterTypes.includes('undefined') &&
-          !(d?.commands?.length > 0)
-        )
-      )
+  const dataFiltered = toArray(data).filter(d => toArray(typesFiltered).length < 1 || toArray(d.commands).findIndex(c => typesFiltered.includes(c.type)) > -1)
 
   return (
-    data ?
-      <div className="space-y-2">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between space-y-2 sm:space-y-0 space-x-0 sm:space-x-2 -mt-0.5">
-          <div className="space-y-1.5">
-            {
-              typeof total === 'number' &&
-              (
-                <div className="flex items-center space-x-1.5 sm:mb-1 ml-2 sm:ml-0">
-                  <span className="tracking-wider text-sm font-semibold">
-                    {number_format(
-                      total,
-                      '0,0',
-                    )}
-                  </span>
-                  <span className="tracking-wider text-sm">
-                    Results
-                  </span>
-                </div>
-              )
-            }
-            <div className="flex flex-wrap items-center">
-              {(evm_chains_data || [])
-                .filter(c =>
-                  !c?.no_inflation &&
-                  !c?.deprecated
-                )
-                .map((c, i) => (
+    <div className="children">
+      {data ?
+        <div className="space-y-2 sm:space-y-4 mt-4 sm:mt-6 mx-auto">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0 space-x-0 sm:space-x-3 px-3">
+            <div className="space-y-0.5">
+              <div className="text-lg font-bold">
+                EVM Batches
+              </div>
+              {typeof total === 'number' && (
+                <NumberDisplay
+                  value={total}
+                  format="0,0"
+                  suffix=" Results"
+                  className="whitespace-nowrap text-slate-500 dark:text-slate-200 font-semibold"
+                />
+              )}
+            </div>
+            <div className="flex flex-col sm:items-end space-y-1">
+              <Filters />
+              <div className="overflow-x-auto flex flex-wrap items-center justify-start sm:justify-end">
+                {Object.entries({ ...types }).map(([k, v]) => (
                   <div
-                    key={i}
-                    className="mb-1 mr-1.5"
+                    key={k}
+                    onClick={() => setTypesFiltered(_.uniq(toArray(typesFiltered).includes(k) ? typesFiltered.filter(t => !equalsIgnoreCase(t, k)) : _.concat(toArray(typesFiltered), k)))}
+                    className={`min-w-max ${toArray(typesFiltered).includes(k) ? 'text-blue-400 dark:text-white font-semibold' : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs sm:text-sm space-x-1 sm:ml-3 mr-3 sm:mr-0`}
                   >
-                    <PendingCommands
-                      chain_data={c}
+                    <span>{k}</span>
+                    <NumberDisplay
+                      value={v}
+                      format="0,0"
+                      className="text-blue-400 dark:text-white"
                     />
                   </div>
-                ))
-              }
+                ))}
+              </div>
             </div>
           </div>
-          <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start sm:justify-end sm:space-x-2.5">
-            {Object.entries({ ...types })
-              .map(([k, v]) => (
-                <div
-                  key={k}
-                  onClick={() =>
-                    setFilterTypes(
-                      _.uniq(
-                        filterTypes?.includes(k) ?
-                          filterTypes
-                            .filter(t =>
-                              !equals_ignore_case(
-                                t,
-                                k,
-                              )
-                            ) :
-                        _.concat(
-                          filterTypes ||
-                          [],
-                          k,
-                        )
-                      )
-                    )
-                  }
-                  className={`max-w-min bg-trasparent ${filterTypes?.includes(k) ? 'font-bold' : 'text-slate-400 hover:text-black dark:text-slate-600 dark:hover:text-white hover:font-medium'} cursor-pointer whitespace-nowrap flex items-center text-xs space-x-1 mr-1 mt-1`}
-                  style={
-                    {
-                      textTransform: 'none',
-                    }
-                  }
-                >
-                  <span>
-                    {k === 'undefined' ?
-                      'Unknown' :
-                      k
-                    }
-                  </span>
-                  <span className="text-blue-500 dark:text-white">
-                    {number_format(
-                      v,
-                      '0,0',
-                    )}
-                  </span>
-                </div>
-              ))
-            }
-          </div>
-        </div>
-        <Datatable
-          columns={
-            [
-              {
-                Header: 'Batch ID',
-                accessor: 'batch_id',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    value,
-                  } = { ...props }
-                  const {
-                    chain,
-                    commands,
-                  } = { ...props.row.original }
-
-                  const _types =
-                    _.countBy(
-                      _.uniqBy(
-                        commands ||
-                        [],
-                        'id',
-                      )
-                      .map(c => c?.type)
-                      .filter(t => t)
-                    )
-
-                  return (
-                    <div className="flex flex-col space-y-2 mb-3">
-                      <div className="flex items-center space-x-1">
-                        <Link href={`/batch/${chain}/${value}`}>
-                          <a
+          <div className="px-3">
+            <Datatable
+              columns={[
+                {
+                  Header: 'Batch ID',
+                  accessor: 'batch_id',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value, row } = { ...props }
+                    const { chain, commands } = { ...row.original }
+                    const types = _.countBy(toArray(_.uniqBy(toArray(commands), 'id').map(c => c.type)))
+                    return (
+                      <div className="flex flex-col mb-6">
+                        <div className="flex items-center space-x-1">
+                          <Link
+                            href={`/evm-batch/${chain}/${value}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                            className="text-blue-400 dark:text-blue-500 font-semibold"
                           >
-                            {ellipse(
-                              value,
-                              10,
-                            )}
-                          </a>
-                        </Link>
-                        <Copy
-                          value={value}
-                        />
-                      </div>
-                      <div className="overflow-x-auto block sm:flex sm:flex-wrap items-center justify-start">
-                        {Object.entries({ ..._types })
-                          .map(([k, v]) => (
-                            <div
-                              key={k}
-                              className="max-w-min bg-trasparent rounded-lg whitespace-nowrap flex items-center text-xs text-slate-600 dark:text-slate-400 font-medium space-x-1.5 mr-3 mb-1"
-                              style={
-                                {
-                                  textTransform: 'none',
-                                }
-                              }
-                            >
-                              <span>
-                                {k === 'undefined' ?
-                                  'Unknown' :
-                                  k
-                                }
-                              </span>
-                              <span className="text-blue-500 dark:text-white">
-                                {number_format(
-                                  v,
-                                  '0,0',
-                                )}
-                              </span>
+                            {ellipse(value, 10)}
+                          </Link>
+                          <Copy value={value} />
+                        </div>
+                        <div className="overflow-x-auto flex flex-wrap items-center">
+                          {Object.entries({ ...types }).map(([k, v]) => (
+                            <div key={k} className="min-w-max whitespace-nowrap flex items-center text-slate-400 dark:text-slate-500 text-xs space-x-1 mr-2">
+                              <span>{k}</span>
+                              <NumberDisplay
+                                value={v}
+                                format="0,0"
+                                className="text-blue-400 dark:text-white"
+                              />
                             </div>
-                          ))
-                        }
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
+                  },
+                  headerClassName: 'whitespace-nowrap',
                 },
-                headerClassName: 'whitespace-nowrap',
-              },
-              {
-                Header: 'Chain',
-                accessor: 'chain',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    value,
-                  } = { ...props }
-
-                  const name =
-                    chainManager
-                      .name(
-                        value,
-                        evm_chains_data,
-                      )
-
-                  const image =
-                    chainManager
-                      .image(
-                        value,
-                        evm_chains_data,
-                      )
-
-                  return (
-                    image ?
-                      <Image
-                        title={name}
-                        src={image}
-                        className="w-6 h-6 rounded-full"
-                      /> :
-                      <span className="font-medium">
-                        {name}
-                      </span>
-                  )
+                {
+                  Header: 'Chain',
+                  accessor: 'chain',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    const { name, image } = { ...getChainData(value, chains_data) }
+                    return (
+                      <Tooltip content={name}>
+                        <div className="w-fit">
+                          <Image
+                            src={image}
+                            width={24}
+                            height={24}
+                            className="3xl:w-8 3xl:h-8 rounded-full"
+                          />
+                        </div>
+                      </Tooltip>
+                    )
+                  },
                 },
-              },
-              {
-                Header: 'Key ID',
-                accessor: 'key_id',
-                disableSortBy: true,
-                Cell: props => (
-                  props.value &&
-                  (
+                {
+                  Header: 'Key ID',
+                  accessor: 'key_id',
+                  disableSortBy: true,
+                  Cell: props => props.value && (
                     <Copy
-                      size={16}
+                      size={14}
                       value={props.value}
                       title={
-                        <span className="cursor-pointer text-slate-400 dark:text-slate-600 text-xs font-medium">
-                          {ellipse(
-                            props.value,
-                            16,
-                          )}
+                        <span className="cursor-pointer text-slate-400 dark:text-slate-500 text-2xs">
+                          {ellipse(props.value, 10)}
                         </span>
                       }
                     />
-                  )
-                ),
-                headerClassName: 'whitespace-nowrap',
-              },
-              {
-                Header: 'Commands',
-                accessor: 'commands',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    value,
-                  } = { ...props }
-                  const {
-                    batch_id,
-                    chain,
-                  } = { ...props.row.original }
+                  ),
+                  headerClassName: 'whitespace-nowrap',
+                },
+                {
+                  Header: 'Commands',
+                  accessor: 'commands',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value, row } = { ...props }
+                    const { batch_id, chain } = { ...row.original }
+                    const { explorer } = { ...getChainData(chain, chains_data) }
+                    const { url, transaction_path } = { ...explorer }
+                    return assets_data && (
+                      toArray(value).length > 0 ?
+                        <div className="min-w-max flex flex-col space-y-2.5 mb-6">
+                          {_.slice(toArray(value), 0, NUM_COMMANDS_TRUNCATE).map((c, i) => {
+                            const {
+                              id,
+                              type,
+                              params,
+                              deposit_address,
+                              transactionHash,
+                              executed,
+                            } = { ...c }
+                            const {
+                              amount,
+                              name,
+                              cap,
+                              account,
+                              salt,
+                              newOwners,
+                              newOperators,
+                              newWeights,
+                              newThreshold,
+                              sourceChain,
+                              sourceTxHash,
+                              contractAddress,
+                            } = { ...params }
+                            let { symbol, decimals } = { ...params }
 
-                  const chain_data =
-                    getChain(
-                      chain,
-                      evm_chains_data,
-                    )
-                  const {
-                    chain_id,
-                    explorer,
-                  } = { ...chain_data }
+                            const transfer_id = parseInt(id, 16)
+                            const asset_data = getAssetData(symbol, assets_data)
+                            const { addresses } = { ...asset_data }
 
-                  return (
-                    assets_data &&
-                    (
-                      value?.length > 0 ?
-                        <div className="flex flex-col space-y-2.5 mb-4">
-                          {
-                            _.slice(
-                              value,
-                              0,
-                              10,
+                            const token_data = addresses?.[chain]
+                            symbol = token_data?.symbol || asset_data?.symbol || symbol
+                            decimals = token_data?.decimals || asset_data?.decimals || decimals || 18
+                            const image = token_data?.image || asset_data?.image
+
+                            const source_chain_data = getChainData(sourceChain, chains_data)
+                            const typeComponent = (
+                              <Tooltip placement="top-start" content={executed ? 'Executed' : 'Unexecuted'}>
+                                <Chip
+                                  color={executed ? 'green' : 'cyan'}
+                                  value={type}
+                                  className="chip normal-case text-2xs font-medium mr-2 py-0 px-2"
+                                />
+                              </Tooltip>
                             )
-                            .filter(c => c)
-                            .map((c, i) => {
-                              const {
-                                id,
-                                params,
-                                type,
-                                deposit_address,
-                                executed,
-                                transactionHash,
-                              } = { ...c }
-                              const {
-                                amount,
-                                name,
-                                cap,
-                                account,
-                                salt,
-                                newOwners,
-                                newOperators,
-                                newWeights,
-                                newThreshold,
-                                sourceChain,
-                                sourceTxHash,
-                                contractAddress,
-                              } = { ...params }
-                              let {
-                                symbol,
-                                decimals,
-                              } = { ...params }
 
-                              const asset_data = (assets_data || [])
-                                .find(a =>
-                                  equals_ignore_case(
-                                    a?.symbol,
-                                    symbol,
-                                  ) ||
-                                  (a?.contracts || [])
-                                    .findIndex(_c =>
-                                      _c?.chain_id === chain_id &&
-                                      equals_ignore_case(
-                                        _c.symbol,
-                                        symbol,
-                                      )
-                                    ) > -1
-                                )
-                              const {
-                                contracts,
-                              } = { ...asset_data }
-
-                              const contract_data = (contracts || [])
-                                .find(_c =>
-                                  _c.chain_id === chain_id
-                                )
-
-                              let {
-                                image,
-                              } = { ...contract_data }
-
-                              decimals =
-                                contract_data?.decimals ||
-                                asset_data?.decimals ||
-                                decimals ||
-                                18
-
-                              symbol =
-                                contract_data?.symbol ||
-                                asset_data?.symbol ||
-                                symbol
-
-                              image =
-                                image ||
-                                asset_data?.image
-
-                              const source_chain_data =
-                                getChain(
-                                  sourceChain,
-                                  evm_chains_data,
-                                )
-
-                              const transfer_id =
-                                parseInt(
-                                  id,
-                                  16,
-                                )
-
-                              const typeComponent =
-                                (
-                                  <div
-                                    title={
-                                      executed ?
-                                        'Executed' :
-                                        ''
-                                    }
-                                    className={`w-fit max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700 font-semibold py-0.5 px-1.5' : 'bg-slate-100 dark:bg-slate-900 font-medium py-1 px-2'} rounded-lg capitalize text-xs mb-1 mr-2`}
+                            return (
+                              <div key={i} className="flex flex-wrap items-start">
+                                {transactionHash && url ?
+                                  <a
+                                    href={`${url}${transaction_path?.replace('{tx}', transactionHash)}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                   >
-                                    {type}
+                                    {typeComponent}
+                                  </a> :
+                                  typeComponent
+                                }
+                                {symbol && !['approveContractCall'].includes(type) && (
+                                  <div className="min-w-max max-w-min flex items-center justify-center space-x-1 mr-2">
+                                    {image && (
+                                      <Image
+                                        src={image}
+                                        width={20}
+                                        height={20}
+                                      />
+                                    )}
+                                    {!!(amount) && (
+                                      <NumberDisplay
+                                        value={formatUnits(amount, decimals)}
+                                        format="0,0.000000"
+                                      />
+                                    )}
+                                    <span className="text-sm font-medium">
+                                      {symbol}
+                                    </span>
                                   </div>
-                                )
-
-                              return (
-                                <div
-                                  key={i}
-                                  className="flex flex-wrap items-center"
-                                >
-                                  {
-                                    typeComponent &&
-                                    (
-                                      transactionHash &&
-                                      explorer ?
-                                        <a
-                                          href={`${explorer.url}${explorer.transaction_path?.replace('{tx}', transactionHash)}`}
+                                )}
+                                {source_chain_data && (
+                                  <div className="flex items-start space-x-1 mr-2">
+                                    <Tooltip content={source_chain_data.name}>
+                                      <div className="w-fit">
+                                        <Image
+                                          src={source_chain_data.image}
+                                          width={20}
+                                          height={20}
+                                          className="rounded-full"
+                                        />
+                                      </div>
+                                    </Tooltip>
+                                    {sourceTxHash && (
+                                      <div className="flex items-center space-x-1">
+                                        <Link
+                                          href={`/gmp/${sourceTxHash}${source_chain_data.chain_type === 'cosmos' && id ? `?command_id=${id}` : ''}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
-                                          className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                          className="text-blue-400 dark:text-blue-500 font-medium"
                                         >
-                                          {typeComponent}
-                                        </a> :
-                                        typeComponent
-                                    )
-                                  }
-                                  {
-                                    source_chain_data &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        {source_chain_data.image ?
-                                          <Image
-                                            src={source_chain_data.image}
-                                            className="w-5 h-5 rounded-full"
-                                          /> :
-                                          <span className="font-medium">
-                                            {source_chain_data.name}
-                                          </span>
-                                        }
-                                        {
-                                          sourceTxHash &&
-                                          (
-                                            <div className="flex items-center space-x-1">
-                                              <Link href={`/gmp/${sourceTxHash}`}>
-                                                <a
-                                                  target="_blank"
-                                                  rel="noopener noreferrer"
-                                                  className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                                >
-                                                  GMP
-                                                </a>
-                                              </Link>
-                                              {
-                                                source_chain_data.explorer?.url &&
-                                                (
-                                                  <a
-                                                    href={`${source_chain_data.explorer.url}${source_chain_data.explorer.transaction_path?.replace('{tx}', sourceTxHash)}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                                                  >
-                                                    {source_chain_data.explorer.icon ?
-                                                      <Image
-                                                        src={source_chain_data.explorer.icon}
-                                                        className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                                      /> :
-                                                      <TiArrowRight
-                                                        size={16}
-                                                        className="transform -rotate-45"
-                                                      />
-                                                    }
-                                                  </a>
-                                                )
-                                              }
-                                            </div>
-                                          )
-                                        }
-                                        {
-                                          contractAddress &&
-                                          (
-                                            <>
-                                              <BiRightArrowCircle
-                                                size={18}
-                                              />
-                                              <div className="flex items-center space-x-1">
-                                                <EnsProfile
-                                                  address={contractAddress}
-                                                  fallback={
-                                                    contractAddress &&
-                                                    (
-                                                      <Copy
-                                                        value={contractAddress}
-                                                        title={
-                                                          <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-sm">
-                                                            <span className="xl:hidden">
-                                                              {ellipse(
-                                                                contractAddress,
-                                                                6,
-                                                              )}
-                                                            </span>
-                                                            <span className="hidden xl:block">
-                                                              {ellipse(
-                                                                contractAddress,
-                                                                8,
-                                                              )}
-                                                            </span>
-                                                          </span>
-                                                        }
-                                                      />
-                                                    )
-                                                  }
-                                                  className="tracking-wider text-black dark:text-white text-sm font-medium"
-                                                />
-                                                {explorer?.url &&
-                                                  (
-                                                    <a
-                                                      href={`${explorer.url}${explorer.address_path?.replace('{address}', contractAddress)}`}
-                                                      target="_blank"
-                                                      rel="noopener noreferrer"
-                                                      className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                                                    >
-                                                      {explorer.icon ?
-                                                        <Image
-                                                          src={explorer.icon}
-                                                          className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                                        /> :
-                                                        <TiArrowRight
-                                                          size={16}
-                                                          className="transform -rotate-45"
-                                                        />
-                                                      }
-                                                    </a>
-                                                  )
-                                                }
-                                              </div>
-                                            </>
-                                          )
-                                        }
+                                          GMP
+                                        </Link>
+                                        {source_chain_data.chain_type !== 'cosmos' && <ExplorerLink value={sourceTxHash} explorer={source_chain_data.explorer} />}
                                       </div>
-                                    )
-                                  }
-                                  {
-                                    symbol &&
-                                    (
-                                      <div className="min-w-max max-w-min flex items-center justify-center sm:justify-end space-x-1.5 mb-1 mr-2">
-                                        {
-                                          image &&
-                                          (
-                                            <Image
-                                              src={image}
-                                              className="w-5 h-5 rounded-full"
-                                            />
-                                          )
-                                        }
-                                        <span className="text-sm font-medium">
-                                          {
-                                            amount > 0 &&
-                                            (
-                                              <span className="mr-1">
-                                                {number_format(
-                                                  utils.formatUnits(
-                                                    BigNumber.from(amount),
-                                                    decimals,
-                                                  ),
-                                                  '0,0.000000',
-                                                  true,
-                                                )}
-                                              </span>
-                                            )
-                                          }
-                                          <span>
-                                            {symbol}
-                                          </span>
-                                        </span>
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    [
-                                      'mintToken',
-                                    ].includes(type) &&
-                                    typeof transfer_id === 'number' &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        <Link href={`/transfer?transfer_id=${transfer_id}`}>
+                                    )}
+                                    {contractAddress && (
+                                      <>
+                                        <BsArrowRightShort size={18} />
+                                        <div className="flex items-center space-x-1">
+                                          <AccountProfile address={contractAddress} explorer={explorer} chain={chain} />
+                                          <ExplorerLink value={contractAddress} explorer={explorer} />
+                                        </div>
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                                {type === 'mintToken' && typeof transfer_id === 'number' && (
+                                  <div className="flex items-center space-x-1 mr-1">
+                                    <Link
+                                      href={`/transfer?transfer_id=${transfer_id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-400 dark:text-blue-500 font-medium"
+                                    >
+                                      Transfer
+                                    </Link>
+                                  </div>
+                                )}
+                                {name && (
+                                  <div className="flex flex-col mr-2">
+                                    <span className="text-sm font-semibold">
+                                      {name}
+                                    </span>
+                                    <div className="flex items-center space-x-1">
+                                      {decimals && (
+                                        <NumberDisplay
+                                          value={decimals}
+                                          format="0,0"
+                                          prefix="Decimals: "
+                                          className="text-slate-600 dark:text-slate-200 text-xs font-medium"
+                                        />
+                                      )}
+                                      {cap && (
+                                        <NumberDisplay
+                                          value={cap}
+                                          format="0,0"
+                                          prefix="Cap: "
+                                          className="text-slate-600 dark:text-slate-200 text-xs font-medium"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                                {account ?
+                                  <div className="flex items-center space-x-1 mr-2">
+                                    <BsArrowRightShort size={18} />
+                                    <div className="flex items-center space-x-1">
+                                      <AccountProfile address={account} explorer={explorer} chain={chain} />
+                                      <ExplorerLink value={account} explorer={explorer} />
+                                    </div>
+                                  </div> :
+                                  salt && (
+                                    <div className="flex items-center space-x-1 mr-2">
+                                      <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">{deposit_address ? 'Deposit address' : 'Salt'}:</span>
+                                      {deposit_address ?
+                                        <>
                                           <a
+                                            href={`/account/${deposit_address}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
+                                            className="text-slate-400 dark:text-slate-500 text-sm font-medium"
                                           >
-                                            Transfer
+                                            {ellipse(deposit_address, 8)}
                                           </a>
-                                        </Link>
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    name &&
-                                    (
-                                      <div className="flex flex-col mb-1 mr-2">
-                                        <span className="font-medium">
-                                          {name}
-                                        </span>
-                                        <div className="flex items-center space-x-1.5">
-                                          {
-                                            decimals &&
-                                            (
-                                              <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
-                                                <span className="font-medium">
-                                                  decimals:
-                                                </span>
-                                                <span>
-                                                  {number_format(
-                                                    decimals,
-                                                    '0,0',
-                                                  )}
-                                                </span>
-                                              </span>
-                                            )
-                                          }
-                                          {
-                                            cap &&
-                                            (
-                                              <span className="text-slate-400 dark:text-slate-600 text-xs space-x-1">
-                                                <span className="font-medium">
-                                                  cap:
-                                                </span>
-                                                <span>
-                                                  {number_format(
-                                                    cap,
-                                                    '0,0',
-                                                  )}
-                                                </span>
-                                              </span>
-                                            )
-                                          }
-                                        </div>
-                                      </div>
-                                    )
-                                  }
-                                  {account ?
-                                    <div className="flex items-center space-x-1 mb-1 mr-2">
-                                      <BiRightArrowCircle
-                                        size={18}
-                                      />
-                                      <div className="flex items-center space-x-1">
-                                        <EnsProfile
-                                          address={account}
-                                          fallback={
-                                            account &&
-                                            (
-                                              <Copy
-                                                value={account}
-                                                title={
-                                                  <span className="cursor-pointer text-slate-400 dark:text-slate-200 text-xs">
-                                                    <span className="xl:hidden">
-                                                      {ellipse(
-                                                        account,
-                                                        6,
-                                                      )}
-                                                    </span>
-                                                    <span className="hidden xl:block">
-                                                      {ellipse(
-                                                        account,
-                                                        8,
-                                                      )}
-                                                    </span>
-                                                  </span>
-                                                }
-                                              />
-                                            )
-                                          }
-                                          className="tracking-wider text-black dark:text-white text-sm font-medium"
-                                        />
-                                        {explorer?.url &&
-                                          (
-                                            <a
-                                              href={`${explorer.url}${explorer.address_path?.replace('{address}', account)}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="min-w-max text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400"
-                                            >
-                                              {explorer.icon ?
-                                                <Image
-                                                  src={explorer.icon}
-                                                  className="w-4 h-4 rounded-full opacity-60 hover:opacity-100"
-                                                /> :
-                                                <TiArrowRight
-                                                  size={16}
-                                                  className="transform -rotate-45"
-                                                />
-                                              }
-                                            </a>
-                                          )
-                                        }
-                                      </div>
-                                    </div> :
-                                    salt &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        <span className="text-slate-400 dark:text-slate-600 font-medium">
-                                          {deposit_address ?
-                                            'Deposit address' :
-                                            'Salt'
-                                          }:
-                                        </span>
-                                        {deposit_address ?
-                                          <>
-                                            <a
-                                              href={`/account/${deposit_address}`}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="text-slate-400 dark:text-slate-600 text-xs font-medium"
-                                            >
-                                              {ellipse(
-                                                deposit_address,
-                                                8,
-                                              )}
-                                            </a>
-                                            <Copy
-                                              value={deposit_address}
-                                            />
-                                          </> :
-                                          <Copy
-                                            value={salt}
-                                            title={
-                                              <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">
-                                                {ellipse(
-                                                  salt,
-                                                  8,
-                                                )}
-                                              </span>
-                                            }
-                                          />
-                                        }
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    newOwners &&
-                                    (
-                                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                        <span className="text-xs font-medium">
-                                          {number_format(
-                                            newOwners
-                                              .split(';')
-                                              .length,
-                                            '0,0',
-                                          )}
-                                        </span>
-                                        <span className="text-xs font-medium">
-                                          New Owners
-                                        </span>
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    newOperators &&
-                                    (
-                                      <div className="max-w-min bg-slate-100 dark:bg-slate-900 rounded-lg space-x-1 py-1 px-2 mb-1 mr-2">
-                                        <span className="text-xs font-medium">
-                                          {number_format(
-                                            newOperators
-                                              .split(';')
-                                              .length,
-                                            '0,0',
-                                          )}
-                                        </span>
-                                        <span className="text-xs font-medium">
-                                          New Operators
-                                        </span>
-                                        {
-                                          newWeights &&
-                                          (
-                                            <span className="text-xs font-medium">
-                                              [
-                                              {number_format(
-                                                _.sum(
-                                                  newWeights
-                                                    .split(';')
-                                                    .map(w =>
-                                                      Number(w)
-                                                    )
-                                                ),
-                                                '0,0',
-                                              )}
-                                              ]
+                                          <Copy value={deposit_address} />
+                                        </> :
+                                        <Copy
+                                          value={salt}
+                                          title={
+                                            <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
+                                              {ellipse(salt, 8)}
                                             </span>
-                                          )
-                                        }
-                                      </div>
-                                    )
-                                  }
-                                  {
-                                    newThreshold &&
-                                    (
-                                      <div className="flex items-center space-x-1 mb-1 mr-2">
-                                        <span className="text-xs font-medium">
-                                          Threshold:
-                                        </span>
-                                        <span className="text-slate-600 dark:text-slate-400 text-xs font-medium">
-                                          {number_format(
-                                            newThreshold,
-                                            '0,0',
-                                          )}
-                                        </span>
-                                      </div>
-                                    )
-                                  }
-                                </div>
-                              )
-                            })
-                          }
-                          {
-                            value.length > 10 &&
-                            (
-                              <Link href={`/batch/${chain}/${batch_id}`}>
-                                <a
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="whitespace-nowrap text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium space-x-1 ml-1"
-                                >
-                                  <span>
-                                    and
-                                  </span>
-                                  <span>
-                                    {number_format(
-                                      value.length - 10,
-                                      '0,0',
+                                          }
+                                        />
+                                      }
+                                    </div>
+                                  )
+                                }
+                                {newOwners && (
+                                  <NumberDisplay
+                                    value={split(newOwners, 'normal', ';').length}
+                                    format="0,0"
+                                    suffix={' New Owners'}
+                                    noTooltip={true}
+                                    className="bg-slate-50 dark:bg-slate-900 rounded whitespace-nowrap text-black dark:text-white text-xs font-medium mr-2 py-0.5 px-1.5"
+                                  />
+                                )}
+                                {newOperators && (
+                                  <div className="flex items-center mr-2">
+                                    <NumberDisplay
+                                      value={split(newOperators, 'normal', ';').length}
+                                      format="0,0"
+                                      suffix={' New Operators'}
+                                      noTooltip={true}
+                                      className="bg-slate-50 dark:bg-slate-900 rounded whitespace-nowrap text-black dark:text-white text-xs font-medium mr-1 py-0.5 px-1.5"
+                                    />
+                                    {newWeights && (
+                                      <NumberDisplay
+                                        value={_.sum(split(newWeights, 'normal', ';').map(w => Number(w)))}
+                                        format="0,0"
+                                        noTooltip={true}
+                                        className="text-slate-600 dark:text-slate-200 text-xs font-medium"
+                                      />
                                     )}
-                                  </span>
-                                  <span>
-                                    more
-                                  </span>
-                                </a>
-                              </Link>
+                                  </div>
+                                )}
+                                {newThreshold && (
+                                  <NumberDisplay
+                                    value={newThreshold}
+                                    format="0,0"
+                                    prefix={'Threshold: '}
+                                    noTooltip={true}
+                                    className="text-xs font-medium mr-2"
+                                  />
+                                )}
+                              </div>
                             )
-                          }
-                        </div> :
-                        <span>
-                          -
-                        </span>
-                    )
-                  )
-                },
-              },
-              {
-                Header: 'Status',
-                accessor: 'status',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    value,
-                  } = { ...props }
-                  const {
-                    commands,
-                  } = { ...props.row.original }
-
-                  const executed = 
-                    commands &&
-                    commands
-                      .length ===
-                    commands
-                      .filter(c =>
-                        c?.executed
-                      )
-                      .length
-
-                  return (
-                    value &&
-                    (
-                      <div className={`max-w-min ${executed ? 'bg-green-200 dark:bg-green-300 border-2 border-green-400 dark:border-green-600 text-green-500 dark:text-green-700' : 'bg-slate-100 dark:bg-slate-800'} rounded-lg flex items-center space-x-1 py-0.5 px-1.5`}>
-                        {
-                          equals_ignore_case(
-                            value,
-                            'BATCHED_COMMANDS_STATUS_SIGNED',
-                          ) ||
-                          executed ?
-                            <BiCheckCircle
-                              size={18}
-                            /> :
-                            equals_ignore_case(
-                              value,
-                              'BATCHED_COMMANDS_STATUS_SIGNING',
-                            ) ?
-                              <MdOutlineWatchLater
-                                size={18}
-                              /> :
-                              <BiXCircle
-                                size={18}
+                          })}
+                          {toArray(value).length > NUM_COMMANDS_TRUNCATE && (
+                            <Link
+                              href={`/evm-batch/${chain}/${batch_id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="whitespace-nowrap text-blue-400 dark:text-blue-500 font-medium"
+                            >
+                              <NumberDisplay
+                                value={toArray(value).length - NUM_COMMANDS_TRUNCATE}
+                                format="0,0"
+                                prefix={'and '}
+                                suffix={' more'}
                               />
-                        }
-                        <span className="capitalize text-xs font-semibold">
-                          {
-                            (executed ?
-                              'Executed' :
-                              value
-                                .replace(
-                                  'BATCHED_COMMANDS_STATUS_',
-                                  '',
-                                )
-                            )
-                            .toLowerCase()
-                          }
-                        </span>
-                      </div>
+                            </Link>
+                          )}
+                        </div> :
+                        '-'
                     )
-                  )
+                  },
                 },
-              },
-              {
-                Header: 'Time',
-                accessor: 'created_at.ms',
-                disableSortBy: true,
-                Cell: props => (
-                  <TimeAgo
-                    time={props.value}
-                    className="ml-auto"
-                  />
-                ),
-                headerClassName: 'justify-end text-right',
-              },
-            ]
-          }
-          data={data_filtered}
-          noPagination={data_filtered.length <= 10}
-          defaultPageSize={25}
-          className="min-h-full no-border"
-        />
-        {
-          data.length > 0 &&
-          (
-            typeof total !== 'number' ||
-            data.length < total
-          ) &&
-          (
-            !fetching ?
-              <div className="flex justify-center">
-                <button
-                  onClick={() => {
-                    setOffet(data.length)
-                    setFetchTrigger(
-                      typeof fetchTrigger === 'number' ?
-                        true :
-                        1
+                {
+                  Header: 'Status',
+                  accessor: 'status',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value, row } = { ...props }
+                    const { commands } = { ...row.original }
+                    const executed = toArray(commands).length === toArray(commands).filter(c => c.executed).length
+                    return value && (
+                      <Chip
+                        color={executed ? 'green' : equalsIgnoreCase(value, 'BATCHED_COMMANDS_STATUS_SIGNED') ? 'teal' : equalsIgnoreCase(value, 'BATCHED_COMMANDS_STATUS_SIGNING') ? 'blue' : 'red'}
+                        value={executed ? 'Executed' : value.replace('BATCHED_COMMANDS_STATUS_', '')}
+                        className="chip normal-case text-2xs font-medium py-0 px-1.5"
+                      />
                     )
-                  }}
-                  className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
-                >
-                  Load more
-                </button>
-              </div> :
-              <div className="flex justify-center">
-                <ColorRing
-                  color={loader_color(theme)}
-                  width="32"
-                  height="32"
-                />
-              </div>
-          )
-        }
-      </div> :
-      <ProgressBar
-        borderColor={loader_color(theme)}
-        width="36"
-        height="36"
-      />
+                  },
+                },
+                {
+                  Header: 'Time',
+                  accessor: 'created_at.ms',
+                  disableSortBy: true,
+                  Cell: props => props.value && (
+                    <div className="flex justify-end">
+                      <TimeAgo time={props.value / 1000} className="text-slate-400 dark:text-slate-500 text-xs font-medium" />
+                    </div>
+                  ),
+                  headerClassName: 'justify-end text-right',
+                },
+              ]}
+              data={dataFiltered}
+              defaultPageSize={PAGE_SIZE}
+              noPagination={dataFiltered.length < PAGE_SIZE}
+              extra={
+                data.length >= PAGE_SIZE && (typeof total !== 'number' || data.length < total) && (
+                  <div className="flex justify-center">
+                    {!fetching ?
+                      <button
+                        onClick={
+                          () => {
+                            setOffset(data.length)
+                            setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
+                          }
+                        }
+                        className="flex items-center text-black dark:text-white space-x-0.5"
+                      >
+                        <span className="font-medium">
+                          Load more
+                        </span>
+                        <BsArrowRightShort size={18} />
+                      </button> :
+                      <Spinner name="ProgressBar" width={32} height={32} />
+                    }
+                  </div>
+                )
+              }
+              offset={offset}
+              className="no-border no-shadow"
+            />
+          </div>
+        </div> :
+        <div className="loading">
+          <Spinner name="Blocks" />
+        </div>
+      }
+    </div>
   )
 }

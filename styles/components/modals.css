@@ -11,7 +11,7 @@
 }
 
 .modal {
-  @apply transform flex justify-center items-center overflow-hidden fixed inset-0 outline-none z-20;
+  @apply transform flex justify-center items-center overflow-hidden fixed inset-0 outline-none z-50;
   &.show {
     animation-name: modalShow;
     animation-iteration-count: 1;

@@ -2,7 +2,7 @@ import { STATUS_DATA } from './types'
 
 export default (
   state = {
-    [`${STATUS_DATA}`]: null,
+    [STATUS_DATA]: null,
   },
   action,
 ) => {
@@ -10,7 +10,7 @@ export default (
     case STATUS_DATA:
       return {
         ...state,
-        [`${STATUS_DATA}`]: action.value,
+        [STATUS_DATA]: action.value,
       }
     default:
       return state

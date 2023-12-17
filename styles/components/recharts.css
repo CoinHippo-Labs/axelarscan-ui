@@ -2,7 +2,7 @@
 
 [data-background="light"] {
   .recharts-responsive-container {
-    @apply text-slate-900;
+    @apply text-black;
   }
 }
 
@@ -10,4 +10,12 @@
   .recharts-responsive-container {
     @apply text-white;
   }
+}
+
+.text-2xs {
+  font-size: .65rem;
+}
+
+.recharts-cartesian-axis-tick-value {
+  @apply text-slate-500 dark:text-slate-400 text-2xs;
 }

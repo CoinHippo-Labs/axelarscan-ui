@@ -1,37 +1,43 @@
 import { combineReducers } from 'redux'
 
 import preferences from './preferences'
-import evm_chains from './evm-chains'
-import cosmos_chains from './cosmos-chains'
+import chains from './chains'
 import assets from './assets'
+import contracts from './contracts'
+import gmp_configurations from './gmp-configurations'
 import ens from './ens'
+import lens from './lens'
+import spaceid from './spaceid'
+import unstoppable from './unstoppable'
 import accounts from './accounts'
 import chain from './chain'
 import status from './status'
+import maintainers from './maintainers'
 import tvl from './tvl'
 import validators from './validators'
-import validators_chains from './validators-chains'
-import validators_profile from './validators-profile'
-import rpc_providers from './rpc-providers'
+import profiles from './profiles'
 import wallet from './wallet'
-import chain_id from './chain-id'
+import cosmos_wallet from './cosmos-wallet'
+import web3 from './web3'
 
-export default combineReducers(
-  {
-    preferences,
-    evm_chains,
-    cosmos_chains,
-    assets,
-    ens,
-    accounts,
-    chain,
-    status,
-    tvl,
-    validators,
-    validators_chains,
-    validators_profile,
-    rpc_providers,
-    wallet,
-    chain_id,
-  },
-)
+export default combineReducers({
+  preferences,
+  chains,
+  assets,
+  contracts,
+  gmp_configurations,
+  ens,
+  lens,
+  spaceid,
+  unstoppable,
+  accounts,
+  chain,
+  status,
+  maintainers,
+  tvl,
+  validators,
+  profiles,
+  wallet,
+  cosmos_wallet,
+  web3,
+})

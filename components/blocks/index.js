@@ -1,393 +1,292 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
 import _ from 'lodash'
 import moment from 'moment'
-import { ProgressBar, ColorRing } from 'react-loader-spinner'
+import { BsArrowRightShort } from 'react-icons/bs'
 
+import Filters from './filters'
+import Spinner from '../spinner'
 import Datatable from '../datatable'
-import ValidatorProfile from '../validator-profile'
+import NumberDisplay from '../number'
 import Copy from '../copy'
-import TimeAgo from '../time-ago'
-import { blocks as getBlocks } from '../../lib/api/index'
-import { number_format, ellipse, equals_ignore_case, loader_color } from '../../lib/utils'
+import ValidatorProfile from '../profile/validator'
+import AccountProfile from '../profile/account'
+import TimeAgo from '../time/timeAgo'
+import { searchBlocks } from '../../lib/api/axelar'
+import { toArray, ellipse, equalsIgnoreCase, getQueryParams } from '../../lib/utils'
 
-const LIMIT = 50
+const PAGE_SIZE = 50
 
-export default (
-  {
-    n,
-  },
-) => {
-  const {
-    preferences,
-    validators,
-  } = useSelector(state =>
-    (
-      {
-        preferences: state.preferences,
-        validators: state.validators,
-      }
-    ),
-    shallowEqual,
-  )
-  const {
-    theme,
-  } = { ...preferences }
-  const {
-    validators_data,
-  } = { ...validators }
+export default ({ n }) => {
+  const { validators } = useSelector(state => ({ validators: state.validators }), shallowEqual)
+  const { validators_data } = { ...validators }
+
+  const router = useRouter()
+  const { pathname, asPath, query } = { ...router }
 
   const [data, setData] = useState(null)
-  const [offset, setOffet] = useState(0)
+  const [total, setTotal] = useState(null)
+  const [offset, setOffset] = useState(0)
+  const [filters, setFilters] = useState(null)
   const [fetchTrigger, setFetchTrigger] = useState(null)
   const [fetching, setFetching] = useState(false)
 
   useEffect(
     () => {
-      const triggering = is_interval => {
-        setFetchTrigger(
-          is_interval ?
-            moment()
-              .valueOf() :
-            typeof fetchTrigger === 'number' ?
-              null :
-              0
-        )
+      if (asPath) {
+        setFilters({ ...getQueryParams(asPath) })
+      }
+    },
+    [asPath],
+  )
+
+  useEffect(
+    () => {
+      const trigger = is_interval => {
+        if (pathname && filters && (!is_interval || !fetching)) {
+          setFetchTrigger(is_interval ? moment().valueOf() : typeof fetchTrigger === 'number' ? null : 0)
+        }
       }
 
-      triggering()
-
-      const interval =
-        setInterval(() =>
-          triggering(true),
-          0.1 * 60 * 1000,
-        )
-
-      return () => clearInterval()
+      trigger()
+      const interval = setInterval(() => trigger(true), (pathname.includes('/search') ? 5 : 0.1) * 60 * 1000)
+      return () => clearInterval(interval)
     },
-    [],
+    [pathname, filters],
   )
 
   useEffect(
     () => {
       const getData = async () => {
-        setFetching(true)
+        if (filters) {
+          setFetching(true)
 
-        if (!fetchTrigger) {
-          setData(null)
-          setOffet(0)
+          if (!fetchTrigger) {
+            setData(null)
+            setTotal(null)
+            setOffset(0)
+          }
+
+          const _data = toArray(fetchTrigger && data)
+          const size = PAGE_SIZE
+          const from = [true, 1].includes(fetchTrigger) ? _data.length : 0
+          const response = await searchBlocks({ ...filters, size, from })
+
+          if (response) {
+            const { total } = { ...response }
+            let { data } = { ...response }
+            setTotal(total)
+            data = _.orderBy(_.uniqBy(_.concat(toArray(data), _data), 'height'), ['height'], ['desc'])
+            setData(data)
+          }
+          else if (!fetchTrigger) {
+            setData([])
+            setTotal(0)
+          }
+
+          setFetching(false)
         }
-
-        const _data =
-          !fetchTrigger ?
-            [] :
-            data ||
-            []
-
-        const size =
-          n ||
-          LIMIT
-
-        const from =
-          fetchTrigger === true ||
-          fetchTrigger === 1 ?
-            _data.length :
-            0
-
-        const response =
-          await getBlocks(
-            {
-              size,
-              from,
-              sort: [{ height: 'desc' }],
-            },
-          )
-
-        if (response) {
-          const {
-            data,
-          } = { ...response }
-
-          setData(
-            _.orderBy(
-              _.uniqBy(
-                _.concat(
-                  data ||
-                  [],
-                  _data,
-                ),
-                'height',
-              ),
-              ['height'],
-              ['desc'],
-            )
-          )
-        }
-        else if (!fetchTrigger) {
-          setData([])
-        }
-
-        setFetching(false)
       }
-
       getData()
     },
     [fetchTrigger],
   )
 
   return (
-    data ?
-      <div className="w-full space-y-2">
-        <Datatable
-          columns={
-            [
-              {
-                Header: 'Height',
-                accessor: 'height',
-                disableSortBy: true,
-                Cell: props => (
-                  <Link href={`/block/${props.value}`}>
-                    <a
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-normal hover:font-medium"
-                    >
-                      {number_format(
-                        props.value,
-                        '0,0',
-                      )}
-                    </a>
-                  </Link>
-                ),
-              },
-              {
-                Header: 'Block Hash',
-                accessor: 'hash',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    height,
-                  } = { ...props.row.original }
-
-                  return (
-                    <Link href={`/block/${height}`}>
-                      <a
+    <div className="children">
+      {data ?
+        <div className="space-y-2 sm:space-y-4 mt-4 sm:mt-6 mx-auto">
+          {!n && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-2 sm:space-y-0 space-x-0 sm:space-x-3 px-3">
+              <div className="space-y-0.5">
+                <div className="text-lg font-bold">
+                  {!pathname.includes('/search') ? 'Latest ' : ''}Blocks
+                </div>
+                {typeof total === 'number' && (
+                  <NumberDisplay
+                    value={total}
+                    format="0,0"
+                    suffix=" Results"
+                    className="whitespace-nowrap text-slate-500 dark:text-slate-200 font-semibold"
+                  />
+                )}
+              </div>
+              <div className="flex flex-col sm:items-end space-y-1">
+                {pathname.includes('/search') && <Filters />}
+              </div>
+            </div>
+          )}
+          <div className={`${!n ? 'px-3' : ''}`}>
+            <Datatable
+              columns={[
+                {
+                  Header: 'Height',
+                  accessor: 'height',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    return value && (
+                      <Link
+                        href={`/block/${value}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-slate-400 dark:text-slate-600"
+                        className="text-blue-400 dark:text-blue-500 font-semibold"
                       >
-                        {ellipse(
-                          props.value,
-                          8,
-                        )}
-                      </a>
-                    </Link>
-                  )
+                        <NumberDisplay
+                          value={value}
+                          format="0,0"
+                        />
+                      </Link>
+                    )
+                  },
                 },
-              },
-              {
-                Header: 'Proposer',
-                accessor: 'proposer_address',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    operator_address,
-                    validator_description,
-                  } = { ...props.row.original }
-                  const {
-                    moniker,
-                  } = { ...validator_description }
-
-                  return (
-                    operator_address ?
-                      <div className={`min-w-max flex items-${moniker ? 'start' : 'center'} space-x-2`}>
-                        <Link href={`/validator/${operator_address}`}>
-                          <a
+                {
+                  Header: 'Block Hash',
+                  accessor: 'hash',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value, row } = { ...props }
+                    const { height } = { ...row.original }
+                    return (
+                      <Link
+                        href={`/block/${height}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 dark:text-blue-500 font-medium"
+                      >
+                        {ellipse(value, 8)}
+                      </Link>
+                    )
+                  },
+                  headerClassName: 'whitespace-nowrap',
+                },
+                {
+                  Header: 'Proposer',
+                  accessor: 'proposer_address',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    const { operator_address, description } = { ...toArray(validators_data).find(v => equalsIgnoreCase(v.consensus_address, value)) }
+                    const { moniker } = { ...description }
+                    return (
+                      description ?
+                        <div className="min-w-max flex items-start space-x-2">
+                          <Link
+                            href={`/validator/${operator_address}`}
                             target="_blank"
                             rel="noopener noreferrer"
                           >
-                            <ValidatorProfile
-                              validator_description={validator_description}
-                            />
-                          </a>
-                        </Link>
-                        <div className="flex flex-col">
-                          {
-                            moniker &&
-                            (
-                              <Link href={`/validator/${operator_address}`}>
-                                <a
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="tracking-wider text-blue-500 hover:text-blue-600 dark:text-blue-500 dark:hover:text-blue-400 font-medium"
-                                >
-                                  {ellipse(
-                                    moniker,
-                                    16,
-                                  )}
-                                </a>
-                              </Link>
-                            )
-                          }
-                          <div className="flex items-center space-x-1">
-                            <Link href={`/validator/${operator_address}`}>
-                              <a
+                            <ValidatorProfile description={description} />
+                          </Link>
+                          <div className="flex flex-col">
+                            <Link
+                              href={`/validator/${operator_address}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 font-medium"
+                            >
+                              {ellipse(moniker, 16)}
+                            </Link>
+                            <div className="flex items-center space-x-1">
+                              <Link
+                                href={`/validator/${operator_address}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-slate-400 dark:text-slate-600"
+                                className="text-slate-400 dark:text-slate-500"
                               >
-                                {ellipse(
-                                  operator_address,
-                                  12,
-                                  process.env.NEXT_PUBLIC_PREFIX_VALIDATOR,
-                                )}
-                              </a>
-                            </Link>
-                            <Copy
-                              value={operator_address}
-                            />
+                                {ellipse(operator_address, 6, 'axelarvaloper')}
+                              </Link>
+                              <Copy value={operator_address} />
+                            </div>
                           </div>
-                        </div>
-                      </div> :
-                      <Copy
-                        value={props.value}
-                        title={
-                          <span className="cursor-pointer text-slate-400 dark:text-slate-600">
-                            {ellipse(
-                              props.value,
-                              12,
-                              process.env.NEXT_PUBLIC_PREFIX_CONSENSUS,
-                            )}
-                          </span>
-                        }
-                      />
-                  )
+                        </div> :
+                        operator_address ?
+                          <div className="flex items-center space-x-1">
+                            <Link
+                              href={`/validator/${operator_address}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-400 font-medium"
+                            >
+                              {ellipse(operator_address, 6, 'axelarvaloper')}
+                            </Link>
+                            <Copy value={operator_address} />
+                          </div> :
+                          value ?
+                            <AccountProfile address={value} url={true} /> :
+                            '-'
+                    )
+                  },
                 },
-              },
-              {
-                Header: 'TXs',
-                accessor: 'num_txs',
-                disableSortBy: true,
-                Cell: props => (
-                  <div className="text-right">
-                    {props.value > -1 ?
-                      number_format(
-                        props.value,
-                        '0,0',
-                      ) :
-                      '-'
+                {
+                  Header: 'TXs',
+                  accessor: 'num_txs',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    return value && (
+                      <NumberDisplay
+                        value={value}
+                        format="0,0"
+                        className="text-xs font-medium"
+                      />
+                    )
+                  },
+                },
+                {
+                  Header: 'Time',
+                  accessor: 'time',
+                  disableSortBy: true,
+                  Cell: props => props.value && (
+                    <div className="flex justify-end">
+                      <TimeAgo time={props.value} className="text-slate-400 dark:text-slate-500 text-xs font-medium" />
+                    </div>
+                  ),
+                  headerClassName: 'justify-end text-right',
+                },
+              ]
+              .filter(c => n ? ['hash'].includes(c.accessor) : true)}
+              data={data}
+              defaultPageSize={n ? 10 : PAGE_SIZE}
+              noPagination={data.length <= 10 || (!n && !pathname.includes('/search'))}
+              extra={
+                !n && data.length >= PAGE_SIZE && (typeof total !== 'number' || data.length < total) && (
+                  <div className="flex justify-center">
+                    {!fetching ?
+                      <button
+                        onClick={
+                          () => {
+                            setOffset(data.length)
+                            setFetchTrigger(typeof fetchTrigger === 'number' ? true : 1)
+                          }
+                        }
+                        className="flex items-center text-black dark:text-white space-x-0.5"
+                      >
+                        <span className="font-medium">
+                          Load more
+                        </span>
+                        <BsArrowRightShort size={18} />
+                      </button> :
+                      <Spinner name="ProgressBar" width={32} height={32} />
                     }
                   </div>
-                ),
-                headerClassName: 'justify-end text-right',
-              },
-              {
-                Header: 'Time',
-                accessor: 'time',
-                disableSortBy: true,
-                Cell: props => {
-                  const {
-                    height,
-                  } = { ...props.row.original }
-
-                  return (
-                    <TimeAgo
-                      time={props.value}
-                      title={
-                        `Block: ${
-                          number_format(
-                            height,
-                            '0,0',
-                          )
-                        }`
-                      }
-                      className="ml-auto"
-                    />
-                  )
-                },
-                headerClassName: 'justify-end text-right',
-              },
-            ]
-            .filter(c =>
-              !(
-                !isNaN(n) ?
-                ['hash'] :
-                []
-              ).includes(c.accessor)
-            )
-          }
-          data={
-            data
-              .filter((d, i) =>
-                !n ||
-                i < n
-              )
-              .map((d, i) => {
-                const {
-                  proposer_address,
-                } = { ...d }
-                const {
-                  operator_address,
-                  description,
-                } = {
-                  ...(
-                    (validators_data || [])
-                      .find(v =>
-                        equals_ignore_case(
-                          v?.consensus_address,
-                          proposer_address,
-                        )
-                      )
-                  ),
-                }
-
-                return {
-                  ...d,
-                  operator_address,
-                  validator_description: description,
-                }
-              })
-          }
-          noPagination={true}
-          defaultPageSize={50}
-          className="min-h-full no-border"
-        />
-        {
-          data.length > 0 &&
-          !n &&
-          (
-            <div className="w-full flex justify-center">
-              {!fetching ?
-                <button
-                  onClick={() => {
-                    setOffet(data.length)
-                    setFetchTrigger(
-                      typeof fetchTrigger === 'number' ?
-                        true :
-                        1
-                    )
-                  }}
-                  className="max-w-min whitespace-nowrap text-slate-400 hover:text-blue-500 dark:text-slate-600 dark:hover:text-blue-500 font-normal hover:font-medium mx-auto"
-                >
-                  Load more
-                </button> :
-                <div className="flex justify-center">
-                  <ColorRing
-                    color={loader_color(theme)}
-                    width="32"
-                    height="32"
-                  />
-                </div>
+                )
               }
-            </div>
-          )
-        }
-      </div> :
-      <ProgressBar
-        borderColor={loader_color(theme)}
-        width="36"
-        height="36"
-      />
+              offset={offset}
+              className="no-border no-shadow"
+            />
+          </div>
+        </div> :
+        n ?
+          <div className="loading">
+            <Spinner name="Blocks" />
+          </div> :
+          <div className="p-3">
+            <Spinner name="ProgressBar" width={36} height={36} />
+          </div>
+      }
+    </div>
   )
 }
