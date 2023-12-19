@@ -25,7 +25,7 @@ export default [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
-    address: '0xE39Dd1830B1d7FF5E3267bf7bf21e56A163402E2',
+    address: '0x83a93500d23Fbc3e82B410aD07A6a9F7A0670D66',
     name: 'Interchain Token Factory',
     image: '/logos/accounts/axelarnet.svg',
   },
