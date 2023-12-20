@@ -28,17 +28,17 @@ const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 const MIN_GAS_REMAIN_AMOUNT = 0.000001
 
 const getTransactionKey = tx => {
-  const DELIMETERS = ['_', ':']
+  const DELIMITERS = ['_', ':']
   let txHash
   let txIndex
   let txLogIndex
 
-  if (tx && DELIMETERS.findIndex(s => tx.includes(s)) > -1) {
+  if (tx && DELIMITERS.findIndex(s => tx.includes(s)) > -1) {
     let hash_split = tx
-    for (const delimeter of DELIMETERS) {
-      hash_split = split(hash_split, 'normal', delimeter).join(_.head(DELIMETERS))
+    for (const delimiter of DELIMITERS) {
+      hash_split = split(hash_split, 'normal', delimiter).join(_.head(DELIMITERS))
     }
-    hash_split = split(hash_split, 'normal', _.head(DELIMETERS))
+    hash_split = split(hash_split, 'normal', _.head(DELIMITERS))
 
     txHash = _.head(hash_split)
     if (hash_split.length > 2) {

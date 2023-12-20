@@ -314,7 +314,7 @@ export default () => {
                           />
                         )}
                         <span className="font-semibold">
-                          {name || getTitle(value)}
+                          {name || ellipse(getTitle(value), 64)}
                         </span>
                         {is_invalid_destination_chain && (
                           <span className="text-red-400 dark:text-red-500 text-xs font-medium">
