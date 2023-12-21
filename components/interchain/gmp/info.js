@@ -487,7 +487,7 @@ export default ({ data, buttons }) => {
                   />
                 )}
                 <span className="font-semibold">
-                  {destination_chain_data?.name || ellipse(getTitle(destinationChain), 64)}
+                  {destination_chain_data?.name || ellipse(getTitle(destinationChain))}
                 </span>
                 {is_invalid_destination_chain && (
                   <span className="text-red-400 dark:text-red-500 text-xs font-medium">
