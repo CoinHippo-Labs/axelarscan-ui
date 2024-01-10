@@ -33,8 +33,7 @@ export default (
     className = 'cursor-pointer font-medium',
   },
 ) => {
-  const { chains, contracts, gmp_configurations, _accounts, validators, profiles } = useSelector(state => ({ chains: state.chains, contracts: state.contracts, gmp_configurations: state.gmp_configurations, _accounts: state.accounts, validators: state.validators, profiles: state.profiles }), shallowEqual)
-  const { chains_data } = { ...chains }
+  const { contracts, gmp_configurations, _accounts, validators, profiles } = useSelector(state => ({ contracts: state.contracts, gmp_configurations: state.gmp_configurations, _accounts: state.accounts, validators: state.validators, profiles: state.profiles }), shallowEqual)
   const { contracts_data } = { ...contracts }
   const { gmp_configurations_data } = { ...gmp_configurations }
   const { accounts_data } = { ..._accounts }
@@ -43,8 +42,8 @@ export default (
 
   address = Array.isArray(address) ? toHex(address) : address
   prefix = address ? address.startsWith('axelar') ? 'axelar' : address.startsWith('0x') ? '0x' : _.head(split(address, 'normal', '').filter(c => !isNaN(c))) === '1' ? address.substring(0, address.indexOf('1')) : prefix : prefix
-  const gateways = toArray(chains_data).filter(c => c.gateway_address).map(c => { return { ...c, address: c.gateway_address, name: 'Axelar Gateway', image: '/logos/accounts/axelarnet.svg' } })
-  const { interchain_token_service_contract, gas_service_contracts } = { ...contracts_data }
+  const { interchain_token_service_contract, gateway_contracts, gas_service_contracts } = { ...contracts_data }
+  const gateways = Object.values({ ...gateway_contracts }).filter(v => v.address).map(v => { return { ...v, name: 'Axelar Gateway', image: '/logos/accounts/axelarnet.svg' } })
   const gas_services = Object.values({ ...gas_service_contracts }).filter(v => v.address).map(v => { return { ...v, name: 'Axelar Gas Service', image: '/logos/accounts/axelarnet.svg' } })
   const interchain_token_services = toArray(interchain_token_service_contract?.addresses).length > 0 && toArray(interchain_token_service_contract?.addresses).map(a => { return { address: a, name: 'Interchain Token Service', image: '/logos/accounts/axelarnet.svg' } })
   const { relayers, express_relayers, refunders } = { ...gmp_configurations_data }

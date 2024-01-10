@@ -28,9 +28,10 @@ const EXECUTE_PERIOD_SECONDS = 10 * 60
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A'
 
 export default () => {
-  const { chains, assets, wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, wallet: state.wallet }), shallowEqual)
+  const { chains, assets, contracts, wallet } = useSelector(state => ({ chains: state.chains, assets: state.assets, contracts: state.contracts, wallet: state.wallet }), shallowEqual)
   const { chains_data } = { ...chains }
   const { assets_data } = { ...assets }
+  const { contracts_data } = { ...contracts }
   const { wallet_data } = { ...wallet }
   const { signer } = { ...wallet_data }
 
@@ -88,6 +89,8 @@ export default () => {
       setExecuting(true)
       setExecuteResponse({ status: 'pending', message: 'Executing...' })
       try {
+        const { gateway_contracts } = { ...contracts_data }
+        const gateway_address = gateway_contracts?.[chain_data?.id]?.address
         const { hash } = { ...await signer.sendTransaction({ to: gateway_address, data: `0x${execute_data}` }) }
         setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', hash })
         const { status } = { ...hash && await signer.provider.waitForTransaction(hash) }
@@ -103,7 +106,7 @@ export default () => {
   const matched = equalsIgnoreCase(id, data?.id)
   const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
   const chain_data = getChainData(chain, chains_data)
-  const { chain_id, name, image, explorer, gateway_address } = { ...chain_data }
+  const { chain_id, name, image, explorer } = { ...chain_data }
   const { url, transaction_path } = { ...explorer }
 
   const wrongChain = chain_id && chain_id !== wallet_data?.chain_id

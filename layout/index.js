@@ -15,11 +15,10 @@ import { getENS } from '../lib/api/ens'
 import { getLENS } from '../lib/api/lens'
 import { getSPACEID } from '../lib/api/spaceid'
 import { getUNSTOPPABLE } from '../lib/api/unstoppable'
-import { getChainMaintainers, getEscrowAddresses } from '../lib/api/axelar'
 import { stakingParams, bankSupply, stakingPool, slashingParams } from '../lib/api/lcd'
 import { getStatus } from '../lib/api/rpc'
 import { getTVL } from '../lib/api/tvl'
-import { searchHeartbeats, getValidators, getValidatorsVotes } from '../lib/api/validators'
+import { searchHeartbeats, getValidators, getValidatorsVotes, getChainMaintainers } from '../lib/api/validators'
 import { getKeyType } from '../lib/key'
 import { NUM_BLOCKS_PER_HEARTBEAT, startBlock, endBlock } from '../lib/heartbeat'
 import { formatUnits } from '../lib/number'
@@ -85,9 +84,9 @@ export default ({ children }) => {
       const getData = async () => {
         const assets = toArray(await getAssets())
         const prices = await getTokensPrice({ symbols: assets.map(a => a.symbol) })
-        if (toArray(prices).length > 0) {
-          for (let i = 0; i < prices.length; i++) {
-            assets[i].price = prices[i]
+        if (prices) {
+          for (let i = 0; i < assets.length; i++) {
+            assets[i].price = prices[assets[i].symbol]?.price
           }
         }
         dispatch({ type: ASSETS_DATA, value: assets })
@@ -149,20 +148,6 @@ export default ({ children }) => {
       getData()
     },
     [address, chains_data],
-  )
-
-  // escrow addresses
-  useEffect(
-    () => {
-      const getData = async () => {
-        const { data } = { ...await getEscrowAddresses() }
-        if (data) {
-          dispatch({ type: ACCOUNTS_DATA, value: data })
-        }
-      }
-      // getData()
-    },
-    [],
   )
 
   // chain

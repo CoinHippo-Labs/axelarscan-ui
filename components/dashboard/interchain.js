@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { useSelector, shallowEqual } from 'react-redux'
 import { Card, CardBody, CardFooter, Tooltip } from '@material-tailwind/react'
 import _ from 'lodash'
 
@@ -23,6 +24,9 @@ const Detail = ({ title, children }) => {
 }
 
 export default ({ data }) => {
+  const { contracts } = useSelector(state => ({ contracts: state.contracts }), shallowEqual)
+  const { contracts_data } = { ...contracts }
+
   const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume, networkGraph, chains_data } = { ...data }
   const { messages } = { ...GMPStats }
 
@@ -170,7 +174,8 @@ export default ({ data }) => {
         )
         break
       case 'chains':
-        const chains = toArray(chains_data).filter(c => !c.deprecated && (!c.maintainer_id || !c.no_inflation || c.gateway_address))
+        const { gateway_contracts } = { ...contracts_data }
+        const chains = toArray(chains_data).filter(c => !c.deprecated && (!c.maintainer_id || gateway_contracts?.[c.id]?.address))
         title = 'Connected Chains'
         url = '/interchain'
         loading = !chains_data

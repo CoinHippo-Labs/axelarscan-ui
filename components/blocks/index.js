@@ -14,7 +14,7 @@ import Copy from '../copy'
 import ValidatorProfile from '../profile/validator'
 import AccountProfile from '../profile/account'
 import TimeAgo from '../time/timeAgo'
-import { searchBlocks } from '../../lib/api/axelar'
+import { searchBlocks } from '../../lib/api/validators'
 import { toArray, ellipse, equalsIgnoreCase, getQueryParams } from '../../lib/utils'
 
 const PAGE_SIZE = 50
