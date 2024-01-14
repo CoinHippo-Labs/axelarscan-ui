@@ -129,7 +129,9 @@ function MobileNavigation() {
             as="div"
             className="absolute inset-x-0 top-full mt-4 flex origin-top flex-col rounded-2xl bg-white dark:bg-zinc-800 p-4 text-lg tracking-tight text-zinc-900 dark:text-zinc-100 shadow-xl ring-1 ring-zinc-900/5"
           >
-            <Search />
+            <div className="md:hidden">
+              <Search />
+            </div>
             {navigations.map((d, i) => {
               const { title, href, children } = { ...d }
 
@@ -173,12 +175,12 @@ export function Header() {
   return (
     <header className="py-6">
       <Container>
-        <nav className="relative z-50 flex justify-between">
-          <div className="flex items-center md:gap-x-12">
+        <nav className="relative z-50 flex justify-between gap-x-4">
+          <div className="flex items-center lg:gap-x-12">
             <Link href="/" aria-label="Dashboard">
               <Logo className="h-10 w-auto" />
             </Link>
-            <div className="hidden md:flex md:gap-x-4">
+            <div className="hidden lg:flex lg:gap-x-4">
               {navigations.map((d, i) => {
                 const { title, href, children } = { ...d }
 
@@ -230,7 +232,7 @@ export function Header() {
             <div className="hidden md:block">
               <Search />
             </div>
-            <div className="hidden md:block">
+            <div className="hidden lg:block">
               <Popover
                 onMouseEnter={() => setPopoverEnvironmentOpen(true)}
                 onMouseLeave={() => setPopoverEnvironmentOpen(false)}
@@ -259,7 +261,7 @@ export function Header() {
               </Popover>
             </div>
             <ThemeToggle />
-            <div className="-mr-1 md:hidden">
+            <div className="-mr-1 lg:hidden">
               <MobileNavigation />
             </div>
           </div>

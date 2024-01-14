@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { RedefinedResolver } from '@redefined/name-resolver-js'
@@ -16,12 +16,13 @@ import { getENS } from '@/lib/api/name-services/ens'
 import { getLENS } from '@/lib/api/name-services/lens'
 import { getSpaceID } from '@/lib/api/name-services/spaceid'
 import { getUnstoppable } from '@/lib/api/name-services/unstoppable'
+import { getSlug } from '@/lib/navigation'
 import { getInputType, split, toArray } from '@/lib/parser'
 import { equalsIgnoreCase } from '@/lib/string'
 
 export function Search() {
+  const pathname = usePathname()
   const router = useRouter()
-  const { tx, address } = { ...router.query }
 
   const ref = useRef()
   const [input, setInput] = useState('')
@@ -104,6 +105,8 @@ export function Search() {
     }
   }
 
+  const tx = getSlug(pathname, 'tx')
+  const address = getSlug(pathname, 'address')
   const searchable = !searching && input && toArray([tx, address]).findIndex(s => equalsIgnoreCase(s, input)) < 0
 
   return (

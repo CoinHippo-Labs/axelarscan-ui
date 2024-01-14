@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ThemeProvider, useTheme } from 'next-themes'
 import TagManager from 'react-gtm-module'
@@ -85,7 +85,8 @@ const GlobalLoader = () => {
 }
 
 export function Providers({ children }) {
-  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [rendered, setRendered] = useState(false)
   const [tagManagerInitiated, setTagManagerInitiated] = useState(false)
   const [client] = useState(() => queryClient)
@@ -99,15 +100,14 @@ export function Providers({ children }) {
       TagManager.initialize({ gtmId: process.env.NEXT_PUBLIC_GTM_ID })
       setTagManagerInitiated(true)
     }
-  }, [rendered, tagManagerInitiated])
+  }, [rendered, tagManagerInitiated, setTagManagerInitiated])
 
   useEffect(() => {
-    const handleRouteChange = url => ga.pageview(url)
-    if (router.events) {
-      router.events.on('routeChangeComplete', handleRouteChange)
-      return () => router.events.off('routeChangeComplete', handleRouteChange)
+    if (pathname && searchParams) {
+      const qs = searchParams.toString()
+      ga.pageview(`${pathname}${qs ? `?${qs}` : ''}`)
     }
-  }, [router.events])
+  }, [pathname, searchParams])
 
   return (
     <ThemeProvider attribute="class" disableTransitionOnChange>
