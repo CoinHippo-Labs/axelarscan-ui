@@ -70,8 +70,7 @@ export const WEB3MODAL = createWeb3Modal({
   projectId: WALLETCONNECT_PROJECT_ID,
   chains: CHAINS,
   themeVariables: {
-    '--w3m-font-family': 'Poppins, sans-serif',
-    '--w3m-background-color': '#1f1f1f',
+    '--w3m-background-color': '#18181b',
     '--w3m-logo-image-url': `${process.env.NEXT_PUBLIC_APP_URL}/logos/logo_white.png`,
   },
   excludeWalletIds: ['19177a98252e07ddfc9af2083ba8e07ef627cb6103467ffebb3f8f4205fd7927'],

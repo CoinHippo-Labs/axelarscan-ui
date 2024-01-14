@@ -1,7 +1,9 @@
 import _ from 'lodash'
 
-import { toArray } from '@/src/lib/parser'
-import { equalsIgnoreCase, removeDoubleQuote } from '@/src/lib/string'
+import { toArray } from '@/lib/parser'
+import { equalsIgnoreCase, removeDoubleQuote } from '@/lib/string'
+
+export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 
 export const getChainKey = (chain, chainsData, exact = false) => {
   let key

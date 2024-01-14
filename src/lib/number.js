@@ -1,8 +1,8 @@
 import { BigNumber, FixedNumber, utils } from 'ethers'
 const { formatUnits: _formatUnits, parseUnits: _parseUnits } = { ...utils }
 
-import { split } from '@/src/lib/parser'
-import { isString, headString } from '@/src/lib/string'
+import { split } from '@/lib/parser'
+import { isString, headString } from '@/lib/string'
 
 export const isNumber = number => typeof number === 'number' || (isString(number) && number && !isNaN(number))
 

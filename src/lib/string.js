@@ -1,6 +1,6 @@
-import _ = from 'lodash'
+import _ from 'lodash'
 
-import { toCase, split, toArray } from '@/src/lib/parser'
+import { toCase, split, toArray } from '@/lib/parser'
 
 export const isString = string => typeof string === 'string'
 

@@ -1,5 +1,5 @@
-import { toArray } from '@/src/lib/parser'
-import { isString, equalsIgnoreCase } from '@/src/lib/string'
+import { toArray } from '@/lib/parser'
+import { isString, equalsIgnoreCase } from '@/lib/string'
 
 export const find = (x, list = []) => list.find(_x => isString(x) ? equalsIgnoreCase(_x, x) : _x === x)
 

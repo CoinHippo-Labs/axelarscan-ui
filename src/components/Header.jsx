@@ -1,18 +1,68 @@
 'use client'
 
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Popover, Transition } from '@headlessui/react'
 import clsx from 'clsx'
+import { FiChevronDown } from 'react-icons/fi'
 
 import { Container } from '@/components/Container'
 import { Logo } from '@/components/Logo'
 import { NavLink } from '@/components/NavLink'
+import { Search } from '@/components/Search'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { ENVIRONMENT } from '@/lib/config'
 
-function MobileNavLink({ href, children }) {
+const navigations = [
+  {
+    title: 'Interchain Data',
+    children: [
+      { title: 'Statistics', href: '/interchain' },
+      { title: 'General Message Passing', href: '/gmp/search' },
+      { title: 'Token Transfers', href: '/transfers/search' },
+    ],
+  },
+  {
+    title: 'Network',
+    children: [
+      { title: 'Validators', href: '/validators' },
+      { title: 'Blocks', href: '/blocks' },
+      { title: 'Transactions', href: '/transactions/search' },
+      { title: 'EVM Polls', href: '/evm-polls' },
+      { title: 'EVM Batches', href: '/evm-batches' },
+      { title: 'Proposals', href: '/proposals' },
+    ],
+  },
+  { title: 'TVL', href: '/tvl' },
+  {
+    title: 'Resources',
+    children: [
+      { title: 'Chains', href: '/resources/chains' },
+      { title: 'Assets', href: '/resources/assets' },
+    ],
+  },
+]
+
+const environments = [
+  { name: 'mainnet', href: 'https://axelarscan.io' },
+  { name: 'testnet', href: 'https://testnet.axelarscan.io' },
+  { name: 'stagenet', href: 'https://stagenet.axelarscan.io' },
+].filter(d => d.name !== 'stagenet' || d.name === ENVIRONMENT)
+
+function MobileNavLink({ href, children, className }) {
+  const pathname = usePathname()
+
   return (
-    <Popover.Button as={Link} href={href} className="block w-full p-2">
+    <Popover.Button
+      as={Link}
+      href={href}
+      className={clsx(
+        'block w-full px-2 py-1',
+        href === pathname ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-700 dark:text-zinc-300',
+        className,
+      )}
+    >
       {children}
     </Popover.Button>
   )
@@ -22,7 +72,7 @@ function MobileNavIcon({ open }) {
   return (
     <svg
       aria-hidden="true"
-      className="h-3.5 w-3.5 overflow-visible stroke-zinc-700 dark:stroke-zinc-100"
+      className="h-3.5 w-3.5 overflow-visible stroke-zinc-700 dark:stroke-zinc-300"
       fill="none"
       strokeWidth={2}
       strokeLinecap="round"
@@ -77,13 +127,23 @@ function MobileNavigation() {
         >
           <Popover.Panel
             as="div"
-            className="absolute inset-x-0 top-full mt-4 flex origin-top flex-col rounded-2xl bg-white dark:bg-zinc-800/50 p-4 text-lg tracking-tight text-zinc-900 dark:text-zinc-100 shadow-xl ring-1 ring-zinc-900/5"
+            className="absolute inset-x-0 top-full mt-4 flex origin-top flex-col rounded-2xl bg-white dark:bg-zinc-800 p-4 text-lg tracking-tight text-zinc-900 dark:text-zinc-100 shadow-xl ring-1 ring-zinc-900/5"
           >
-            <MobileNavLink href="#features">Features</MobileNavLink>
-            <MobileNavLink href="#testimonials">Testimonials</MobileNavLink>
-            <MobileNavLink href="#pricing">Pricing</MobileNavLink>
-            <hr className="m-2 border-zinc-300/40 dark:border-zinc-500/40" />
-            <MobileNavLink href="/login">Sign in</MobileNavLink>
+            <Search />
+            {navigations.map((d, i) => {
+              const { title, href, children } = { ...d }
+
+              if (children) {
+                return (
+                  <div key={i} className="flex flex-col">
+                    <span className="px-2 pt-4 pb-1 font-bold">{title}</span>
+                    {children.map((c, j) => <MobileNavLink key={j} href={c.href}>{c.title}</MobileNavLink>)}
+                  </div>
+                )
+              }
+
+              return href && (<MobileNavLink key={i} href={href} className="font-bold pt-4">{title}</MobileNavLink>)
+            })}
           </Popover.Panel>
         </Transition.Child>
       </Transition.Root>
@@ -91,7 +151,25 @@ function MobileNavigation() {
   )
 }
 
+function EnvirontmentLink({ name, href, children }) {
+  return (
+    <Link
+      href={href}
+      className={clsx(
+        'w-full inline-block rounded-lg p-2 capitalize text-sm hover:text-blue-600 dark:hover:text-blue-500 whitespace-nowrap',
+        name === ENVIRONMENT ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-700 dark:text-zinc-300',
+      )}
+    >
+      {children}
+    </Link>
+  )
+}
+
 export function Header() {
+  const [popoverOpen, setPopoverOpen] = useState(null)
+  const [popoverEnvironmentOpen, setPopoverEnvironmentOpen] = useState(false)
+  const pathname = usePathname()
+
   return (
     <header className="py-6">
       <Container>
@@ -100,15 +178,85 @@ export function Header() {
             <Link href="/" aria-label="Dashboard">
               <Logo className="h-10 w-auto" />
             </Link>
-            <div className="hidden md:flex md:gap-x-6">
-              <NavLink href="#features">Features</NavLink>
-              <NavLink href="#testimonials">Testimonials</NavLink>
-              <NavLink href="#pricing">Pricing</NavLink>
+            <div className="hidden md:flex md:gap-x-4">
+              {navigations.map((d, i) => {
+                const { title, href, children } = { ...d }
+
+                if (children) {
+                  return (
+                    <Popover
+                      key={i}
+                      onMouseEnter={() => setPopoverOpen(i)}
+                      onMouseLeave={() => setPopoverOpen(null)}
+                      className="relative"
+                    >
+                      <Popover.Button
+                        className={clsx(
+                          'rounded-lg focus:outline-none uppercase text-sm whitespace-nowrap',
+                          href === pathname || children.find(c => c.href === pathname) ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-700 dark:text-zinc-300',
+                        )}
+                      >
+                        <Link href={children[0].href} className="p-2 inline-flex items-center gap-x-1">
+                          <span>{title}</span>
+                          <FiChevronDown className="h-4 w-4" />
+                        </Link>
+                      </Popover.Button>
+
+                      <Transition
+                        show={i === popoverOpen}
+                        as={Fragment}
+                        enter="transition ease-out duration-200"
+                        enterFrom="opacity-0 translate-y-1"
+                        enterTo="opacity-100 translate-y-0"
+                        leave="transition ease-in duration-150"
+                        leaveFrom="opacity-100 translate-y-0"
+                        leaveTo="opacity-0 translate-y-1"
+                      >
+                        <Popover.Panel className="absolute left-1/2 z-10 flex w-screen max-w-min -translate-x-1/2">
+                          <div className="shrink rounded-xl bg-white dark:bg-zinc-800 p-2 text-sm shadow-lg ring-1 ring-zinc-900/5">
+                            {children.map((c, j) => <NavLink key={j} href={c.href}>{c.title}</NavLink>)}
+                          </div>
+                        </Popover.Panel>
+                      </Transition>
+                    </Popover>
+                  )
+                }
+
+                return href && (<NavLink key={i} href={href}>{title}</NavLink>)
+              })}
             </div>
           </div>
-          <div className="flex items-center gap-x-5 md:gap-x-8">
+          <div className="flex items-center gap-x-4">
             <div className="hidden md:block">
-              <NavLink href="/login">Sign in</NavLink>
+              <Search />
+            </div>
+            <div className="hidden md:block">
+              <Popover
+                onMouseEnter={() => setPopoverEnvironmentOpen(true)}
+                onMouseLeave={() => setPopoverEnvironmentOpen(false)}
+                className="relative"
+              >
+                <Popover.Button className="p-2 rounded-lg focus:outline-none capitalize text-sm text-zinc-700 dark:text-zinc-300 whitespace-nowrap">
+                  <span>{ENVIRONMENT}</span>
+                </Popover.Button>
+
+                <Transition
+                  show={popoverEnvironmentOpen}
+                  as={Fragment}
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-1"
+                  enterTo="opacity-100 translate-y-0"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0"
+                  leaveTo="opacity-0 translate-y-1"
+                >
+                  <Popover.Panel className="absolute left-1/2 z-10 flex w-screen max-w-min -translate-x-1/2">
+                    <div className="shrink rounded-xl bg-white dark:bg-zinc-800 p-2 text-sm shadow-lg ring-1 ring-zinc-900/5">
+                      {environments.map((d, i) => <EnvirontmentLink key={i} {...d}>{d.name}</EnvirontmentLink>)}
+                    </div>
+                  </Popover.Panel>
+                </Transition>
+              </Popover>
             </div>
             <ThemeToggle />
             <div className="-mr-1 md:hidden">

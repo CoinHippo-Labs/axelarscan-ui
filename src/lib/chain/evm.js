@@ -1,9 +1,9 @@
 import { providers } from 'ethers'
 const { FallbackProvider, StaticJsonRpcProvider: JsonRpcProvider } = { ...providers }
 
-import { getChainData } from '@/src/lib/config'
-import { toArray } from '@/src/lib/parser'
-import { toNumber } from '@/src/lib/number'
+import { getChainData } from '@/lib/config'
+import { toArray } from '@/lib/parser'
+import { toNumber } from '@/lib/number'
 
 const createRPCProvider = (url, chain_id) => new JsonRpcProvider(url, chain_id ? toNumber(chain_id) : undefined)
 

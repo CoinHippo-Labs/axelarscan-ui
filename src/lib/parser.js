@@ -1,6 +1,6 @@
 import { utils } from 'ethers'
 const { base64, getAddress, hexlify, toUtf8String } = { ...utils }
-import decodeBase64 = base64.decode
+const decodeBase64 = base64.decode
 import _ from 'lodash'
 
 export const getIcapAddress = string => {
@@ -41,6 +41,18 @@ export const getIBCDenomBase64 = ibc_denom => {
   } catch (error) {
     return ibc_denom
   }
+}
+
+export const getInputType = (string, chainsData) => {
+  const regexMap = {
+    txhash: new RegExp(/^0x([A-Fa-f0-9]{64})$/, 'igm'),
+    evmAddress: new RegExp(/^0x[a-fA-F0-9]{40}$/, 'igm'),
+    domainName: new RegExp(/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/, 'igm'),
+    validator: new RegExp('axelarvaloper.*$', 'igm'),
+    axelarAddress: new RegExp('axelar.*$', 'igm'),
+    cosmosAddress: Object.fromEntries(toArray(chainsData).filter(d => d.id !== 'axelarnet' && d.prefix_address).map(d => [d.id, new RegExp(`${d.prefix_address}.*$`, 'igm')])),
+  }
+  return !string ? null : _.head(Object.entries(regexMap).filter(([k, v]) => k === 'cosmosAddress' ? Object.values(v).findIndex(_v => string.match(_v)) > -1 : string.match(v)).map(([k, v]) => k)) || (!isNaN(string) ? 'block' : 'tx')
 }
 
 export const toJson = string => {
