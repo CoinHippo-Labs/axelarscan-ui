@@ -2,8 +2,6 @@ import { QueryClient } from '@tanstack/react-query'
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
 import { mainnet, goerli, sepolia, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, arbitrumSepolia, optimism, optimismGoerli, base, baseGoerli, mantle, mantleTestnet, celo, celoAlfajores, kava, kavaTestnet, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scroll, scrollSepolia } from 'wagmi/chains'
 
-export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
-
 export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
   [
     { _id: 'ethereum', ...mainnet },
@@ -22,9 +20,9 @@ export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
     { _id: 'kava', ...kava },
     { _id: 'filecoin', ...filecoin },
     { _id: 'linea', ...linea },
-    { _id: 'centrifuge', id: 2031, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Centrifuge', symbol: 'CFG', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.parachain.centrifuge.io'] } }, blockExplorers: { default: { name: 'Centrifuge', url: 'https://centrifuge.subscan.io' } } },
-    { _id: 'immutable', id: 13371, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'IMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.immutable.com' } } },
-    { _id: 'scroll', scroll },
+    { _id: 'centrifuge', id: 2031, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Centrifuge', symbol: 'CFG', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.parachain.centrifuge.io'] }, public: { http: ['https://fullnode.parachain.centrifuge.io'] } }, blockExplorers: { default: { name: 'Centrifuge', url: 'https://centrifuge.subscan.io' } } },
+    { _id: 'scroll', ...scroll },
+    { _id: 'immutable', id: 13371, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'IMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.immutable.com'] }, public: { http: ['https://rpc.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.immutable.com' } } },
   ] :
   [
     { _id: 'ethereum-2', ...goerli },
@@ -46,18 +44,18 @@ export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
     { _id: 'filecoin', ...filecoinHyperspace },
     { _id: 'filecoin-2', ...filecoinCalibration },
     { _id: 'linea', ...lineaTestnet },
-    { _id: 'centrifuge', id: 2089, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Algol', symbol: 'ALGL', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.algol.cntrfg.com/rpc'] } }, blockExplorers: { default: { name: 'Centrifuge', url: '' } } },
-    { _id: 'centrifuge-2', id: 2090, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Algol', symbol: 'ALGL', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.demo.k-f.dev'] } }, blockExplorers: { default: { name: 'Centrifuge', url: '' } } },
-    { _id: 'immutable', id: 13473, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
-    { _id: 'immutable-devnet', id: 15003, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.dev.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
+    { _id: 'centrifuge', id: 2089, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Algol', symbol: 'ALGL', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.algol.cntrfg.com/rpc'] }, public: { http: ['https://fullnode.algol.cntrfg.com/rpc'] } }, blockExplorers: { default: { name: 'Centrifuge', url: '' } } },
+    { _id: 'centrifuge-2', id: 2090, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Algol', symbol: 'ALGL', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.demo.k-f.dev'] }, public: { http: ['https://fullnode.demo.k-f.dev'] } }, blockExplorers: { default: { name: 'Centrifuge', url: '' } } },
     { _id: 'scroll', ...scrollSepolia },
+    { _id: 'immutable', id: 13473, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.immutable.com'] }, public: { http: ['https://rpc.testnet.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
+    { _id: 'immutable-devnet', id: 15003, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.dev.immutable.com'] }, public: { http: ['https://rpc.dev.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
   ]
 
 export const queryClient = new QueryClient()
 
 export const wagmiConfig = defaultWagmiConfig({
   chains: CHAINS,
-  projectId: WALLETCONNECT_PROJECT_ID,
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
   metadata: {
     name: 'Axelarscan',
     description: process.env.NEXT_PUBLIC_DEFAULT_TITLE,
@@ -67,7 +65,7 @@ export const wagmiConfig = defaultWagmiConfig({
 
 export const WEB3MODAL = createWeb3Modal({
   wagmiConfig,
-  projectId: WALLETCONNECT_PROJECT_ID,
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID,
   chains: CHAINS,
   themeVariables: {
     '--w3m-background-color': '#18181b',

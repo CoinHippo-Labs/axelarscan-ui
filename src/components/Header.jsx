@@ -16,7 +16,7 @@ import { ENVIRONMENT } from '@/lib/config'
 
 const navigations = [
   {
-    title: 'Interchain Data',
+    title: 'Interchain',
     children: [
       { title: 'Statistics', href: '/interchain' },
       { title: 'General Message Passing', href: '/gmp/search' },

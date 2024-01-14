@@ -85,7 +85,7 @@ export function Search() {
               setLENS(await getLENS(addresses.filter(a => !lens?.[a])))
               break
             case 'spaceid':
-              setSpaceID(await getSpaceID(addresses.filter(a => !spaceid?.[a]), undefined, chains))
+              setSpaceID(await getSpaceID(addresses.filter(a => !spaceID?.[a]), undefined, chains))
               break
             case 'unstoppable':
               setUnstoppable(await getUnstoppable(addresses.filter(a => !unstoppable?.[a])))
@@ -125,7 +125,7 @@ export function Search() {
           <Button
             color="blue"
             onClick={() => onSubmit()}
-            className="absolute right-0 mr-2"
+            className="absolute right-0 mr-2 !px-2"
           >
             <FiSearch />
           </Button>
