@@ -1,8 +1,4 @@
-const { createSecureHeaders } = require('next-secure-headers')
+/** @type {import('next').NextConfig} */
+const nextConfig = {}
 
-module.exports = {
-  headers: () => { return [{ source: '/(.*)', headers: createSecureHeaders() }] },
-  experimental: {
-    appDir: false,
-  },
-}
+module.exports = nextConfig
