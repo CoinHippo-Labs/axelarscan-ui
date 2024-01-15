@@ -44,6 +44,7 @@
     "next-themes": "^0.2.1",
     "pino-pretty": "^10.3.1",
     "react": "^18.2.0",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
     "react-gtm-module": "^2.0.11",
     "react-hook-form": "^7.49.3",
@@ -51,6 +52,7 @@
     "react-linkify": "^1.0.0-alpha",
     "tailwindcss": "^3.4.1",
     "wagmi": "^1.4.13",
+    "web3": "^4.3.0",
     "zustand": "^4.3.2"
   },
   "devDependencies": {

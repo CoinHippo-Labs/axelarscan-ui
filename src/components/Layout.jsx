@@ -13,7 +13,7 @@ export function Layout({ children }) {
       <motion.header layoutScroll className="contents lg:z-40">
         {process.env.NEXT_PUBLIC_STATUS_MESSAGE && (
           <div className="w-full bg-blue-600 dark:bg-blue-700 overflow-x-auto flex items-center p-3">
-            <div className="flex flex-wrap items-center text-white text-sm font-medium text-center space-x-2 mx-auto">
+            <div className="flex flex-wrap items-center text-white text-sm font-medium text-center gap-x-2 mx-auto">
               <span className="status-message">
                 <Linkify>
                   {parse(process.env.NEXT_PUBLIC_STATUS_MESSAGE)}

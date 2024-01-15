@@ -17,3 +17,5 @@ export const toBoolean = (string, defaultValue = true) => typeof string === 'boo
 export const headString = (string, delimiter = '-') => _.head(split(string, { delimiter }))
 
 export const lastString = (string, delimiter = '-') => _.last(split(string, { delimiter }))
+
+export const ellipse = (string, length = 10, prefix = '') => !isString(string) || !string ? '' : string.length < (length * 2) + 3 ? string : `${string.startsWith(prefix) ? prefix : ''}${string.replace(prefix, '').slice(0, length)}...${string.replace(prefix, '').slice(-length)}`

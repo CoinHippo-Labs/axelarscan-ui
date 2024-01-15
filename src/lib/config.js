@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { toArray } from '@/lib/parser'
+import { toCase, toArray } from '@/lib/parser'
 import { equalsIgnoreCase, removeDoubleQuote } from '@/lib/string'
 
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
@@ -8,7 +8,7 @@ export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 export const getChainKey = (chain, chainsData, exact = false) => {
   let key
   if (chain) {
-    chain = removeDoubleQuote(chain, 'lower')
+    chain = toCase(removeDoubleQuote(chain), 'lower')
     key = _.head(toArray(chainsData).filter(d => {
       const { id, chain_id, chain_name, maintainer_id, prefix_address, prefix_chain_ids, chain_type } = { ...d }
       return (
