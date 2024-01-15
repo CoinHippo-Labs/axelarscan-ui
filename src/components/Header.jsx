@@ -168,9 +168,9 @@ function EnvirontmentLink({ name, href, children }) {
 }
 
 export function Header() {
+  const pathname = usePathname()
   const [popoverOpen, setPopoverOpen] = useState(null)
   const [popoverEnvironmentOpen, setPopoverEnvironmentOpen] = useState(false)
-  const pathname = usePathname()
 
   return (
     <header className="py-6">

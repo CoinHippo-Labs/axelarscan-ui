@@ -23,7 +23,6 @@ import { equalsIgnoreCase } from '@/lib/string'
 export function Search() {
   const pathname = usePathname()
   const router = useRouter()
-
   const ref = useRef()
   const [input, setInput] = useState('')
   const [searching, setSearching] = useState(false)

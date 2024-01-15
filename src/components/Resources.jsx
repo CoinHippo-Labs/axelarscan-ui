@@ -15,11 +15,10 @@ import { Tag } from '@/components/Tag'
 import { AddMetamask } from '@/components/Metamask'
 import { ValueBox } from '@/components/ValueBox'
 import { useGlobalStore } from '@/app/providers'
-import { split, toArray } from '@/lib/parser'
+import { getChainData } from '@/lib/config'
+import { getIBCDenomBase64, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase } from '@/lib/string'
-
-const resources = ['chains', 'assets']
 
 function Chain({ data }) {
   const { contracts } = useGlobalStore()
@@ -107,14 +106,143 @@ function Chain({ data }) {
   )
 }
 
+function Asset({ data, focusID, onFocus }) {
+  const NUM_CHAINS_TRUNCATE = 6
+  const [seeMore, setSeeMore] = useState(false)
+  const [chainSelected, setChainSelected] = useState(null)
+  const { chains } = useGlobalStore()
+
+  useEffect(() => {
+    if (focusID !== denom) setSeeMore(false)
+  }, [focusID])
+
+  const { denom, denoms, native_chain, name, symbol, decimals, image } = { ...data }
+  let { addresses } = { ...data }
+  const { id, explorer, chain_type } = { ...(focusID === denom && getChainData(chainSelected, chains)) }
+  const { url, contract_path, asset_path } = { ...explorer }
+  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...addresses?.[native_chain] }, Object.entries({ ...addresses }).map(([k, v]) => { return { chain: k, ...v } } ))), 'chain').filter(d => getChainData(d.chain, chains))
+  const tokenData = addresses.find(d => d.chain === id)
+  const { address, ibc_denom } = { ...tokenData }
+  const tokenSymbol = tokenData?.symbol || symbol
+
+  return (
+    <li>
+      <div className="relative bg-zinc-50/75 dark:bg-zinc-800/25 p-6 rounded-2xl">
+        <div className="flex items-start justify-between">
+          <div className="overflow-hidden">
+            <Image
+              src={image}
+              width={56}
+              height={56}
+              className="object-cover"
+            />
+          </div>
+          <div className="flex flex-col items-end gap-y-1">
+            {symbol && <Tag>{symbol}</Tag>}
+            <div className="flex flex-wrap items-center">
+              {toArray(_.concat(denom, _.head(denoms))).map(d => (
+                <Tag key={d} className="bg-orange-400 dark:bg-orange-500 font-normal whitespace-nowrap ml-1 mt-1">
+                  {d}
+                </Tag>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center justify-between mt-3">
+          <span className="font-display text-xl font-medium">{name}</span>
+          {decimals > 0 && <span className="text-zinc-400 dark:text-zinc-500 text-sm font-normal whitespace-nowrap mt-0.5">Decimals: {decimals}</span>}
+        </div>
+        <div className="flex flex-col gap-y-4 mt-6 mb-1">
+          <div className="flex flex-col gap-y-1">
+            <span className="text-base text-zinc-400 dark:text-zinc-500">
+              Interchain Tokens
+            </span>
+            <div className="flex flex-wrap items-center">
+              {_.slice(addresses, 0, focusID === denom && seeMore ? addresses.length : NUM_CHAINS_TRUNCATE).map((d, i) => {
+                const { chain, address, ibc_denom, symbol } = { ...d }
+                const { name, image } = { ...getChainData(chain, chains) }
+
+                return (
+                  <div key={i} className="mr-1.5 mb-1.5">
+                    <Tooltip content={`${name}${chain === native_chain ? ' (Native Chain)' : ''}`} className="whitespace-nowrap">
+                      <button
+                        onClick={() => {
+                          setChainSelected(chain === chainSelected ? null : chain)
+                          if (onFocus) onFocus(denom)
+                        }}
+                      >
+                        <Image
+                          src={image}
+                          width={24}
+                          height={24}
+                          className={clsx(
+                            'rounded-full',
+                            focusID === denom && chain === chainSelected ? 'border-2 border-blue-600 dark:border-blue-500' : chain === native_chain ? 'border-2 border-orange-400 dark:border-orange-500' : '',
+                          )}
+                        />
+                      </button>
+                    </Tooltip>
+                  </div>
+                )
+              })}
+              {addresses.length > NUM_CHAINS_TRUNCATE && (
+                <button
+                  onClick={() => {
+                    setSeeMore(!seeMore)
+                    if (onFocus) onFocus(denom)
+                  }}
+                  className="bg-zinc-100 dark:bg-zinc-800 rounded text-blue-600 dark:text-blue-500 text-xs 3xl:text-sm font-medium mb-1.5 px-1.5 3xl:px-2.5 py-1 3xl:py-1.5"
+                >
+                  {seeMore ? 'See Less' : `+${addresses.length - NUM_CHAINS_TRUNCATE} More`}
+                </button>
+              )}
+            </div>
+          </div>
+          {id && (
+            <div className="flex flex-col gap-y-3">
+              <div className="flex items-center justify-between gap-x-2">
+                <Tag className="uppercase">{id}</Tag>
+                {chain_type === 'evm' && <AddMetamask chain={id} asset={denom} />}
+              </div>
+              {address && (
+                <ValueBox
+                  title="Token Contract"
+                  value={address}
+                  url={url && `${url}${contract_path?.replace('{address}', address)}`}
+                />
+              )}
+              {ibc_denom && (
+                <ValueBox
+                  title="IBC Denom"
+                  value={ibc_denom}
+                  url={url && asset_path && `${url}${asset_path.replace('{ibc_denom}', getIBCDenomBase64(ibc_denom))}`}
+                  ellipsePrefix="ibc/"
+                />
+              )}
+              {tokenSymbol && (
+                <ValueBox
+                  title="Symbol"
+                  value={tokenSymbol}
+                  url={url && (address ? `${url}${contract_path?.replace('{address}', address)}` : asset_path && ibc_denom ? `${url}${asset_path.replace('{ibc_denom}', getIBCDenomBase64(ibc_denom))}` : null)}
+                />
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </li>
+  )
+}
+
+const resources = ['chains', 'assets']
+
 export function Resources({ resource }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { chains, assets } = useGlobalStore()
-
   const [rendered, setRendered] = useState(false)
   const [input, setInput] = useState('')
   const [assetFocusID, setAssetFocusID] = useState(null)
+  const { chains, assets } = useGlobalStore()
 
   useEffect(() => {
     switch (pathname) {
@@ -157,16 +285,16 @@ export function Resources({ resource }) {
         )
       case 'assets':
         return (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-7 gap-4 xl:gap-6">
-            {/*filter(resource).map((d, i) => <AssetCard key={i} data={d} focusId={assetFocusID} focus={id => setAssetFocusID(id)} />)*/}
-          </div>
+          <ul role="list" className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            {filter(resource).map((d, i) => <Asset key={i} data={d} focusID={assetFocusID} onFocus={id => setAssetFocusID(id)} />)}
+          </ul>
         )
       default:
         return <div />
     }
   }
 
-  return rendered && resource && (
+  return resource && (
     <Container className="flex flex-col gap-y-8 sm:gap-y-12 sm:mt-8">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-y-4 sm:gap-y-0 sm:gap-x-2">
         <nav className="flex gap-x-4">

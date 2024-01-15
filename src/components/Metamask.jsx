@@ -83,7 +83,7 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
           else switchNetwork(chain_id)
         }
       }}
-      className={clsx(alreadyOnChain || !chain ? 'cursor-not-allowed' : 'cursor-pointer')}
+      className={clsx((alreadyOnChain && !asset) || !chain ? 'cursor-not-allowed' : 'cursor-pointer')}
     >
       <Image
         src={MetamaskLogo}
@@ -93,7 +93,7 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
     </button>
   )
 
-  const tooltip = alreadyOnChain ? 'Your Metamask is currently on this chain.' : split(`Add ${asset ? tokenData.symbol || asset : ''} ${chain && asset ? 'on' : ''} ${name || chain} to Metamask`, { delimiter: ' ' }).join(' ')
+  const tooltip = alreadyOnChain && !asset ? 'Your Metamask is currently on this chain.' : split(`Add ${asset ? tokenData.symbol || asset : ''} ${chain && asset ? 'on' : ''} ${name || chain} to Metamask`, { delimiter: ' ' }).join(' ')
   return chainId && (!noTooltip ?
     <Tooltip content={tooltip} className="whitespace-nowrap">
       {button}
