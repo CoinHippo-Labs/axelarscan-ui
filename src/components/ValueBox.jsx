@@ -8,13 +8,13 @@ export function ValueBox({
   title,
   value,
   url,
+  prefix = '0x',
   ellipseLength = 10,
-  ellipsePrefix = '0x',
   noEllipse = false,
   noTooltip = true,
   className = 'border border-zinc-200 dark:border-zinc-700 rounded-lg flex items-center justify-between gap-x-1.5 py-1.5 pl-2.5 pr-2',
 }) {
-  const displayValue = noEllipse ? value : ellipse(value, ellipseLength, ellipsePrefix)
+  const displayValue = noEllipse ? value : ellipse(value, ellipseLength, prefix)
   const element = url ?
     <a
       href={url}

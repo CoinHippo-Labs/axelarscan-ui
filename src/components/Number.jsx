@@ -3,6 +3,7 @@ import _ from 'lodash'
 
 import { Tooltip } from '@/components/Tooltip'
 import { split } from '@/lib/parser'
+import { headString, lastString } from '@/lib/string'
 import { isNumber, toNumber, toFixed, numberFormat } from '@/lib/number'
 
 const LARGE_NUMBER_THRESHOLD = 1000
@@ -23,7 +24,7 @@ export function Number({
   let _value = valid ? value.toString() : undefined
   if (_value && _value.includes(delimiter) && !_value.endsWith(delimiter)) {
     const valueNumber = toNumber(split(_value).join(''))
-    const decimals = _.last(split(_value, { delimiter }))
+    const decimals = lastString(_value, delimiter)
     maxDecimals = isNumber(maxDecimals) ? maxDecimals : valueNumber >= LARGE_NUMBER_THRESHOLD ? 0 : valueNumber >= 1 ? 2 : 6
 
     // handle exceed maxDecimals
@@ -35,13 +36,13 @@ export function Number({
       while (_value.includes(delimiter) && _value.endsWith('0') && !_value.endsWith(`${delimiter}00`)) {
         _value = _value.substring(0, _value.length - 1)
       }
-      if ([delimiter, `${delimiter}0`].findIndex(s => _value.endsWith(s)) > -1) _value = _.head(split(_value, { delimiter }))
+      if ([delimiter, `${delimiter}0`].findIndex(s => _value.endsWith(s)) > -1) _value = headString(_value, delimiter)
     }
   }
   else _value = undefined
 
   // remove .0
-  if (typeof value === 'string' && value.endsWith(`${delimiter}0`)) value = _.head(split(value, { delimiter }))
+  if (typeof value === 'string' && value.endsWith(`${delimiter}0`)) value = headString(value, delimiter)
 
   if (toNumber(_value) >= LARGE_NUMBER_THRESHOLD) _value = numberFormat(_value, format, true)
   else if (toNumber(value) >= LARGE_NUMBER_THRESHOLD) value = numberFormat(value, format, true)

@@ -120,7 +120,7 @@ function Asset({ data, focusID, onFocus }) {
   let { addresses } = { ...data }
   const { id, explorer, chain_type } = { ...(focusID === denom && getChainData(chainSelected, chains)) }
   const { url, contract_path, asset_path } = { ...explorer }
-  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...addresses?.[native_chain] }, Object.entries({ ...addresses }).map(([k, v]) => { return { chain: k, ...v } } ))), 'chain').filter(d => getChainData(d.chain, chains))
+  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...addresses?.[native_chain] }, Object.entries({ ...addresses }).map(([k, v]) => ({ chain: k, ...v })))), 'chain').filter(d => getChainData(d.chain, chains))
   const tokenData = addresses.find(d => d.chain === id)
   const { address, ibc_denom } = { ...tokenData }
   const tokenSymbol = tokenData?.symbol || symbol
@@ -216,7 +216,7 @@ function Asset({ data, focusID, onFocus }) {
                   title="IBC Denom"
                   value={ibc_denom}
                   url={url && asset_path && `${url}${asset_path.replace('{ibc_denom}', getIBCDenomBase64(ibc_denom))}`}
-                  ellipsePrefix="ibc/"
+                  prefix="ibc/"
                 />
               )}
               {tokenSymbol && (

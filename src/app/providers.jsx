@@ -9,7 +9,9 @@ import { create } from 'zustand'
 
 import WagmiConfigProvider from '@/lib/provider/WagmiConfigProvider'
 import { queryClient } from '@/lib/provider/wagmi'
-import { getChains, getAssets, getContracts } from '@/lib/api/axelarscan'
+import { getChains, getAssets } from '@/lib/api/axelarscan'
+import { getContracts, getConfigurations } from '@/lib/api/gmp'
+import { getValidators } from '@/lib/api/validator'
 import * as ga from '@/lib/ga'
 
 function ThemeWatcher() {
@@ -40,9 +42,13 @@ export const useGlobalStore = create()(set => ({
   chains: null,
   assets: null,
   contracts: null,
+  configurations: null,
+  validators: null,
   setChains: data => set(state => ({ ...state, chains: data })),
   setAssets: data => set(state => ({ ...state, assets: data })),
   setContracts: data => set(state => ({ ...state, contracts: data })),
+  setConfigurations: data => set(state => ({ ...state, configurations: data })),
+  setValidators: data => set(state => ({ ...state, validators: data })),
 }))
 
 export const useNameServicesStore = create()(set => ({
@@ -57,11 +63,11 @@ export const useNameServicesStore = create()(set => ({
 }))
 
 const GlobalLoader = () => {
-  const { setChains, setAssets, setContracts } = useGlobalStore()
+  const { setChains, setAssets, setContracts, setConfigurations, setValidators } = useGlobalStore()
 
   useEffect(() => {
     const getData = async () => {
-      await Promise.all(['chains', 'assets', 'contracts'].map(k => new Promise(async resolve => {
+      await Promise.all(['chains', 'assets', 'contracts', 'configurations', 'validators'].map(k => new Promise(async resolve => {
         switch (k) {
           case 'chains':
             setChains(await getChains())
@@ -72,6 +78,11 @@ const GlobalLoader = () => {
           case 'contracts':
             setContracts(await getContracts())
             break
+          case 'configurations':
+            setConfigurations(await getConfigurations())
+            break
+          case 'getValidators':
+            setValidators(await getValidators())
           default:
             break
         }
@@ -79,7 +90,7 @@ const GlobalLoader = () => {
       })))
     }
     getData()
-  }, [setChains, setAssets, setContracts])
+  }, [setChains, setAssets, setContracts, setConfigurations, setValidators])
 
   return null
 }

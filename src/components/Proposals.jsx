@@ -11,7 +11,8 @@ import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
 import { getProposals } from '@/lib/api/axelarscan'
-import { split, toArray } from '@/lib/parser'
+import { toArray } from '@/lib/parser'
+import { toTitle } from '@/lib/string'
 import { toNumber } from '@/lib/number'
 
 export function Proposals() {
@@ -128,7 +129,7 @@ export function Proposals() {
                                   key={k}
                                   value={v}
                                   format="0,0.00a"
-                                  prefix={`${split(k, { delimiter: '_' }).join(' ')}: `}
+                                  prefix={`${toTitle(k)}: `}
                                   noTooltip={true}
                                   className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
                                 />

@@ -1,4 +1,4 @@
-import Head from 'next/head'
+import Script from 'next/script'
 import { Inter, Lexend } from 'next/font/google'
 import clsx from 'clsx'
 
@@ -39,25 +39,23 @@ export default function RootLayout({ children }) {
         lexend.variable,
       )}
     >
-      <Head>
-        {process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
-          <>
-            <script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`} />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GA_TRACKING_ID}', {
-                    page_path: window.location.pathname,
-                  });
-                `,
-              }}
-            />
-          </>
-        )}
-      </Head>
+      {process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
+        <>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`} />
+          <Script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_TRACKING_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `,
+            }}
+          />
+        </>
+      )}
       <body className="flex min-h-full bg-white dark:bg-zinc-900 antialiased">
         <Providers>
           <div className="w-full">

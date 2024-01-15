@@ -19,3 +19,5 @@ export const headString = (string, delimiter = '-') => _.head(split(string, { de
 export const lastString = (string, delimiter = '-') => _.last(split(string, { delimiter }))
 
 export const ellipse = (string, length = 10, prefix = '') => !isString(string) || !string ? '' : string.length < (length * 2) + 3 ? string : `${string.startsWith(prefix) ? prefix : ''}${string.replace(prefix, '').slice(0, length)}...${string.replace(prefix, '').slice(-length)}`
+
+export const toTitle = (string, delimiter = '_') => split(string, { delimiter }).join(' ')
