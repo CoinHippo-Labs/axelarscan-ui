@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSelector, shallowEqual } from 'react-redux'
+import _ from 'lodash'
 
 import Spinner from '../spinner'
 import Datatable from '../datatable'
