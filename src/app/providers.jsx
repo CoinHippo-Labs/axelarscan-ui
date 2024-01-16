@@ -9,7 +9,7 @@ import { create } from 'zustand'
 
 import WagmiConfigProvider from '@/lib/provider/WagmiConfigProvider'
 import { queryClient } from '@/lib/provider/wagmi'
-import { getChains, getAssets } from '@/lib/api/axelarscan'
+import { getChains, getAssets, getTokensPrice, getTVL } from '@/lib/api/axelarscan'
 import { getContracts, getConfigurations } from '@/lib/api/gmp'
 import { getValidators } from '@/lib/api/validator'
 import * as ga from '@/lib/ga'
@@ -44,11 +44,13 @@ export const useGlobalStore = create()(set => ({
   contracts: null,
   configurations: null,
   validators: null,
+  tvl: null,
   setChains: data => set(state => ({ ...state, chains: data })),
   setAssets: data => set(state => ({ ...state, assets: data })),
   setContracts: data => set(state => ({ ...state, contracts: data })),
   setConfigurations: data => set(state => ({ ...state, configurations: data })),
   setValidators: data => set(state => ({ ...state, validators: data })),
+  setTVL: data => set(state => ({ ...state, tvl: data })),
 }))
 
 export const useNameServicesStore = create()(set => ({
@@ -63,17 +65,24 @@ export const useNameServicesStore = create()(set => ({
 }))
 
 const GlobalLoader = () => {
-  const { setChains, setAssets, setContracts, setConfigurations, setValidators } = useGlobalStore()
+  const { setChains, setAssets, setContracts, setConfigurations, setValidators, setTVL } = useGlobalStore()
 
   useEffect(() => {
     const getData = async () => {
-      await Promise.all(['chains', 'assets', 'contracts', 'configurations', 'validators'].map(k => new Promise(async resolve => {
+      await Promise.all(['chains', 'assets', 'contracts', 'configurations', 'validators', 'tvl'].map(k => new Promise(async resolve => {
         switch (k) {
           case 'chains':
             setChains(await getChains())
             break
           case 'assets':
-            setAssets(await getAssets())
+            const assets = await getAssets()
+            if (assets) {
+              for (const [k, v] of Object.entries({ ...await getTokensPrice({ symbols: assets.map(d => d.id) }) })) {
+                const i = assets.findIndex(d => d.id === k)
+                if (i > -1) assets[i].price = assets[i].price || v.price
+              }
+            }
+            setAssets(assets)
             break
           case 'contracts':
             setContracts(await getContracts())
@@ -81,8 +90,12 @@ const GlobalLoader = () => {
           case 'configurations':
             setConfigurations(await getConfigurations())
             break
-          case 'getValidators':
+          case 'validators':
             setValidators(await getValidators())
+            break
+          case 'tvl':
+            setTVL(await getTVL())
+            break
           default:
             break
         }
@@ -90,7 +103,7 @@ const GlobalLoader = () => {
       })))
     }
     getData()
-  }, [setChains, setAssets, setContracts, setConfigurations, setValidators])
+  }, [setChains, setAssets, setContracts, setConfigurations, setValidators, setTVL])
 
   return null
 }

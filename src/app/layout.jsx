@@ -41,7 +41,7 @@ export default function RootLayout({ children }) {
     >
       {process.env.NEXT_PUBLIC_GA_TRACKING_ID && (
         <>
-          <Script src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`} />
+          <Script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_TRACKING_ID}`} />
           <Script
             dangerouslySetInnerHTML={{
               __html: `

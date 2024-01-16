@@ -89,7 +89,7 @@ const toDecimals = n => {
     }
   }
 
-  return sign < 0 && typeof n === 'string' && !n.startsWith('-') ? -n : n
+  return sign < 0 && isString(n) && !n.startsWith('-') ? -n : n
 }
 
 export const numberFormat = (number, format, exact) => {

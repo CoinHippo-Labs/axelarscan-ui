@@ -176,11 +176,11 @@ export function Header() {
     <header className="py-6">
       <Container>
         <nav className="relative z-50 flex justify-between gap-x-4">
-          <div className="flex items-center lg:gap-x-12">
+          <div className="flex items-center xl:gap-x-12">
             <Link href="/" aria-label="Dashboard">
               <Logo className="h-10 w-auto" />
             </Link>
-            <div className="hidden lg:flex lg:gap-x-4">
+            <div className="hidden xl:flex xl:gap-x-4">
               {navigations.map((d, i) => {
                 const { title, href, children } = { ...d }
 
@@ -232,7 +232,7 @@ export function Header() {
             <div className="hidden md:block">
               <Search />
             </div>
-            <div className="hidden lg:block">
+            <div className="hidden xl:block">
               <Popover
                 onMouseEnter={() => setPopoverEnvironmentOpen(true)}
                 onMouseLeave={() => setPopoverEnvironmentOpen(false)}
@@ -261,7 +261,7 @@ export function Header() {
               </Popover>
             </div>
             <ThemeToggle />
-            <div className="-mr-1 lg:hidden">
+            <div className="-mr-1 xl:hidden">
               <MobileNavigation />
             </div>
           </div>

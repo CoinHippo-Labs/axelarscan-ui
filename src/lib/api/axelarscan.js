@@ -5,5 +5,7 @@ const request = async params => {
 
 export const getChains = async () => request({ method: 'getChains' })
 export const getAssets = async () => request({ method: 'getAssets' })
+export const getTokensPrice = async params => request({ ...params, method: 'getTokensPrice' })
+export const getTVL = async params => request({ ...params, method: 'getTVL' })
 export const getProposals = async () => request({ method: 'getProposals' })
 export const getProposal = async params => request({ ...params, method: 'getProposal' })

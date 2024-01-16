@@ -3,7 +3,7 @@ import _ from 'lodash'
 
 import { Tooltip } from '@/components/Tooltip'
 import { split } from '@/lib/parser'
-import { headString, lastString } from '@/lib/string'
+import { isString, headString, lastString } from '@/lib/string'
 import { isNumber, toNumber, toFixed, numberFormat } from '@/lib/number'
 
 const LARGE_NUMBER_THRESHOLD = 1000
@@ -42,7 +42,7 @@ export function Number({
   else _value = undefined
 
   // remove .0
-  if (typeof value === 'string' && value.endsWith(`${delimiter}0`)) value = headString(value, delimiter)
+  if (isString(value) && value.endsWith(`${delimiter}0`)) value = headString(value, delimiter)
 
   if (toNumber(_value) >= LARGE_NUMBER_THRESHOLD) _value = numberFormat(_value, format, true)
   else if (toNumber(value) >= LARGE_NUMBER_THRESHOLD) value = numberFormat(value, format, true)
@@ -50,10 +50,10 @@ export function Number({
   className = clsx('text-sm whitespace-nowrap', className)
   const element = (
     <span className={className}>
-      {typeof _value === 'string' ? `${prefix}${_value}${suffix}` : isNumber(value) ? `${prefix}${value}${suffix}` : '-'}
+      {isString(_value) ? `${prefix}${_value}${suffix}` : isNumber(value) || isString(value) ? `${prefix}${value}${suffix}` : '-'}
     </span>
   )
-  return valid && (typeof _value === 'string' ?
+  return valid && (isString(_value) ?
     !noTooltip || tooltipContent ?
       <Tooltip content={tooltipContent || `${prefix}${value}${suffix}`} className="whitespace-nowrap">
         {element}
