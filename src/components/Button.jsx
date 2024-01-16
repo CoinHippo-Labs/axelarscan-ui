@@ -16,6 +16,10 @@ const variantStyles = {
       'bg-blue-600 text-white hover:text-zinc-100 hover:bg-blue-500 active:bg-blue-800 active:text-blue-100 focus-visible:outline-blue-600',
     white:
       'bg-white text-zinc-900 hover:bg-blue-50 active:bg-blue-200 active:text-zinc-600 focus-visible:outline-white',
+    default:
+      'bg-zinc-50 text-zinc-900 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700',
+    none:
+      'bg-transparent text-zinc-900 dark:text-zinc-100',
   },
   outline: {
     zinc:
@@ -36,6 +40,7 @@ export function Button({ className, ...props }) {
       : props.variant === 'solid'
         ? variantStyles.solid[props.color]
         : undefined,
+    props.circle && '!p-2',
     className,
   )
 

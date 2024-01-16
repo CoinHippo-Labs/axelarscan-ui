@@ -82,14 +82,14 @@ export function SpaceIDProfile({
           src={image404 ? SpaceIDLogo : src}
           width={width}
           height={height}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
+          className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         /> :
         <img
           src={src}
           alt=""
           onLoad={() => setImage404(false)}
           onError={() => setImage404(true)}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5')}
+          className={clsx('rounded-full', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         />
       }
       {url ?
@@ -101,9 +101,9 @@ export function SpaceIDProfile({
           >
             {element}
           </Link>
-          {!noCopy && <Copy value={address} />}
+          {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy value={address} title={element} />
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
       }
     </div> :
     <ENSProfile
@@ -172,14 +172,14 @@ export function LENSProfile({
           src={image404 ? LENSLogo : src}
           width={width}
           height={height}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
+          className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         /> :
         <img
           src={src}
           alt=""
           onLoad={() => setImage404(false)}
           onError={() => setImage404(true)}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5')}
+          className={clsx('rounded-full', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         />
       }
       {url ?
@@ -191,9 +191,9 @@ export function LENSProfile({
           >
             {element}
           </Link>
-          {!noCopy && <Copy value={address} />}
+          {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy value={address} title={element} />
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
       }
     </div> :
     <UnstoppableProfile
@@ -261,14 +261,14 @@ export function UnstoppableProfile({
           src={image404 ? UnstoppableLogo : src}
           width={width}
           height={height}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
+          className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         /> :
         <img
           src={src}
           alt=""
           onLoad={() => setImage404(false)}
           onError={() => setImage404(true)}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5')}
+          className={clsx('rounded-full', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         />
       }
       {url ?
@@ -280,9 +280,9 @@ export function UnstoppableProfile({
           >
             {element}
           </Link>
-          {!noCopy && <Copy value={address} />}
+          {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy value={address} title={element} />
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
       }
     </div> :
     <ENSProfile
@@ -352,14 +352,14 @@ export function ENSProfile({
           src={image404 ? ENSLogo : src}
           width={width}
           height={height}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
+          className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         /> :
         <img
           src={src}
           alt=""
           onLoad={() => setImage404(false)}
           onError={() => setImage404(true)}
-          className={clsx('rounded-full mr-2 3xl:mr-3', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5')}
+          className={clsx('rounded-full', width === 24 ? 'w-6 3xl:w-8 h-6 3xl:h-8' : 'w-5 h-5', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
         />
       }
       {url ?
@@ -371,9 +371,9 @@ export function ENSProfile({
           >
             {element}
           </Link>
-          {!noCopy && <Copy value={address} />}
+          {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy value={address} title={element} />
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
       }
     </div> :
     origin !== 'unstoppable' ?
@@ -394,9 +394,9 @@ export function ENSProfile({
           >
             {element}
           </Link>
-          {!noCopy && <Copy value={address} />}
+          {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy value={address} title={element} />
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
 }
 
 export function EVMProfile({ chain, ...props }) {
@@ -500,7 +500,7 @@ export function Profile({
   const url = explorer ? `${explorer.url}${explorer.address_path?.replace('{address}', address)}` : undefined
 
   return address && (name ?
-    <div className={clsx('min-w-max flex items-center gap-x-2 3xl:gap-x-3', className)}>
+    <div className={clsx('min-w-max flex items-center', width < 24 ? 'gap-x-1.5' : 'gap-x-2 3xl:gap-x-3', className)}>
       {image ?
         <Image
           src={image}
@@ -518,7 +518,7 @@ export function Profile({
         >
           {ellipse(name, 24)}
         </Link>
-        {!noCopy && <Copy value={address} />}
+        {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
       </div>
     </div> :
     address.startsWith('0x') ?
@@ -540,8 +540,8 @@ export function Profile({
           >
             {ellipse(address, 10, prefix)}
           </Link>
-          {!noCopy && <Copy value={address} />}
+          {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        <Copy value={address} title={ellipse(address, 10, prefix)} />
+        <Copy size={width < 24 ? 16 : 18} value={address}>{ellipse(address, 10, prefix)}</Copy>
   )
 }

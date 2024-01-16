@@ -15,6 +15,8 @@ import { toArray } from '@/lib/parser'
 import { toTitle } from '@/lib/string'
 import { toNumber } from '@/lib/number'
 
+const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
+
 export function Proposals() {
   const [data, setData] = useState(null)
 
@@ -38,7 +40,7 @@ export function Proposals() {
               </p>
             </div>
           </div>
-          <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-8">
+          <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-4">
             <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
               <thead className="sticky top-0 bg-white dark:bg-zinc-900">
                 <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
@@ -97,7 +99,7 @@ export function Proposals() {
                         <div className="flex flex-col gap-y-1">
                           {[d.voting_start_time, d.voting_end_time].map((t, i) => (
                             <span key={i} className="text-zinc-700 dark:text-zinc-300 text-xs font-medium whitespace-nowrap">
-                              {moment(t).format('MMM D, YYYY h:mm:ss A z')}
+                              {moment(t).format(TIME_FORMAT)}
                             </span>
                           ))}
                         </div>
