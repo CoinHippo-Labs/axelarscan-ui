@@ -2,214 +2,379 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import Linkify from 'react-linkify'
 import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
+import { MdOutlineCode, MdOutlineArrowBack } from 'react-icons/md'
 
 import { Container } from '@/components/Container'
 import Image from '@/components/Image'
-import JSONView from '@/components/JSONView'
-import { Profile } from '@/components/Profile'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
+import { Profile } from '@/components/Profile'
+import { useEVMWalletStore, EVMWallet } from '@/components/Wallet'
 import { useGlobalStore } from '@/app/providers'
-import { getProposal } from '@/lib/api/axelarscan'
-import { getChainData } from '@/lib/config'
-import { toJson, toArray } from '@/lib/parser'
-import { equalsIgnoreCase, ellipse, toTitle } from '@/lib/string'
-import { toNumber } from '@/lib/number'
+import { getBatch } from '@/lib/api/token-transfer'
+import { getChainData, getAssetData } from '@/lib/config'
+import { split, toArray, parseError } from '@/lib/parser'
+import { equalsIgnoreCase, ellipse } from '@/lib/string'
+import { toNumber, formatUnits } from '@/lib/number'
+import { timeDiff } from '@/lib/time'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
-function Info({ data, end, voteOptions }) {
-  const { chains } = useGlobalStore()
+function Info({ data, chain, id, executeButton, executeResponse }) {
+  const { chains, assets } = useGlobalStore()
 
-  const { proposal_id, type, content, status, submit_time, deposit_end_time, voting_start_time, voting_end_time, total_deposit, final_tally_result } = { ...data }
-  const { plan, title, description, changes, contract_calls } = { ...content }
-  const { height, info } = { ...plan }
+  const { key_id, commands, created_at, execute_data, prev_batched_commands_id } = { ...data }
+  let { signatures } = { ...data?.proof }
+  signatures = toArray(signatures || data?.signature)
+
+  const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
+  const status = executed ? 'executed' : data?.status?.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()
+  const chainData = getChainData(chain, chains)
+  const { url, transaction_path } = { ...chainData?.explorer }
+  const { status: xstatus, message, hash } = { ...executeResponse }
 
   return (
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
       <div className="px-4 sm:px-6 py-6">
-        <h3 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-7">{title || plan?.name}</h3>
-        <p className="max-w-2xl text-zinc-400 dark:text-zinc-500 text-sm leading-6 mt-1">Proposal ID: {proposal_id}</p>
+        <h3 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-7">
+          <Copy value={id}>{ellipse(id, 16)}</Copy>
+          <Copy size={16} value={key_id}>
+            <span className="text-zinc-400 dark:text-zinc-500 text-sm font-normal leading-6">
+              {key_id}
+            </span>
+          </Copy>
+        </h3>
+        <div className="max-w-2xl mt-3">
+          {prev_batched_commands_id && (
+            <Link
+              href={`/evm-batch/${chain}/${prev_batched_commands_id}`}
+              className="flex items-center text-blue-600 dark:text-blue-500 font-medium gap-x-1"
+            >
+              <MdOutlineArrowBack size={18} />
+              <span>Previous Batch ({ellipse(prev_batched_commands_id, 8)})</span>
+            </Link>
+          )}
+        </div>
       </div>
       <div className="border-t border-zinc-200 dark:border-zinc-700">
         <dl className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Description</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <span className="max-w-xl linkify text-zinc-400 dark:text-zinc-500 break-words whitespace-pre-wrap">
-                <Linkify>
-                  {description}
-                </Linkify>
-              </span>
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Chain</dt>
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              {chainData && (
+                <div className="min-w-max flex items-center gap-x-2">
+                  <Image
+                    src={chainData.image}
+                    width={24}
+                    height={24}
+                  />
+                  <span className="text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap">
+                    {chainData.name}
+                  </span>
+                </div>
+              )}
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Status</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <Tag className={clsx('w-fit', ['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(status) ? '' : ['VOTING_PERIOD'].includes(status) ? 'bg-yellow-400 dark:bg-yellow-500' : ['REJECTED', 'FAILED'].includes(status) ? 'bg-red-600 dark:bg-red-500' : 'bg-green-600 dark:bg-green-500')}>
-                {status}
-              </Tag>
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              {status && (
+                <div className="flex items-center space-x-3">
+                  <Tag className={clsx('w-fit capitalize', ['executed'].includes(status) ? 'bg-green-600 dark:bg-green-500' : ['signed'].includes(status) ? 'bg-orange-500 dark:bg-orange-600' : ['signing'].includes(status) ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-red-600 dark:bg-red-500')}>
+                    {status}
+                  </Tag>
+                  {executeButton}
+                </div>
+              )}
             </dd>
           </div>
-          {type && (
-            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Type</dt>
-              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <Tag className="w-fit">{type}</Tag>
+          {commands && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{`Command${commands.length > 1 ? `s (${commands.length})` : ''}`}</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">
+                  <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+                    <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
+                      <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
+                        <th scope="col" className="pl-4 sm:pl-3 pr-3 py-2.5 text-left">
+                          ID
+                        </th>
+                        <th scope="col" className="px-3 py-2.5 text-left">
+                          Command
+                        </th>
+                        <th scope="col" className="pl-3 pr-4 sm:pr-3 px-3 py-2.5 text-left">
+                          Parameters
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+                      {toArray(commands).map((d, i) => {
+                        const { amount, name, cap, account, salt, newOwners, newOperators, newWeights, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...d.params }
+                        let { symbol, decimals } = { ...d.params }
+
+                        const transferID = parseInt(d.id, 16)
+                        const assetData = getAssetData(symbol, assets)
+                        const tokenData = assetData?.addresses?.[chain]
+                        symbol = tokenData?.symbol || assetData?.symbol || symbol
+                        decimals = tokenData?.decimals || assetData?.decimals || decimals || 18
+                        const image = tokenData?.image || assetData?.image
+
+                        const sourceChainData = getChainData(sourceChain, chains)
+                        const IDElement = (
+                          <span className="font-medium">
+                            {ellipse(d.id, 6)}
+                          </span>
+                        )
+                        const typeElement = (
+                          <div className="flex">
+                            <Tooltip content={d.executed ? 'Executed' : 'Unexecuted'}>
+                              <Tag className={clsx('w-fit capitalize text-2xs', d.executed ? 'bg-green-600 dark:bg-green-500' : 'bg-orange-500 dark:bg-orange-600')}>
+                                {d.type}
+                              </Tag>
+                            </Tooltip>
+                          </div>
+                        )
+
+                        return (
+                          <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-xs">
+                            <td className="pl-4 sm:pl-3 pr-3 py-3 text-left">
+                              {url && d.transactionHash ?
+                                <Copy size={16} value={d.id}>
+                                  <Link
+                                    href={`${url}${transaction_path?.replace('{tx}', d.transactionHash)}`}
+                                    target="_blank"
+                                    className="text-blue-600 dark:text-blue-500"
+                                  >
+                                    {IDElement}
+                                  </Link>
+                                </Copy> :
+                                <Copy size={16} value={d.id}>
+                                  {IDElement}
+                                </Copy>
+                              }
+                            </td>
+                            <td className="px-3 py-3 text-left">
+                              {url && d.transactionHash ?
+                                <Link href={`${url}${transaction_path?.replace('{tx}', d.transactionHash)}`} target="_blank">
+                                  {typeElement}
+                                </Link> :
+                                typeElement
+                              }
+                            </td>
+                            <td className="pl-3 pr-4 sm:pr-3 py-3 text-left">
+                              <div className="flex lg:flex-wrap lg:items-center">
+                                {symbol && !['approveContractCall'].includes(d.type) && (
+                                  <div className="min-w-fit h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center gap-x-1.5 mr-2 px-2.5 py-1">
+                                    {image && (
+                                      <Image
+                                        src={image}
+                                        width={16}
+                                        height={16}
+                                      />
+                                    )}
+                                    {amount && assets ?
+                                      <Number
+                                        value={formatUnits(amount, decimals)}
+                                        format="0,0.000000"
+                                        suffix={` ${symbol}`}
+                                        className="text-zinc-900 dark:text-zinc-100 text-xs font-medium"
+                                      /> :
+                                      <span className="text-zinc-900 dark:text-zinc-100 text-xs font-medium">
+                                        {symbol}
+                                      </span>
+                                    }
+                                  </div>
+                                )}
+                                {sourceChainData && (
+                                  <div className="min-w-fit h-6 flex items-center gap-x-1.5 mr-2">
+                                    <Tooltip content={sourceChainData.name} className="whitespace-nowrap">
+                                      <Image
+                                        src={sourceChainData.image}
+                                        width={20}
+                                        height={20}
+                                      />
+                                    </Tooltip>
+                                    {sourceTxHash && (
+                                      <Link
+                                        href={`/gmp/${sourceTxHash}${sourceChainData.chain_type === 'cosmos' && d.id ? `?commandId=${d.id}` : ''}`}
+                                        target="_blank"
+                                        className="text-blue-600 dark:text-blue-500 font-medium"
+                                      >
+                                        GMP
+                                      </Link>
+                                    )}
+                                    {contractAddress && (
+                                      <>
+                                        <MdOutlineCode size={20} className="text-zinc-700 dark:text-zinc-300" />
+                                        <Profile
+                                          address={contractAddress}
+                                          chain={chain}
+                                          width={20}
+                                          height={20}
+                                        />
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                                {d.type === 'mintToken' && (
+                                  <div className="min-w-fit h-6 flex items-center gap-x-1.5 mr-2">
+                                    <Link
+                                      href={`/transfer?transferId=${transferID}`}
+                                      target="_blank"
+                                      className="text-blue-600 dark:text-blue-500 font-medium"
+                                    >
+                                      Transfer
+                                    </Link>
+                                    {account && (
+                                      <>
+                                        <MdOutlineCode size={20} className="text-zinc-700 dark:text-zinc-300" />
+                                        <Profile
+                                          address={account}
+                                          chain={chain}
+                                          width={20}
+                                          height={20}
+                                        />
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                                {salt && (
+                                  <div className="h-6 flex items-center gap-x-1.5 mr-2">
+                                    <span className="text-slate-400 dark:text-slate-500">
+                                      {deposit_address ? 'Deposit address' : 'Salt'}:
+                                    </span>
+                                    {deposit_address ?
+                                      <Copy size={16} value={deposit_address}>
+                                        <Link
+                                          href={`/account/${deposit_address}`}
+                                          target="_blank"
+                                          className="text-slate-400 dark:text-slate-500"
+                                        >
+                                          {ellipse(deposit_address, 6, '0x')}
+                                        </Link>
+                                      </Copy> :
+                                      <Copy size={16} value={salt}>
+                                        <span className="text-slate-400 dark:text-slate-500">
+                                          {ellipse(salt, 6, '0x')}
+                                        </span>
+                                      </Copy>
+                                    }
+                                  </div>
+                                )}
+                                {name && (
+                                  <div className="flex flex-col mr-2">
+                                    <span className="text-zinc-900 dark:text-zinc-100 text-xs font-medium">
+                                      {name}
+                                    </span>
+                                    <div className="flex items-center gap-x-2">
+                                      {decimals && (
+                                        <Number
+                                          value={decimals}
+                                          prefix="Decimals: "
+                                          className="text-zinc-400 dark:text-zinc-500 text-xs"
+                                        />
+                                      )}
+                                      {cap && (
+                                        <Number
+                                          value={cap}
+                                          prefix="Cap: "
+                                          className="text-zinc-400 dark:text-zinc-500 text-xs"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                                {newOwners && (
+                                  <Number
+                                    value={split(newOwners, { delimiter: ';' }).length}
+                                    suffix={' New Owners'}
+                                    className="h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-700 dark:text-zinc-300 text-xs font-medium mr-2 px-2.5 py-1"
+                                  />
+                                )}
+                                {newOperators && (
+                                  <div className="flex items-center mr-2">
+                                    <Number
+                                      value={split(newOperators, { delimiter: ';' }).length}
+                                      suffix={' New Operators'}
+                                      className="h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl text-zinc-700 dark:text-zinc-300 text-xs font-medium mr-2 px-2.5 py-1"
+                                    />
+                                    {newWeights && (
+                                      <Number
+                                        value={_.sum(split(newWeights, { delimiter: ';' }).map(w => toNumber(w)))}
+                                        prefix="["
+                                        suffix="]"
+                                        className="text-zinc-700 dark:text-zinc-300 text-xs font-medium"
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                                {newThreshold && (
+                                  <Number
+                                    value={newThreshold}
+                                    prefix={'Threshold: '}
+                                    className="text-xs font-medium mr-2"
+                                  />
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </dd>
             </div>
           )}
-          {plan && (
-            <>
-              <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Plan</dt>
-                <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm font-medium leading-6 mt-1 sm:mt-0">
-                  {plan.name}
-                </dd>
-              </div>
-              <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Height</dt>
-                <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm font-medium leading-6 mt-1 sm:mt-0">
-                  <Number value={height} />
-                </dd>
-              </div>
-              {info && (
-                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{type}</dt>
-                  <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm font-medium leading-6 mt-1 sm:mt-0">
-                    {typeof toJson(info) === 'object' ?
-                      <JSONView value={info} /> :
-                      <div className="bg-zinc-100 dark:bg-zinc-800 rounded-lg p-3">
-                        {info}
-                      </div>
-                    }
-                  </dd>
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time</dt>
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              {moment(created_at?.ms).format(TIME_FORMAT)}
+            </dd>
+          </div>
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{executed ? 'Signed Commands' : 'Execute Data'}</dt>
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              {execute_data && (
+                <div className="flex items-start gap-x-2">
+                  <Tag className="bg-white dark:bg-zinc-800 break-all text-zinc-500 dark:text-zinc-500 font-sans px-3 py-3">
+                    {ellipse(execute_data, 256)}
+                  </Tag>
+                  <Copy value={execute_data} className="mt-3" />
                 </div>
               )}
-            </>
-          )}
-          {toArray(changes).filter(d => d.subspace).map((d, i) => {
-            const { key, value, subspace } = { ...d }
-            return (
-              <div key={i} className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{subspace}</dt>
-                <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm font-medium leading-6 mt-1 sm:mt-0">
-                  {typeof toJson(value) === 'object' ?
-                    <div className="flex flex-col gap-y-2">
-                      <Tag className="w-fit bg-orange-400 dark:bg-orange-500 whitespace-nowrap">{key}</Tag>
-                      <JSONView value={value} />
-                    </div> :
-                    <Tag className="w-fit bg-orange-400 dark:bg-orange-500 whitespace-nowrap">{key} = {value}</Tag>
-                  }
-                </dd>
-              </div>
-            )
-          })}
-          {toArray(contract_calls).length > 0 && (
-            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">GMP(s)</dt>
-              <Link
-                href={`/gmp/search?proposalId=${proposal_id}`}
-                target="_blank"
-                className="h-6 flex items-center gap-x-3"
-              >
-                <div>
-                  <div className="block dark:hidden">
-                    <Image
-                      src="/logos/logo.png"
-                      width={24}
-                      height={24}
-                    />
-                  </div>
-                  <div className="hidden dark:block">
-                    <Image
-                      src="/logos/logo_white.png"
-                      width={24}
-                      height={24}
-                    />
-                  </div>
-                </div>
-                <div className="w-12 h-1 border-t-2 border-dashed border-zinc-400 dark:border-zinc-600" />
-                <div className="max-w-fit flex flex-wrap items-center">
-                  {toArray(contract_calls).map((d, i) => {
-                    const { name, image } = { ...getChainData(d.chain, chains) }
-                    return (
-                      <div key={i} className="mr-0.5 mb-0.5">
-                        <Tooltip content={name}>
-                          <Image
-                            src={image}
-                            width={20}
-                            height={20}
-                          />
-                        </Tooltip>
-                      </div>
-                    )
-                  })}
-                </div>
-              </Link>
-            </div>
-          )}
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Deposit Period</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              {moment(submit_time).format(TIME_FORMAT)} - {moment(deposit_end_time).format(TIME_FORMAT)}
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Voting Period</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              {moment(voting_start_time).format(TIME_FORMAT)} - {moment(voting_end_time).format(TIME_FORMAT)}
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Data</dt>
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              {data?.data && (
+                <div className="flex items-start gap-x-2">
+                  <Tag className="bg-white dark:bg-zinc-800 break-all text-zinc-500 dark:text-zinc-500 font-sans px-3 py-3">
+                    {ellipse(data.data, 256)}
+                  </Tag>
+                  <Copy value={data.data} className="mt-3" />
+                </div>
+              )}
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Total Deposit</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <div className="flex flex-col gap-y-1">
-                {toArray(total_deposit).map((d, i) => (
-                  <Number
-                    key={i}
-                    value={d.amount}
-                    suffix={` ${d.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-700 dark:text-zinc-300 font-medium"
-                  />
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{`Signature${signatures.length > 1 ? `s (${signatures.length})` : ''}`}</dt>
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1">
+                {signatures.map((d, i) => (
+                  <Copy key={i} size={14} value={d}>
+                    <span className="text-zinc-400 dark:text-zinc-500 text-xs">
+                      {ellipse(d, 8)}
+                    </span>
+                  </Copy>
                 ))}
-              </div>
-            </dd>
-          </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{end ? 'Final Tally' : 'Votes'}</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <div className="flex flex-col gap-y-1">
-                {end ?
-                  Object.entries({ ...final_tally_result }).filter(([k, v]) => toNumber(v) > 0).map(([k, v]) => (
-                    <Number
-                      key={k}
-                      value={v}
-                      format="0,0.00a"
-                      prefix={`${toTitle(k)}: `}
-                      noTooltip={true}
-                      className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
-                    />
-                  )) :
-                  voteOptions.map((d, i) => (
-                    <NumberDisplay
-                      key={i}
-                      value={d.value}
-                      format="0,0.00a"
-                      prefix={`${toTitle(d.option)}: `}
-                      noTooltip={true}
-                      className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
-                    />
-                  ))
-                }
               </div>
             </dd>
           </div>
@@ -219,122 +384,73 @@ function Info({ data, end, voteOptions }) {
   )
 }
 
-function Votes({ data }) {
-  const { validators } = useGlobalStore()
-
-  const totalVotingPower = _.sumBy(toArray(validators).filter(d => !d.jailed && d.status === 'BOND_STATUS_BONDED'), 'tokens')
-  return data && (
-    <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-8">
-      <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-        <thead className="sticky top-0 bg-white dark:bg-zinc-900">
-          <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
-            <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
-              #
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-left">
-              Voter
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-left">
-              Validator
-            </th>
-            <th scope="col" className="px-3 py-3.5 text-right">
-              Voting Power
-            </th>
-            <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right">
-              Vote
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
-          {data.map((d, i) => (
-            <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
-              <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
-                {i}
-              </td>
-              <td className="px-3 py-4 text-left">
-                <div className="flex items-center gap-x-1">
-                  <Link
-                    href={`/account/${d.voter}`}
-                    target="_blank"
-                    className="text-blue-600 dark:text-blue-500 font-medium"
-                  >
-                    {ellipse(d.voter, 10, 'axelar')}
-                  </Link>
-                  <Copy value={d.voter} />
-                </div>
-              </td>
-              <td className="px-3 py-4 text-left">
-                <Profile address={d.validatorData.operator_address} prefix="axelarvaloper" />
-              </td>
-              <td className="px-3 py-4 text-right">
-                <div className="flex flex-col items-end gap-y-1">
-                  <Number
-                    value={d.voting_power}
-                    format="0,0.00a"
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-semibold"
-                  />
-                  {totalVotingPower > 0 && (
-                    <Number
-                      value={d.voting_power * 100 / totalVotingPower}
-                      format="0,0.000000"
-                      suffix="%"
-                      className="text-zinc-400 dark:text-zinc-500"
-                    />
-                  )}
-                </div>
-              </td>
-              <td className="pl-3 pr-4 sm:pr-0 py-4 text-right">
-                {d.option && (
-                  <div className="flex flex-col items-end">
-                    <Tag className={clsx('w-fit capitalize', ['NO'].includes(d.option) ? 'bg-red-600 dark:bg-red-500' : ['YES'].includes(d.option) ? 'bg-green-600 dark:bg-green-500' : '')}>
-                      {toTitle(d.option)}
-                    </Tag>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
+const EXECUTE_PERIOD_SECONDS = 5 * 60
 
 export function EVMBatch({ chain, id }) {
   const [data, setData] = useState(null)
-  const { validators } = useGlobalStore()
+  const [executing, setExecuting] = useState(false)
+  const [executeResponse, setExecuteResponse] = useState(null)
+  const { chains, contracts } = useGlobalStore()
+  const { chainId, signer } = useEVMWalletStore()
 
   useEffect(() => {
     const getData = async () => {
-      const response = await getProposal({ id })
-      setData({ ...response, votes: setValidatorsToVotes(response?.votes) })
+      const data = await getBatch(chain, id)
+      console.log('[data]', data)
+      setData(data)
     }
     getData()
-  }, [id, setData])
+  }, [chain, id, setData])
 
-  useEffect(() => {
-    if (validators && data) setData({ ...data, votes: setValidatorsToVotes(data.votes) })
-  }, [validators, setData])
+  const { commands, created_at, execute_data } = { ...data }
+  const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
+  const chainData = getChainData(chain, chains)
+  const { chain_id } = { ...chainData }
 
-  const setValidatorsToVotes = votes => {
-    if (!validators) return votes
-    return _.orderBy(
-      toArray(votes).map(d => ({ ...d, validatorData: validators.find(v => equalsIgnoreCase(v.delegator_address, d.voter)) })).map(d => ({ ...d, voting_power: d.validatorData ? d.validatorData.tokens : -1 })),
-      ['voting_power', 'validatorData.description.moniker'], ['desc', 'asc'],
-    )
+  const execute = async () => {
+    if (execute_data && signer) {
+      setExecuting(true)
+      setExecuteResponse({ status: 'pending', message: 'Executing...' })
+      try {
+        const gatewayAddress = contracts?.gateway_contracts?.[chainData?.id]?.address
+        const { hash } = { ...await signer.sendTransaction({ to: gatewayAddress, data: `0x${execute_data}` }) }
+        setExecuteResponse({ status: 'pending', message: 'Wait for Confirmation', hash })
+
+        const { status } = { ...hash && await signer.provider.waitForTransaction(hash) }
+        setExecuteResponse({ status: status ? 'success' : 'failed', message: status ? 'Execute successful' : 'Failed to execute', hash })
+      } catch (error) {
+        setExecuteResponse({ status: 'failed', ...parseError(error) })
+      }
+      setExecuting(false)
+    }
   }
 
-  const { proposal_id, voting_end_time, votes } = { ...data }
-  const end = voting_end_time && voting_end_time < moment().valueOf()
-  const voteOptions = Object.entries(_.groupBy(toArray(votes), 'option')).map(([k, v]) => ({ option: k, value: toArray(v).length })).filter(d => d.value)
+  const executeButton = equalsIgnoreCase(data?.status, 'BATCHED_COMMANDS_STATUS_SIGNED') && execute_data && !executed && timeDiff(created_at?.ms) > EXECUTE_PERIOD_SECONDS && (
+    <div className="flex items-center gap-x-2">
+      {signer && chain_id === chainId && (
+        <button
+          disabled={executing}
+          onClick={() => execute()}
+          className={clsx('h-6 rounded-xl flex items-center font-display text-white whitespace-nowrap px-2.5 py-1', executing ? 'pointer-events-none bg-blue-400 dark:bg-blue-400' : 'bg-blue-600 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600')}
+        >
+          Execut{executing ? 'ing...' : 'e'}
+        </button>
+      )}
+      <EVMWallet connectChainId={chain_id} />
+    </div>
+  )
 
   return (
     <Container className="sm:mt-8">
-      {!(data && toNumber(id) === toNumber(proposal_id)) ? <Spinner /> :
-        <div className="max-w-4xl flex flex-col gap-y-4 sm:gap-y-6">
-          <Info data={data} end={end} voteOptions={voteOptions} />
-          {!end && validators && <Votes data={votes} />}
+      {!data ? <Spinner /> :
+        <div className="max-w-5xl">
+          <Info
+            data={data}
+            chain={chain}
+            id={id}
+            executeButton={executeButton}
+            executeResponse={executeResponse}
+          />
         </div>
       }
     </Container>

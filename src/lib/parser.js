@@ -105,3 +105,9 @@ export const toArray = (x, options) => {
   if (Array.isArray(x)) return x.map(_x => toCase(_x, _toCase)).filter(_x => !filterBlank || _x)
   return split(x, { delimiter, toCase: _toCase, filterBlank })
 }
+
+export const parseError = error => {
+  const message = error?.reason || error?.data?.message || error?.data?.text || error?.message || (typeof error === 'string' ? error : undefined)
+  const code = _.slice(split(message, { delimiter: ' ', toCase: 'lower' }), 0, 2).join('_')
+  return { message, code }
+}

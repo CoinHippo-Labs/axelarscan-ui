@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { ThemeProvider, useTheme } from 'next-themes'
 import TagManager from 'react-gtm-module'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { useWeb3ModalTheme } from '@web3modal/wagmi/react'
 import { create } from 'zustand'
 
 import WagmiConfigProvider from '@/lib/provider/WagmiConfigProvider'
@@ -16,6 +17,7 @@ import * as ga from '@/lib/ga'
 
 function ThemeWatcher() {
   const { resolvedTheme, setTheme } = useTheme()
+  const { setThemeMode } = useWeb3ModalTheme()
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)')
@@ -25,6 +27,7 @@ function ThemeWatcher() {
       if (resolvedTheme === systemTheme) {
         setTheme('system')
       }
+      setThemeMode(resolvedTheme)
     }
 
     onMediaChange()
@@ -51,17 +54,6 @@ export const useGlobalStore = create()(set => ({
   setConfigurations: data => set(state => ({ ...state, configurations: data })),
   setValidators: data => set(state => ({ ...state, validators: data })),
   setTVL: data => set(state => ({ ...state, tvl: data })),
-}))
-
-export const useNameServicesStore = create()(set => ({
-  ens: null,
-  lens: null,
-  spaceID: null,
-  unstoppable: null,
-  setENS: data => set(state => ({ ...state, ens: { ...state.ens, ...data } })),
-  setLENS: data => set(state => ({ ...state, lens: { ...state.lens, ...data } })),
-  setSpaceID: data => set(state => ({ ...state, spaceID: { ...state.spaceID, ...data } })),
-  setUnstoppable: data => set(state => ({ ...state, unstoppable: { ...state.unstoppable, ...data } })),
 }))
 
 const GlobalLoader = () => {

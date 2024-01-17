@@ -8,7 +8,7 @@ import moment from 'moment'
 import Image from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
-import { useGlobalStore, useNameServicesStore } from '@/app/providers'
+import { useGlobalStore } from '@/app/providers'
 import { getKeybaseUser } from '@/lib/api/keybase'
 import { getENS } from '@/lib/api/name-services/ens'
 import { getLENS } from '@/lib/api/name-services/lens'
@@ -26,6 +26,17 @@ import ENSLogo from '@/images/name-services/ens.png'
 import LENSLogo from '@/images/name-services/lens.png'
 import SpaceIDLogo from '@/images/name-services/spaceid.png'
 import UnstoppableLogo from '@/images/name-services/unstoppable.png'
+
+export const useNameServicesStore = create()(set => ({
+  ens: null,
+  lens: null,
+  spaceID: null,
+  unstoppable: null,
+  setENS: data => set(state => ({ ...state, ens: { ...state.ens, ...data } })),
+  setLENS: data => set(state => ({ ...state, lens: { ...state.lens, ...data } })),
+  setSpaceID: data => set(state => ({ ...state, spaceID: { ...state.spaceID, ...data } })),
+  setUnstoppable: data => set(state => ({ ...state, unstoppable: { ...state.unstoppable, ...data } })),
+}))
 
 export function SpaceIDProfile({
   address,

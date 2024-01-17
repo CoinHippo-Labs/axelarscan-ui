@@ -1,5 +1,6 @@
 import { DatePicker } from 'antd'
 import clsx from 'clsx'
+import _ from 'lodash'
 import moment from 'moment'
 import dayjs from 'dayjs'
 
@@ -30,7 +31,7 @@ export function DateRangePicker({ params, format = 'YYYY/MM/DD HH:mm:ss', onChan
         { label: 'All Time', value: [] },
       ]}
       value={fromTime && toTime ? [createDayJSFromUnixtime(fromTime), createDayJSFromUnixtime(toTime)] : undefined}
-      onChange={v => onChange({ fromTime: getUnixtime(v[0]), toTime: getUnixtime(v[1]) })}
+      onChange={v => onChange({ fromTime: getUnixtime(_.head(v)), toTime: getUnixtime(_.last(v)) })}
       className={clsx('py-2', className)}
     />
   )
