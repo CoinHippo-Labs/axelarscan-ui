@@ -685,7 +685,6 @@ export default [
    {
     address: 'axelar16ml47kyg4we30xeqze3jnyr3yuy06czfyfut2g',
     name: 'Skyskipper',
-    image: '/logos/accounts/axelarnet.png',
     environment: 'testnet',
   },
 ]
