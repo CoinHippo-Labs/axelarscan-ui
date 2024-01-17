@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import clsx from 'clsx'
 
+import { toBoolean } from '@/lib/string'
+
 const baseStyles = {
   solid:
     'group inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2',
@@ -40,7 +42,7 @@ export function Button({ className, ...props }) {
       : props.variant === 'solid'
         ? variantStyles.solid[props.color]
         : undefined,
-    props.circle && '!p-2',
+    toBoolean(props.circle, false) && '!p-2',
     className,
   )
 

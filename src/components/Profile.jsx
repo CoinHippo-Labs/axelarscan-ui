@@ -69,10 +69,10 @@ export function SpaceIDProfile({
 
   const element = name ?
     <span title={name} className={clsx('font-medium', className)}>
-      {ellipse(name, 24)}
+      {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 10, '0x')}
+      {ellipse(address, 8, '0x')}
     </span>
 
   return name ?
@@ -159,10 +159,10 @@ export function LENSProfile({
 
   const element = name ?
     <span title={name} className={clsx('font-medium', className)}>
-      {ellipse(name, 24)}
+      {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 10, '0x')}
+      {ellipse(address, 8, '0x')}
     </span>
 
   return name ?
@@ -248,10 +248,10 @@ export function UnstoppableProfile({
 
   const element = name ?
     <span title={name} className={clsx('font-medium', className)}>
-      {ellipse(name, 24)}
+      {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 10, '0x')}
+      {ellipse(address, 8, '0x')}
     </span>
 
   return name ?
@@ -339,10 +339,10 @@ export function ENSProfile({
 
   const element = name ?
     <span title={name} className={clsx('font-medium', className)}>
-      {ellipse(name, 24)}
+      {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 10, '0x')}
+      {ellipse(address, 8, '0x')}
     </span>
 
   return name ?
@@ -516,7 +516,7 @@ export function Profile({
           target="_blank"
           className="text-blue-600 dark:text-blue-500 font-medium"
         >
-          {ellipse(name, 24)}
+          {ellipse(name, 16)}
         </Link>
         {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
       </div>
@@ -538,10 +538,10 @@ export function Profile({
             target="_blank"
             className="text-blue-600 dark:text-blue-500 font-medium"
           >
-            {ellipse(address, 10, prefix)}
+            {ellipse(address, 8, prefix)}
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        <Copy size={width < 24 ? 16 : 18} value={address}>{ellipse(address, 10, prefix)}</Copy>
+        <Copy size={width < 24 ? 16 : 18} value={address}>{ellipse(address, 8, prefix)}</Copy>
   )
 }

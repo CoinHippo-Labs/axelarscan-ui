@@ -2,13 +2,18 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { Dialog, Listbox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import _ from 'lodash'
-import { MdOutlineCode, MdOutlineRefresh } from 'react-icons/md'
+import { MdOutlineCode, MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck } from 'react-icons/md'
+import { LuChevronsUpDown } from 'react-icons/lu'
 
 import { Container } from '@/components/Container'
+import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
+import { DateRangePicker } from '@/components/DateRangePicker'
 import Image from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
@@ -22,7 +27,7 @@ import { useGlobalStore } from '@/app/providers'
 import { searchBatches } from '@/lib/api/token-transfer'
 import { getChainData, getAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
-import { toBoolean, ellipse } from '@/lib/string'
+import { equalsIgnoreCase, capitalize, toBoolean, ellipse } from '@/lib/string'
 import { toNumber, formatUnits } from '@/lib/number'
 
 const size = 25
@@ -32,9 +37,203 @@ function Filters() {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const params = getParams(searchParams, size)
+  const [open, setOpen] = useState(false)
+  const [params, setParams] = useState(getParams(searchParams, size))
+  const [types, setTypes] = useState([])
+  const { handleSubmit } = useForm()
+  const { chains } = useGlobalStore()
 
-  return
+  useEffect(() => {
+    const getTypes = async () => {
+      const response = await searchBatches({ aggs: { types: { terms: { field: 'commands.type.keyword', size: 25 } } }, size: 0 })
+      setTypes(toArray(response).map(d => d.key))
+    }
+    getTypes()
+  }, [])
+
+  const onSubmit = (e1, e2, _params) => {
+    _params = _params || params
+    if (!_.isEqual(_params, getParams(searchParams, size))) {
+      router.push(`${pathname}?${getQueryString(_params)}`)
+      setParams(_params)
+    }
+    setOpen(false)
+  }
+
+  const onClose = () => {
+    setOpen(false)
+    setParams(getParams(searchParams, size))
+  }
+
+  const attributes = [
+    { label: 'Batch ID', name: 'batchId' },
+    { label: 'Command ID', name: 'commandId' },
+    { label: 'Chain', name: 'chain', type: 'select', multiple: true, options: _.orderBy(toArray(chains).filter(d => d.chain_type === 'evm' && (!d.no_inflation || d.deprecated)).map((d, i) => ({ ...d, i })), ['deprecated', 'i'], ['desc', 'asc']).map(d => ({ value: d.id, title: d.name })) },
+    { label: 'Command Type', name: 'type', type: 'select', options: _.concat({ title: 'Any' }, types.map(d => ({ value: d, title: d }))) },
+    { label: 'Status', name: 'status', type: 'select', options: _.concat({ title: 'Any' }, ['executed', 'unexecuted', 'signed', 'signing', 'aborted'].map(d => ({ value: d, title: capitalize(d) }))) },
+    { label: 'Time', name: 'time', type: 'datetimeRange' },
+  ]
+
+  const filtered = Object.keys(params).filter(k => !['from'].includes(k)).length > 0
+  return (
+    <>
+      <Button
+        color="default"
+        circle="true"
+        onClick={() => setOpen(true)}
+        className={clsx(filtered && 'bg-blue-50 dark:bg-blue-950')}
+      >
+        <MdOutlineFilterList size={20} className={clsx(filtered && 'text-blue-600 dark:text-blue-500')} />
+      </Button>
+      <Transition.Root show={open} as={Fragment}>
+        <Dialog as="div" onClose={onClose} className="relative z-50">
+          <Transition.Child
+            as={Fragment}
+            enter="transform transition ease-in-out duration-500 sm:duration-700"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transform transition ease-in-out duration-500 sm:duration-700"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-50 dark:bg-zinc-900 bg-opacity-50 dark:bg-opacity-50 transition-opacity" />
+          </Transition.Child>
+          <div className="fixed inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
+                <Transition.Child
+                  as={Fragment}
+                  enter="transform transition ease-in-out duration-500 sm:duration-700"
+                  enterFrom="translate-x-full"
+                  enterTo="translate-x-0"
+                  leave="transform transition ease-in-out duration-500 sm:duration-700"
+                  leaveFrom="translate-x-0"
+                  leaveTo="translate-x-full"
+                >
+                  <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
+                    <form onSubmit={handleSubmit(onSubmit)} className="h-full bg-white divide-y divide-zinc-200 shadow-xl flex flex-col">
+                      <div className="h-0 flex-1 overflow-y-auto">
+                        <div className="bg-blue-600 flex items-center justify-between p-4 sm:px-6">
+                          <Dialog.Title className="text-white text-base font-semibold leading-6">
+                            Filter
+                          </Dialog.Title>
+                          <button
+                            type="button"
+                            onClick={() => onClose()}
+                            className="relative text-blue-200 hover:text-white ml-3"
+                          >
+                            <MdClose size={20} />
+                          </button>
+                        </div>
+                        <div className="flex flex-1 flex-col justify-between gap-y-6 px-4 sm:px-6 py-6">
+                          {attributes.map((d, i) => (
+                            <div key={i}>
+                              <label htmlFor={d.name} className="text-zinc-900 text-sm font-medium leading-6">
+                                {d.label}
+                              </label>
+                              <div className="mt-2">
+                                {d.type === 'select' ?
+                                  <Listbox value={d.multiple ? split(params[d.name]) : params[d.name]} onChange={v => setParams({ ...params, [d.name]: d.multiple ? v.join(',') : v })} multiple={d.multiple}>
+                                    {({ open }) => {
+                                      const isSelected = v => d.multiple ? split(params[d.name]).includes(v) : v === params[d.name] || equalsIgnoreCase(v, params[d.name])
+                                      const selectedValue = d.multiple ? toArray(d.options).filter(o => isSelected(o.value)) : toArray(d.options).find(o => isSelected(o.value))
+
+                                      return (
+                                        <div className="relative">
+                                          <Listbox.Button className="relative w-full cursor-pointer rounded-md shadow-sm border border-zinc-200 text-zinc-900 sm:text-sm sm:leading-6 text-left pl-3 pr-10 py-1.5">
+                                            {d.multiple ?
+                                              <div className={clsx('flex flex-wrap', selectedValue.length !== 0 && 'my-1')}>
+                                                {selectedValue.length === 0 ?
+                                                  <span className="block truncate">Any</span> :
+                                                  selectedValue.map((v, j) => (
+                                                    <div
+                                                      key={j}
+                                                      onClick={() => setParams({ ...params, [d.name]: selectedValue.filter(_v => _v.value !== v.value).map(_v => _v.value).join(',') })}
+                                                      className="min-w-fit h-6 bg-zinc-100 rounded-xl flex items-center text-zinc-900 mr-2 my-1 px-2.5 py-1"
+                                                    >
+                                                      {v.title}
+                                                    </div>
+                                                  ))
+                                                }
+                                              </div> :
+                                              <span className="block truncate">{selectedValue?.title}</span>
+                                            }
+                                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                              <LuChevronsUpDown size={20} className="text-zinc-400" />
+                                            </span>
+                                          </Listbox.Button>
+                                          <Transition
+                                            show={open}
+                                            as={Fragment}
+                                            leave="transition ease-in duration-100"
+                                            leaveFrom="opacity-100"
+                                            leaveTo="opacity-0"
+                                          >
+                                            <Listbox.Options className="absolute z-10 w-full max-h-60 bg-white overflow-auto rounded-md shadow-lg text-base sm:text-sm mt-1 py-1">
+                                              {toArray(d.options).map((o, j) => (
+                                                <Listbox.Option key={j} value={o.value} className={({ active }) => clsx('relative cursor-default select-none pl-3 pr-9 py-2', active ? 'bg-blue-600 text-white' : 'text-zinc-900')}>
+                                                  {({ selected, active }) => (
+                                                    <>
+                                                      <span className={clsx('block truncate', selected ? 'font-semibold' : 'font-normal')}>
+                                                        {o.title}
+                                                      </span>
+                                                      {selected && (
+                                                        <span className={clsx('absolute inset-y-0 right-0 flex items-center pr-4', active ? 'text-white' : 'text-blue-600')}>
+                                                          <MdCheck size={20} />
+                                                        </span>
+                                                      )}
+                                                    </>
+                                                  )}
+                                                </Listbox.Option>
+                                              ))}
+                                            </Listbox.Options>
+                                          </Transition>
+                                        </div>
+                                      )
+                                    }}
+                                  </Listbox> :
+                                  d.type === 'datetimeRange' ?
+                                    <DateRangePicker params={params} onChange={v => setParams({ ...params, ...v })} /> :
+                                    <input
+                                      type={d.type || 'text'}
+                                      name={d.name}
+                                      placeholder={d.label}
+                                      value={params[d.name]}
+                                      onChange={e => setParams({ ...params, [d.name]: e.target.value })}
+                                      className="w-full rounded-md shadow-sm border border-zinc-200 focus:border-blue-600 focus:ring-0 text-zinc-900 placeholder:text-zinc-400 sm:text-sm sm:leading-6 py-1.5"
+                                    />
+                                }
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex flex-shrink-0 justify-end p-4">
+                        <button
+                          type="button"
+                          onClick={() => onSubmit(undefined, undefined, {})}
+                          className="bg-white hover:bg-zinc-50 rounded-md shadow-sm ring-1 ring-inset ring-zinc-200 text-zinc-900 text-sm font-semibold px-3 py-2"
+                        >
+                          Reset
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={!filtered}
+                          className={clsx('rounded-md shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 inline-flex justify-center text-white text-sm font-semibold ml-4 px-3 py-2', filtered ? 'bg-blue-600 hover:bg-blue-500' : 'bg-blue-500 cursor-not-allowed')}
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </form>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+    </>
+  )
 }
 
 export function EVMBatches() {
@@ -47,7 +246,10 @@ export function EVMBatches() {
 
   useEffect(() => {
     const _params = getParams(searchParams, size)
-    if (!_.isEqual(_params, params)) setParams(_params)
+    if (!_.isEqual(_params, params)) {
+      setParams(_params)
+      setRefresh(true)
+    }
   }, [searchParams, params, setParams])
 
   useEffect(() => {
@@ -74,10 +276,11 @@ export function EVMBatches() {
               </p>
             </div>
             <div className="flex items-center gap-x-2">
+              <Filters />
               {refresh ? <Spinner /> :
                 <Button
                   color="default"
-                  circle
+                  circle="true"
                   onClick={() => setRefresh(true)}
                 >
                   <MdOutlineRefresh size={20} />
@@ -85,6 +288,7 @@ export function EVMBatches() {
               }
             </div>
           </div>
+          {refresh && <Overlay />}
           <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-4">
             <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
               <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">

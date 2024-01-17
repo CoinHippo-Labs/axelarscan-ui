@@ -316,7 +316,7 @@ export function Resources({ resource }) {
             placeholder={`Search by ${resource === 'assets' ? 'Denom / Symbol / Address' : 'Chain Name / ID'}`}
             value={input}
             onChange={e => setInput(split(e.target.value, { delimiter: ' ', filterBlank: false }).join(' '))}
-            className="w-full sm:w-80 h-10 bg-zinc-50 dark:bg-zinc-800 appearance-none border-zinc-200 dark:border-zinc-700 focus:ring-0 rounded-lg text-sm text-zinc-600 dark:text-zinc-400 px-3"
+            className="w-full sm:w-80 h-10 bg-white dark:bg-zinc-900 appearance-none border-zinc-200 hover:border-blue-300 focus:border-blue-600 dark:border-zinc-700 dark:hover:border-blue-800 dark:focus:border-blue-500 focus:ring-0 rounded-lg text-sm text-zinc-600 dark:text-zinc-400 px-3"
           />
         </div>
       </div>

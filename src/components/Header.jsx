@@ -34,7 +34,7 @@ const navigations = [
       { title: 'Proposals', href: '/proposals' },
     ],
   },
-  { title: 'TVL', href: '/tvl' },
+  ENVIRONMENT === 'mainnet' && { title: 'TVL', href: '/tvl' },
   {
     title: 'Resources',
     children: [
