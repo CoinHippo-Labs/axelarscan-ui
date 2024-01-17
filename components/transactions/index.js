@@ -17,7 +17,7 @@ import Copy from '../copy'
 import ValidatorProfile from '../profile/validator'
 import AccountProfile from '../profile/account'
 import TimeAgo from '../time/timeAgo'
-import { searchTransactions } from '../../lib/api/axelar'
+import { searchTransactions } from '../../lib/api/validators'
 import { searchDepositAddresses } from '../../lib/api/transfers'
 import { getTransactions, getTransaction } from '../../lib/api/lcd'
 import { getKeyType } from '../../lib/key'
@@ -88,7 +88,7 @@ export default ({ n }) => {
           }
 
           const _data = toArray(fetchTrigger && data)
-          const size = n || pathname.includes('/search') ? 50 : PAGE_SIZE
+          const size = n ? 50 : PAGE_SIZE
           const from = [true, 1].includes(fetchTrigger) ? _data.length : 0
 
           let transactions_data
@@ -453,10 +453,10 @@ export default ({ n }) => {
               ]
               .filter(c => height ? !['height'].includes(c.accessor) : address ? !['tx.auth_info.fee'].includes(c.accessor) : n ? !['height', 'recipient', 'tx.auth_info.fee'].includes(c.accessor) : true)}
               data={dataFiltered}
-              defaultPageSize={n || height ? 10 : 50}
+              defaultPageSize={n || height ? 10 : PAGE_SIZE}
               noPagination={dataFiltered.length <= 10 || (!n && !(pathname.includes('/search') || height || address))}
               extra={
-                !n && data.length >= (n || pathname.includes('/search') ? 50 : PAGE_SIZE) && (typeof total !== 'number' || data.length < total) && (
+                !n && data.length >= (n ? 50 : PAGE_SIZE) && (typeof total !== 'number' || data.length < total) && (
                   <div className="flex justify-center">
                     {!fetching ?
                       <button
