@@ -4,3 +4,4 @@ const request = async params => {
 }
 
 export const getValidators = async params => request({ ...params, method: 'getValidators' })
+export const searchPolls = async params => request({ ...params, method: 'searchPolls' })

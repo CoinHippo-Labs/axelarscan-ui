@@ -16,7 +16,7 @@ export function Number({
   prefix = '',
   suffix = '',
   noTooltip = false,
-  tooltipContent = '',
+  tooltipContent,
   className,
 }) {
   const valid = isNumber(value)

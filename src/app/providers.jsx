@@ -83,7 +83,7 @@ const GlobalLoader = () => {
             setConfigurations(await getConfigurations())
             break
           case 'validators':
-            setValidators(await getValidators())
+            setValidators((await getValidators())?.data)
             break
           case 'tvl':
             setTVL(await getTVL())

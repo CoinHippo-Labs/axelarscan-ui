@@ -59,6 +59,11 @@ export const toJson = string => {
   if (!string) return null
   if (typeof string === 'object') return string
   try {
+    if (typeof string === 'string' && string.startsWith('{') && string.endsWith('}') && !string.includes('"')) {
+      try {
+        string = `{${split(string.substring(1, string.length - 1), { delimiter: ',' }).map(s => split(s, { delimiter: ':' }).map(_s => typeof _s === 'string' ? `"${_s}"` : _s).join(':')).join(',')}}`
+      } catch (error) {}
+    }
     return JSON.parse(string)
   } catch (error) {
     return null
