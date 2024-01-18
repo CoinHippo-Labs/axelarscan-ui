@@ -5,7 +5,9 @@ import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
+import toast, { Toaster } from 'react-hot-toast'
 import { MdOutlineCode, MdOutlineArrowBack } from 'react-icons/md'
+import { PiCheckCircleFill, PiXCircleFill } from 'react-icons/pi'
 
 import { Container } from '@/components/Container'
 import Image from '@/components/Image'
@@ -15,6 +17,7 @@ import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
 import { Profile } from '@/components/Profile'
+import { ExplorerLink } from '@/components/ExplorerLink'
 import { useEVMWalletStore, EVMWallet } from '@/components/Wallet'
 import { useGlobalStore } from '@/app/providers'
 import { getBatch } from '@/lib/api/token-transfer'
@@ -26,7 +29,7 @@ import { timeDiff } from '@/lib/time'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
-function Info({ data, chain, id, executeButton, executeResponse }) {
+function Info({ data, chain, id, executeButton }) {
   const { chains, assets } = useGlobalStore()
 
   const { key_id, commands, created_at, execute_data, prev_batched_commands_id } = { ...data }
@@ -37,7 +40,6 @@ function Info({ data, chain, id, executeButton, executeResponse }) {
   const status = executed ? 'executed' : data?.status?.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()
   const chainData = getChainData(chain, chains)
   const { url, transaction_path } = { ...chainData?.explorer }
-  const { status: xstatus, message, hash } = { ...executeResponse }
 
   return (
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
@@ -402,6 +404,63 @@ export function EVMBatch({ chain, id }) {
     getData()
   }, [chain, id, setData])
 
+  useEffect(() => {
+    const { status, message, hash } = { ...executeResponse }
+
+    toast.remove()
+    if (message) {
+      if (hash && chainData?.explorer) {
+        let icon
+        switch (status) {
+          case 'success':
+            icon = <PiCheckCircleFill size={20} className="text-green-600" />
+            break
+          case 'failed':
+            icon = <PiXCircleFill size={20} className="text-red-600" />
+            break
+          default:
+            break
+        }
+
+        toast.custom((
+          <div className="bg-white rounded-lg shadow-lg flex flex-col gap-y-1 sm:gap-y-0 px-3 py-2.5">
+            <div className="flex items-center gap-x-1.5 sm:gap-x-2">
+              {icon}
+              <span className="text-zinc-700">{message}</span>
+            </div>
+            <div className="flex items-center justify-between gap-x-4 ml-6 sm:ml-7 pl-0.5 sm:pl-0">
+              <ExplorerLink
+                value={hash}
+                chain={chain}
+                iconOnly={false}
+                nonIconClassName="text-zinc-700 text-xs sm:text-sm"
+              />
+              <button onClick={() => setExecuteResponse(null)} className="underline text-zinc-400 text-xs sm:text-sm font-light">
+                Dismiss
+              </button>
+            </div>
+          </div>
+        ), { duration: 60000 })
+      }
+      else {
+        const duration = 10000
+        switch (status) {
+          case 'pending':
+            toast.loading(message)
+            break
+          case 'success':
+            toast.success(message, { duration })
+            break
+          case 'failed':
+            toast.error(message, { duration })
+            break
+          default:
+            break
+        }
+      }
+    }
+  }, [executeResponse])
+
   const { commands, created_at, execute_data } = { ...data }
   const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
   const chainData = getChainData(chain, chains)
@@ -436,7 +495,7 @@ export function EVMBatch({ chain, id }) {
           Execut{executing ? 'ing...' : 'e'}
         </button>
       )}
-      <EVMWallet connectChainId={chain_id} />
+      {!executing && <EVMWallet connectChainId={chain_id} />}
     </div>
   )
 
@@ -444,13 +503,8 @@ export function EVMBatch({ chain, id }) {
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :
         <div className="max-w-5xl">
-          <Info
-            data={data}
-            chain={chain}
-            id={id}
-            executeButton={executeButton}
-            executeResponse={executeResponse}
-          />
+          <Toaster />
+          <Info data={data} chain={chain} id={id} executeButton={executeButton} />
         </div>
       }
     </Container>

@@ -17,6 +17,7 @@ export function ExplorerLink({
   iconOnly = true,
   width = 16,
   height = 16,
+  nonIconClassName,
   className,
 }) {
   const { chains } = useGlobalStore()
@@ -45,10 +46,10 @@ export function ExplorerLink({
     <Link
       href={customURL || `${url}${path?.replace(`{${field}}`, value)}${type === 'tx' && value.startsWith('0x') && hasEventLog ? '#eventlog' : ''}`}
       target="_blank"
-      className="min-w-max flex items-center gap-x-1"
+      className="min-w-max flex items-center gap-x-2"
     >
       {!iconOnly && (
-        <span className="font-medium">
+        <span className={clsx('font-medium', nonIconClassName)}>
           View on {name}
         </span>
       )}
