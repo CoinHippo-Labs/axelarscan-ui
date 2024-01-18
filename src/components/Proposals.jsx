@@ -42,7 +42,7 @@ export function Proposals() {
           </div>
           <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-4">
             <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-              <thead className="sticky top-0 bg-white dark:bg-zinc-900">
+              <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
                 <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
                   <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
                     ID
@@ -56,7 +56,7 @@ export function Proposals() {
                   <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-left">
                     Height
                   </th>
-                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-left">
+                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-left whitespace-nowrap">
                     Voting Period
                   </th>
                   <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-right">

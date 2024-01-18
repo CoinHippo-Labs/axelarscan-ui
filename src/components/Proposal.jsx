@@ -200,7 +200,7 @@ function Info({ data, end, voteOptions }) {
                     />
                   )) :
                   voteOptions.map((d, i) => (
-                    <NumberDisplay
+                    <Number
                       key={i}
                       value={d.value}
                       format="0,0.00a"
@@ -226,7 +226,7 @@ function Votes({ data }) {
   return data && (
     <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-8">
       <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-        <thead className="sticky top-0 bg-white dark:bg-zinc-900">
+        <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
           <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
             <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
               #
@@ -237,7 +237,7 @@ function Votes({ data }) {
             <th scope="col" className="px-3 py-3.5 text-left">
               Validator
             </th>
-            <th scope="col" className="px-3 py-3.5 text-right">
+            <th scope="col" className="px-3 py-3.5 text-right whitespace-nowrap">
               Voting Power
             </th>
             <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right">
@@ -249,10 +249,10 @@ function Votes({ data }) {
           {data.map((d, i) => (
             <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
               <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
-                {i}
+                {i + 1}
               </td>
               <td className="px-3 py-4 text-left">
-                <div className="flex items-center gap-x-1">
+                <Copy value={d.voter}>
                   <Link
                     href={`/account/${d.voter}`}
                     target="_blank"
@@ -260,29 +260,31 @@ function Votes({ data }) {
                   >
                     {ellipse(d.voter, 10, 'axelar')}
                   </Link>
-                  <Copy value={d.voter} />
-                </div>
+                </Copy>
               </td>
               <td className="px-3 py-4 text-left">
-                <Profile address={d.validatorData.operator_address} prefix="axelarvaloper" />
+                {d.validatorData && <Profile address={d.validatorData.operator_address} prefix="axelarvaloper" />}
               </td>
               <td className="px-3 py-4 text-right">
-                <div className="flex flex-col items-end gap-y-1">
-                  <Number
-                    value={d.voting_power}
-                    format="0,0.00a"
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-semibold"
-                  />
-                  {totalVotingPower > 0 && (
+                {d.voting_power > 0 && (
+                  <div className="flex flex-col items-end gap-y-1">
                     <Number
-                      value={d.voting_power * 100 / totalVotingPower}
-                      format="0,0.000000"
-                      suffix="%"
-                      className="text-zinc-400 dark:text-zinc-500"
+                      value={d.voting_power}
+                      format="0,0.00a"
+                      noTooltip={true}
+                      className="text-zinc-900 dark:text-zinc-100 font-semibold"
                     />
-                  )}
-                </div>
+                    {totalVotingPower > 0 && (
+                      <Number
+                        value={d.voting_power * 100 / totalVotingPower}
+                        format="0,0.000000"
+                        suffix="%"
+                        noTooltip={true}
+                        className="text-zinc-400 dark:text-zinc-500"
+                      />
+                    )}
+                  </div>
+                )}
               </td>
               <td className="pl-3 pr-4 sm:pr-0 py-4 text-right">
                 {d.option && (
@@ -307,15 +309,13 @@ export function Proposal({ id }) {
 
   useEffect(() => {
     const getData = async () => {
-      const response = await getProposal({ id })
-      setData({ ...response, votes: setValidatorsToVotes(response?.votes) })
+      if (validators) {
+        const response = await getProposal({ id })
+        setData({ ...response, votes: setValidatorsToVotes(response?.votes) })
+      }
     }
     getData()
-  }, [id, setData])
-
-  useEffect(() => {
-    if (validators && data) setData({ ...data, votes: setValidatorsToVotes(data.votes) })
-  }, [validators, setData])
+  }, [id, setData, validators])
 
   const setValidatorsToVotes = votes => {
     if (!validators) return votes

@@ -505,7 +505,7 @@ export function Profile({
       }
     }
     getData()
-  }, [address, validators, validatorImages, setValidatorImages])
+  }, [address, validators, setValidatorImages])
 
   const { explorer } = { ...getChainData(chain, chains) }
   const url = explorer ? `${explorer.url}${explorer.address_path?.replace('{address}', address)}` : undefined
@@ -519,7 +519,7 @@ export function Profile({
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
         /> :
-        isValidator && <Spinner className="w-6 h-6" />
+        isValidator && <Spinner className="!w-6 !h-6" />
       }
       <div className="flex items-center gap-x-1">
         <Link
