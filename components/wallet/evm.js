@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useSelector, useDispatch, shallowEqual } from 'react-redux'
 import { useWeb3Modal } from '@web3modal/wagmi/react'
 import { usePublicClient, useNetwork, useSwitchNetwork, useWalletClient, useAccount, useDisconnect, useSignMessage } from 'wagmi'
+import { hashMessage, parseAbiItem, verifyMessage } from 'viem'
 // import { BrowserProvider, FallbackProvider, JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { providers } from 'ethers'
 
@@ -143,7 +144,7 @@ export default (
           </button> :
           <button
             disabled={disabled}
-            onClick={disconnect}
+            onClick={() => disconnect()}
             className={className}
           >
             {children || (
@@ -154,7 +155,7 @@ export default (
           </button> :
         <button
           disabled={disabled}
-          onClick={open}
+          onClick={() => open()}
           className={className}
         >
           {children || (
