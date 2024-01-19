@@ -363,8 +363,8 @@ export default () => {
         console.log('[reExecute request]', { ...params })
         const response = await save(params)
         console.log('[reExecute response]', response)
-        const { result } = { ...response?.response }
-        const success = result === 'updated' || response?.event === 'not_executed'
+        const { result } = { ...response }
+        const success = result === 'updated' || response?.data?.event === 'not_executed'
 
         if (success) {
           await sleep(15 * 1000)
@@ -399,8 +399,8 @@ export default () => {
         console.log('[refund request]', { ...params })
         const response = await save(params)
         console.log('[refund response]', response)
-        const { result } = { ...response?.response }
-        const success = result === 'updated' || response?.event === 'to_refund'
+        const { result } = { ...response }
+        const success = result === 'updated' || response?.data?.event === 'to_refund'
 
         if (success) {
           await sleep(15 * 1000)
