@@ -10,7 +10,7 @@ import { create } from 'zustand'
 
 import WagmiConfigProvider from '@/lib/provider/WagmiConfigProvider'
 import { queryClient } from '@/lib/provider/wagmi'
-import { getChains, getAssets, getTokensPrice, getTVL } from '@/lib/api/axelarscan'
+import { getChains, getAssets, getTokensPrice, getInflation, getNetworkParameters, getTVL } from '@/lib/api/axelarscan'
 import { getContracts, getConfigurations } from '@/lib/api/gmp'
 import { getValidators } from '@/lib/api/validator'
 import * as ga from '@/lib/ga'
@@ -47,21 +47,25 @@ export const useGlobalStore = create()(set => ({
   contracts: null,
   configurations: null,
   validators: null,
+  inflationData: null,
+  networkParameters: null,
   tvl: null,
   setChains: data => set(state => ({ ...state, chains: data })),
   setAssets: data => set(state => ({ ...state, assets: data })),
   setContracts: data => set(state => ({ ...state, contracts: data })),
   setConfigurations: data => set(state => ({ ...state, configurations: data })),
   setValidators: data => set(state => ({ ...state, validators: data })),
+  setInflationData: data => set(state => ({ ...state, inflationData: data })),
+  setNetworkParameters: data => set(state => ({ ...state, networkParameters: data })),
   setTVL: data => set(state => ({ ...state, tvl: data })),
 }))
 
 const GlobalLoader = () => {
-  const { setChains, setAssets, setContracts, setConfigurations, setValidators, setTVL } = useGlobalStore()
+  const { setChains, setAssets, setContracts, setConfigurations, setValidators, setInflationData, setNetworkParameters, setTVL } = useGlobalStore()
 
   useEffect(() => {
     const getData = async () => {
-      await Promise.all(['chains', 'assets', 'contracts', 'configurations', 'validators', 'tvl'].map(k => new Promise(async resolve => {
+      await Promise.all(['chains', 'assets', 'contracts', 'configurations', 'validators', 'inflationData', 'networkParameters', 'tvl'].map(k => new Promise(async resolve => {
         switch (k) {
           case 'chains':
             setChains(await getChains())
@@ -85,6 +89,12 @@ const GlobalLoader = () => {
           case 'validators':
             setValidators((await getValidators())?.data)
             break
+          case 'inflationData':
+            setInflationData(await getInflation())
+            break
+          case 'networkParameters':
+            setNetworkParameters(await getNetworkParameters())
+            break
           case 'tvl':
             setTVL(await getTVL())
             break
@@ -95,7 +105,7 @@ const GlobalLoader = () => {
       })))
     }
     getData()
-  }, [setChains, setAssets, setContracts, setConfigurations, setValidators, setTVL])
+  }, [setChains, setAssets, setContracts, setConfigurations, setValidators, setInflationData, setNetworkParameters, setTVL])
 
   return null
 }

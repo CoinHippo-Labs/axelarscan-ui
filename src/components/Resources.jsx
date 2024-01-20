@@ -296,7 +296,7 @@ export function Resources({ resource }) {
 
   return resource && (
     <Container className="flex flex-col gap-y-8 sm:gap-y-12 sm:mt-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-y-4 sm:gap-y-0 sm:gap-x-2">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-x-2 gap-y-4 sm:gap-y-0">
         <nav className="flex gap-x-4">
           {resources.map((d, i) => (
             <Link

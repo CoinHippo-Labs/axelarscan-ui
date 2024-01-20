@@ -263,7 +263,7 @@ function Votes({ data }) {
                 </Copy>
               </td>
               <td className="px-3 py-4 text-left">
-                {d.validatorData && <Profile address={d.validatorData.operator_address} prefix="axelarvaloper" />}
+                {d.validatorData && <Profile i={i} address={d.validatorData.operator_address} prefix="axelarvaloper" />}
               </td>
               <td className="px-3 py-4 text-right">
                 {d.voting_power > 0 && (

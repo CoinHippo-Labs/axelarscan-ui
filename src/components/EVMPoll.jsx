@@ -332,7 +332,7 @@ function Votes({ data }) {
                 </td>
                 <td className="px-3 py-4 text-left">
                   {d.validatorData ?
-                    <Profile address={d.validatorData.operator_address} prefix="axelarvaloper" /> :
+                    <Profile i={i} address={d.validatorData.operator_address} prefix="axelarvaloper" /> :
                     <Copy value={d.voter}>
                       <Link
                         href={`/account/${d.voter}`}

@@ -428,7 +428,7 @@ export function EVMProfile({ chain, ...props }) {
 }
 
 const AXELAR_LOGO = '/logos/accounts/axelarnet.svg'
-const randImage = i => `/logos/addresses/${_.random(1, 8)}.png`
+const randImage = i => `/logos/addresses/${isNumber(i) ? (i % 8) + 1 : _.random(1, 8)}.png`
 
 export const useValidatorImagesStore = create()(set => ({
   validatorImages: {},
@@ -436,6 +436,7 @@ export const useValidatorImagesStore = create()(set => ({
 }))
 
 export function Profile({
+  i,
   address,
   chain,
   prefix = 'axelar',
@@ -519,7 +520,15 @@ export function Profile({
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
         /> :
-        isValidator && <Spinner className="!w-6 !h-6" />
+        // isValidator && <Spinner className="!w-6 !h-6" />
+        isValidator && (
+          <Image
+            src={randImage(i)}
+            width={width}
+            height={height}
+            className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
+          />
+        )
       }
       <div className="flex items-center gap-x-1">
         <Link

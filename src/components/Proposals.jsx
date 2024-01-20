@@ -36,7 +36,7 @@ export function Proposals() {
             <div className="sm:flex-auto">
               <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">Proposals</h1>
               <p className="mt-2 text-zinc-400 dark:text-zinc-500 text-sm">
-                A list of all the proposals in Axelar Network including ID, title, description, type and status.
+                List of proposals in Axelar Network including ID, title, description, type and status.
               </p>
             </div>
           </div>
