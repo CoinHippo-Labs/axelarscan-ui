@@ -610,7 +610,7 @@ export default ({ data }) => {
                       noTooltip={true}
                       className="whitespace-nowrap text-slate-600 dark:text-slate-200 text-xs font-medium"
                     />
-                    {express_supported && express_fee > 0 && (chain_type !== 'cosmos' || express_executed) && (
+                    {express_supported && express_fee > 0 && (/*chain_type !== 'cosmos' || */express_executed) && (
                       <NumberDisplay
                         value={express_fee}
                         format="0,0.00"
