@@ -1,3 +1,483 @@
+'use client'
+
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import Linkify from 'react-linkify'
+import clsx from 'clsx'
+import _ from 'lodash'
+import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-icons/md'
+
+import { Container } from '@/components/Container'
+import { Button } from '@/components/Button'
+import Image from '@/components/Image'
+import { Copy } from '@/components/Copy'
+import { Tooltip } from '@/components/Tooltip'
+import { ProgressBar } from '@/components/ProgressBar'
+import { Spinner } from '@/components/Spinner'
+import { Tag } from '@/components/Tag'
+import { Number } from '@/components/Number'
+import { Profile } from '@/components/Profile'
+import { useValidatorStore } from '@/components/Validators'
+import { useGlobalStore } from '@/app/providers'
+import { getBalances } from '@/lib/api/axelarscan'
+import { getRPCStatus, searchUptimes, searchProposedBlocks, searchHeartbeats, searchPolls, getChainMaintainers, getValidatorDelegations } from '@/lib/api/validator'
+import { getChainData, getAssetData } from '@/lib/config'
+import { toArray } from '@/lib/parser'
+import { includesStringList } from '@/lib/operator'
+import { equalsIgnoreCase, ellipse } from '@/lib/string'
+import { isNumber, toNumber } from '@/lib/number'
+
+function Pagination({ data, maxPage = 5, sizePerPage = 25, onChange }) {
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    if (page && onChange) onChange(page)
+  }, [page, onChange])
+
+  const half = Math.floor(toNumber(maxPage) / 2)
+  const totalPage = Math.ceil(toNumber(data.length) / sizePerPage)
+  const pages = _.range(page - half, page + half + 1).filter(p => p > 0 && p <= totalPage)
+  const prev = _.min(_.range(_.head(pages) - maxPage, _.head(pages)).filter(p => p > 0))
+  const next = _.max(_.range(_.last(pages) + 1, _.last(pages) + maxPage + 1).filter(p => p <= totalPage))
+
+  return (
+    <div className="flex items-center justify-center gap-x-1">
+      {isNumber(prev) && (
+        <Button
+          color="none"
+          onClick={() => setPage(prev)}
+          className="!px-1"
+        >
+          <MdKeyboardDoubleArrowLeft size={18} />
+        </Button>
+      )}
+      {pages.map(p => (
+        <Button
+          key={p}
+          color={p === page ? 'blue' : 'default'}
+          onClick={() => setPage(p)}
+          className="!text-2xs !px-3 !py-1"
+        >
+          <Number value={p} />
+        </Button>
+      ))}
+      {isNumber(next) && (
+        <Button
+          color="none"
+          onClick={() => setPage(next)}
+          className="!px-1"
+        >
+          <MdKeyboardDoubleArrowRight size={18} />
+        </Button>
+      )}
+    </div>
+  )
+}
+
+function Info({ data, address, delegations }) {
+  const delegationsSizePerPage = 10
+  const [delegationsPage, setDelegationsPage] = useState(1)
+  const { chains, assets, validators } = useGlobalStore()
+
+  const { operator_address, consensus_address, delegator_address, broadcaster_address, broadcasterBalance, status, tokens, quadratic_voting_power, supportedChains } = { ...data }
+  const { details, website } = { ...data?.description }
+  const { rate } = { ...data?.commission?.commission_rates }
+
+  const totalVotingPower = _.sumBy(toArray(validators).filter(d => d.status === 'BOND_STATUS_BONDED'), 'tokens')
+  const totalQuadraticVotingPower = _.sumBy(toArray(validators).filter(d => d.status === 'BOND_STATUS_BONDED'), 'quadratic_voting_power')
+
+  return (
+    <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
+      <div className="px-4 sm:px-6 py-6">
+        <h3 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-7">
+          <Profile address={address} width={32} height={32} />
+        </h3>
+        <div className="flex flex-col mt-1">
+          {details && (
+            <div className="max-w-xl linkify text-zinc-400 dark:text-zinc-500 text-sm leading-6 break-words whitespace-pre-wrap">
+              <Linkify>
+                {details}
+              </Linkify>
+            </div>
+          )}
+          {website && (
+            <Link
+              href={website}
+              target="_blank"
+              className="text-blue-600 dark:text-blue-500 text-sm"
+            >
+              {website}
+            </Link>
+          )}
+        </div>
+      </div>
+      <div className="border-t border-zinc-200 dark:border-zinc-700">
+        <dl className="divide-y divide-zinc-100 dark:divide-zinc-800">
+          {operator_address && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Operator Address</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <Copy value={operator_address}>{ellipse(operator_address, 10, 'axelarvaloper')}</Copy>
+              </dd>
+            </div>
+          )}
+          {consensus_address && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Consensus Address</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <Copy value={consensus_address}>{ellipse(consensus_address, 10, 'axelarvalcons')}</Copy>
+              </dd>
+            </div>
+          )}
+          {delegator_address && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Delegator Address</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <Copy value={delegator_address}>
+                  <Link
+                    href={`/account/${delegator_address}`}
+                    target="_blank"
+                    className="text-blue-600 dark:text-blue-500"
+                  >
+                    {ellipse(delegator_address, 14, 'axelar')}
+                  </Link>
+                </Copy>
+              </dd>
+            </div>
+          )}
+          {broadcaster_address && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Broadcaster Address</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex flex-col items-start gap-y-1">
+                  <Copy value={broadcaster_address}>
+                    <Link
+                      href={`/account/${broadcaster_address}`}
+                      target="_blank"
+                      className="text-blue-600 dark:text-blue-500"
+                    >
+                      {ellipse(broadcaster_address, 14, 'axelar')}
+                    </Link>
+                  </Copy>
+                  {isNumber(broadcasterBalance?.amount) && (
+                    <Number
+                      value={broadcasterBalance.amount}
+                      format="0,0.00"
+                      suffix={` ${broadcasterBalance.symbol}`}
+                      className={clsx('font-medium', broadcasterBalance.amount < 5 ? 'text-red-600 dark:text-red-500' : 'text-green-600 dark:text-green-500')}
+                    />
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Status</dt>
+            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              {status && (
+                <Tag className={clsx('w-fit', status.includes('UN') ? status.endsWith('ED') ? 'bg-red-600 dark:bg-red-500' : 'bg-orange-500 dark:bg-orange-600' : 'bg-green-600 dark:bg-green-500')}>
+                  {status.replace('BOND_STATUS_', '')}
+                </Tag>
+              )}
+            </dd>
+          </div>
+          {isNumber(rate) && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Commission</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <Number
+                  value={rate * 100}
+                  maxDecimals={2}
+                  suffix="%"
+                  noTooltip={true}
+                  className="font-medium"
+                />
+              </dd>
+            </div>
+          )}
+          {isNumber(tokens) && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{status === 'BOND_STATUS_BONDED' ? 'Consensus Power' : 'Staking'}</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex items-center gap-x-2">
+                  <Number
+                    value={tokens}
+                    format="0,0.0a"
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                  {status === 'BOND_STATUS_BONDED' && (
+                    <Number
+                      value={tokens * 100 / totalVotingPower}
+                      format="0,0.0a"
+                      prefix="("
+                      suffix="%)"
+                      noTooltip={true}
+                      className="text-zinc-400 dark:text-zinc-500"
+                    />
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+          {isNumber(quadratic_voting_power) && status === 'BOND_STATUS_BONDED' && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Quadratic Power</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex items-center gap-x-2">
+                  <Number
+                    value={quadratic_voting_power}
+                    format="0,0.0a"
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                  <Number
+                    value={quadratic_voting_power * 100 / totalQuadraticVotingPower}
+                    format="0,0.0a"
+                    prefix="("
+                    suffix="%)"
+                    noTooltip={true}
+                    className="text-zinc-400 dark:text-zinc-500"
+                  />
+                </div>
+              </dd>
+            </div>
+          )}
+          {supportedChains && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">EVM Supported</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex flex-wrap">
+                  {supportedChains.map((c, i) => {
+                    const { name, image } = { ...getChainData(c, chains) }
+                    return (
+                      <Tooltip key={i} content={name} className="whitespace-nowrap">
+                        <Image
+                          src={image}
+                          width={20}
+                          height={20}
+                          className="mr-1.5 mb-1.5"
+                        />
+                      </Tooltip>
+                    )
+                  })}
+                </div>
+              </dd>
+            </div>
+          )}
+          {delegations && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{`Delegation${delegations.length > 1 ? `s (${delegations.length})` : ''}`}</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex flex-col gap-y-4">
+                  <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">
+                    <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+                      <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
+                        <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
+                          <th scope="col" className="pl-4 sm:pl-3 pr-3 py-2.5 text-left">
+                            Delegator
+                          </th>
+                          <th scope="col" className="px-3 py-2.5 text-right">
+                            Amount
+                          </th>
+                          <th scope="col" className="pl-3 pr-4 sm:pr-3 px-3 py-2.5 text-right">
+                            Value
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+                        {toArray(delegations).filter((d, i) => i >= (delegationsPage - 1) * delegationsSizePerPage && i < delegationsPage * delegationsSizePerPage).map((d, i) => {
+                          const { price } = { ...getAssetData(d.denom, assets) }
+                          return (
+                            <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-xs">
+                              <td className="pl-4 sm:pl-3 pr-3 py-3 text-left">
+                                <Copy value={d.delegator_address}>
+                                  <Link
+                                    href={`/account/${d.delegator_address}`}
+                                    target="_blank"
+                                    className="text-blue-600 dark:text-blue-500 font-medium"
+                                  >
+                                    {ellipse(d.delegator_address, 10, 'axelar')}
+                                  </Link>
+                                </Copy>
+                              </td>
+                              <td className="px-3 py-3 text-right">
+                                <div className="flex items-center justify-end">
+                                  <Number
+                                    value={d.amount}
+                                    format="0,0.00"
+                                    className="text-zinc-900 dark:text-zinc-100 text-xs font-semibold"
+                                  />
+                                </div>
+                              </td>
+                              <td className="pl-3 pr-4 sm:pr-3 py-3 text-right">
+                                <div className="flex items-center justify-end">
+                                  <Number
+                                    value={d.amount * price}
+                                    format="0,0.00"
+                                    prefix="$"
+                                    noTooltip={true}
+                                    className="text-xs font-medium"
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {delegations.length > delegationsSizePerPage && (
+                    <Pagination
+                      data={delegations}
+                      onChange={page => setDelegationsPage(page)}
+                      sizePerPage={delegationsSizePerPage}
+                    />
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+        </dl>
+      </div>
+    </div>
+  )
+}
+
 export function Validator({ address }) {
-  return null
+  const router = useRouter()
+  const [EVMChains, setEVMChains] = useState(null)
+  const [data, setData] = useState(null)
+  const [delegations, setDelegations] = useState(null)
+  const [uptimes, setUptimes] = useState(null)
+  const [proposedBlocks, setProposedBlocks] = useState(null)
+  const [heartbeats, setHeartbeats] = useState(null)
+  const [votes, setVotes] = useState(null)
+  const { chains, contracts, validators } = useGlobalStore()
+  const { maintainers, setMaintainers } = useValidatorStore()
+
+  useEffect(() => {
+    if (address && validators) {
+      if (['axelarvalcons', 'axelar1'].findIndex(p => address.startsWith(p)) > -1) {
+        const { operator_address } = { ...validators.find(d => includesStringList([d.consensus_address, d.delegator_address, d.broadcaster_address], address.toLowerCase())) }
+        if (operator_address) router.push(`/validator/${operator_address}`)
+      }
+      else if (address.startsWith('axelarvaloper') && chains && contracts) setEVMChains(toArray(chains).filter(d => d.chain_type ==='evm' && contracts.gateway_contracts?.[d.id]?.address))
+    }
+  }, [address, chains, contracts, validators, setEVMChains])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (EVMChains) {
+        setMaintainers(Object.fromEntries(toArray(
+          await Promise.all(EVMChains.filter(d => !maintainers?.[d.id]).map(d => new Promise(async resolve => {
+            const { maintainers } = { ...await getChainMaintainers({ chain: d.id }) }
+            resolve(maintainers && [d.id, maintainers])
+          })))
+        )))
+      }
+    }
+    getData()
+  }, [EVMChains, setMaintainers])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (address?.startsWith('axelarvaloper') && EVMChains && validators && Object.keys({ ...maintainers }).length === EVMChains.length) {
+        const _data = validators.find(d => equalsIgnoreCase(d.operator_address, address))
+        if (_data) {
+          if (_data.broadcaster_address) {
+            const { data } = { ...await getBalances({ address: _data.broadcaster_address }) }
+            _data.broadcasterBalance = toArray(data).find(d => d.denom === 'uaxl')
+          }
+          _data.supportedChains = Object.entries(maintainers).filter(([k, v]) => v.includes(_data.operator_address)).map(([k, v]) => k)
+          if (!_.isEqual(_data, data)) setData(_data)
+        }
+      }
+    }
+    getData()
+  }, [address, EVMChains, data, validators, maintainers, setData])
+
+  useEffect(() => {
+    const size = 200
+
+    const getData = async () => {
+      if (address && data) {
+        const { consensus_address, broadcaster_address } = { ...data }
+        const { latest_block_height } = { ...await getRPCStatus() }
+
+        if (latest_block_height) {
+          let toBlock = latest_block_height - 1
+          let fromBlock = toBlock - size
+
+          await Promise.all(['delegations', 'uptimes', 'proposedBlocks', 'heartbeats', 'votes'].map(d => new Promise(async resolve => {
+            switch (d) {
+              case 'delegations':
+                setDelegations((await getValidatorDelegations({ address }))?.data)
+                break
+              case 'uptimes':
+                const uptimes = (await searchUptimes({ fromBlock, toBlock, size }))?.data
+                setUptimes(_.range(0, size).map(i => {
+                  const height = toBlock - i
+                  const d = toArray(uptimes).find(d => d.height === height)
+                  return { ...d, height, status: toArray(d?.validators).findIndex(a => equalsIgnoreCase(a, consensus_address)) > -1 }
+                }))
+                break
+              case 'proposedBlocks':
+                const proposedBlocks = (await searchProposedBlocks({ fromBlock, toBlock, size }))?.data
+                setProposedBlocks(toArray(proposedBlocks).filter(d => equalsIgnoreCase(d.proposer, consensus_address)))
+                break
+              case 'heartbeats':
+                const NUM_BLOCKS_PER_HEARTBEAT = 50
+                const endBlock = (height, numBlocks = NUM_BLOCKS_PER_HEARTBEAT, fraction = 1) => {
+                  height = toNumber(height) + numBlocks
+                  while (height > 0 && height % numBlocks !== fraction) height--
+                  return height - 1
+                }
+                const startBlock = height => endBlock(toNumber(height) - NUM_BLOCKS_PER_HEARTBEAT) + 1
+
+                fromBlock = startBlock(latest_block_height - (size * NUM_BLOCKS_PER_HEARTBEAT))
+                toBlock = endBlock(latest_block_height)
+
+                const heartbeats = (await searchHeartbeats({ address: broadcaster_address, fromBlock, toBlock, size }))?.data
+                setHeartbeats(_.range(0, size).map(i => {
+                  const height = startBlock(toBlock - (i * NUM_BLOCKS_PER_HEARTBEAT))
+                  const d = toArray(heartbeats).find(d => d.period_height === height)
+                  return { ...d, period_height: height, status: equalsIgnoreCase(d?.sender, broadcaster_address) }
+                }))
+                break
+              case 'votes':
+                fromBlock = toBlock - 10000
+                const votes = broadcaster_address && (await searchPolls({ voter: broadcaster_address, fromBlock, toBlock, size }))?.data
+                setVotes(toArray(votes).map(d => Object.fromEntries(
+                  Object.entries(d).filter(([k, v]) => !k.startsWith('axelar1') || equalsIgnoreCase(k, broadcaster_address)).flatMap(([k, v]) =>
+                    equalsIgnoreCase(k, broadcaster_address) ? Object.entries({ ...v }).map(([_k, _v]) => [_k === 'id' ? 'txhash' : _k, _v]) : [[k, v]]
+                  )
+                )))
+                break
+              default:
+                break
+            }
+            resolve()
+          })))
+        }
+      }
+    }
+
+    getData()
+  }, [address, data])
+
+  return (
+    <Container className="sm:mt-8">
+      {!data ? <Spinner /> :
+        <div className="grid md:grid-cols-3 md:gap-x-4 gap-y-4 md:gap-y-0">
+          <div className="md:col-span-2">
+            <Info data={data} address={address} delegations={delegations} />
+          </div>
+          <div className="flex flex-col gap-y-4">
+          </div>
+        </div>
+      }
+    </Container>
+  )
 }

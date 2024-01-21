@@ -8,7 +8,6 @@ import _ from 'lodash'
 
 import { Container } from '@/components/Container'
 import Image from '@/components/Image'
-import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Spinner } from '@/components/Spinner'
@@ -187,7 +186,7 @@ export function Validators({ status }) {
                               prefix="Commission: "
                               suffix="%"
                               noTooltip={true}
-                              className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
+                              className="text-zinc-400 dark:text-zinc-500 font-medium"
                             />
                           )}
                           {isNumber(d.inflation) && (
@@ -197,7 +196,7 @@ export function Validators({ status }) {
                               prefix="Inflation: "
                               suffix="%"
                               noTooltip={true}
-                              className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
+                              className="text-zinc-400 dark:text-zinc-500 font-medium"
                             />
                           )}
                           {isNumber(d.apr) && (
@@ -207,7 +206,7 @@ export function Validators({ status }) {
                               prefix="APR: "
                               suffix="%"
                               noTooltip={true}
-                              className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
+                              className="text-zinc-400 dark:text-zinc-500 font-medium"
                             />
                           )}
                           {(status === 'inactive' || d.status !== 'BOND_STATUS_BONDED') && (
@@ -228,7 +227,7 @@ export function Validators({ status }) {
                       </td>
                       <td className="px-3 py-4 text-left">
                         {isNumber(d.tokens) && (
-                          <div className="grid gap-y-0.5">
+                          <div className="max-w-32 grid gap-y-2">
                             <div className="flex items-center gap-x-2">
                               <Number
                                 value={d.tokens}
@@ -254,7 +253,7 @@ export function Validators({ status }) {
                       {status === 'active' && (
                         <td className="px-3 py-4 text-left">
                           {isNumber(d.quadratic_voting_power) && (
-                            <div className="grid gap-y-0.5">
+                            <div className="max-w-32 grid gap-y-2">
                               <div className="flex items-center gap-x-2">
                                 <Number
                                   value={d.quadratic_voting_power}
@@ -278,13 +277,7 @@ export function Validators({ status }) {
                       )}
                       <td className="hidden sm:table-cell px-3 py-4 text-left">
                         <div className="max-w-24 grid gap-y-2 my-0.5">
-                          {isNumber(d.uptime) && (
-                            <ProgressBar
-                              value={d.uptime}
-                              className={clsx(d.uptime < 50 ? 'bg-red-600 dark:bg-red-500' : d.uptime < 80 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-500')}
-                              valueClassName="text-xs"
-                            />
-                          )}
+                          {isNumber(d.uptime) && <ProgressBar value={d.uptime} className={clsx(d.uptime < 50 ? 'bg-red-600 dark:bg-red-500' : d.uptime < 80 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-500')} />}
                           {status === 'active' && isNumber(d.proposed_blocks) && (
                             <div className="flex flex-col">
                               <span className="text-zinc-400 dark:text-zinc-500 text-xs whitespace-nowrap">Proposed Block</span>
@@ -310,13 +303,7 @@ export function Validators({ status }) {
                       </td>
                       <td className="px-3 py-4 text-left">
                         <div className="max-w-24 flex flex-col gap-y-2 my-0.5">
-                          {isNumber(d.heartbeat_uptime) && (
-                            <ProgressBar
-                              value={d.heartbeat_uptime}
-                              className={clsx(d.heartbeat_uptime < 50 ? 'bg-red-600 dark:bg-red-500' : d.heartbeat_uptime < 80 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-500')}
-                              valueClassName="text-xs"
-                            />
-                          )}
+                          {isNumber(d.heartbeat_uptime) && <ProgressBar value={d.heartbeat_uptime} className={clsx(d.heartbeat_uptime < 50 ? 'bg-red-600 dark:bg-red-500' : d.heartbeat_uptime < 80 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-500')} />}
                           {d.stale_heartbeats && (
                             <span className="text-red-600 dark:text-red-500 text-xs font-medium whitespace-nowrap">
                               Stale Heartbeats

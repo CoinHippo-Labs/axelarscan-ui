@@ -13,7 +13,7 @@ export function ProgressBar({ value, className, valueClassName }) {
           format="0,0.0a"
           suffix="%"
           noTooltip={true}
-          className={clsx(value < 40 ? 'text-zinc-700 dark:text-zinc-300' : 'text-white', valueClassName)}
+          className={clsx('text-xs', value < 33 ? 'text-zinc-700 dark:text-zinc-300' : 'text-white', valueClassName)}
         />
       </div>
     </div>
