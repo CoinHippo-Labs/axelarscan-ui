@@ -7,15 +7,20 @@ import clsx from 'clsx'
 import _ from 'lodash'
 
 import { Container } from '@/components/Container'
+import Image from '@/components/Image'
+import { Copy } from '@/components/Copy'
+import { Tooltip } from '@/components/Tooltip'
+import { ProgressBar } from '@/components/ProgressBar'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
 import { Profile } from '@/components/Profile'
 import { useGlobalStore } from '@/app/providers'
 import { getValidatorsVotes, getChainMaintainers } from '@/lib/api/validator'
+import { getChainData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
 import { equalsIgnoreCase } from '@/lib/string'
-import { isNumber, toNumber, formatUnits, toFixed } from '@/lib/number'
+import { isNumber, toNumber, formatUnits, toFixed, numberFormat } from '@/lib/number'
 
 export const useValidatorStore = create()(set => ({
   maintainers: null,
@@ -109,7 +114,7 @@ export function Validators({ status }) {
             <div className="sm:flex-auto">
               <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">Validators</h1>
               <p className="mt-2 text-zinc-400 dark:text-zinc-500 text-sm">
-                List of {status || 'active'} validators in Axelar Network.
+                List of {status || 'active'} validators in Axelar Network with the latest 10K blocks performance.
               </p>
             </div>
             <nav className="flex gap-x-4">
@@ -137,22 +142,24 @@ export function Validators({ status }) {
                   <th scope="col" className="px-3 py-3.5 text-left">
                     Validator
                   </th>
-                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-left whitespace-nowrap">
-                    Consensus Power
-                  </th>
                   <th scope="col" className="px-3 py-3.5 text-left whitespace-nowrap">
-                    Quadratic Power
+                    {status === 'active' ? 'Consensus Power' : 'Staking'}
                   </th>
-                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-right">
+                  {status === 'active' && (
+                    <th scope="col" className="px-3 py-3.5 text-left whitespace-nowrap">
+                      Quadratic Power
+                    </th>
+                  )}
+                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-left">
                     Uptime
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-right">
+                  <th scope="col" className="px-3 py-3.5 text-left">
                     Heartbeat
                   </th>
-                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-right">
+                  <th scope="col" className="hidden sm:table-cell px-3 py-3.5 text-left whitespace-nowrap">
                     EVM Votes
                   </th>
-                  <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right">
+                  <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-left whitespace-nowrap">
                     EVM Supported
                   </th>
                 </tr>
@@ -160,6 +167,10 @@ export function Validators({ status }) {
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                 {filter(status).map((d, i) => {
                   const { rate } = { ...d.commission?.commission_rates }
+                  const totalVotingPower = _.sumBy(filter(status), 'tokens')
+                  const totalQuadraticVotingPower = _.sumBy(filter(status), 'quadratic_voting_power')
+                  const cumulativeVotingPower = _.sumBy(_.slice(filter(status), 0, i + 1), 'tokens')
+                  const cumulativeQuadraticVotingPower = _.sumBy(_.slice(filter(status), 0, i + 1), 'quadratic_voting_power')
 
                   return (
                     <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
@@ -199,49 +210,164 @@ export function Validators({ status }) {
                               className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
                             />
                           )}
+                          {status === 'inactive' && (
+                            <>
+                              {d.status && (
+                                <Tag className={clsx('w-fit', d.status.includes('UN') ? d.status.endsWith('ED') ? 'bg-red-600 dark:bg-red-500' : 'bg-orange-500 dark:bg-orange-600' : 'bg-green-600 dark:bg-green-500')}>
+                                  {d.status.replace('BOND_STATUS_', '')}
+                                </Tag>
+                              )}
+                              {d.jailed && (
+                                <Tag className="w-fit bg-red-600 dark:bg-red-500">
+                                  Jailed
+                                </Tag>
+                              )}
+                            </>
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
-                        {d.type && <Tag className="w-fit">{d.type}</Tag>}
-                      </td>
-                      <td className="hidden sm:table-cell px-3 py-4 text-left">
-                        <Number value={d.content?.plan?.height} />
-                      </td>
-                      <td className="hidden sm:table-cell px-3 py-4 text-right">
-                        <div className="flex flex-col items-end gap-y-1">
-                          {toArray(d.total_deposit).map((d, i) => (
-                            <Number
-                              key={i}
-                              value={d.amount}
-                              suffix={` ${d.symbol}`}
-                              noTooltip={true}
-                              className="text-zinc-700 dark:text-zinc-300 font-medium"
-                            />
-                          ))}
-                        </div>
-                      </td>
-                      <td className="pl-3 pr-4 sm:pr-0 py-4 text-right">
-                        {d.status && (
-                          <div className="flex flex-col items-end gap-y-1">
-                            <Tag className={clsx('w-fit', ['UNSPECIFIED', 'DEPOSIT_PERIOD'].includes(d.status) ? '' : ['VOTING_PERIOD'].includes(d.status) ? 'bg-yellow-400 dark:bg-yellow-500' : ['REJECTED', 'FAILED'].includes(d.status) ? 'bg-red-600 dark:bg-red-500' : 'bg-green-600 dark:bg-green-500')}>
-                              {d.status}
-                            </Tag>
-                            {['PASSED', 'REJECTED'].includes(d.status) && (
-                              <div className="flex flex-col items-end gap-y-0.5">
-                                {Object.entries({ ...d.final_tally_result }).filter(([k, v]) => toNumber(v) > 0).map(([k, v]) => (
-                                  <Number
-                                    key={k}
-                                    value={v}
-                                    format="0,0.00a"
-                                    prefix={`${k}: `}
-                                    noTooltip={true}
-                                    className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
-                                  />
-                                ))}
-                              </div>
-                            )}
+                        {isNumber(d.tokens) && (
+                          <div className="grid gap-y-0.5">
+                            <div className="flex items-center gap-x-2">
+                              <Number
+                                value={d.tokens}
+                                format="0,0.0a"
+                                noTooltip={true}
+                                className="text-zinc-900 dark:text-zinc-100 font-medium"
+                              />
+                              {status === 'active' && (
+                                <Number
+                                  value={d.tokens * 100 / totalVotingPower}
+                                  format="0,0.0a"
+                                  prefix="("
+                                  suffix="%)"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500"
+                                />
+                              )}
+                            </div>
+                            {status === 'active' && <ProgressBar value={cumulativeVotingPower * 100 / totalVotingPower} />}
                           </div>
                         )}
+                      </td>
+                      {status === 'active' && (
+                        <td className="px-3 py-4 text-left">
+                          {isNumber(d.quadratic_voting_power) && (
+                            <div className="grid gap-y-0.5">
+                              <div className="flex items-center gap-x-2">
+                                <Number
+                                  value={d.quadratic_voting_power}
+                                  format="0,0.0a"
+                                  noTooltip={true}
+                                  className="text-zinc-900 dark:text-zinc-100 font-medium"
+                                />
+                                <Number
+                                  value={d.quadratic_voting_power * 100 / totalQuadraticVotingPower}
+                                  format="0,0.0a"
+                                  prefix="("
+                                  suffix="%)"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500"
+                                />
+                              </div>
+                              <ProgressBar value={cumulativeQuadraticVotingPower * 100 / totalQuadraticVotingPower} className="bg-red-600 dark:bg-red-500" />
+                            </div>
+                          )}
+                        </td>
+                      )}
+                      <td className="hidden sm:table-cell px-3 py-4 text-left">
+                        <div className="grid gap-y-2 my-0.5">
+                          {isNumber(d.uptime) && (
+                            <ProgressBar
+                              value={d.uptime}
+                              className={clsx(d.uptime < 50 ? 'bg-red-600 dark:bg-red-500' : d.uptime < 80 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-500')}
+                              valueClassName="text-xs"
+                            />
+                          )}
+                          {status === 'active' && isNumber(d.proposed_blocks) && (
+                            <div className="flex flex-col">
+                              <span className="text-zinc-400 dark:text-zinc-500 text-xs whitespace-nowrap">Proposed Block</span>
+                              <div className="flex items-center gap-x-2">
+                                <Number
+                                  value={d.proposed_blocks}
+                                  format="0,0.0a"
+                                  noTooltip={true}
+                                  className="text-zinc-900 dark:text-zinc-100 font-medium"
+                                />
+                                <Number
+                                  value={d.proposed_blocks_proportion}
+                                  format="0,0.0a"
+                                  prefix="("
+                                  suffix="%)"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-3 py-4 text-left">
+                        <div className="grid gap-y-2 my-0.5">
+                          {isNumber(d.heartbeat_uptime) && (
+                            <ProgressBar
+                              value={d.heartbeat_uptime}
+                              className={clsx(d.heartbeat_uptime < 50 ? 'bg-red-600 dark:bg-red-500' : d.heartbeat_uptime < 80 ? 'bg-yellow-400 dark:bg-yellow-500' : 'bg-green-600 dark:bg-green-500')}
+                              valueClassName="text-xs"
+                            />
+                          )}
+                        </div>
+                      </td>
+                      <td className="hidden sm:table-cell px-3 py-4 text-left">
+                        <div className="min-w-48 grid grid-cols-2 gap-x-2 gap-y-1.5">
+                          {_.orderBy(Object.entries(d.votes.chains).map(([k, v]) => ({ chain: k, ...v })), ['total_polls'], ['desc']).map(d => {
+                            const { name, image } = { ...getChainData(d.chain, chains) }
+                            const votesDetails = ['true', 'false', 'unsubmitted'].map(s => [s === 'true' ? 'Y' : s === 'false' ? 'N' : 'UN', d.votes[s]]).filter(([k, v]) => v).map(([k, v]) => `${numberFormat(v, '0,0')}${k}`).join(' / ')
+
+                            return (
+                              <div key={d.chain} className="flex justify-start">
+                                <Tooltip content={`${name}: ${votesDetails}`} className="whitespace-nowrap">
+                                  <div className="flex items-center gap-x-2">
+                                    <Image src={image} width={20} height={20} />
+                                    <div className="flex items-center gap-x-1">
+                                      <Number
+                                        value={d.total}
+                                        format="0,0.0a"
+                                        noTooltip={true}
+                                        className={clsx('text-xs font-medium', d.total < d.total_polls ? 'text-zinc-400 dark:text-zinc-500' : 'text-zinc-900 dark:text-zinc-100')}
+                                      />
+                                      <Number
+                                        value={d.total_polls}
+                                        format="0,0.0a"
+                                        prefix=" / "
+                                        noTooltip={true}
+                                        className="text-zinc-900 dark:text-zinc-100 text-xs font-medium"
+                                      />
+                                    </div>
+                                  </div>
+                                </Tooltip>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </td>
+                      <td className="pl-3 pr-4 sm:pr-0 py-4 text-left">
+                        <div className="max-w-40 flex flex-wrap">
+                          {d.supportedChains.map((c, j) => {
+                            const { name, image } = { ...getChainData(c, chains) }
+                            return (
+                              <Tooltip key={j} content={name} className="whitespace-nowrap">
+                                <Image
+                                  src={image}
+                                  width={20}
+                                  height={20}
+                                  className="mr-1.5 mb-1.5"
+                                />
+                              </Tooltip>
+                            )
+                          })}
+                        </div>
                       </td>
                     </tr>
                   )
