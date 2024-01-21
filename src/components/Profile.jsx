@@ -536,7 +536,7 @@ export function Profile({
           target="_blank"
           className="text-blue-600 dark:text-blue-500 font-medium"
         >
-          {ellipse(name, 16)}
+          {ellipse(name, isValidator ? 10 : 16)}
         </Link>
         {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
       </div>

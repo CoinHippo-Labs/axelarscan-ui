@@ -210,7 +210,7 @@ export function Validators({ status }) {
                               className="capitalize text-zinc-400 dark:text-zinc-500 font-medium"
                             />
                           )}
-                          {status === 'inactive' && (
+                          {(status === 'inactive' || d.status !== 'BOND_STATUS_BONDED') && (
                             <>
                               {d.status && (
                                 <Tag className={clsx('w-fit', d.status.includes('UN') ? d.status.endsWith('ED') ? 'bg-red-600 dark:bg-red-500' : 'bg-orange-500 dark:bg-orange-600' : 'bg-green-600 dark:bg-green-500')}>
@@ -277,7 +277,7 @@ export function Validators({ status }) {
                         </td>
                       )}
                       <td className="hidden sm:table-cell px-3 py-4 text-left">
-                        <div className="grid gap-y-2 my-0.5">
+                        <div className="max-w-24 grid gap-y-2 my-0.5">
                           {isNumber(d.uptime) && (
                             <ProgressBar
                               value={d.uptime}
@@ -309,7 +309,7 @@ export function Validators({ status }) {
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
-                        <div className="grid gap-y-2 my-0.5">
+                        <div className="max-w-24 flex flex-col gap-y-2 my-0.5">
                           {isNumber(d.heartbeat_uptime) && (
                             <ProgressBar
                               value={d.heartbeat_uptime}
@@ -317,10 +317,15 @@ export function Validators({ status }) {
                               valueClassName="text-xs"
                             />
                           )}
+                          {d.stale_heartbeats && (
+                            <span className="text-red-600 dark:text-red-500 text-xs font-medium whitespace-nowrap">
+                              Stale Heartbeats
+                            </span>
+                          )}
                         </div>
                       </td>
                       <td className="hidden sm:table-cell px-3 py-4 text-left">
-                        <div className="min-w-48 grid grid-cols-2 gap-x-2 gap-y-1.5">
+                        <div className="min-w-48 grid grid-cols-2 gap-x-2 gap-y-1">
                           {_.orderBy(Object.entries(d.votes.chains).map(([k, v]) => ({ chain: k, ...v })), ['total_polls'], ['desc']).map(d => {
                             const { name, image } = { ...getChainData(d.chain, chains) }
                             const votesDetails = ['true', 'false', 'unsubmitted'].map(s => [s === 'true' ? 'Y' : s === 'false' ? 'N' : 'UN', d.votes[s]]).filter(([k, v]) => v).map(([k, v]) => `${numberFormat(v, '0,0')}${k}`).join(' / ')
