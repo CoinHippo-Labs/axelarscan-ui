@@ -5,6 +5,9 @@ const request = async params => {
 
 export const rpc = async params => await request({ method: 'rpc', ...params })
 export const getRPCStatus = async params => await request({ method: 'rpc', path: '/status' })
+export const searchBlocks = async params => request({ ...params, method: 'searchBlocks' })
+export const searchTransactions = async params => request({ ...params, method: 'searchTransactions' })
+export const getTransactions = async params => request({ ...params, method: 'getTransactions' })
 export const getValidators = async params => request({ ...params, method: 'getValidators' })
 export const getValidatorsVotes = async params => request({ ...params, method: 'getValidatorsVotes' })
 export const searchUptimes = async params => request({ ...params, method: 'searchUptimes' })

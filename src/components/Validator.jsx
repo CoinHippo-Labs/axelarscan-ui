@@ -268,7 +268,7 @@ function Info({ data, address, delegations }) {
           )}
           {delegations && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{`Delegation${delegations.length > 1 ? `s (${delegations.length})` : ''}`}</dt>
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">{`Delegation${delegations.length > 1 ? `s (${numberFormat(delegations.length, '0,0')})` : ''}`}</dt>
               <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex flex-col gap-y-4">
                   <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">

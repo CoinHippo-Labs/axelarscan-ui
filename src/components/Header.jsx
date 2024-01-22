@@ -28,7 +28,7 @@ const navigations = [
     children: [
       { title: 'Validators', href: '/validators' },
       { title: 'Blocks', href: '/blocks' },
-      { title: 'Transactions', href: '/transactions/search' },
+      { title: 'Transactions', href: '/transactions' },
       { title: 'EVM Polls', href: '/evm-polls' },
       { title: 'EVM Batches', href: '/evm-batches' },
       { title: 'Proposals', href: '/proposals' },
