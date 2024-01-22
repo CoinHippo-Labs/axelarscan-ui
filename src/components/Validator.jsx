@@ -26,7 +26,7 @@ import { getChainData, getAssetData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase, ellipse } from '@/lib/string'
-import { isNumber, toNumber } from '@/lib/number'
+import { isNumber, toNumber, numberFormat } from '@/lib/number'
 
 function Pagination({ data, maxPage = 5, sizePerPage = 25, onChange }) {
   const [page, setPage] = useState(1)
@@ -292,13 +292,13 @@ function Info({ data, address, delegations }) {
                           return (
                             <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-xs">
                               <td className="pl-4 sm:pl-3 pr-3 py-3 text-left">
-                                <Copy value={d.delegator_address}>
+                                <Copy size={14} value={d.delegator_address}>
                                   <Link
                                     href={`/account/${d.delegator_address}`}
                                     target="_blank"
                                     className="text-blue-600 dark:text-blue-500 font-medium"
                                   >
-                                    {ellipse(d.delegator_address, 10, 'axelar')}
+                                    {ellipse(d.delegator_address, 6, 'axelar')}
                                   </Link>
                                 </Copy>
                               </td>
@@ -344,6 +344,200 @@ function Info({ data, address, delegations }) {
     </div>
   )
 }
+
+function Uptimes({ data }) {
+  return data && (
+    <div className="flex flex-col gap-y-2 my-2.5">
+      <div className="flex items-center justify-between gap-x-4 pr-1">
+        <div className="flex flex-col">
+          <h3 className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6">
+            Uptimes
+          </h3>
+          <p className="text-zinc-400 dark:text-zinc-500 text-xs leading-5">
+            Latest {numberFormat(size, '0,0')} Blocks
+          </p>
+        </div>
+        <div className="flex flex-col items-end">
+          <Number
+            value={data.filter(d => d.status).length * 100 / data.length}
+            format="0,0.00"
+            suffix="%"
+            className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6"
+          />
+          <Number
+            value={data.filter(d => d.status).length}
+            format="0,0"
+            suffix={`/${data.length}`}
+            className="text-zinc-400 dark:text-zinc-500 text-xs leading-5"
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap">
+        {data.map((d, i) => (
+          <Link
+            key={i}
+            href={`/block/${d.height}`}
+            target="_blank"
+            className="w-5 h-5"
+          >
+            <Tooltip content={numberFormat(d.height, '0,0')}>
+              <div className={clsx('w-4 h-4 rounded-sm m-0.5', d.status ? 'bg-green-600 dark:bg-green-500' : 'bg-zinc-300 dark:bg-zinc-700')} />
+            </Tooltip>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ProposedBlocks({ data }) {
+  return data && (
+    <div className="flex flex-col gap-y-2 my-2.5">
+      <div className="flex items-center justify-between gap-x-4 pr-1">
+        <div className="flex flex-col">
+          <h3 className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6">
+            Proposed Blocks
+          </h3>
+          <p className="text-zinc-400 dark:text-zinc-500 text-xs leading-5">
+            Latest {numberFormat(NUM_LATEST_PROPOSED_BLOCKS, '0,0')} Blocks
+          </p>
+        </div>
+        <div className="flex flex-col items-end">
+          <Number
+            value={data.length * 100 / NUM_LATEST_PROPOSED_BLOCKS}
+            format="0,0.00"
+            suffix="%"
+            className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6"
+          />
+          <Number
+            value={data.length}
+            format="0,0"
+            suffix={`/${NUM_LATEST_PROPOSED_BLOCKS}`}
+            className="text-zinc-400 dark:text-zinc-500 text-xs leading-5"
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap">
+        {data.map((d, i) => (
+          <Link
+            key={i}
+            href={`/block/${d.height}`}
+            target="_blank"
+            className="w-5 h-5"
+          >
+            <Tooltip content={numberFormat(d.height, '0,0')}>
+              <div className={clsx('w-4 h-4 bg-green-600 dark:bg-green-500 rounded-sm m-0.5')} />
+            </Tooltip>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Heartbeats({ data }) {
+  return data && (
+    <div className="flex flex-col gap-y-2 my-2.5">
+      <div className="flex items-center justify-between gap-x-4 pr-1">
+        <div className="flex flex-col">
+          <h3 className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6">
+            Heartbeats
+          </h3>
+          <p className="text-zinc-400 dark:text-zinc-500 text-xs leading-5">
+            Latest {numberFormat(NUM_LATEST_BLOCKS, '0,0')} Blocks
+          </p>
+        </div>
+        <div className="flex flex-col items-end">
+          <Number
+            value={data.filter(d => d.status).length * 100 / data.length}
+            format="0,0.00"
+            suffix="%"
+            className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6"
+          />
+          <Number
+            value={data.filter(d => d.status).length}
+            format="0,0"
+            suffix={`/${data.length}`}
+            className="text-zinc-400 dark:text-zinc-500 text-xs leading-5"
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap">
+        {data.map((d, i) => (
+          <Link
+            key={i}
+            href={d.txhash ? `/tx/${d.txhash}` : `/block/${d.height || d.period_height}`}
+            target="_blank"
+            className="w-5 h-5"
+          >
+            <Tooltip content={numberFormat(d.height || d.period_height, '0,0')}>
+              <div className={clsx('w-4 h-4 rounded-sm m-0.5', d.status ? 'bg-green-600 dark:bg-green-500' : 'bg-zinc-300 dark:bg-zinc-700')} />
+            </Tooltip>
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Votes({ data }) {
+  const { chains } = useGlobalStore()
+  const totalY = toArray(data).filter(d => typeof d.vote === 'boolean' && d.vote).length
+  const totalN = toArray(data).filter(d => typeof d.vote === 'boolean' && !d.vote).length
+  const totalUN = toArray(data).filter(d => typeof d.vote !== 'boolean').length
+  const totalVotes = Object.fromEntries(Object.entries({ Y: totalY, N: totalN, UN: totalUN }).filter(([k, v]) => v || k === 'Y'))
+
+  return data && (
+    <div className="flex flex-col gap-y-2 my-2.5">
+      <div className="flex justify-between gap-x-4 pr-1">
+        <div className="flex flex-col">
+          <h3 className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6">
+            EVM Votes
+          </h3>
+          <p className="text-zinc-400 dark:text-zinc-500 text-xs leading-5">
+            Latest {numberFormat(size, '0,0')} Polls ({numberFormat(NUM_LATEST_BLOCKS, '0,0')} Blocks)
+          </p>
+        </div>
+        <div className="flex flex-col items-end">
+          <Number
+            value={data.filter(d => typeof d.vote === 'boolean').length * 100 / data.length}
+            format="0,0.00"
+            suffix="%"
+            className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold leading-6"
+          />
+          <Number
+            value={data.length}
+            format="0,0"
+            prefix={`${Object.keys(totalVotes).length > 1 ? '(' : ''}${Object.entries(totalVotes).map(([k, v]) => `${numberFormat(v, '0,0')}${k}`).join(' : ')}${Object.keys(totalVotes).length > 1 ? ')' : ''}/`}
+            className="text-zinc-400 dark:text-zinc-500 text-xs leading-5"
+          />
+        </div>
+      </div>
+      <div className="flex flex-wrap">
+        {data.map((d, i) => {
+          const { name } = { ...getChainData(d.sender_chain, chains) }
+          return (
+            <Link
+              key={i}
+              href={d.id ? `/evm-poll/${d.id}` : `/block/${d.height}`}
+              target="_blank"
+              className="w-5 h-5"
+            >
+              <Tooltip content={d.id ? `Poll ID: ${d.id} (${name})` : numberFormat(d.height, '0,0')} className="whitespace-nowrap">
+                <div className={clsx('w-4 h-4 rounded-sm m-0.5', typeof d.vote === 'boolean' ? d.vote ? 'bg-green-600 dark:bg-green-500' : 'bg-red-600 dark:bg-red-500' : 'bg-zinc-300 dark:bg-zinc-700')} />
+              </Tooltip>
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+const size = 200
+const NUM_LATEST_BLOCKS = 10000
+const NUM_LATEST_PROPOSED_BLOCKS = 2500
+const NUM_BLOCKS_PER_HEARTBEAT = 50
 
 export function Validator({ address }) {
   const router = useRouter()
@@ -399,36 +593,40 @@ export function Validator({ address }) {
   }, [address, EVMChains, data, validators, maintainers, setData])
 
   useEffect(() => {
-    const size = 200
-
     const getData = async () => {
       if (address && data) {
         const { consensus_address, broadcaster_address } = { ...data }
         const { latest_block_height } = { ...await getRPCStatus() }
 
         if (latest_block_height) {
-          let toBlock = latest_block_height - 1
-          let fromBlock = toBlock - size
-
           await Promise.all(['delegations', 'uptimes', 'proposedBlocks', 'heartbeats', 'votes'].map(d => new Promise(async resolve => {
             switch (d) {
               case 'delegations':
                 setDelegations((await getValidatorDelegations({ address }))?.data)
                 break
               case 'uptimes':
-                const uptimes = (await searchUptimes({ fromBlock, toBlock, size }))?.data
-                setUptimes(_.range(0, size).map(i => {
-                  const height = toBlock - i
-                  const d = toArray(uptimes).find(d => d.height === height)
-                  return { ...d, height, status: toArray(d?.validators).findIndex(a => equalsIgnoreCase(a, consensus_address)) > -1 }
-                }))
+                try {
+                  const toBlock = latest_block_height - 1
+                  const fromBlock = toBlock - size
+
+                  const data = (await searchUptimes({ fromBlock, toBlock, size }))?.data
+                  setUptimes(_.range(0, size).map(i => {
+                    const height = toBlock - i
+                    const d = toArray(data).find(d => d.height === height)
+                    return { ...d, height, status: toArray(d?.validators).findIndex(a => equalsIgnoreCase(a, consensus_address)) > -1 }
+                  }))
+                } catch (error) {}
                 break
               case 'proposedBlocks':
-                const proposedBlocks = (await searchProposedBlocks({ fromBlock, toBlock, size }))?.data
-                setProposedBlocks(toArray(proposedBlocks).filter(d => equalsIgnoreCase(d.proposer, consensus_address)))
+                try {
+                  const toBlock = latest_block_height - 1
+                  const fromBlock = toBlock - NUM_LATEST_PROPOSED_BLOCKS
+
+                  const data = (await searchProposedBlocks({ fromBlock, toBlock, size: NUM_LATEST_PROPOSED_BLOCKS }))?.data
+                  setProposedBlocks(toArray(data).filter(d => equalsIgnoreCase(d.proposer, consensus_address)))
+                } catch (error) {}
                 break
               case 'heartbeats':
-                const NUM_BLOCKS_PER_HEARTBEAT = 50
                 const endBlock = (height, numBlocks = NUM_BLOCKS_PER_HEARTBEAT, fraction = 1) => {
                   height = toNumber(height) + numBlocks
                   while (height > 0 && height % numBlocks !== fraction) height--
@@ -436,24 +634,30 @@ export function Validator({ address }) {
                 }
                 const startBlock = height => endBlock(toNumber(height) - NUM_BLOCKS_PER_HEARTBEAT) + 1
 
-                fromBlock = startBlock(latest_block_height - (size * NUM_BLOCKS_PER_HEARTBEAT))
-                toBlock = endBlock(latest_block_height)
+                try {
+                  const fromBlock = startBlock(latest_block_height - NUM_LATEST_BLOCKS)
+                  const toBlock = endBlock(latest_block_height)
 
-                const heartbeats = (await searchHeartbeats({ address: broadcaster_address, fromBlock, toBlock, size }))?.data
-                setHeartbeats(_.range(0, size).map(i => {
-                  const height = startBlock(toBlock - (i * NUM_BLOCKS_PER_HEARTBEAT))
-                  const d = toArray(heartbeats).find(d => d.period_height === height)
-                  return { ...d, period_height: height, status: equalsIgnoreCase(d?.sender, broadcaster_address) }
-                }))
+                  const data = (await searchHeartbeats({ address: broadcaster_address, fromBlock, toBlock, size }))?.data
+                  setHeartbeats(_.range(0, size).map(i => {
+                    const height = startBlock(toBlock - (i * NUM_BLOCKS_PER_HEARTBEAT))
+                    const d = toArray(data).find(d => d.period_height === height)
+                    return { ...d, period_height: height, status: equalsIgnoreCase(d?.sender, broadcaster_address) }
+                  }))
+                } catch (error) {}
                 break
               case 'votes':
-                fromBlock = toBlock - 10000
-                const votes = broadcaster_address && (await searchPolls({ voter: broadcaster_address, fromBlock, toBlock, size }))?.data
-                setVotes(toArray(votes).map(d => Object.fromEntries(
-                  Object.entries(d).filter(([k, v]) => !k.startsWith('axelar1') || equalsIgnoreCase(k, broadcaster_address)).flatMap(([k, v]) =>
-                    equalsIgnoreCase(k, broadcaster_address) ? Object.entries({ ...v }).map(([_k, _v]) => [_k === 'id' ? 'txhash' : _k, _v]) : [[k, v]]
-                  )
-                )))
+                try {
+                  const toBlock = latest_block_height - 1
+                  const fromBlock = toBlock - NUM_LATEST_BLOCKS
+
+                  const data = broadcaster_address && (await searchPolls({ voter: broadcaster_address, fromBlock, toBlock, size }))?.data
+                  setVotes(toArray(data).map(d => Object.fromEntries(
+                    Object.entries(d).filter(([k, v]) => !k.startsWith('axelar1') || equalsIgnoreCase(k, broadcaster_address)).flatMap(([k, v]) =>
+                      equalsIgnoreCase(k, broadcaster_address) ? Object.entries({ ...v }).map(([_k, _v]) => [_k === 'id' ? 'txhash' : _k, _v]) : [[k, v]]
+                    )
+                  )))
+                } catch (error) {}
                 break
               default:
                 break
@@ -474,8 +678,14 @@ export function Validator({ address }) {
           <div className="md:col-span-2">
             <Info data={data} address={address} delegations={delegations} />
           </div>
-          <div className="flex flex-col gap-y-4">
-          </div>
+          {!(uptimes || proposedBlocks || heartbeats || votes) ? <Spinner /> :
+            <div className="flex flex-col gap-y-4">
+              <Uptimes data={uptimes} />
+              <ProposedBlocks data={proposedBlocks} />
+              <Heartbeats data={heartbeats} />
+              <Votes data={votes} />
+            </div>
+          }
         </div>
       }
     </Container>
