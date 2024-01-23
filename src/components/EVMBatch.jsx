@@ -45,7 +45,7 @@ function Info({ data, chain, id, executeButton }) {
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
       <div className="px-4 sm:px-6 py-6">
         <h3 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-7">
-          <Copy value={id}>{ellipse(id, 16)}</Copy>
+          <Copy value={id}><span>{ellipse(id, 16)}</span></Copy>
           <Copy size={16} value={key_id}>
             <span className="text-zinc-400 dark:text-zinc-500 text-sm font-normal leading-6">
               {key_id}

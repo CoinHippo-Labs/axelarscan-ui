@@ -114,7 +114,7 @@ export function SpaceIDProfile({
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{element}</span></Copy>
       }
     </div> :
     <ENSProfile
@@ -204,7 +204,7 @@ export function LENSProfile({
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{element}</span></Copy>
       }
     </div> :
     <UnstoppableProfile
@@ -293,7 +293,7 @@ export function UnstoppableProfile({
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{element}</span></Copy>
       }
     </div> :
     <ENSProfile
@@ -384,7 +384,7 @@ export function ENSProfile({
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{element}</span></Copy>
       }
     </div> :
     origin !== 'unstoppable' ?
@@ -407,7 +407,7 @@ export function ENSProfile({
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}>{element}</Copy>
+        noCopy ? element : <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{element}</span></Copy>
 }
 
 export function EVMProfile({ chain, ...props }) {
@@ -562,6 +562,6 @@ export function Profile({
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        <Copy size={width < 24 ? 16 : 18} value={address}>{ellipse(address, 8, prefix)}</Copy>
+        <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{ellipse(address, 8, prefix)}</span></Copy>
   )
 }

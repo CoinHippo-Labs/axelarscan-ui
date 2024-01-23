@@ -118,7 +118,7 @@ function Info({ data, address, delegations }) {
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Operator Address</dt>
               <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <Copy value={operator_address}>{ellipse(operator_address, 10, 'axelarvaloper')}</Copy>
+                <Copy value={operator_address}><span>{ellipse(operator_address, 10, 'axelarvaloper')}</span></Copy>
               </dd>
             </div>
           )}
@@ -126,7 +126,7 @@ function Info({ data, address, delegations }) {
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Consensus Address</dt>
               <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <Copy value={consensus_address}>{ellipse(consensus_address, 10, 'axelarvalcons')}</Copy>
+                <Copy value={consensus_address}><span>{ellipse(consensus_address, 10, 'axelarvalcons')}</span></Copy>
               </dd>
             </div>
           )}

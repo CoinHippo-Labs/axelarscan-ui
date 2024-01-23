@@ -5,6 +5,8 @@ const request = async params => {
 
 export const rpc = async params => await request({ method: 'rpc', ...params })
 export const getRPCStatus = async params => await request({ method: 'rpc', path: '/status' })
+export const lcd = async params => await request({ method: 'rpc', ...params })
+export const getTransaction = async txhash => await request({ method: 'lcd', path: `/cosmos/tx/v1beta1/txs/${txhash}` })
 export const searchBlocks = async params => request({ ...params, method: 'searchBlocks' })
 export const searchTransactions = async params => request({ ...params, method: 'searchTransactions' })
 export const getTransactions = async params => request({ ...params, method: 'getTransactions' })

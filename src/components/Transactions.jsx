@@ -9,13 +9,11 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import { MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck } from 'react-icons/md'
 import { LuChevronsUpDown } from 'react-icons/lu'
-import { IoCheckmarkCircle, IoCheckmarkDoneCircle } from 'react-icons/io5'
 
 import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
-import Image from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -30,9 +28,8 @@ import { getAssetData } from '@/lib/config'
 import { getIcapAddress, getInputType, toJson, toHex, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { getAttributeValue } from '@/lib/cosmos'
-import { isString, equalsIgnoreCase, capitalize, removeDoubleQuote, toBoolean, lastString, ellipse, toTitle } from '@/lib/string'
-import { isNumber, toNumber, formatUnits, numberFormat } from '@/lib/number'
-import { timeDiff } from '@/lib/time'
+import { isString, equalsIgnoreCase, capitalize, removeDoubleQuote, toBoolean, lastString, ellipse } from '@/lib/string'
+import { isNumber, formatUnits } from '@/lib/number'
 
 const size = 25
 
@@ -47,7 +44,7 @@ function Filters() {
 
   useEffect(() => {
     const getTypes = async () => {
-      const response = await searchTransactions({ aggs: { types: { terms: { field: 'types.keyword', size: 25 } } }, size: 0 })
+      const response = await searchTransactions({ aggs: { types: { terms: { field: 'types.keyword', size: 1000 } } }, size: 0 })
       setTypes(toArray(response).map(d => d.key))
     }
     getTypes()
@@ -69,7 +66,7 @@ function Filters() {
 
   const attributes = [
     { label: 'Tx Hash', name: 'txHash' },
-    { label: 'Type', name: 'type', type: 'select', options: _.concat({ title: 'Any' }, types.map(d => ({ value: d, title: d }))) },
+    { label: 'Type', name: 'type', type: 'select', options: _.concat({ title: 'Any' }, _.orderBy(types.map(d => ({ value: d, title: d })), ['title'], ['asc'])) },
     { label: 'Status', name: 'status', type: 'select', options: _.concat({ title: 'Any' }, ['success', 'failed'].map(d => ({ value: d, title: capitalize(d) }))) },
     { label: 'Address', name: 'address' },
     { label: 'Time', name: 'time', type: 'datetimeRange' },
@@ -463,10 +460,9 @@ export const getActivities = (data, assets) => {
 
 export const getSender = (data, assets) => {
   if (!data) return
-  const { types } = { ...data }
   const { messages } = { ...data.tx?.body }
 
-  return _.head(toArray(toArray([equalsIgnoreCase(types[0], 'MsgDelegate') && 'delegator_address', equalsIgnoreCase(types[0], 'MsgUndelegate') && 'validator_address', 'sender', 'signer']).map(f =>
+  return _.head(toArray(toArray([equalsIgnoreCase(getType(data), 'MsgDelegate') && 'delegator_address', equalsIgnoreCase(getType(data), 'MsgUndelegate') && 'validator_address', 'sender', 'signer']).map(f =>
     toArray(messages).map(d => d[f])[0] || _.head(data[`tx.body.messages.${f}`]) || toArray(getActivities(data, assets)).find(d => d[f])?.[f]
   )))
 }
@@ -476,7 +472,7 @@ export const getRecipient = (data, assets) => {
   const { types } = { ...data }
   const { messages } = { ...data.tx?.body }
 
-  return _.head(toArray(toArray([equalsIgnoreCase(types[0], 'MsgDelegate') && 'validator_address', equalsIgnoreCase(types[0], 'MsgUndelegate') && 'delegator_address', 'recipient']).map(f =>
+  return _.head(toArray(toArray([equalsIgnoreCase(getType(data), 'MsgDelegate') && 'validator_address', equalsIgnoreCase(getType(data), 'MsgUndelegate') && 'delegator_address', 'recipient']).map(f =>
     toArray(messages).map(d => d[f])[0] || _.head(data[`tx.body.messages.${f}`]) || toArray(getActivities(data, assets)).find(d => d[f])?.[f]
   )))
 }
@@ -604,9 +600,11 @@ export function Transactions({ height, address }) {
                   <th scope="col" className="px-3 py-3.5 text-left">
                     Sender
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left">
-                    Recipient
-                  </th>
+                  {!!(address) && (
+                    <th scope="col" className="px-3 py-3.5 text-left">
+                      Recipient
+                    </th>
+                  )}
                   <th scope="col" className="px-3 py-3.5 text-right">
                     Fee
                   </th>
@@ -657,13 +655,15 @@ export function Transactions({ height, address }) {
                     <td className="px-3 py-4 text-left">
                       <Profile address={d.sender} />
                     </td>
-                    <td className="px-3 py-4 text-left">
-                      {!includesStringList(d.type, ['HeartBeat', 'SubmitSignature', 'SubmitPubKey']) && (
-                        <div className="flex flex-col gap-y-0.5">
-                          {toArray(d.recipient).map((a, i) => <Profile key={i} address={a} />)}
-                        </div>
-                      )}
-                    </td>
+                    {!!(address) && (
+                      <td className="px-3 py-4 text-left">
+                        {!includesStringList(d.type, ['HeartBeat', 'SubmitSignature', 'SubmitPubKey']) && (
+                          <div className="flex flex-col gap-y-0.5">
+                            {toArray(d.recipient).map((a, i) => <Profile key={i} address={a} />)}
+                          </div>
+                        )}
+                      </td>
+                    )}
                     <td className="px-3 py-4 text-right">
                       {d.tx?.auth_info?.fee?.amount && (
                         <Number
@@ -671,7 +671,7 @@ export function Transactions({ height, address }) {
                           format="0,0.00000000"
                           suffix=" AXL"
                           noTooltip={true}
-                          className="text-zinc-700 dark:text-zinc-300 font-medium"
+                          className="text-zinc-700 dark:text-zinc-300 text-xs font-medium"
                         />
                       )}
                     </td>

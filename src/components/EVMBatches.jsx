@@ -331,7 +331,7 @@ export function EVMBatches() {
                             </Link>
                           </Copy>
                           <Copy value={d.key_id}>
-                            {d.key_id}
+                            <span>{d.key_id}</span>
                           </Copy>
                         </div>
                       </td>

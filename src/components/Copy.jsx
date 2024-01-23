@@ -13,7 +13,7 @@ export function Copy({ size = 18, value, onCopy, children, className }) {
 
   return copied ?
     <div className={clsx('flex items-center gap-x-1 3xl:gap-x-2', children && 'min-w-max')}>
-      {children && <span>{children}</span>}
+      {children}
       <LuClipboardCheck size={size} className={clsx('3xl:w-6 3xl:h-6 text-green-500 dark:text-green-400', className)} />
     </div> :
     <CopyToClipboard
@@ -24,7 +24,7 @@ export function Copy({ size = 18, value, onCopy, children, className }) {
       }}
     >
       <div className={clsx('flex items-center gap-x-1 3xl:gap-x-2', children && 'min-w-max')}>
-        {children && <span>{children}</span>}
+        {children}
         <LuClipboard size={size} className={clsx('3xl:w-6 3xl:h-6 cursor-pointer text-zinc-300 hover:text-zinc-400 dark:text-zinc-600 dark:hover:text-zinc-500', className)} />
       </div>
     </CopyToClipboard>
