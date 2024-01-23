@@ -606,7 +606,7 @@ export function Transactions({ height, address }) {
   }, [height, address, chains, assets, params, setData, setTotal, refresh, setRefresh])
 
   return (
-    <Container className={clsx(height || address ? 'mx-0 mt-5 pt-0.5' : 'sm:mt-8')}>
+    <Container className={clsx(height ? 'mx-0 mt-5 pt-0.5' : address ? 'max-w-full' : 'sm:mt-8')}>
       {!data ? <Spinner /> :
         <div>
           <div className="flex items-center justify-between gap-x-4">
@@ -619,7 +619,7 @@ export function Transactions({ height, address }) {
               )}
             </div>
             <div className="flex items-center gap-x-2">
-              {!height && <Filters />}
+              {!(height || address) && <Filters />}
               {refresh ? <Spinner /> :
                 <Button
                   color="default"
@@ -653,12 +653,12 @@ export function Transactions({ height, address }) {
                   <th scope="col" className="px-3 py-3.5 text-left">
                     Sender
                   </th>
-                  {!!(address) && (
+                  {!!address && (
                     <th scope="col" className="px-3 py-3.5 text-left">
                       Recipient
                     </th>
                   )}
-                  {!height && (
+                  {!(height || address) && (
                     <th scope="col" className="px-3 py-3.5 text-right">
                       Fee
                     </th>
@@ -670,7 +670,7 @@ export function Transactions({ height, address }) {
               </thead>
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                 {(height ? data.filter((d, i) => i >= (page - 1) * sizePerPage && i < page * sizePerPage) : data).map((d, i) => (
-                  <tr key={d.txhash} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
+                  <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                     <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
                       <div className="flex flex-col gap-y-0.5">
                         <Copy value={d.txhash}>
@@ -712,7 +712,7 @@ export function Transactions({ height, address }) {
                     <td className="px-3 py-4 text-left">
                       <Profile i={i} address={d.sender} />
                     </td>
-                    {!!(address) && (
+                    {!!address && (
                       <td className="px-3 py-4 text-left">
                         {!includesStringList(d.type, ['HeartBeat', 'SubmitSignature', 'SubmitPubKey']) && (
                           <div className="flex flex-col gap-y-0.5">
@@ -721,7 +721,7 @@ export function Transactions({ height, address }) {
                         )}
                       </td>
                     )}
-                    {!height && (
+                    {!(height || address) && (
                       <td className="px-3 py-4 text-right">
                         {d.tx?.auth_info?.fee?.amount && (
                           <Number

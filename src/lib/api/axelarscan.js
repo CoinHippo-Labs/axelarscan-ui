@@ -9,7 +9,7 @@ export const getTokensPrice = async params => request({ ...params, method: 'getT
 export const getInflation = async params => request({ ...params, method: 'getInflation' })
 export const getNetworkParameters = async params => request({ ...params, method: 'getNetworkParameters' })
 export const getBalances = async params => request({ ...params, method: 'getBalances' })
-export const getDelegations = async params => request({ ...params, method: 'getDelegations' })
+export const getAccountAmounts = async params => request({ ...params, method: 'getAccountAmounts' })
 export const getProposals = async () => request({ method: 'getProposals' })
 export const getProposal = async params => request({ ...params, method: 'getProposal' })
 export const getTVL = async params => request({ ...params, method: 'getTVL' })
