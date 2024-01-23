@@ -3,6 +3,7 @@ import clsx from 'clsx'
 import moment from 'moment'
 
 import { Tooltip } from '@/components/Tooltip'
+import { isNumber } from '@/lib/number'
 import { timeDiff, timeDiffString } from '@/lib/time'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A'
@@ -15,7 +16,7 @@ export function TimeAgo({ timestamp, format = TIME_FORMAT, noTooltip = false, ti
     return () => clearTimeout(timeout)
   }, [trigger, setTrigger])
 
-  if (!timestamp) return
+  if (!(timestamp || isNumber(timestamp))) return
   const time = moment(timestamp)
   const diff = timeDiff(time)
   const timeDisplay = diff > 59 || diff <= 0 ? time.fromNow() : `${diff}s ago`
@@ -42,7 +43,7 @@ export function TimeSpent({ fromTimestamp, toTimestamp, format = TIME_FORMAT, no
     return () => clearTimeout(timeout)
   }, [trigger, setTrigger])
 
-  if (!(fromTimestamp && toTimestamp)) return
+  if (!((fromTimestamp || isNumber(fromTimestamp)) && (toTimestamp || isNumber(toTimestamp)))) return
   const fromTime = moment(fromTimestamp)
   const toTime = moment(toTimestamp)
   const timeDisplay = timeDiffString(fromTime, toTime)
@@ -69,7 +70,7 @@ export function TimeUntil({ timestamp, format = TIME_FORMAT, noTooltip = true, t
     return () => clearTimeout(timeout)
   }, [trigger, setTrigger])
 
-  if (!timestamp) return
+  if (!(timestamp || isNumber(timestamp))) return
   const time = moment(timestamp)
   if (!(timeDiff(moment(), 'seconds', time) > 0)) return
   const timeDisplay = timeDiffString(moment(), time)

@@ -687,10 +687,4 @@ export default [
     name: 'Skyskipper',
     environment: 'testnet',
   },
-  {
-    address: '0x524d524B4c9366be706D3A90dcf70076ca037aE3',
-    name: 'RMRK',
-    image: '/logos/accounts/rmrk.svg',
-    environment: 'mainnet',
-  },
 ]
