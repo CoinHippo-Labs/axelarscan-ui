@@ -84,18 +84,20 @@ function Info({ data, tx }) {
               {moment(timestamp).format(TIME_FORMAT)}
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Fee</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <Number
-                value={formatUnits(_.head(fee.amount)?.amount, 6)}
-                format="0,0.00000000"
-                suffix=" AXL"
-                noTooltip={true}
-                className="text-zinc-700 dark:text-zinc-300 font-medium"
-              />
-            </dd>
-          </div>
+          {fee && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Fee</dt>
+              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <Number
+                  value={formatUnits(_.head(fee.amount)?.amount, 6)}
+                  format="0,0.00000000"
+                  suffix=" AXL"
+                  noTooltip={true}
+                  className="text-zinc-700 dark:text-zinc-300 font-medium"
+                />
+              </dd>
+            </div>
+          )}
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Used</dt>
             <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">

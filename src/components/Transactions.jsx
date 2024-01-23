@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { Dialog, Listbox, Transition } from '@headlessui/react'
 import clsx from 'clsx'
 import _ from 'lodash'
-import { MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck } from 'react-icons/md'
+import { MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck, MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-icons/md'
 import { LuChevronsUpDown } from 'react-icons/lu'
 
 import { Container } from '@/components/Container'
@@ -29,9 +29,10 @@ import { getIcapAddress, getInputType, toJson, toHex, split, toArray } from '@/l
 import { includesStringList } from '@/lib/operator'
 import { getAttributeValue } from '@/lib/cosmos'
 import { isString, equalsIgnoreCase, capitalize, removeDoubleQuote, toBoolean, lastString, ellipse } from '@/lib/string'
-import { isNumber, formatUnits } from '@/lib/number'
+import { isNumber, toNumber, formatUnits } from '@/lib/number'
 
 const size = 25
+const sizePerPage = 10
 
 function Filters() {
   const router = useRouter()
@@ -477,12 +478,60 @@ export const getRecipient = (data, assets) => {
   )))
 }
 
+function _Pagination({ data, maxPage = 5, sizePerPage = 25, onChange }) {
+  const [page, setPage] = useState(1)
+
+  useEffect(() => {
+    if (page && onChange) onChange(page)
+  }, [page, onChange])
+
+  const half = Math.floor(toNumber(maxPage) / 2)
+  const totalPage = Math.ceil(toNumber(data.length) / sizePerPage)
+  const pages = _.range(page - half, page + half + 1).filter(p => p > 0 && p <= totalPage)
+  const prev = _.min(_.range(_.head(pages) - maxPage, _.head(pages)).filter(p => p > 0))
+  const next = _.max(_.range(_.last(pages) + 1, _.last(pages) + maxPage + 1).filter(p => p <= totalPage))
+
+  return (
+    <div className="flex items-center justify-center gap-x-1">
+      {isNumber(prev) && (
+        <Button
+          color="none"
+          onClick={() => setPage(prev)}
+          className="!px-1"
+        >
+          <MdKeyboardDoubleArrowLeft size={18} />
+        </Button>
+      )}
+      {pages.map(p => (
+        <Button
+          key={p}
+          color={p === page ? 'blue' : 'default'}
+          onClick={() => setPage(p)}
+          className="!text-2xs !px-3 !py-1"
+        >
+          <Number value={p} />
+        </Button>
+      ))}
+      {isNumber(next) && (
+        <Button
+          color="none"
+          onClick={() => setPage(next)}
+          className="!px-1"
+        >
+          <MdKeyboardDoubleArrowRight size={18} />
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function Transactions({ height, address }) {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
   const [refresh, setRefresh] = useState(null)
+  const [page, setPage] = useState(1)
   const { chains, assets } = useGlobalStore()
 
   useEffect(() => {
@@ -557,18 +606,20 @@ export function Transactions({ height, address }) {
   }, [height, address, chains, assets, params, setData, setTotal, refresh, setRefresh])
 
   return (
-    <Container className="sm:mt-8">
+    <Container className={clsx(height || address ? 'mx-0 mt-5 pt-0.5' : 'sm:mt-8')}>
       {!data ? <Spinner /> :
         <div>
           <div className="flex items-center justify-between gap-x-4">
             <div className="sm:flex-auto">
               <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">Transactions</h1>
-              <p className="mt-2 text-zinc-400 dark:text-zinc-500 text-sm">
-                <Number value={total} suffix={` result${total > 1 ? 's' : ''}`} /> 
-              </p>
+              {!height && (
+                <p className="mt-2 text-zinc-400 dark:text-zinc-500 text-sm">
+                  <Number value={total} suffix={` result${total > 1 ? 's' : ''}`} /> 
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-x-2">
-              <Filters />
+              {!height && <Filters />}
               {refresh ? <Spinner /> :
                 <Button
                   color="default"
@@ -581,16 +632,18 @@ export function Transactions({ height, address }) {
             </div>
           </div>
           {refresh && <Overlay />}
-          <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-4">
+          <div className={clsx('overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0', height || address ? 'mt-0' : 'mt-4')}>
             <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
               <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
                 <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
                   <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
                     Tx Hash
                   </th>
-                  <th scope="col" className="px-3 py-3.5 text-left">
-                    Height
-                  </th>
+                  {!height && (
+                    <th scope="col" className="px-3 py-3.5 text-left">
+                      Height
+                    </th>
+                  )}
                   <th scope="col" className="px-3 py-3.5 text-left">
                     Type
                   </th>
@@ -605,16 +658,18 @@ export function Transactions({ height, address }) {
                       Recipient
                     </th>
                   )}
-                  <th scope="col" className="px-3 py-3.5 text-right">
-                    Fee
-                  </th>
+                  {!height && (
+                    <th scope="col" className="px-3 py-3.5 text-right">
+                      Fee
+                    </th>
+                  )}
                   <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right">
                     Time
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
-                {data.map(d => (
+                {(height ? data.filter((d, i) => i >= (page - 1) * sizePerPage && i < page * sizePerPage) : data).map((d, i) => (
                   <tr key={d.txhash} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                     <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
                       <div className="flex flex-col gap-y-0.5">
@@ -629,17 +684,19 @@ export function Transactions({ height, address }) {
                         </Copy>
                       </div>
                     </td>
-                    <td className="px-3 py-4 text-left">
-                      {d.height && (
-                        <Link
-                          href={`/block/${d.height}`}
-                          target="_blank"
-                          className="text-blue-600 dark:text-blue-500 font-medium"
-                        >
-                          <Number value={d.height} />
-                        </Link>
-                      )}
-                    </td>
+                    {!height && (
+                      <td className="px-3 py-4 text-left">
+                        {d.height && (
+                          <Link
+                            href={`/block/${d.height}`}
+                            target="_blank"
+                            className="text-blue-600 dark:text-blue-500 font-medium"
+                          >
+                            <Number value={d.height} />
+                          </Link>
+                        )}
+                      </td>
+                    )}
                     <td className="px-3 py-4 text-left">
                       {d.type && (
                         <Tag className={clsx('w-fit capitalize bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100')}>
@@ -653,28 +710,30 @@ export function Transactions({ height, address }) {
                       </Tag>
                     </td>
                     <td className="px-3 py-4 text-left">
-                      <Profile address={d.sender} />
+                      <Profile i={i} address={d.sender} />
                     </td>
                     {!!(address) && (
                       <td className="px-3 py-4 text-left">
                         {!includesStringList(d.type, ['HeartBeat', 'SubmitSignature', 'SubmitPubKey']) && (
                           <div className="flex flex-col gap-y-0.5">
-                            {toArray(d.recipient).map((a, i) => <Profile key={i} address={a} />)}
+                            {toArray(d.recipient).map((a, j) => <Profile key={j} i={j} address={a} />)}
                           </div>
                         )}
                       </td>
                     )}
-                    <td className="px-3 py-4 text-right">
-                      {d.tx?.auth_info?.fee?.amount && (
-                        <Number
-                          value={formatUnits(_.head(d.tx?.auth_info.fee.amount)?.amount, 6)}
-                          format="0,0.00000000"
-                          suffix=" AXL"
-                          noTooltip={true}
-                          className="text-zinc-700 dark:text-zinc-300 text-xs font-medium"
-                        />
-                      )}
-                    </td>
+                    {!height && (
+                      <td className="px-3 py-4 text-right">
+                        {d.tx?.auth_info?.fee?.amount && (
+                          <Number
+                            value={formatUnits(_.head(d.tx?.auth_info.fee.amount)?.amount, 6)}
+                            format="0,0.00000000"
+                            suffix=" AXL"
+                            noTooltip={true}
+                            className="text-zinc-700 dark:text-zinc-300 text-xs font-medium"
+                          />
+                        )}
+                      </td>
+                    )}
                     <td className="pl-3 pr-4 sm:pr-0 py-4 flex items-center justify-end text-right">
                       <TimeAgo timestamp={d.timestamp} />
                     </td>
@@ -683,9 +742,16 @@ export function Transactions({ height, address }) {
               </tbody>
             </table>
           </div>
-          {total > size && (
+          {total > (height ? sizePerPage : size) && (
             <div className="flex items-center justify-center mt-8">
-              <Pagination sizePerPage={size} total={total} />
+              {height ?
+                <_Pagination
+                  data={data}
+                  onChange={page => setPage(page)}
+                  sizePerPage={sizePerPage}
+                /> :
+                <Pagination sizePerPage={size} total={total} />
+              }
             </div>
           )}
         </div>

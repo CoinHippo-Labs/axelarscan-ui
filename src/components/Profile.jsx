@@ -467,7 +467,7 @@ export function Profile({
   // validator
   let isValidator
   if (address?.startsWith('axelar') && !name && validators) {
-    const { broadcaster_address, operator_address, description } = { ...validators.find(d => includesStringList(address, toArray([d.broadcaster_address, d.operator_address, d.delegator_address], { toCase: 'lower' }))) }
+    const { broadcaster_address, operator_address, description } = { ...validators.find(d => includesStringList(address, toArray([d.broadcaster_address, d.operator_address, d.delegator_address, d.consensus_address], { toCase: 'lower' }))) }
     const { moniker } = { ...description }
 
     if (moniker) name = `${moniker}${equalsIgnoreCase(address, broadcaster_address) ? `: Proxy` : ''}`
