@@ -3,7 +3,7 @@ const request = async params => {
   return response && await response.json()
 }
 
-export const searchTransfers = async params => request({ ...params, method: 'searchTransfers' })
-export const searchDepositAddresses = async params => request({ ...params, method: 'searchDepositAddresses' })
-export const searchBatches = async params => request({ ...params, method: 'searchBatches' })
+export const searchTransfers = async params => await request({ ...params, method: 'searchTransfers' })
+export const searchDepositAddresses = async params => await request({ ...params, method: 'searchDepositAddresses' })
+export const searchBatches = async params => await request({ ...params, method: 'searchBatches' })
 export const getBatch = async (chain, batchId) => await request({ method: 'lcd', path: `/axelar/evm/v1beta1/batched_commands/${chain}/${batchId}` })

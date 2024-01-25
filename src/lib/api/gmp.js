@@ -3,6 +3,6 @@ const request = async params => {
   return response && await response.json()
 }
 
-export const getContracts = async () => request({ method: 'getContracts' })
-export const getConfigurations = async () => request({ method: 'getConfigurations' })
-export const searchGMP = async params => request({ ...params, method: 'searchGMP' })
+export const getContracts = async () => await request({ method: 'getContracts' })
+export const getConfigurations = async () => await request({ method: 'getConfigurations' })
+export const searchGMP = async params => await request({ ...params, method: 'searchGMP' })
