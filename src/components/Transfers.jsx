@@ -232,6 +232,8 @@ function Filters() {
   )
 }
 
+export const normalizeType = type => ['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'deposit_service' : type || 'deposit_address'
+
 export function Transfers() {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
@@ -263,6 +265,11 @@ export function Transfers() {
     getData()
   }, [params, setData, setTotal, refresh, setRefresh])
 
+  useEffect(() => {
+    const interval = setInterval(() => setRefresh('true'), 0.5 * 60 * 1000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :
@@ -276,7 +283,7 @@ export function Transfers() {
             </div>
             <div className="flex items-center gap-x-2">
               <Filters />
-              {refresh ? <Spinner /> :
+              {refresh && refresh !== 'true' ? <Spinner /> :
                 <Button
                   color="default"
                   circle="true"
@@ -287,7 +294,7 @@ export function Transfers() {
               }
             </div>
           </div>
-          {refresh && <Overlay />}
+          {refresh && refresh !== 'true' && <Overlay />}
           <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-4">
             <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
               <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
@@ -354,7 +361,7 @@ export function Transfers() {
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1.5">
                           <Tag className={clsx('w-fit capitalize')}>
-                            {toTitle(['wrap', 'unwrap', 'erc20_transfer'].includes(d.type) ? 'deposit_service' : d.type || 'deposit_address')}
+                            {toTitle(normalizeType(d.type))}
                           </Tag>
                           {symbol && (
                             <div className="w-fit h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center gap-x-1.5 px-2.5 py-1">
