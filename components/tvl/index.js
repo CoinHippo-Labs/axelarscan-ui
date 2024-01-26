@@ -262,7 +262,7 @@ export default () => {
                 },
                 _.orderBy(
                   _.uniqBy(
-                    chains_data.filter(c => !c.no_inflation || c.deprecated).map(c => {
+                    chains_data.filter(c => !c.no_inflation && !c.no_tvl).map(c => {
                       const { id } = { ...c }
                       return {
                         ...c,
