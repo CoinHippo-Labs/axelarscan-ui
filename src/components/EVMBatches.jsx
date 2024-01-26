@@ -20,7 +20,7 @@ import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
-import { Profile } from '@/components/Profile'
+import { Profile, ChainProfile } from '@/components/Profile'
 import { TimeAgo } from '@/components/Time'
 import { getParams, getQueryString, Pagination } from '@/components/Pagination'
 import { useGlobalStore } from '@/app/providers'
@@ -312,8 +312,7 @@ export function EVMBatches() {
               </thead>
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                 {data.map(d => {
-                  const chainData = getChainData(d.chain, chains)
-                  const { url, transaction_path } = { ...chainData?.explorer }
+                  const { url, transaction_path } = { ...getChainData(d.chain, chains)?.explorer }
                   const executed = toArray(d.commands).length === toArray(d.commands).filter(c => c.executed).length
                   const status = executed ? 'executed' : d.status?.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()
 
@@ -336,18 +335,7 @@ export function EVMBatches() {
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
-                        {chainData && (
-                          <div className="min-w-max flex items-center gap-x-2">
-                            <Image
-                              src={chainData.image}
-                              width={24}
-                              height={24}
-                            />
-                            <span className="text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
-                              {chainData.name}
-                            </span>
-                          </div>
-                        )}
+                        <ChainProfile value={d.chain} />
                       </td>
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-3">

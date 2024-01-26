@@ -20,6 +20,7 @@ import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
+import { ChainProfile } from '@/components/Profile'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { TimeAgo } from '@/components/Time'
 import { getParams, getQueryString, Pagination } from '@/components/Pagination'
@@ -415,18 +416,7 @@ export function EVMPolls() {
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
-                        {chainData && (
-                          <div className="min-w-max flex items-center gap-x-2">
-                            <Image
-                              src={chainData.image}
-                              width={24}
-                              height={24}
-                            />
-                            <span className="text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
-                              {chainData.name}
-                            </span>
-                          </div>
-                        )}
+                        <ChainProfile value={d.sender_chain} />
                       </td>
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1.5">

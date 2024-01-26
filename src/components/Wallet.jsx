@@ -7,6 +7,8 @@ import { providers } from 'ethers'
 import { create } from 'zustand'
 import clsx from 'clsx'
 
+import { ENVIRONMENT } from '@/lib/config'
+
 const publicClientToProvider = publicClient => {
   const { chain, transport } = { ...publicClient }
   const network = { chainId: chain.id, name: chain.name, ensAddress: chain.contracts?.ensRegistry?.address }
@@ -110,6 +112,114 @@ export function EVMWallet({ connectChainId, children, className }) {
         )}
       </button> :
     <button onClick={() => open()} className={clsx(className)}>
+      {children || (
+        <div className="h-6 bg-blue-600 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl flex items-center font-display text-white whitespace-nowrap px-2.5 py-1">
+          Connect
+        </div>
+      )}
+    </button>
+}
+
+export const useCosmosWalletStore = create()(set => ({
+  chainId: null,
+  address: null,
+  provider: null,
+  signer: null,
+  setChainId: data => set(state => ({ ...state, chainId: data })),
+  setAddress: data => set(state => ({ ...state, address: data })),
+  setProvider: data => set(state => ({ ...state, provider: data })),
+  setSigner: data => set(state => ({ ...state, signer: data })),
+}))
+
+export function CosmosWallet({ connectChainId, children, className }) {
+  const { chainId, provider, setChainId, setAddress, setProvider, setSigner } = useCosmosWalletStore()
+
+  useEffect(() => {
+    if (chain?.id && walletClient && address) {
+      setChainId(chain.id)
+      setAddress(address)
+      setProvider(publicClientToProvider(publicClient))
+      setSigner(walletClientToSigner(walletClient))
+    }
+    else {
+      setChainId(null)
+      setAddress(null)
+      setProvider(null)
+      setSigner(null)
+    }
+  }, [chain, walletClient, address, setChainId, setAddress, setProvider, setSigner])
+
+  const enable = async (chainId = connectChainId) => {
+    try {
+      if (chainId) await window.keplr.enable(chainId)
+    } catch (error) {
+      if (!error?.toString()?.includes('Request rejected')) {
+        try {
+          const response = await fetch(`https://${ENVIRONMENT !== 'mainnet' ? 'testnet.' : ''}api.0xsquid.com/v1/chains`).catch(error => { return null })
+          const { chains } = { ...await response.json() }
+
+          await window.keplr.experimentalSuggestChain(toArray(chains).find(d => d.chainId === chainId))
+          await window.keplr.enable(chainId)
+        } catch (error) {}
+      }
+    }
+  }
+
+  const getSigner = async (chainId = connectChainId) => {
+    if (!chainId) return
+    await enable(chainId)
+    try {
+      return await window.keplr.getOfflineSignerAuto(chainId)
+    } catch (error) {
+      return null
+    }
+  }
+
+  const getAddress = async (chainId = connectChainId) => {
+    if (!chainId) return
+    const signer = await getSigner(chainId)
+    if (!signer) return
+    const [account] = await signer.getAccounts()
+    return account.address
+  }
+
+  const connect = async (chainId = connectChainId) => {
+    const signer = await getSigner(chainId)
+    const address = signer && await getAddress(chainId)
+
+    if (chainId && signer && address) {
+      setChainId(chainId)
+      setAddress(address)
+      setProvider(window?.keplr)
+      setSigner(signer)
+    }
+    else disconnect()
+  }
+
+  const disconnect = () => {
+    setChainId(null)
+    setAddress(null)
+    setProvider(null)
+    setSigner(null)
+  }
+
+  return provider ?
+    connectChainId && connectChainId !== chainId ?
+      <button onClick={() => connect(connectChainId)} className={clsx(className)}>
+        {children || (
+          <div className="h-6 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 rounded-xl flex items-center font-display text-zinc-900 dark:text-zinc-100 whitespace-nowrap px-2.5 py-1">
+            Connect
+          </div>
+        )}
+      </button> :
+      <button onClick={() => disconnect()} className={clsx(className)}>
+        {children || (
+          <div className="h-6 bg-red-600 hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-600 rounded-xl flex items-center font-display text-white whitespace-nowrap px-2.5 py-1">
+            Disconnect
+          </div>
+        )}
+      </button> :
+    <button onClick={() => connect(connectChainId)} className={clsx(className)}>
       {children || (
         <div className="h-6 bg-blue-600 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-xl flex items-center font-display text-white whitespace-nowrap px-2.5 py-1">
           Connect

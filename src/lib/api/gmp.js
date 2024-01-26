@@ -6,3 +6,4 @@ const request = async params => {
 export const getContracts = async () => await request({ method: 'getContracts' })
 export const getConfigurations = async () => await request({ method: 'getConfigurations' })
 export const searchGMP = async params => await request({ ...params, method: 'searchGMP' })
+export const estimateTimeSpent = async params => await request({ ...params, method: 'estimateTimeSpent' })

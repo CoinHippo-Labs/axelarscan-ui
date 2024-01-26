@@ -9,6 +9,7 @@ import { Container } from '@/components/Container'
 import Image from '@/components/Image'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
+import { ChainProfile, AssetProfile } from '@/components/Profile'
 import { useGlobalStore } from '@/app/providers'
 import { getChainData, getAssetData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
@@ -42,7 +43,7 @@ export function TVL() {
   }, [chains, assets, tvl, setData])
 
   const loading = !(data && assets && data.length >= assets.filter(d => !d.no_tvl).length)
-  const chainsTVL = !loading && _.orderBy(_.uniqBy(chains.filter(d => !d.no_inflation || d.deprecated).map(d => {
+  const chainsTVL = !loading && _.orderBy(_.uniqBy(chains.filter(d => !d.no_inflation && !d.no_tvl).map(d => {
     return {
       ...d,
       total_value: _.sumBy(data.map(_d => {
@@ -128,30 +129,10 @@ export function TVL() {
               {data.filter(d => d.assetData).map(d => (
                 <tr key={d.asset} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                   <td className="sticky left-0 z-10 backdrop-blur backdrop-filter px-3 py-4 text-left">
-                    <div className="min-w-max flex items-center gap-x-2">
-                      <Image
-                        src={d.assetData.image}
-                        width={24}
-                        height={24}
-                      />
-                      <span className="text-zinc-900 dark:text-zinc-100 font-bold whitespace-nowrap">
-                        {d.assetData.symbol}
-                      </span>
-                    </div>
+                    <AssetProfile value={d.asset} titleClassName="font-bold" />
                   </td>
                   <td className="px-3 py-4 text-left">
-                    {d.nativeChain?.chainData && (
-                      <div className="min-w-max flex items-center gap-x-2">
-                        <Image
-                          src={d.nativeChain.chainData.image}
-                          width={24}
-                          height={24}
-                        />
-                        <span className="text-zinc-400 dark:text-zinc-500 whitespace-nowrap">
-                          {d.nativeChain.chainData.name}
-                        </span>
-                      </div>
-                    )}
+                    <ChainProfile value={d.nativeChain?.chainData?.id} />
                   </td>
                   <td className="px-3 py-4 text-right">
                     {[d].map(d => {

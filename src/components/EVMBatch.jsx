@@ -16,7 +16,7 @@ import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
-import { Profile } from '@/components/Profile'
+import { Profile, ChainProfile } from '@/components/Profile'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { useEVMWalletStore, EVMWallet } from '@/components/Wallet'
 import { useGlobalStore } from '@/app/providers'
@@ -38,8 +38,7 @@ function Info({ data, chain, id, executeButton }) {
 
   const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
   const status = executed ? 'executed' : data?.status?.replace('BATCHED_COMMANDS_STATUS_', '').toLowerCase()
-  const chainData = getChainData(chain, chains)
-  const { url, transaction_path } = { ...chainData?.explorer }
+  const { url, transaction_path } = { ...getChainData(chain, chains)?.explorer }
 
   return (
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
@@ -69,18 +68,7 @@ function Info({ data, chain, id, executeButton }) {
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Chain</dt>
             <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              {chainData && (
-                <div className="min-w-max flex items-center gap-x-2">
-                  <Image
-                    src={chainData.image}
-                    width={24}
-                    height={24}
-                  />
-                  <span className="text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap">
-                    {chainData.name}
-                  </span>
-                </div>
-              )}
+              <ChainProfile value={chain} />
             </dd>
           </div>
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">

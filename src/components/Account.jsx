@@ -13,26 +13,23 @@ import Image from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
-import { Profile } from '@/components/Profile'
+import { Profile, ChainProfile, AssetProfile } from '@/components/Profile'
 import { TimeAgo } from '@/components/Time'
 import { Transactions } from '@/components/Transactions'
 import { useGlobalStore } from '@/app/providers'
 import { getAccountAmounts } from '@/lib/api/axelarscan'
 import { searchTransfers, searchDepositAddresses } from '@/lib/api/token-transfer'
-import { getChainData, getAssetData } from '@/lib/config'
+import { getAssetData } from '@/lib/config'
 import { getInputType, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase, ellipse } from '@/lib/string'
 import { isNumber, toNumber } from '@/lib/number'
 
 function DepositAddress({ data, address }) {
-  const { chains, assets } = useGlobalStore()
-
   const { depositAddressData, transferData } = { ...data }
   const { original_sender_chain, original_recipient_chain, sender_chain, recipient_chain, denom, sender_address, recipient_address } = { ...depositAddressData }
-  const sourceChainData = getChainData(transferData?.send?.source_chain, chains) || getChainData(sender_chain, chains) || getChainData(original_sender_chain, chains)
-  const destinationChainData = getChainData(recipient_chain, chains) || getChainData(original_recipient_chain, chains)
-  const assetData = getAssetData(denom, assets)
+  const sourceChain = transferData?.send?.source_chain || sender_chain || original_sender_chain
+  const destinationChain = recipient_chain || original_recipient_chain
 
   return (
     <div className="overflow-hidden h-fit bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
@@ -47,18 +44,7 @@ function DepositAddress({ data, address }) {
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Source</dt>
             <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <div className="flex flex-col">
-                {sourceChainData && (
-                  <div className="min-w-max flex items-center gap-x-2">
-                    <Image
-                      src={sourceChainData.image}
-                      width={24}
-                      height={24}
-                    />
-                    <span className="text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap">
-                      {sourceChainData.name}
-                    </span>
-                  </div>
-                )}
+                <ChainProfile value={sourceChain} />
                 <Profile address={sender_address} chain={sender_chain} />
               </div>
             </dd>
@@ -67,18 +53,7 @@ function DepositAddress({ data, address }) {
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Destination</dt>
             <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <div className="flex flex-col">
-                {destinationChainData && (
-                  <div className="min-w-max flex items-center gap-x-2">
-                    <Image
-                      src={destinationChainData.image}
-                      width={24}
-                      height={24}
-                    />
-                    <span className="text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap">
-                      {destinationChainData.name}
-                    </span>
-                  </div>
-                )}
+                <ChainProfile value={destinationChain} />
                 <Profile address={recipient_address} chain={recipient_chain} />
               </div>
             </dd>
@@ -86,18 +61,7 @@ function DepositAddress({ data, address }) {
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Asset</dt>
             <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              {assetData && (
-                <div className="min-w-max flex items-center gap-x-2">
-                  <Image
-                    src={assetData.image}
-                    width={24}
-                    height={24}
-                  />
-                  <span className="text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap">
-                    {assetData.symbol}
-                  </span>
-                </div>
-              )}
+              <AssetProfile value={denom} />
             </dd>
           </div>
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">

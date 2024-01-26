@@ -10,6 +10,7 @@ import _ from 'lodash'
 import { MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck, MdOutlineTimer } from 'react-icons/md'
 import { LuChevronsUpDown } from 'react-icons/lu'
 import { PiWarningCircle } from 'react-icons/pi'
+import { RiTimerFlashLine } from 'react-icons/ri'
 
 import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
@@ -17,18 +18,18 @@ import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
 import Image from '@/components/Image'
 import { Copy } from '@/components/Copy'
+import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
-import { Profile, ChainProfile } from '@/components/Profile'
+import { Profile, ChainProfile, AssetProfile } from '@/components/Profile'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { TimeAgo, TimeSpent } from '@/components/Time'
 import { getParams, getQueryString, Pagination } from '@/components/Pagination'
 import { useGlobalStore } from '@/app/providers'
-import { searchTransfers } from '@/lib/api/token-transfer'
-import { getAssetData } from '@/lib/config'
+import { searchGMP } from '@/lib/api/gmp'
 import { split, toArray } from '@/lib/parser'
-import { equalsIgnoreCase, capitalize, toBoolean, ellipse, toTitle } from '@/lib/string'
+import { equalsIgnoreCase, toBoolean, ellipse, toTitle } from '@/lib/string'
 import { isNumber } from '@/lib/number'
 
 const size = 25
@@ -40,7 +41,7 @@ function Filters() {
   const [open, setOpen] = useState(false)
   const [params, setParams] = useState(getParams(searchParams, size))
   const { handleSubmit } = useForm()
-  const { chains, assets } = useGlobalStore()
+  const { chains, assets, itsAssets } = useGlobalStore()
 
   const onSubmit = (e1, e2, _params) => {
     _params = _params || params
@@ -56,19 +57,22 @@ function Filters() {
     setParams(getParams(searchParams, size))
   }
 
-  const attributes = [
+  const attributes = toArray([
     { label: 'Tx Hash', name: 'txHash' },
     { label: 'Source Chain', name: 'sourceChain', type: 'select', multiple: true, options: _.orderBy(toArray(chains).map((d, i) => ({ ...d, i })), ['deprecated', 'i'], ['desc', 'asc']).map(d => ({ value: d.id, title: d.name })) },
     { label: 'Destination Chain', name: 'destinationChain', type: 'select', multiple: true, options: _.orderBy(toArray(chains).map((d, i) => ({ ...d, i })), ['deprecated', 'i'], ['desc', 'asc']).map(d => ({ value: d.id, title: d.name })) },
     { label: 'From / To Chain', name: 'chain', type: 'select', multiple: true, options: _.orderBy(toArray(chains).map((d, i) => ({ ...d, i })), ['deprecated', 'i'], ['desc', 'asc']).map(d => ({ value: d.id, title: d.name })) },
-    { label: 'Type', name: 'event', type: 'select', options: _.concat({ title: 'Any' }, [{ value: 'deposit_address', title: 'Deposit Address' }, { value: 'send_token', title: 'Send Token' }, { value: 'wrap', title: 'Wrap' }, { value: 'unwrap', title: 'Unwrap' }, { value: 'erc20_transfer', title: 'ERC20 Transfer' }]) },
-    { label: 'Status', name: 'status', type: 'select', options: _.concat({ title: 'Any' }, ['executed', 'failed'].map(d => ({ value: d, title: capitalize(d) }))) },
+    { label: 'Method', name: 'contractMethod', type: 'select', options: _.concat({ title: 'Any' }, [{ value: 'callContract', title: 'CallContract' }, { value: 'callContractWithToken', title: 'CallContractWithToken' }, { value: 'InterchainTransfer', title: 'InterchainTransfer' }, { value: 'InterchainTokenDeployment', title: 'InterchainTokenDeployment' }]) },
+    { label: 'Status', name: 'status', type: 'select', options: _.concat({ title: 'Any' }, [{ value: 'called', title: 'Called' }, { value: 'confirming', title: 'Wait for Confirmation' }, { value: 'express_executed', title: 'Express Executed' }, { value: 'approving', title: 'Wait for Approval' }, { value: 'approved', title: 'Approved' }, { value: 'executing', title: 'Executing' }, { value: 'executed', title: 'Executed' }, { value: 'error', title: 'Error Execution' }, { value: 'insufficient_fee', title: 'Insufficient Fee' }, { value: 'not_enough_gas_to_execute', title: 'Not Enough Gas' }]) },
     { label: 'Sender', name: 'senderAddress' },
-    { label: 'Recipient', name: 'recipientAddress' },
-    { label: 'Asset', name: 'asset', type: 'select', multiple: true, options: toArray(assets).map(d => ({ value: d.id, title: d.symbol })) },
+    { label: 'Contract', name: 'contractAddress' },
+    { label: 'Asset Type', name: 'assetType', type: 'select', options: _.concat({ title: 'Any' }, [{ value: 'gateway', title: 'Gateway Token' }, { value: 'its', title: 'ITS Token' }]) },
+    { label: 'Asset', name: 'asset', type: 'select', multiple: true, options: toArray(_.concat(params.assetType !== 'its' && toArray(assets).map(d => ({ value: d.id, title: d.symbol })), params.assetType !== 'gateway' && toArray(itsAssets).map(d => ({ value: d.symbol, title: `${d.symbol} (ITS)` })))) },
+    params.assetType === 'its' && { label: 'ITS Token Address', name: 'itsTokenAddress' },
     { label: 'Time', name: 'time', type: 'datetimeRange' },
-    { label: 'Sort By', name: 'sortBy', type: 'select', options: _.concat({ title: 'Any' }, [{ value: 'time', title: 'Transfer Time' }, { value: 'value', title: 'Transfer Value' }]) },
-  ]
+    { label: 'Sort By', name: 'sortBy', type: 'select', options: _.concat({ title: 'Any' }, [{ value: 'time', title: 'ContractCall Time' }, { value: 'value', title: 'Token Value' }]) },
+    { label: 'Proposal ID', name: 'proposalId' },
+  ])
 
   const filtered = Object.keys(params).filter(k => !['from'].includes(k)).length > 0
   return (
@@ -232,15 +236,23 @@ function Filters() {
   )
 }
 
-export const normalizeType = type => ['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'deposit_service' : type || 'deposit_address'
+export const getEvent = data => {
+  const { call, token_sent, token_deployment_initialized, token_deployed, token_manager_deployment_started, interchain_token_deployment_started, interchain_transfer, interchain_transfer_with_data } = { ...data }
+  if (token_sent || interchain_transfer || interchain_transfer_with_data) return 'InterchainTransfer'
+  if (token_deployment_initialized) return 'TokenDeploymentInitialized'
+  if (token_deployed) return 'TokenDeployed'
+  if (token_manager_deployment_started) return 'TokenManagerDeployment'
+  if (interchain_token_deployment_started) return 'InterchainTokenDeployment'
+  return call?.event
+}
+export const normalizeEvent = event => event?.replace('ContractCall', 'callContract')
 
-export function Transfers() {
+export function GMPs() {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
   const [data, setData] = useState(null)
   const [total, setTotal] = useState(null)
   const [refresh, setRefresh] = useState(null)
-  const { assets } = useGlobalStore()
 
   useEffect(() => {
     const _params = getParams(searchParams, size)
@@ -253,10 +265,10 @@ export function Transfers() {
   useEffect(() => {
     const getData = async () => {
       if (params && toBoolean(refresh)) {
-        const sort = params.sortBy === 'value' ? { 'send.value': 'desc' } : undefined
+        const sort = params.sortBy === 'value' ? { value: 'desc' } : undefined
         delete params.sortBy
 
-        const { data, total } = { ...await searchTransfers({ ...params, size, sort }) }
+        const { data, total } = { ...await searchGMP({ ...params, size, sort }) }
         setData(data)
         setTotal(total)
         setRefresh(false)
@@ -276,7 +288,7 @@ export function Transfers() {
         <div>
           <div className="flex items-center justify-between gap-x-4">
             <div className="sm:flex-auto">
-              <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">Token Transfers</h1>
+              <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">General Message Passings</h1>
               <p className="mt-2 text-zinc-400 dark:text-zinc-500 text-sm">
                 <Number value={total} suffix={` result${total > 1 ? 's' : ''}`} /> 
               </p>
@@ -321,87 +333,81 @@ export function Transfers() {
               </thead>
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                 {data.map(d => {
-                  const assetData = getAssetData(d.send.denom, assets)
-                  const { addresses } = { ...assetData }
-                  let { symbol, image } = { ...addresses?.[d.send.source_chain] }
-                  symbol = symbol || assetData?.symbol
-                  image = image || assetData?.image
-
-                  if (symbol) {
-                    switch (d.type) {
-                      case 'wrap':
-                        const WRAP_PREFIXES = ['w', 'axl']
-                        const index = WRAP_PREFIXES.findIndex(p => symbol.toLowerCase().startsWith(p) && !equalsIgnoreCase(p, symbol))
-                        if (index > -1) symbol = symbol.substring(WRAP_PREFIXES[index].length)
-                        break
-                      default:
-                        break
-                    }
-                  }
-
+                  const symbol = d.call.returnValues?.symbol || d.token_sent?.symbol || d.interchain_transfer?.symbol || d.interchain_transfer_with_data?.symbol || d.token_deployed?.symbol || d.token_deployment_initialized?.tokenSymbol || d.interchain_token_deployment_started?.tokenSymbol
                   return (
-                    <tr key={d.send.txhash} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
+                    <tr key={d.call.id} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                       <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
                         <div className="flex items-center gap-x-1">
-                          <Copy value={d.send.txhash}>
+                          <Copy value={d.call.transactionHash}>
                             <Link
-                              href={`/transfer/${d.send.txhash}`}
+                              href={`/gmp/${d.call.transactionHash}${d.call.chain_type === 'evm' && d.call.receipt && isNumber(d.call.logIndex) ? `:${d.call.logIndex}` : d.call.chain_type === 'cosmos' && isNumber(d.call.messageIdIndex) ? `:${d.call.messageIdIndex}` : ''}`}
                               target="_blank"
                               className="text-blue-600 dark:text-blue-500 font-semibold"
                             >
-                              {ellipse(d.send.txhash)}
+                              {ellipse(d.call.transactionHash)}
                             </Link>
                           </Copy>
-                          <ExplorerLink value={d.send.txhash} chain={d.send.source_chain} />
+                          <ExplorerLink value={d.call.transactionHash} chain={d.call.chain} />
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1.5">
                           <Tag className={clsx('w-fit capitalize')}>
-                            {toTitle(normalizeType(d.type))}
+                            {toTitle(normalizeEvent(getEvent(d)))}
                           </Tag>
                           {symbol && (
-                            <div className="w-fit h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center gap-x-1.5 px-2.5 py-1">
-                              {image && (
-                                <Image
-                                  src={image}
-                                  width={16}
-                                  height={16}
-                                />
-                              )}
-                              {isNumber(d.send.amount) && assets ?
-                                <Number
-                                  value={d.send.amount}
-                                  format="0,0.000000"
-                                  suffix={` ${symbol}`}
-                                  className="text-zinc-900 dark:text-zinc-100 text-xs font-medium"
-                                /> :
-                                <span className="text-zinc-900 dark:text-zinc-100 text-xs font-medium">
-                                  {symbol}
-                                </span>
-                              }
-                            </div>
+                            <AssetProfile
+                              value={symbol}
+                              chain={d.call.chain}
+                              amount={d.amount}
+                              ITSPossible={true}
+                              onlyITS={!getEvent(d)?.includes('ContractCall')}
+                              width={16}
+                              height={16}
+                              className="w-fit h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl px-2.5 py-1"
+                              titleClassName="text-xs"
+                            />
                           )}
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1">
                           <ChainProfile
-                            value={d.send.source_chain}
+                            value={d.call.chain}
                             className="h-6"
                             titleClassName="font-semibold"
                           />
-                          <Profile address={d.send.sender_address} chain={d.send.source_chain} />
+                          <Profile address={d.call.transaction?.from} chain={d.call.chain} />
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1">
-                          <ChainProfile
-                            value={d.send.destination_chain}
-                            className="h-6"
-                            titleClassName="font-semibold"
-                          />
-                          <Profile address={d.send.recipient_address} chain={d.send.destination_chain} />
+                          {d.is_invalid_destination_chain ?
+                            <div className="flex">
+                              <Tooltip content={d.call.returnValues?.destinationChain}>
+                                <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
+                                  <PiWarningCircle size={20} />
+                                  <span>Invalid Chain</span>
+                                </div>
+                              </Tooltip>
+                            </div> :
+                            <ChainProfile
+                              value={d.call.returnValues?.destinationChain}
+                              className="h-6"
+                              titleClassName="font-semibold"
+                            />
+                          }
+                          {d.is_invalid_contract_address ?
+                            <div className="flex">
+                              <Tooltip content={d.call.returnValues?.destinationContractAddress}>
+                                <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
+                                  <PiWarningCircle size={20} />
+                                  <span>Invalid Contract</span>
+                                </div>
+                              </Tooltip>
+                            </div> :
+                            <Profile address={d.call.returnValues?.destinationContractAddress} chain={d.call.returnValues?.destinationChain} />
+                          }
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
@@ -411,13 +417,19 @@ export function Transfers() {
                               {d.simplified_status}
                             </Tag>
                           )}
-                          {d.send.insufficient_fee && (
+                          {d.is_insufficient_fee && (
                             <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
                               <PiWarningCircle size={16} />
                               <span className="text-xs">Insufficient Fee</span>
                             </div>
                           )}
-                          {d.time_spent?.total > 0 && ['received'].includes(d.simplified_status) && (
+                          {d.time_spent?.call_express_executed > 0 && ['express_executed', 'executed'].includes(d.status) && (
+                            <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
+                              <RiTimerFlashLine size={16} />
+                              <TimeSpent fromTimestamp={0} toTimestamp={d.time_spent.call_express_executed * 1000} className="text-xs" />
+                            </div>
+                          )}
+                          {d.time_spent?.total > 0 && ['executed'].includes(d.status) && (
                             <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
                               <MdOutlineTimer size={16} />
                               <TimeSpent fromTimestamp={0} toTimestamp={d.time_spent.total * 1000} className="text-xs" />
@@ -426,7 +438,7 @@ export function Transfers() {
                         </div>
                       </td>
                       <td className="pl-3 pr-4 sm:pr-0 py-4 flex items-center justify-end text-right">
-                        <TimeAgo timestamp={d.send.created_at?.ms} />
+                        <TimeAgo timestamp={d.call.block_timestamp * 1000} />
                       </td>
                     </tr>
                   )

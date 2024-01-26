@@ -8,20 +8,22 @@ import moment from 'moment'
 import Image from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
+import { Number } from '@/components/Number'
 import { useGlobalStore } from '@/app/providers'
 import { getKeybaseUser } from '@/lib/api/keybase'
 import { getENS } from '@/lib/api/name-services/ens'
 import { getLENS } from '@/lib/api/name-services/lens'
 import { getSpaceID } from '@/lib/api/name-services/spaceid'
 import { getUnstoppable } from '@/lib/api/name-services/unstoppable'
-import { ENVIRONMENT, getChainData } from '@/lib/config'
+import { ENVIRONMENT, getChainData, getAssetData, getITSAssetData } from '@/lib/config'
 import { getIcapAddress, toHex, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
-import { equalsIgnoreCase, ellipse } from '@/lib/string'
+import { equalsIgnoreCase, capitalize, ellipse } from '@/lib/string'
 import { isNumber } from '@/lib/number'
 import { timeDiff } from '@/lib/time'
 import accounts from '@/data/accounts'
 import broadcasters from '@/data/broadcasters'
+import its from '@/data/its'
 import ENSLogo from '@/images/name-services/ens.png'
 import LENSLogo from '@/images/name-services/lens.png'
 import SpaceIDLogo from '@/images/name-services/spaceid.png'
@@ -563,5 +565,74 @@ export function Profile({
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
         <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{ellipse(address, 8, prefix)}</span></Copy>
+  )
+}
+
+export function ChainProfile({
+  value,
+  width = 24,
+  height = 24,
+  className,
+  titleClassName,
+}) {
+  const { chains } = useGlobalStore()
+  const { name, image } = { ...getChainData(value, chains) }
+
+  return value && (
+    <div className={clsx('min-w-max flex items-center gap-x-2', className)}>
+      {image && (
+        <Image
+          src={image}
+          width={width}
+          height={height}
+        />
+      )}
+      <span className={clsx('text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap', titleClassName)}>
+        {name || capitalize(value)}
+      </span>
+    </div>
+  )
+}
+
+export function AssetProfile({
+  value,
+  chain,
+  amount,
+  addressOrDenom,
+  ITSPossible = false,
+  onlyITS = false,
+  width = 24,
+  height = 24,
+  className,
+  titleClassName,
+}) {
+  const { assets, itsAssets } = useGlobalStore()
+
+  const assetData = (!onlyITS && getAssetData(addressOrDenom || value, assets)) || (ITSPossible && getITSAssetData(addressOrDenom || value, _.concat(its, itsAssets)))
+  const { addresses } = { ...assetData }
+  let { symbol, image } = { ...assetData }
+  symbol = addresses?.[chain]?.symbol || symbol
+  image = addresses?.[chain]?.image || image
+
+  return value && (
+    <div className={clsx('min-w-max flex items-center', isNumber(amount) ? 'gap-x-1.5' : 'gap-x-2', className)}>
+      {image && (
+        <Image
+          src={image}
+          width={width}
+          height={height}
+        />
+      )}
+      {isNumber(amount) && (
+        <Number
+          value={amount}
+          format="0,0.000000"
+          className={clsx('text-zinc-900 dark:text-zinc-100 font-medium', titleClassName)}
+        />
+      )}
+      <span className={clsx('text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap', titleClassName)}>
+        {symbol || value}
+      </span>
+    </div>
   )
 }

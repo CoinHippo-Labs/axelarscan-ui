@@ -321,7 +321,11 @@ export function Validators({ status }) {
                               <div key={d.chain} className="flex justify-start">
                                 <Tooltip content={`${name}: ${votesDetails}`} className="whitespace-nowrap">
                                   <div className="flex items-center gap-x-2">
-                                    <Image src={image} width={20} height={20} />
+                                    <Image
+                                      src={image}
+                                      width={20}
+                                      height={20}
+                                    />
                                     <div className="flex items-center gap-x-1">
                                       <Number
                                         value={d.total}

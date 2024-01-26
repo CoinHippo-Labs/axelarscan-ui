@@ -16,7 +16,7 @@ import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
-import { Profile } from '@/components/Profile'
+import { Profile, ChainProfile } from '@/components/Profile'
 import { getType, getActivities, getSender } from '@/components/Transactions'
 import { useGlobalStore } from '@/app/providers'
 import { getTransaction } from '@/lib/api/validator'
@@ -280,16 +280,12 @@ function Data({ data }) {
                           <div className="text-zinc-400 dark:text-zinc-500 text-xs">
                             Chain
                           </div>
-                          <div className="flex items-center gap-x-1.5">
-                            {chainData?.image && (
-                              <Image
-                                src={chainData.image}
-                                width={20}
-                                height={20}
-                              />
-                            )}
-                            <span className="text-xs font-medium">{chainData?.name || d.chain}</span>
-                          </div>
+                          <ChainProfile
+                            value={d.chain}
+                            width={20}
+                            height={20}
+                            className="text-xs gap-x-1.5"
+                          />
                         </div>
                       )}
                       {deposit_address && (
