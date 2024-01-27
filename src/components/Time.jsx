@@ -43,9 +43,9 @@ export function TimeSpent({ fromTimestamp, toTimestamp, format = TIME_FORMAT, no
     return () => clearTimeout(timeout)
   }, [trigger, setTrigger])
 
-  if (!((fromTimestamp || isNumber(fromTimestamp)) && (toTimestamp || isNumber(toTimestamp)))) return
+  if (!(fromTimestamp || isNumber(fromTimestamp))) return
   const fromTime = moment(fromTimestamp)
-  const toTime = moment(toTimestamp)
+  const toTime = toTimestamp ? moment(toTimestamp) : moment()
   const timeDisplay = timeDiffString(fromTime, toTime)
 
   const element = (
@@ -62,7 +62,7 @@ export function TimeSpent({ fromTimestamp, toTimestamp, format = TIME_FORMAT, no
   )
 }
 
-export function TimeUntil({ timestamp, format = TIME_FORMAT, noTooltip = true, title, className }) {
+export function TimeUntil({ timestamp, format = TIME_FORMAT, prefix, suffix, noTooltip = true, title, className }) {
   const [trigger, setTrigger] = useState(false)
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export function TimeUntil({ timestamp, format = TIME_FORMAT, noTooltip = true, t
 
   const element = (
     <span className={clsx('text-zinc-400 dark:text-zinc-500 font-normal whitespace-nowrap', className)}>
-      {timeDisplay}
+      {prefix}{timeDisplay}{suffix}
     </span>
   )
   format = timeDiff(moment(), 'seconds', time) < 365 * 24 * 60 * 60 && format === TIME_FORMAT ? 'MMM D, H:mm:ss' : format

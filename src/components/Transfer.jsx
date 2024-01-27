@@ -204,7 +204,7 @@ function Info({ data, tx }) {
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Status</dt>
             <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <div className="flex flex-col gap-y-1.5">
-                <nav aria-label="Progress">
+                <nav aria-label="Progress" className="h-16 sm:h-12 overflow-x-auto">
                   <ol role="list" className="flex items-center">
                     {steps.map((d, i) => {
                       const { txhash, poll_id, batch_id, transactionHash, recv_txhash, ack_txhash, failed_txhash, tx_hash_unwrap } = { ...d.data }
@@ -247,12 +247,12 @@ function Info({ data, tx }) {
                           <div className={clsx('relative w-8 h-8 rounded-full flex items-center justify-center', d.status === 'failed' ? 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400')}>
                             {d.status === 'failed' ? <MdClose className="w-5 h-5 text-white" /> : <MdCheck className="w-5 h-5 text-white" />}
                           </div>
-                          <span className={clsx('absolute text-2xs font-medium mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length < 5 ? 'ml-1' : '')}>{d.title}</span>
+                          <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
                         </>
                       )
 
                       return (
-                        <li key={d.id} className={clsx('relative', i !== steps.length - 1 ? 'pr-8 sm:pr-20' : '')}>
+                        <li key={d.id} className={clsx('relative', i !== steps.length - 1 ? 'pr-16 sm:pr-24' : '')}>
                           {d.status === 'pending' ?
                             <>
                               <div className="absolute inset-0 flex items-center" aria-hidden="true">
@@ -260,7 +260,7 @@ function Info({ data, tx }) {
                               </div>
                               <div className={clsx('relative w-8 h-8 bg-zinc-50 dark:bg-zinc-800 rounded-full border-2 flex items-center justify-center', steps[i - 1]?.status === 'pending' ? 'border-zinc-200 dark:border-zinc-700' : 'border-blue-600 dark:border-blue-500')} aria-current="step">
                                 {steps[i - 1]?.status !== 'pending' && <PiClock className={clsx('w-5 h-5', steps[i - 1]?.status === 'pending' ? 'text-zinc-200 dark:text-zinc-700' : 'text-blue-600 dark:text-blue-500')} />}
-                                <span className={clsx('absolute text-2xs font-medium mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length < 5 ? 'ml-1' : '')}>{d.title}</span>
+                                <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
                               </div>
                             </> :
                             <>
@@ -475,11 +475,11 @@ function Details({ data }) {
 
                     if (transactionHash) {
                       stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={batch_id}>
+                        <Copy size={16} key={stepMoreInfos.length} value={batch_id}>
                           <Link
                             href={`/evm-batch/${destinationChainData.id}/${batch_id}`}
                             target="_blank"
-                            className="text-blue-600 dark:text-blue-500 underline"
+                            className="text-blue-600 dark:text-blue-500 text-xs underline"
                           >
                             Batch
                           </Link>
@@ -499,11 +499,11 @@ function Details({ data }) {
 
                     if (recv_txhash) {
                       stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={ack_txhash}>
+                        <Copy key={stepMoreInfos.length} size={16} value={ack_txhash}>
                           <Link
                             href={`${url}${transaction_path.replace('{tx}', ack_txhash)}`}
                             target="_blank"
-                            className="text-blue-600 dark:text-blue-500 underline"
+                            className="text-blue-600 dark:text-blue-500 text-xs underline"
                           >
                             Acknowledgement
                           </Link>
@@ -517,11 +517,11 @@ function Details({ data }) {
 
                     if (recv_txhash && !ack_txhash) {
                       stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={failed_txhash}>
+                        <Copy key={stepMoreInfos.length} size={16} value={failed_txhash}>
                           <Link
                             href={`${url}${transaction_path.replace('{tx}', failed_txhash)}`}
                             target="_blank"
-                            className="text-red-600 dark:text-red-500 whitespace-nowrap underline"
+                            className="text-red-600 dark:text-red-500 text-xs whitespace-nowrap underline"
                           >
                             IBC Failed
                           </Link>
@@ -535,11 +535,11 @@ function Details({ data }) {
 
                     if (recv_txhash || ack_txhash || failed_txhash) {
                       stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={txhash}>
+                        <Copy key={stepMoreInfos.length} size={16} value={txhash}>
                           <Link
                             href={`${url}${transaction_path.replace('{tx}', txhash)}`}
                             target="_blank"
-                            className="text-blue-600 dark:text-blue-500 whitespace-nowrap underline"
+                            className="text-blue-600 dark:text-blue-500 text-xs whitespace-nowrap underline"
                           >
                             IBC Send
                           </Link>
@@ -581,7 +581,7 @@ function Details({ data }) {
                       </div>
                     )}
                     {stepMoreInfos.length > 0 && (
-                      <div className="flex items-center gap-x-1.5">
+                      <div className="flex items-center gap-x-3">
                         {stepMoreInfos}
                       </div>
                     )}
@@ -590,7 +590,7 @@ function Details({ data }) {
                 <td className="px-3 py-4 text-left">
                   {height && (url && block_path ?
                     <Link
-                      href={`${url}/${block_path.replace('{block}', height)}`}
+                      href={`${url}${block_path.replace('{block}', height)}`}
                       target="_blank"
                       className="text-blue-600 dark:text-blue-500 font-medium"
                     >
@@ -654,7 +654,7 @@ export function Transfer({ tx, transferId }) {
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :
-        <div className="max-w-4xl flex flex-col gap-y-4">
+        <div className="max-w-5xl flex flex-col gap-y-4">
           <Info data={data} tx={tx} />
           <Details data={data} />
         </div>

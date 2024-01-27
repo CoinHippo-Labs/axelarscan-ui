@@ -9,7 +9,7 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
 import toast, { Toaster } from 'react-hot-toast'
-import { MdClose, MdCheck, MdOutlineTimer } from 'react-icons/md'
+import { MdClose, MdCheck, MdOutlineTimer, MdKeyboardArrowRight } from 'react-icons/md'
 import { PiClock, PiWarningCircle, PiCheckCircleFill, PiXCircleFill } from 'react-icons/pi'
 import { RiTimerFlashLine } from 'react-icons/ri'
 
@@ -19,8 +19,8 @@ import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
-import { Profile, ChainProfile } from '@/components/Profile'
-import { TimeAgo, TimeSpent } from '@/components/Time'
+import { Profile, ChainProfile, AssetProfile } from '@/components/Profile'
+import { TimeAgo, TimeSpent, TimeUntil } from '@/components/Time'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { useEVMWalletStore, EVMWallet, useCosmosWalletStore, CosmosWallet } from '@/components/Wallet'
 import { getEvent, normalizeEvent } from '@/components/GMPs'
@@ -30,8 +30,8 @@ import { getProvider } from '@/lib/chain/evm'
 import { ENVIRONMENT, getChainData, getAssetData } from '@/lib/config'
 import { split, toArray, parseError } from '@/lib/parser'
 import { sleep } from '@/lib/operator'
-import { equalsIgnoreCase, ellipse, toTitle } from '@/lib/string'
-import { isNumber, toBigNumber } from '@/lib/number'
+import { isString, equalsIgnoreCase, ellipse, toTitle } from '@/lib/string'
+import { isNumber, toNumber, toBigNumber, numberFormat } from '@/lib/number'
 import { timeDiff } from '@/lib/time'
 import IAxelarExecutable from '@/data/contract/interfaces/gmp/IAxelarExecutable.json'
 
@@ -62,52 +62,50 @@ export const getStep = data => {
       title: gas_paid || gas_paid_to_callback ? 'Gas Paid' : timeDiff(call?.block_timestamp * 1000) < 30 ? 'Checking Gas Paid' : 'Pay Gas',
       status: gas_paid || gas_paid_to_callback ? 'success' : 'pending',
       data: gas_paid || gas_paid_to_callback,
-      chain_data: gas_paid_to_callback ? destinationChainData : sourceChainData,
+      chainData: gas_paid_to_callback ? destinationChainData : sourceChainData,
     },
     express_executed && {
       id: 'express',
       title: 'Express Executed',
       status: 'success',
       data: express_executed,
-      chain_data: destinationChainData,
+      chainData: destinationChainData,
     },
     sourceChainData?.chain_type === 'evm' && (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
       title: (confirm && confirm.poll_id !== confirm_failed_event?.poll_id) || approved || executed || is_executed || error ? 'Confirmed' : is_invalid_call ? 'Invalid Call' : confirm_failed ? 'Fail to Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
       status: (confirm && confirm.poll_id !== confirm_failed_event?.poll_id) || approved || executed || is_executed || error ? 'success' : is_invalid_call || confirm_failed ? 'failed' : 'pending',
       data: confirm || confirm_failed_event,
-      chain_data: axelarChainData,
+      chainData: axelarChainData,
     },
     destinationChainData?.chain_type === 'evm' && {
       id: 'approve',
       title: approved ? 'Approved' : confirm && confirm.poll_id !== confirm_failed_event?.poll_id ? 'Approving' : 'Approve',
       status: approved ? 'success' : 'pending',
       data: approved,
-      chain_data: destinationChainData,
+      chainData: destinationChainData,
     },
     {
       id: 'execute',
       title: (executed && (!executed.axelarTransactionHash || (executed.transactionHash && !error))) || is_executed ? 'Executed' : errored ? 'Error' : executed?.axelarTransactionHash && timeDiff((confirm?.block_timestamp || call?.block_timestamp) * 1000) > 60 ? 'Waiting for IBC' : 'Execute',
       status: (executed && (!executed.axelarTransactionHash || (executed.transactionHash && !error))) || is_executed ? 'success' : errored ? 'failed' : 'pending',
       data: executed || is_executed || error,
-      chain_data: executed?.axelarTransactionHash && !executed.transactionHash ? axelarChainData : destinationChainData,
+      chainData: executed?.axelarTransactionHash && !executed.transactionHash ? axelarChainData : destinationChainData,
     },
     refunded?.receipt?.status && {
       id: 'refund',
       title: 'Refunded',
       status: 'success',
       data: refunded,
-      chain_data: sourceChainData,
+      chainData: sourceChainData,
     },
   ])
 }
 
-function Info({ data, tx }) {
-  const { chains, assets } = useGlobalStore()
+function Info({ data, estimatedTimeSpent, buttons, tx }) {
+  const { chains } = useGlobalStore()
 
-  const { send, wrap, unwrap, erc20_transfer, confirm, vote, command, simplified_status } = { ...data }
-
-  const { call, approved, status, time_spent } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, approved, executed, error, refunded, token_sent, token_deployed, interchain_transfer, interchain_transfer_with_data, token_deployment_initialized, interchain_token_deployment_started, is_executed, amount, fees, gas, is_insufficient_fee, is_invalid_destination_chain, is_invalid_contract_address, not_enough_gas_to_execute, status, simplified_status, time_spent, proposal_id, callbackData, originData } = { ...data }
   const txhash = call?.transactionHash || tx
 
   const sourceChain = call?.chain
@@ -118,40 +116,10 @@ function Info({ data, tx }) {
 
   const sourceChainData = getChainData(sourceChain, chains)
   const { url, transaction_path } = { ...sourceChainData?.explorer }
-  const destinationChainData = getChainData(destinationChain, chains)
-  const axelarChainData = getChainData('axelarnet', chains)
 
-  const assetData = getAssetData(send?.denom, assets)
-  const { addresses } = { ...assetData }
-  let { symbol, image } = { ...addresses?.[sourceChainData?.id] }
-  symbol = symbol || assetData?.symbol || send?.denom
-  image = image || assetData?.image
-
-  if (symbol) {
-    switch (type) {
-      case 'wrap':
-        const WRAP_PREFIXES = ['w', 'axl']
-        const index = WRAP_PREFIXES.findIndex(p => symbol.toLowerCase().startsWith(p) && !equalsIgnoreCase(p, symbol))
-        if (index > -1) {
-          symbol = symbol.substring(WRAP_PREFIXES[index].length)
-          if (image) {
-            image = split(image, { delimiter: '/' }).map(s => {
-              if (s?.includes('.')) {
-                const index = WRAP_PREFIXES.findIndex(p => s.toLowerCase().startsWith(p))
-                if (index > -1) s = s.substring(WRAP_PREFIXES[index].length)
-              }
-              return s
-            }).join('/')
-            image = image.startsWith('/') ? image : `/${image}`
-          }
-        }
-        break
-      default:
-        break
-    }
-  }
-
+  const symbol = call.returnValues?.symbol || token_sent?.symbol || interchain_transfer?.symbol || interchain_transfer_with_data?.symbol || token_deployed?.symbol || token_deployment_initialized?.tokenSymbol || interchain_token_deployment_started?.tokenSymbol
   const steps = getStep(data)
+
   return (
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
       <div className="px-4 sm:px-6 py-6">
@@ -173,59 +141,48 @@ function Info({ data, tx }) {
                   `${ellipse(txhash)}${call.chain_type === 'evm' && call.receipt && isNumber(call.logIndex) ? `:${call.logIndex}` : call.chain_type === 'cosmos' && isNumber(call.messageIdIndex) ? `:${call.messageIdIndex}` : ''}`
                 }
               </Copy>
-              <ExplorerLink value={txhash} chain={sourceChain} />
+              {!proposal_id && <ExplorerLink value={txhash} chain={sourceChain} hasEventLog={call.chain_type === 'evm' && isNumber(call.logIndex)} />}
             </div>
           )}
         </div>
       </div>
       <div className="border-t border-zinc-200 dark:border-zinc-700">
         <dl className="divide-y divide-zinc-100 dark:divide-zinc-800">
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Method</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <Tag className={clsx('w-fit capitalize')}>
                 {toTitle(normalizeEvent(getEvent(data)))}
               </Tag>
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Status</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <div className="flex flex-col gap-y-1.5">
-                <nav aria-label="Progress">
+                <nav aria-label="Progress" className="h-16 overflow-x-auto">
                   <ol role="list" className="flex items-center">
                     {steps.map((d, i) => {
-                      const { txhash, poll_id, batch_id, transactionHash, recv_txhash, ack_txhash, failed_txhash, tx_hash_unwrap } = { ...d.data }
+                      const { confirmation_txhash, poll_id, axelarTransactionHash, receipt, proposal_id } = { ...d.data }
                       const { url, transaction_path } = { ...d.chainData?.explorer }
+                      const transactionHash = d.data?.transactionHash || receipt?.transactionHash || receipt?.hash
 
                       let stepURL
                       if (url && transaction_path) {
                         switch (d.id) {
-                          case 'link':
-                          case 'send':
-                          case 'wrap':
-                          case 'erc20_transfer':
-                          case 'confirm':
-                          case 'axelar_transfer':
-                            if (txhash) stepURL = `${url}${transaction_path.replace('{tx}', txhash)}`
+                          case 'pay_gas':
+                            if (transactionHash || originData?.call?.transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || originData?.call?.transactionHash)}`
                             break
-                          case 'vote':
-                            if (txhash) stepURL = `/tx/${txhash}`
+                          case 'confirm':
+                            if (confirmation_txhash) stepURL = `/tx/${confirmation_txhash}`
                             else if (poll_id) stepURL = `/evm-poll/${poll_id}`
                             break
-                          case 'command':
-                            if (transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash)}`
-                            else if (batch_id && destinationChainData) stepURL = `/evm-batch/${destinationChainData.id}/${batch_id}`
-                            break
-                          case 'ibc_send':
-                            if (recv_txhash) stepURL = `${url}${transaction_path.replace('{tx}', recv_txhash)}`
-                            else if (ack_txhash) stepURL = `${url}${transaction_path.replace('{tx}', ack_txhash)}`
-                            else if (failed_txhash) stepURL = `${url}${transaction_path.replace('{tx}', failed_txhash)}`
-                            break
-                          case 'unwrap':
-                            if (tx_hash_unwrap) stepURL = `${url}${transaction_path.replace('{tx}', tx_hash_unwrap)}`
+                          case 'executed':
+                            if (transactionHash || axelarTransactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || axelarTransactionHash)}`
                             break
                           default:
+                            if (proposal_id) stepURL = `/proposal/${proposal_id}`
+                            else if (transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash)}`
                             break
                         }
                       }
@@ -235,12 +192,12 @@ function Info({ data, tx }) {
                           <div className={clsx('relative w-8 h-8 rounded-full flex items-center justify-center', d.status === 'failed' ? 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400')}>
                             {d.status === 'failed' ? <MdClose className="w-5 h-5 text-white" /> : <MdCheck className="w-5 h-5 text-white" />}
                           </div>
-                          <span className={clsx('absolute text-2xs font-medium mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length < 5 ? 'ml-1' : '')}>{d.title}</span>
+                          <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
                         </>
                       )
 
                       return (
-                        <li key={d.id} className={clsx('relative', i !== steps.length - 1 ? 'pr-8 sm:pr-20' : '')}>
+                        <li key={d.id} className={clsx('relative', i !== steps.length - 1 ? 'pr-16 sm:pr-24' : '')}>
                           {d.status === 'pending' ?
                             <>
                               <div className="absolute inset-0 flex items-center" aria-hidden="true">
@@ -248,7 +205,18 @@ function Info({ data, tx }) {
                               </div>
                               <div className={clsx('relative w-8 h-8 bg-zinc-50 dark:bg-zinc-800 rounded-full border-2 flex items-center justify-center', steps[i - 1]?.status === 'pending' ? 'border-zinc-200 dark:border-zinc-700' : 'border-blue-600 dark:border-blue-500')} aria-current="step">
                                 {steps[i - 1]?.status !== 'pending' && <PiClock className={clsx('w-5 h-5', steps[i - 1]?.status === 'pending' ? 'text-zinc-200 dark:text-zinc-700' : 'text-blue-600 dark:text-blue-500')} />}
-                                <span className={clsx('absolute text-2xs font-medium mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length < 5 ? 'ml-1' : '')}>{d.title}</span>
+                                <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
+                                {d.id === 'confirm' && !express_executed && estimatedTimeSpent && timeDiff(moment(), 'seconds', (call?.block_timestamp + estimatedTimeSpent.confirm) * 1000) > 0 && (
+                                  <div className="absolute mt-20">
+                                    <TimeUntil
+                                      timestamp={(call.block_timestamp + estimatedTimeSpent.confirm) * 1000}
+                                      prefix="("
+                                      suffix=")"
+                                      noTooltip={true}
+                                      className="text-2xs !font-medium ml-1"
+                                    />
+                                  </div>
+                                )}
                               </div>
                             </> :
                             <>
@@ -268,72 +236,104 @@ function Info({ data, tx }) {
                     })}
                   </ol>
                 </nav>
-                {send?.insufficient_fee && (
+                {is_insufficient_fee && !approved && (
                   <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
                     <PiWarningCircle size={16} />
                     <span className="text-xs">Insufficient Fee</span>
                   </div>
                 )}
+                {not_enough_gas_to_execute && !executed && !is_executed && (
+                  <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
+                    <PiWarningCircle size={16} />
+                    <span className="text-xs">Insufficient Gas</span>
+                  </div>
+                )}
               </div>
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          {Object.keys({ ...buttons }).length > 0 && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Recovery</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex flex-col gap-y-2">
+                  {Object.entries(buttons).map(([k, v]) => (
+                    <div key={k} className="w-72 grid grid-cols-3 gap-x-4">
+                      <span className="font-semibold capitalize">{toTitle(k)}:</span>
+                      <div className="col-span-2 flex items-center">{v}</div>
+                    </div>
+                  ))}
+                </div>
+              </dd>
+            </div>
+          )}
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Source Chain</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <ChainProfile value={sourceChain} />
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Destination Chain</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <ChainProfile value={destinationChain} />
-            </dd>
-          </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Asset</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <div className="min-w-max flex items-center gap-x-2">
-                <Image
-                  src={image}
-                  width={24}
-                  height={24}
-                />
-                {isNumber(send?.amount) && assets ?
-                  <Number
-                    value={send.amount}
-                    format="0,0.000000"
-                    suffix={` ${symbol}`}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  /> :
-                  <span className="text-zinc-900 dark:text-zinc-100 font-medium">
-                    {symbol}
-                  </span>
-                }
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              <div className="flex flex-col gap-y-2">
+                <ChainProfile value={destinationChain} />
+                {is_invalid_destination_chain && (
+                  <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
+                    <PiWarningCircle size={20} />
+                    <span>Invalid Chain</span>
+                  </div>
+                )}
               </div>
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          {symbol && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Asset</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <AssetProfile
+                  value={symbol}
+                  chain={sourceChain}
+                  amount={amount}
+                  ITSPossible={true}
+                  onlyITS={!getEvent(data)?.includes('ContractCall')}
+                  width={16}
+                  height={16}
+                  className="w-fit h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl px-2.5 py-1"
+                  titleClassName="text-xs"
+                />
+              </dd>
+            </div>
+          )}
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Sender</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <Profile address={senderAddress} chain={sourceChain} />
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Contract</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <Profile address={contractAddress} chain={destinationChain} />
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              <div className="flex flex-col gap-y-2">
+                <Profile address={contractAddress} chain={destinationChain} />
+                {is_invalid_contract_address && (
+                  <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
+                    <PiWarningCircle size={20} />
+                    <span>Invalid Contract</span>
+                  </div>
+                )}
+              </div>
             </dd>
           </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Created</dt>
-            <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               {moment(call?.block_timestamp * 1000).format(TIME_FORMAT)}
             </dd>
           </div>
-          {((time_spent?.call_express_executed > 0 && ['express_executed', 'executed'].includes(status)) || (time_spent?.total > 0 && ['executed'].includes(status))) && (
-            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+          {((time_spent?.call_express_executed > 0 && ['express_executed', 'executed'].includes(status)) || (time_spent?.total > 0 && ['executed'].includes(status))) ?
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time Spent</dt>
-              <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex flex-col gap-y-2">
                   {time_spent.call_express_executed > 0 && ['express_executed', 'executed'].includes(status) && (
                     <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
@@ -349,6 +349,266 @@ function Info({ data, tx }) {
                   )}
                 </div>
               </dd>
+            </div> :
+            estimatedTimeSpent && (
+              <>
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Estimated Time Spent</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <div className="flex flex-col gap-y-2">
+                      {fees?.express_supported && !(confirm || approved) && estimatedTimeSpent.express_execute > 0 && timeDiff(call?.block_timestamp * 1000) < estimatedTimeSpent.express_execute && (
+                        <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
+                          <RiTimerFlashLine size={20} />
+                          <TimeSpent fromTimestamp={0} toTimestamp={estimatedTimeSpent.express_execute * 1000} />
+                        </div>
+                      )}
+                      {estimatedTimeSpent.total > 0 && (
+                        <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
+                          <MdOutlineTimer size={20} />
+                          <TimeSpent fromTimestamp={0} toTimestamp={estimatedTimeSpent.total * 1000} />
+                        </div>
+                      )}
+                    </div>
+                  </dd>
+                </div>
+                {!['express_executed', 'executed'].includes(status) && (
+                  <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                    <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time Spent</dt>
+                    <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                      <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
+                        <MdOutlineTimer size={20} />
+                        <TimeSpent fromTimestamp={call?.block_timestamp * 1000} />
+                      </div>
+                    </dd>
+                  </div>
+                )}
+              </>
+            )
+          }
+          {fees?.base_fee > 0 && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Base Fee</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex flex-col gap-y-1">
+                  <div className="flex items-center gap-x-2">
+                    <Number
+                      value={fees.base_fee}
+                      format="0,0.000000"
+                      suffix={` ${fees.source_token?.symbol}`}
+                      noTooltip={true}
+                      className="font-medium"
+                    />
+                    {fees.base_fee_usd > 0 && (
+                      <Number
+                        value={fees.base_fee_usd}
+                        format="0,0.00"
+                        prefix="($"
+                        suffix=")"
+                        noTooltip={true}
+                        className="text-zinc-400 dark:text-zinc-500 font-normal"
+                      />
+                    )}
+                  </div>
+                  {fees.source_confirm_fee > 0 && (
+                    <>
+                      <div className="flex items-center gap-x-1 ml-3">
+                        <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Confirm Fee:</span>
+                        <Number
+                          value={fees.source_confirm_fee}
+                          format="0,0.000000"
+                          suffix={` ${fees.source_token?.symbol}`}
+                          noTooltip={true}
+                          className="text-xs font-medium"
+                        />
+                        {fees.source_token?.token_price?.usd > 0 > 0 && (
+                          <Number
+                            value={fees.source_confirm_fee * fees.source_token.token_price.usd}
+                            format="0,0.00"
+                            prefix="($"
+                            suffix=")"
+                            noTooltip={true}
+                            className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                          />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-x-1 ml-3">
+                        <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Approve Fee:</span>
+                        <Number
+                          value={fees.base_fee - fees.source_confirm_fee}
+                          format="0,0.000000"
+                          suffix={` ${fees.source_token?.symbol}`}
+                          noTooltip={true}
+                          className="text-xs font-medium"
+                        />
+                        {fees.source_token?.token_price?.usd > 0 > 0 && (
+                          <Number
+                            value={(fees.base_fee - fees.source_confirm_fee) * fees.source_token.token_price.usd}
+                            format="0,0.00"
+                            prefix="($"
+                            suffix=")"
+                            noTooltip={true}
+                            className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+          {express_executed && fees?.express_supported && fees.express_fee > 0 && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Express Fee</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex flex-col gap-y-1">
+                  <div className="flex items-center gap-x-2">
+                    <Number
+                      value={fees.express_fee}
+                      format="0,0.000000"
+                      suffix={` ${fees.source_token?.symbol}`}
+                      noTooltip={true}
+                      className="font-medium"
+                    />
+                    {fees.express_fee_usd > 0 && (
+                      <Number
+                        value={fees.express_fee_usd}
+                        format="0,0.00"
+                        prefix="($"
+                        suffix=")"
+                        noTooltip={true}
+                        className="text-zinc-400 dark:text-zinc-500 font-normal"
+                      />
+                    )}
+                  </div>
+                  {fees.source_express_fee && (
+                    <>
+                      {isNumber(fees.source_express_fee.relayer_fee) && (
+                        <div className="flex items-center gap-x-1 ml-3">
+                          <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Relayer Fee:</span>
+                          <Number
+                            value={fees.source_express_fee.relayer_fee}
+                            format="0,0.000000"
+                            suffix={` ${fees.source_token?.symbol}`}
+                            noTooltip={true}
+                            className="text-xs font-medium"
+                          />
+                          {fees.source_express_fee.relayer_fee_usd > 0 && (
+                            <Number
+                              value={fees.source_express_fee.relayer_fee_usd}
+                              format="0,0.00"
+                              prefix="($"
+                              suffix=")"
+                              noTooltip={true}
+                              className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                            />
+                          )}
+                        </div>
+                      )}
+                      {isNumber(fees.source_express_fee.express_gas_overhead_fee) && (
+                        <div className="flex items-center gap-x-1 ml-3">
+                          <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Overhead Fee:</span>
+                          <Number
+                            value={fees.source_express_fee.express_gas_overhead_fee}
+                            format="0,0.000000"
+                            suffix={` ${fees.source_token?.symbol}`}
+                            noTooltip={true}
+                            className="text-xs font-medium"
+                          />
+                          {fees.source_express_fee.express_gas_overhead_fee_usd > 0 && (
+                            <Number
+                              value={fees.source_express_fee.express_gas_overhead_fee_usd}
+                              format="0,0.00"
+                              prefix="($"
+                              suffix=")"
+                              noTooltip={true}
+                              className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+          {((gas_paid && gas?.gas_paid_amount > 0) || gas_paid_to_callback) && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Paid</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex items-center gap-x-2">
+                  <Number
+                    value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * fees?.source_token?.gas_price}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="font-medium"
+                  />
+                  {fees?.source_token?.token_price?.usd > 0 && (
+                    <Number
+                      value={(gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * fees.source_token.gas_price) * fees.source_token.token_price.usd}
+                      format="0,0.00"
+                      prefix="($"
+                      suffix=")"
+                      noTooltip={true}
+                      className="text-zinc-400 dark:text-zinc-500 font-normal"
+                    />
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+          {executed && isNumber(gas?.gas_used_amount) && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Used</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex items-center gap-x-2">
+                  <Number
+                    value={gas.gas_used_amount}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="font-medium"
+                  />
+                  {fees?.source_token?.token_price?.usd > 0 && (
+                    <Number
+                      value={gas.gas_used_amount * fees.source_token.token_price.usd}
+                      format="0,0.00"
+                      prefix="($"
+                      suffix=")"
+                      noTooltip={true}
+                      className="text-zinc-400 dark:text-zinc-500 font-normal"
+                    />
+                  )}
+                </div>
+              </dd>
+            </div>
+          )}
+          {executed && (refunded?.receipt?.status || ((executed || is_executed || error) && timeDiff((executed.block_timestamp || error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000) >= 300)) && isNumber(gas?.gas_paid_amount) && isNumber(gas.gas_remain_amount) && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Charged</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex items-center gap-x-2">
+                  <Number
+                    value={gas.gas_paid_amount - (refunded?.receipt?.status ? isNumber(refunded.amount) ? refunded.amount : gas.gas_remain_amount : 0)}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="font-medium"
+                  />
+                  {fees?.source_token?.token_price?.usd > 0 && (
+                    <Number
+                      value={(gas.gas_paid_amount - (refunded?.receipt?.status ? isNumber(refunded.amount) ? refunded.amount : gas.gas_remain_amount : 0)) * fees.source_token.token_price.usd}
+                      format="0,0.00"
+                      prefix="($"
+                      suffix=")"
+                      noTooltip={true}
+                      className="text-zinc-400 dark:text-zinc-500 font-normal"
+                    />
+                  )}
+                </div>
+              </dd>
             </div>
           )}
         </dl>
@@ -360,14 +620,32 @@ function Info({ data, tx }) {
 function Details({ data }) {
   const { chains } = useGlobalStore()
 
-  const { link, send, unwrap } = { ...data }
-  const destinationChain = send?.original_destination_chain || link?.original_destination_chain || unwrap?.destination_chain || send?.destination_chain || link?.destination_chain
+  const { call, gas_paid, approved, refunded, gas_added_transactions, refunded_more_transactions, fees, gas } = { ...data }
+  const sourceChain = call?.chain
+  const destinationChain = approved?.chain || call?.returnValues?.destinationChain
   const destinationChainData = getChainData(destinationChain, chains)
+  const axelarChainData = getChainData('axelarnet', chains)
 
   const steps = getStep(data)
-
   return steps.length > 0 && (
     <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-8">
+      {(data.originData || data.callbackData) && (
+        <div className="flex items-center gap-x-2">
+          <ChainProfile
+            value={sourceChain}
+            width={20}
+            height={20}
+            titleClassName="text-sm font-semibold"
+          />
+          <MdKeyboardArrowRight size={20} />
+          <ChainProfile
+            value={destinationChain}
+            width={20}
+            height={20}
+            titleClassName="text-sm font-semibold"
+          />
+        </div>
+      )}
       <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
         <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
           <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
@@ -381,7 +659,13 @@ function Details({ data }) {
               Height
             </th>
             <th scope="col" className="px-3 py-3.5 text-left">
+              Address
+            </th>
+            <th scope="col" className="px-3 py-3.5 text-left">
               Status
+            </th>
+            <th scope="col" className="px-3 py-3.5 text-left">
+              Gas
             </th>
             <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right">
               Time
@@ -390,128 +674,284 @@ function Details({ data }) {
         </thead>
         <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
           {steps.filter(d => d.status !== 'pending').map((d, i) => {
-            const { txhash, poll_id, batch_id, transactionHash, recv_txhash, ack_txhash, failed_txhash, tx_hash_unwrap, height, block_timestamp, received_at, created_at } = { ...d.data }
+            const { logIndex, _logIndex, chain_type, confirmation_txhash, poll_id, axelarTransactionHash, blockNumber, axelarBlockNumber, transaction, receipt, returnValues, error, contract_address, block_timestamp, created_at, proposal_id } = { ...(d.id === 'pay_gas' && isString(d.data) ? data.originData?.gas_paid : d.data) }
+            const transactionHash = d.data?.transactionHash || receipt?.transactionHash || receipt?.hash
+            const height = d.data.blockNumber || blockNumber
             const { url, block_path, transaction_path } = { ...d.chainData?.explorer }
 
             let stepTX
             let stepURL
             const stepMoreInfos = []
+            const stepMoreTransactions = []
             if (url && transaction_path) {
               switch (d.id) {
-                case 'link':
-                case 'send':
-                case 'wrap':
-                case 'erc20_transfer':
                 case 'confirm':
-                case 'axelar_transfer':
-                  if (txhash) {
-                    stepTX = txhash
-                    stepURL = `${url}${transaction_path.replace('{tx}', txhash)}`
-                  }
-                  break
-                case 'vote':
-                  if (txhash) {
-                    stepTX = txhash
-                    stepURL = `/tx/${txhash}`
+                  if (confirmation_txhash) {
+                    stepTX = confirmation_txhash
+                    stepURL = `/tx/${confirmation_txhash}`
                   }
                   else if (poll_id) {
                     stepTX = poll_id
                     stepURL = `/evm-poll/${poll_id}`
                   }
-                  break
-                case 'command':
-                  if (transactionHash) {
-                    stepTX = transactionHash
-                    stepURL = `${url}${transaction_path.replace('{tx}', transactionHash)}`
-                  }
-                  if (batch_id && destinationChainData) {
-                    stepTX = stepTX || batch_id
-                    stepURL = stepURL || `/evm-batch/${destinationChainData.id}/${batch_id}`
 
-                    if (transactionHash) {
-                      stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={batch_id}>
-                          <Link
-                            href={`/evm-batch/${destinationChainData.id}/${batch_id}`}
-                            target="_blank"
-                            className="text-blue-600 dark:text-blue-500 underline"
-                          >
-                            Batch
-                          </Link>
-                        </Copy>
-                      ))
-                    }
-                  }
-                  break
-                case 'ibc_send':
-                  if (recv_txhash) {
-                    stepTX = recv_txhash
-                    stepURL = `${url}${transaction_path.replace('{tx}', recv_txhash)}`
-                  }
-                  if (ack_txhash) {
-                    stepTX = stepTX || ack_txhash
-                    stepURL = stepURL || `${url}${transaction_path.replace('{tx}', ack_txhash)}`
-
-                    if (recv_txhash) {
-                      stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={ack_txhash}>
-                          <Link
-                            href={`${url}${transaction_path.replace('{tx}', ack_txhash)}`}
-                            target="_blank"
-                            className="text-blue-600 dark:text-blue-500 underline"
-                          >
-                            Acknowledgement
-                          </Link>
-                        </Copy>
-                      ))
-                    }
-                  }
-                  if (failed_txhash) {
-                    stepTX = stepTX || failed_txhash
-                    stepURL = stepURL || `${url}${transaction_path.replace('{tx}', failed_txhash)}`
-
-                    if (recv_txhash && !ack_txhash) {
-                      stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={failed_txhash}>
-                          <Link
-                            href={`${url}${transaction_path.replace('{tx}', failed_txhash)}`}
-                            target="_blank"
-                            className="text-red-600 dark:text-red-500 whitespace-nowrap underline"
-                          >
-                            IBC Failed
-                          </Link>
-                        </Copy>
-                      ))
-                    }
-                  }
-                  if (txhash) {
-                    stepTX = stepTX || txhash
-                    stepURL = stepURL || `${url}${transaction_path.replace('{tx}', txhash)}`
-
-                    if (recv_txhash || ack_txhash || failed_txhash) {
-                      stepMoreInfos.push((
-                        <Copy key={stepMoreInfos.length} value={txhash}>
-                          <Link
-                            href={`${url}${transaction_path.replace('{tx}', txhash)}`}
-                            target="_blank"
-                            className="text-blue-600 dark:text-blue-500 whitespace-nowrap underline"
-                          >
-                            IBC Send
-                          </Link>
-                        </Copy>
-                      ))
-                    }
-                  }
-                  break
-                case 'unwrap':
-                  if (tx_hash_unwrap) {
-                    stepTX = tx_hash_unwrap
-                    stepURL = `${url}${transaction_path.replace('{tx}', tx_hash_unwrap)}`
+                  if (poll_id) {
+                    stepMoreInfos.push((
+                      <Copy size={16} key={stepMoreInfos.length} value={poll_id}>
+                        <Link
+                          href={`/evm-poll/${poll_id}`}
+                          target="_blank"
+                          className="text-blue-600 dark:text-blue-500 text-xs underline"
+                        >
+                          Poll: {poll_id}
+                        </Link>
+                      </Copy>
+                    ))
                   }
                   break
                 default:
+                  if (proposal_id) stepTX = returnValues?.messageId || transactionHash
+                  else {
+                    if (transactionHash) {
+                      stepTX = transactionHash
+                      stepURL = `${url}${transaction_path.replace('{tx}', transactionHash)}`
+                    }
+                    else if (axelarTransactionHash && axelarChainData?.explorer?.url) {
+                      stepTX = axelarTransactionHash
+                      stepURL = `${axelarChainData.explorer.url}${axelarChainData.explorer.transaction_path.replace('{tx}', axelarTransactionHash)}`
+                    }
+
+                    if (transactionHash && axelarTransactionHash && axelarChainData?.explorer?.url) {
+                      stepMoreInfos.push((
+                        <div key={stepMoreInfos.length} className="flex items-center gap-x-1">
+                          <Copy size={16} value={axelarTransactionHash}>
+                            <Link
+                              href={`${axelarChainData.explorer.url}${axelarChainData.explorer.transaction_path.replace('{tx}', axelarTransactionHash)}`}
+                              target="_blank"
+                              className="text-blue-600 dark:text-blue-500 text-xs underline"
+                            >
+                              {['send', 'pay_gas'].includes(d.id) ? 'MessageReceived' : 'RouteMessage'}
+                            </Link>
+                          </Copy>
+                          <ExplorerLink
+                            value={axelarTransactionHash}
+                            chain={axelarChainData.id}
+                            width={14}
+                            height={14}
+                          />
+                        </div>
+                      ))
+                    }
+
+                    if (['send', 'pay_gas', 'approve'].includes(d.id) && chain_type === 'evm') {
+                      if (isNumber(logIndex)) {
+                        stepMoreInfos.push((
+                          <div key={stepMoreInfos.length} className="flex items-center gap-x-1">
+                            <span className="text-zinc-700 dark:text-zinc-300 text-xs">LogIndex:</span>
+                            <ExplorerLink
+                              value={transactionHash}
+                              chain={d.chainData.id}
+                              hasEventLog={true}
+                              title={numberFormat(logIndex, '0,0')}
+                              iconOnly={false}
+                              width={14}
+                              height={14}
+                              containerClassName="!gap-x-1"
+                              nonIconClassName="text-blue-600 dark:text-blue-500 text-xs"
+                            />
+                          </div>
+                        ))
+                      }
+                      if (d.id === 'send' && isNumber(_logIndex)) {
+                        stepMoreInfos.push((
+                          <div key={stepMoreInfos.length} className="flex items-center gap-x-1">
+                            <span className="text-zinc-700 dark:text-zinc-300 text-xs">EventIndex:</span>
+                            <ExplorerLink
+                              value={transactionHash}
+                              chain={d.chainData.id}
+                              hasEventLog={true}
+                              title={numberFormat(_logIndex, '0,0')}
+                              iconOnly={false}
+                              width={14}
+                              height={14}
+                              containerClassName="!gap-x-1"
+                              nonIconClassName="text-blue-600 dark:text-blue-500 text-xs"
+                            />
+                          </div>
+                        ))
+                      }
+                    }
+
+                    if (d.id === 'approve' && returnValues?.commandId) {
+                      stepMoreInfos.push((
+                        <Copy key={stepMoreInfos.length} size={16} value={returnValues.commandId}>
+                          <Link
+                            href={`/evm-batches?commandId=${returnValues.commandId}`}
+                            target="_blank"
+                            className="text-blue-600 dark:text-blue-500 text-xs underline"
+                          >
+                            Command ID
+                          </Link>
+                        </Copy>
+                      ))
+                    }
+
+                    if (d.id === 'execute' && d.status === 'failed' && error) {
+                      const message = error?.data?.message || error?.message
+                      const reason = error?.reason
+                      const code = error?.code
+                      const body = error?.body?.replaceAll('"""', '')
+
+                      stepMoreInfos.push((
+                        <div key={stepMoreInfos.length} className="w-64 flex flex-col gap-y-1">
+                          {message && (
+                            <div className="whitespace-pre-wrap text-red-600 dark:text-red-500 text-xs font-normal">
+                              {ellipse(message, 256)}
+                            </div>
+                          )}
+                          {reason && (
+                            <div className="whitespace-pre-wrap text-red-600 dark:text-red-500 text-xs font-medium">
+                              Reason: {ellipse(reason, 256)}
+                            </div>
+                          )}
+                          <div className="flex flex-col gap-y-4">
+                            {code && (
+                              <Link
+                                href={isNumber(code) ? 'https://docs.metamask.io/guide/ethereum-provider.html#errors' : `https://docs.ethers.io/v5/api/utils/logger/#errors-${isString(code) ? `-${split(code, { toCase: 'lower', delimiter: '_' }).join('-')}` : 'ethereum'}`}
+                                target="_blank"
+                                className="w-fit h-6 bg-zinc-50 dark:bg-zinc-800 rounded-xl flex items-center text-2xs px-2.5 py-1"
+                              >
+                                {code}
+                              </Link>
+                            )}
+                            {body && (
+                              <div className="w-fit bg-zinc-50 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap break-all text-xs p-2.5">
+                                {ellipse(body, 256)}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    }
+
+                    if ((d.id === 'pay_gas' && gas_added_transactions) || (d.id === 'refund' && refunded_more_transactions)) {
+                      for (const tx of toArray(d.id === 'pay_gas' ? gas_added_transactions : refunded_more_transactions)) {
+                        stepMoreTransactions.push((
+                          <div key={stepMoreTransactions.length} className="flex items-center gap-x-1">
+                            <Copy size={16} value={tx.transactionHash}>
+                              <Link
+                                href={`${url}${transaction_path.replace('{tx}', tx.transactionHash)}`}
+                                target="_blank"
+                                className="text-blue-600 dark:text-blue-500 text-xs font-medium"
+                              >
+                                {ellipse(tx.transactionHash)}
+                              </Link>
+                            </Copy>
+                            <ExplorerLink
+                              value={tx.transactionHash}
+                              chain={d.chainData?.id}
+                              width={14}
+                              height={14}
+                            />
+                          </div>
+                        ))
+                      }
+                    }
+                  }
                   break
               }
+            }
+
+            const fromAddress = transaction?.from
+            let toAddress = contract_address
+            switch (d.id) {
+              case 'send':
+                if (!toAddress && chain_type === 'cosmos') toAddress = returnValues?.sender
+                break
+              case 'pay_gas':
+                if (!toAddress && chain_type === 'cosmos') toAddress = returnValues?.recipient
+                break
+              case 'execute':
+                if (!toAddress && chain_type === 'cosmos') toAddress = returnValues?.destinationContractAddress || returnValues?.receiver
+                break
+              case 'refund':
+                toAddress = gas_paid?.returnValues?.refundAddress || toAddress
+                break
+              default:
+                break
+            }
+
+            let gasElement
+            let gasConvertedElement
+            switch (d.id) {
+              case 'pay_gas':
+                gasElement = (
+                  <Number
+                    value={isString(d.data) ? d.data * fees?.source_token?.gas_price : gas?.gas_paid_amount}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                )
+                break
+              case 'express':
+                gasElement = (
+                  <Number
+                    value={gas?.gas_express_amount}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                )
+                break
+              case 'confirm':
+                gasElement = (
+                  <Number
+                    value={fees?.source_confirm_fee}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                )
+                break
+              case 'approve':
+                gasElement = (
+                  <Number
+                    value={gas?.gas_approve_amount - fees?.source_confirm_fee}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                )
+                break
+              case 'execute':
+                gasElement = (
+                  <Number
+                    value={gas?.gas_execute_amount}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                )
+                break
+              case 'refund':
+                gasElement = (
+                  <Number
+                    value={refunded?.amount + _.sum(toArray(refunded_more_transactions).map(d => toNumber(d.amount)))}
+                    format="0,0.000000"
+                    suffix={` ${fees?.source_token?.symbol}`}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 font-medium"
+                  />
+                )
+                break
+              default:
+                break
             }
 
             return (
@@ -536,23 +976,56 @@ function Details({ data }) {
                       </div>
                     )}
                     {stepMoreInfos.length > 0 && (
-                      <div className="flex items-center gap-x-1.5">
+                      <div className="flex items-center gap-x-3">
                         {stepMoreInfos}
+                      </div>
+                    )}
+                    {stepMoreTransactions.length > 0 && (
+                      <div className="flex flex-col gap-y-1.5">
+                        {stepMoreTransactions}
                       </div>
                     )}
                   </div>
                 </td>
                 <td className="px-3 py-4 text-left">
-                  {height && (url && block_path ?
-                    <Link
-                      href={`${url}/${block_path.replace('{block}', height)}`}
-                      target="_blank"
-                      className="text-blue-600 dark:text-blue-500 font-medium"
-                    >
+                  <div className="flex flex-col gap-y-2">
+                    {height && (url && block_path ?
+                      <Link
+                        href={`${url}${block_path.replace('{block}', height)}`}
+                        target="_blank"
+                        className="text-blue-600 dark:text-blue-500 font-medium"
+                      >
+                        <Number value={height} />
+                      </Link> :
                       <Number value={height} />
-                    </Link> :
-                    <Number value={height} />
-                  )}
+                    )}
+                    {axelarBlockNumber && (axelarChainData?.explorer?.url && axelarChainData.explorer.block_path ?
+                      <Link
+                        href={`${axelarChainData.explorer.url}${axelarChainData.explorer.block_path.replace('{block}', axelarBlockNumber)}`}
+                        target="_blank"
+                        className="text-blue-600 dark:text-blue-500 font-medium"
+                      >
+                        <Number value={axelarBlockNumber} />
+                      </Link> :
+                      <Number value={axelarBlockNumber} />
+                    )}
+                  </div>
+                </td>
+                <td className="px-3 py-4 text-left">
+                  <div className="flex flex-col gap-y-2">
+                    {fromAddress && (
+                      <div className="flex items-center gap-x-4">
+                        <span className="w-10">From:</span>
+                        <Profile address={fromAddress} chain={d.chainData?.id} />
+                      </div>
+                    )}
+                    {toAddress && (
+                      <div className="flex items-center gap-x-4">
+                        <span className="w-10">To:</span>
+                        <Profile address={toAddress} chain={d.chainData?.id} />
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-3 py-4 text-left">
                   {d.status && (
@@ -561,8 +1034,13 @@ function Details({ data }) {
                     </Tag>
                   )}
                 </td>
+                <td className="px-3 py-4 text-left">
+                  <div className="flex flex-col gap-y-2">
+                    {gasElement}
+                  </div>
+                </td>
                 <td className="pl-3 pr-4 sm:pr-0 py-4 flex items-center justify-end text-right">
-                  <TimeAgo timestamp={block_timestamp * 1000 || received_at?.ms || created_at?.ms} />
+                  <TimeAgo timestamp={block_timestamp * 1000 || created_at?.ms} />
                 </td>
               </tr>
             )
@@ -607,17 +1085,17 @@ export function GMP({ tx, commandId }) {
           // callback
           if (d.callback?.transactionHash) {
             const { data } = { ...await searchGMP({ txHash: d.callback.transactionHash, txIndex: d.callback.transactionIndex, txLogIndex: d.callback.logIndex }) }
-            d.callback_data = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.callback.transactionHash))
+            d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.callback.transactionHash))
           }
           else if (d.executed?.transactionHash) {
             const { data } = { ...await searchGMP({ txHash: d.executed.transactionHash }) }
-            d.callback_data = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.executed.transactionHash))
+            d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.executed.transactionHash))
           }
 
           // origin
           if (d.call && (d.gas_paid_to_callback || d.is_call_from_relayer)) {
             const { data } = { ...await searchGMP({ txHash: d.call.transactionHash }) }
-            d.origin_data = toArray(data).find(_d => toArray([_d.express_executed?.transactionHash, _d.executed?.transactionHash]).findIndex(tx => equalsIgnoreCase(tx, d.call.transactionHash)) > -1)
+            d.originData = toArray(data).find(_d => toArray([_d.express_executed?.transactionHash, _d.executed?.transactionHash]).findIndex(tx => equalsIgnoreCase(tx, d.call.transactionHash)) > -1)
           }
 
           if (d.call) {
@@ -816,6 +1294,8 @@ export function GMP({ tx, commandId }) {
           hash: transaction?.transactionHash,
           chain: data.approved.chain,
         })
+
+        if (success && transaction) getData()
       } catch (error) {
         setResponse({ status: 'failed', ...parseError(error) })
       }
@@ -825,11 +1305,11 @@ export function GMP({ tx, commandId }) {
 
   const needSwitchChain = (id, type) => id !== (type === 'cosmos' ? cosmosWalletStore?.chainId : chainId)
 
-  const { call, gas_paid, gas_paid_to_callback, confirm, confirm_failed, confirm_failed_event, approved, executed, error, gas, is_executed, is_insufficient_fee, is_call_from_relayer, is_invalid_destination_chain, is_invalid_call, is_not_enough_gas, not_enough_gas_to_execute, proposal_id } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, confirm, confirm_failed, confirm_failed_event, approved, executed, error, gas, is_executed, is_insufficient_fee, is_call_from_relayer, is_invalid_destination_chain, is_invalid_call, not_enough_gas_to_execute, proposal_id } = { ...data }
   const sourceChainData = getChainData(call?.chain, chains)
   const destinationChainData = getChainData(call?.returnValues?.destinationChain, chains)
 
-  const addGasButton = call && !executed && !is_executed && (call.chain_type !== 'cosmos' || timeDiff(call.block_timestamp * 1000) >= 60) && (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || is_not_enough_gas || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
+  const addGasButton = call && !executed && !is_executed && !approved && (call.chain_type !== 'cosmos' || timeDiff(call.block_timestamp * 1000) >= 60) && (!(gas_paid || gas_paid_to_callback) || is_insufficient_fee || not_enough_gas_to_execute || gas?.gas_remain_amount < MIN_GAS_REMAIN_AMOUNT) && (
     <div key="addGas" className="flex items-center gap-x-1">
       {(call.chain_type === 'cosmos' ? cosmosWalletStore?.signer : signer) && !needSwitchChain(sourceChainData?.chain_id, call.chain_type) && (
         <button
@@ -857,7 +1337,7 @@ export function GMP({ tx, commandId }) {
     </div>
   )
 
-  const executeButton = call && (call.destination_chain_type === 'cosmos' ? confirm || call.chain_type !== 'evm' : approved) && !executed && !is_executed && (error || timeDiff(((call.destination_chain_type === 'cosmos' ? confirm.block_timestamp : approved.block_timestamp) || call.block_timestamp) * 1000) >= (call.destination_chain_type === 'cosmos' ? 300 : 120)) && payload && (
+  const executeButton = call && (call.destination_chain_type === 'cosmos' ? confirm || call.chain_type !== 'evm' : approved) && !executed && !is_executed && (error || timeDiff(((call.destination_chain_type === 'cosmos' ? confirm.block_timestamp : approved.block_timestamp) || call.block_timestamp) * 1000) >= (call.destination_chain_type === 'cosmos' ? 300 : 120)) && call.returnValues?.payload && (
     <div key="execute" className="flex items-center gap-x-1">
       {call.destination_chain_type === 'cosmos' || (signer && !needSwitchChain(destinationChainData?.chain_id, call.destination_chain_type)) && (
         <button
@@ -875,10 +1355,21 @@ export function GMP({ tx, commandId }) {
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :
-        <div className="max-w-5xl flex flex-col gap-y-4">
+        <div className="max-w-6xl flex flex-col gap-y-4">
           <Toaster />
-          <Info data={data} tx={tx} />
+          <Info
+            data={data}
+            estimatedTimeSpent={estimatedTimeSpent}
+            buttons={Object.fromEntries(Object.entries({
+              pay_gas: addGasButton,
+              [call.chain_type !== 'cosmos' && !confirm ? 'confirm' : 'approve']: approveButton,
+              execute: executeButton,
+            }).filter(([k, v]) => v))}
+            tx={tx}
+          />
+          {data.originData && <Details data={{ ...data.originData, callbackData: Object.fromEntries(Object.entries(data).filter(([k, v]) => !['originData', 'callbackData'].includes(k))) }} />}
           <Details data={data} />
+          {data.callbackData && <Details data={{ ...data.callbackData, originData: Object.fromEntries(Object.entries(data).filter(([k, v]) => !['originData', 'callbackData'].includes(k))) }} />}
         </div>
       }
     </Container>
