@@ -3,7 +3,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard'
 import clsx from 'clsx'
 import { LuClipboard, LuClipboardCheck } from 'react-icons/lu'
 
-export function Copy({ size = 18, value, onCopy, children, className }) {
+export function Copy({ size = 18, value, onCopy, children, childrenClassName, className }) {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -12,9 +12,9 @@ export function Copy({ size = 18, value, onCopy, children, className }) {
   }, [copied])
 
   return copied ?
-    <div className={clsx('flex items-center gap-x-1 3xl:gap-x-2', children && 'min-w-max')}>
+    <div className={clsx('flex items-center gap-x-1 3xl:gap-x-2', children && 'min-w-max', childrenClassName)}>
       {children}
-      <LuClipboardCheck size={size} className={clsx('3xl:w-6 3xl:h-6 text-green-500 dark:text-green-400', className)} />
+      <LuClipboardCheck size={size} className={clsx('3xl:w-6 3xl:h-6 min-w-fit text-green-500 dark:text-green-400', className)} />
     </div> :
     <CopyToClipboard
       text={value}
@@ -23,9 +23,9 @@ export function Copy({ size = 18, value, onCopy, children, className }) {
         if (onCopy) onCopy()
       }}
     >
-      <div className={clsx('flex items-center gap-x-1 3xl:gap-x-2', children && 'min-w-max')}>
+      <div className={clsx('flex items-center gap-x-1 3xl:gap-x-2', children && 'min-w-max', childrenClassName)}>
         {children}
-        <LuClipboard size={size} className={clsx('3xl:w-6 3xl:h-6 cursor-pointer text-zinc-300 hover:text-zinc-400 dark:text-zinc-600 dark:hover:text-zinc-500', className)} />
+        <LuClipboard size={size} className={clsx('3xl:w-6 3xl:h-6 min-w-fit cursor-pointer text-zinc-300 hover:text-zinc-400 dark:text-zinc-600 dark:hover:text-zinc-500', className)} />
       </div>
     </CopyToClipboard>
 }

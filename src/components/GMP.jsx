@@ -12,6 +12,8 @@ import toast, { Toaster } from 'react-hot-toast'
 import { MdClose, MdCheck, MdOutlineTimer, MdKeyboardArrowRight } from 'react-icons/md'
 import { PiClock, PiWarningCircle, PiCheckCircleFill, PiXCircleFill } from 'react-icons/pi'
 import { RiTimerFlashLine } from 'react-icons/ri'
+import { FiPlus } from 'react-icons/fi'
+import { RxCaretDown, RxCaretUp } from 'react-icons/rx'
 
 import { Container } from '@/components/Container'
 import Image from '@/components/Image'
@@ -102,14 +104,15 @@ export const getStep = data => {
   ])
 }
 
-function Info({ data, estimatedTimeSpent, buttons, tx }) {
-  const { chains } = useGlobalStore()
+function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
+  const [seeMore, setSeeMore] = useState(false)
+  const { chains, assets } = useGlobalStore()
 
   const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, approved, executed, error, refunded, token_sent, token_deployed, interchain_transfer, interchain_transfer_with_data, token_deployment_initialized, interchain_token_deployment_started, is_executed, amount, fees, gas, is_insufficient_fee, is_invalid_destination_chain, is_invalid_contract_address, not_enough_gas_to_execute, status, simplified_status, time_spent, proposal_id, callbackData, originData } = { ...data }
   const txhash = call?.transactionHash || tx
 
-  const sourceChain = call?.chain
-  const destinationChain = call?.returnValues?.destinationChain || approved?.chain
+  const sourceChain = approved?.returnValues?.sourceChain || getChainData(call?.chain, chains)?.chain_name || call?.chain
+  const destinationChain = call?.returnValues?.destinationChain || getChainData(approved?.chain, chains)?.chain_name || approved?.chain
 
   const senderAddress = call?.transaction?.from
   const contractAddress = approved?.returnValues?.contractAddress || call?.returnValues?.destinationContractAddress
@@ -117,8 +120,20 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
   const sourceChainData = getChainData(sourceChain, chains)
   const { url, transaction_path } = { ...sourceChainData?.explorer }
 
-  const symbol = call.returnValues?.symbol || token_sent?.symbol || interchain_transfer?.symbol || interchain_transfer_with_data?.symbol || token_deployed?.symbol || token_deployment_initialized?.tokenSymbol || interchain_token_deployment_started?.tokenSymbol
-  const steps = getStep(data)
+  const symbol = call?.returnValues?.symbol || token_sent?.symbol || interchain_transfer?.symbol || interchain_transfer_with_data?.symbol || token_deployed?.symbol || token_deployment_initialized?.tokenSymbol || interchain_token_deployment_started?.tokenSymbol
+  const { addresses } = { ...getAssetData(symbol, assets) }
+  const isMultihop = !!(data.originData || data.callbackData)
+
+  const messageId = call?.returnValues?.messageId || (call?.transactionHash && isNumber(call._logIndex) ? `${call.transactionHash}-${call._logIndex}` : undefined)
+  const commandId = approved?.returnValues?.commandId || data.command_id
+  const sourceAddress = call?.returnValues?.sender
+  const destinationContractAddress = contractAddress
+  const payloadHash = call?.returnValues?.payloadHash
+  const payload = call?.returnValues?.payload
+  const version = call?.destination_chain_type === 'cosmos' && payload ? toBigNumber(payload.substring(0, 10)) : undefined
+  const sourceSymbol = call?.returnValues?.symbol
+  const destinationSymbol = approved?.returnValues?.symbol || addresses?.[destinationChain?.toLowerCase()]?.symbol || sourceSymbol
+  const amountInUnits = approved?.returnValues?.amount || call?.returnValues?.amount
 
   return (
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
@@ -159,95 +174,122 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Status</dt>
             <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <div className="flex flex-col gap-y-1.5">
-                <nav aria-label="Progress" className="h-16 overflow-x-auto">
-                  <ol role="list" className="flex items-center">
-                    {steps.map((d, i) => {
-                      const { confirmation_txhash, poll_id, axelarTransactionHash, receipt, proposal_id } = { ...d.data }
-                      const { url, transaction_path } = { ...d.chainData?.explorer }
-                      const transactionHash = d.data?.transactionHash || receipt?.transactionHash || receipt?.hash
+              <div className="flex flex-col gap-y-3">
+                {toArray([data.originData, data, data.callbackData]).map((d, i) => {
+                  const sourceChain = d.call?.chain
+                  const destinationChain = d.call?.returnValues?.destinationChain || d.approved?.chain
+                  const steps = getStep(d)
 
-                      let stepURL
-                      if (url && transaction_path) {
-                        switch (d.id) {
-                          case 'pay_gas':
-                            if (transactionHash || originData?.call?.transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || originData?.call?.transactionHash)}`
-                            break
-                          case 'confirm':
-                            if (confirmation_txhash) stepURL = `/tx/${confirmation_txhash}`
-                            else if (poll_id) stepURL = `/evm-poll/${poll_id}`
-                            break
-                          case 'executed':
-                            if (transactionHash || axelarTransactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || axelarTransactionHash)}`
-                            break
-                          default:
-                            if (proposal_id) stepURL = `/proposal/${proposal_id}`
-                            else if (transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash)}`
-                            break
-                        }
-                      }
+                  return (
+                    <div key={i} className="flex flex-col gap-y-1.5">
+                      {isMultihop && (
+                        <div className="flex items-center gap-x-2">
+                          <ChainProfile
+                            value={sourceChain}
+                            width={20}
+                            height={20}
+                            titleClassName="text-sm font-semibold"
+                          />
+                          <MdKeyboardArrowRight size={20} />
+                          <ChainProfile
+                            value={destinationChain}
+                            width={20}
+                            height={20}
+                            titleClassName="text-sm font-semibold"
+                          />
+                        </div>
+                      )}
+                      <nav aria-label="Progress" className="h-16 overflow-x-auto">
+                        <ol role="list" className="flex items-center">
+                          {steps.map((d, i) => {
+                            const { confirmation_txhash, poll_id, axelarTransactionHash, receipt, proposal_id } = { ...d.data }
+                            const { url, transaction_path } = { ...d.chainData?.explorer }
+                            const transactionHash = d.data?.transactionHash || receipt?.transactionHash || receipt?.hash
 
-                      const element = (
-                        <>
-                          <div className={clsx('relative w-8 h-8 rounded-full flex items-center justify-center', d.status === 'failed' ? 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400')}>
-                            {d.status === 'failed' ? <MdClose className="w-5 h-5 text-white" /> : <MdCheck className="w-5 h-5 text-white" />}
-                          </div>
-                          <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
-                        </>
-                      )
-
-                      return (
-                        <li key={d.id} className={clsx('relative', i !== steps.length - 1 ? 'pr-16 sm:pr-24' : '')}>
-                          {d.status === 'pending' ?
-                            <>
-                              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                                <div className="w-full h-0.5 bg-zinc-200 dark:bg-zinc-700" />
-                              </div>
-                              <div className={clsx('relative w-8 h-8 bg-zinc-50 dark:bg-zinc-800 rounded-full border-2 flex items-center justify-center', steps[i - 1]?.status === 'pending' ? 'border-zinc-200 dark:border-zinc-700' : 'border-blue-600 dark:border-blue-500')} aria-current="step">
-                                {steps[i - 1]?.status !== 'pending' && <PiClock className={clsx('w-5 h-5', steps[i - 1]?.status === 'pending' ? 'text-zinc-200 dark:text-zinc-700' : 'text-blue-600 dark:text-blue-500')} />}
-                                <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
-                                {d.id === 'confirm' && !express_executed && estimatedTimeSpent && timeDiff(moment(), 'seconds', (call?.block_timestamp + estimatedTimeSpent.confirm) * 1000) > 0 && (
-                                  <div className="absolute mt-20">
-                                    <TimeUntil
-                                      timestamp={(call.block_timestamp + estimatedTimeSpent.confirm) * 1000}
-                                      prefix="("
-                                      suffix=")"
-                                      noTooltip={true}
-                                      className="text-2xs !font-medium ml-1"
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </> :
-                            <>
-                              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                                <div className={clsx('w-full h-0.5', d.status === 'failed' ? 'bg-red-600 dark:bg-red-500' : 'bg-blue-600 dark:bg-blue-500')} />
-                              </div>
-                              {stepURL ?
-                                <Link href={stepURL} target="_blank">
-                                  {element}
-                                </Link> :
-                                element
+                            let stepURL
+                            if (url && transaction_path) {
+                              switch (d.id) {
+                                case 'pay_gas':
+                                  if (transactionHash || originData?.call?.transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || originData?.call?.transactionHash)}`
+                                  break
+                                case 'confirm':
+                                  if (confirmation_txhash) stepURL = `/tx/${confirmation_txhash}`
+                                  else if (poll_id) stepURL = `/evm-poll/${poll_id}`
+                                  break
+                                case 'executed':
+                                  if (transactionHash || axelarTransactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || axelarTransactionHash)}`
+                                  break
+                                default:
+                                  if (proposal_id) stepURL = `/proposal/${proposal_id}`
+                                  else if (transactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash)}`
+                                  break
                               }
-                            </>
-                          }
-                        </li>
-                      )
-                    })}
-                  </ol>
-                </nav>
-                {is_insufficient_fee && !approved && (
-                  <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
-                    <PiWarningCircle size={16} />
-                    <span className="text-xs">Insufficient Fee</span>
-                  </div>
-                )}
-                {not_enough_gas_to_execute && !executed && !is_executed && (
-                  <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
-                    <PiWarningCircle size={16} />
-                    <span className="text-xs">Insufficient Gas</span>
-                  </div>
-                )}
+                            }
+
+                            const element = (
+                              <>
+                                <div className={clsx('relative w-8 h-8 rounded-full flex items-center justify-center', d.status === 'failed' ? 'bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400' : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400')}>
+                                  {d.status === 'failed' ? <MdClose className="w-5 h-5 text-white" /> : <MdCheck className="w-5 h-5 text-white" />}
+                                </div>
+                                <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
+                              </>
+                            )
+
+                            return (
+                              <li key={d.id} className={clsx('relative', i !== steps.length - 1 ? 'pr-16 sm:pr-24' : '')}>
+                                {d.status === 'pending' ?
+                                  <>
+                                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                      <div className="w-full h-0.5 bg-zinc-200 dark:bg-zinc-700" />
+                                    </div>
+                                    <div className={clsx('relative w-8 h-8 bg-zinc-50 dark:bg-zinc-800 rounded-full border-2 flex items-center justify-center', steps[i - 1]?.status === 'pending' ? 'border-zinc-200 dark:border-zinc-700' : 'border-blue-600 dark:border-blue-500')} aria-current="step">
+                                      {steps[i - 1]?.status !== 'pending' && <PiClock className={clsx('w-5 h-5', steps[i - 1]?.status === 'pending' ? 'text-zinc-200 dark:text-zinc-700' : 'text-blue-600 dark:text-blue-500')} />}
+                                      <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
+                                      {d.id === 'confirm' && !express_executed && estimatedTimeSpent && timeDiff(moment(), 'seconds', (call?.block_timestamp + estimatedTimeSpent.confirm) * 1000) > 0 && (
+                                        <div className="absolute mt-20">
+                                          <TimeUntil
+                                            timestamp={(call.block_timestamp + estimatedTimeSpent.confirm) * 1000}
+                                            prefix="("
+                                            suffix=")"
+                                            noTooltip={true}
+                                            className="text-2xs !font-medium ml-1"
+                                          />
+                                        </div>
+                                      )}
+                                    </div>
+                                  </> :
+                                  <>
+                                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                                      <div className={clsx('w-full h-0.5', d.status === 'failed' ? 'bg-red-600 dark:bg-red-500' : 'bg-blue-600 dark:bg-blue-500')} />
+                                    </div>
+                                    {stepURL ?
+                                      <Link href={stepURL} target="_blank">
+                                        {element}
+                                      </Link> :
+                                      element
+                                    }
+                                  </>
+                                }
+                              </li>
+                            )
+                          })}
+                        </ol>
+                      </nav>
+                      {is_insufficient_fee && !approved && (
+                        <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
+                          <PiWarningCircle size={16} />
+                          <span className="text-xs">Insufficient Fee</span>
+                        </div>
+                      )}
+                      {not_enough_gas_to_execute && !executed && !is_executed && (
+                        <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
+                          <PiWarningCircle size={16} />
+                          <span className="text-xs">Insufficient Gas</span>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             </dd>
           </div>
@@ -266,26 +308,42 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
               </dd>
             </div>
           )}
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Source Chain</dt>
-            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <ChainProfile value={sourceChain} />
-            </dd>
-          </div>
-          <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-            <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Destination Chain</dt>
-            <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <div className="flex flex-col gap-y-2">
-                <ChainProfile value={destinationChain} />
-                {is_invalid_destination_chain && (
-                  <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
-                    <PiWarningCircle size={20} />
-                    <span>Invalid Chain</span>
-                  </div>
-                )}
+          {isMultihop ?
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Path</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <div className="flex items-center gap-x-3">
+                  <ChainProfile value={data.originData?.call?.chain || sourceChain} titleClassName="text-base font-semibold" />
+                  <MdKeyboardArrowRight size={24} />
+                  <ChainProfile value={data.originData?.call?.returnValues?.destinationChain || destinationChain} titleClassName="text-base font-semibold" />
+                  <MdKeyboardArrowRight size={24} />
+                  <ChainProfile value={data.callbackData?.call?.returnValues?.destinationChain || destinationChain} titleClassName="text-base font-semibold" />
+                </div>
+              </dd>
+            </div> :
+            <>
+              <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Source Chain</dt>
+                <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                  <ChainProfile value={sourceChain} />
+                </dd>
               </div>
-            </dd>
-          </div>
+              <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Destination Chain</dt>
+                <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                  <div className="flex flex-col gap-y-2">
+                    <ChainProfile value={destinationChain} />
+                    {is_invalid_destination_chain && (
+                      <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
+                        <PiWarningCircle size={20} />
+                        <span>Invalid Chain</span>
+                      </div>
+                    )}
+                  </div>
+                </dd>
+              </div>
+            </>
+          }
           {symbol && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Asset</dt>
@@ -307,15 +365,15 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Sender</dt>
             <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              <Profile address={senderAddress} chain={sourceChain} />
+              <Profile address={data.originData?.call?.transaction?.from || senderAddress} chain={data.originData?.call?.chain || sourceChain} />
             </dd>
           </div>
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Contract</dt>
             <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               <div className="flex flex-col gap-y-2">
-                <Profile address={contractAddress} chain={destinationChain} />
-                {is_invalid_contract_address && (
+                <Profile address={data.callbackData?.call?.returnValues?.destinationContractAddress || contractAddress} chain={data.callbackData?.call?.returnValues?.destinationChain || destinationChain} />
+                {data.callbackData?.is_invalid_contract_address || is_invalid_contract_address && (
                   <div className="h-6 flex items-center text-red-600 dark:text-red-500 gap-x-1.5">
                     <PiWarningCircle size={20} />
                     <span>Invalid Contract</span>
@@ -327,227 +385,422 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Created</dt>
             <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-              {moment(call?.block_timestamp * 1000).format(TIME_FORMAT)}
+              {moment((data.originData?.call || call)?.block_timestamp * 1000).format(TIME_FORMAT)}
             </dd>
           </div>
-          {((time_spent?.call_express_executed > 0 && ['express_executed', 'executed'].includes(status)) || (time_spent?.total > 0 && ['executed'].includes(status))) ?
+          {isMultihop ?
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time Spent</dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <div className="flex flex-col gap-y-2">
-                  {time_spent.call_express_executed > 0 && ['express_executed', 'executed'].includes(status) && (
-                    <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
-                      <RiTimerFlashLine size={20} />
-                      <TimeSpent fromTimestamp={0} toTimestamp={time_spent.call_express_executed * 1000} />
+                <div className="flex items-center gap-x-4">
+                  {toArray([data.originData, data, data.callbackData]).filter(d => (d.time_spent?.call_express_executed > 0 && ['express_executed', 'executed'].includes(d.status)) || (d.time_spent?.total > 0 && ['executed'].includes(d.status))).map((d, i) => (
+                    <div key={i} className="flex items-center gap-x-4">
+                      {i > 0 && <FiPlus size={18} className="text-zinc-400 dark:text-zinc-500" />}
+                      <div className="flex flex-col gap-y-2">
+                        {d.time_spent.call_express_executed > 0 && ['express_executed', 'executed'].includes(d.status) && (
+                          <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
+                            <RiTimerFlashLine size={20} />
+                            <TimeSpent fromTimestamp={0} toTimestamp={d.time_spent.call_express_executed * 1000} />
+                          </div>
+                        )}
+                        {d.time_spent.total > 0 && ['executed'].includes(d.status) && (
+                          <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
+                            <MdOutlineTimer size={20} />
+                            <TimeSpent fromTimestamp={0} toTimestamp={d.time_spent.total * 1000} />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  {time_spent.total > 0 && ['executed'].includes(status) && (
-                    <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
-                      <MdOutlineTimer size={20} />
-                      <TimeSpent fromTimestamp={0} toTimestamp={time_spent.total * 1000} />
-                    </div>
-                  )}
+                  ))}
                 </div>
               </dd>
             </div> :
-            estimatedTimeSpent && (
-              <>
-                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Estimated Time Spent</dt>
-                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                    <div className="flex flex-col gap-y-2">
-                      {fees?.express_supported && !(confirm || approved) && estimatedTimeSpent.express_execute > 0 && timeDiff(call?.block_timestamp * 1000) < estimatedTimeSpent.express_execute && (
-                        <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
-                          <RiTimerFlashLine size={20} />
-                          <TimeSpent fromTimestamp={0} toTimestamp={estimatedTimeSpent.express_execute * 1000} />
-                        </div>
-                      )}
-                      {estimatedTimeSpent.total > 0 && (
+            (time_spent?.call_express_executed > 0 && ['express_executed', 'executed'].includes(status)) || (time_spent?.total > 0 && ['executed'].includes(status)) ?
+              <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time Spent</dt>
+                <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                  <div className="flex flex-col gap-y-2">
+                    {time_spent.call_express_executed > 0 && ['express_executed', 'executed'].includes(status) && (
+                      <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
+                        <RiTimerFlashLine size={20} />
+                        <TimeSpent fromTimestamp={0} toTimestamp={time_spent.call_express_executed * 1000} />
+                      </div>
+                    )}
+                    {time_spent.total > 0 && ['executed'].includes(status) && (
+                      <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
+                        <MdOutlineTimer size={20} />
+                        <TimeSpent fromTimestamp={0} toTimestamp={time_spent.total * 1000} />
+                      </div>
+                    )}
+                  </div>
+                </dd>
+              </div> :
+              estimatedTimeSpent && (
+                <>
+                  <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                    <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Estimated Time Spent</dt>
+                    <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                      <div className="flex flex-col gap-y-2">
+                        {fees?.express_supported && !(confirm || approved) && estimatedTimeSpent.express_execute > 0 && timeDiff(call?.block_timestamp * 1000) < estimatedTimeSpent.express_execute && (
+                          <div className="flex items-center text-green-600 dark:text-green-500 gap-x-1">
+                            <RiTimerFlashLine size={20} />
+                            <TimeSpent fromTimestamp={0} toTimestamp={estimatedTimeSpent.express_execute * 1000} />
+                          </div>
+                        )}
+                        {estimatedTimeSpent.total > 0 && (
+                          <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
+                            <MdOutlineTimer size={20} />
+                            <TimeSpent fromTimestamp={0} toTimestamp={estimatedTimeSpent.total * 1000} />
+                          </div>
+                        )}
+                      </div>
+                    </dd>
+                  </div>
+                  {!['express_executed', 'executed'].includes(status) && (
+                    <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                      <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time Spent</dt>
+                      <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                         <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
                           <MdOutlineTimer size={20} />
-                          <TimeSpent fromTimestamp={0} toTimestamp={estimatedTimeSpent.total * 1000} />
+                          <TimeSpent fromTimestamp={call?.block_timestamp * 1000} />
                         </div>
+                      </dd>
+                    </div>
+                  )}
+                </>
+              )
+          }
+          {isMultihop ?
+            <>
+              {toArray([data.originData, data, data.callbackData]).findIndex(d => d.fees?.base_fee > 0) > -1 && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Base Fee</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <div className="overflow-x-auto flex items-center gap-x-4">
+                      {toArray([data.originData, data, data.callbackData]).filter(d => d.fees).map((d, i) => (
+                        <div key={i} className="flex items-center gap-x-4">
+                          {i > 0 && <FiPlus size={18} className="text-zinc-400 dark:text-zinc-500" />}
+                          <div className="flex flex-col gap-y-1">
+                            <div className="flex items-center gap-x-2">
+                              <Number
+                                value={d.fees.base_fee}
+                                format="0,0.000000"
+                                suffix={` ${d.fees.source_token?.symbol}`}
+                                noTooltip={true}
+                                className="font-medium"
+                              />
+                              {d.fees.base_fee_usd > 0 && (
+                                <Number
+                                  value={d.fees.base_fee_usd}
+                                  format="0,0.00"
+                                  prefix="($"
+                                  suffix=")"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500 font-normal"
+                                />
+                              )}
+                            </div>
+                            {d.fees.source_confirm_fee > 0 && (
+                              <>
+                                <div className="flex items-center gap-x-1 ml-3">
+                                  <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Confirm Fee:</span>
+                                  <Number
+                                    value={d.fees.source_confirm_fee}
+                                    format="0,0.000000"
+                                    suffix={` ${d.fees.source_token?.symbol}`}
+                                    noTooltip={true}
+                                    className="text-xs font-medium"
+                                  />
+                                  {d.fees.source_token?.token_price?.usd > 0 > 0 && (
+                                    <Number
+                                      value={d.fees.source_confirm_fee * d.fees.source_token.token_price.usd}
+                                      format="0,0.00"
+                                      prefix="($"
+                                      suffix=")"
+                                      noTooltip={true}
+                                      className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                                    />
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-x-1 ml-3">
+                                  <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Approve Fee:</span>
+                                  <Number
+                                    value={d.fees.base_fee - d.fees.source_confirm_fee}
+                                    format="0,0.000000"
+                                    suffix={` ${d.fees.source_token?.symbol}`}
+                                    noTooltip={true}
+                                    className="text-xs font-medium"
+                                  />
+                                  {d.fees.source_token?.token_price?.usd > 0 > 0 && (
+                                    <Number
+                                      value={(d.fees.base_fee - d.fees.source_confirm_fee) * d.fees.source_token.token_price.usd}
+                                      format="0,0.00"
+                                      prefix="($"
+                                      suffix=")"
+                                      noTooltip={true}
+                                      className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                                    />
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </dd>
+                </div>
+              )}
+              {toArray([data.originData, data, data.callbackData]).findIndex(d => d.express_executed && d.fees?.express_supported && d.fees.express_fee > 0) > -1 && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Express Fee</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <div className="overflow-x-auto flex items-center gap-x-4">
+                      {toArray([data.originData, data, data.callbackData]).filter(d => d.fees?.express_supported).map((d, i) => (
+                        <div key={i} className="flex items-center gap-x-4">
+                          {i > 0 && <FiPlus size={18} className="text-zinc-400 dark:text-zinc-500" />}
+                          <div className="flex flex-col gap-y-1">
+                            <div className="flex items-center gap-x-2">
+                              <Number
+                                value={d.fees.express_fee}
+                                format="0,0.000000"
+                                suffix={` ${d.fees.source_token?.symbol}`}
+                                noTooltip={true}
+                                className="font-medium"
+                              />
+                              {d.fees.express_fee_usd > 0 && (
+                                <Number
+                                  value={d.fees.express_fee_usd}
+                                  format="0,0.00"
+                                  prefix="($"
+                                  suffix=")"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500 font-normal"
+                                />
+                              )}
+                            </div>
+                            {d.fees.source_express_fee && (
+                              <>
+                                {isNumber(d.fees.source_express_fee.relayer_fee) && (
+                                  <div className="flex items-center gap-x-1 ml-3">
+                                    <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Relayer Fee:</span>
+                                    <Number
+                                      value={d.fees.source_express_fee.relayer_fee}
+                                      format="0,0.000000"
+                                      suffix={` ${d.fees.source_token?.symbol}`}
+                                      noTooltip={true}
+                                      className="text-xs font-medium"
+                                    />
+                                    {d.fees.source_express_fee.relayer_fee_usd > 0 && (
+                                      <Number
+                                        value={d.fees.source_express_fee.relayer_fee_usd}
+                                        format="0,0.00"
+                                        prefix="($"
+                                        suffix=")"
+                                        noTooltip={true}
+                                        className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                                {isNumber(d.fees.source_express_fee.express_gas_overhead_fee) && (
+                                  <div className="flex items-center gap-x-1 ml-3">
+                                    <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Overhead Fee:</span>
+                                    <Number
+                                      value={d.fees.source_express_fee.express_gas_overhead_fee}
+                                      format="0,0.000000"
+                                      suffix={` ${d.fees.source_token?.symbol}`}
+                                      noTooltip={true}
+                                      className="text-xs font-medium"
+                                    />
+                                    {d.fees.source_express_fee.express_gas_overhead_fee_usd > 0 && (
+                                      <Number
+                                        value={d.fees.source_express_fee.express_gas_overhead_fee_usd}
+                                        format="0,0.00"
+                                        prefix="($"
+                                        suffix=")"
+                                        noTooltip={true}
+                                        className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </dd>
+                </div>
+              )}
+            </> :
+            <>
+              {fees?.base_fee > 0 && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Base Fee</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <div className="flex flex-col gap-y-1">
+                      <div className="flex items-center gap-x-2">
+                        <Number
+                          value={fees.base_fee}
+                          format="0,0.000000"
+                          suffix={` ${fees.source_token?.symbol}`}
+                          noTooltip={true}
+                          className="font-medium"
+                        />
+                        {fees.base_fee_usd > 0 && (
+                          <Number
+                            value={fees.base_fee_usd}
+                            format="0,0.00"
+                            prefix="($"
+                            suffix=")"
+                            noTooltip={true}
+                            className="text-zinc-400 dark:text-zinc-500 font-normal"
+                          />
+                        )}
+                      </div>
+                      {fees.source_confirm_fee > 0 && (
+                        <>
+                          <div className="flex items-center gap-x-1 ml-3">
+                            <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Confirm Fee:</span>
+                            <Number
+                              value={fees.source_confirm_fee}
+                              format="0,0.000000"
+                              suffix={` ${fees.source_token?.symbol}`}
+                              noTooltip={true}
+                              className="text-xs font-medium"
+                            />
+                            {fees.source_token?.token_price?.usd > 0 > 0 && (
+                              <Number
+                                value={fees.source_confirm_fee * fees.source_token.token_price.usd}
+                                format="0,0.00"
+                                prefix="($"
+                                suffix=")"
+                                noTooltip={true}
+                                className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                              />
+                            )}
+                          </div>
+                          <div className="flex items-center gap-x-1 ml-3">
+                            <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Approve Fee:</span>
+                            <Number
+                              value={fees.base_fee - fees.source_confirm_fee}
+                              format="0,0.000000"
+                              suffix={` ${fees.source_token?.symbol}`}
+                              noTooltip={true}
+                              className="text-xs font-medium"
+                            />
+                            {fees.source_token?.token_price?.usd > 0 > 0 && (
+                              <Number
+                                value={(fees.base_fee - fees.source_confirm_fee) * fees.source_token.token_price.usd}
+                                format="0,0.00"
+                                prefix="($"
+                                suffix=")"
+                                noTooltip={true}
+                                className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                              />
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                   </dd>
                 </div>
-                {!['express_executed', 'executed'].includes(status) && (
-                  <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-                    <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Time Spent</dt>
-                    <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                      <div className="flex items-center text-zinc-400 dark:text-zinc-500 gap-x-1">
-                        <MdOutlineTimer size={20} />
-                        <TimeSpent fromTimestamp={call?.block_timestamp * 1000} />
+              )}
+              {express_executed && fees?.express_supported && fees.express_fee > 0 && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Express Fee</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <div className="flex flex-col gap-y-1">
+                      <div className="flex items-center gap-x-2">
+                        <Number
+                          value={fees.express_fee}
+                          format="0,0.000000"
+                          suffix={` ${fees.source_token?.symbol}`}
+                          noTooltip={true}
+                          className="font-medium"
+                        />
+                        {fees.express_fee_usd > 0 && (
+                          <Number
+                            value={fees.express_fee_usd}
+                            format="0,0.00"
+                            prefix="($"
+                            suffix=")"
+                            noTooltip={true}
+                            className="text-zinc-400 dark:text-zinc-500 font-normal"
+                          />
+                        )}
                       </div>
-                    </dd>
-                  </div>
-                )}
-              </>
-            )
+                      {fees.source_express_fee && (
+                        <>
+                          {isNumber(fees.source_express_fee.relayer_fee) && (
+                            <div className="flex items-center gap-x-1 ml-3">
+                              <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Relayer Fee:</span>
+                              <Number
+                                value={fees.source_express_fee.relayer_fee}
+                                format="0,0.000000"
+                                suffix={` ${fees.source_token?.symbol}`}
+                                noTooltip={true}
+                                className="text-xs font-medium"
+                              />
+                              {fees.source_express_fee.relayer_fee_usd > 0 && (
+                                <Number
+                                  value={fees.source_express_fee.relayer_fee_usd}
+                                  format="0,0.00"
+                                  prefix="($"
+                                  suffix=")"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                                />
+                              )}
+                            </div>
+                          )}
+                          {isNumber(fees.source_express_fee.express_gas_overhead_fee) && (
+                            <div className="flex items-center gap-x-1 ml-3">
+                              <span className="text-zinc-700 dark:text-zinc-300 text-xs whitespace-nowrap">- Overhead Fee:</span>
+                              <Number
+                                value={fees.source_express_fee.express_gas_overhead_fee}
+                                format="0,0.000000"
+                                suffix={` ${fees.source_token?.symbol}`}
+                                noTooltip={true}
+                                className="text-xs font-medium"
+                              />
+                              {fees.source_express_fee.express_gas_overhead_fee_usd > 0 && (
+                                <Number
+                                  value={fees.source_express_fee.express_gas_overhead_fee_usd}
+                                  format="0,0.00"
+                                  prefix="($"
+                                  suffix=")"
+                                  noTooltip={true}
+                                  className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
+                                />
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </dd>
+                </div>
+              )}
+            </>
           }
-          {fees?.base_fee > 0 && (
-            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Base Fee</dt>
-              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <div className="flex flex-col gap-y-1">
-                  <div className="flex items-center gap-x-2">
-                    <Number
-                      value={fees.base_fee}
-                      format="0,0.000000"
-                      suffix={` ${fees.source_token?.symbol}`}
-                      noTooltip={true}
-                      className="font-medium"
-                    />
-                    {fees.base_fee_usd > 0 && (
-                      <Number
-                        value={fees.base_fee_usd}
-                        format="0,0.00"
-                        prefix="($"
-                        suffix=")"
-                        noTooltip={true}
-                        className="text-zinc-400 dark:text-zinc-500 font-normal"
-                      />
-                    )}
-                  </div>
-                  {fees.source_confirm_fee > 0 && (
-                    <>
-                      <div className="flex items-center gap-x-1 ml-3">
-                        <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Confirm Fee:</span>
-                        <Number
-                          value={fees.source_confirm_fee}
-                          format="0,0.000000"
-                          suffix={` ${fees.source_token?.symbol}`}
-                          noTooltip={true}
-                          className="text-xs font-medium"
-                        />
-                        {fees.source_token?.token_price?.usd > 0 > 0 && (
-                          <Number
-                            value={fees.source_confirm_fee * fees.source_token.token_price.usd}
-                            format="0,0.00"
-                            prefix="($"
-                            suffix=")"
-                            noTooltip={true}
-                            className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
-                          />
-                        )}
-                      </div>
-                      <div className="flex items-center gap-x-1 ml-3">
-                        <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Approve Fee:</span>
-                        <Number
-                          value={fees.base_fee - fees.source_confirm_fee}
-                          format="0,0.000000"
-                          suffix={` ${fees.source_token?.symbol}`}
-                          noTooltip={true}
-                          className="text-xs font-medium"
-                        />
-                        {fees.source_token?.token_price?.usd > 0 > 0 && (
-                          <Number
-                            value={(fees.base_fee - fees.source_confirm_fee) * fees.source_token.token_price.usd}
-                            format="0,0.00"
-                            prefix="($"
-                            suffix=")"
-                            noTooltip={true}
-                            className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
-                          />
-                        )}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </dd>
-            </div>
-          )}
-          {express_executed && fees?.express_supported && fees.express_fee > 0 && (
-            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Express Fee</dt>
-              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <div className="flex flex-col gap-y-1">
-                  <div className="flex items-center gap-x-2">
-                    <Number
-                      value={fees.express_fee}
-                      format="0,0.000000"
-                      suffix={` ${fees.source_token?.symbol}`}
-                      noTooltip={true}
-                      className="font-medium"
-                    />
-                    {fees.express_fee_usd > 0 && (
-                      <Number
-                        value={fees.express_fee_usd}
-                        format="0,0.00"
-                        prefix="($"
-                        suffix=")"
-                        noTooltip={true}
-                        className="text-zinc-400 dark:text-zinc-500 font-normal"
-                      />
-                    )}
-                  </div>
-                  {fees.source_express_fee && (
-                    <>
-                      {isNumber(fees.source_express_fee.relayer_fee) && (
-                        <div className="flex items-center gap-x-1 ml-3">
-                          <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Relayer Fee:</span>
-                          <Number
-                            value={fees.source_express_fee.relayer_fee}
-                            format="0,0.000000"
-                            suffix={` ${fees.source_token?.symbol}`}
-                            noTooltip={true}
-                            className="text-xs font-medium"
-                          />
-                          {fees.source_express_fee.relayer_fee_usd > 0 && (
-                            <Number
-                              value={fees.source_express_fee.relayer_fee_usd}
-                              format="0,0.00"
-                              prefix="($"
-                              suffix=")"
-                              noTooltip={true}
-                              className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
-                            />
-                          )}
-                        </div>
-                      )}
-                      {isNumber(fees.source_express_fee.express_gas_overhead_fee) && (
-                        <div className="flex items-center gap-x-1 ml-3">
-                          <span className="text-zinc-700 dark:text-zinc-300 text-xs">- Overhead Fee:</span>
-                          <Number
-                            value={fees.source_express_fee.express_gas_overhead_fee}
-                            format="0,0.000000"
-                            suffix={` ${fees.source_token?.symbol}`}
-                            noTooltip={true}
-                            className="text-xs font-medium"
-                          />
-                          {fees.source_express_fee.express_gas_overhead_fee_usd > 0 && (
-                            <Number
-                              value={fees.source_express_fee.express_gas_overhead_fee_usd}
-                              format="0,0.00"
-                              prefix="($"
-                              suffix=")"
-                              noTooltip={true}
-                              className="text-zinc-400 dark:text-zinc-500 text-xs font-normal"
-                            />
-                          )}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </dd>
-            </div>
-          )}
           {((gas_paid && gas?.gas_paid_amount > 0) || gas_paid_to_callback) && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Paid</dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex items-center gap-x-2">
                   <Number
-                    value={gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * fees?.source_token?.gas_price}
+                    value={data.originData ? data.originData.gas?.gas_paid_amount : gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * fees?.source_token?.gas_price}
                     format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
+                    suffix={` ${(data.originData?.fees || fees)?.source_token?.symbol}`}
                     noTooltip={true}
                     className="font-medium"
                   />
-                  {fees?.source_token?.token_price?.usd > 0 && (
+                  {(data.originData?.fees || fees)?.source_token?.token_price?.usd > 0 && (
                     <Number
-                      value={(gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * fees.source_token.gas_price) * fees.source_token.token_price.usd}
+                      value={(data.originData ? data.originData.gas?.gas_paid_amount : gas_paid ? gas.gas_paid_amount : gas_paid_to_callback * fees.source_token.gas_price) * (data.originData?.fees || fees).source_token.token_price.usd}
                       format="0,0.00"
                       prefix="($"
                       suffix=")"
@@ -559,21 +812,21 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
               </dd>
             </div>
           )}
-          {executed && isNumber(gas?.gas_used_amount) && (
+          {(!data.originData || data.originData.executed) && executed && isNumber((data.originData?.gas || gas)?.gas_used_amount) && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Used</dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex items-center gap-x-2">
                   <Number
-                    value={gas.gas_used_amount}
+                    value={(data.originData?.gas || gas).gas_used_amount}
                     format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
+                    suffix={` ${(data.originData?.fees || fees)?.source_token?.symbol}`}
                     noTooltip={true}
                     className="font-medium"
                   />
-                  {fees?.source_token?.token_price?.usd > 0 && (
+                  {(data.originData?.fees || fees)?.source_token?.token_price?.usd > 0 && (
                     <Number
-                      value={gas.gas_used_amount * fees.source_token.token_price.usd}
+                      value={(data.originData?.gas || gas).gas_used_amount * (data.originData?.fees || fees).source_token.token_price.usd}
                       format="0,0.00"
                       prefix="($"
                       suffix=")"
@@ -585,21 +838,21 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
               </dd>
             </div>
           )}
-          {executed && (refunded?.receipt?.status || ((executed || is_executed || error) && timeDiff((executed.block_timestamp || error?.block_timestamp || approved?.block_timestamp || confirm?.block_timestamp) * 1000) >= 300)) && isNumber(gas?.gas_paid_amount) && isNumber(gas.gas_remain_amount) && (
+          {(!data.originData || data.originData.executed) && executed && ((data.originData?.refunded || refunded)?.receipt?.status || ((((!data.originData || data.originData.executed) && executed) || is_executed || error) && timeDiff(((data.originData?.executed || executed).block_timestamp || (data.originData?.error || error)?.block_timestamp || (data.originData?.approved || approved)?.block_timestamp || (data.originData?.confirm || confirm)?.block_timestamp) * 1000) >= 300)) && isNumber((data.originData?.gas || gas)?.gas_paid_amount) && isNumber((data.originData?.gas || gas).gas_remain_amount) && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Charged</dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex items-center gap-x-2">
                   <Number
-                    value={gas.gas_paid_amount - (refunded?.receipt?.status ? isNumber(refunded.amount) ? refunded.amount : gas.gas_remain_amount : 0)}
+                    value={(data.originData?.gas || gas).gas_paid_amount - ((data.originData?.refunded || refunded)?.receipt?.status ? isNumber((data.originData?.refunded || refunded).amount) ? (data.originData?.refunded || refunded).amount : (data.originData?.gas || gas).gas_remain_amount : 0)}
                     format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
+                    suffix={` ${(data.originData?.fees || fees)?.source_token?.symbol}`}
                     noTooltip={true}
                     className="font-medium"
                   />
-                  {fees?.source_token?.token_price?.usd > 0 && (
+                  {(data.originData?.fees || fees)?.source_token?.token_price?.usd > 0 && (
                     <Number
-                      value={(gas.gas_paid_amount - (refunded?.receipt?.status ? isNumber(refunded.amount) ? refunded.amount : gas.gas_remain_amount : 0)) * fees.source_token.token_price.usd}
+                      value={((data.originData?.gas || gas).gas_paid_amount - ((data.originData?.refunded || refunded)?.receipt?.status ? isNumber((data.originData?.refunded || refunded).amount) ? (data.originData?.refunded || refunded).amount : (data.originData?.gas || gas).gas_remain_amount : 0)) * (data.originData?.fees || fees).source_token.token_price.usd}
                       format="0,0.00"
                       prefix="($"
                       suffix=")"
@@ -611,7 +864,140 @@ function Info({ data, estimatedTimeSpent, buttons, tx }) {
               </dd>
             </div>
           )}
+          {seeMore && (
+            <>
+              {messageId && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">messageId</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={messageId} childrenClassName="min-w-min">
+                      <span className="break-all">{messageId}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {commandId && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">commandId</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={commandId} childrenClassName="min-w-min">
+                      <span className="break-all">{commandId}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {sourceChain && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">sourceChain</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={sourceChain}>
+                      <span>{sourceChain}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {destinationChain && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">destinationChain</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={destinationChain}>
+                      <span>{destinationChain}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {sourceAddress && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">sourceAddress</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={sourceAddress} childrenClassName="min-w-min">
+                      <span className="break-all">{sourceAddress}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {destinationContractAddress && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">destinationContractAddress</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={destinationContractAddress} childrenClassName="min-w-min">
+                      <span className="break-all">{destinationContractAddress}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {payloadHash && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">payloadHash</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={payloadHash} childrenClassName="min-w-min">
+                      <span className="break-all">{payloadHash}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {payload && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">payload</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy size={16} value={payload} childrenClassName="min-w-min !items-start">
+                      <span className="text-xs break-all">{payload}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {sourceSymbol && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">sourceSymbol</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={sourceSymbol}>
+                      <span>{sourceSymbol}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {destinationSymbol && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">destinationSymbol</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={destinationSymbol}>
+                      <span>{destinationSymbol}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {amountInUnits && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">amount</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy value={amountInUnits}>
+                      <span>{amountInUnits}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+              {executeData && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">executeData</dt>
+                  <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <Copy size={16} value={executeData} childrenClassName="min-w-min !items-start">
+                      <span className="text-xs break-all">{executeData}</span>
+                    </Copy>
+                  </dd>
+                </div>
+              )}
+            </>
+          )}
         </dl>
+      </div>
+      <div className="px-4 sm:px-6 pb-4">
+        <button
+          onClick={() => setSeeMore(!seeMore)}
+          className="flex items-center text-blue-600 dark:text-blue-500 text-xs font-medium gap-x-1"
+        >
+          <span>See {seeMore ? 'Less' : 'More'}</span>
+          {seeMore ? <RxCaretUp size={14} /> : <RxCaretDown size={14} />}
+        </button>
       </div>
     </div>
   )
@@ -756,7 +1142,7 @@ function Details({ data }) {
                               iconOnly={false}
                               width={14}
                               height={14}
-                              containerClassName="!gap-x-1"
+                              containerClassName="!gap-x-1.5"
                               nonIconClassName="text-blue-600 dark:text-blue-500 text-xs"
                             />
                           </div>
@@ -774,7 +1160,7 @@ function Details({ data }) {
                               iconOnly={false}
                               width={14}
                               height={14}
-                              containerClassName="!gap-x-1"
+                              containerClassName="!gap-x-1.5"
                               nonIconClassName="text-blue-600 dark:text-blue-500 text-xs"
                             />
                           </div>
@@ -881,78 +1267,47 @@ function Details({ data }) {
                 break
             }
 
-            let gasElement
-            let gasConvertedElement
+            let gasAmount
             switch (d.id) {
               case 'pay_gas':
-                gasElement = (
-                  <Number
-                    value={isString(d.data) ? d.data * fees?.source_token?.gas_price : gas?.gas_paid_amount}
-                    format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  />
-                )
+                gasAmount = isString(d.data) ? d.data * fees?.source_token?.gas_price : gas?.gas_paid_amount
                 break
               case 'express':
-                gasElement = (
-                  <Number
-                    value={gas?.gas_express_amount}
-                    format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  />
-                )
+                gasAmount = gas?.gas_express_amount
                 break
               case 'confirm':
-                gasElement = (
-                  <Number
-                    value={fees?.source_confirm_fee}
-                    format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  />
-                )
+                gasAmount = fees?.source_confirm_fee
                 break
               case 'approve':
-                gasElement = (
-                  <Number
-                    value={gas?.gas_approve_amount - fees?.source_confirm_fee}
-                    format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  />
-                )
+                gasAmount = gas?.gas_approve_amount - fees?.source_confirm_fee
                 break
               case 'execute':
-                gasElement = (
-                  <Number
-                    value={gas?.gas_execute_amount}
-                    format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  />
-                )
+                gasAmount = gas?.gas_execute_amount
                 break
               case 'refund':
-                gasElement = (
-                  <Number
-                    value={refunded?.amount + _.sum(toArray(refunded_more_transactions).map(d => toNumber(d.amount)))}
-                    format="0,0.000000"
-                    suffix={` ${fees?.source_token?.symbol}`}
-                    noTooltip={true}
-                    className="text-zinc-900 dark:text-zinc-100 font-medium"
-                  />
-                )
+                gasAmount = refunded?.amount + _.sum(toArray(refunded_more_transactions).map(d => toNumber(d.amount)))
                 break
               default:
                 break
             }
+            const gasElement = isNumber(gasAmount) && (
+              <Number
+                value={gasAmount}
+                format="0,0.000000"
+                suffix={` ${fees?.source_token?.symbol}`}
+                noTooltip={true}
+                className="text-zinc-900 dark:text-zinc-100 font-medium"
+              />
+            )
+            const gasConvertedElement = data.originData?.fees?.source_token?.token_price?.usd > 0 && gasElement && (
+              <Number
+                value={gasAmount * fees?.source_token?.token_price?.usd / data.originData.fees.source_token.token_price.usd}
+                format="0,0.000000"
+                suffix={` ${data.originData.fees.source_token.symbol}`}
+                noTooltip={true}
+                className="text-zinc-400 dark:text-zinc-500 text-xs font-medium"
+              />
+            )
 
             return (
               <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
@@ -1012,16 +1367,16 @@ function Details({ data }) {
                   </div>
                 </td>
                 <td className="px-3 py-4 text-left">
-                  <div className="flex flex-col gap-y-2">
+                  <div className="flex flex-col gap-y-1.5">
                     {fromAddress && (
                       <div className="flex items-center gap-x-4">
-                        <span className="w-10">From:</span>
+                        <span className="w-8">From:</span>
                         <Profile address={fromAddress} chain={d.chainData?.id} />
                       </div>
                     )}
                     {toAddress && (
                       <div className="flex items-center gap-x-4">
-                        <span className="w-10">To:</span>
+                        <span className="w-8">To:</span>
                         <Profile address={toAddress} chain={d.chainData?.id} />
                       </div>
                     )}
@@ -1037,6 +1392,7 @@ function Details({ data }) {
                 <td className="px-3 py-4 text-left">
                   <div className="flex flex-col gap-y-2">
                     {gasElement}
+                    {gasConvertedElement}
                   </div>
                 </td>
                 <td className="pl-3 pr-4 sm:pr-0 py-4 flex items-center justify-end text-right">
@@ -1106,16 +1462,16 @@ export function GMP({ tx, commandId }) {
             }
 
             // execute data
-            if (!executeData) {
+            if (!executeData && d.approved) {
               try {
                 const { addresses } = { ...getAssetData(d.call.returnValues?.symbol, assets) }
-                const symbol = d.approved?.returnValues?.symbol || addresses?.[d.call.returnValues?.destinationChain?.toLowerCase()]?.symbol || d.call.returnValues?.symbol
-                const commandId = d.approved?.returnValues?.commandId || d.command_id
-                const sourceChain = d.approved?.returnValues?.sourceChain || getChainData(d.call.chain, chains)?.chain_name
-                const sourceAddress = d.approved?.returnValues?.sourceAddress || d.call.returnValues?.sender
-                const contractAddress = d.approved?.returnValues?.contractAddress || d.call.returnValues?.destinationContractAddress
+                const symbol = d.approved.returnValues?.symbol || addresses?.[d.call.returnValues?.destinationChain?.toLowerCase()]?.symbol || d.call.returnValues?.symbol
+                const commandId = d.approved.returnValues?.commandId || d.command_id
+                const sourceChain = d.approved.returnValues?.sourceChain || getChainData(d.call.chain, chains)?.chain_name
+                const sourceAddress = d.approved.returnValues?.sourceAddress || d.call.returnValues?.sender
+                const contractAddress = d.approved.returnValues?.contractAddress || d.call.returnValues?.destinationContractAddress
                 const payload = d.call.returnValues?.payload
-                const amount = toBigNumber(d.approved?.returnValues?.amount || d.call.returnValues?.amount)
+                const amount = toBigNumber(d.approved.returnValues?.amount || d.call.returnValues?.amount)
 
                 const contract = new Contract(contractAddress, IAxelarExecutable.abi, getProvider(d.call.returnValues?.destinationChain, chains))
                 const { data } = { ...(symbol ? await contract/*.executeWithToken*/.populateTransaction.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount) : await contract/*.execute*/.populateTransaction.execute(commandId, sourceChain, sourceAddress, payload)) }
@@ -1360,6 +1716,7 @@ export function GMP({ tx, commandId }) {
           <Info
             data={data}
             estimatedTimeSpent={estimatedTimeSpent}
+            executeData={executeData}
             buttons={Object.fromEntries(Object.entries({
               pay_gas: addGasButton,
               [call.chain_type !== 'cosmos' && !confirm ? 'confirm' : 'approve']: approveButton,
