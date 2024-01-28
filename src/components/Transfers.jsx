@@ -234,7 +234,7 @@ function Filters() {
 
 export const normalizeType = type => ['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'deposit_service' : type || 'deposit_address'
 
-export function Transfers() {
+export function Transfers({ address }) {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
   const [data, setData] = useState(null)
@@ -244,11 +244,12 @@ export function Transfers() {
 
   useEffect(() => {
     const _params = getParams(searchParams, size)
+    if (address) _params.address = address
     if (!_.isEqual(_params, params)) {
       setParams(_params)
       setRefresh(true)
     }
-  }, [searchParams, params, setParams])
+  }, [address, searchParams, params, setParams])
 
   useEffect(() => {
     const getData = async () => {
@@ -282,7 +283,7 @@ export function Transfers() {
               </p>
             </div>
             <div className="flex items-center gap-x-2">
-              <Filters />
+              {!address && <Filters />}
               {refresh && refresh !== 'true' ? <Spinner /> :
                 <Button
                   color="default"

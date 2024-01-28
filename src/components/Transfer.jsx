@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import _ from 'lodash'
@@ -18,6 +18,7 @@ import { Number } from '@/components/Number'
 import { Profile, ChainProfile } from '@/components/Profile'
 import { TimeAgo, TimeSpent } from '@/components/Time'
 import { ExplorerLink } from '@/components/ExplorerLink'
+import { getParams } from '@/components/Pagination'
 import { normalizeType } from '@/components/Transfers'
 import { useGlobalStore } from '@/app/providers'
 import { searchTransfers } from '@/lib/api/token-transfer'
@@ -618,13 +619,15 @@ function Details({ data }) {
   )
 }
 
-export function Transfer({ tx, transferId }) {
+export function Transfer({ tx }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [data, setData] = useState(null)
   const [ended, setEnded] = useState(null)
 
   useEffect(() => {
     const getData = async () => {
+      const { transferId } = { ...getParams(searchParams) }
       if (tx) {
         if (!ended) {
           const { data } = { ...await searchTransfers({ txHash: tx }) }
@@ -649,7 +652,7 @@ export function Transfer({ tx, transferId }) {
     getData()
     const interval = !ended && setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [tx, transferId, ended, setData, setEnded])
+  }, [tx, searchParams, ended, setData, setEnded])
 
   return (
     <Container className="sm:mt-8">

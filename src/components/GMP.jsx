@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { Contract } from 'ethers'
@@ -25,6 +25,7 @@ import { Profile, ChainProfile, AssetProfile } from '@/components/Profile'
 import { TimeAgo, TimeSpent, TimeUntil } from '@/components/Time'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { useEVMWalletStore, EVMWallet, useCosmosWalletStore, CosmosWallet } from '@/components/Wallet'
+import { getParams } from '@/components/Pagination'
 import { getEvent, normalizeEvent } from '@/components/GMPs'
 import { useGlobalStore } from '@/app/providers'
 import { searchGMP, estimateTimeSpent } from '@/lib/api/gmp'
@@ -1409,8 +1410,9 @@ function Details({ data }) {
 
 const MIN_GAS_REMAIN_AMOUNT = 0.000001
 
-export function GMP({ tx, commandId }) {
+export function GMP({ tx }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [data, setData] = useState(null)
   const [ended, setEnded] = useState(null)
   const [estimatedTimeSpent, setEstimatedTimeSpent] = useState(null)
@@ -1423,6 +1425,7 @@ export function GMP({ tx, commandId }) {
   const cosmosWalletStore = useCosmosWalletStore()
 
   const getData = async () => {
+    const { commandId } = { ...getParams(searchParams) }
     if (commandId) {
       const { data } = { ...await searchGMP({ commandId }) }
       const d = _.head(data)
@@ -1493,7 +1496,7 @@ export function GMP({ tx, commandId }) {
     getData()
     const interval = !ended && setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [tx, commandId, ended, setData, setEnded])
+  }, [tx, searchParams, ended, setData, setEnded])
 
   useEffect(() => {
     try {

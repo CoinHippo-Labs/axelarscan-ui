@@ -367,11 +367,23 @@ function Delegations({ data }) {
   }
 
   const total = _data?.length
-  return (
+  return toArray([delegations?.data || redelegations?.data || unbondings?.data]).findIndex(d => d.length > 0) > -1 && (
     <div className="bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg flex flex-col px-4 sm:px-6 pt-3 pb-6">
       <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">
         <nav className="flex gap-x-4">
-          {tabs.map((d, i) => (
+          {tabs.filter(d => {
+            switch (d) {
+              case 'delegations':
+                return toArray(delegations?.data).length > 0
+              case 'redelegations':
+                return toArray(redelegations?.data).length > 0
+                break
+              case 'unstakings':
+                return toArray(unbondings?.data).length > 0
+              default:
+                return true
+            }
+          }).map((d, i) => (
             <button
               key={i}
               onClick={() => {
