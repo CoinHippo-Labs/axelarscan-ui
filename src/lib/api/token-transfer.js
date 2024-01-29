@@ -4,6 +4,12 @@ const request = async params => {
 }
 
 export const searchTransfers = async params => await request({ ...params, method: 'searchTransfers' })
+export const transfersStats = async params => await request({ ...params, method: 'transfersStats' })
+export const transfersChart = async params => await request({ ...params, method: 'transfersChart' })
+export const transfersTotalVolume = async params => await request({ ...params, method: 'transfersTotalVolume' })
+export const transfersTotalFee = async params => await request({ ...params, method: 'transfersTotalFee' })
+export const transfersTotalActiveUsers = async params => await request({ ...params, method: 'transfersTotalActiveUsers' })
+export const transfersTopUsers = async params => await request({ ...params, method: 'transfersTopUsers' })
 export const searchDepositAddresses = async params => await request({ ...params, method: 'searchDepositAddresses' })
 export const searchBatches = async params => await request({ ...params, method: 'searchBatches' })
 export const getBatch = async (chain, batchId) => await request({ method: 'lcd', path: `/axelar/evm/v1beta1/batched_commands/${chain}/${batchId}` })
