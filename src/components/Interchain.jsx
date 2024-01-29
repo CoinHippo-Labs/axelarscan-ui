@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { Dialog, Listbox, Transition } from '@headlessui/react'
+import { ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Tooltip } from 'recharts'
 import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
@@ -24,8 +25,8 @@ import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, G
 import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '@/lib/api/token-transfer'
 import { ENVIRONMENT } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
-import { equalsIgnoreCase, toBoolean } from '@/lib/string'
-import { toNumber } from '@/lib/number'
+import { equalsIgnoreCase, toBoolean, toTitle } from '@/lib/string'
+import { isNumber, toNumber, numberFormat } from '@/lib/number'
 import { timeDiff } from '@/lib/time'
 import accounts from '@/data/accounts'
 
@@ -242,7 +243,7 @@ function Filters() {
 }
 
 function Summary({ data }) {
-  const { GMPStats, transfersStats, GMPTotalVolume, transfersTotalVolume, GMPTotalActiveUsers } = { ...data }
+  const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
 
   const contracts = _.orderBy(Object.entries(_.groupBy(
     toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s =>
@@ -272,7 +273,7 @@ function Summary({ data }) {
             <Number
               value={toNumber(_.sumBy(GMPStats?.messages, 'num_txs'))}
               format="0,0.00a"
-              prefix="GMP: "
+              prefix="GMPs: "
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
@@ -300,7 +301,7 @@ function Summary({ data }) {
             <Number
               value={toNumber(GMPTotalVolume)}
               format="0,0.00a"
-              prefix="GMP: $"
+              prefix="GMPs: $"
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
@@ -328,7 +329,7 @@ function Summary({ data }) {
             <Number
               value={toNumber(GMPTotalVolume) / (toNumber(_.sumBy(GMPStats?.messages, 'num_txs')) || 1)}
               format="0,0.00a"
-              prefix="GMP: $"
+              prefix="GMPs: $"
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
@@ -363,6 +364,246 @@ function Summary({ data }) {
       </dl>
     </div>
   )
+}
+
+function StatsBarChart({
+  i,
+  data,
+  totalValue,
+  field = 'num_txs',
+  stacks = ['gmp', 'transfers'],
+  colors = { gmp: '#ff7d20', transfers: '#009ef7', transfers_airdrop: '#de3163' },
+  scale = '',
+  useStack = true,
+  title = '',
+  description = '',
+  dateFormat = 'D MMM',
+  granularity = 'day',
+  valueFormat = '0,0',
+  valuePrefix = '',
+}) {
+  const [chartData, setChartData] = useState(null)
+  const [x, setX] = useState(null)
+
+  useEffect(() => {
+    if (data) {
+      setChartData(toArray(data).map(d => {
+        const time = moment(d.timestamp).utc()
+        const timeString = time.format(dateFormat)
+
+        let focusTimeString
+        switch (granularity) {
+          case 'month':
+            focusTimeString = time.format('MMM YYYY')
+            break
+          case 'week':
+            focusTimeString = [time.format(dateFormat), moment(time).add(7, 'days').format(dateFormat)].join(' - ')
+            break
+          default:
+            focusTimeString = timeString
+            break
+        }
+
+        return { ...d, timeString, focusTimeString }
+      }).filter(d => scale !== 'log' || field !== 'volume' || d[field] > 100))
+    }
+  }, [data, setChartData])
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (!active) return null
+
+    const data = _.head(payload)?.payload
+    const values = toArray(_.concat(stacks, 'total')).map(d => ({ key: d, value: data?.[`${d !== 'total' ? `${d}_` : ''}${field}`] })).filter(d => field !== 'volume' || !d.key.includes('airdrop') || d.value > 100).map(d => ({ ...d, key: d.key === 'transfers_airdrop' ? 'airdrop_participations' : d.key }))
+
+    return (
+      <div className="bg-zinc-50 dark:bg-zinc-800 rounded-lg flex flex-col gap-y-1.5 p-2">
+        {toArray(values).map((d, i) => (
+          <div key={i} className="flex items-center justify-between gap-x-4">
+            <span className="capitalize text-xs font-semibold">{toTitle(d.key === 'gmp' ? 'GMPs' : d.key)}</span>
+            <Number
+              value={d.value}
+              format={valueFormat}
+              prefix={valuePrefix}
+              noTooltip={true}
+              className="text-xs font-medium"
+            />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const d = toArray(chartData).find(d => d.timestamp === x)
+  const value = d ? d[field] : chartData ? totalValue || _.sumBy(chartData, field) : null
+  const timeString = d ? d.focusTimeString : chartData ? toArray([_.head(split(_.head(chartData)?.focusTimeString, { delimiter: ' - ' })), _.last(split(_.last(chartData)?.focusTimeString, { delimiter: ' - ' }))]).join(' - ') : null
+
+  return (
+    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-2 px-4 sm:px-6 xl:px-8 py-8', i % 2 !== 0 ? 'sm:border-l-0' : '')}>
+      <div className="flex items-start justify-between gap-x-4">
+        <div className="flex flex-col gap-y-0.5">
+          <span className="text-zinc-900 dark:text-zinc-100 text-base font-semibold">
+            {title}
+          </span>
+          {description && (
+            <span className="hidden lg:block text-slate-400 dark:text-slate-500 text-sm font-normal">
+              {description}
+            </span>
+          )}
+        </div>
+        {isNumber(value) && (
+          <div className="flex flex-col items-end gap-y-0.5">
+            <Number
+              value={value}
+              format={valueFormat}
+              prefix={valuePrefix}
+              noTooltip={true}
+              className="text-zinc-900 dark:text-zinc-100 !text-base font-semibold"
+            />
+            <span className="text-zinc-400 dark:text-zinc-500 text-sm text-right whitespace-nowrap">
+              {timeString}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="w-full h-64 -mb-4">
+        {!chartData ?
+          <div className="w-full h-full flex items-center justify-center">
+            <Spinner />
+          </div> :
+          <ResponsiveContainer>
+            <BarChart
+              data={chartData}
+              onMouseEnter={e => setX(_.head(e?.activePayload)?.payload?.timestamp)}
+              onMouseMove={e => setX(_.head(e?.activePayload)?.payload?.timestamp)}
+              onMouseLeave={() => setX(null)}
+              margin={{ top: 12, right: 0, bottom: 0, left: scale ? -24 : 0 }}
+            >
+              <XAxis
+                dataKey="timeString"
+                axisLine={false}
+                tickLine={false}
+                className="text-xs"
+              />
+              {scale && (
+                <YAxis
+                  dataKey={field}
+                  scale={scale}
+                  domain={[useStack ? 'dataMin' : _.min(stacks.map(s => _.minBy(chartData, `${s}_${field}`)?.[`${s}_${field}`])), useStack ? 'dataMax' : _.max(stacks.map(s => _.maxBy(chartData, `${s}_${field}`)?.[`${s}_${field}`]))]}
+                  allowDecimals={false}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={v => numberFormat(v, '0,0a')}
+                />
+              )}
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'transparent' }} />
+              {_.reverse(_.cloneDeep(stacks)).map((s, i) => (
+                <Bar
+                  key={i}
+                  stackId={useStack ? field : undefined}
+                  dataKey={`${s}_${field}${s.includes('airdrop') ? '_value' : ''}`}
+                  fill={colors[s]}
+                  minPointSize={scale && i === 0 ? 10 : 0}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        }
+      </div>
+    </div>
+  )
+}
+
+function Charts({ data, granularity }) {
+  const { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, transfersStats, transfersChart, transfersAirdropChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers } = { ...data }
+  const TIME_FORMAT = granularity === 'month' ? 'MMM' : 'D MMM'
+
+  const chartData = _.orderBy(Object.entries(_.groupBy(_.concat(
+    toArray(GMPChart?.data).map(d => ({ ...d, gmp_num_txs: d.num_txs, gmp_volume: d.volume, gmp_fee: d.fee, gmp_users: d.users })),
+    toArray(transfersChart?.data).map(d => ({ ...d, transfers_num_txs: d.num_txs, transfers_volume: d.volume, transfers_fee: d.fee, transfers_users: d.users })),
+    toArray(transfersAirdropChart?.data).map(d => ({ ...d, transfers_airdrop_num_txs: d.num_txs, transfers_airdrop_volume: d.volume, transfers_airdrop_fee: d.fee, transfers_airdrop_users: d.users })),
+  ), 'timestamp')).map(([k, v]) => ({
+    timestamp: toNumber(k),
+    num_txs: _.sumBy(v, 'num_txs'),
+    volume: _.sumBy(v, 'volume'),
+    fee: _.sumBy(v, 'fee'),
+    users: _.sumBy(v, 'users'),
+    gmp_num_txs: _.sumBy(v.filter(_v => _v.gmp_num_txs > 0), 'gmp_num_txs'),
+    gmp_volume: _.sumBy(v.filter(_v => _v.gmp_volume > 0), 'gmp_volume'),
+    gmp_fee: _.sumBy(v.filter(_v => _v.gmp_fee > 0), 'gmp_fee'),
+    gmp_users: _.sumBy(v.filter(_v => _v.gmp_users > 0), 'gmp_users'),
+    transfers_num_txs: _.sumBy(v.filter(_v => _v.transfers_num_txs > 0), 'transfers_num_txs'),
+    transfers_volume: _.sumBy(v.filter(_v => _v.transfers_volume > 0), 'transfers_volume'),
+    transfers_fee: _.sumBy(v.filter(_v => _v.transfers_fee > 0), 'transfers_fee'),
+    transfers_users: _.sumBy(v.filter(_v => _v.transfers_users > 0), 'transfers_users'),
+    transfers_airdrop_num_txs: _.sumBy(v.filter(_v => _v.transfers_airdrop_num_txs > 0), 'transfers_airdrop_num_txs'),
+    transfers_airdrop_volume: _.sumBy(v.filter(_v => _v.transfers_airdrop_volume > 0), 'transfers_airdrop_volume'),
+    transfers_airdrop_fee: _.sumBy(v.filter(_v => _v.transfers_airdrop_fee > 0), 'transfers_airdrop_fee'),
+    transfers_airdrop_users: _.sumBy(v.filter(_v => _v.transfers_airdrop_users > 0), 'transfers_airdrop_users'),
+  })).map(d => ({ ...d, transfers_airdrop_volume_value: d.transfers_airdrop_volume > 0 ? d.transfers_airdrop_volume > 100000 ? _.mean([d.gmp_volume, d.transfers_volume]) * 2 : d.transfers_airdrop_volume : 0 })), ['timestamp'], ['asc'])
+
+  const maxVolumePerMean = _.maxBy(chartData, 'volume')?.volume / (_.meanBy(chartData, 'volume') || 1)
+  const hasAirdropActivities = chartData.find(d => d.transfers_airdrop_volume > 0)
+  const scale = maxVolumePerMean > 5 && !hasAirdropActivities ? 'log' : undefined
+  const useStack = maxVolumePerMean <= 5 || maxVolumePerMean > 10 || hasAirdropActivities
+
+  return (
+    <div className="border-b border-b-zinc-200 dark:border-b-zinc-700">
+      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:px-2 xl:px-0">
+        <StatsBarChart
+          i={0}
+          data={chartData}
+          totalValue={toNumber(_.sumBy(GMPStats?.messages, 'num_txs')) + toNumber(transfersStats?.total)}
+          field="num_txs"
+          title="Transactions"
+          description={`Number of transactions by ${granularity}`}
+          dateFormat={TIME_FORMAT}
+          granularity={granularity}
+        />
+        <StatsBarChart
+          i={1}
+          data={chartData}
+          totalValue={toNumber(GMPTotalVolume) + toNumber(transfersTotalVolume)}
+          field="volume"
+          stacks={['transfers_airdrop', 'gmp', 'transfers']}
+          colors={scale === 'log' && useStack ? { gmp: '#33b700', transfers: '#33b700', transfers_airdrop: '#33b700' } : undefined}
+          scale={scale}
+          useStack={useStack}
+          title="Volume"
+          description={`Transfer volume by ${granularity}`}
+          dateFormat={TIME_FORMAT}
+          granularity={granularity}
+          valuePrefix="$"
+        />
+        <StatsBarChart
+          i={2}
+          data={chartData}
+          totalValue={toNumber(GMPTotalActiveUsers) + toNumber(transfersTotalActiveUsers)}
+          field="users"
+          title="Active Users"
+          description={`Number of active users by ${granularity}`}
+          dateFormat={TIME_FORMAT}
+          granularity={granularity}
+        />
+        <StatsBarChart
+          i={3}
+          data={chartData}
+          totalValue={toNumber(GMPTotalFee) + toNumber(transfersTotalFee)}
+          field="fee"
+          title="Gas Fees"
+          description={`Gas fees by ${granularity}`}
+          dateFormat={TIME_FORMAT}
+          granularity={granularity}
+          valuePrefix="$"
+        />
+      </dl>
+    </div>
+  )
+}
+
+function TimeSpents({ data }) {
+  if (!data) return null
+
+  return null
 }
 
 const generateKeyFromParams = params => JSON.stringify(params)
@@ -487,7 +728,6 @@ export function Interchain() {
   const { transfersType, contractAddress, fromTime, toTime } = { ...params }
   const types = toArray(transfersType || ['gmp', 'transfers'])
   const granularity = getGranularity(fromTime, toTime)
-  const _timeSpentData = timeSpentData?.[generateKeyFromParams(params)]
 
   return (
     <Container className="sm:mt-8">
@@ -532,6 +772,8 @@ export function Interchain() {
           </div>
           {refresh && refresh !== 'true' && <Overlay />}
           <Summary data={data[generateKeyFromParams(params)]} />
+          <Charts data={data[generateKeyFromParams(params)]} granularity={granularity} />
+          {types.includes('gmp') && <TimeSpents data={timeSpentData?.[generateKeyFromParams(params)]} />}
         </div>
       }
     </Container>
