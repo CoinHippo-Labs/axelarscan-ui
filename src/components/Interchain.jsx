@@ -9,13 +9,14 @@ import { ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Tooltip } from 'recha
 import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
-import { MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck } from 'react-icons/md'
+import { MdOutlineRefresh, MdOutlineFilterList, MdClose, MdCheck, MdKeyboardArrowRight } from 'react-icons/md'
 import { LuChevronsUpDown } from 'react-icons/lu'
 
 import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
+import Image from '@/components/Image'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
 import { Profile } from '@/components/Profile'
@@ -23,7 +24,7 @@ import { getParams, getQueryString } from '@/components/Pagination'
 import { useGlobalStore } from '@/app/providers'
 import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '@/lib/api/gmp'
 import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '@/lib/api/token-transfer'
-import { ENVIRONMENT } from '@/lib/config'
+import { ENVIRONMENT, getChainData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import { equalsIgnoreCase, toBoolean, toTitle } from '@/lib/string'
 import { isNumber, toNumber, numberFormat } from '@/lib/number'
@@ -243,6 +244,8 @@ function Filters() {
 }
 
 function Summary({ data }) {
+  if (!data) return null
+
   const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
 
   const contracts = _.orderBy(Object.entries(_.groupBy(
@@ -266,7 +269,7 @@ function Summary({ data }) {
               value={toNumber(_.sumBy(GMPStats?.messages, 'num_txs')) + toNumber(transfersStats?.total)}
               format="0,0"
               noTooltip={true}
-              className="text-zinc-900 dark:text-zinc-100 text-3xl font-medium leading-10 tracking-tight"
+              className="text-zinc-900 dark:text-zinc-100 !text-3xl font-medium leading-10 tracking-tight"
             />
           </dd>
           <dd className="w-full grid grid-cols-2 gap-x-2 mt-1">
@@ -294,7 +297,7 @@ function Summary({ data }) {
               format="0,0"
               prefix="$"
               noTooltip={true}
-              className="text-zinc-900 dark:text-zinc-100 text-3xl font-medium leading-10 tracking-tight"
+              className="text-zinc-900 dark:text-zinc-100 !text-3xl font-medium leading-10 tracking-tight"
             />
           </dd>
           <dd className="w-full grid grid-cols-2 gap-x-2 mt-1">
@@ -322,7 +325,7 @@ function Summary({ data }) {
               format="0,0"
               prefix="$"
               noTooltip={true}
-              className="text-zinc-900 dark:text-zinc-100 text-3xl font-medium leading-10 tracking-tight"
+              className="text-zinc-900 dark:text-zinc-100 !text-3xl font-medium leading-10 tracking-tight"
             />
           </dd>
           <dd className="w-full grid grid-cols-2 gap-x-2 mt-1">
@@ -349,7 +352,7 @@ function Summary({ data }) {
               value={contracts.length}
               format="0,0"
               noTooltip={true}
-              className="text-zinc-900 dark:text-zinc-100 text-3xl font-medium leading-10 tracking-tight"
+              className="text-zinc-900 dark:text-zinc-100 !text-3xl font-medium leading-10 tracking-tight"
             />
           </dd>
           <dd className="w-full grid grid-cols-2 gap-x-2 mt-1">
@@ -465,7 +468,7 @@ function StatsBarChart({
           </div>
         )}
       </div>
-      <div className="w-full h-64 -mb-4">
+      <div className="w-full h-64 -mb-2.5">
         {!chartData ?
           <div className="w-full h-full flex items-center justify-center">
             <Spinner />
@@ -514,6 +517,8 @@ function StatsBarChart({
 }
 
 function Charts({ data, granularity }) {
+  if (!data) return null
+
   const { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, transfersStats, transfersChart, transfersAirdropChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers } = { ...data }
   const TIME_FORMAT = granularity === 'month' ? 'MMM' : 'D MMM'
 
@@ -548,7 +553,7 @@ function Charts({ data, granularity }) {
 
   return (
     <div className="border-b border-b-zinc-200 dark:border-b-zinc-700">
-      <dl className="grid grid-cols-1 sm:grid-cols-2 lg:px-2 xl:px-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:px-2 xl:px-0">
         <StatsBarChart
           i={0}
           data={chartData}
@@ -595,7 +600,259 @@ function Charts({ data, granularity }) {
           granularity={granularity}
           valuePrefix="$"
         />
-      </dl>
+      </div>
+    </div>
+  )
+}
+
+function Top({
+  i,
+  data,
+  type = 'chain',
+  transfersType,
+  field = 'num_txs',
+  title = '',
+  description = '',
+  format = '0,0.00a',
+  prefix = '',
+  className,
+}) {
+  const { chains } = useGlobalStore()
+  return (
+    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-3 px-4 sm:px-6', type === 'chain' ? i % 3 !== 0 ? 'sm:border-l-0' : i % 6 !== 0 ? 'lg:border-l-0' : '' : i % 4 !== 0 ? 'sm:border-l-0' : '', type === 'chain' ? 'xl:px-4 py-4' : 'xl:px-8 py-8')}>
+      <div className="flex flex-col gap-y-0.5">
+        <span className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold">
+          {title}
+        </span>
+        {description && (
+          <span className="text-slate-400 dark:text-slate-500 text-xs font-normal">
+            {description}
+          </span>
+        )}
+      </div>
+      <div className="w-full">
+        {!data ?
+          <div className="w-full h-full flex items-center justify-center">
+            <Spinner />
+          </div> :
+          <div className={clsx('overflow-y-auto flex flex-col gap-y-1', className)}>
+            {toArray(data).filter(d => type !== 'chain' || split(d.key, { delimiter: '_' }).filter(k => !getChainData(k, chains)).length < 1).map((d, i) => {
+              const keys = split(d.key, { delimiter: '_' })
+              return keys.length > 0 && (
+                <div key={i} className="flex items-center justify-between gap-x-2">
+                  <div className={clsx('flex items-center gap-x-1', ['contract', 'address'].includes(type) ? 'h-8' : 'h-6')}>
+                    {keys.map((k, j) => {
+                      switch (type) {
+                        case 'contract':
+                        case 'address':
+                          return (
+                            <Profile
+                              key={j}
+                              address={k}
+                              chain={_.head(toArray(d.chain))}
+                              width={20}
+                              height={20}
+                              noCopy={true}
+                              customURL={type === 'address' && `/address/${k}${transfersType ? `?transfersType=${transfersType}` : ''}`}
+                              className="text-xs font-medium"
+                            />
+                          )
+                        case 'chain':
+                        default:
+                          const { name, image } = { ...getChainData(k, chains) }
+                          const element = (
+                            <div key={j} className="flex items-center gap-x-1.5">
+                              <Image
+                                src={image}
+                                width={20}
+                                height={20}
+                              />
+                              {keys.length === 1 && (
+                                <span className="text-zinc-700 dark:text-zinc-300 text-xs font-medium">
+                                  {name}
+                                </span>
+                              )}
+                              {keys.length > 1 && (
+                                <span className="hidden 2xl:block text-zinc-700 dark:text-zinc-300 text-xs font-medium">
+                                  {name}
+                                </span>
+                              )}
+                            </div>
+                          )
+                          return keys.length > 1 ?
+                            <div key={j} className="flex items-center gap-x-1">
+                              {j > 0 && <MdKeyboardArrowRight size={16} className="text-zinc-700 dark:text-zinc-300" />}
+                              {element}
+                            </div> :
+                            element
+                      }
+                    })}
+                  </div>
+                  <Number
+                    value={d[field]}
+                    format={format}
+                    prefix={prefix}
+                    noTooltip={true}
+                    className="text-zinc-900 dark:text-zinc-100 text-xs font-semibold"
+                  />
+                </div>
+              )
+            })}
+          </div>
+        }
+      </div>
+    </div>
+  )
+} 
+
+function Tops({ data, types }) {
+  if (!data) return null
+
+  const { chains } = useGlobalStore()
+  const { GMPStats, GMPTopUsers, transfersStats, transfersTopUsers, transfersTopUsersByVolume } = { ...data }
+
+  const groupData = (data, by = 'key') => Object.entries(_.groupBy(toArray(data), by)).map(([k, v]) => ({
+    key: _.head(v)?.key || k,
+    num_txs: _.sumBy(v, 'num_txs'),
+    volume: _.sumBy(v, 'volume'),
+    chain: _.orderBy(toArray(_.uniq(toArray(by === 'customKey' ? _.head(v)?.chain : v.map(d => d.chain))).map(d => getChainData(d, chains))), ['i'], ['asc']).map(d => d.id),
+  }))
+
+  const getTopData = (data, field = 'num_txs', n = 5) => _.slice(_.orderBy(toArray(data), [field], ['desc']), 0, n)
+
+  const hasGMP = types.includes('gmp')
+
+  const chainPairs = groupData(_.concat(
+    toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s => toArray(s.destinationChains || s.destination_chains).map(d => ({ key: `${s.key}_${d.key}`, num_txs: d.num_txs, volume: d.volume })))),
+    toArray(transfersStats?.data).map(d => ({ key: `${d.source_chain}_${d.destination_chain}`, num_txs: d.num_txs, volume: d.volume })),
+  ))
+
+  const sourceChains = groupData(_.concat(
+    toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s => toArray(s.destinationChains || s.destination_chains).map(d => ({ key: s.key, num_txs: d.num_txs, volume: d.volume })))),
+    toArray(transfersStats?.data).map(d => ({ key: d.source_chain, num_txs: d.num_txs, volume: d.volume })),
+  ))
+
+  const destionationChains = groupData(_.concat(
+    toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s => toArray(s.destinationChains || s.destination_chains).map(d => ({ key: d.key, num_txs: d.num_txs, volume: d.volume })))),
+    toArray(transfersStats?.data).map(d => ({ key: d.destination_chain, num_txs: d.num_txs, volume: d.volume })),
+  ))
+
+  const transfersUsers = groupData(toArray(transfersTopUsers?.data).map(d => {
+    const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, d.key)) }
+    return { key: d.key, customKey: name || d.key, num_txs: d.num_txs, volume: d.volume }
+  }), 'customKey')
+
+  const transfersUsersByVolume = groupData(toArray(transfersTopUsersByVolume?.data).map(d => {
+    const { key, num_txs, volume } = { ...d }
+    const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, d.key)) }
+    return { key: d.key, customKey: name || d.key, num_txs: d.num_txs, volume: d.volume }
+  }), 'customKey')
+
+  const contracts = groupData(toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s =>
+    toArray(s.destinationChains || s.destination_chains).flatMap(d => toArray(d.contracts).map(c => {
+      const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, c.key)) }
+      return { key: c.key?.toLowerCase(), customKey: name || c.key?.toLowerCase(), num_txs: c.num_txs, volume: c.volume, chain: d.key }
+    }))
+  )), 'customKey')
+
+  const GMPUsers = groupData(toArray(GMPTopUsers?.data).map(d => {
+    const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, d.key)) }
+    return { key: d.key?.toLowerCase(), customKey: name || d.key?.toLowerCase(), num_txs: d.num_txs }
+  }), 'customKey')
+
+  return (
+    <div className="border-b border-b-zinc-200 dark:border-b-zinc-700">
+      <div className={clsx('grid lg:px-2 xl:px-0', hasGMP ? '' : 'lg:grid-cols-2')}>
+        <div className={clsx('grid grid-cols-2 sm:grid-cols-3', hasGMP ? 'lg:grid-cols-6' : '')}>
+          <Top
+            i={0}
+            data={getTopData(chainPairs, 'num_txs', 100)}
+            title="Top Paths"
+            description="by transactions"
+            className="h-48"
+          />
+          <Top
+            i={1}
+            data={getTopData(sourceChains, 'num_txs', 100)}
+            title="Top Sources"
+            description="by transactions"
+            className="h-48"
+          />
+          <Top
+            i={2}
+            data={getTopData(destionationChains, 'num_txs', 100)}
+            title="Top Destinations"
+            description="by transactions"
+            className="h-48"
+          />
+          <Top
+            i={3}
+            data={getTopData(chainPairs, 'volume', 100)}
+            field="volume"
+            title="Top Paths"
+            description="by volume"
+            prefix="$"
+            className="h-48"
+          />
+          <Top
+            i={4}
+            data={getTopData(sourceChains, 'volume', 100)}
+            field="volume"
+            title="Top Sources"
+            description="by volume"
+            prefix="$"
+            className="h-48"
+          />
+          <Top
+            i={5}
+            data={getTopData(destionationChains, 'volume', 100)}
+            field="volume"
+            title="Top Destinations"
+            description="by volume"
+            prefix="$"
+            className="h-48"
+          />
+        </div>
+        <div className={clsx('grid sm:grid-cols-2', hasGMP ? 'lg:grid-cols-4' : '')}>
+          <Top
+            i={0}
+            data={getTopData(transfersUsers, 'num_txs', 10)}
+            type="address"
+            transfersType="transfers"
+            title="Top Users"
+            description="Top users by token transfers transactions"
+          />
+          <Top
+            i={1}
+            data={getTopData(transfersUsersByVolume, 'volume', 10)}
+            type="address"
+            transfersType="transfers"
+            field="volume"
+            title="Top Users"
+            description="Top users by token transfers volume"
+            prefix="$"
+          />
+          {hasGMP && (
+            <>
+              <Top
+                i={2}
+                data={getTopData(contracts, 'num_txs', 10)}
+                type="contract"
+                title="Top Contracts"
+                description="Top contracts by GMP transactions"
+              />
+              <Top
+                i={3}
+                data={getTopData(GMPUsers, 'num_txs', 10)}
+                type="address"
+                transfersType="gmp"
+                title="Top GMP Users"
+                description="Top users by GMP transactions"
+              />
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -773,6 +1030,7 @@ export function Interchain() {
           {refresh && refresh !== 'true' && <Overlay />}
           <Summary data={data[generateKeyFromParams(params)]} />
           <Charts data={data[generateKeyFromParams(params)]} granularity={granularity} />
+          <Tops data={data[generateKeyFromParams(params)]} types={types} />
           {types.includes('gmp') && <TimeSpents data={timeSpentData?.[generateKeyFromParams(params)]} />}
         </div>
       }

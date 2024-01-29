@@ -445,6 +445,7 @@ export function Profile({
   width = 24,
   height = 24,
   noCopy = false,
+  customURL,
   className,
 }) {
   const { chains, contracts, configurations, validators } = useGlobalStore()
@@ -511,7 +512,7 @@ export function Profile({
   }, [address, validators, setValidatorImages])
 
   const { explorer } = { ...getChainData(chain, chains) }
-  const url = explorer ? `${explorer.url}${explorer.address_path?.replace('{address}', address)}` : undefined
+  const url = customURL || (explorer ? `${explorer.url}${explorer.address_path?.replace('{address}', address)}` : undefined)
 
   return address && (name ?
     <div className={clsx('min-w-max flex items-center', width < 24 ? 'gap-x-1.5' : 'gap-x-2 3xl:gap-x-3', className)}>
