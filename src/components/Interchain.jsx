@@ -17,9 +17,11 @@ import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
 import Image from '@/components/Image'
+import { TooltipComponent } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
-import { Profile } from '@/components/Profile'
+import { Profile, ChainProfile } from '@/components/Profile'
+import { TimeAgo, TimeSpent } from '@/components/Time'
 import { getParams, getQueryString } from '@/components/Pagination'
 import { useGlobalStore } from '@/app/providers'
 import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '@/lib/api/gmp'
@@ -27,7 +29,7 @@ import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee
 import { ENVIRONMENT, getChainData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import { equalsIgnoreCase, toBoolean, toTitle } from '@/lib/string'
-import { isNumber, toNumber, numberFormat } from '@/lib/number'
+import { isNumber, toNumber, toFixed, numberFormat } from '@/lib/number'
 import { timeDiff } from '@/lib/time'
 import accounts from '@/data/accounts'
 
@@ -448,7 +450,7 @@ function StatsBarChart({
             {title}
           </span>
           {description && (
-            <span className="hidden lg:block text-slate-400 dark:text-slate-500 text-sm font-normal">
+            <span className="hidden lg:block text-zinc-400 dark:text-zinc-500 text-sm font-normal">
               {description}
             </span>
           )}
@@ -609,6 +611,7 @@ function Top({
   i,
   data,
   type = 'chain',
+  hasGMP = true,
   transfersType,
   field = 'num_txs',
   title = '',
@@ -619,13 +622,13 @@ function Top({
 }) {
   const { chains } = useGlobalStore()
   return (
-    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-3 px-4 sm:px-6', type === 'chain' ? i % 3 !== 0 ? 'sm:border-l-0' : i % 6 !== 0 ? 'lg:border-l-0' : '' : i % 4 !== 0 ? 'sm:border-l-0' : '', type === 'chain' ? 'xl:px-4 py-4' : 'xl:px-8 py-8')}>
+    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-3 px-4 sm:px-6', type === 'chain' ? i % 3 !== 0 ? 'sm:border-l-0' : i % 6 !== 0 ? 'lg:border-l-0' : '' : !hasGMP || i % 4 !== 0 ? 'sm:border-l-0' : '', type === 'chain' ? 'xl:px-4 py-4' : 'xl:px-8 py-8')}>
       <div className="flex flex-col gap-y-0.5">
         <span className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold">
           {title}
         </span>
         {description && (
-          <span className="text-slate-400 dark:text-slate-500 text-xs font-normal">
+          <span className="text-zinc-400 dark:text-zinc-500 text-xs font-normal">
             {description}
           </span>
         )}
@@ -767,6 +770,7 @@ function Tops({ data, types }) {
           <Top
             i={0}
             data={getTopData(chainPairs, 'num_txs', 100)}
+            hasGMP={hasGMP}
             title="Top Paths"
             description="by transactions"
             className="h-48"
@@ -774,6 +778,7 @@ function Tops({ data, types }) {
           <Top
             i={1}
             data={getTopData(sourceChains, 'num_txs', 100)}
+            hasGMP={hasGMP}
             title="Top Sources"
             description="by transactions"
             className="h-48"
@@ -781,6 +786,7 @@ function Tops({ data, types }) {
           <Top
             i={2}
             data={getTopData(destionationChains, 'num_txs', 100)}
+            hasGMP={hasGMP}
             title="Top Destinations"
             description="by transactions"
             className="h-48"
@@ -788,6 +794,7 @@ function Tops({ data, types }) {
           <Top
             i={3}
             data={getTopData(chainPairs, 'volume', 100)}
+            hasGMP={hasGMP}
             field="volume"
             title="Top Paths"
             description="by volume"
@@ -797,6 +804,7 @@ function Tops({ data, types }) {
           <Top
             i={4}
             data={getTopData(sourceChains, 'volume', 100)}
+            hasGMP={hasGMP}
             field="volume"
             title="Top Sources"
             description="by volume"
@@ -806,6 +814,7 @@ function Tops({ data, types }) {
           <Top
             i={5}
             data={getTopData(destionationChains, 'volume', 100)}
+            hasGMP={hasGMP}
             field="volume"
             title="Top Destinations"
             description="by volume"
@@ -818,6 +827,7 @@ function Tops({ data, types }) {
             i={0}
             data={getTopData(transfersUsers, 'num_txs', 10)}
             type="address"
+            hasGMP={hasGMP}
             transfersType="transfers"
             title="Top Users"
             description="Top users by token transfers transactions"
@@ -826,6 +836,7 @@ function Tops({ data, types }) {
             i={1}
             data={getTopData(transfersUsersByVolume, 'volume', 10)}
             type="address"
+            hasGMP={hasGMP}
             transfersType="transfers"
             field="volume"
             title="Top Users"
@@ -838,6 +849,7 @@ function Tops({ data, types }) {
                 i={2}
                 data={getTopData(contracts, 'num_txs', 10)}
                 type="contract"
+                hasGMP={hasGMP}
                 title="Top Contracts"
                 description="Top contracts by GMP transactions"
               />
@@ -845,6 +857,7 @@ function Tops({ data, types }) {
                 i={3}
                 data={getTopData(GMPUsers, 'num_txs', 10)}
                 type="address"
+                hasGMP={hasGMP}
                 transfersType="gmp"
                 title="Top GMP Users"
                 description="Top users by GMP transactions"
@@ -857,10 +870,124 @@ function Tops({ data, types }) {
   )
 }
 
-function TimeSpents({ data }) {
+function GMPTimeSpent({ data, format = '0,0', prefix = '' }) {
   if (!data) return null
 
-  return null
+  const { key, num_txs, express_execute, confirm, approve, total } = { ...data }
+
+  const Point = ({ title, name, noTooltip = false }) => {
+    const point = (
+      <div className="flex flex-col gap-y-0.5">
+        <div className="w-2 h-2 bg-blue-600 dark:bg-blue-500 rounded-full p-1" />
+        <span className="uppercase text-blue-600 dark:text-blue-500 text-2xs font-medium">
+          {title}
+        </span>
+      </div>
+    )
+    return noTooltip ? point : <TooltipComponent content={name} className="whitespace-nowrap">{point}</TooltipComponent>
+  }
+
+  let points = toArray([
+    express_execute && { id: 'express_execute', title: 'X', name: 'Express Execute', time_spent: express_execute },
+    confirm && { id: 'confirm', title: 'C', name: 'Confirm', time_spent: confirm },
+    approve && { id: 'approve', title: 'A', name: 'Approve', time_spent: approve },
+    total && { id: 'execute', title: 'E', name: 'Execute', label: 'Total', time_spent: total },
+  ])
+
+  if (total) {
+    points = points.map((d, i) => {
+      const value = d.time_spent - (i > 0 ? points[i - 1].time_spent : 0)
+      return { ...d, value, width: toFixed(value * 100 / total, 2) }
+    })
+  }
+
+  return (
+    <div className="bg-zinc-50 dark:bg-zinc-800 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:gap-x-2 gap-y-2 sm:gap-y-0 px-3 py-4">
+      <div className="w-40 flex flex-col gap-y-0.5">
+        <ChainProfile
+          value={key}
+          width={20}
+          height={20}
+          className="gap-x-1"
+          titleClassName="text-xs"
+        />
+        <Number
+          value={num_txs}
+          format="0,0.00a"
+          suffix=" records"
+          className="text-zinc-700 dark:text-zinc-300 text-xs font-medium whitespace-nowrap"
+        />
+      </div>
+      {total > 0 && (
+        <div className="w-full flex flex-col gap-y-0.5">
+          <div className="w-full flex items-center justify-between">
+            <Point title="S" name="Start" />
+            {points.map((d, i) => (
+              <div key={i} className="flex justify-between" style={{ width: `${d.width}%` }}>
+                <div className="w-full h-0.5 bg-blue-600 dark:bg-blue-500" style={{ marginTop: '3px' }} />
+                <TooltipComponent
+                  content={(
+                    <div className="flex flex-col">
+                      <span>{d.name}</span>
+                      <TimeSpent
+                        fromTimestamp={0}
+                        toTimestamp={d.value * 1000}
+                        noTooltip={true}
+                        className="font-medium"
+                      />
+                    </div>
+                  )}
+                  className="whitespace-nowrap"
+                >
+                  <Point title={d.title} name={d.name} noTooltip={true} />
+                </TooltipComponent>
+              </div>
+            ))}
+          </div>
+          <div className="w-full flex items-center justify-between ml-2">
+            {points.map((d, i) => (
+              <div key={i} className="flex justify-end ml-2" style={{ width: `${d.width}%` }}>
+                {['express_execute', 'execute'].includes(d.id) ?
+                  <TooltipComponent content={d.label || d.name} className="whitespace-nowrap">
+                    <TimeSpent
+                      fromTimestamp={0}
+                      toTimestamp={d.time_spent * 1000}
+                      noTooltip={true}
+                      className="text-zinc-900 dark:text-zinc-100 text-2xs font-medium whitespace-nowrap"
+                    />
+                  </TooltipComponent> :
+                  <div />
+                }
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GMPTimeSpents({ data }) {
+  if (!data) return null
+
+  const { GMPStatsAVGTimes } = { ...data }
+  return (
+    <div className="border border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-4 px-4 sm:px-6 xl:px-8 py-8">
+      <div className="flex items-start justify-between gap-x-4">
+        <div className="flex flex-col gap-y-0.5">
+          <span className="text-zinc-900 dark:text-zinc-100 text-base font-semibold">
+            GMP Time Spent
+          </span>
+          <span className="text-zinc-400 dark:text-zinc-500 text-sm font-normal">
+            The median time spent of General Message Passing from each chain
+          </span>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {toArray(GMPStatsAVGTimes?.time_spents).map((d, i) => <GMPTimeSpent key={i} data={d} />)}
+      </div>
+    </div>
+  )
 }
 
 const generateKeyFromParams = params => JSON.stringify(params)
@@ -1031,7 +1158,7 @@ export function Interchain() {
           <Summary data={data[generateKeyFromParams(params)]} />
           <Charts data={data[generateKeyFromParams(params)]} granularity={granularity} />
           <Tops data={data[generateKeyFromParams(params)]} types={types} />
-          {types.includes('gmp') && <TimeSpents data={timeSpentData?.[generateKeyFromParams(params)]} />}
+          {types.includes('gmp') && <GMPTimeSpents data={timeSpentData?.[generateKeyFromParams(params)]} />}
         </div>
       }
     </Container>

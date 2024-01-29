@@ -445,7 +445,7 @@ export function EVMBatches() {
                                 )}
                                 {salt && (
                                   <div className="h-6 flex items-center gap-x-1.5 mr-2">
-                                    <span className="text-slate-400 dark:text-slate-500">
+                                    <span className="text-zinc-400 dark:text-zinc-500">
                                       {deposit_address ? 'Deposit address' : 'Salt'}:
                                     </span>
                                     {deposit_address ?
@@ -453,13 +453,13 @@ export function EVMBatches() {
                                         <Link
                                           href={`/account/${deposit_address}`}
                                           target="_blank"
-                                          className="text-slate-400 dark:text-slate-500"
+                                          className="text-zinc-400 dark:text-zinc-500"
                                         >
                                           {ellipse(deposit_address, 6, '0x')}
                                         </Link>
                                       </Copy> :
                                       <Copy size={16} value={salt}>
-                                        <span className="text-slate-400 dark:text-slate-500">
+                                        <span className="text-zinc-400 dark:text-zinc-500">
                                           {ellipse(salt, 6, '0x')}
                                         </span>
                                       </Copy>

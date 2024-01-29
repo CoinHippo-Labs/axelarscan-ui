@@ -12,3 +12,5 @@ export function Tooltip({ content, className, children }) {
     </div>
   )
 }
+
+export const TooltipComponent = Tooltip
