@@ -49,6 +49,7 @@
     "react": "^18.2.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.2.0",
+    "react-force-graph-2d": "^1.25.3",
     "react-gtm-module": "^2.0.11",
     "react-hook-form": "^7.49.3",
     "react-hot-toast": "^2.4.1",

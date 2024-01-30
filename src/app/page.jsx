@@ -1,6 +1,5 @@
+import { Overview } from '@/components/Overview'
+
 export default () => {
-  return (
-    <main>
-    </main>
-  )
+  return <Overview />
 }

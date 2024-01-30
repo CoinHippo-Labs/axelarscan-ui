@@ -245,10 +245,11 @@ function Filters() {
   )
 }
 
-function Summary({ data }) {
+export function Summary({ data }) {
   if (!data) return null
 
   const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
+  const globalStore = useGlobalStore()
 
   const contracts = _.orderBy(Object.entries(_.groupBy(
     toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s =>
@@ -258,7 +259,8 @@ function Summary({ data }) {
       })
     ))), 'key')
   ).map(([k, v]) => ({ key: k, chains: _.uniq(v.map(d => d.chain)), num_txs: _.sumBy(v, 'num_txs'), volume: _.sumBy(v, 'volume') })), ['num_txs', 'volume', 'key'], ['desc', 'desc', 'asc'])
-  const chains = _.uniq(contracts.flatMap(d => d.chains))
+  // const chains = _.uniq(contracts.flatMap(d => d.chains))
+  const chains = toArray(globalStore.chains).filter(d => !d.deprecated && (!d.maintainer_id || globalStore.contracts?.gateway_contracts?.[d.id]?.address))
   console.log('[destinationContracts]', contracts.map(d => d.key))
 
   return (
