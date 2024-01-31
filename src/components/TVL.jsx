@@ -42,7 +42,7 @@ export function TVL() {
     }
   }, [chains, assets, tvl, setData])
 
-  const loading = !(data && assets && data.length >= assets.filter(d => !d.no_tvl).length)
+  const loading = !(data && assets && data.length >= assets.filter(d => !d.no_tvl).length - 3)
   const chainsTVL = !loading && _.orderBy(_.uniqBy(chains.filter(d => !d.no_inflation && !d.no_tvl).map(d => {
     return {
       ...d,

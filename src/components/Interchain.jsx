@@ -26,7 +26,7 @@ import { getParams, getQueryString } from '@/components/Pagination'
 import { useGlobalStore } from '@/components/Global'
 import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '@/lib/api/gmp'
 import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '@/lib/api/token-transfer'
-import { ENVIRONMENT, getChainData } from '@/lib/config'
+import { ENVIRONMENT, getChainData, getITSAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import { equalsIgnoreCase, toBoolean, toTitle } from '@/lib/string'
 import { isNumber, toNumber, toFixed, numberFormat } from '@/lib/number'
@@ -1024,7 +1024,10 @@ export function Interchain() {
     const getData = async () => {
       if (params && toBoolean(refresh)) {
         getGMPStatsAVGTimes(params)
+
         setData({ ...data, [generateKeyFromParams(params)]: Object.fromEntries((await Promise.all(toArray(metrics.map(d => new Promise(async resolve => {
+          const isSearchITSOnTransfers = types.includes('transfers') && d.startsWith('transfers') && (params.assetType === 'its' || toArray(params.asset).findIndex(a => getITSAssetData(a, globalStore.itsAssets)) > -1)
+
           switch (d) {
             case 'GMPStats':
               resolve([d, types.includes('gmp') && await GMPStats(params)])
@@ -1048,57 +1051,66 @@ export function Interchain() {
               resolve([d, types.includes('gmp') && await GMPTopUsers({ ...params, size: 100 })])
               break
             case 'transfersStats':
-              resolve([d, types.includes('transfers') && await transfersStats(params)])
+              if (isSearchITSOnTransfers) resolve([d, { data: [] }])
+              else resolve([d, types.includes('transfers') && await transfersStats(params)])
               break
             case 'transfersChart':
-              let value = types.includes('transfers') && await transfersChart({ ...params, granularity })
-              const values = [[d, value]]
+              if (isSearchITSOnTransfers) resolve([d, { data: [] }])
+              else {
+                let value = types.includes('transfers') && await transfersChart({ ...params, granularity })
+                const values = [[d, value]]
 
-              if (value?.data && granularity === 'month') {
-                const airdrops = [
-                  { date: '08-01-2023', fromTime: undefined, toTime: undefined, chain: 'sei', environment: 'mainnet' },
-                ]
+                if (value?.data && granularity === 'month') {
+                  const airdrops = [
+                    { date: '08-01-2023', fromTime: undefined, toTime: undefined, chain: 'sei', environment: 'mainnet' },
+                  ]
 
-                for (const airdrop of airdrops) {
-                  const { date, chain, environment } = { ...airdrop }
-                  let { fromTime, toTime } = { ...airdrop }
-                  fromTime = fromTime || moment(date).startOf('month').unix()
-                  toTime = toTime || moment(date).endOf('month').unix()
+                  for (const airdrop of airdrops) {
+                    const { date, chain, environment } = { ...airdrop }
+                    let { fromTime, toTime } = { ...airdrop }
+                    fromTime = fromTime || moment(date).startOf('month').unix()
+                    toTime = toTime || moment(date).endOf('month').unix()
 
-                  if (environment === ENVIRONMENT && (!params.fromTime || toNumber(params.fromTime) < fromTime) && (!params.toTime || toNumber(params.toTime) > toTime)) {
-                    const _value = await transfersChart({ ...params, chain, fromTime, toTime, granularity })
+                    if (environment === ENVIRONMENT && (!params.fromTime || toNumber(params.fromTime) < fromTime) && (!params.toTime || toNumber(params.toTime) > toTime)) {
+                      const _value = await transfersChart({ ...params, chain, fromTime, toTime, granularity })
 
-                    if (toArray(_value?.data).length > 0) {
-                      for (const v of _value.data) {
-                        if (v.timestamp && v.volume > 0) {
-                          const index = value.data.findIndex(_v => _v.timestamp === v.timestamp)
-                          if (index > -1 && value.data[index].volume >= v.volume) {
-                            value.data[index] = { ...value.data[index], volume: value.data[index].volume - v.volume }
+                      if (toArray(_value?.data).length > 0) {
+                        for (const v of _value.data) {
+                          if (v.timestamp && v.volume > 0) {
+                            const index = value.data.findIndex(_v => _v.timestamp === v.timestamp)
+                            if (index > -1 && value.data[index].volume >= v.volume) {
+                              value.data[index] = { ...value.data[index], volume: value.data[index].volume - v.volume }
+                            }
                           }
                         }
+                        values.push([d.replace('transfers', 'transfersAirdrop'), _value])
                       }
-                      values.push([d.replace('transfers', 'transfersAirdrop'), _value])
                     }
                   }
                 }
-              }
 
-              resolve(values)
+                resolve(values)
+              }
               break
             case 'transfersTotalVolume':
-              resolve([d, types.includes('transfers') && await transfersTotalVolume(params)])
+              if (isSearchITSOnTransfers) resolve([d, 0])
+              else resolve([d, types.includes('transfers') && await transfersTotalVolume(params)])
               break
             case 'transfersTotalFee':
-              resolve([d, types.includes('transfers') && await transfersTotalFee(params)])
+              if (isSearchITSOnTransfers) resolve([d, 0])
+              else resolve([d, types.includes('transfers') && await transfersTotalFee(params)])
               break
             case 'transfersTotalActiveUsers':
-              resolve([d, types.includes('transfers') && await transfersTotalActiveUsers(params)])
+              if (isSearchITSOnTransfers) resolve([d, 0])
+              else resolve([d, types.includes('transfers') && await transfersTotalActiveUsers(params)])
               break
             case 'transfersTopUsers':
-              resolve([d, types.includes('transfers') && await transfersTopUsers({ ...params, size: 100 })])
+              if (isSearchITSOnTransfers) resolve([d, { data: [] }])
+              else resolve([d, types.includes('transfers') && await transfersTopUsers({ ...params, size: 100 })])
               break
             case 'transfersTopUsersByVolume':
-              resolve([d, types.includes('transfers') && await transfersTopUsers({ ...params, orderBy: 'volume', size: 100 })])
+              if (isSearchITSOnTransfers) resolve([d, { data: [] }])
+              else resolve([d, types.includes('transfers') && await transfersTopUsers({ ...params, orderBy: 'volume', size: 100 })])
               break
             default:
               resolve()

@@ -25,4 +25,4 @@ export const getChainData = (chain, chainsData, exact = true) => chain && toArra
 
 export const getAssetData = (asset, assetsData) => asset && toArray(assetsData).find(d => equalsIgnoreCase(d.denom, asset) || toArray(d.denoms).findIndex(_d => equalsIgnoreCase(_d, asset)) > -1 || equalsIgnoreCase(d.symbol, asset) || toArray(Object.values({ ...d.addresses })).findIndex(a => ['symbol', 'address', 'ibc_denom'].findIndex(f => equalsIgnoreCase(a[f], asset)) > -1) > -1)
 
-export const getITSAssetData = (asset, assetsData) => asset && toArray(assetsData).find(d => toArray([_.concat(d.symbol, d.addresses, d.address)]).findIndex(_d => equalsIgnoreCase(_d, asset)) > -1)
+export const getITSAssetData = (asset, assetsData) => asset && toArray(assetsData).find(d => toArray(_.concat(d.symbol, d.addresses, d.address)).findIndex(_d => equalsIgnoreCase(_d, asset)) > -1)
