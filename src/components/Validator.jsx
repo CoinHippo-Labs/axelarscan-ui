@@ -28,8 +28,12 @@ import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase, ellipse } from '@/lib/string'
 import { isNumber, toNumber, numberFormat } from '@/lib/number'
 
-function Pagination({ data, maxPage = 5, sizePerPage = 25, onChange }) {
-  const [page, setPage] = useState(1)
+function Pagination({ data, value = 1, maxPage = 5, sizePerPage = 25, onChange }) {
+  const [page, setPage] = useState(value)
+
+  useEffect(() => {
+    if (value) setPage(value)
+  }, [value, setPage])
 
   useEffect(() => {
     if (page && onChange) onChange(page)
@@ -331,6 +335,7 @@ function Info({ data, address, delegations }) {
                   {delegations.length > delegationsSizePerPage && (
                     <Pagination
                       data={delegations}
+                      value={delegationsPage}
                       onChange={page => setDelegationsPage(page)}
                       sizePerPage={delegationsSizePerPage}
                     />

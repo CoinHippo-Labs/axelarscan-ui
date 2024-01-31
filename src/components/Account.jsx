@@ -191,8 +191,12 @@ function Info({ data, address }) {
 
 const size = 10
 
-function Pagination({ data, maxPage = 5, sizePerPage = 25, onChange }) {
-  const [page, setPage] = useState(1)
+function Pagination({ data, value = 1, maxPage = 5, sizePerPage = 25, onChange }) {
+  const [page, setPage] = useState(value)
+
+  useEffect(() => {
+    if (value) setPage(value)
+  }, [value, setPage])
 
   useEffect(() => {
     if (page && onChange) onChange(page)
@@ -334,6 +338,7 @@ function Balances({ data }) {
         <div className="flex items-center justify-center mt-4">
           <Pagination
             data={data}
+            value={page}
             onChange={page => setPage(page)}
             sizePerPage={size}
           />
@@ -458,6 +463,7 @@ function Delegations({ data }) {
         <div className="flex items-center justify-center mt-4">
           <Pagination
             data={_data}
+            value={page}
             onChange={page => setPage(page)}
             sizePerPage={size}
           />

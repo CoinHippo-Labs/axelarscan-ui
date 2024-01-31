@@ -151,7 +151,7 @@ function Metrics() {
             </Link>
           </div>
         )}
-        {inflationData?.inflation && (
+        {inflationData?.inflation > 0 && (
           <>
             {networkParameters?.bankSupply?.amount && networkParameters.stakingPool?.bonded_tokens && (
               <div className="h-6 flex items-center gap-x-1.5">
@@ -248,16 +248,16 @@ export function Overview() {
   return (
     <>
       <Metrics />
-      <Container className="sm:mt-8">
+      <Container className="mt-8">
         {!data ? <Spinner /> :
           <div className="flex flex-col gap-y-8">
-            <div className="flex flex-col gap-y-4 mt-8 sm:mt-0">
+            <div className="flex flex-col gap-y-4">
               <h2 className="text-2xl font-semibold">Cross-Chain Activities</h2>
               <Summary data={data} />
             </div>
-            <div className="flex flex-col gap-y-4 mt-8 sm:mt-0">
+            <div className="flex flex-col gap-y-4">
               <h2 className="text-2xl font-semibold">Network Graph</h2>
-              <NetworkGraph data={data.networkGraph} />
+              {typeof window !== 'undefined' && <NetworkGraph data={data.networkGraph} />}
             </div>
           </div>
         }

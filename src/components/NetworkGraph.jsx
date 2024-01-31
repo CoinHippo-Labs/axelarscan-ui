@@ -1,17 +1,20 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
+import ForceGraph2D from 'react-force-graph-2d'
 import _ from 'lodash'
+import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-icons/md'
 
-import { Container } from '@/components/Container'
+import { Button } from '@/components/Button'
 import { Spinner } from '@/components/Spinner'
+import { Number } from '@/components/Number'
+import { ChainProfile } from '@/components/Profile'
 import { useGlobalStore } from '@/app/providers'
 import { getChainData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
-import { equalsIgnoreCase } from '@/lib/string'
-import { isNumber, toNumber, numberFormat } from '@/lib/number'
+import { isString, equalsIgnoreCase } from '@/lib/string'
+import { isNumber, toNumber } from '@/lib/number'
 
 const preloadImagePromise = src => new Promise((resolve, reject) => {
   const img = new Image()
@@ -47,16 +50,15 @@ const useImagePreloader = images => {
 }
 
 const drawNode = (node, ctx, globalScale, isSelected, image) => {
-  const { color, tier } = node
   let { x, y } = node
   if (x === undefined || y === undefined) return
 
-  const radius = (12 - tier) / 2
+  const radius = (TIERS.length + 1 + Math.pow(2, TIERS.length + 1 - (node.tier || 1))) / 2
   const fillStyleOpecity = isSelected ? '1a' : '0d'
 
-  if (color && isSelected) {
-    ctx.strokeStyle = color
-    ctx.fillStyle = `${color}${fillStyleOpecity}`
+  if (node.color && isSelected) {
+    ctx.strokeStyle = node.color
+    ctx.fillStyle = `${node.color}${fillStyleOpecity}`
     ctx.beginPath()
     ctx.lineWidth = 4 / globalScale
 
@@ -72,7 +74,7 @@ const drawNode = (node, ctx, globalScale, isSelected, image) => {
     ctx.closePath()
     ctx.stroke()
     ctx.fill()
-    ctx.shadowColor = color
+    ctx.shadowColor = node.color
     ctx.shadowBlur = 16 * globalScale
   }
   else {
@@ -88,24 +90,21 @@ const drawNode = (node, ctx, globalScale, isSelected, image) => {
 
 const drawTitle = (node, ctx, isSelected, theme) => {
   const fontSize = 2
-  const { x, y, label, tier } = node
+  const { x, y } = node
   if (x === undefined || y === undefined) return
 
-  const radius = (12 - tier + fontSize) / 2
-  const textColor = theme === 'dark' ? isSelected ? '#fff' : '#ddd' : isSelected ? '#000' : '#222'
-
+  const radius = (TIERS.length + 1 + Math.pow(2, TIERS.length + 1 - (node.tier || 1)) + fontSize) / 2
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `${isSelected ? '600' : '400'} ${fontSize}px Poppins`
-  ctx.fillStyle = textColor
-  ctx.fillText(label, x, y + radius)
+  ctx.font = `${isSelected ? '700' : '500'} ${fontSize}px Inter, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif`
+  ctx.fillStyle = theme === 'dark' ? isSelected ? '#f4f4f5' : '#d4d4d8' : isSelected ? '#18181b' : '#3f3f46'
+  ctx.fillText(node.label, x, y + radius)
 }
 
 const drawNodeCanvasObject = (node, ctx, globalScale, selectedNode, links, images, theme) => {
   if (!node || node.x === undefined || node.y === undefined) return
-  const { img } = node
   const isSelected = node.id === selectedNode?.id
-  drawNode(node, ctx, globalScale, isSelected, images?.[img])
+  drawNode(node, ctx, globalScale, isSelected, images?.[node.image])
   drawTitle(node, ctx, isSelected, theme)
 }
 
@@ -118,10 +117,10 @@ const COMET_SPEED = 0.0033
 const COMET_LENGTH = 3
 
 const drawLine = (link, ctx, scale, isSelected, theme) => {
-  if (typeof link.source === 'string' || typeof link.target === 'string') return
+  if (isString(link.source) || isString(link.target)) return
   if (link.source.x != null && link.source.y != null && link.target.x != null && link.target.y != null) {
     ctx.lineWidth = 0.5 / scale
-    ctx.strokeStyle = theme === 'dark' ? isSelected ? '#f5f5f5' : '#252525' : isSelected ? '#454545' : '#e5e5e5'
+    ctx.strokeStyle = theme === 'dark' ? isSelected ? '#e4e4e7' : '#27272a' : isSelected ? '#52525b' : '#e4e4e7'
     ctx.beginPath()
     ctx.moveTo(link.source.x, link.source.y)
     ctx.lineTo(link.target.x, link.target.y)
@@ -142,8 +141,8 @@ const calculateAndDrawComet = (ctx, targetX, sourceX, targetY, sourceY, commetPr
   const cometEndY = sourceY + diffY * cometEndProgress || 0
 
   const gradient = ctx.createLinearGradient(cometStartX, cometStartY, cometEndX, cometEndY)
-  gradient.addColorStop(0, `${color || (theme === 'dark' ? '#f5f5f5' : '#151515')}ff`)
-  gradient.addColorStop(1, `${color || (theme === 'dark' ? '#f5f5f5' : '#151515')}00`)
+  gradient.addColorStop(0, `${color || (theme === 'dark' ? '#f4f4f5' : '#18181b')}ff`)
+  gradient.addColorStop(1, `${color || (theme === 'dark' ? '#f4f4f5' : '#18181b')}00`)
 
   ctx.strokeStyle = gradient
   ctx.beginPath()
@@ -165,8 +164,7 @@ const drawCommet = (link, ctx, theme) => {
     return
   }
 
-  const { color } = { ...link }
-  calculateAndDrawComet(ctx, targetX, sourceX, targetY, sourceY, comet.__progress, color, theme)
+  calculateAndDrawComet(ctx, targetX, sourceX, targetY, sourceY, comet.__progress, link.color, theme)
   link.__comet = comet
 }
 
@@ -181,11 +179,61 @@ const useLinkCanvasObject = (selectedNode, theme) => useCallback(
   [selectedNode, theme],
 )
 
-const N_SD = 0.15
+function Pagination({ data, value = 1, maxPage = 5, sizePerPage = 25, onChange }) {
+  const [page, setPage] = useState(value)
+
+  useEffect(() => {
+    if (value) setPage(value)
+  }, [value, setPage])
+
+  useEffect(() => {
+    if (page && onChange) onChange(page)
+  }, [page, onChange])
+
+  const half = Math.floor(toNumber(maxPage) / 2)
+  const totalPage = Math.ceil(toNumber(data.length) / sizePerPage)
+  const pages = _.range(page - half, page + half + 1).filter(p => p > 0 && p <= totalPage)
+  const prev = _.min(_.range(_.head(pages) - maxPage, _.head(pages)).filter(p => p > 0))
+  const next = _.max(_.range(_.last(pages) + 1, _.last(pages) + maxPage + 1).filter(p => p <= totalPage))
+
+  return (
+    <div className="flex items-center justify-center gap-x-1">
+      {isNumber(prev) && (
+        <Button
+          color="none"
+          onClick={() => setPage(prev)}
+          className="!px-1"
+        >
+          <MdKeyboardDoubleArrowLeft size={18} />
+        </Button>
+      )}
+      {pages.map(p => (
+        <Button
+          key={p}
+          color={p === page ? 'blue' : 'default'}
+          onClick={() => setPage(p)}
+          className="!text-2xs !px-3 !py-1"
+        >
+          <Number value={p} />
+        </Button>
+      ))}
+      {isNumber(next) && (
+        <Button
+          color="none"
+          onClick={() => setPage(next)}
+          className="!px-1"
+        >
+          <MdKeyboardDoubleArrowRight size={18} />
+        </Button>
+      )}
+    </div>
+  )
+}
+
 const TIERS = [
-  { id: 1, n_sd: N_SD, size: 44 },
-  { id: 2, n_sd: -0.475, size: 32 },
-  { id: 3, n_sd: null, size: 18 },
+  { id: 1, n_sd: 0.25 },
+  { id: 2, n_sd: -0.25 },
+  { id: 3, n_sd: null },
 ]
 
 const MEAN = (data, field = 'num_txs') => _.mean(toArray(data).map(d => toNumber(d[field])))
@@ -196,25 +244,23 @@ const SD = (data, field = 'num_txs') => {
   return Math.sqrt(_.sum(data.map(d => Math.pow(toNumber(d[field]) - MEAN(data, field), 2))) / data.length)
 }
 
-const THRESHOLD = (data, n_sd = N_SD, field = 'num_txs') => !isNumber(n_sd) ? 0 : MEAN(data, field) + (n_sd * SD(data, field))
+const THRESHOLD = (data, n_sd, field = 'num_txs') => !isNumber(n_sd) ? 0 : MEAN(data, field) + (n_sd * SD(data, field))
 
 export function NetworkGraph({ data }) {
   if (!data) return null
 
   const graphRef = useRef()
-  const ForceGraph2D = typeof window !== 'undefined' && dynamic(import('react-force-graph-2d'))
   const [graphData, setGraphData] = useState(null)
   const [selectedNode, setSelectedNode] = useState(null)
+  const [page, setPage] = useState(1)
   const { resolvedTheme } = useTheme()
   const { chains } = useGlobalStore()
 
   useEffect(() => {
     const fg = graphRef.current
-    if (fg) {
-      fg.d3Force('link', null)
-      fg.d3Force('charge')?.strength(0)
-      fg.d3Force('center')?.strength(0)
-    }
+    fg?.d3Force('link', null)
+    fg?.d3Force('charge')?.strength(0)
+    fg?.d3Force('center')?.strength(0)
   }, [])
 
   useEffect(() => {
@@ -236,7 +282,6 @@ export function NetworkGraph({ data }) {
 
       let nodes = []
       const edges = []
-      const labelCfg = { style: { fontFamily: '"Poppins", sans-serif', fontSize: 18, fontWeight: 500, fill: resolvedTheme === 'dark' ? '#fff' : '#000' } }
 
       toArray(_data).forEach(d => {
         ['source', 'destination'].forEach(s => {
@@ -244,64 +289,146 @@ export function NetworkGraph({ data }) {
 
           if (id && nodes.findIndex(n => equalsIgnoreCase(n.id, id)) < 0) {
             const { name, image, color } = { ...getChainData(id, chains) }
-            const size = id === AXELAR ? 80 : 64
-
-            nodes.push({
-              id, size, type: 'image', img: image, label: name, labelCfg, color,
-              clipCfg: { show: true, type: 'circle', r: size / 2 },
-              num_txs: _.sumBy(_data.filter(d => [d.sourceChain, d.destinationChain].includes(id)), 'num_txs'),              
-            })
+            nodes.push({ id, image, label: name, color, num_txs: _.sumBy(_data.filter(d => [d.sourceChain, d.destinationChain].includes(id)), 'num_txs') })
           }
         })
 
         const { color } = { ...getChainData(d.sourceChain, chains) }
-        edges.push({
-          data: d, color, id: d.id, source: d.sourceChain, target: d.destinationChain,
-          label: numberFormat(d.num_txs, '0,0.0a'), labelCfg: { style: { ...labelCfg.style, fontSize: 14, textBaseline: 'bottom' } },
-          curveOffset: 32,
-          style: { stroke: resolvedTheme === 'dark' ? '#333' : '#ddd' },
-        })
+        edges.push({ data: d, id: d.id, source: d.sourceChain, target: d.destinationChain, color })
       })
 
       const tiers = TIERS.map(d => ({ ...d, threshold: THRESHOLD(nodes.filter(d => d.id !== AXELAR), d.n_sd) }))
-      nodes = _.orderBy(nodes.map(d => ({ ...d, tier: d.id === AXELAR ? -1 : tiers.find(t => t.threshold <= d.num_txs)?.id })), ['num_txs'], ['desc'])
+      nodes = _.orderBy(nodes.map(d => ({ ...d, tier: d.id === AXELAR ? 0 : tiers.find(t => t.threshold <= d.num_txs)?.id })), ['num_txs'], ['desc'])
 
       setGraphData({ nodes, edges })
     }
   }, [data, resolvedTheme, chains, setGraphData])
 
+  useEffect(() => {
+    if (!page) setPage(1)
+  }, [page, setPage])
+
   const { nodes, edges } = { ...graphData }
-  const imagesUrl = useMemo(() => toArray(nodes).map(d => d.img), [nodes])
+  const imagesUrl = useMemo(() => toArray(nodes).map(d => d.image), [nodes])
   const images = useImagePreloader(toArray(imagesUrl))
   const imagesLoaded = chains && Object.keys({ ...images }).length / chains.length >= 0.75
   const nodeCanvasObject = useNodeCanvasObject(selectedNode, edges, images, resolvedTheme)
   const linkCanvasObject = useLinkCanvasObject(selectedNode, resolvedTheme)
 
-  return (
-    <Container className="sm:mt-8">
-      {!data || !(imagesLoaded && ForceGraph2D && graphData) ? <Spinner /> :
-        <div className="flex items-center justify-center sm:justify-between gap-x-4">
-          <ForceGraph2D
-            ref={graphRef}
-            graphData={{ nodes, links: edges }}
-            width={716.33}
-            height={520.66}
-            backgroundColor={resolvedTheme === 'dark' ? '#000' : '#fff'}
-            showNavInfo={false}
-            nodeVal={node => node ? (12 - node.tier) / 2 : 0}
-            nodeCanvasObject={nodeCanvasObject}
-            linkCanvasObject={linkCanvasObject}
-            onNodeClick={node => setSelectedNode(node)}
-            onLinkClick={() => setSelectedNode(null)}
-            onBackgroundClick={() => setSelectedNode(null)}
-            maxZoom={4.33}
-            minZoom={4.33}
-            cooldownTime={Infinity}
-            enableZoomInteraction={true}
-            enableNodeDrag={false}
-          />
+  const filteredData = toArray(data).filter(d => !selectedNode?.id || [d.sourceChain, d.destinationChain].includes(selectedNode.id))
+  const size = 10
+
+  return !data || !(imagesLoaded && graphData) ? <Spinner /> :
+    <div className="grid lg:grid-cols-2 lg:gap-x-4 xl:gap-x-8">
+      <div className="-ml-4 -mt-4">
+        <ForceGraph2D
+          ref={graphRef}
+          graphData={{ nodes, links: edges }}
+          width={608}
+          height={608}
+          backgroundColor={resolvedTheme === 'dark' ? '#18181b' : '#ffffff'}
+          showNavInfo={false}
+          nodeCanvasObject={nodeCanvasObject}
+          linkCanvasObject={linkCanvasObject}
+          onNodeClick={node => {
+            setSelectedNode(node)
+            setPage(undefined)
+          }}
+          onLinkClick={() => {
+            setSelectedNode(null)
+            setPage(undefined)
+          }}
+          onBackgroundClick={() => {
+            setSelectedNode(null)
+            setPage(undefined)
+          }}
+          maxZoom={5}
+          minZoom={5}
+          cooldownTime={Infinity}
+          enableZoomInteraction={true}
+          enableNodeDrag={false}
+        />
+      </div>
+      <div className="lg:-mt-4">
+        <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">
+          <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+            <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
+              <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
+                <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
+                  Source
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-left">
+                  Destination
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-right">
+                  Transactions
+                </th>
+                <th scope="col" className="px-3 py-3.5 text-right">
+                  Volume
+                </th>
+                <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right whitespace-nowrap">
+                  Volume / TX
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+              {filteredData.filter((d, i) => i >= (page - 1) * size && i < page * size).map((d, i) => (
+                <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
+                  <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
+                    <ChainProfile
+                      value={d.sourceChain}
+                      className="h-6"
+                      titleClassName="font-semibold"
+                    />
+                  </td>
+                  <td className="px-3 py-4 text-left">
+                    <ChainProfile
+                      value={d.destinationChain}
+                      className="h-6"
+                      titleClassName="font-semibold"
+                    />
+                  </td>
+                  <td className="px-3 py-4 text-right">
+                    <div className="flex items-center justify-end">
+                      <Number value={d.num_txs} className="text-zinc-900 dark:text-zinc-100 font-medium" />
+                    </div>
+                  </td>
+                  <td className="px-3 py-4 text-right">
+                    <div className="flex items-center justify-end">
+                      <Number
+                        value={d.volume}
+                        format="0,0"
+                        prefix="$"
+                        noTooltip={true}
+                        className="text-zinc-900 dark:text-zinc-100 font-medium"
+                      />
+                    </div>
+                  </td>
+                  <td className="pl-3 pr-4 sm:pr-0 py-4 text-right">
+                    <div className="flex items-center justify-end">
+                      <Number
+                        value={d.volume / d.num_txs}
+                        format="0,0.00"
+                        prefix="$"
+                        noTooltip={true}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      }
-    </Container>
-  )
+        {filteredData.length > size && (
+          <div className="flex items-center justify-center mt-4">
+            <Pagination
+              data={filteredData}
+              value={page}
+              onChange={page => setPage(page)}
+              sizePerPage={size}
+            />
+          </div>
+        )}
+      </div>
+    </div>
 }
