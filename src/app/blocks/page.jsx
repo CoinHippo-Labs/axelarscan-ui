@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
+
 import { Blocks } from '@/components/Blocks'
 
 export default function BlocksPage() {
-  return <Blocks />
+  return <Suspense><Blocks /></Suspense>
 }

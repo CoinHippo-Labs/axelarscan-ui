@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
+
 import { Transfer } from '@/components/Transfer'
 
 export default function TransferPage({ params }) {
-  return <Transfer {...params} />
+  return <Suspense><Transfer {...params} /></Suspense>
 }

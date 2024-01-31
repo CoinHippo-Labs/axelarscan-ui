@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
+
 import { TVL } from '@/components/TVL'
 
 export default function TVLPage() {
-  return <TVL />
+  return <Suspense><TVL /></Suspense>
 }

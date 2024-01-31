@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
+
 import { Overview } from '@/components/Overview'
 
 export default function Index() {
-  return <Overview />
+  return <Suspense><Overview /></Suspense>
 }

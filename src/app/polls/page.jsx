@@ -1,5 +1,7 @@
+import { Suspense } from 'react'
+
 import { EVMPolls } from '@/components/EVMPolls'
 
 export default function PollsPage() {
-  return <EVMPolls />
+  return <Suspense><EVMPolls /></Suspense>
 }
