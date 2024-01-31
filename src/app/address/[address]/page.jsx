@@ -1,5 +1,5 @@
 import { Address } from '@/components/Address'
 
-export default ({ params }) => {
+export default function AddressPage({ params }) {
   return <Address {...params} />
 }

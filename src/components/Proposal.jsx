@@ -8,8 +8,8 @@ import _ from 'lodash'
 import moment from 'moment'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
-import JSONView from '@/components/JSONView'
+import { Image } from '@/components/Image'
+import { JSONView } from '@/components/JSONView'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
@@ -124,6 +124,7 @@ function Info({ data, end, voteOptions }) {
                   <div className="block dark:hidden">
                     <Image
                       src="/logos/logo.png"
+                      alt=""
                       width={24}
                       height={24}
                     />
@@ -131,6 +132,7 @@ function Info({ data, end, voteOptions }) {
                   <div className="hidden dark:block">
                     <Image
                       src="/logos/logo_white.png"
+                      alt=""
                       width={24}
                       height={24}
                     />
@@ -145,6 +147,7 @@ function Info({ data, end, voteOptions }) {
                         <Tooltip content={name}>
                           <Image
                             src={image}
+                            alt=""
                             width={20}
                             height={20}
                           />
@@ -308,6 +311,14 @@ export function Proposal({ id }) {
   const { validators } = useGlobalStore()
 
   useEffect(() => {
+    const setValidatorsToVotes = votes => {
+      if (!validators) return votes
+      return _.orderBy(
+        toArray(votes).map(d => ({ ...d, validatorData: validators.find(v => equalsIgnoreCase(v.delegator_address, d.voter)) })).map(d => ({ ...d, voting_power: d.validatorData ? d.validatorData.tokens : -1 })),
+        ['voting_power', 'validatorData.description.moniker'], ['desc', 'asc'],
+      )
+    }
+
     const getData = async () => {
       if (validators) {
         const response = await getProposal({ id })
@@ -316,14 +327,6 @@ export function Proposal({ id }) {
     }
     getData()
   }, [id, setData, validators])
-
-  const setValidatorsToVotes = votes => {
-    if (!validators) return votes
-    return _.orderBy(
-      toArray(votes).map(d => ({ ...d, validatorData: validators.find(v => equalsIgnoreCase(v.delegator_address, d.voter)) })).map(d => ({ ...d, voting_power: d.validatorData ? d.validatorData.tokens : -1 })),
-      ['voting_power', 'validatorData.description.moniker'], ['desc', 'asc'],
-    )
-  }
 
   const { proposal_id, voting_end_time, votes } = { ...data }
   const end = voting_end_time && voting_end_time < moment().valueOf()

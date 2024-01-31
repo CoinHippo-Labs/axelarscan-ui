@@ -247,8 +247,6 @@ const SD = (data, field = 'num_txs') => {
 const THRESHOLD = (data, n_sd, field = 'num_txs') => !isNumber(n_sd) ? 0 : MEAN(data, field) + (n_sd * SD(data, field))
 
 export function NetworkGraph({ data }) {
-  if (!data) return null
-
   const graphRef = useRef()
   const [graphData, setGraphData] = useState(null)
   const [selectedNode, setSelectedNode] = useState(null)

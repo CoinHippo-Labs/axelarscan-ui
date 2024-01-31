@@ -1,5 +1,5 @@
 import { Account } from '@/components/Account'
 
-export default ({ params }) => {
+export default function AccountPage({ params }) {
   return <Account {...params} />
 }

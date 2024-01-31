@@ -1,5 +1,5 @@
 import { EVMBatch } from '@/components/EVMBatch'
 
-export default ({ params }) => {
+export default function BatchPage({ params }) {
   return <EVMBatch {...params} />
 }

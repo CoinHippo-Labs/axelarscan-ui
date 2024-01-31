@@ -10,7 +10,7 @@ import { MdOutlineCode, MdOutlineArrowBack } from 'react-icons/md'
 import { PiCheckCircleFill, PiXCircleFill } from 'react-icons/pi'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
@@ -164,6 +164,7 @@ function Info({ data, chain, id, executeButton }) {
                                     {image && (
                                       <Image
                                         src={image}
+                                        alt=""
                                         width={16}
                                         height={16}
                                       />
@@ -186,6 +187,7 @@ function Info({ data, chain, id, executeButton }) {
                                     <Tooltip content={sourceChainData.name} className="whitespace-nowrap">
                                       <Image
                                         src={sourceChainData.image}
+                                        alt=""
                                         width={20}
                                         height={20}
                                       />
@@ -447,7 +449,7 @@ export function EVMBatch({ chain, id }) {
         }
       }
     }
-  }, [executeResponse])
+  }, [chain, executeResponse, chainData])
 
   const { commands, created_at, execute_data } = { ...data }
   const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { AxelarGMPRecoveryAPI } from '@axelar-network/axelarjs-sdk'
 import { Contract } from 'ethers'
 import clsx from 'clsx'
@@ -16,7 +16,7 @@ import { FiPlus } from 'react-icons/fi'
 import { RxCaretDown, RxCaretUp } from 'react-icons/rx'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -40,8 +40,7 @@ import IAxelarExecutable from '@/data/contract/interfaces/gmp/IAxelarExecutable.
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
-export const getStep = data => {
-  const { chains } = useGlobalStore()
+export function getStep(data, chains) {
   const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, confirm_failed, confirm_failed_event, approved, executed, error, refunded, is_executed, is_invalid_call, proposal_id } = { ...data }
 
   const sourceChain = call?.chain
@@ -179,7 +178,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                 {toArray([data.originData, data, data.callbackData]).map((d, i) => {
                   const sourceChain = d.call?.chain
                   const destinationChain = d.call?.returnValues?.destinationChain || d.approved?.chain
-                  const steps = getStep(d)
+                  const steps = getStep(d, chains)
 
                   return (
                     <div key={i} className="flex flex-col gap-y-1.5">
@@ -1013,7 +1012,7 @@ function Details({ data }) {
   const destinationChainData = getChainData(destinationChain, chains)
   const axelarChainData = getChainData('axelarnet', chains)
 
-  const steps = getStep(data)
+  const steps = getStep(data, chains)
   return steps.length > 0 && (
     <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-8">
       {(data.originData || data.callbackData) && (
@@ -1424,7 +1423,7 @@ export function GMP({ tx }) {
   const { chainId, signer } = useEVMWalletStore()
   const cosmosWalletStore = useCosmosWalletStore()
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
     const { commandId } = { ...getParams(searchParams) }
     if (commandId) {
       const { data } = { ...await searchGMP({ commandId }) }
@@ -1490,13 +1489,13 @@ export function GMP({ tx }) {
       }
     }
     return
-  }
+  }, [tx, router, searchParams, chains, assets, ended, estimatedTimeSpent, executeData])
 
   useEffect(() => {
     getData()
     const interval = !ended && setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [tx, searchParams, ended, setData, setEnded])
+  }, [tx, searchParams, ended, setData, setEnded, getData])
 
   useEffect(() => {
     try {
@@ -1562,7 +1561,7 @@ export function GMP({ tx }) {
         }
       }
     }
-  }, [response])
+  }, [response, chains])
 
   const addGas = async data => {
     if (data?.call && sdk && (data.call.chain_type === 'cosmos' ? cosmosWalletStore?.signer : signer)) {

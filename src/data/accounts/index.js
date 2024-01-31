@@ -7,7 +7,7 @@
 }
 */
 
-export default [
+const data = [
   {
     address: 'axelar1d4v2fad26kze27s9przdc6zrcyxqsj20vas39m',
     name: 'Cross-chain Faucet',
@@ -18,6 +18,18 @@ export default [
     address: 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5',
     name: 'Axelar GMP Account',
     image: '/logos/accounts/axelarnet.svg',
+  },
+  {
+    address: '0x607113F751251267fC0E00927e524cE846AE1205',
+    name: 'Sugarcane Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x2eA9cC891E1f8e14E010c08bd51077BFB941b39d',
+    name: 'Sugarcane Express Relayer',
+    image: '/logos/accounts/axelarnet.svg',
+    environment: 'testnet',
   },
   {
     address: '0xfDF36A30070ea0241d69052ea85ff44Ad0476a66',
@@ -688,3 +700,5 @@ export default [
     environment: 'testnet',
   },
 ]
+
+export default data

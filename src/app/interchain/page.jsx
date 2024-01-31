@@ -1,5 +1,5 @@
 import { Interchain } from '@/components/Interchain'
 
-export default () => {
+export default function InterchainPage() {
   return <Interchain />
 }

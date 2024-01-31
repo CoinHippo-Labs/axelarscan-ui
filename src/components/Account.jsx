@@ -9,7 +9,7 @@ import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight, MdArrowForwardIo
 
 import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
@@ -281,6 +281,7 @@ function Balances({ data }) {
                       {image && (
                         <Image
                           src={image}
+                          alt=""
                           width={16}
                           height={16}
                         />
@@ -511,7 +512,7 @@ export function Account({ address }) {
       }
     }
     getData()
-  }, [address, assets, validators, setData])
+  }, [address, router, chains, assets, validators, setData])
 
   const isDepositAddress = (address && (address.length >= 65 || getInputType(address, chains) === 'evmAddress')) || data?.depositAddressData
 

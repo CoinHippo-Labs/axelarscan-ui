@@ -1,5 +1,5 @@
 import { Transfer } from '@/components/Transfer'
 
-export default ({ params }) => {
+export default function TransferPage({ params }) {
   return <Transfer {...params} />
 }

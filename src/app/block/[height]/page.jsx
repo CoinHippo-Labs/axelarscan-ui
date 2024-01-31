@@ -1,5 +1,5 @@
 import { Block } from '@/components/Block'
 
-export default ({ params }) => {
+export default function BlockPage({ params }) {
   return <Block {...params} />
 }

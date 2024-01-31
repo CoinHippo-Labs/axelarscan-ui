@@ -7,7 +7,7 @@ import clsx from 'clsx'
 import _ from 'lodash'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Tooltip } from '@/components/Tooltip'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Spinner } from '@/components/Spinner'
@@ -51,7 +51,7 @@ export function Validators({ status }) {
       }
     }
     getData()
-  }, [EVMChains, setMaintainers])
+  }, [EVMChains, maintainers, setMaintainers])
 
   useEffect(() => {
     const getData = async () => {
@@ -323,6 +323,7 @@ export function Validators({ status }) {
                                   <div className="flex items-center gap-x-2">
                                     <Image
                                       src={image}
+                                      alt=""
                                       width={20}
                                       height={20}
                                     />
@@ -356,6 +357,7 @@ export function Validators({ status }) {
                               <Tooltip key={j} content={name} className="whitespace-nowrap">
                                 <Image
                                   src={image}
+                                  alt=""
                                   width={20}
                                   height={20}
                                   className="mr-1.5 mb-1.5"

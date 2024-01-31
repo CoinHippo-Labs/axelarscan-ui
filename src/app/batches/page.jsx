@@ -1,5 +1,5 @@
 import { EVMBatches } from '@/components/EVMBatches'
 
-export default () => {
+export default function BatchesPage() {
   return <EVMBatches />
 }

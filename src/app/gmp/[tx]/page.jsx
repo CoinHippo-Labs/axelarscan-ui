@@ -1,5 +1,5 @@
 import { GMP } from '@/components/GMP'
 
-export default ({ params }) => {
+export default function GMPPage({ params }) {
   return <GMP {...params} />
 }

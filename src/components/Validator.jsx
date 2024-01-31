@@ -10,7 +10,7 @@ import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-ico
 
 import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { ProgressBar } from '@/components/ProgressBar'
@@ -259,6 +259,7 @@ function Info({ data, address, delegations }) {
                       <Tooltip key={i} content={name} className="whitespace-nowrap">
                         <Image
                           src={image}
+                          alt=""
                           width={20}
                           height={20}
                           className="mr-1.5 mb-1.5"
@@ -564,7 +565,7 @@ export function Validator({ address }) {
       }
       else if (address.startsWith('axelarvaloper') && chains && contracts) setEVMChains(toArray(chains).filter(d => d.chain_type ==='evm' && contracts.gateway_contracts?.[d.id]?.address))
     }
-  }, [address, chains, contracts, validators, setEVMChains])
+  }, [address, router, chains, contracts, validators, setEVMChains])
 
   useEffect(() => {
     const getData = async () => {
@@ -578,7 +579,7 @@ export function Validator({ address }) {
       }
     }
     getData()
-  }, [EVMChains, setMaintainers])
+  }, [EVMChains, maintainers, setMaintainers])
 
   useEffect(() => {
     const getData = async () => {

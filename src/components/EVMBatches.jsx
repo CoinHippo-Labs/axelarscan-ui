@@ -14,7 +14,7 @@ import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
@@ -373,6 +373,7 @@ export function EVMBatches() {
                                     {image && (
                                       <Image
                                         src={image}
+                                        alt=""
                                         width={16}
                                         height={16}
                                       />
@@ -395,6 +396,7 @@ export function EVMBatches() {
                                     <Tooltip content={sourceChainData.name} className="whitespace-nowrap">
                                       <Image
                                         src={sourceChainData.image}
+                                        alt=""
                                         width={20}
                                         height={20}
                                       />

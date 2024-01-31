@@ -1,5 +1,5 @@
 import { Proposals } from '@/components/Proposals'
 
-export default () => {
+export default function ProposalsPage() {
   return <Proposals />
 }

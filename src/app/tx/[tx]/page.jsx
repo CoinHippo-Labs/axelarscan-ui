@@ -1,5 +1,5 @@
 import { Transaction } from '@/components/Transaction'
 
-export default ({ params }) => {
+export default function TransactionPage({ params }) {
   return <Transaction {...params} />
 }

@@ -10,7 +10,7 @@ import { MdClose, MdCheck } from 'react-icons/md'
 import { PiClock, PiWarningCircle } from 'react-icons/pi'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -29,8 +29,7 @@ import { isNumber } from '@/lib/number'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
-const getStep = data => {
-  const { chains } = useGlobalStore()
+export function getStep(data, chains) {
   const { link, send, wrap, unwrap, erc20_transfer, confirm, vote, command, ibc_send, axelar_transfer, type } = { ...data }
 
   const sourceChain = send?.original_source_chain || link?.original_source_chain || send?.source_chain
@@ -164,7 +163,7 @@ function Info({ data, tx }) {
     }
   }
 
-  const steps = getStep(data)
+  const steps = getStep(data, chains)
   return (
     <div className="overflow-hidden bg-zinc-50/75 dark:bg-zinc-800/25 shadow sm:rounded-lg">
       <div className="px-4 sm:px-6 py-6">
@@ -308,6 +307,7 @@ function Info({ data, tx }) {
               <div className="min-w-max flex items-center gap-x-2">
                 <Image
                   src={image}
+                  alt=""
                   width={24}
                   height={24}
                 />
@@ -332,6 +332,7 @@ function Info({ data, tx }) {
                 <div className="min-w-max flex items-center gap-x-2">
                   <Image
                     src={image}
+                    alt=""
                     width={24}
                     height={24}
                   />
@@ -410,7 +411,7 @@ function Details({ data }) {
   const destinationChain = send?.original_destination_chain || link?.original_destination_chain || unwrap?.destination_chain || send?.destination_chain || link?.destination_chain
   const destinationChainData = getChainData(destinationChain, chains)
 
-  const steps = getStep(data)
+  const steps = getStep(data, chains)
 
   return steps.length > 0 && (
     <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0 mt-8">
@@ -652,7 +653,7 @@ export function Transfer({ tx }) {
     getData()
     const interval = !ended && setInterval(() => getData(), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
-  }, [tx, searchParams, ended, setData, setEnded])
+  }, [tx, router, searchParams, ended, setData, setEnded])
 
   return (
     <Container className="sm:mt-8">

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Switch } from '@headlessui/react'
+import { Switch as HeadlessSwitch } from '@headlessui/react'
 import clsx from 'clsx'
 
-export default ({ value, onChange, title }) => {
+export function Switch({ value, onChange, title }) {
   const [enabled, setEnabled] = useState(value)
 
   useEffect(() => {
@@ -11,11 +11,11 @@ export default ({ value, onChange, title }) => {
 
   useEffect(() => {
     if (onChange) onChange(enabled)
-  }, [enabled])
+  }, [onChange, enabled])
 
   return (
-    <Switch.Group as="div" className="flex items-center gap-x-3">
-      <Switch
+    <HeadlessSwitch.Group as="div" className="flex items-center gap-x-3">
+      <HeadlessSwitch
         checked={enabled}
         onChange={setEnabled}
         className={clsx(
@@ -30,12 +30,12 @@ export default ({ value, onChange, title }) => {
             enabled ? 'translate-x-5' : 'translate-x-0',
           )}
         />
-      </Switch>
+      </HeadlessSwitch>
       {title && (
-        <Switch.Label as="span" className="text-sm">
+        <HeadlessSwitch.Label as="span" className="text-sm">
           <span className="text-zinc-900 dark:text-zinc-100 font-medium">{title}</span>
-        </Switch.Label>
+        </HeadlessSwitch.Label>
       )}
-    </Switch.Group>
+    </HeadlessSwitch.Group>
   )
 }

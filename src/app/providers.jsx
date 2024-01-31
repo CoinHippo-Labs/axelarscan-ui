@@ -28,7 +28,7 @@ function ThemeWatcher() {
     onMediaChange()
     media.addEventListener('change', onMediaChange)
     return () => media.removeEventListener('change', onMediaChange)
-  }, [resolvedTheme, setTheme])
+  }, [resolvedTheme, setTheme, setThemeMode])
 
   return null
 }

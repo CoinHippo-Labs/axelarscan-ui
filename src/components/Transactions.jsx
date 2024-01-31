@@ -558,30 +558,30 @@ export function Transactions({ height, address }) {
           const { deposit_address } = { ..._.head((await searchDepositAddresses({ address }))?.data) }
 
           if (deposit_address || addressType === 'evmAddress') {
-            address = equalsIgnoreCase(address, deposit_address) ? deposit_address : address
+            let _address = equalsIgnoreCase(address, deposit_address) ? deposit_address : address
 
             let response
             switch (addressType) {
               case 'axelarAddress':
-                response = await getTransactions({ events: `transfer.sender='${address}'` })
+                response = await getTransactions({ events: `transfer.sender='${_address}'` })
                 data = _.concat(toArray(response?.data), toArray(data))
 
-                response = await getTransactions({ events: `message.sender='${address}'` })
+                response = await getTransactions({ events: `message.sender='${_address}'` })
                 data = _.concat(toArray(response?.data), toArray(data))
                 break
               case 'evmAddress':
-                address = getIcapAddress(address)
-                response = await searchTransactions({ ...params, address, size })
+                _address = getIcapAddress(_address)
+                response = await searchTransactions({ ...params, address: _address, size })
                 data = response?.data
                 break
               default:
                 break
             }
 
-            response = await getTransactions({ events: `link.depositAddress='${address}'` })
+            response = await getTransactions({ events: `link.depositAddress='${_address}'` })
             data = _.concat(toArray(response?.data), toArray(data))
 
-            response = await getTransactions({ events: `transfer.recipient='${address}'` })
+            response = await getTransactions({ events: `transfer.recipient='${_address}'` })
             data = _.concat(toArray(response?.data), toArray(data))
             total = data.length
           }

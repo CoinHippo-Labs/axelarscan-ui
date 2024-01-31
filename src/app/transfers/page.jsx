@@ -1,5 +1,5 @@
 import { Transfers } from '@/components/Transfers'
 
-export default () => {
+export default function TransfersPage() {
   return <Transfers />
 }

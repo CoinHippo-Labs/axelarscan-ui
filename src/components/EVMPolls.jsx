@@ -15,7 +15,7 @@ import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -320,7 +320,7 @@ export function EVMPolls() {
       }
     }
     getData()
-  }, [params, setData, setTotal, refresh, setRefresh])
+  }, [chains, params, setData, setTotal, refresh, setRefresh])
 
   return (
     <Container className="sm:mt-8">
@@ -446,6 +446,7 @@ export function EVMPolls() {
                                 {image && (
                                   <Image
                                     src={image}
+                                    alt=""
                                     width={16}
                                     height={16}
                                   />

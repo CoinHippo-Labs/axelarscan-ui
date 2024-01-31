@@ -34,7 +34,7 @@ export function Address({ address }) {
 
   useEffect(() => {
     if (address && params) router.push(`/address/${address}?${getQueryString(params)}`)
-  }, [address, params])
+  }, [address, router, params])
 
   const { transfersType } = { ...params }
   return address && transfersType && (

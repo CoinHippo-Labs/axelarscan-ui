@@ -9,7 +9,7 @@ import { LuFileSearch2 } from 'react-icons/lu'
 import { GoDotFill } from 'react-icons/go'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Tooltip } from '@/components/Tooltip'
 import { Tag } from '@/components/Tag'
 import { AddMetamask } from '@/components/Metamask'
@@ -37,6 +37,7 @@ function Chain({ data }) {
           <div className="overflow-hidden">
             <Image
               src={image}
+              alt=""
               width={56}
               height={56}
               className="object-cover"
@@ -114,7 +115,7 @@ function Asset({ data, focusID, onFocus }) {
 
   useEffect(() => {
     if (focusID !== denom) setSeeMore(false)
-  }, [focusID])
+  }, [focusID, denom])
 
   const { denom, denoms, native_chain, name, symbol, decimals, image } = { ...data }
   let { addresses } = { ...data }
@@ -132,6 +133,7 @@ function Asset({ data, focusID, onFocus }) {
           <div className="overflow-hidden">
             <Image
               src={image}
+              alt=""
               width={56}
               height={56}
               className="object-cover"
@@ -173,6 +175,7 @@ function Asset({ data, focusID, onFocus }) {
                       >
                         <Image
                           src={image}
+                          alt=""
                           width={24}
                           height={24}
                           className={clsx(
@@ -237,8 +240,8 @@ function Asset({ data, focusID, onFocus }) {
 const resources = ['chains', 'assets']
 
 export function Resources({ resource }) {
-  const pathname = usePathname()
   const router = useRouter()
+  const pathname = usePathname()
   const [rendered, setRendered] = useState(false)
   const [input, setInput] = useState('')
   const [assetFocusID, setAssetFocusID] = useState(null)
@@ -261,7 +264,7 @@ export function Resources({ resource }) {
         }
         break
     }
-  }, [pathname, rendered, setRendered, resource, setInput, setAssetFocusID])
+  }, [router, pathname, rendered, setRendered, resource, setInput, setAssetFocusID])
 
   const filter = resource => {
     const words = split(input, { delimiter: ' ', toCase: 'lower' })

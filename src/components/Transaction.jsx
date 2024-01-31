@@ -9,9 +9,9 @@ import moment from 'moment'
 import { MdArrowForwardIos } from 'react-icons/md'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
-import Switch from '@/components/Switch'
-import JSONView from '@/components/JSONView'
+import { Image } from '@/components/Image'
+import { Switch } from '@/components/Switch'
+import { JSONView } from '@/components/JSONView'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -252,6 +252,7 @@ function Data({ data }) {
                             {image && (
                               <Image
                                 src={image}
+                                alt=""
                                 width={20}
                                 height={20}
                               />
@@ -452,7 +453,7 @@ export function Transaction({ tx }) {
       }
     }
     getData()
-  }, [tx, setData])
+  }, [tx, assets, setData])
 
   return (
     <Container className="sm:mt-8">

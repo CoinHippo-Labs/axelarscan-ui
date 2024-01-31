@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
 
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
@@ -93,6 +93,7 @@ export function SpaceIDProfile({
       {typeof image404 === 'boolean' ?
         <Image
           src={image404 ? SpaceIDLogo : src}
+          alt=""
           width={width}
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
@@ -183,6 +184,7 @@ export function LENSProfile({
       {typeof image404 === 'boolean' ?
         <Image
           src={image404 ? LENSLogo : src}
+          alt=""
           width={width}
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
@@ -272,6 +274,7 @@ export function UnstoppableProfile({
       {typeof image404 === 'boolean' ?
         <Image
           src={image404 ? UnstoppableLogo : src}
+          alt=""
           width={width}
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
@@ -363,6 +366,7 @@ export function ENSProfile({
       {typeof image404 === 'boolean' ?
         <Image
           src={image404 ? ENSLogo : src}
+          alt=""
           width={width}
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8', width < 24 ? 'mr-1.5' : 'mr-2 3xl:mr-3')}
@@ -509,7 +513,7 @@ export function Profile({
       }
     }
     getData()
-  }, [address, validators, setValidatorImages])
+  }, [address, validators, validatorImages, setValidatorImages])
 
   const { explorer } = { ...getChainData(chain, chains) }
   const url = customURL || (explorer ? `${explorer.url}${explorer.address_path?.replace('{address}', address)}` : undefined)
@@ -519,6 +523,7 @@ export function Profile({
       {image ?
         <Image
           src={image}
+          alt=""
           width={width}
           height={height}
           className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
@@ -527,6 +532,7 @@ export function Profile({
         isValidator && (
           <Image
             src={randImage(i)}
+            alt=""
             width={width}
             height={height}
             className={clsx('rounded-full', width === 24 && 'w-6 3xl:w-8 h-6 3xl:h-8')}
@@ -584,6 +590,7 @@ export function ChainProfile({
       {image && (
         <Image
           src={image}
+          alt=""
           width={width}
           height={height}
         />
@@ -620,6 +627,7 @@ export function AssetProfile({
       {image && (
         <Image
           src={image}
+          alt=""
           width={width}
           height={height}
         />

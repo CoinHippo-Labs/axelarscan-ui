@@ -1,5 +1,5 @@
 import { Proposal } from '@/components/Proposal'
 
-export default ({ params }) => {
+export default function ProposalPage({ params }) {
   return <Proposal {...params} />
 }

@@ -1,5 +1,5 @@
 import { Resources } from '@/components/Resources'
 
-export default () => {
+export default function ResourcesPage() {
   return <Resources />
 }

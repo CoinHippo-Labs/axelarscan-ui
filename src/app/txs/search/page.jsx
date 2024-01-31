@@ -1,5 +1,5 @@
 import { Transactions } from '@/components/Transactions'
 
-export default () => {
+export default function TransactionsPage() {
   return <Transactions />
 }

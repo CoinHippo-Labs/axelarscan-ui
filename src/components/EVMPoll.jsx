@@ -8,7 +8,7 @@ import moment from 'moment'
 import { IoCheckmarkCircle, IoCheckmarkDoneCircle } from 'react-icons/io5'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -103,6 +103,7 @@ function Info({ data, id }) {
                         {image && (
                           <Image
                             src={image}
+                            alt=""
                             width={16}
                             height={16}
                           />
@@ -277,7 +278,7 @@ function Votes({ data }) {
         }),
       ))
     }
-  }, [data, setVotes])
+  }, [validators, data, setVotes])
 
   const { initiated_txhash, confirmation_txhash } = { ...data }
   const totalVotingPower = _.sumBy(toArray(validators).filter(d => !d.jailed && d.status === 'BOND_STATUS_BONDED'), 'quadratic_voting_power')
@@ -488,7 +489,7 @@ export function EVMPoll({ id }) {
       setData(d)
     }
     getData()
-  }, [id, setData])
+  }, [id, chains, setData])
 
   return (
     <Container className="sm:mt-8">

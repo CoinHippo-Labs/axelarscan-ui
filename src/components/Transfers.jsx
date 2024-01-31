@@ -15,7 +15,7 @@ import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
@@ -366,6 +366,7 @@ export function Transfers({ address }) {
                               {image && (
                                 <Image
                                   src={image}
+                                  alt=""
                                   width={16}
                                   height={16}
                                 />

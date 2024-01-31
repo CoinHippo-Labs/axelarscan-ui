@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Web3 } from 'web3'
 import { create } from 'zustand'
 import clsx from 'clsx'
 
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Tooltip } from '@/components/Tooltip'
 import { useGlobalStore } from '@/components/Global'
 import { getChainData, getAssetData } from '@/lib/config'
@@ -31,13 +31,13 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
         } catch (error) {}
       }
     }
-  }, [web3])
+  }, [web3, setChainId])
 
   useEffect(() => {
     if (data?.tokenData && data.chain_id === chainId) addToken(data.chain_id, data.tokenData)
-  }, [data, chainId])
+  }, [data, chainId, addToken])
 
-  const addToken = async (chain_id, tokenData) => {
+  const addToken = useCallback(async (chain_id, tokenData) => {
     if (web3 && tokenData) {
       if (chain_id === chainId) {
         try {
@@ -54,9 +54,9 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
       }
       else switchNetwork(chain_id, tokenData)
     }
-  }
+  }, [web3, chainId, switchNetwork])
 
-  const switchNetwork = async (chain_id, tokenData) => {
+  const switchNetwork = useCallback(async (chain_id, tokenData) => {
     try {
       await web3.currentProvider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: web3.utils.toHex(chain_id) }] })
     } catch (error) {
@@ -68,7 +68,7 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
       }
     }
     if (tokenData) setData({ chain_id, tokenData })
-  }
+  }, [web3.currentProvider, web3.utils, chains])
 
   const { id, chain_id, name } = { ...getChainData(chain, chains, false) }
   const { symbol, decimals, image, addresses } = { ...getAssetData(asset, assets) }
@@ -87,6 +87,7 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
     >
       <Image
         src={MetamaskLogo}
+        alt=""
         width={width}
         height={height}
       />

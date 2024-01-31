@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import _ from 'lodash'
 
 import { Container } from '@/components/Container'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
 import { ChainProfile, AssetProfile } from '@/components/Profile'
@@ -108,6 +108,7 @@ export function TVL() {
                       <div className="min-w-max flex items-center gap-x-1.5">
                         <Image
                           src={d.image}
+                          alt=""
                           width={18}
                           height={18}
                         />

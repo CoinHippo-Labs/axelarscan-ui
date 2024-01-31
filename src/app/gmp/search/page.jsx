@@ -1,5 +1,5 @@
 import { GMPs } from '@/components/GMPs'
 
-export default () => {
+export default function GMPsPage() {
   return <GMPs />
 }

@@ -3,7 +3,7 @@ import { constants } from 'ethers'
 const { AddressZero: ZeroAddress } = { ...constants }
 import clsx from 'clsx'
 
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { useGlobalStore } from '@/components/Global'
 import { getChainData } from '@/lib/config'
 import { getInputType } from '@/lib/parser'
@@ -57,6 +57,7 @@ export function ExplorerLink({
       )}
       <Image
         src={icon}
+        alt=""
         width={width}
         height={height}
         className={clsx('rounded-full opacity-60 hover:opacity-100', className)}

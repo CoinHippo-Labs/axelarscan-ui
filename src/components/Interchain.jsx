@@ -16,7 +16,7 @@ import { Container } from '@/components/Container'
 import { Overlay } from '@/components/Overlay'
 import { Button } from '@/components/Button'
 import { DateRangePicker } from '@/components/DateRangePicker'
-import Image from '@/components/Image'
+import { Image } from '@/components/Image'
 import { TooltipComponent } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
@@ -246,10 +246,10 @@ function Filters() {
 }
 
 export function Summary({ data }) {
-  if (!data) return null
-
-  const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
   const globalStore = useGlobalStore()
+
+  if (!data) return null
+  const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
 
   const contracts = _.orderBy(Object.entries(_.groupBy(
     toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s =>
@@ -414,7 +414,7 @@ function StatsBarChart({
         return { ...d, timeString, focusTimeString }
       }).filter(d => scale !== 'log' || field !== 'volume' || d[field] > 100))
     }
-  }, [data, setChartData])
+  }, [data, field, scale, dateFormat, granularity, setChartData])
 
   const CustomTooltip = ({ active, payload }) => {
     if (!active) return null
@@ -669,6 +669,7 @@ function Top({
                             <div key={j} className="flex items-center gap-x-1.5">
                               <Image
                                 src={image}
+                                alt=""
                                 width={20}
                                 height={20}
                               />
@@ -711,9 +712,9 @@ function Top({
 } 
 
 function Tops({ data, types }) {
-  if (!data) return null
-
   const { chains } = useGlobalStore()
+
+  if (!data) return null
   const { GMPStats, GMPTopUsers, transfersStats, transfersTopUsers, transfersTopUsersByVolume } = { ...data }
 
   const groupData = (data, by = 'key') => Object.entries(_.groupBy(toArray(data), by)).map(([k, v]) => ({
@@ -1001,6 +1002,11 @@ export function Interchain() {
   const [data, setData] = useState(null)
   const [timeSpentData, setTimeSpentData] = useState(null)
   const [refresh, setRefresh] = useState(null)
+  const globalStore = useGlobalStore()
+
+  const { transfersType, contractAddress, fromTime, toTime } = { ...params }
+  const types = toArray(transfersType || ['gmp', 'transfers'])
+  const granularity = getGranularity(fromTime, toTime)
 
   useEffect(() => {
     const _params = getParams(searchParams)
@@ -1104,16 +1110,12 @@ export function Interchain() {
     }
 
     getData()
-  }, [params, setData, setTimeSpentData, refresh, setRefresh])
+  }, [params, data, setData, timeSpentData, setTimeSpentData, refresh, setRefresh, types, granularity])
 
   useEffect(() => {
     const interval = setInterval(() => setRefresh('true'), 5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
-
-  const { transfersType, contractAddress, fromTime, toTime } = { ...params }
-  const types = toArray(transfersType || ['gmp', 'transfers'])
-  const granularity = getGranularity(fromTime, toTime)
 
   return (
     <Container className="sm:mt-8">

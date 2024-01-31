@@ -8,7 +8,7 @@ import { MdArrowBackIosNew, MdArrowForwardIos } from 'react-icons/md'
 import { RxCaretDown, RxCaretUp } from 'react-icons/rx'
 
 import { Container } from '@/components/Container'
-import JSONView from '@/components/JSONView'
+import { JSONView } from '@/components/JSONView'
 import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'

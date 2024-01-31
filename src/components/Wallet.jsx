@@ -60,22 +60,6 @@ export function EVMWallet({ connectChainId, children, className }) {
   const message = process.env.NEXT_PUBLIC_APP_URL
   const { data: signature } = useSignMessage({ message })
 
-  const validateSignature = async () => {
-    try {
-      if (await publicClient.getBytecode({ address })) {
-        const response = await publicClient.readContract({
-          address,
-          abi: [parseAbiItem('function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)')],
-          functionName: 'isValidSignature',
-          args: [hashMessage(message), signature],
-        })
-        // https://eips.ethereum.org/EIPS/eip-1271
-        setSignatureValid(response === '0x1626ba7e')
-      }
-      else setSignatureValid(await verifyMessage({ address, message, signature }))
-    } catch (error) {}
-  }
-
   useEffect(() => {
     if (chain?.id && walletClient && address) {
       setChainId(chain.id)
@@ -89,11 +73,27 @@ export function EVMWallet({ connectChainId, children, className }) {
       setProvider(null)
       setSigner(null)
     }
-  }, [chain, walletClient, address, setChainId, setAddress, setProvider, setSigner])
+  }, [chain, publicClient, walletClient, address, setChainId, setAddress, setProvider, setSigner])
 
   useEffect(() => {
+    const validateSignature = async () => {
+      try {
+        if (await publicClient.getBytecode({ address })) {
+          const response = await publicClient.readContract({
+            address,
+            abi: [parseAbiItem('function isValidSignature(bytes32 hash, bytes signature) view returns (bytes4)')],
+            functionName: 'isValidSignature',
+            args: [hashMessage(message), signature],
+          })
+          // https://eips.ethereum.org/EIPS/eip-1271
+          setSignatureValid(response === '0x1626ba7e')
+        }
+        else setSignatureValid(await verifyMessage({ address, message, signature }))
+      } catch (error) {}
+    }
+
     if (!signatureValid && publicClient) validateSignature()
-  }, [signatureValid && publicClient, validateSignature])
+  }, [signatureValid, publicClient, address, message, signature])
 
   return provider ?
     connectChainId && connectChainId !== chainId ?
@@ -147,7 +147,7 @@ export function CosmosWallet({ connectChainId, children, className }) {
       setProvider(null)
       setSigner(null)
     }
-  }, [chain, walletClient, address, setChainId, setAddress, setProvider, setSigner])
+  }, [setChainId, setAddress, setProvider, setSigner])
 
   const enable = async (chainId = connectChainId) => {
     try {

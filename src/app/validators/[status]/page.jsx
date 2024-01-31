@@ -1,5 +1,5 @@
 import { Validators } from '@/components/Validators'
 
-export default ({ params }) => {
+export default function ValidatorsPage({ params }) {
   return <Validators {...params} />
 }

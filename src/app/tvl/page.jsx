@@ -1,5 +1,5 @@
 import { TVL } from '@/components/TVL'
 
-export default () => {
+export default function TVLPage() {
   return <TVL />
 }

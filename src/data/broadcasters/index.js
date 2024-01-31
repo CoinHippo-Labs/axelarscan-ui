@@ -1,4 +1,4 @@
-export default {
+const data = {
   mainnet: {
     axelar1n466qgus86pncxnesa8zgwx7f9p63wj6zaeqf3: 'axlsvcbroadcaster-1',
     axelar1xv40h9x92myx6kpfh2sk5d0f9cz2mx4tphpr57: 'axlsvcbroadcaster-2',
@@ -2508,3 +2508,5 @@ export default {
     axelar10dwjv6xj0flfj5m3ce4t5v7xpjmrt5du7h6zs6: 'controller-1',
   },
 }
+
+export default data
