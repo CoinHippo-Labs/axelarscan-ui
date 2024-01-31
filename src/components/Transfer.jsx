@@ -280,6 +280,11 @@ function Info({ data, tx }) {
                     })}
                   </ol>
                 </nav>
+                {simplified_status && (
+                  <Tag className={clsx('w-fit capitalize', ['received'].includes(simplified_status) ? 'bg-green-600 dark:bg-green-500' : ['approved'].includes(simplified_status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(simplified_status) ? 'bg-red-600 dark:bg-red-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
+                    {simplified_status}
+                  </Tag>
+                )}
                 {send?.insufficient_fee && (
                   <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
                     <PiWarningCircle size={16} />

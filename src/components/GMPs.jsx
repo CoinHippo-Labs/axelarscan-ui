@@ -415,7 +415,7 @@ export function GMPs({ address }) {
                         <div className="flex flex-col gap-y-1.5">
                           {d.simplified_status && (
                             <Tag className={clsx('w-fit capitalize', ['received'].includes(d.simplified_status) ? 'bg-green-600 dark:bg-green-500' : ['approved'].includes(d.simplified_status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(d.simplified_status) ? 'bg-red-600 dark:bg-red-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
-                              {d.simplified_status}
+                              {d.simplified_status === 'received' && getEvent(d) === 'ContractCall' ? 'Executed' : d.simplified_status}
                             </Tag>
                           )}
                           {d.is_insufficient_fee && (
