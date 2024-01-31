@@ -5,7 +5,7 @@ import clsx from 'clsx'
 
 import Image from '@/components/Image'
 import { Tooltip } from '@/components/Tooltip'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { getChainData, getAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import MetamaskLogo from '@/images/wallets/metamask.png'

@@ -24,7 +24,7 @@ import { ChainProfile } from '@/components/Profile'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { TimeAgo } from '@/components/Time'
 import { getParams, getQueryString, Pagination } from '@/components/Pagination'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { searchPolls } from '@/lib/api/validator'
 import { getChainData, getAssetData } from '@/lib/config'
 import { toJson, split, toArray } from '@/lib/parser'
@@ -71,8 +71,8 @@ function Filters() {
     { label: 'Poll ID', name: 'pollId' },
     { label: 'Tx Hash', name: 'transactionId' },
     { label: 'Chain', name: 'chain', type: 'select', multiple: true, options: _.orderBy(toArray(chains).filter(d => d.chain_type === 'evm' && (!d.no_inflation || d.deprecated)).map((d, i) => ({ ...d, i })), ['deprecated', 'i'], ['desc', 'asc']).map(d => ({ value: d.id, title: d.name })) },
-    { label: 'Event Type', name: 'event', type: 'select', options: _.concat({ title: 'Any' }, types.map(d => ({ value: d, title: split(toTitle(d), { delimiter: ' ' }).map(s => capitalize(s)).join('') }))) },
-    { label: 'Status', name: 'status', type: 'select', options: _.concat({ title: 'Any' }, ['completed', 'failed', 'confirmed', 'pending'].map(d => ({ value: d, title: capitalize(d) }))) },
+    { label: 'Event Type', name: 'event', type: 'select', multiple: true, options: _.concat({ title: 'Any' }, types.map(d => ({ value: d, title: split(toTitle(d), { delimiter: ' ' }).map(s => capitalize(s)).join('') }))) },
+    { label: 'Status', name: 'status', type: 'select', multiple: true, options: _.concat({ title: 'Any' }, ['completed', 'failed', 'confirmed', 'pending'].map(d => ({ value: d, title: capitalize(d) }))) },
     { label: 'Voter (Broadcaster Address)', name: 'voter' },
     params.voter?.startsWith('axelar') && { label: 'Vote', name: 'vote', type: 'select', options: _.concat({ title: 'Any' }, ['yes', 'no', 'unsubmitted'].map(d => ({ value: d, title: capitalize(d) }))) },
     { label: 'Time', name: 'time', type: 'datetimeRange' },

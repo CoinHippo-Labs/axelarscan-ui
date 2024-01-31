@@ -10,7 +10,7 @@ import { Button } from '@/components/Button'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
 import { ChainProfile } from '@/components/Profile'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { getChainData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
 import { isString, equalsIgnoreCase } from '@/lib/string'
@@ -318,7 +318,7 @@ export function NetworkGraph({ data }) {
   const filteredData = toArray(data).filter(d => !selectedNode?.id || [d.sourceChain, d.destinationChain].includes(selectedNode.id))
   const size = 10
 
-  return !data || !(imagesLoaded && graphData) ? <Spinner /> :
+  return !data || !(ForceGraph2D && graphData && imagesLoaded) ? <Spinner /> :
     <div className="grid lg:grid-cols-2 lg:gap-x-4 xl:gap-x-8">
       <div className="-ml-4 -mt-4">
         <ForceGraph2D

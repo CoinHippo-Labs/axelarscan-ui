@@ -10,7 +10,7 @@ import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
 import { Summary } from '@/components/Interchain'
 import { NetworkGraph } from '@/components/NetworkGraph'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { getRPCStatus } from '@/lib/api/validator'
 import { GMPStats, GMPTotalVolume } from '@/lib/api/gmp'
 import { transfersStats, transfersTotalVolume } from '@/lib/api/token-transfer'
@@ -53,7 +53,7 @@ function Metrics() {
             )}
           </div>
         )}
-        {validators && (
+        {toArray(validators).length > 0 && (
           <>
             <span className="text-zinc-200 dark:text-zinc-700">|</span>
             <div className="flex items-center gap-x-2.5">
@@ -257,7 +257,7 @@ export function Overview() {
             </div>
             <div className="flex flex-col gap-y-4">
               <h2 className="text-2xl font-semibold">Network Graph</h2>
-              {typeof window !== 'undefined' && <NetworkGraph data={data.networkGraph} />}
+              <NetworkGraph data={data.networkGraph} />
             </div>
           </div>
         }

@@ -10,7 +10,7 @@ import { FiSearch } from 'react-icons/fi'
 
 import { Button } from '@/components/Button'
 import { useNameServicesStore } from '@/components/Profile'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { searchGMP } from '@/lib/api/gmp'
 import { searchTransfers } from '@/lib/api/token-transfer'
 import { getENS } from '@/lib/api/name-services/ens'

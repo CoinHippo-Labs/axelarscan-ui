@@ -23,7 +23,7 @@ import { Number } from '@/components/Number'
 import { Profile, ChainProfile } from '@/components/Profile'
 import { TimeAgo, TimeSpent } from '@/components/Time'
 import { getParams, getQueryString } from '@/components/Pagination'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '@/lib/api/gmp'
 import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '@/lib/api/token-transfer'
 import { ENVIRONMENT, getChainData } from '@/lib/config'
@@ -904,7 +904,7 @@ function GMPTimeSpent({ data, format = '0,0', prefix = '' }) {
   }
 
   return (
-    <div className="bg-zinc-50 dark:bg-zinc-800 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:gap-x-2 gap-y-2 sm:gap-y-0 px-3 py-4">
+    <div className="bg-zinc-50 dark:bg-zinc-800/25 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:gap-x-2 gap-y-2 sm:gap-y-0 px-3 py-4">
       <div className="w-40 flex flex-col gap-y-0.5">
         <ChainProfile
           value={key}

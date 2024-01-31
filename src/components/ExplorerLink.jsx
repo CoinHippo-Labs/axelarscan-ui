@@ -4,7 +4,7 @@ const { AddressZero: ZeroAddress } = { ...constants }
 import clsx from 'clsx'
 
 import Image from '@/components/Image'
-import { useGlobalStore } from '@/app/providers'
+import { useGlobalStore } from '@/components/Global'
 import { getChainData } from '@/lib/config'
 import { getInputType } from '@/lib/parser'
 
