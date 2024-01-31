@@ -513,7 +513,7 @@ export function Profile({
       }
     }
     getData()
-  }, [address, validators, validatorImages, setValidatorImages])
+  }, [address, validators, setValidatorImages])
 
   const { explorer } = { ...getChainData(chain, chains) }
   const url = customURL || (explorer ? `${explorer.url}${explorer.address_path?.replace('{address}', address)}` : undefined)
