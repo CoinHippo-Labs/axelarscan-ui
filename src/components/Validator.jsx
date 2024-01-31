@@ -579,7 +579,7 @@ export function Validator({ address }) {
       }
     }
     getData()
-  }, [EVMChains, maintainers, setMaintainers])
+  }, [EVMChains, setMaintainers])
 
   useEffect(() => {
     const getData = async () => {

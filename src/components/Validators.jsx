@@ -51,7 +51,7 @@ export function Validators({ status }) {
       }
     }
     getData()
-  }, [EVMChains, maintainers, setMaintainers])
+  }, [EVMChains, setMaintainers])
 
   useEffect(() => {
     const getData = async () => {
