@@ -151,9 +151,9 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                     target="_blank"
                     className="text-blue-600 dark:text-blue-500 font-semibold"
                   >
-                    {ellipse(txhash)}{call.chain_type === 'evm' && call.receipt && isNumber(call.logIndex) ? `:${call.logIndex}` : call.chain_type === 'cosmos' && isNumber(call.messageIdIndex) ? `:${call.messageIdIndex}` : ''}
+                    {ellipse(txhash)}{call.chain_type === 'evm' && call.receipt ? isNumber(call._logIndex) ? `-${call._logIndex}` : isNumber(call.logIndex) ? `:${call.logIndex}` : '' : call.chain_type === 'cosmos' && isNumber(call.messageIdIndex) ? `-${call.messageIdIndex}` : ''}
                   </Link> :
-                  `${ellipse(txhash)}${call.chain_type === 'evm' && call.receipt && isNumber(call.logIndex) ? `:${call.logIndex}` : call.chain_type === 'cosmos' && isNumber(call.messageIdIndex) ? `:${call.messageIdIndex}` : ''}`
+                  `${ellipse(txhash)}${call.chain_type === 'evm' && call.receipt ? isNumber(call._logIndex) ? `-${call._logIndex}` : isNumber(call.logIndex) ? `:${call.logIndex}` : '' : call.chain_type === 'cosmos' && isNumber(call.messageIdIndex) ? `-${call.messageIdIndex}` : ''}`
                 }
               </Copy>
               {!proposal_id && <ExplorerLink value={txhash} chain={sourceChain} hasEventLog={call.chain_type === 'evm' && isNumber(call.logIndex)} />}
