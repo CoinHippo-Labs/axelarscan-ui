@@ -21,6 +21,20 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
   const { chainId, setChainId } = useChainIdStore()
   const { chains, assets } = useGlobalStore()
 
+  const switchNetwork = useCallback(async (chain_id, tokenData) => {
+    try {
+      await web3.currentProvider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: web3.utils.toHex(chain_id) }] })
+    } catch (error) {
+      if (error?.code === 4902) {
+        try {
+          const { provider_params } = { ...toArray(chains).find(d => d.chain_id === chain_id) }
+          await web3.currentProvider.request({ method: 'wallet_addEthereumChain', params: provider_params })
+        } catch (error) {}
+      }
+    }
+    if (tokenData) setData({ chain_id, tokenData })
+  }, [web3?.currentProvider, web3?.utils, chains])
+
   const addToken = useCallback(async (chain_id, tokenData) => {
     if (web3 && tokenData) {
       if (chain_id === chainId) {
@@ -39,20 +53,6 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
       else switchNetwork(chain_id, tokenData)
     }
   }, [web3, chainId, switchNetwork])
-
-  const switchNetwork = useCallback(async (chain_id, tokenData) => {
-    try {
-      await web3.currentProvider.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: web3.utils.toHex(chain_id) }] })
-    } catch (error) {
-      if (error?.code === 4902) {
-        try {
-          const { provider_params } = { ...toArray(chains).find(d => d.chain_id === chain_id) }
-          await web3.currentProvider.request({ method: 'wallet_addEthereumChain', params: provider_params })
-        } catch (error) {}
-      }
-    }
-    if (tokenData) setData({ chain_id, tokenData })
-  }, [web3.currentProvider, web3.utils, chains])
 
   useEffect(() => {
     if (!web3 && window.ethereum) setWeb3(new Web3(window.ethereum))
