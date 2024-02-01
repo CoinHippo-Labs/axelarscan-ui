@@ -245,7 +245,7 @@ function Filters() {
   )
 }
 
-export function Summary({ data }) {
+export function Summary({ data, params }) {
   const globalStore = useGlobalStore()
 
   if (!data) return null
@@ -259,8 +259,7 @@ export function Summary({ data }) {
       })
     ))), 'key')
   ).map(([k, v]) => ({ key: k, chains: _.uniq(v.map(d => d.chain)), num_txs: _.sumBy(v, 'num_txs'), volume: _.sumBy(v, 'volume') })), ['num_txs', 'volume', 'key'], ['desc', 'desc', 'asc'])
-  // const chains = _.uniq(contracts.flatMap(d => d.chains))
-  const chains = toArray(globalStore.chains).filter(d => !d.deprecated && (!d.maintainer_id || globalStore.contracts?.gateway_contracts?.[d.id]?.address))
+  const chains = params?.contractAddress ? _.uniq(contracts.flatMap(d => d.chains)) : toArray(globalStore.chains).filter(d => !d.deprecated && (!d.maintainer_id || globalStore.contracts?.gateway_contracts?.[d.id]?.address))
   console.log('[destinationContracts]', contracts.map(d => d.key))
 
   return (
@@ -1171,7 +1170,7 @@ export function Interchain() {
             </div>
           </div>
           {refresh && refresh !== 'true' && <Overlay />}
-          <Summary data={data[generateKeyFromParams(params)]} />
+          <Summary data={data[generateKeyFromParams(params)]} params={params} />
           <Charts data={data[generateKeyFromParams(params)]} granularity={granularity} />
           <Tops data={data[generateKeyFromParams(params)]} types={types} />
           {types.includes('gmp') && <GMPTimeSpents data={timeSpentData?.[generateKeyFromParams(params)]} />}
