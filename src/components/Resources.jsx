@@ -113,10 +113,6 @@ function Asset({ data, focusID, onFocus }) {
   const [chainSelected, setChainSelected] = useState(null)
   const { chains } = useGlobalStore()
 
-  useEffect(() => {
-    if (focusID !== denom) setSeeMore(false)
-  }, [focusID, denom])
-
   const { denom, denoms, native_chain, name, symbol, decimals, image } = { ...data }
   let { addresses } = { ...data }
   const { id, explorer, chain_type } = { ...(focusID === denom && getChainData(chainSelected, chains)) }
@@ -125,6 +121,10 @@ function Asset({ data, focusID, onFocus }) {
   const tokenData = addresses.find(d => d.chain === id)
   const { address, ibc_denom } = { ...tokenData }
   const tokenSymbol = tokenData?.symbol || symbol
+
+  useEffect(() => {
+    if (focusID !== denom) setSeeMore(false)
+  }, [focusID, denom])
 
   return (
     <li>

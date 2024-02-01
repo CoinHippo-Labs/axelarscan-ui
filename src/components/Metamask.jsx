@@ -21,22 +21,6 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
   const { chainId, setChainId } = useChainIdStore()
   const { chains, assets } = useGlobalStore()
 
-  useEffect(() => {
-    if (!web3 && window.ethereum) setWeb3(new Web3(window.ethereum))
-    else if (web3?.currentProvider) {
-      web3.currentProvider._handleChainChanged = e => {
-        try {
-          const chainId = Web3.utils.hexToNumber(e.chainId)
-          setChainId(chainId)
-        } catch (error) {}
-      }
-    }
-  }, [web3, setChainId])
-
-  useEffect(() => {
-    if (data?.tokenData && data.chain_id === chainId) addToken(data.chain_id, data.tokenData)
-  }, [data, chainId, addToken])
-
   const addToken = useCallback(async (chain_id, tokenData) => {
     if (web3 && tokenData) {
       if (chain_id === chainId) {
@@ -69,6 +53,22 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
     }
     if (tokenData) setData({ chain_id, tokenData })
   }, [web3.currentProvider, web3.utils, chains])
+
+  useEffect(() => {
+    if (!web3 && window.ethereum) setWeb3(new Web3(window.ethereum))
+    else if (web3?.currentProvider) {
+      web3.currentProvider._handleChainChanged = e => {
+        try {
+          const chainId = Web3.utils.hexToNumber(e.chainId)
+          setChainId(chainId)
+        } catch (error) {}
+      }
+    }
+  }, [web3, setChainId])
+
+  useEffect(() => {
+    if (data?.tokenData && data.chain_id === chainId) addToken(data.chain_id, data.tokenData)
+  }, [data, chainId, addToken])
 
   const { id, chain_id, name } = { ...getChainData(chain, chains, false) }
   const { symbol, decimals, image, addresses } = { ...getAssetData(asset, assets) }
