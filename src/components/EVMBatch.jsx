@@ -385,6 +385,11 @@ export function EVMBatch({ chain, id }) {
   const { chains, contracts } = useGlobalStore()
   const { chainId, signer } = useEVMWalletStore()
 
+  const { commands, created_at, execute_data } = { ...data }
+  const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
+  const chainData = getChainData(chain, chains)
+  const { chain_id } = { ...chainData }
+
   useEffect(() => {
     const getData = async () => {
       const data = await getBatch(chain, id)
@@ -450,11 +455,6 @@ export function EVMBatch({ chain, id }) {
       }
     }
   }, [chain, executeResponse, chainData])
-
-  const { commands, created_at, execute_data } = { ...data }
-  const executed = toArray(commands).length === toArray(commands).filter(d => d.executed).length
-  const chainData = getChainData(chain, chains)
-  const { chain_id } = { ...chainData }
 
   const execute = async () => {
     if (execute_data && signer) {
