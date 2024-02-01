@@ -305,7 +305,7 @@ export function EVMPolls() {
           return {
             ...d,
             idNumber: isNumber(d.id) ? toNumber(d.id) : d.id,
-            status: d.success ? 'completed' : d.failed ? 'failed' : d.confirmation || confirmation_txhash ? 'confirmed' : 'pending',
+            status: d.success ? 'completed' : d.failed ? 'failed' : d.expired ? 'expired' : d.confirmation || confirmation_txhash ? 'confirmed' : 'pending',
             height: _.minBy(votes, 'height')?.height || d.height,
             confirmation_txhash,
             votes: _.orderBy(votes, ['height', 'created_at'], ['desc', 'desc']),
@@ -488,7 +488,7 @@ export function EVMPolls() {
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1">
                           {d.status && (
-                            <Tag className={clsx('w-fit capitalize', ['completed'].includes(d.status) ? 'bg-green-600 dark:bg-green-500' : ['confirmed'].includes(d.status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(d.status) ? 'bg-red-600 dark:bg-red-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
+                            <Tag className={clsx('w-fit capitalize', ['completed'].includes(d.status) ? 'bg-green-600 dark:bg-green-500' : ['confirmed'].includes(d.status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(d.status) ? 'bg-red-600 dark:bg-red-500' : ['expired'].includes(d.status) ? 'bg-zinc-400 dark:bg-zinc-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
                               {d.status}
                             </Tag>
                           )}

@@ -137,7 +137,7 @@ function Info({ data, id }) {
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Status</dt>
             <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
               {status && (
-                <Tag className={clsx('w-fit capitalize', ['completed'].includes(status) ? 'bg-green-600 dark:bg-green-500' : ['confirmed'].includes(status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(status) ? 'bg-red-600 dark:bg-red-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
+                <Tag className={clsx('w-fit capitalize', ['completed'].includes(status) ? 'bg-green-600 dark:bg-green-500' : ['confirmed'].includes(status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(status) ? 'bg-red-600 dark:bg-red-500' : ['expired'].includes(status) ? 'bg-zinc-400 dark:bg-zinc-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
                   {status}
                 </Tag>
               )}
@@ -475,7 +475,7 @@ export function EVMPoll({ id }) {
         const confirmation_txhash = toArray(votes).find(v => v.confirmed)?.id
         d = {
           ...d,
-          status: d.success ? 'completed' : d.failed ? 'failed' : d.confirmation || confirmation_txhash ? 'confirmed' : 'pending',
+          status: d.success ? 'completed' : d.failed ? 'failed' : d.expired ? 'expired' : d.confirmation || confirmation_txhash ? 'confirmed' : 'pending',
           height: _.minBy(votes, 'height')?.height || d.height,
           confirmation_txhash,
           votes: _.orderBy(votes, ['height', 'created_at'], ['desc', 'desc']),
