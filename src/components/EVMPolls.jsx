@@ -72,7 +72,7 @@ function Filters() {
     { label: 'Tx Hash', name: 'transactionId' },
     { label: 'Chain', name: 'chain', type: 'select', multiple: true, options: _.orderBy(toArray(chains).filter(d => d.chain_type === 'evm' && (!d.no_inflation || d.deprecated)).map((d, i) => ({ ...d, i })), ['deprecated', 'i'], ['desc', 'asc']).map(d => ({ value: d.id, title: d.name })) },
     { label: 'Event Type', name: 'event', type: 'select', multiple: true, options: _.concat({ title: 'Any' }, types.map(d => ({ value: d, title: split(toTitle(d), { delimiter: ' ' }).map(s => capitalize(s)).join('') }))) },
-    { label: 'Status', name: 'status', type: 'select', multiple: true, options: _.concat({ title: 'Any' }, ['completed', 'failed', 'confirmed', 'pending'].map(d => ({ value: d, title: capitalize(d) }))) },
+    { label: 'Status', name: 'status', type: 'select', multiple: true, options: _.concat({ title: 'Any' }, ['completed', 'failed', 'expired', 'confirmed', 'pending'].map(d => ({ value: d, title: capitalize(d) }))) },
     { label: 'Voter (Broadcaster Address)', name: 'voter' },
     params.voter?.startsWith('axelar') && { label: 'Vote', name: 'vote', type: 'select', options: _.concat({ title: 'Any' }, ['yes', 'no', 'unsubmitted'].map(d => ({ value: d, title: capitalize(d) }))) },
     { label: 'Time', name: 'time', type: 'datetimeRange' },
