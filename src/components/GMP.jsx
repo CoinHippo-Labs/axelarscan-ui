@@ -275,11 +275,6 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                           })}
                         </ol>
                       </nav>
-                      {d.simplified_status && (
-                        <Tag className={clsx('w-fit capitalize', ['received'].includes(d.simplified_status) ? 'bg-green-600 dark:bg-green-500' : ['approved'].includes(d.simplified_status) ? 'bg-orange-500 dark:bg-orange-600' : ['failed'].includes(d.simplified_status) ? 'bg-red-600 dark:bg-red-500' : 'bg-yellow-400 dark:bg-yellow-500')}>
-                          {d.simplified_status === 'received' && getEvent(d) === 'ContractCall' ? 'Executed' : d.simplified_status}
-                        </Tag>
-                      )}
                       {is_insufficient_fee && !approved && (
                         <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
                           <PiWarningCircle size={16} />
