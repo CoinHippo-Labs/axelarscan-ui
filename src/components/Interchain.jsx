@@ -1136,7 +1136,15 @@ export function Interchain() {
             <div className="sm:flex-auto">
               <div className="flex items-center gap-x-4">
                 <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">Statistics</h1>
-                <Profile address={contractAddress} />
+                {_.slice(toArray(contractAddress), 0, 1).map((a, i) => (
+                  <Profile
+                    key={i}
+                    address={a}
+                    width={20}
+                    height={20}
+                    className="text-xs"
+                  />
+                ))}
               </div>
               <div className="max-w-xl flex flex-wrap items-center mt-2">
                 {timeShortcuts.map((d, i) => {
