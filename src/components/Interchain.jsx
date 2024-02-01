@@ -948,7 +948,7 @@ function GMPTimeSpent({ data, format = '0,0', prefix = '' }) {
           </div>
           <div className="w-full flex items-center justify-between ml-2">
             {points.map((d, i) => (
-              <div key={i} className="flex justify-end ml-2" style={{ width: `${d.width}%` }}>
+              <div key={i} className="flex justify-end" style={{ width: `${d.width}%` }}>
                 {['express_execute', 'execute'].includes(d.id) ?
                   <TooltipComponent content={d.label || d.name} className="whitespace-nowrap">
                     <TimeSpent
