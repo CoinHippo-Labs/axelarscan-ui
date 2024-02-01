@@ -7,5 +7,5 @@
 }
 
 .ant-btn-primary {
-  @apply bg-blue-600;
+  @apply !bg-blue-600 !text-white;
 }

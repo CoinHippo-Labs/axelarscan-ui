@@ -1140,8 +1140,8 @@ export function Interchain() {
                   <Profile
                     key={i}
                     address={a}
-                    width={20}
-                    height={20}
+                    width={18}
+                    height={18}
                     className="text-xs"
                   />
                 ))}
