@@ -693,4 +693,16 @@ export default [
     image: '/logos/accounts/rmrk.svg',
     environment: 'mainnet',
   },
+  {
+    address: '0x791b648AA3Bd21964417690C635040F40ce974a5',
+    name: 'Insrt: Perpetual Mints',
+    image: '/logos/accounts/insrt.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xEf97C7394F71851880A7868D21df3A9dF24FAfC7',
+    name: 'Insrt: $MINT',
+    image: '/logos/accounts/insrt.png',
+    environment: 'mainnet',
+  },
 ]
