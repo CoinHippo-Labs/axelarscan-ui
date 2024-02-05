@@ -1501,7 +1501,7 @@ export function GMP({ tx }) {
     try {
       setSDK(new AxelarGMPRecoveryAPI({ environment: ENVIRONMENT, axelarRpcUrl: process.env.NEXT_PUBLIC_RPC_URL, axelarLcdUrl: process.env.NEXT_PUBLIC_LCD_URL }))
     } catch (error) {
-      setAPI(undefined)
+      setSDK(undefined)
     }
   }, [])
 
