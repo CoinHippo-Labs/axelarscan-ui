@@ -579,7 +579,7 @@ function Details({ data }) {
                             {ellipse(stepTX)}
                           </Link>
                         </Copy>
-                        <ExplorerLink value={stepTX} chain={d.chainData?.id} />
+                        <ExplorerLink value={stepTX} chain={d.chainData?.id} customURL={stepURL} />
                       </div>
                     )}
                     {stepMoreInfos.length > 0 && (
