@@ -1683,7 +1683,7 @@ export function GMP({ tx }) {
   )
 
   const finalityTime = estimatedTimeSpent?.confirm ? estimatedTimeSpent.confirm + 15 : 600
-  const approveButton = call && !confirm_failed && !(call.destination_chain_type === 'cosmos' ? confirm && confirm.poll_id !== confirm_failed_event?.poll_id : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed && (confirm || timeDiff(call.block_timestamp * 1000) >= finalityTime) && timeDiff((confirm || call).block_timestamp * 1000) >= 60 && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) && (
+  const approveButton = call && call.chain_type === 'evm' && !confirm_failed && !(call.destination_chain_type === 'cosmos' ? confirm && confirm.poll_id !== confirm_failed_event?.poll_id : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed && (confirm || timeDiff(call.block_timestamp * 1000) >= finalityTime) && timeDiff((confirm || call).block_timestamp * 1000) >= 60 && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) && (
     <div key="approve" className="flex items-center gap-x-1">
       <button
         disabled={processing}
@@ -1695,9 +1695,9 @@ export function GMP({ tx }) {
     </div>
   )
 
-  const executeButton = call && (call.destination_chain_type === 'cosmos' ? confirm || call.chain_type !== 'evm' : approved) && !executed && !is_executed && (error || timeDiff(((call.destination_chain_type === 'cosmos' ? confirm.block_timestamp : approved.block_timestamp) || call.block_timestamp) * 1000) >= (call.destination_chain_type === 'cosmos' ? 300 : 120)) && call.returnValues?.payload && (
+  const executeButton = call && (call.destination_chain_type === 'cosmos' ? confirm || call.chain_type !== 'evm' : approved) && !executed && !is_executed && (error || timeDiff(((call.destination_chain_type === 'cosmos' ? confirm?.block_timestamp : approved.block_timestamp) || call.block_timestamp) * 1000) >= (call.destination_chain_type === 'cosmos' ? 300 : 120)) && call.returnValues?.payload && (
     <div key="execute" className="flex items-center gap-x-1">
-      {call.destination_chain_type === 'cosmos' || (signer && !needSwitchChain(destinationChainData?.chain_id, call.destination_chain_type)) && (
+      {(call.destination_chain_type === 'cosmos' || (signer && !needSwitchChain(destinationChainData?.chain_id, call.destination_chain_type))) && (
         <button
           disabled={processing}
           onClick={() => call.destination_chain_type === 'cosmos' ? approve(data) : execute(data)}
