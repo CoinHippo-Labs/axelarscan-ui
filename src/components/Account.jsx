@@ -278,14 +278,12 @@ function Balances({ data }) {
                   </td>
                   <td className="px-3 py-4 text-left">
                     <div className="w-fit flex items-center gap-x-2">
-                      {image && (
-                        <Image
-                          src={image}
-                          alt=""
-                          width={16}
-                          height={16}
-                        />
-                      )}
+                      <Image
+                        src={image}
+                        alt=""
+                        width={16}
+                        height={16}
+                      />
                       {(symbol || d.denom) && (
                         <div className="flex items-center gap-x-2">
                           <div className="flex items-center gap-x-1">

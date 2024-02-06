@@ -161,14 +161,12 @@ function Info({ data, chain, id, executeButton }) {
                               <div className="flex lg:flex-wrap lg:items-center">
                                 {symbol && !['approveContractCall'].includes(d.type) && (
                                   <div className="min-w-fit h-6 bg-zinc-100 dark:bg-zinc-800 rounded-xl flex items-center gap-x-1.5 mr-2 px-2.5 py-1">
-                                    {image && (
-                                      <Image
-                                        src={image}
-                                        alt=""
-                                        width={16}
-                                        height={16}
-                                      />
-                                    )}
+                                    <Image
+                                      src={image}
+                                      alt=""
+                                      width={16}
+                                      height={16}
+                                    />
                                     {amount && assets ?
                                       <Number
                                         value={formatUnits(amount, decimals)}

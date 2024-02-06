@@ -249,14 +249,12 @@ function Data({ data }) {
                         )}
                         {(isNumber(d.amount) || symbol) && (
                           <div className="flex items-center gap-x-1.5">
-                            {image && (
-                              <Image
-                                src={image}
-                                alt=""
-                                width={20}
-                                height={20}
-                              />
-                            )}
+                            <Image
+                              src={image}
+                              alt=""
+                              width={20}
+                              height={20}
+                            />
                             {d.amount > 0 && (
                               <Number
                                 value={d.amount}

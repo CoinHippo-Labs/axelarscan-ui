@@ -587,14 +587,12 @@ export function ChainProfile({
 
   return value && (
     <div className={clsx('min-w-max flex items-center gap-x-2', className)}>
-      {image && (
-        <Image
-          src={image}
-          alt=""
-          width={width}
-          height={height}
-        />
-      )}
+      <Image
+        src={image}
+        alt=""
+        width={width}
+        height={height}
+      />
       <span className={clsx('text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap', titleClassName)}>
         {name || capitalize(value)}
       </span>
@@ -624,14 +622,12 @@ export function AssetProfile({
 
   return value && (
     <div className={clsx('min-w-max flex items-center', isNumber(amount) ? 'gap-x-1.5' : 'gap-x-2', className)}>
-      {image && (
-        <Image
-          src={image}
-          alt=""
-          width={width}
-          height={height}
-        />
-      )}
+      <Image
+        src={image}
+        alt=""
+        width={width}
+        height={height}
+      />
       {isNumber(amount) && (
         <Number
           value={amount}
