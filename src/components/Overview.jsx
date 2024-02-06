@@ -196,26 +196,25 @@ function Metrics() {
 
 export function Overview() {
   const [data, setData] = useState(null)
-  const { chains } = useGlobalStore()
+  const { chains, stats } = useGlobalStore()
 
   useEffect(() => {
     const metrics = ['GMPStats', 'GMPTotalVolume', 'transfersStats', 'transfersTotalVolume']
-
     const getData = async () => {
-      if (chains) {
+      if (chains && stats) {
         const data = Object.fromEntries(await Promise.all(toArray(metrics.map(d => new Promise(async resolve => {
           switch (d) {
             case 'GMPStats':
-              resolve([d, { ...await GMPStats() }])
+              resolve([d, { ...(stats[d] || await GMPStats()) }])
               break
             case 'GMPTotalVolume':
-              resolve([d, toNumber(await GMPTotalVolume())])
+              resolve([d, toNumber((stats[d] || await GMPTotalVolume()))])
               break
             case 'transfersStats':
-              resolve([d, { ...await transfersStats() }])
+              resolve([d, { ...(stats[d] || await transfersStats()) }])
               break
             case 'transfersTotalVolume':
-              resolve([d, toNumber(await transfersTotalVolume())])
+              resolve([d, toNumber((stats[d] || await transfersTotalVolume()))])
               break
             default:
               resolve()
@@ -239,11 +238,8 @@ export function Overview() {
         setData(data)
       }
     }
-
     getData()
-    const interval = setInterval(() => getData(), 5 * 60 * 1000)
-    return () => clearInterval(interval)
-  }, [chains, setData])
+  }, [chains, stats, setData])
 
   return (
     <>

@@ -1002,6 +1002,7 @@ export function Interchain() {
   const [timeSpentData, setTimeSpentData] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const globalStore = useGlobalStore()
+  const { stats } = { ...globalStore }
 
   const { transfersType, contractAddress, fromTime, toTime } = { ...params }
   const types = toArray(transfersType || ['gmp', 'transfers'])
@@ -1018,93 +1019,97 @@ export function Interchain() {
   useEffect(() => {
     const metrics = ['GMPStats', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
     const getData = async () => {
-      if (params && toBoolean(refresh)) {
+      if (stats && params && toBoolean(refresh)) {
         setData({ ...data, [generateKeyFromParams(params)]: Object.fromEntries((await Promise.all(toArray(metrics.map(d => new Promise(async resolve => {
           const isSearchITSOnTransfers = types.includes('transfers') && d.startsWith('transfers') && (params.assetType === 'its' || toArray(params.asset).findIndex(a => getITSAssetData(a, globalStore.itsAssets)) > -1)
+          const noFilter = Object.keys(params).length === 0
 
           switch (d) {
             case 'GMPStats':
-              resolve([d, types.includes('gmp') && await GMPStats(params)])
+              resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPStats(params))])
               break
             case 'GMPStatsAVGTimes':
               resolve([d, types.includes('gmp') && await GMPStats({ ...params, avg_times: true })])
               break
             case 'GMPChart':
-              resolve([d, types.includes('gmp') && await GMPChart({ ...params, granularity })])
+              resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPChart({ ...params, granularity }))])
               break
             case 'GMPTotalVolume':
-              resolve([d, types.includes('gmp') && await GMPTotalVolume(params)])
+              resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPTotalVolume(params))])
               break
             case 'GMPTotalFee':
-              resolve([d, types.includes('gmp') && await GMPTotalFee(params)])
+              resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPTotalFee(params))])
               break
             case 'GMPTotalActiveUsers':
-              resolve([d, types.includes('gmp') && await GMPTotalActiveUsers(params)])
+              resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPTotalActiveUsers(params))])
               break
             case 'GMPTopUsers':
-              resolve([d, types.includes('gmp') && await GMPTopUsers({ ...params, size: 100 })])
+              resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPTopUsers({ ...params, size: 100 }))])
               break
             case 'transfersStats':
               if (isSearchITSOnTransfers) resolve([d, { data: [] }])
-              else resolve([d, types.includes('transfers') && await transfersStats(params)])
+              else resolve([d, types.includes('transfers') && ((noFilter && stats[d]) || await transfersStats(params))])
               break
             case 'transfersChart':
               if (isSearchITSOnTransfers) resolve([d, { data: [] }])
               else {
-                let value = types.includes('transfers') && await transfersChart({ ...params, granularity })
-                const values = [[d, value]]
+                if (noFilter && stats[d]) resolve([[d, stats[d]], [d.replace('transfers', 'transfersAirdrop'), stats[d.replace('transfers', 'transfersAirdrop')]]])
+                else {
+                  let value = types.includes('transfers') && await transfersChart({ ...params, granularity })
+                  const values = [[d, value]]
 
-                if (value?.data && granularity === 'month') {
-                  const airdrops = [
-                    { date: '08-01-2023', fromTime: undefined, toTime: undefined, chain: 'sei', environment: 'mainnet' },
-                  ]
+                  if (value?.data && granularity === 'month') {
+                    const airdrops = [
+                      { date: '08-01-2023', fromTime: undefined, toTime: undefined, chain: 'sei', environment: 'mainnet' },
+                    ]
 
-                  for (const airdrop of airdrops) {
-                    const { date, chain, environment } = { ...airdrop }
-                    let { fromTime, toTime } = { ...airdrop }
-                    fromTime = fromTime || moment(date).startOf('month').unix()
-                    toTime = toTime || moment(date).endOf('month').unix()
+                    for (const airdrop of airdrops) {
+                      const { date, chain, environment } = { ...airdrop }
+                      let { fromTime, toTime } = { ...airdrop }
+                      fromTime = fromTime || moment(date).startOf('month').unix()
+                      toTime = toTime || moment(date).endOf('month').unix()
 
-                    if (environment === ENVIRONMENT && (!params.fromTime || toNumber(params.fromTime) < fromTime) && (!params.toTime || toNumber(params.toTime) > toTime)) {
-                      const _value = await transfersChart({ ...params, chain, fromTime, toTime, granularity })
+                      if (environment === ENVIRONMENT && (!params.fromTime || toNumber(params.fromTime) < fromTime) && (!params.toTime || toNumber(params.toTime) > toTime)) {
+                        const _value = await transfersChart({ ...params, chain, fromTime, toTime, granularity })
 
-                      if (toArray(_value?.data).length > 0) {
-                        for (const v of _value.data) {
-                          if (v.timestamp && v.volume > 0) {
-                            const index = value.data.findIndex(_v => _v.timestamp === v.timestamp)
-                            if (index > -1 && value.data[index].volume >= v.volume) {
-                              value.data[index] = { ...value.data[index], volume: value.data[index].volume - v.volume }
+                        if (toArray(_value?.data).length > 0) {
+                          for (const v of _value.data) {
+                            if (v.timestamp && v.volume > 0) {
+                              const index = value.data.findIndex(_v => _v.timestamp === v.timestamp)
+                              if (index > -1 && value.data[index].volume >= v.volume) {
+                                value.data[index] = { ...value.data[index], volume: value.data[index].volume - v.volume }
+                              }
                             }
                           }
+                          values.push([d.replace('transfers', 'transfersAirdrop'), _value])
                         }
-                        values.push([d.replace('transfers', 'transfersAirdrop'), _value])
                       }
                     }
                   }
-                }
 
-                resolve(values)
+                  resolve(values)
+                }
               }
               break
             case 'transfersTotalVolume':
               if (isSearchITSOnTransfers) resolve([d, 0])
-              else resolve([d, types.includes('transfers') && await transfersTotalVolume(params)])
+              else resolve([d, types.includes('transfers') && ((noFilter && stats[d]) || await transfersTotalVolume(params))])
               break
             case 'transfersTotalFee':
               if (isSearchITSOnTransfers) resolve([d, 0])
-              else resolve([d, types.includes('transfers') && await transfersTotalFee(params)])
+              else resolve([d, types.includes('transfers') && ((noFilter && stats[d]) || await transfersTotalFee(params))])
               break
             case 'transfersTotalActiveUsers':
               if (isSearchITSOnTransfers) resolve([d, 0])
-              else resolve([d, types.includes('transfers') && await transfersTotalActiveUsers(params)])
+              else resolve([d, types.includes('transfers') && ((noFilter && stats[d]) || await transfersTotalActiveUsers(params))])
               break
             case 'transfersTopUsers':
               if (isSearchITSOnTransfers) resolve([d, { data: [] }])
-              else resolve([d, types.includes('transfers') && await transfersTopUsers({ ...params, size: 100 })])
+              else resolve([d, types.includes('transfers') && ((noFilter && stats[d]) || await transfersTopUsers({ ...params, size: 100 }))])
               break
             case 'transfersTopUsersByVolume':
               if (isSearchITSOnTransfers) resolve([d, { data: [] }])
-              else resolve([d, types.includes('transfers') && await transfersTopUsers({ ...params, orderBy: 'volume', size: 100 })])
+              else resolve([d, types.includes('transfers') && ((noFilter && stats[d]) || await transfersTopUsers({ ...params, orderBy: 'volume', size: 100 }))])
               break
             default:
               resolve()
@@ -1115,7 +1120,7 @@ export function Interchain() {
       }
     }
     getData()
-  }, [params, data, setData, refresh, setRefresh])
+  }, [stats, params, data, setData, refresh, setRefresh])
 
   useEffect(() => {
     const getData = async () => {
