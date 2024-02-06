@@ -15,7 +15,7 @@ export const metadata = {
   },
   description: process.env.NEXT_PUBLIC_DEFAULT_DESCRIPTION,
   openGraph: {
-    images: '/images/ogimage.png',
+    images: `${process.env.NEXT_PUBLIC_APP_URL}/images/ogimage.png`,
   },
 }
 
