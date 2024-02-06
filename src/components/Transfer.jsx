@@ -105,8 +105,8 @@ export function getStep(data, chains) {
     },
     type === 'unwrap' && {
       id: 'unwrap',
-      title: unwrap ? 'Unwrapped' : 'Unwrap',
-      status: unwrap ? 'success' : 'pending',
+      title: unwrap?.tx_hash_unwrap ? 'Unwrapped' : 'Unwrap',
+      status: unwrap?.tx_hash_unwrap ? 'success' : 'pending',
       data: unwrap,
       chainData: destinationChainData,
     },
