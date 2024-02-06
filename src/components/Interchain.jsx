@@ -1017,13 +1017,8 @@ export function Interchain() {
 
   useEffect(() => {
     const metrics = ['GMPStats', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
-
-    const getGMPStatsAVGTimes = async params => setTimeSpentData({ ...timeSpentData, [generateKeyFromParams(params)]: { GMPStatsAVGTimes: types.includes('gmp') && await GMPStats({ ...params, avg_times: true }) } })
-
     const getData = async () => {
       if (params && toBoolean(refresh)) {
-        getGMPStatsAVGTimes(params)
-
         setData({ ...data, [generateKeyFromParams(params)]: Object.fromEntries((await Promise.all(toArray(metrics.map(d => new Promise(async resolve => {
           const isSearchITSOnTransfers = types.includes('transfers') && d.startsWith('transfers') && (params.assetType === 'its' || toArray(params.asset).findIndex(a => getITSAssetData(a, globalStore.itsAssets)) > -1)
 
@@ -1119,9 +1114,17 @@ export function Interchain() {
         setRefresh(false)
       }
     }
-
     getData()
-  }, [params, data, setData, timeSpentData, setTimeSpentData, refresh, setRefresh])
+  }, [params, data, setData, refresh, setRefresh])
+
+  useEffect(() => {
+    const getData = async () => {
+      if (params && toBoolean(refresh)) {
+        setTimeSpentData({ ...timeSpentData, [generateKeyFromParams(params)]: { GMPStatsAVGTimes: types.includes('gmp') && await GMPStats({ ...params, avg_times: true }) } })
+      }
+    }
+    getData()
+  }, [params, setTimeSpentData, refresh, setRefresh])
 
   useEffect(() => {
     const interval = setInterval(() => setRefresh('true'), 5 * 60 * 1000)
