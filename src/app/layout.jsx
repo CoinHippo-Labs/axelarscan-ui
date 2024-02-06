@@ -14,7 +14,9 @@ export const metadata = {
     default: process.env.NEXT_PUBLIC_DEFAULT_TITLE,
   },
   description: process.env.NEXT_PUBLIC_DEFAULT_DESCRIPTION,
-  image: '/images/ogimage.png',
+  openGraph: {
+    images: '/images/ogimage.png',
+  },
 }
 
 const inter = Inter({
