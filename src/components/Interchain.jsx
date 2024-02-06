@@ -1121,7 +1121,7 @@ export function Interchain() {
     }
 
     getData()
-  }, [params, data, setData, timeSpentData, setTimeSpentData, refresh, setRefresh, types, granularity])
+  }, [params, data, setData, timeSpentData, setTimeSpentData, refresh, setRefresh])
 
   useEffect(() => {
     const interval = setInterval(() => setRefresh('true'), 5 * 60 * 1000)
