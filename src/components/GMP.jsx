@@ -1059,7 +1059,7 @@ function Details({ data }) {
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
-          {steps.filter(d => d.status !== 'pending').map((d, i) => {
+          {steps.filter(d => d.status !== 'pending' || d.data?.axelarTransactionHash).map((d, i) => {
             const { logIndex, _logIndex, chain_type, confirmation_txhash, poll_id, axelarTransactionHash, blockNumber, axelarBlockNumber, transaction, receipt, returnValues, error, contract_address, block_timestamp, created_at, proposal_id } = { ...(d.id === 'pay_gas' && isString(d.data) ? data.originData?.gas_paid : d.data) }
             const transactionHash = d.data?.transactionHash || receipt?.transactionHash || receipt?.hash
             const height = d.data.blockNumber || blockNumber
@@ -1344,7 +1344,7 @@ function Details({ data }) {
                 </td>
                 <td className="px-3 py-4 text-left">
                   <div className="flex flex-col gap-y-2">
-                    {height && (url && block_path ?
+                    {toNumber(height) > 0 && (url && block_path ?
                       <Link
                         href={`${url}${block_path.replace('{block}', height)}`}
                         target="_blank"
@@ -1377,7 +1377,7 @@ function Details({ data }) {
                     {toAddress && (
                       <div className="flex items-center gap-x-4">
                         <span className="w-8">To:</span>
-                        <Profile address={toAddress} chain={d.chainData?.id} />
+                        <Profile address={toAddress} chain={d.data?.axelarTransactionHash ? destinationChainData?.id : d.chainData?.id} />
                       </div>
                     )}
                   </div>
