@@ -55,7 +55,14 @@ export function Global() {
             setAssets(assets)
             break
           case 'itsAssets':
-            setITSAssets(await getITSAssets())
+            const itsAssets = await getITSAssets()
+            if (itsAssets) {
+              for (const [k, v] of Object.entries({ ...await getTokensPrice({ symbols: itsAssets.map(d => d.symbol) }) })) {
+                const i = itsAssets.findIndex(d => d.symbol === k)
+                if (i > -1) itsAssets[i].price = itsAssets[i].price || v.price
+              }
+            }
+            setITSAssets(itsAssets)
             break
           case 'contracts':
             setContracts(await getContracts())
