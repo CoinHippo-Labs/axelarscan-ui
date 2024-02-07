@@ -612,6 +612,7 @@ function Top({
   i,
   data,
   type = 'chain',
+  hasTransfers = true,
   hasGMP = true,
   transfersType,
   field = 'num_txs',
@@ -623,7 +624,7 @@ function Top({
 }) {
   const { chains } = useGlobalStore()
   return (
-    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-3 px-4 sm:px-6', type === 'chain' ? i % 3 !== 0 ? 'sm:border-l-0' : i % 6 !== 0 ? 'lg:border-l-0' : '' : !hasGMP || i % 4 !== 0 ? 'sm:border-l-0' : '', type === 'chain' ? 'xl:px-4 py-4' : 'xl:px-8 py-8')}>
+    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-3 px-4 sm:px-6', type === 'chain' ? i % 3 !== 0 ? 'sm:border-l-0' : i % 6 !== 0 ? 'lg:border-l-0' : '' : !hasTransfers || !hasGMP || i % 4 !== 0 ? 'sm:border-l-0' : '', type === 'chain' ? 'xl:px-4 py-4' : 'xl:px-8 py-8')}>
       <div className="flex flex-col gap-y-0.5">
         <span className="text-zinc-900 dark:text-zinc-100 text-sm font-semibold">
           {title}
@@ -710,8 +711,8 @@ function Top({
   )
 } 
 
-function Tops({ data, types }) {
-  const { chains } = useGlobalStore()
+function Tops({ data, types, params }) {
+  const { chains, itsAssets } = useGlobalStore()
 
   if (!data) return null
   const { GMPStats, GMPTopUsers, transfersStats, transfersTopUsers, transfersTopUsersByVolume } = { ...data }
@@ -725,6 +726,7 @@ function Tops({ data, types }) {
 
   const getTopData = (data, field = 'num_txs', n = 5) => _.slice(_.orderBy(toArray(data), [field], ['desc']), 0, n)
 
+  const hasTransfers = types.includes('transfers') && !(params?.assetType === 'its' || toArray(params?.asset).findIndex(a => getITSAssetData(a, itsAssets)) > -1)
   const hasGMP = types.includes('gmp')
 
   const chainPairs = groupData(_.concat(
@@ -767,8 +769,8 @@ function Tops({ data, types }) {
 
   return (
     <div className="border-b border-b-zinc-200 dark:border-b-zinc-700">
-      <div className={clsx('grid lg:px-2 xl:px-0', hasGMP ? '' : 'lg:grid-cols-2')}>
-        <div className={clsx('grid grid-cols-2 sm:grid-cols-3', hasGMP ? 'lg:grid-cols-6' : '')}>
+      <div className={clsx('grid lg:px-2 xl:px-0', hasTransfers && hasGMP ? '' : 'lg:grid-cols-2')}>
+        <div className={clsx('grid grid-cols-2 sm:grid-cols-3', hasTransfers && hasGMP ? 'lg:grid-cols-6' : '')}>
           <Top
             i={0}
             data={getTopData(chainPairs, 'num_txs', 100)}
@@ -824,33 +826,40 @@ function Tops({ data, types }) {
             className="h-48"
           />
         </div>
-        <div className={clsx('grid sm:grid-cols-2', hasGMP ? 'lg:grid-cols-4' : '')}>
-          <Top
-            i={0}
-            data={getTopData(transfersUsers, 'num_txs', 10)}
-            type="address"
-            hasGMP={hasGMP}
-            transfersType="transfers"
-            title="Top Users"
-            description="Top users by token transfers transactions"
-          />
-          <Top
-            i={1}
-            data={getTopData(transfersUsersByVolume, 'volume', 10)}
-            type="address"
-            hasGMP={hasGMP}
-            transfersType="transfers"
-            field="volume"
-            title="Top Users"
-            description="Top users by token transfers volume"
-            prefix="$"
-          />
+        <div className={clsx('grid sm:grid-cols-2', hasTransfers && hasGMP ? 'lg:grid-cols-4' : '')}>
+          {hasTransfers && (
+            <>
+              <Top
+                i={0}
+                data={getTopData(transfersUsers, 'num_txs', 10)}
+                type="address"
+                hasTransfers={hasTransfers}
+                hasGMP={hasGMP}
+                transfersType="transfers"
+                title="Top Users"
+                description="Top users by token transfers transactions"
+              />
+              <Top
+                i={1}
+                data={getTopData(transfersUsersByVolume, 'volume', 10)}
+                type="address"
+                hasTransfers={hasTransfers}
+                hasGMP={hasGMP}
+                transfersType="transfers"
+                field="volume"
+                title="Top Users"
+                description="Top users by token transfers volume"
+                prefix="$"
+              />
+            </>
+          )}
           {hasGMP && (
             <>
               <Top
                 i={2}
                 data={getTopData(contracts, 'num_txs', 10)}
                 type="contract"
+                hasTransfers={hasTransfers}
                 hasGMP={hasGMP}
                 title="Top Contracts"
                 description="Top contracts by GMP transactions"
@@ -859,6 +868,7 @@ function Tops({ data, types }) {
                 i={3}
                 data={getTopData(GMPUsers, 'num_txs', 10)}
                 type="address"
+                hasTransfers={hasTransfers}
                 hasGMP={hasGMP}
                 transfersType="gmp"
                 title="Top GMP Users"
@@ -1188,7 +1198,7 @@ export function Interchain() {
           {refresh && refresh !== 'true' && <Overlay />}
           <Summary data={data[generateKeyFromParams(params)]} params={params} />
           <Charts data={data[generateKeyFromParams(params)]} granularity={granularity} />
-          <Tops data={data[generateKeyFromParams(params)]} types={types} />
+          <Tops data={data[generateKeyFromParams(params)]} types={types} params={params} />
           {types.includes('gmp') && <GMPTimeSpents data={timeSpentData?.[generateKeyFromParams(params)]} />}
         </div>
       }
