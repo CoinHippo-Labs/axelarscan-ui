@@ -94,7 +94,7 @@ export default ({ n }) => {
           let transactions_data
           let total_data
           if (height) {
-            const { tx_responses, pagination } = { ...await getTransactions({ index: true, events: `tx.height=${height}` }) }
+            const { tx_responses, pagination } = { ...await getTransactions({ events: `tx.height=${height}` }) }
             transactions_data = toArray(tx_responses)
             total_data = pagination?.total
           }
