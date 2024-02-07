@@ -267,9 +267,10 @@ export function GMPs({ address }) {
     const getData = async () => {
       if (params && toBoolean(refresh)) {
         const sort = params.sortBy === 'value' ? { value: 'desc' } : undefined
-        delete params.sortBy
+        const _params = _.cloneDeep(params)
+        delete _params.sortBy
 
-        const { data, total } = { ...await searchGMP({ ...params, size, sort }) }
+        const { data, total } = { ...await searchGMP({ ..._params, size, sort }) }
         setData(data)
         setTotal(total)
         setRefresh(false)
