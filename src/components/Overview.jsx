@@ -73,7 +73,7 @@ function Metrics() {
           <div className="h-6 flex items-center gap-x-1.5">
             <div className="text-zinc-400 dark:text-zinc-300 text-xs">Threshold:</div>
             <Link
-              href="/validators"
+              href="https://axelar.network/blog/axelar-governance-explained"
               target="_blank"
               className="flex items-center text-blue-600 dark:text-blue-500"
             >
