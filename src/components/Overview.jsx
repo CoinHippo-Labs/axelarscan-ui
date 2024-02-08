@@ -34,7 +34,7 @@ function Metrics() {
 
   return blockData && (
     <div className="w-full overflow-x-auto border border-zinc-100 dark:border-zinc-800 lg:inline-table">
-      <div className="mx-auto w-full max-w-7xl flex items-center gap-x-4 px-4 py-3">
+      <div className="mx-auto w-full max-w-7xl flex items-center gap-x-3 px-4 py-3">
         {blockData.latest_block_height && (
           <div className="h-6 flex items-center gap-x-1.5">
             <div className="text-zinc-400 dark:text-zinc-300 text-xs whitespace-nowrap">Latest Block:</div>
@@ -129,7 +129,10 @@ function Metrics() {
             </Link>
           </div>
           <div className="h-6 flex items-center gap-x-1.5">
-            <div className="text-zinc-400 dark:text-zinc-300 text-xs"><MdLocalGasStation size={16} /></div>
+            <div className="flex items-center gap-x-1 text-zinc-400 dark:text-zinc-300 text-xs">
+              <MdLocalGasStation size={16} />
+              <span>unit:</span>
+            </div>
             <Link
               href="https://axelar.network/blog/axelar-governance-explained"
               target="_blank"
@@ -137,15 +140,51 @@ function Metrics() {
             >
               <div className="hidden lg:block">
                 <Tooltip content="AXL gas fees per transaction" className="whitespace-nowrap">
-                  <span className="text-xs font-medium whitespace-nowrap">
-                    0.007μAXL gas unit, 0.0014 AXL for transfer
-                  </span>
+                  <Number
+                    value={0.007}
+                    suffix=" uaxl"
+                    className="text-xs font-medium"
+                  />
                 </Tooltip>
               </div>
               <div className="block lg:hidden">
-                <span className="text-xs font-medium whitespace-nowrap">
-                  0.007μAXL gas unit, 0.0014 AXL for transfer
-                </span>
+                <div className="flex items-center">
+                  <Number
+                    value={0.007}
+                    suffix=" uaxl"
+                    className="text-xs font-medium"
+                  />
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="h-6 flex items-center gap-x-1.5">
+            <div className="flex items-center gap-x-1 text-zinc-400 dark:text-zinc-300 text-xs">
+              <MdLocalGasStation size={16} />
+              <span className="whitespace-nowrap">per transfer:</span>
+            </div>
+            <Link
+              href="https://axelar.network/blog/axelar-governance-explained"
+              target="_blank"
+              className="flex items-center text-blue-600 dark:text-blue-500"
+            >
+              <div className="hidden lg:block">
+                <Tooltip content="AXL gas fees per transaction" className="whitespace-nowrap">
+                  <Number
+                    value={0.0014}
+                    suffix=" AXL"
+                    className="text-xs font-medium"
+                  />
+                </Tooltip>
+              </div>
+              <div className="block lg:hidden">
+                <div className="flex items-center">
+                  <Number
+                    value={0.0014}
+                    suffix=" AXL"
+                    className="text-xs font-medium"
+                  />
+                </div>
               </div>
             </Link>
           </div>
