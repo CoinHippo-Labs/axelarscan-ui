@@ -607,20 +607,24 @@ export function AssetProfile({
   addressOrDenom,
   ITSPossible = false,
   onlyITS = false,
+  isLink = false,
   width = 24,
   height = 24,
   className,
   titleClassName,
 }) {
-  const { assets, itsAssets } = useGlobalStore()
+  const { chains, assets, itsAssets } = useGlobalStore()
 
-  const assetData = (!onlyITS && getAssetData(addressOrDenom || value, assets)) || (ITSPossible && getITSAssetData(addressOrDenom || value, _.concat(its, itsAssets)))
+  const assetData = (!onlyITS && getAssetData(addressOrDenom || value, assets)) || (ITSPossible && getITSAssetData(addressOrDenom || value, _.concat(itsAssets, its)))
   const { addresses } = { ...assetData }
   let { symbol, image } = { ...assetData }
+
+  if (!chain && assetData?.chains) chain = _.head(Object.keys(assetData.chains))
   symbol = addresses?.[chain]?.symbol || symbol
   image = addresses?.[chain]?.image || image
 
-  return value && (
+  const { url, contract_path } = { ...getChainData(chain, chains)?.explorer }
+  const element = value && (
     <div className={clsx('min-w-max flex items-center', isNumber(amount) ? 'gap-x-1.5' : 'gap-x-2', className)}>
       <Image
         src={image}
@@ -635,9 +639,15 @@ export function AssetProfile({
           className={clsx('text-zinc-900 dark:text-zinc-100 font-medium', titleClassName)}
         />
       )}
-      <span className={clsx('text-zinc-900 dark:text-zinc-100 font-medium whitespace-nowrap', titleClassName)}>
-        {symbol || value}
+      <span className={clsx('font-medium whitespace-nowrap', isLink && url ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-900 dark:text-zinc-100', titleClassName)}>
+        {symbol || (value === addressOrDenom ? ellipse(value, 8, '0x') : value)}
       </span>
     </div>
   )
+
+  return !value ? undefined : isLink && url ? (
+    <Link href={`${url}${contract_path?.replace('{address}', addressOrDenom || value)}`} target="_blank">
+      {element}
+    </Link>
+  ) : element
 }

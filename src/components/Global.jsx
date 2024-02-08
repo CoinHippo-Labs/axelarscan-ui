@@ -7,7 +7,7 @@ import moment from 'moment'
 import { getChains, getAssets, getITSAssets, getTokensPrice, getInflation, getNetworkParameters, getTVL } from '@/lib/api/axelarscan'
 import { getValidators } from '@/lib/api/validator'
 import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '@/lib/api/token-transfer'
-import { getContracts, getConfigurations, GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '@/lib/api/gmp'
+import { getContracts, getConfigurations, GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers, GMPTopITSAssets } from '@/lib/api/gmp'
 import { ENVIRONMENT } from '@/lib/config'
 import { toArray } from '@/lib/parser'
 
@@ -83,7 +83,7 @@ export function Global() {
             setTVL(await getTVL())
             break
           case 'stats':
-            const metrics = ['GMPStats', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
+            const metrics = ['GMPStats', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'GMPTopITSUsers', 'GMPTopITSUsersByVolume', 'GMPTopITSAssets', 'GMPTopITSAssetsByVolume', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
             setStats(Object.fromEntries((await Promise.all(toArray(metrics.map(d => new Promise(async resolve => {
               switch (d) {
                 case 'GMPStats':
@@ -103,6 +103,18 @@ export function Global() {
                   break
                 case 'GMPTopUsers':
                   resolve([d, await GMPTopUsers({ size: 100 })])
+                  break
+                case 'GMPTopITSUsers':
+                  resolve([d, await GMPTopUsers({ assetType: 'its', size: 100 })])
+                  break
+                case 'GMPTopITSUsersByVolume':
+                  resolve([d, await GMPTopUsers({ assetType: 'its', orderBy: 'volume', size: 100 })])
+                  break
+                case 'GMPTopITSAssets':
+                  resolve([d, await GMPTopITSAssets({ size: 100 })])
+                  break
+                case 'GMPTopITSAssetsByVolume':
+                  resolve([d, await GMPTopITSAssets({ orderBy: 'volume', size: 100 })])
                   break
                 case 'transfersStats':
                   resolve([d, await transfersStats()])

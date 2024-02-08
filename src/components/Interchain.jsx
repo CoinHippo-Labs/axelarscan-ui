@@ -20,13 +20,13 @@ import { Image } from '@/components/Image'
 import { TooltipComponent } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Number } from '@/components/Number'
-import { Profile, ChainProfile } from '@/components/Profile'
+import { Profile, ChainProfile, AssetProfile } from '@/components/Profile'
 import { TimeAgo, TimeSpent } from '@/components/Time'
 import { getParams, getQueryString } from '@/components/Pagination'
 import { useGlobalStore } from '@/components/Global'
-import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers } from '@/lib/api/gmp'
+import { GMPStats, GMPChart, GMPTotalVolume, GMPTotalFee, GMPTotalActiveUsers, GMPTopUsers, GMPTopITSAssets } from '@/lib/api/gmp'
 import { transfersStats, transfersChart, transfersTotalVolume, transfersTotalFee, transfersTotalActiveUsers, transfersTopUsers } from '@/lib/api/token-transfer'
-import { ENVIRONMENT, getChainData, getITSAssetData } from '@/lib/config'
+import { ENVIRONMENT, getChainData, getAssetData, getITSAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import { equalsIgnoreCase, toBoolean, toTitle } from '@/lib/string'
 import { isNumber, toNumber, toFixed, numberFormat } from '@/lib/number'
@@ -614,6 +614,7 @@ function Top({
   type = 'chain',
   hasTransfers = true,
   hasGMP = true,
+  hasITS = true,
   transfersType,
   field = 'num_txs',
   title = '',
@@ -645,9 +646,23 @@ function Top({
               const keys = split(d.key, { delimiter: '_' })
               return keys.length > 0 && (
                 <div key={i} className="flex items-center justify-between gap-x-2">
-                  <div className={clsx('flex items-center gap-x-1', ['contract', 'address'].includes(type) ? 'h-8' : 'h-6')}>
+                  <div className={clsx('flex items-center gap-x-1', ['asset', 'contract', 'address'].includes(type) ? 'h-8' : 'h-6')}>
                     {keys.map((k, j) => {
                       switch (type) {
+                        case 'asset':
+                          return (
+                            <AssetProfile
+                              key={j}
+                              value={k}
+                              addressOrDenom={k}
+                              ITSPossible={true}
+                              onlyITS={true}
+                              isLink={true}
+                              width={20}
+                              height={20}
+                              className="text-xs font-medium"
+                            />
+                          )
                         case 'contract':
                         case 'address':
                           return (
@@ -712,10 +727,10 @@ function Top({
 } 
 
 function Tops({ data, types, params }) {
-  const { chains, itsAssets } = useGlobalStore()
+  const { chains, assets, itsAssets } = useGlobalStore()
 
   if (!data) return null
-  const { GMPStats, GMPTopUsers, transfersStats, transfersTopUsers, transfersTopUsersByVolume } = { ...data }
+  const { GMPStats, GMPTopUsers, GMPTopITSUsers, GMPTopITSUsersByVolume, GMPTopITSAssets, GMPTopITSAssetsByVolume, transfersStats, transfersTopUsers, transfersTopUsersByVolume } = { ...data }
 
   const groupData = (data, by = 'key') => Object.entries(_.groupBy(toArray(data), by)).map(([k, v]) => ({
     key: _.head(v)?.key || k,
@@ -728,6 +743,7 @@ function Tops({ data, types, params }) {
 
   const hasTransfers = types.includes('transfers') && !(params?.assetType === 'its' || toArray(params?.asset).findIndex(a => getITSAssetData(a, itsAssets)) > -1)
   const hasGMP = types.includes('gmp')
+  const hasITS = hasGMP && params?.assetType !== 'gateway' && toArray(params?.asset).findIndex(a => getAssetData(a, assets)) < 0
 
   const chainPairs = groupData(_.concat(
     toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s => toArray(s.destinationChains || s.destination_chains).map(d => ({ key: `${s.key}_${d.key}`, num_txs: d.num_txs, volume: d.volume })))),
@@ -765,6 +781,26 @@ function Tops({ data, types, params }) {
   const GMPUsers = groupData(toArray(GMPTopUsers?.data).map(d => {
     const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, d.key)) }
     return { key: d.key?.toLowerCase(), customKey: name || d.key?.toLowerCase(), num_txs: d.num_txs }
+  }), 'customKey')
+
+  const ITSUsers = groupData(toArray(GMPTopITSUsers?.data).map(d => {
+    const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, d.key)) }
+    return { key: d.key?.toLowerCase(), customKey: name || d.key?.toLowerCase(), num_txs: d.num_txs }
+  }), 'customKey')
+
+  const ITSUsersByVolume = groupData(toArray(GMPTopITSUsersByVolume?.data).filter(d => d.volume > 0).map(d => {
+    const { name } = { ...accounts.find(a => equalsIgnoreCase(a.address, d.key)) }
+    return { key: d.key?.toLowerCase(), customKey: name || d.key?.toLowerCase(), num_txs: d.num_txs, volume: d.volume }
+  }), 'customKey')
+
+  const ITSAssets = groupData(toArray(GMPTopITSAssets?.data).map(d => {
+    const { symbol } = { ...getITSAssetData(d.key, itsAssets) }
+    return { key: d.key?.toLowerCase(), customKey: symbol || d.key?.toLowerCase(), num_txs: d.num_txs }
+  }), 'customKey')
+
+  const ITSAssetsByVolume = groupData(toArray(GMPTopITSAssetsByVolume?.data).filter(d => d.volume > 0).map(d => {
+    const { symbol } = { ...getITSAssetData(d.key, itsAssets) }
+    return { key: d.key?.toLowerCase(), customKey: symbol || d.key?.toLowerCase(), num_txs: d.num_txs, volume: d.volume }
   }), 'customKey')
 
   return (
@@ -835,6 +871,7 @@ function Tops({ data, types, params }) {
                 type="address"
                 hasTransfers={hasTransfers}
                 hasGMP={hasGMP}
+                hasITS={hasITS}
                 transfersType="transfers"
                 title="Top Users"
                 description="Top users by token transfers transactions"
@@ -845,6 +882,7 @@ function Tops({ data, types, params }) {
                 type="address"
                 hasTransfers={hasTransfers}
                 hasGMP={hasGMP}
+                hasITS={hasITS}
                 transfersType="transfers"
                 field="volume"
                 title="Top Users"
@@ -877,6 +915,46 @@ function Tops({ data, types, params }) {
             </>
           )}
         </div>
+        {hasITS && (
+          <div className={clsx('grid sm:grid-cols-2 lg:grid-cols-4', !hasTransfers && 'lg:col-span-2')}>
+            <Top
+              i={0}
+              data={getTopData(ITSUsers, 'num_txs', 10)}
+              type="address"
+              transfersType="gmp"
+              title="Top ITS Users"
+              description="Top users by ITS transactions"
+            />
+            <Top
+              i={1}
+              data={getTopData(ITSUsersByVolume, 'volume', 10)}
+              type="address"
+              transfersType="gmp"
+              field="volume"
+              title="Top ITS Users"
+              description="Top users by ITS volume"
+              prefix="$"
+            />
+            <Top
+              i={3}
+              data={getTopData(ITSAssets, 'num_txs', 10)}
+              type="asset"
+              transfersType="gmp"
+              title="Top ITS Assets"
+              description="Top assets by ITS transactions"
+            />
+            <Top
+              i={4}
+              data={getTopData(ITSAssetsByVolume, 'volume', 10)}
+              type="asset"
+              transfersType="gmp"
+              field="volume"
+              title="Top ITS Assets"
+              description="Top assets by ITS volume"
+              prefix="$"
+            />
+          </div>
+        )}
       </div>
     </div>
   )
@@ -1012,7 +1090,7 @@ export function Interchain() {
   const [timeSpentData, setTimeSpentData] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const globalStore = useGlobalStore()
-  const { stats } = { ...globalStore }
+  const { assets, stats } = { ...globalStore }
 
   const { transfersType, contractAddress, fromTime, toTime } = { ...params }
   const types = toArray(transfersType || ['gmp', 'transfers'])
@@ -1027,11 +1105,12 @@ export function Interchain() {
   }, [searchParams, params, setParams])
 
   useEffect(() => {
-    const metrics = ['GMPStats', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
+    const metrics = ['GMPStats', 'GMPChart', 'GMPTotalVolume', 'GMPTotalFee', 'GMPTotalActiveUsers', 'GMPTopUsers', 'GMPTopITSUsers', 'GMPTopITSUsersByVolume', 'GMPTopITSAssets', 'GMPTopITSAssetsByVolume', 'transfersStats', 'transfersChart', 'transfersTotalVolume', 'transfersTotalFee', 'transfersTotalActiveUsers', 'transfersTopUsers', 'transfersTopUsersByVolume']
     const getData = async () => {
       if (stats && params && toBoolean(refresh)) {
         setData({ ...data, [generateKeyFromParams(params)]: Object.fromEntries((await Promise.all(toArray(metrics.map(d => new Promise(async resolve => {
           const isSearchITSOnTransfers = types.includes('transfers') && d.startsWith('transfers') && (params.assetType === 'its' || toArray(params.asset).findIndex(a => getITSAssetData(a, globalStore.itsAssets)) > -1)
+          const hasITS = types.includes('gmp') && params.assetType !== 'gateway' && toArray(params.asset).findIndex(a => getAssetData(a, assets)) < 0
           const noFilter = Object.keys(params).length === 0
 
           switch (d) {
@@ -1055,6 +1134,18 @@ export function Interchain() {
               break
             case 'GMPTopUsers':
               resolve([d, types.includes('gmp') && ((noFilter && stats[d]) || await GMPTopUsers({ ...params, size: 100 }))])
+              break
+            case 'GMPTopITSUsers':
+              resolve([d, hasITS && ((noFilter && stats[d]) || await GMPTopUsers({ ...params, assetType: 'its', size: 100 }))])
+              break
+            case 'GMPTopITSUsersByVolume':
+              resolve([d, hasITS && ((noFilter && stats[d]) || await GMPTopUsers({ ...params, assetType: 'its', orderBy: 'volume', size: 100 }))])
+              break
+            case 'GMPTopITSAssets':
+              resolve([d, hasITS && ((noFilter && stats[d]) || await GMPTopITSAssets({ ...params, size: 100 }))])
+              break
+            case 'GMPTopITSAssetsByVolume':
+              resolve([d, hasITS && ((noFilter && stats[d]) || await GMPTopITSAssets({ ...params, orderBy: 'volume', size: 100 }))])
               break
             case 'transfersStats':
               if (isSearchITSOnTransfers) resolve([d, { data: [] }])
