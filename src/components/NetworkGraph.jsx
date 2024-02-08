@@ -96,7 +96,7 @@ const drawTitle = (node, ctx, isSelected, theme) => {
   const radius = (TIERS.length + 1 + Math.pow(2, TIERS.length + 1 - (node.tier || 1)) + fontSize) / 2
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  ctx.font = `${isSelected ? '700' : '500'} ${fontSize}px Inter, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif`
+  ctx.font = `${isSelected ? '700' : '600'} ${fontSize}px Inter, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif`
   ctx.fillStyle = theme === 'dark' ? isSelected ? '#f4f4f5' : '#d4d4d8' : isSelected ? '#18181b' : '#3f3f46'
   ctx.fillText(node.label, x, y + radius)
 }
