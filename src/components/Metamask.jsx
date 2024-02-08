@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import { Image } from '@/components/Image'
 import { Tooltip } from '@/components/Tooltip'
 import { useGlobalStore } from '@/components/Global'
-import { getChainData, getAssetData } from '@/lib/config'
+import { getChainData, getAssetData, getITSAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import MetamaskLogo from '@/images/wallets/metamask.png'
 
@@ -15,11 +15,11 @@ export const useChainIdStore = create()(set => ({
   setChainId: data => set(state => ({ ...state, chainId: data })),
 }))
 
-export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip = false }) {
+export function AddMetamask({ chain, asset, type, width = 20, height = 20, noTooltip = false }) {
   const [web3, setWeb3] = useState(null)
   const [data, setData] = useState(null)
   const { chainId, setChainId } = useChainIdStore()
-  const { chains, assets } = useGlobalStore()
+  const { chains, assets, itsAssets } = useGlobalStore()
 
   const switchNetwork = useCallback(async (chain_id, tokenData) => {
     try {
@@ -71,8 +71,10 @@ export function AddMetamask({ chain, asset, width = 20, height = 20, noTooltip =
   }, [data, chainId, addToken])
 
   const { id, chain_id, name } = { ...getChainData(chain, chains, false) }
-  const { symbol, decimals, image, addresses } = { ...getAssetData(asset, assets) }
-  const tokenData = { symbol, decimals, image, ...addresses?.[id] }
+  const assetData = type === 'its' ? getITSAssetData(asset, itsAssets) : getAssetData(asset, assets)
+  const { symbol, decimals, image, addresses } = { ...assetData }
+  const tokenData = { symbol, decimals, image, ...(type === 'its' ? assetData?.chains?.[id] : addresses?.[id]) }
+  if (tokenData?.tokenAddress) tokenData.address = tokenData.tokenAddress
   const alreadyOnChain = chain_id === chainId
 
   const button = (

@@ -18,7 +18,7 @@ import { useGlobalStore } from '@/components/Global'
 import { getChainData } from '@/lib/config'
 import { getIBCDenomBase64, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
-import { equalsIgnoreCase } from '@/lib/string'
+import { equalsIgnoreCase, ellipse } from '@/lib/string'
 
 function Chain({ data }) {
   const { contracts } = useGlobalStore()
@@ -113,18 +113,19 @@ function Asset({ data, focusID, onFocus }) {
   const [chainSelected, setChainSelected] = useState(null)
   const { chains } = useGlobalStore()
 
-  const { denom, denoms, native_chain, name, symbol, decimals, image } = { ...data }
+  const { type, denom, denoms, native_chain, name, symbol, decimals, image } = { ...data }
   let { addresses } = { ...data }
-  const { id, explorer, chain_type } = { ...(focusID === denom && getChainData(chainSelected, chains)) }
+  const _id = type === 'its' ? data.id : denom
+  const { id, explorer, chain_type } = { ...(focusID === _id && getChainData(chainSelected, chains)) }
   const { url, contract_path, asset_path } = { ...explorer }
-  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...addresses?.[native_chain] }, Object.entries({ ...addresses }).map(([k, v]) => ({ chain: k, ...v })))), 'chain').filter(d => getChainData(d.chain, chains))
+  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...(type === 'its' ? data.chains?.[native_chain] : addresses?.[native_chain]) }, Object.entries({ ...(type === 'its' ? data.chains : addresses) }).map(([k, v]) => ({ chain: k, ...v })))), 'chain').filter(d => getChainData(d.chain, chains)).map(d => ({ ...d, address: d.address || d.tokenAddress }))
   const tokenData = addresses.find(d => d.chain === id)
   const { address, ibc_denom } = { ...tokenData }
   const tokenSymbol = tokenData?.symbol || symbol
 
   useEffect(() => {
-    if (focusID !== denom) setSeeMore(false)
-  }, [focusID, denom])
+    if (focusID !== _id) setSeeMore(false)
+  }, [focusID, data, type, denom])
 
   return (
     <li>
@@ -144,7 +145,7 @@ function Asset({ data, focusID, onFocus }) {
             <div className="flex flex-wrap items-center">
               {toArray(_.concat(denom, _.head(denoms))).map(d => (
                 <Tag key={d} className="bg-orange-400 dark:bg-orange-500 font-normal whitespace-nowrap ml-1 mt-1">
-                  {d}
+                  {ellipse(d)}
                 </Tag>
               ))}
             </div>
@@ -157,10 +158,10 @@ function Asset({ data, focusID, onFocus }) {
         <div className="flex flex-col gap-y-4 mt-6 mb-1">
           <div className="flex flex-col gap-y-1">
             <span className="text-base text-zinc-400 dark:text-zinc-500">
-              Interchain Tokens
+              {type === 'its' ? 'Interchain' : 'Gateway'} Tokens
             </span>
             <div className="flex flex-wrap items-center">
-              {_.slice(addresses, 0, focusID === denom && seeMore ? addresses.length : NUM_CHAINS_TRUNCATE).map((d, i) => {
+              {_.slice(addresses, 0, focusID === _id && seeMore ? addresses.length : NUM_CHAINS_TRUNCATE).map((d, i) => {
                 const { chain, address, ibc_denom, symbol } = { ...d }
                 const { name, image } = { ...getChainData(chain, chains) }
 
@@ -170,7 +171,7 @@ function Asset({ data, focusID, onFocus }) {
                       <button
                         onClick={() => {
                           setChainSelected(chain === chainSelected ? null : chain)
-                          if (onFocus) onFocus(denom)
+                          if (onFocus) onFocus(_id)
                         }}
                       >
                         <Image
@@ -180,7 +181,7 @@ function Asset({ data, focusID, onFocus }) {
                           height={24}
                           className={clsx(
                             'rounded-full',
-                            focusID === denom && chain === chainSelected ? 'border-2 border-blue-600 dark:border-blue-500' : chain === native_chain ? 'border-2 border-orange-400 dark:border-orange-500' : '',
+                            focusID === _id && chain === chainSelected ? 'border-2 border-blue-600 dark:border-blue-500' : chain === native_chain ? 'border-2 border-orange-400 dark:border-orange-500' : '',
                           )}
                         />
                       </button>
@@ -192,7 +193,7 @@ function Asset({ data, focusID, onFocus }) {
                 <button
                   onClick={() => {
                     setSeeMore(!seeMore)
-                    if (onFocus) onFocus(denom)
+                    if (onFocus) onFocus(_id)
                   }}
                   className="bg-zinc-100 dark:bg-zinc-800 rounded text-blue-600 dark:text-blue-500 text-xs 3xl:text-sm font-medium mb-1.5 px-1.5 3xl:px-2.5 py-1 3xl:py-1.5"
                 >
@@ -205,7 +206,7 @@ function Asset({ data, focusID, onFocus }) {
             <div className="flex flex-col gap-y-3">
               <div className="flex items-center justify-between gap-x-2">
                 <Tag className="uppercase">{id}</Tag>
-                {chain_type === 'evm' && <AddMetamask chain={id} asset={denom} />}
+                {chain_type === 'evm' && <AddMetamask chain={id} asset={_id} type={type} />}
               </div>
               {address && (
                 <ValueBox
@@ -245,7 +246,7 @@ export function Resources({ resource }) {
   const [rendered, setRendered] = useState(false)
   const [input, setInput] = useState('')
   const [assetFocusID, setAssetFocusID] = useState(null)
-  const { chains, assets } = useGlobalStore()
+  const { chains, assets, itsAssets } = useGlobalStore()
 
   useEffect(() => {
     switch (pathname) {
@@ -272,7 +273,10 @@ export function Resources({ resource }) {
       case 'chains':
         return toArray(chains).filter(d => !d.no_inflation || d.deprecated).filter(d => !input || includesStringList(_.uniq(toArray(['id', 'chain_id', 'chain_name', 'name'].map(f => d[f]?.toString()), { toCase: 'lower' })), words))
       case 'assets':
-        return toArray(assets).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['denom', 'name', 'symbol'].map(f => d[f]), d.denoms, Object.values({ ...d.addresses }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.address, a.ibc_denom]))), { toCase: 'lower' })), words))
+        return _.concat(
+          toArray(assets).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['denom', 'name', 'symbol'].map(f => d[f]), d.denoms, Object.values({ ...d.addresses }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.address, a.ibc_denom]))), { toCase: 'lower' })), words)),
+          toArray(itsAssets).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['name', 'symbol'].map(f => d[f]), Object.values({ ...d.chains }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.tokenAddress]))), { toCase: 'lower' })), words)).map(d => ({ ...d, type: 'its' })),
+        )
       default:
         return null
     }
