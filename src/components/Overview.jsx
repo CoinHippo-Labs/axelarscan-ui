@@ -3,10 +3,13 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import _ from 'lodash'
+import { MdLocalGasStation } from 'react-icons/md'
+import { PiRadioButtonFill } from 'react-icons/pi'
 
 import { Container } from '@/components/Container'
 import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
+import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
 import { Summary } from '@/components/Interchain'
 import { NetworkGraph } from '@/components/NetworkGraph'
@@ -53,80 +56,92 @@ function Metrics() {
             )}
           </div>
         )}
-        {toArray(validators).length > 0 && (
-          <>
-            <span className="text-zinc-200 dark:text-zinc-700">|</span>
-            <div className="flex items-center gap-x-2.5">
-              <div className="h-6 flex items-center gap-x-1.5">
-                <div className="text-zinc-400 dark:text-zinc-300 text-xs">Validators:</div>
-                <Link
-                  href="/validators"
-                  target="_blank"
-                  className="flex items-center text-blue-600 dark:text-blue-500"
-                >
-                  <Number value={validators.filter(d => d.status === 'BOND_STATUS_BONDED').length} className="text-xs font-medium" />
-                </Link>
-              </div>
-              <div className="h-6 flex items-center gap-x-1.5">
-                <div className="text-zinc-400 dark:text-zinc-300 text-xs">Threshold:</div>
-                <Link
-                  href="/validators"
-                  target="_blank"
-                  className="flex items-center text-blue-600 dark:text-blue-500"
-                >
-                  <div className="hidden lg:block">
-                    <Tooltip content="Threshold number of quadratic voting power required to onboard a new EVM chain" className="whitespace-nowrap">
-                      <Number
-                        value={60}
-                        prefix=">"
-                        suffix="%"
-                        className="text-xs font-medium"
-                      />
-                    </Tooltip>
-                  </div>
-                  <div className="block lg:hidden">
-                    <div className="flex items-center">
-                      <Number
-                        value={60}
-                        prefix=">"
-                        suffix="%"
-                        className="text-xs font-medium"
-                      />
-                    </div>
-                  </div>
-                </Link>
-              </div>
-              <div className="h-6 flex items-center gap-x-1.5">
-                <div className="text-zinc-400 dark:text-zinc-300 text-xs">Rewards:</div>
-                <Link
-                  href="https://axelar.network/blog/axelar-governance-explained"
-                  target="_blank"
-                  className="flex items-center text-blue-600 dark:text-blue-500"
-                >
-                  <div className="hidden lg:block">
-                    <Tooltip content="Additional chain rewards" className="whitespace-nowrap">
-                      <Number
-                        value={0.3}
-                        suffix="% / EVM chain"
-                        className="text-xs font-medium"
-                      />
-                    </Tooltip>
-                  </div>
-                  <div className="block lg:hidden">
-                    <div className="flex items-center">
-                      <Number
-                        value={0.3}
-                        suffix="% / EVM chain"
-                        className="text-xs font-medium"
-                      />
-                    </div>
-                  </div>
-                </Link>
-              </div>
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
+        <div className="flex items-center gap-x-2.5">
+          {toArray(validators).length > 0 && (
+            <div className="h-6 flex items-center gap-x-1.5">
+              <div className="text-zinc-400 dark:text-zinc-300 text-xs">Validators:</div>
+              <Link
+                href="/validators"
+                target="_blank"
+                className="flex items-center text-blue-600 dark:text-blue-500"
+              >
+                <Number value={validators.filter(d => d.status === 'BOND_STATUS_BONDED').length} className="text-xs font-medium" />
+              </Link>
             </div>
-            <span className="text-zinc-200 dark:text-zinc-700">|</span>
-          </>
-        )}
+          )}
+          <div className="h-6 flex items-center gap-x-1.5">
+            <div className="text-zinc-400 dark:text-zinc-300 text-xs">Threshold:</div>
+            <Link
+              href="/validators"
+              target="_blank"
+              className="flex items-center text-blue-600 dark:text-blue-500"
+            >
+              <div className="hidden lg:block">
+                <Tooltip content="Threshold number of quadratic voting power required to onboard a new EVM chain" className="whitespace-nowrap">
+                  <Number
+                    value={60}
+                    prefix=">"
+                    suffix="%"
+                    className="text-xs font-medium"
+                  />
+                </Tooltip>
+              </div>
+              <div className="block lg:hidden">
+                <div className="flex items-center">
+                  <Number
+                    value={60}
+                    prefix=">"
+                    suffix="%"
+                    className="text-xs font-medium"
+                  />
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="h-6 flex items-center gap-x-1.5">
+            <div className="text-zinc-400 dark:text-zinc-300 text-xs">Rewards:</div>
+            <Link
+              href="https://axelar.network/blog/axelar-governance-explained"
+              target="_blank"
+              className="flex items-center text-blue-600 dark:text-blue-500"
+            >
+              <div className="hidden lg:block">
+                <Tooltip content="Base inflation rate + Additional chain rewards" className="whitespace-nowrap">
+                  <Number
+                    value={0.3}
+                    prefix="1% base + "
+                    suffix="% / EVM chain"
+                    className="text-xs font-medium"
+                  />
+                </Tooltip>
+              </div>
+              <div className="block lg:hidden">
+                <div className="flex items-center">
+                  <Number
+                    value={0.3}
+                    prefix="1% base + "
+                    suffix="% / EVM chain"
+                    className="text-xs font-medium"
+                  />
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="h-6 flex items-center gap-x-1.5">
+            <div className="text-zinc-400 dark:text-zinc-300 text-xs"><MdLocalGasStation size={16} /></div>
+            <Link
+              href="https://axelar.network/blog/axelar-governance-explained"
+              target="_blank"
+              className="flex items-center text-blue-600 dark:text-blue-500"
+            >
+              <span className="text-xs font-medium whitespace-nowrap">
+                0.007μAXL gas unit, 0.0014 AXL / TX
+              </span>
+            </Link>
+          </div>
+        </div>
+        <span className="text-zinc-200 dark:text-zinc-700">|</span>
         {networkParameters?.bankSupply?.amount && networkParameters.stakingPool?.bonded_tokens && (
           <div className="h-6 flex items-center gap-x-1.5">
             <div className="text-zinc-400 dark:text-zinc-300 text-xs">Staked:</div>
@@ -196,7 +211,7 @@ function Metrics() {
 
 export function Overview() {
   const [data, setData] = useState(null)
-  const { chains, stats } = useGlobalStore()
+  const { chains, contracts, stats } = useGlobalStore()
 
   useEffect(() => {
     const metrics = ['GMPStats', 'GMPTotalVolume', 'transfersStats', 'transfersTotalVolume']
@@ -248,7 +263,15 @@ export function Overview() {
         {!data ? <Spinner /> :
           <div className="flex flex-col gap-y-8">
             <div className="flex flex-col gap-y-4">
-              <h2 className="text-2xl font-semibold">Cross-Chain Activities</h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-x-4 gap-y-4 sm:gap-y-0">
+                <h2 className="text-2xl font-semibold">Cross-Chain Activity</h2>
+                {chains && (
+                  <Tag className="w-fit capitalize bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center text-base gap-x-1">
+                    <PiRadioButtonFill size={14} className="text-green-600 dark:text-green-500 -ml-0.5" />
+                    <span>Connected chains: {toArray(chains).filter(d => !d.deprecated && (!d.maintainer_id || contracts?.gateway_contracts?.[d.id]?.address)).length}</span>
+                  </Tag>
+                )}
+              </div>
               <Summary data={data} />
             </div>
             <div className="flex flex-col gap-y-4">
