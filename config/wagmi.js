@@ -50,6 +50,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainne
     { _id: 'immutable', id: 13473, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.immutable.com'] }, public: { http: ['https://rpc.testnet.immutable.com'] }, infura: { http: ['https://rpc.testnet.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
     { _id: 'immutable-devnet', id: 15003, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.dev.immutable.com'] }, public: { http: ['https://rpc.dev.immutable.com'] }, infura: { http: ['https://rpc.dev.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
     { _id: 'scroll', ...scrollSepolia },
+    { _id: 'fraxtal', id: 2522, network: 'fraxtal', name: 'Fraxtal', nativeCurrency: { name: 'Frax Ether', symbol: 'frxETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.frax.com'] }, public: { http: ['https://rpc.testnet.frax.com'] } }, blockExplorers: { default: { name: 'Fraxtal', url: 'https://testnet.frax.com' } } },
   ]
 
 export const queryClient = new QueryClient()
