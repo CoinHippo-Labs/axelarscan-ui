@@ -279,14 +279,14 @@ export function Summary({ data, params }) {
             <Number
               value={toNumber(_.sumBy(GMPStats?.messages, 'num_txs'))}
               format="0,0.00a"
-              prefix="GMPs: "
+              prefix="GMP: "
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
             <Number
               value={toNumber(transfersStats?.total)}
               format="0,0.00a"
-              prefix="Transfers: "
+              prefix="Transfer: "
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
@@ -307,14 +307,14 @@ export function Summary({ data, params }) {
             <Number
               value={toNumber(GMPTotalVolume)}
               format="0,0.00a"
-              prefix="GMPs: $"
+              prefix="GMP: $"
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
             <Number
               value={toNumber(transfersTotalVolume)}
               format="0,0.00a"
-              prefix="Transfers: $"
+              prefix="Transfer: $"
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
@@ -335,14 +335,14 @@ export function Summary({ data, params }) {
             <Number
               value={toNumber(GMPTotalVolume) / (toNumber(_.sumBy(GMPStats?.messages, 'num_txs')) || 1)}
               format="0,0.00a"
-              prefix="GMPs: $"
+              prefix="GMP: $"
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />
             <Number
               value={toNumber(transfersTotalVolume) / (toNumber(transfersStats?.total) || 1)}
               format="0,0.00a"
-              prefix="Transfers: $"
+              prefix="Transfer: $"
               noTooltip={true}
               className="text-zinc-400 dark:text-zinc-500 text-xs"
             />

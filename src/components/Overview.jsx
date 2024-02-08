@@ -131,7 +131,7 @@ function Metrics() {
           <div className="h-6 flex items-center gap-x-1.5">
             <div className="flex items-center gap-x-1 text-zinc-400 dark:text-zinc-300 text-xs">
               <MdLocalGasStation size={16} />
-              <span>unit:</span>
+              <span>Unit:</span>
             </div>
             <Link
               href="https://axelar.network/blog/axelar-governance-explained"
@@ -161,7 +161,7 @@ function Metrics() {
           <div className="h-6 flex items-center gap-x-1.5">
             <div className="flex items-center gap-x-1 text-zinc-400 dark:text-zinc-300 text-xs">
               <MdLocalGasStation size={16} />
-              <span className="whitespace-nowrap">per transfer:</span>
+              <span className="whitespace-nowrap">Per Transfer:</span>
             </div>
             <Link
               href="https://axelar.network/blog/axelar-governance-explained"
