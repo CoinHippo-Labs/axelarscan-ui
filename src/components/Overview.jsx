@@ -135,9 +135,18 @@ function Metrics() {
               target="_blank"
               className="flex items-center text-blue-600 dark:text-blue-500"
             >
-              <span className="text-xs font-medium whitespace-nowrap">
-                0.007μAXL gas unit, 0.0014 AXL / TX
-              </span>
+              <div className="hidden lg:block">
+                <Tooltip content="AXL gas fees per transaction" className="whitespace-nowrap">
+                  <span className="text-xs font-medium whitespace-nowrap">
+                    0.007μAXL gas unit, 0.0014 AXL for transfer
+                  </span>
+                </Tooltip>
+              </div>
+              <div className="block lg:hidden">
+                <span className="text-xs font-medium whitespace-nowrap">
+                  0.007μAXL gas unit, 0.0014 AXL for transfer
+                </span>
+              </div>
             </Link>
           </div>
         </div>
