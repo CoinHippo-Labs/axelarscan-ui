@@ -441,7 +441,7 @@ function StatsBarChart({
 
   const d = toArray(chartData).find(d => d.timestamp === x)
   const value = d ? d[field] : chartData ? totalValue || _.sumBy(chartData, field) : null
-  const timeString = d ? d.focusTimeString : chartData ? toArray([_.head(split(_.head(chartData)?.focusTimeString, { delimiter: ' - ' })), _.last(split(_.last(chartData)?.focusTimeString, { delimiter: ' - ' }))]).join(' - ') : null
+  const timeString = d ? d.focusTimeString : chartData ? toArray([_.head(split(_.head(chartData.filter(d => d.timestamp))?.focusTimeString, { delimiter: ' - ' })), _.last(split(_.last(chartData.filter(d => d.timestamp))?.focusTimeString, { delimiter: ' - ' }))]).join(' - ') : null
 
   return (
     <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-2 px-4 sm:px-6 xl:px-8 py-8', i % 2 !== 0 ? 'sm:border-l-0' : '')}>
