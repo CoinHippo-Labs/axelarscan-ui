@@ -8,24 +8,25 @@ import _ from 'lodash'
 import { Container } from '@/components/Container'
 import { Image } from '@/components/Image'
 import { Spinner } from '@/components/Spinner'
+import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
 import { ChainProfile, AssetProfile } from '@/components/Profile'
 import { useGlobalStore } from '@/components/Global'
-import { getChainData, getAssetData } from '@/lib/config'
+import { getChainData, getAssetData, getITSAssetData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
 import { isNumber, toNumber } from '@/lib/number'
 
 export function TVL() {
   const [data, setData] = useState(null)
-  const { chains, assets, tvl } = useGlobalStore()
+  const { chains, assets, itsAssets, tvl } = useGlobalStore()
 
   useEffect(() => {
-    if (chains && assets && tvl?.data && tvl.data.length > assets.length / 2) {
+    if (chains && assets && itsAssets && tvl?.data && tvl.data.length > assets.length / 2) {
       setData(_.orderBy(tvl.data.map((d, j) => {
-        const { asset, total_on_evm, total_on_cosmos, total } = { ...d }
+        const { asset, assetType, total_on_evm, total_on_cosmos, total } = { ...d }
         let { price } = { ...d }
 
-        const assetData = getAssetData(asset, assets)
+        const assetData = assetType === 'its' ? getITSAssetData(asset, itsAssets) : getAssetData(asset, assets)
         price = toNumber(isNumber(price) ? price : isNumber(assetData?.price) ? assetData.price : -1)
 
         return {
@@ -40,7 +41,7 @@ export function TVL() {
         }
       }), ['i', 'value', 'total', 'j'], ['asc', 'desc', 'desc', 'asc']))
     }
-  }, [chains, assets, tvl, setData])
+  }, [chains, assets, itsAssets, tvl, setData])
 
   const loading = !(data && assets && data.length >= assets.filter(d => !d.no_tvl).length - 3)
   const chainsTVL = !loading && _.orderBy(_.uniqBy(chains.filter(d => !d.no_inflation && !d.no_tvl).map(d => {
@@ -130,7 +131,10 @@ export function TVL() {
               {data.filter(d => d.assetData).map(d => (
                 <tr key={d.asset} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                   <td className="sticky left-0 z-10 backdrop-blur backdrop-filter px-3 py-4 text-left">
-                    <AssetProfile value={d.asset} titleClassName="font-bold" />
+                    <div className="flex flex-items-center gap-x-2">
+                      <AssetProfile value={d.asset} ITSPossible={d.assetType === 'its'} titleClassName="font-bold" />
+                      {d.assetType === 'its' && <Tag className="w-fit bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100">ITS</Tag>}
+                    </div>
                   </td>
                   <td className="px-3 py-4 text-left">
                     <ChainProfile value={d.nativeChain?.chainData?.id} />
