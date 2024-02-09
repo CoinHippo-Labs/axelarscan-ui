@@ -21,7 +21,7 @@ export function TVL() {
   const { chains, assets, itsAssets, tvl } = useGlobalStore()
 
   useEffect(() => {
-    if (chains && assets && itsAssets && tvl?.data && tvl.data.length > assets.length / 2) {
+    if (chains && assets && itsAssets && tvl?.data && tvl.data.length > (assets.length + itsAssets.length) / 2) {
       setData(_.orderBy(tvl.data.map((d, j) => {
         const { asset, assetType, total_on_evm, total_on_cosmos, total } = { ...d }
         let { price } = { ...d }

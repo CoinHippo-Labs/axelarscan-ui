@@ -1,10 +1,11 @@
 'use client'
 
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Popover, Transition } from '@headlessui/react'
 import clsx from 'clsx'
+import _ from 'lodash'
 import { FiChevronDown } from 'react-icons/fi'
 
 import { Container } from '@/components/Container'
@@ -12,7 +13,12 @@ import { Logo } from '@/components/Logo'
 import { NavLink } from '@/components/NavLink'
 import { Search } from '@/components/Search'
 import { ThemeToggle } from '@/components/ThemeToggle'
-import { ENVIRONMENT } from '@/lib/config'
+import { Tag } from '@/components/Tag'
+import { Number } from '@/components/Number'
+import { useGlobalStore } from '@/components/Global'
+import { ENVIRONMENT, getAssetData, getITSAssetData } from '@/lib/config'
+import { toArray } from '@/lib/parser'
+import { isNumber, toNumber } from '@/lib/number'
 
 const navigations = [
   {
@@ -171,6 +177,22 @@ export function Header() {
   const pathname = usePathname()
   const [popoverOpen, setPopoverOpen] = useState(null)
   const [popoverEnvironmentOpen, setPopoverEnvironmentOpen] = useState(false)
+  const [data, setData] = useState(null)
+  const { assets, itsAssets, tvl } = useGlobalStore()
+
+  useEffect(() => {
+    if (assets && itsAssets && tvl?.data && tvl.data.length > (assets.length + itsAssets.length) / 2) {
+      setData(tvl.data.map(d => {
+        const { asset, assetType, total } = { ...d }
+        let { price } = { ...d }
+
+        const assetData = assetType === 'its' ? getITSAssetData(asset, itsAssets) : getAssetData(asset, assets)
+        price = toNumber(isNumber(price) ? price : isNumber(assetData?.price) ? assetData.price : -1)
+
+        return { ...d, value: toNumber(total) * price }
+      }))
+    }
+  }, [assets, itsAssets, tvl, setData])
 
   return (
     <header className="py-6">
@@ -224,7 +246,24 @@ export function Header() {
                   )
                 }
 
-                return href && (<NavLink key={i} href={href}>{title}</NavLink>)
+                return href && (
+                  <NavLink key={i} href={href}>
+                    <div className="flex items-center">
+                      {title}
+                      {title === 'TVL' && !!data && (
+                        <Tag className="w-fit bg-zinc-100 dark:bg-zinc-800 ml-2">
+                          <Number
+                            value={_.sumBy(data.filter(d => d.value > 0), 'value')}
+                            format="0,0.0a"
+                            prefix="$"
+                            noTooltip={true}
+                            className="text-green-600 dark:text-green-500 text-xs font-semibold"
+                          />
+                        </Tag>
+                      )}
+                    </div>
+                  </NavLink>
+                )
               })}
             </div>
           </div>
