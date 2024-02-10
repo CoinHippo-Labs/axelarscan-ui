@@ -23,6 +23,7 @@ export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
     { _id: 'centrifuge', id: 2031, network: 'centrifuge', name: 'Centrifuge', nativeCurrency: { name: 'Centrifuge', symbol: 'CFG', decimals: 18 }, rpcUrls: { default: { http: ['https://fullnode.parachain.centrifuge.io'] }, public: { http: ['https://fullnode.parachain.centrifuge.io'] } }, blockExplorers: { default: { name: 'Centrifuge', url: 'https://centrifuge.subscan.io' } } },
     { _id: 'scroll', ...scroll },
     { _id: 'immutable', id: 13371, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'IMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.immutable.com'] }, public: { http: ['https://rpc.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.immutable.com' } } },
+    { _id: 'fraxtal', id: 252, network: 'fraxtal', name: 'Fraxtal', nativeCurrency: { name: 'Frax Ether', symbol: 'frxETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.frax.com'] }, public: { http: ['https://rpc.frax.com'] } }, blockExplorers: { default: { name: 'Fraxtal', url: 'https://fraxscan.com' } } },
   ] :
   [
     { _id: 'ethereum-2', ...goerli },
@@ -49,7 +50,7 @@ export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
     { _id: 'scroll', ...scrollSepolia },
     { _id: 'immutable', id: 13473, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.immutable.com'] }, public: { http: ['https://rpc.testnet.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
     { _id: 'immutable-devnet', id: 15003, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.dev.immutable.com'] }, public: { http: ['https://rpc.dev.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
-    { _id: 'fraxtal', id: 2522, network: 'fraxtal', name: 'Fraxtal', nativeCurrency: { name: 'Frax Ether', symbol: 'frxETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.frax.com'] }, public: { http: ['https://rpc.testnet.frax.com'] } }, blockExplorers: { default: { name: 'Fraxtal', url: 'https://explorer.testnet.frax.com' } } },
+    { _id: 'fraxtal', id: 2522, network: 'fraxtal', name: 'Fraxtal', nativeCurrency: { name: 'Frax Ether', symbol: 'frxETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.frax.com'] }, public: { http: ['https://rpc.testnet.frax.com'] } }, blockExplorers: { default: { name: 'Fraxtal', url: 'https://holesky.fraxscan.com' } } },
   ]
 
 export const queryClient = new QueryClient()
