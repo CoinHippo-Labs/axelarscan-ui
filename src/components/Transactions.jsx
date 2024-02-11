@@ -592,7 +592,7 @@ export function Transactions({ height, address }) {
           }
         }
         else {
-          const response = await searchTransactions({ ...params, address, size })
+          const response = await searchTransactions({ ...params, address: params.address || address, size })
           data = response?.data
           total = response?.total
         }
