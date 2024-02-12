@@ -593,7 +593,7 @@ function Details({ data }) {
                 <td className="px-3 py-4 text-left">
                   {(height || blockNumber) && (url && block_path ?
                     <Link
-                      href={`${url}${block_path.replace('{block}', height || blockNumber)}`}
+                      href={`${height && d.id === 'ibc_send' ? axelarChainData.explorer.url : url}${(height && d.id === 'ibc_send' ? axelarChainData.explorer.block_path : block_path).replace('{block}', height || blockNumber)}`}
                       target="_blank"
                       className="text-blue-600 dark:text-blue-500 font-medium"
                     >
