@@ -231,7 +231,7 @@ function Info({ data, tx }) {
                             break
                           case 'ibc_send':
                             if (recv_txhash) stepURL = `${url}${transaction_path.replace('{tx}', recv_txhash)}`
-                            else if (ack_txhash) stepURL = `${url}${transaction_path.replace('{tx}', ack_txhash)}`
+                            else if (ack_txhash) stepURL = `${axelarChainData.explorer.url}${axelarChainData.explorer.transaction_path.replace('{tx}', ack_txhash)}`
                             else if (failed_txhash) stepURL = `${url}${transaction_path.replace('{tx}', failed_txhash)}`
                             break
                           case 'unwrap':
@@ -410,6 +410,7 @@ function Details({ data }) {
   const { link, send, unwrap } = { ...data }
   const destinationChain = send?.original_destination_chain || link?.original_destination_chain || unwrap?.destination_chain || send?.destination_chain || link?.destination_chain
   const destinationChainData = getChainData(destinationChain, chains)
+  const axelarChainData = getChainData('axelarnet', chains)
 
   const steps = getStep(data, chains)
 
@@ -497,13 +498,13 @@ function Details({ data }) {
                   }
                   if (ack_txhash) {
                     stepTX = stepTX || ack_txhash
-                    stepURL = stepURL || `${url}${transaction_path.replace('{tx}', ack_txhash)}`
+                    stepURL = stepURL || `${axelarChainData.explorer.url}${axelarChainData.explorer.transaction_path.replace('{tx}', ack_txhash)}`
 
                     if (recv_txhash) {
                       stepMoreInfos.push((
                         <Copy key={stepMoreInfos.length} size={16} value={ack_txhash}>
                           <Link
-                            href={`${url}${transaction_path.replace('{tx}', ack_txhash)}`}
+                            href={`${axelarChainData.explorer.url}${axelarChainData.explorer.transaction_path.replace('{tx}', ack_txhash)}`}
                             target="_blank"
                             className="text-blue-600 dark:text-blue-500 text-xs underline"
                           >
@@ -539,7 +540,7 @@ function Details({ data }) {
                       stepMoreInfos.push((
                         <Copy key={stepMoreInfos.length} size={16} value={txhash}>
                           <Link
-                            href={`${url}${transaction_path.replace('{tx}', txhash)}`}
+                            href={`${axelarChainData.explorer.url}${axelarChainData.explorer.transaction_path.replace('{tx}', txhash)}`}
                             target="_blank"
                             className="text-blue-600 dark:text-blue-500 text-xs whitespace-nowrap underline"
                           >
