@@ -45,7 +45,7 @@ export function Validators({ status }) {
         setMaintainers(Object.fromEntries(toArray(
           await Promise.all(EVMChains.filter(d => !maintainers?.[d.id]).map(d => new Promise(async resolve => {
             const { maintainers } = { ...await getChainMaintainers({ chain: d.id }) }
-            resolve(maintainers && [d.id, maintainers])
+            resolve([d.id, toArray(maintainers)])
           })))
         )))
       }
