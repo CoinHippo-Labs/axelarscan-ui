@@ -104,21 +104,21 @@ function Info({ data, address }) {
         <dl className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {getInputType(address, chains) === 'axelarAddress' && (
             <>
-              <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
-                <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Rewards</dt>
-                <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                  <div className="flex items-center">
-                    {_.head(rewards?.total) && (
+              {_.head(rewards?.total) && (
+                <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
+                  <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Rewards</dt>
+                  <dd className="sm:col-span-2 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                    <div className="flex items-center">
                       <Number
                         value={_.head(rewards.total).amount}
                         format="0,0.000000"
                         suffix=" AXL"
                         className="text-zinc-700 dark:text-zinc-300 font-medium"
                       />
-                    )}
-                  </div>
-                </dd>
-              </div>
+                    </div>
+                  </dd>
+                </div>
+              )}
               {validatorData && (
                 <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-3 sm:gap-4">
                   <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Commissions</dt>
