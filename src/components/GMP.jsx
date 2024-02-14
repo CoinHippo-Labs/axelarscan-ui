@@ -1420,7 +1420,7 @@ export function GMP({ tx }) {
   const [processing, setProcessing] = useState(false)
   const [response, setResponse] = useState(null)
   const { chains, assets } = useGlobalStore()
-  const { chainId, signer } = useEVMWalletStore()
+  const { chainId, provider, signer } = useEVMWalletStore()
   const cosmosWalletStore = useCosmosWalletStore()
 
   const getData = useCallback(async () => {
@@ -1577,9 +1577,10 @@ export function GMP({ tx }) {
           offlineSigner: cosmosWalletStore.signer,
           txFee: { gas: '250000', amount: [{ denom: getChainData(chain, chains)?.native_token?.denom, amount: '30000' }] },
         }
+        const estimatedGasUsed = 700000
 
-        console.log('[addGas request]', { chain, transactionHash, logIndex, messageId, refundAddress: address, token, sendOptions })
-        const response = chain_type === 'cosmos' ? await sdk.addGasToCosmosChain({ txHash: transactionHash, messageId, chain, token, sendOptions }) : await sdk.addNativeGas(chain, transactionHash/*, logIndex*/, { useWindowEthereum: true, signer, refundAddress: address })
+        console.log('[addGas request]', { chain, destinationChain, transactionHash, logIndex, messageId, estimatedGasUsed, refundAddress: address, token, sendOptions })
+        const response = chain_type === 'cosmos' ? await sdk.addGasToCosmosChain({ txHash: transactionHash, messageId, gasLimit: estimatedGasUsed, chain, token, sendOptions }) : await sdk.addNativeGas(chain, transactionHash, estimatedGasUsed, { evmWalletDetails: { useWindowEthereum: true, provider, signer }, destChain: destinationChain, logIndex, refundAddress: address })
         console.log('[addGas response]', response)
 
         const { success, error, transaction, broadcastResult } = { ...response }

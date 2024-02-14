@@ -26,7 +26,7 @@
   "homepage": "https://github.com/axelarnetwork/axelarscan-ui#readme",
   "browserslist": "defaults, not ie <= 11",
   "dependencies": {
-    "@axelar-network/axelarjs-sdk": "^0.13.9",
+    "@axelar-network/axelarjs-sdk": "^0.14.0",
     "@headlessui/react": "^1.7.17",
     "@headlessui/tailwindcss": "^0.2.0",
     "@redefined/name-resolver-js": "^2.10.6",
