@@ -1420,7 +1420,7 @@ export function GMP({ tx }) {
   const [processing, setProcessing] = useState(false)
   const [response, setResponse] = useState(null)
   const { chains, assets } = useGlobalStore()
-  const { chainId, provider, signer } = useEVMWalletStore()
+  const { chainId, address, provider, signer } = useEVMWalletStore()
   const cosmosWalletStore = useCosmosWalletStore()
 
   const getData = useCallback(async () => {
