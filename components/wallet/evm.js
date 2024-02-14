@@ -24,7 +24,7 @@ const publicClientToProvider = publicClient => {
   if (transport.type === 'fallback') {
     return new providers.FallbackProvider(transport.transports.map(({ value }) => new providers.JsonRpcProvider(value?.url, network)))
   }
-  return new providers.JsonRpcProvider(transport.url, network)
+  return new providers.Web3Provider(transport, network) || new providers.JsonRpcProvider(transport.url, network)
 }
 
 const walletClientToSigner = walletClient => {
