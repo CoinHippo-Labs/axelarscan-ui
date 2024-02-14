@@ -61,7 +61,7 @@ export default () => {
   const { assets_data } = { ...assets }
   const { wallet_data } = { ...wallet }
   const { cosmos_wallet_data } = { ...cosmos_wallet }
-  const { chain_id, provider, signer, address } = { ...wallet_data }
+  const { chain_id, signer, address } = { ...wallet_data }
 
   const router = useRouter()
   const { query } = { ...router }
@@ -247,7 +247,7 @@ export default () => {
         const estimatedGasUsed = 700000
 
         console.log('[addGas request]', { chain, destinationChain, transactionHash, logIndex, messageId, estimatedGasUsed, refundAddress: address, gasMultipler, token, sendOptions })
-        const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, messageId, gasLimit: estimatedGasUsed, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, estimatedGasUsed, { evmWalletDetails: { useWindowEthereum: true, provider, signer }, destChain: destinationChain, logIndex, refundAddress: address, gasMultipler })
+        const response = chain_type === 'cosmos' ? await api.addGasToCosmosChain({ txHash: transactionHash, messageId, gasLimit: estimatedGasUsed, chain, token, sendOptions }) : await api.addNativeGas(chain, transactionHash, estimatedGasUsed, { evmWalletDetails: { useWindowEthereum: true, signer }, destChain: destinationChain, logIndex, refundAddress: address, gasMultipler })
         console.log('[addGas response]', response)
         const { success, error, transaction, broadcastResult } = { ...response }
         const { message } = { ...error }
