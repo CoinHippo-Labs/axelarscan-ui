@@ -630,7 +630,7 @@ export default () => {
     )
 
   const executeButton = destination_chain_type === 'cosmos' ?
-    payload && (chain_type !== 'evm' || confirm) && !executed && !is_executed && (error || moment().diff(moment((confirm?.block_timestamp || call.block_timestamp) * 1000), 'minutes') >= 5) && (
+    payload && (chain_type !== 'evm' || confirm) && !executed?.transactionHash && !is_executed && (error || moment().diff(moment((confirm?.block_timestamp || call.block_timestamp) * 1000), 'minutes') >= 5) && (
       <div key="execute" className="flex items-center space-x-1">
         <button
           disabled={processing}
