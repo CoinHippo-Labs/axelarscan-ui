@@ -335,7 +335,7 @@ export function GMPs({ address }) {
               </thead>
               <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                 {data.map(d => {
-                  const symbol = d.call.returnValues?.symbol || d.token_sent?.symbol || d.interchain_transfer?.symbol || d.interchain_transfer_with_data?.symbol || d.token_deployed?.symbol || d.token_deployment_initialized?.tokenSymbol || d.interchain_token_deployment_started?.tokenSymbol
+                  const symbol = d.call.returnValues?.symbol || d.token_sent?.symbol || d.interchain_transfer?.symbol || d.interchain_transfer_with_data?.symbol || d.token_deployed?.symbol || d.token_deployment_initialized?.tokenSymbol || d.token_manager_deployment_started?.symbol || d.interchain_token_deployment_started?.tokenSymbol
                   return (
                     <tr key={d.call.id} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                       <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">

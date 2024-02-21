@@ -108,7 +108,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
   const [seeMore, setSeeMore] = useState(false)
   const { chains, assets } = useGlobalStore()
 
-  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, approved, executed, error, refunded, token_sent, token_deployed, interchain_transfer, interchain_transfer_with_data, token_deployment_initialized, interchain_token_deployment_started, is_executed, amount, fees, gas, is_insufficient_fee, is_invalid_destination_chain, is_invalid_contract_address, not_enough_gas_to_execute, status, simplified_status, time_spent, proposal_id, callbackData, originData } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, approved, executed, error, refunded, token_sent, token_deployment_initialized, token_deployed, interchain_transfer, interchain_transfer_with_data, token_manager_deployment_started, interchain_token_deployment_started, is_executed, amount, fees, gas, is_insufficient_fee, is_invalid_destination_chain, is_invalid_contract_address, not_enough_gas_to_execute, status, simplified_status, time_spent, proposal_id, callbackData, originData } = { ...data }
   const txhash = call?.transactionHash || tx
 
   const sourceChain = approved?.returnValues?.sourceChain || getChainData(call?.chain, chains)?.chain_name || call?.chain
@@ -120,7 +120,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
   const sourceChainData = getChainData(sourceChain, chains)
   const { url, transaction_path } = { ...sourceChainData?.explorer }
 
-  const symbol = call?.returnValues?.symbol || token_sent?.symbol || interchain_transfer?.symbol || interchain_transfer_with_data?.symbol || token_deployed?.symbol || token_deployment_initialized?.tokenSymbol || interchain_token_deployment_started?.tokenSymbol
+  const symbol = call?.returnValues?.symbol || token_sent?.symbol || interchain_transfer?.symbol || interchain_transfer_with_data?.symbol || token_deployed?.symbol || token_deployment_initialized?.tokenSymbol || token_manager_deployment_started?.symbol || interchain_token_deployment_started?.tokenSymbol
   const { addresses } = { ...getAssetData(symbol, assets) }
   const isMultihop = !!(data.originData || data.callbackData)
 
