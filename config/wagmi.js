@@ -25,7 +25,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainne
     { _id: 'immutable', id: 13371, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'IMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.immutable.com'] }, public: { http: ['https://rpc.immutable.com'] }, infura: { http: ['https://rpc.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.immutable.com' } } },
     { _id: 'scroll', id: 534352, network: 'scroll', name: 'Scroll', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.scroll.io'] }, public: { http: ['https://rpc.scroll.io'] }, infura: { http: ['https://rpc.scroll.io'] } }, blockExplorers: { default: { name: 'Scroll', url: 'https://scrollscan.com' } } },
     { _id: 'fraxtal', id: 252, network: 'fraxtal', name: 'Fraxtal', nativeCurrency: { name: 'Frax Ether', symbol: 'frxETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.frax.com'] }, public: { http: ['https://rpc.frax.com'] } }, blockExplorers: { default: { name: 'Fraxtal', url: 'https://fraxscan.com' } } },
-    { _id: 'blast', id: 238, network: 'blast', name: 'Blast', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.blastblockchain.com'] }, public: { http: ['https://rpc.blastblockchain.com'] } }, blockExplorers: { default: { name: 'Blast', url: 'https://mainnet.blastblockchain.com' } } },
+    // { _id: 'blast', id: 81457, network: 'blast', name: 'Blast', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: [''] }, public: { http: [''] } }, blockExplorers: { default: { name: 'Blast', url: 'https://blastscan.io' } } },
   ] :
   [
     { _id: 'ethereum-2', ...goerli },
@@ -53,6 +53,7 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainne
     { _id: 'immutable-devnet', id: 15003, network: 'immutable', name: 'Immutable', nativeCurrency: { name: 'ImmutableX', symbol: 'tIMX', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.dev.immutable.com'] }, public: { http: ['https://rpc.dev.immutable.com'] }, infura: { http: ['https://rpc.dev.immutable.com'] } }, blockExplorers: { default: { name: 'Immutable', url: 'https://explorer.testnet.immutable.com' } } },
     { _id: 'scroll', ...scrollSepolia },
     { _id: 'fraxtal', id: 2522, network: 'fraxtal', name: 'Fraxtal', nativeCurrency: { name: 'Frax Ether', symbol: 'frxETH', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.testnet.frax.com'] }, public: { http: ['https://rpc.testnet.frax.com'] } }, blockExplorers: { default: { name: 'Fraxtal', url: 'https://explorer.testnet.frax.com' } } },
+    { _id: 'blast', id: 168587773, network: 'blast', name: 'Blast', nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 }, rpcUrls: { default: { http: ['https://sepolia.blast.io'] }, public: { http: ['https://sepolia.blast.io'] } }, blockExplorers: { default: { name: 'Blast', url: 'https://testnet.blastscan.io' } } },
   ]
 
 export const queryClient = new QueryClient()
