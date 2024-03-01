@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
-import { mainnet, goerli, sepolia, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, arbitrumSepolia, optimism, optimismGoerli, base, baseGoerli, mantle, mantleTestnet, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scrollSepolia } from 'wagmi/chains'
+import { mainnet, goerli, sepolia, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, arbitrumSepolia, optimism, optimismGoerli, optimismSepolia, base, baseGoerli, baseSepolia, mantle, mantleTestnet, celo, celoAlfajores, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scrollSepolia } from 'wagmi/chains'
 
 export const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
@@ -40,8 +40,11 @@ export const EVM_CHAIN_CONFIGS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainne
     { _id: 'arbitrum', ...arbitrumGoerli },
     { _id: 'arbitrum-sepolia', ...arbitrumSepolia },
     { _id: 'optimism', ...optimismGoerli },
+    { _id: 'optimism-sepolia', ...optimismSepolia },
     { _id: 'base', ...baseGoerli },
+    { _id: 'base-sepolia', ...baseSepolia },
     { _id: 'mantle', ...mantleTestnet },
+    { _id: 'mantle-sepolia', id: 5003, network: 'mantle', name: 'Mantle Sepolia', nativeCurrency: { name: 'Mantle', symbol: 'MNT', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.sepolia.mantle.xyz'] }, public: { http: ['https://rpc.sepolia.mantle.xyz'] } }, blockExplorers: { default: { name: 'Mantle', url: 'https://explorer.sepolia.mantle.xyz' } } },
     { _id: 'celo', ...celoAlfajores },
     { _id: 'kava', id: 2221, network: 'kava', name: 'Kava', nativeCurrency: { name: 'Kava', symbol: 'KAVA', decimals: 18 }, rpcUrls: { default: { http: ['https://evm.testnet.kava.io'] }, public: { http: ['https://evm.testnet.kava.io'] }, infura: { http: ['https://evm.testnet.kava.io'] } }, blockExplorers: { default: { name: 'Kava', url: 'https://explorer.testnet.kava.io' } } },
     { _id: 'filecoin', ...filecoinHyperspace },
