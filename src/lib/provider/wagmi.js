@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query'
 import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react'
-import { mainnet, goerli, sepolia, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, arbitrumSepolia, optimism, optimismGoerli, base, baseGoerli, mantle, mantleTestnet, celo, celoAlfajores, kava, kavaTestnet, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scroll, scrollSepolia } from 'wagmi/chains'
+import { mainnet, goerli, sepolia, bsc, bscTestnet, polygon, polygonMumbai, polygonZkEvm, polygonZkEvmTestnet, avalanche, avalancheFuji, fantom, fantomTestnet, moonbeam, moonbaseAlpha, aurora, auroraTestnet, arbitrum, arbitrumGoerli, arbitrumSepolia, optimism, optimismGoerli, optimismSepolia, base, baseGoerli, baseSepolia, mantle, mantleTestnet, celo, celoAlfajores, kava, kavaTestnet, filecoin, filecoinHyperspace, filecoinCalibration, linea, lineaTestnet, scroll, scrollSepolia } from 'wagmi/chains'
 
 export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
   [
@@ -39,8 +39,11 @@ export const CHAINS = process.env.NEXT_PUBLIC_ENVIRONMENT === 'mainnet' ?
     { _id: 'arbitrum', ...arbitrumGoerli },
     { _id: 'arbitrum-sepolia', ...arbitrumSepolia },
     { _id: 'optimism', ...optimismGoerli },
+    { _id: 'optimism-sepolia', ...optimismSepolia },
     { _id: 'base', ...baseGoerli },
+    { _id: 'base-sepolia', ...baseSepolia },
     { _id: 'mantle', ...mantleTestnet },
+    { _id: 'mantle-sepolia', id: 5003, network: 'mantle', name: 'Mantle Sepolia', nativeCurrency: { name: 'Mantle', symbol: 'MNT', decimals: 18 }, rpcUrls: { default: { http: ['https://rpc.sepolia.mantle.xyz'] }, public: { http: ['https://rpc.sepolia.mantle.xyz'] } }, blockExplorers: { default: { name: 'Mantle', url: 'https://explorer.sepolia.mantle.xyz' } } },
     { _id: 'celo', ...celoAlfajores },
     { _id: 'kava', ...kavaTestnet },
     { _id: 'filecoin', ...filecoinHyperspace },
