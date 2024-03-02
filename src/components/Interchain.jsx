@@ -936,7 +936,7 @@ function Tops({ data, types, params }) {
               prefix="$"
             />
             <Top
-              i={3}
+              i={2}
               data={getTopData(ITSAssets, 'num_txs', 10)}
               type="asset"
               transfersType="gmp"
@@ -944,7 +944,7 @@ function Tops({ data, types, params }) {
               description="Top assets by ITS transactions"
             />
             <Top
-              i={4}
+              i={3}
               data={getTopData(ITSAssetsByVolume, 'volume', 10)}
               type="asset"
               transfersType="gmp"
