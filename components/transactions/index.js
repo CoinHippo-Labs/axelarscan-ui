@@ -180,7 +180,7 @@ export default ({ n }) => {
 
   const dataFiltered = _.slice(toArray(data).filter(d => toArray(typesFiltered).length < 1 || typesFiltered.includes(d.type)), 0, n || undefined)
   const isTransactionsPage = includesStringList(pathname, ['/transactions', '/txs'])
-
+console.log(dataFiltered)
   return (
     <div className={`${data ? '' : 'children'}`}>
       {data ?
@@ -229,7 +229,8 @@ export default ({ n }) => {
                   accessor: 'txhash',
                   disableSortBy: true,
                   Cell: props => {
-                    const { value } = { ...props }
+                    let { value } = { ...props }
+                    value = value || props.row.original.tx_response?.txhash
                     return value && (
                       <div className="flex items-center space-x-1 mb-6">
                         <Link
@@ -443,9 +444,9 @@ export default ({ n }) => {
                   Header: 'Time',
                   accessor: 'timestamp',
                   disableSortBy: true,
-                  Cell: props => props.value && (
+                  Cell: props => (props.value || props.row.original.tx_response?.timestamp) && (
                     <div className="flex justify-end">
-                      <TimeAgo time={moment(props.value).unix()} className="text-slate-400 dark:text-slate-500 text-xs font-medium" />
+                      <TimeAgo time={moment(props.value || props.row.original.tx_response?.timestamp).unix()} className="text-slate-400 dark:text-slate-500 text-xs font-medium" />
                     </div>
                   ),
                   headerClassName: 'justify-end text-right',
