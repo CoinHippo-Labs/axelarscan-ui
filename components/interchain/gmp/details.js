@@ -624,6 +624,7 @@ export default ({ data }) => {
                 break
               case 'express':
                 try {
+                  const { source_token, destination_native_token } = { ...(data?.express_gas_price_rate || data?.gas_price_rate || fees) }
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
                 } catch (error) {}
                 if (rate) {
@@ -683,6 +684,7 @@ export default ({ data }) => {
                 break
               case 'approve':
                 try {
+                  const { source_token, destination_native_token } = { ...(data?.gas_price_rate || fees) }
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
                   if (!gas_approve_amount && origin_data) {
                     rate = origin_data?.fees?.source_token?.token_price?.usd / destination_native_token?.token_price?.usd
@@ -710,6 +712,7 @@ export default ({ data }) => {
                 break
               case 'execute':
                 try {
+                  const { source_token, destination_native_token } = { ...(data?.gas_price_rate || fees) }
                   rate = source_token?.token_price?.usd / destination_native_token?.token_price?.usd
                   if (!gas_execute_amount && origin_data) {
                     rate = origin_data?.fees?.source_token?.token_price?.usd / destination_native_token?.token_price?.usd
