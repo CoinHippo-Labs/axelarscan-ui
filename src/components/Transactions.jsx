@@ -597,7 +597,7 @@ export function Transactions({ height, address }) {
           total = response?.total
         }
 
-        setData(_.orderBy(toArray(data).map(d => ({ ...d, type: getType(d), sender: getSender(d, assets), recipient: getRecipient(d, assets) })), ['height', 'timestamp', 'txhash'], ['desc', 'desc', 'asc']))
+        setData(_.orderBy(_.uniqBy(toArray(data), 'txhash').map(d => ({ ...d, type: getType(d), sender: getSender(d, assets), recipient: getRecipient(d, assets) })), ['height', 'timestamp', 'txhash'], ['desc', 'desc', 'asc']))
         setTotal(total)
         setRefresh(false)
       }
