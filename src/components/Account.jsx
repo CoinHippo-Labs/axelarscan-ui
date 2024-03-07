@@ -485,7 +485,8 @@ export function Account({ address }) {
           router.push(`/validator/${operator_address}`)
         }
         else {
-          const d = await getAccountAmounts({ address })
+          const isEVMAddress = getInputType(address, chains) === 'evmAddress'
+          const d = isEVMAddress ? {} : await getAccountAmounts({ address })
 
           if (d) {
             if (d.balances?.data) d.balances.data = _.orderBy(d.balances.data.map(d => {
@@ -493,7 +494,7 @@ export function Account({ address }) {
               return { ...d, value: price > 0 ? d.amount * price : 0 }
             }), ['value'], ['desc'])
 
-            if (address.length >= 65 || getInputType(address, chains) === 'evmAddress') {
+            if (address.length >= 65 || isEVMAddress) {
               const depositAddressData = _.head((await searchDepositAddresses({ address }))?.data)
 
               if (depositAddressData) {
