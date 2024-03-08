@@ -449,6 +449,18 @@ const data = [
     environment: 'mainnet',
   },
   {
+    address: '0xDC3D8e1Abe590BCa428a8a2FC4CfDbD1AcF57Bd9',
+    name: 'Squid',
+    image: '/logos/accounts/squid.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x492751eC3c57141deb205eC2da8bFcb410738630',
+    name: 'Squid',
+    image: '/logos/accounts/squid.svg',
+    environment: 'mainnet',
+  },
+  {
     address: 'osmo15jw7xccxaxk30lf4xgag8f7aeg53pgkh74e39rv00xfnymldjaas2fk627',
     name: 'Squid',
     image: '/logos/accounts/squid.svg',
