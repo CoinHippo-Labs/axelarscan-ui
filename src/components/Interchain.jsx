@@ -551,7 +551,7 @@ function Charts({ data, granularity }) {
 
   const maxVolumePerMean = _.maxBy(chartData, 'volume')?.volume / (_.meanBy(chartData, 'volume') || 1)
   const hasAirdropActivities = chartData.find(d => d.transfers_airdrop_volume > 0)
-  const scale = maxVolumePerMean > 5 && !hasAirdropActivities ? 'log' : undefined
+  const scale = false && maxVolumePerMean > 5 && !hasAirdropActivities ? 'log' : undefined
   const useStack = maxVolumePerMean <= 5 || maxVolumePerMean > 10 || hasAirdropActivities
 
   return (
