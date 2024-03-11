@@ -24,8 +24,8 @@ import { useGlobalStore } from '@/components/Global'
 import { searchTransfers } from '@/lib/api/token-transfer'
 import { getChainData, getAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
-import { equalsIgnoreCase, ellipse, toTitle } from '@/lib/string'
-import { isNumber } from '@/lib/number'
+import { isString, equalsIgnoreCase, ellipse, toTitle } from '@/lib/string'
+import { isNumber, formatUnits } from '@/lib/number'
 
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
@@ -313,7 +313,7 @@ function Info({ data, tx }) {
                 />
                 {isNumber(send?.amount) && assets ?
                   <Number
-                    value={send.amount}
+                    value={isString(send.amount) ? formatUnits(send.amount, assetData?.decimals) : send.amount}
                     format="0,0.000000"
                     suffix={` ${symbol}`}
                     className="text-zinc-900 dark:text-zinc-100 font-medium"
@@ -337,7 +337,7 @@ function Info({ data, tx }) {
                     height={24}
                   />
                   <Number
-                    value={send.fee}
+                    value={isString(send.fee) ? formatUnits(send.fee, assetData?.decimals) : send.fee}
                     format="0,0.000000"
                     suffix={` ${symbol}`}
                     className="text-zinc-900 dark:text-zinc-100 font-medium"

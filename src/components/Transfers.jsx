@@ -28,8 +28,8 @@ import { useGlobalStore } from '@/components/Global'
 import { searchTransfers } from '@/lib/api/token-transfer'
 import { getAssetData } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
-import { equalsIgnoreCase, capitalize, toBoolean, ellipse, toTitle } from '@/lib/string'
-import { isNumber } from '@/lib/number'
+import { isString, equalsIgnoreCase, capitalize, toBoolean, ellipse, toTitle } from '@/lib/string'
+import { isNumber, formatUnits } from '@/lib/number'
 
 const size = 25
 
@@ -375,7 +375,7 @@ export function Transfers({ address }) {
                               />
                               {isNumber(d.send.amount) && assets ?
                                 <Number
-                                  value={d.send.amount}
+                                  value={isString(d.send.amount) ? formatUnits(d.send.amount, assetData?.decimals) : d.send.amount}
                                   format="0,0.000000"
                                   suffix={` ${symbol}`}
                                   className="text-zinc-900 dark:text-zinc-100 text-xs font-medium"
