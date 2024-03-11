@@ -132,6 +132,7 @@ function Info({ data, tx }) {
   const { url, transaction_path } = { ...sourceChainData?.explorer }
   const destinationChainData = getChainData(destinationChain, chains)
   const depositChainData = getChainData(depositAddress?.startsWith('axelar') ? 'axelarnet' : sourceChain, chains)
+  const axelarChainData = getChainData('axelarnet', chains)
 
   const assetData = getAssetData(send?.denom, assets)
   const { addresses } = { ...assetData }
