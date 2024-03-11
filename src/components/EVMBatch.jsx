@@ -105,6 +105,7 @@ function Info({ data, chain, id, executeButton }) {
                     </thead>
                     <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
                       {toArray(commands).map((d, i) => {
+                        const { deposit_address } = { ...d }
                         const { amount, name, cap, account, salt, newOwners, newOperators, newWeights, newThreshold, sourceChain, sourceTxHash, contractAddress } = { ...d.params }
                         let { symbol, decimals } = { ...d.params }
 
