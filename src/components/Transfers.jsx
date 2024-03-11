@@ -341,6 +341,9 @@ export function Transfers({ address }) {
                     }
                   }
 
+                  const senderAddress = d.wrap?.sender_address || d.erc20_transfer?.sender_address || d.send?.sender_address
+                  const recipientAddress = d.unwrap?.recipient_address || d.link?.recipient_address
+
                   return (
                     <tr key={d.send.txhash} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                       <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
@@ -392,7 +395,7 @@ export function Transfers({ address }) {
                             className="h-6"
                             titleClassName="font-semibold"
                           />
-                          <Profile address={d.send.sender_address} chain={d.send.source_chain} />
+                          <Profile address={senderAddress} chain={d.send.source_chain} />
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
@@ -402,7 +405,7 @@ export function Transfers({ address }) {
                             className="h-6"
                             titleClassName="font-semibold"
                           />
-                          <Profile address={d.send.recipient_address} chain={d.send.destination_chain} />
+                          <Profile address={recipientAddress} chain={d.send.destination_chain} />
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
