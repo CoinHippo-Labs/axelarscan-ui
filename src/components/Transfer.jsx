@@ -438,7 +438,7 @@ function Details({ data }) {
           </tr>
         </thead>
         <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
-          {steps.filter(d => d.status !== 'pending').map((d, i) => {
+          {steps.filter(d => d.status !== 'pending' || (d.id === 'ibc_send' && d.data)).map((d, i) => {
             const { txhash, poll_id, batch_id, transactionHash, recv_txhash, ack_txhash, failed_txhash, tx_hash_unwrap, height, blockNumber, block_timestamp, received_at, created_at } = { ...d.data }
             const { url, block_path, transaction_path } = { ...d.chainData?.explorer }
 
