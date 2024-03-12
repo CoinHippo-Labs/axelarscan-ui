@@ -472,6 +472,8 @@ function Delegations({ data }) {
   )
 }
 
+const axelarContract = 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5'
+
 export function Account({ address }) {
   const router = useRouter()
   const [data, setData] = useState(null)
@@ -494,7 +496,7 @@ export function Account({ address }) {
               return { ...d, value: price > 0 ? d.amount * price : 0 }
             }), ['value'], ['desc'])
 
-            if (address.length >= 65 || isEVMAddress) {
+            if ((address.length >= 65 || isEVMAddress) && address !== axelarContract) {
               const depositAddressData = _.head((await searchDepositAddresses({ address }))?.data)
 
               if (depositAddressData) {
@@ -513,7 +515,7 @@ export function Account({ address }) {
     getData()
   }, [address, router, chains, assets, validators, setData])
 
-  const isDepositAddress = (address && (address.length >= 65 || getInputType(address, chains) === 'evmAddress')) || data?.depositAddressData
+  const isDepositAddress = (address && (address.length >= 65 || getInputType(address, chains) === 'evmAddress') && address !== axelarContract) || data?.depositAddressData
 
   return (
     <Container className={clsx('sm:mt-8', data ? 'max-w-full' : '')}>
