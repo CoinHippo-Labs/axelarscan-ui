@@ -19,7 +19,7 @@ import { Transactions } from '@/components/Transactions'
 import { useGlobalStore } from '@/components/Global'
 import { getAccountAmounts } from '@/lib/api/axelarscan'
 import { searchTransfers, searchDepositAddresses } from '@/lib/api/token-transfer'
-import { getAssetData } from '@/lib/config'
+import { axelarContract, getAssetData } from '@/lib/config'
 import { getInputType, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase, ellipse } from '@/lib/string'
@@ -471,8 +471,6 @@ function Delegations({ data }) {
     </div>
   )
 }
-
-const axelarContract = 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5'
 
 export function Account({ address }) {
   const router = useRouter()

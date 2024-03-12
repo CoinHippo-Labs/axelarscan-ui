@@ -5,6 +5,8 @@ import { equalsIgnoreCase, removeDoubleQuote } from '@/lib/string'
 
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT
 
+export const axelarContract = 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5'
+
 export const getChainKey = (chain, chainsData, exact = false) => {
   let key
   if (chain) {

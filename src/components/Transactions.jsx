@@ -24,7 +24,7 @@ import { getParams, getQueryString, Pagination } from '@/components/Pagination'
 import { useGlobalStore } from '@/components/Global'
 import { searchTransactions, getTransactions } from '@/lib/api/validator'
 import { searchDepositAddresses } from '@/lib/api/token-transfer'
-import { getAssetData } from '@/lib/config'
+import { axelarContract, getAssetData } from '@/lib/config'
 import { getIcapAddress, getInputType, toJson, toHex, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { getAttributeValue } from '@/lib/cosmos'
@@ -554,7 +554,7 @@ export function Transactions({ height, address }) {
           data = response?.data
           total = response?.total
         }
-        else if (address?.length >= 65 || addressType === 'evmAddress') {
+        else if ((address?.length >= 65 || addressType === 'evmAddress') && address !== axelarContract) {
           const { deposit_address } = { ..._.head((await searchDepositAddresses({ address }))?.data) }
 
           if (deposit_address || addressType === 'evmAddress') {
