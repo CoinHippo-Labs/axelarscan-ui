@@ -45,11 +45,13 @@ function Info({ data, chain, id, executeButton }) {
       <div className="px-4 sm:px-6 py-6">
         <h3 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-7">
           <Copy value={id}><span>{ellipse(id, 16)}</span></Copy>
-          <Copy size={16} value={key_id}>
-            <span className="text-zinc-400 dark:text-zinc-500 text-sm font-normal leading-6">
-              {key_id}
-            </span>
-          </Copy>
+          {key_id && (
+            <Copy size={16} value={key_id}>
+              <span className="text-zinc-400 dark:text-zinc-500 text-sm font-normal leading-6">
+                {key_id}
+              </span>
+            </Copy>
+          )}
         </h3>
         <div className="max-w-2xl mt-3">
           {prev_batched_commands_id && (
