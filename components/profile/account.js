@@ -59,7 +59,9 @@ export default (
     name = moniker ? `${moniker}${equalsIgnoreCase(address, broadcaster_address) ? `: Proxy` : ''}` : null
     image = profiles_data?.[identity]?.image
   }
-  address = address?.startsWith('0x') && address !== '0x' ? getAddress(address) : address
+  try {
+    address = address?.startsWith('0x') && address !== '0x' ? getAddress(address) : address
+  } catch (error) {}
 
   const { address_path } = { ...explorer }
   url = !url && explorer ? `${explorer.url}${address_path?.replace('{address}', address)}` : url

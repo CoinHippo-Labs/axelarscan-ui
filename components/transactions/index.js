@@ -112,7 +112,9 @@ export default ({ n }) => {
                   transactions_data = _.concat(toArray(response?.tx_responses), toArray(transactions_data))
                   break
                 case 'evmAddress':
-                  address = getAddress(address)
+                  try {
+                    address = getAddress(address)
+                  } catch (error) {}
                   const { data } = { ...await searchTransactions({ ...filters, address, size, from }) }
                   transactions_data = data
                   break
