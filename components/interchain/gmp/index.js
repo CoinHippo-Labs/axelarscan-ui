@@ -565,7 +565,7 @@ export default () => {
   const [txHash, txIndex, txLogIndex] = getTransactionKey(tx)
   const matched = ((equalsIgnoreCase(txHash, data?.call?.transactionHash) || equalsIgnoreCase(txHash.substring(txHash?.startsWith('0x') ? 2 : 0), data?.call?.axelarTransactionHash) || data?.id?.startsWith(txHash?.toLowerCase())) && (typeof txIndex !== 'number' || txIndex === data.call.transactionIndex) && (typeof txLogIndex !== 'number' || txLogIndex === data.call.logIndex || txLogIndex === data.call.messageIdIndex)) || (txHash && Object.values({ ...data }).filter(d => typeof d === 'object').findIndex(d => equalsIgnoreCase(txHash, d?.transactionHash) || equalsIgnoreCase(txHash, d?.axelarTransactionHash)) > -1)
   const notFound = data && Object.keys(data).length < 1
-  const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && window.location.hostname === 'localhost')
+  const STAGING = process.env.NEXT_PUBLIC_APP_URL?.includes('staging') || (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname?.includes('vercel.app')))
   const EDITABLE = edit === 'true' && (ENVIRONMENT !== 'mainnet' || STAGING)
   const wrongSourceChain = source_chain_data && source_chain_data.chain_id !== (chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)
   const wrongDestinationChain = destination_chain_data && destination_chain_data.chain_id !== (destination_chain_type === 'cosmos' ? cosmos_wallet_data?.chain_id : chain_id)

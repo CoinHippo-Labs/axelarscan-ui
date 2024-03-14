@@ -30,7 +30,7 @@
     "@siddomains/sidjs": "^0.1.29",
     "@solana/spl-token": "^0.3.8",
     "@tanstack/react-query": "^4.35.3",
-    "@web3modal/wagmi": "^3.2.0",
+    "@web3modal/wagmi": "^3.5.5",
     "antd": "^5.9.2",
     "env-cmd": "^10.1.0",
     "ethers": "^5.7.2",
@@ -56,7 +56,7 @@
     "react-table": "^7.8.0",
     "recharts": "2.1.11",
     "redux": "^4.2.1",
-    "wagmi": "^1.4.5",
+    "wagmi": "^1.4.13",
     "web3": "^1.10.2"
   },
   "devDependencies": {

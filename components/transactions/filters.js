@@ -6,7 +6,7 @@ import moment from 'moment'
 import { BiX } from 'react-icons/bi'
 
 import Modal from '../modal'
-import { searchTransactions } from '../../lib/api/axelar'
+import { searchTransactions } from '../../lib/api/validators'
 import { toArray, getQueryParams, createDayJSFromUnixtime } from '../../lib/utils'
 
 export default () => {
