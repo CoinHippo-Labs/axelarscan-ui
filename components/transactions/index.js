@@ -144,7 +144,7 @@ export default ({ n }) => {
             setTotal(toArray(transactions_data).length > total_data ? toArray(transactions_data).length : total_data)
             transactions_data = _.orderBy(
               _.uniqBy(
-                _.concat(toArray(transactions_data), _data).map(d => {
+                _.concat(toArray(transactions_data), _data).map(d => d.tx_response || d).map(d => {
                   return {
                     ...d,
                     type: getType(d),
@@ -182,7 +182,7 @@ export default ({ n }) => {
 
   const dataFiltered = _.slice(toArray(data).filter(d => toArray(typesFiltered).length < 1 || typesFiltered.includes(d.type)), 0, n || undefined)
   const isTransactionsPage = includesStringList(pathname, ['/transactions', '/txs'])
-console.log(dataFiltered)
+
   return (
     <div className={`${data ? '' : 'children'}`}>
       {data ?
