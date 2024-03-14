@@ -52,7 +52,7 @@ export default () => {
 
   return (
     <div className="children">
-      {toArray(data).length > 0 && data.length >= toArray(assets_data).filter(a => !a.no_tvl).length ?
+      {toArray(data).length > 0 && data.length >= toArray(assets_data).filter(a => !a.no_tvl).length - 5 ?
         <Datatable
           columns={
             _.orderBy(
