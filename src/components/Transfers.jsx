@@ -234,11 +234,12 @@ function Filters() {
 
 export const normalizeType = type => ['wrap', 'unwrap', 'erc20_transfer'].includes(type) ? 'deposit_service' : type || 'deposit_address'
 
+const generateKeyFromParams = params => JSON.stringify(params)
+
 export function Transfers({ address }) {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
-  const [data, setData] = useState(null)
-  const [total, setTotal] = useState(null)
+  const [searchResults, setSearchResults] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const { assets } = useGlobalStore()
 
@@ -258,20 +259,19 @@ export function Transfers({ address }) {
         const _params = _.cloneDeep(params)
         delete _params.sortBy
 
-        const { data, total } = { ...await searchTransfers({ ..._params, size, sort }) }
-        setData(data)
-        setTotal(total)
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...await searchTransfers({ ..._params, size, sort }) } })
         setRefresh(false)
       }
     }
     getData()
-  }, [params, setData, setTotal, refresh, setRefresh])
+  }, [params, setSearchResults, refresh, setRefresh])
 
   useEffect(() => {
     const interval = setInterval(() => setRefresh('true'), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
 
+  const { data, total } = { ...searchResults?.[generateKeyFromParams(params)] }
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :

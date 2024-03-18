@@ -247,11 +247,12 @@ export const getEvent = data => {
 }
 export const normalizeEvent = event => event?.replace('ContractCall', 'callContract')
 
+const generateKeyFromParams = params => JSON.stringify(params)
+
 export function GMPs({ address }) {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
-  const [data, setData] = useState(null)
-  const [total, setTotal] = useState(null)
+  const [searchResults, setSearchResults] = useState(null)
   const [refresh, setRefresh] = useState(null)
 
   useEffect(() => {
@@ -270,20 +271,19 @@ export function GMPs({ address }) {
         const _params = _.cloneDeep(params)
         delete _params.sortBy
 
-        const { data, total } = { ...await searchGMP({ ..._params, size, sort }) }
-        setData(data)
-        setTotal(total)
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...await searchGMP({ ..._params, size, sort }) } })
         setRefresh(false)
       }
     }
     getData()
-  }, [params, setData, setTotal, refresh, setRefresh])
+  }, [params, setSearchResults, refresh, setRefresh])
 
   useEffect(() => {
     const interval = setInterval(() => setRefresh('true'), 0.5 * 60 * 1000)
     return () => clearInterval(interval)
   }, [])
 
+  const { data, total } = { ...searchResults?.[generateKeyFromParams(params)] }
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :
