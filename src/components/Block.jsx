@@ -91,7 +91,7 @@ function Info({ data, validatorSets, height }) {
               </dd>
             </div>
           )}
-          {validatorSets && (
+          {validatorSets && signedValidatorsData.length + unsignedValidatorsData.length > 0 && (
             <div className="px-4 sm:px-6 py-6 flex flex-col gap-y-2">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Signer / Absent</dt>
               <dd className="text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1">
