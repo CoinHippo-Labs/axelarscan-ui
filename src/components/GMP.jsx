@@ -1577,7 +1577,30 @@ export function GMP({ tx }) {
           offlineSigner: cosmosWalletStore.signer,
           txFee: { gas: '250000', amount: [{ denom: getChainData(chain, chains)?.native_token?.denom, amount: '30000' }] },
         }
-        const estimatedGasUsed = 700000
+        const estimatedGasUsed = {
+          ethereum: 400000,
+          binance: 150000,
+          polygon: 400000,
+          avalanche: 500000,
+          fantom: 400000,
+          arbitrum: 1000000,
+          'arbitrum-sepolia': 1000000,
+          optimism: 400000,
+          'optimism-sepolia': 400000,
+          base: 400000,
+          'base-sepolia': 400000,
+          mantle: 3000000000,
+          'mantle-sepolia': 3000000000,
+          celo: 400000,
+          kava: 400000,
+          filecoin: 200000000,
+          'filecoin-2': 200000000,
+          linea: 400000,
+          centrifuge: 1000000,
+          'centrifuge-2': 1000000,
+          scroll: 500000,
+          fraxtal: 400000,
+        }[destinationChain?.toLowerCase()] || 700000
 
         console.log('[addGas request]', { chain, destinationChain, transactionHash, logIndex, messageId, estimatedGasUsed, refundAddress: address, token, sendOptions })
         const response = chain_type === 'cosmos' ? await sdk.addGasToCosmosChain({ txHash: transactionHash, messageId, gasLimit: estimatedGasUsed, chain, token, sendOptions }) : await sdk.addNativeGas(chain, transactionHash, estimatedGasUsed, { evmWalletDetails: { useWindowEthereum: true, signer }, destChain: destinationChain, logIndex, refundAddress: address })
