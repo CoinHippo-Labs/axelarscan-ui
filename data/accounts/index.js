@@ -716,5 +716,23 @@ export default [
     name: 'Insrt: $MINT',
     image: '/logos/accounts/insrt.png',
     environment: 'mainnet',
+  },  
+  {
+    address: '0xAf753cc76156Ab0f2C9f316049Cc3df267f78e1a',
+    name: 'eesee.io: AssetHub',
+    image: '/logos/accounts/eesee.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xb62339c4CCda62c920C75bCC5FD43f07431dfdE4',
+    name: 'eesee.io: AssetSpoke',
+    image: '/logos/accounts/eesee.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x4690C5B0EB109219Bb27E660b17099fEb870F4bD',
+    name: 'eesee.io: AssetSpoke',
+    image: '/logos/accounts/eesee.png',
+    environment: 'mainnet',
   },
 ]
