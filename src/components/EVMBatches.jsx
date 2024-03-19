@@ -236,11 +236,12 @@ function Filters() {
   )
 }
 
+const generateKeyFromParams = params => JSON.stringify(params)
+
 export function EVMBatches() {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
-  const [data, setData] = useState(null)
-  const [total, setTotal] = useState(null)
+  const [searchResults, setSearchResults] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const { chains, assets } = useGlobalStore()
 
@@ -255,15 +256,14 @@ export function EVMBatches() {
   useEffect(() => {
     const getData = async () => {
       if (params && toBoolean(refresh)) {
-        const { data, total } = { ...await searchBatches({ ...params, size }) }
-        setData(toArray(data))
-        setTotal(total)
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...await searchBatches({ ...params, size }) } })
         setRefresh(false)
       }
     }
     getData()
-  }, [params, setData, setTotal, refresh, setRefresh])
+  }, [params, setSearchResults, refresh, setRefresh])
 
+  const { data, total } = { ...searchResults?.[generateKeyFromParams(params)] }
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :

@@ -241,11 +241,12 @@ function Filters() {
   )
 }
 
+const generateKeyFromParams = params => JSON.stringify(params)
+
 export function EVMPolls() {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
-  const [data, setData] = useState(null)
-  const [total, setTotal] = useState(null)
+  const [searchResults, setSearchResults] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const { chains, assets, validators } = useGlobalStore()
 
@@ -262,66 +263,68 @@ export function EVMPolls() {
       if (params && toBoolean(refresh)) {
         const { data, total } = { ...await searchPolls({ ...params, size }) }
 
-        setData(_.orderBy(toArray(data).map(d => {
-          const votes = []
-          Object.entries(d).filter(([k, v]) => k.startsWith('axelar')).forEach(([k, v]) => votes.push(v))
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: {
+          data: _.orderBy(toArray(data).map(d => {
+            const votes = []
+            Object.entries(d).filter(([k, v]) => k.startsWith('axelar')).forEach(([k, v]) => votes.push(v))
 
-          let voteOptions = Object.entries(_.groupBy(toArray(votes).map(v => ({ ...v, option: v.vote ? 'yes' : typeof v.vote === 'boolean' ? 'no' : 'unsubmitted' })), 'option')).map(([k, v]) => {
+            let voteOptions = Object.entries(_.groupBy(toArray(votes).map(v => ({ ...v, option: v.vote ? 'yes' : typeof v.vote === 'boolean' ? 'no' : 'unsubmitted' })), 'option')).map(([k, v]) => {
+              return {
+                option: k,
+                value: toArray(v).length,
+                voters: toArray(toArray(v).map(_v => _v.voter)),
+              }
+            }).filter(v => v.value).map(v => ({ ...v, i: v.option === 'yes' ? 0 : v.option === 'no' ? 1 : 2 }))
+
+            if (toArray(d.participants).length > 0 && voteOptions.findIndex(v => v.option === 'unsubmitted') < 0 && _.sumBy(voteOptions, 'value') < d.participants.length) {
+              voteOptions.push({ option: 'unsubmitted', value: d.participants.length - _.sumBy(voteOptions, 'value') })
+            }
+            voteOptions = _.orderBy(voteOptions, ['i'], ['asc'])
+
+            let eventName = split(d.event, { delimiter: '_', toCase: 'lower' }).join('_')
+            if (d.confirmation_events) {
+              const { type, txID } = { ...d.confirmation_events[0] }
+              switch (type) {
+                case 'depositConfirmation':
+                  eventName = eventName || 'Transfer'
+                  break
+                case 'ContractCallApproved':
+                  eventName = eventName || 'ContractCall'
+                  break
+                case 'ContractCallApprovedWithMint':
+                case 'ContractCallWithMintApproved':
+                  eventName = eventName || 'ContractCallWithToken'
+                  break
+                default:
+                  eventName = type
+                  break
+              }
+              d.transaction_id = d.transaction_id || txID
+            }
+
+            const { url, transaction_path } = { ...getChainData(d.sender_chain, chains)?.explorer }
+            const confirmation_txhash = toArray(votes).find(v => v.confirmed)?.id
             return {
-              option: k,
-              value: toArray(v).length,
-              voters: toArray(toArray(v).map(_v => _v.voter)),
+              ...d,
+              idNumber: isNumber(d.id) ? toNumber(d.id) : d.id,
+              status: d.success ? 'completed' : d.failed ? 'failed' : d.expired ? 'expired' : d.confirmation || confirmation_txhash ? 'confirmed' : 'pending',
+              height: _.minBy(votes, 'height')?.height || d.height,
+              confirmation_txhash,
+              votes: _.orderBy(votes, ['height', 'created_at'], ['desc', 'desc']),
+              voteOptions,
+              eventName: d.event ? split(toTitle(eventName), { delimiter: ' ' }).map(s => capitalize(s)).join('') : eventName,
+              url: includesStringList(eventName, ['operator', 'token_deployed']) ? `${url}${transaction_path?.replace('{tx}', d.transaction_id)}` : `/${includesStringList(eventName, ['contract_call', 'ContractCall']) || !(includesStringList(eventName, ['transfer', 'Transfer']) || d.deposit_address) ? 'gmp' : 'transfer'}/${d.transaction_id ? d.transaction_id : d.transfer_id ? `?transferId=${d.transfer_id}` : ''}`,
             }
-          }).filter(v => v.value).map(v => ({ ...v, i: v.option === 'yes' ? 0 : v.option === 'no' ? 1 : 2 }))
-
-          if (toArray(d.participants).length > 0 && voteOptions.findIndex(v => v.option === 'unsubmitted') < 0 && _.sumBy(voteOptions, 'value') < d.participants.length) {
-            voteOptions.push({ option: 'unsubmitted', value: d.participants.length - _.sumBy(voteOptions, 'value') })
-          }
-          voteOptions = _.orderBy(voteOptions, ['i'], ['asc'])
-
-          let eventName = split(d.event, { delimiter: '_', toCase: 'lower' }).join('_')
-          if (d.confirmation_events) {
-            const { type, txID } = { ...d.confirmation_events[0] }
-            switch (type) {
-              case 'depositConfirmation':
-                eventName = eventName || 'Transfer'
-                break
-              case 'ContractCallApproved':
-                eventName = eventName || 'ContractCall'
-                break
-              case 'ContractCallApprovedWithMint':
-              case 'ContractCallWithMintApproved':
-                eventName = eventName || 'ContractCallWithToken'
-                break
-              default:
-                eventName = type
-                break
-            }
-            d.transaction_id = d.transaction_id || txID
-          }
-
-          const { url, transaction_path } = { ...getChainData(d.sender_chain, chains)?.explorer }
-          const confirmation_txhash = toArray(votes).find(v => v.confirmed)?.id
-          return {
-            ...d,
-            idNumber: isNumber(d.id) ? toNumber(d.id) : d.id,
-            status: d.success ? 'completed' : d.failed ? 'failed' : d.expired ? 'expired' : d.confirmation || confirmation_txhash ? 'confirmed' : 'pending',
-            height: _.minBy(votes, 'height')?.height || d.height,
-            confirmation_txhash,
-            votes: _.orderBy(votes, ['height', 'created_at'], ['desc', 'desc']),
-            voteOptions,
-            eventName: d.event ? split(toTitle(eventName), { delimiter: ' ' }).map(s => capitalize(s)).join('') : eventName,
-            url: includesStringList(eventName, ['operator', 'token_deployed']) ? `${url}${transaction_path?.replace('{tx}', d.transaction_id)}` : `/${includesStringList(eventName, ['contract_call', 'ContractCall']) || !(includesStringList(eventName, ['transfer', 'Transfer']) || d.deposit_address) ? 'gmp' : 'transfer'}/${d.transaction_id ? d.transaction_id : d.transfer_id ? `?transferId=${d.transfer_id}` : ''}`,
-          }
-        }), ['idNumber', 'created_at.ms'], ['desc', 'desc']))
-
-        setTotal(total)
+          }), ['idNumber', 'created_at.ms'], ['desc', 'desc']),
+          total,
+        } })
         setRefresh(false)
       }
     }
     getData()
-  }, [chains, params, setData, setTotal, refresh, setRefresh])
+  }, [chains, params, setSearchResults, refresh, setRefresh])
 
+  const { data, total } = { ...searchResults?.[generateKeyFromParams(params)] }
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :

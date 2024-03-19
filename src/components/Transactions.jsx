@@ -525,11 +525,12 @@ function _Pagination({ data, maxPage = 5, sizePerPage = 25, onChange }) {
   )
 }
 
+const generateKeyFromParams = params => JSON.stringify(params)
+
 export function Transactions({ height, address }) {
   const searchParams = useSearchParams()
   const [params, setParams] = useState(null)
-  const [data, setData] = useState(null)
-  const [total, setTotal] = useState(null)
+  const [searchResults, setSearchResults] = useState(null)
   const [refresh, setRefresh] = useState(null)
   const [page, setPage] = useState(1)
   const { chains, assets } = useGlobalStore()
@@ -597,14 +598,14 @@ export function Transactions({ height, address }) {
           total = response?.total
         }
 
-        setData(_.orderBy(_.uniqBy(toArray(data), 'txhash').map(d => ({ ...d, type: getType(d), sender: getSender(d, assets), recipient: getRecipient(d, assets) })), ['height', 'timestamp', 'txhash'], ['desc', 'desc', 'asc']))
-        setTotal(total)
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { data: _.orderBy(_.uniqBy(toArray(data), 'txhash').map(d => ({ ...d, type: getType(d), sender: getSender(d, assets), recipient: getRecipient(d, assets) })), ['height', 'timestamp', 'txhash'], ['desc', 'desc', 'asc']), total } })
         setRefresh(false)
       }
     }
     getData()
-  }, [height, address, chains, assets, params, setData, setTotal, refresh, setRefresh])
+  }, [height, address, chains, assets, params, setSearchResults, refresh, setRefresh])
 
+  const { data, total } = { ...searchResults?.[generateKeyFromParams(params)] }
   return (
     <Container className={clsx(height ? 'mx-0 mt-5 pt-0.5' : address ? 'max-w-full' : 'sm:mt-8')}>
       {!data ? <Spinner /> :
