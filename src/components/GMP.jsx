@@ -73,16 +73,16 @@ export function getStep(data, chains) {
       data: express_executed,
       chainData: destinationChainData,
     },
-    sourceChainData?.chain_type === 'evm' && (confirm || !approved || !(executed || is_executed || error)) && {
+    (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: (confirm && confirm.poll_id !== confirm_failed_event?.poll_id) || approved || executed || is_executed || error ? 'Confirmed' : is_invalid_call ? 'Invalid Call' : confirm_failed ? 'Fail to Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
-      status: (confirm && confirm.poll_id !== confirm_failed_event?.poll_id) || approved || executed || is_executed || error ? 'success' : is_invalid_call || confirm_failed ? 'failed' : 'pending',
+      title: (confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id)) || approved || executed || is_executed || error ? 'Confirmed' : is_invalid_call ? 'Invalid Call' : confirm_failed ? 'Fail to Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+      status: (confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id)) || approved || executed || is_executed || error ? 'success' : is_invalid_call || confirm_failed ? 'failed' : 'pending',
       data: confirm || confirm_failed_event,
       chainData: axelarChainData,
     },
     destinationChainData?.chain_type === 'evm' && {
       id: 'approve',
-      title: approved ? 'Approved' : confirm && confirm.poll_id !== confirm_failed_event?.poll_id ? 'Approving' : 'Approve',
+      title: approved ? 'Approved' : confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id) ? 'Approving' : 'Approve',
       status: approved ? 'success' : 'pending',
       data: approved,
       chainData: destinationChainData,
@@ -245,7 +245,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                                     <div className={clsx('relative w-8 h-8 bg-zinc-50 dark:bg-zinc-800 rounded-full border-2 flex items-center justify-center', steps[i - 1]?.status === 'pending' ? 'border-zinc-200 dark:border-zinc-700' : 'border-blue-600 dark:border-blue-500')} aria-current="step">
                                       {steps[i - 1]?.status !== 'pending' && <PiClock className={clsx('w-5 h-5', steps[i - 1]?.status === 'pending' ? 'text-zinc-200 dark:text-zinc-700' : 'text-blue-600 dark:text-blue-500')} />}
                                       <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-12 pt-1', steps[i - 1]?.status !== 'pending' ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 dark:text-zinc-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
-                                      {d.id === 'confirm' && !express_executed && estimatedTimeSpent && timeDiff(moment(), 'seconds', (call?.block_timestamp + estimatedTimeSpent.confirm) * 1000) > 0 && (
+                                      {d.id === 'confirm' && !express_executed && estimatedTimeSpent?.confirm && timeDiff(moment(), 'seconds', (call?.block_timestamp + estimatedTimeSpent.confirm) * 1000) > 0 && (
                                         <div className="absolute mt-20">
                                           <TimeUntil
                                             timestamp={(call.block_timestamp + estimatedTimeSpent.confirm) * 1000}
@@ -1604,7 +1604,7 @@ export function GMP({ tx }) {
   const approve = async (data, afterPayGas = false) => {
     if (data?.call && sdk) {
       setProcessing(true)
-      if (!afterPayGas) setResponse({ status: 'pending', message: data.call.chain_type !== 'cosmos' && !data.confirm ? 'Confirming...' : data.call.destination_chain_type === 'cosmos' ? 'Executing...' : 'Approving...' })
+      if (!afterPayGas) setResponse({ status: 'pending', message: !data.confirm ? 'Confirming...' : data.call.destination_chain_type === 'cosmos' ? 'Executing...' : 'Approving...' })
       try {
         const { destination_chain_type, transactionHash, logIndex, _logIndex } = { ...data.call }
         let { messageId } = { ...data.call.returnValues }
@@ -1684,19 +1684,19 @@ export function GMP({ tx }) {
   )
 
   const finalityTime = estimatedTimeSpent?.confirm ? estimatedTimeSpent.confirm + 15 : 600
-  const approveButton = call && call.chain_type === 'evm' && !confirm_failed && !(call.destination_chain_type === 'cosmos' ? confirm && confirm.poll_id !== confirm_failed_event?.poll_id : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed && (confirm || timeDiff(call.block_timestamp * 1000) >= finalityTime) && timeDiff((confirm || call).block_timestamp * 1000) >= 60 && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) && (
+  const approveButton = call && call.chain_type === 'evm' && !confirm_failed && !(call.destination_chain_type === 'cosmos' ? confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id) : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed && (confirm || timeDiff(call.block_timestamp * 1000) >= finalityTime) && timeDiff((confirm || call).block_timestamp * 1000) >= 60 && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) && (
     <div key="approve" className="flex items-center gap-x-1">
       <button
         disabled={processing}
         onClick={() => approve(data)}
         className={clsx('h-6 rounded-xl flex items-center font-display text-white whitespace-nowrap px-2.5 py-1', processing ? 'pointer-events-none bg-blue-400 dark:bg-blue-400' : 'bg-blue-600 hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-600')}
       >
-        {call.chain_type !== 'cosmos' && !confirm ? 'Confirm' : 'Approv'}{processing ? 'ing...' : call.chain_type !== 'cosmos' && !confirm ? '' : 'e'}
+        {!confirm ? 'Confirm' : 'Approv'}{processing ? 'ing...' : !confirm ? '' : 'e'}
       </button>
     </div>
   )
 
-  const executeButton = call && (call.destination_chain_type === 'cosmos' ? confirm || call.chain_type !== 'evm' : approved) && !executed?.transactionHash && !is_executed && (error || timeDiff(((call.destination_chain_type === 'cosmos' ? confirm?.block_timestamp : approved.block_timestamp) || call.block_timestamp) * 1000) >= (call.destination_chain_type === 'cosmos' ? 300 : 120)) && call.returnValues?.payload && (
+  const executeButton = call && (call.destination_chain_type === 'cosmos' ? confirm : approved) && !executed?.transactionHash && !is_executed && (error || timeDiff(((call.destination_chain_type === 'cosmos' ? confirm?.block_timestamp : approved.block_timestamp) || call.block_timestamp) * 1000) >= (call.destination_chain_type === 'cosmos' ? 300 : 120)) && call.returnValues?.payload && (
     <div key="execute" className="flex items-center gap-x-1">
       {(call.destination_chain_type === 'cosmos' || (signer && !needSwitchChain(destinationChainData?.chain_id, call.destination_chain_type))) && (
         <button
@@ -1722,7 +1722,7 @@ export function GMP({ tx }) {
             executeData={executeData}
             buttons={Object.fromEntries(Object.entries({
               pay_gas: addGasButton,
-              [call.chain_type !== 'cosmos' && !confirm ? 'confirm' : 'approve']: approveButton,
+              [!confirm ? 'confirm' : 'approve']: approveButton,
               execute: executeButton,
             }).filter(([k, v]) => v))}
             tx={tx}
