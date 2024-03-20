@@ -77,7 +77,7 @@ export function getStep(data, chains) {
     },
     sourceChainData?.chain_type === 'evm' && {
       id: 'vote',
-      title: vote ? vote.success ? 'Confirmed' : 'Confirm Failed' : confirm ? 'Confirming' : 'Confirm',
+      title: vote ? vote.success ? 'Confirmed' : 'Failed to Confirm' : confirm ? 'Confirming' : 'Confirm',
       status: vote ? vote.success ? 'success' : 'failed' : 'pending',
       data: vote,
       chainData: axelarChainData,

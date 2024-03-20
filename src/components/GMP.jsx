@@ -75,7 +75,7 @@ export function getStep(data, chains) {
     },
     (confirm || !approved || !(executed || is_executed || error)) && {
       id: 'confirm',
-      title: (confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id)) || approved || executed || is_executed || error ? 'Confirmed' : is_invalid_call ? 'Invalid Call' : confirm_failed ? 'Fail to Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
+      title: (confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id)) || approved || executed || is_executed || error ? 'Confirmed' : is_invalid_call ? 'Invalid Call' : confirm_failed ? 'Failed to Confirm' : gas_paid || gas_paid_to_callback || express_executed ? 'Waiting for Finality' : 'Confirm',
       status: (confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id)) || approved || executed || is_executed || error ? 'success' : is_invalid_call || confirm_failed ? 'failed' : 'pending',
       data: confirm || confirm_failed_event,
       chainData: axelarChainData,
@@ -1707,7 +1707,7 @@ export function GMP({ tx }) {
   )
 
   const finalityTime = estimatedTimeSpent?.confirm ? estimatedTimeSpent.confirm + 15 : 600
-  const approveButton = call && call.chain_type === 'evm' && !confirm_failed && !(call.destination_chain_type === 'cosmos' ? confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id) : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed && (confirm || timeDiff(call.block_timestamp * 1000) >= finalityTime) && timeDiff((confirm || call).block_timestamp * 1000) >= 60 && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) && (
+  const approveButton = call && call.chain_type === 'evm' && !(call.destination_chain_type === 'cosmos' ? confirm && (sourceChainData?.chain_type === 'cosmos' || confirm.poll_id !== confirm_failed_event?.poll_id) : approved) && (!executed || (error && executed.axelarTransactionHash && !executed.transactionHash)) && !is_executed && (confirm || timeDiff(call.block_timestamp * 1000) >= finalityTime) && timeDiff((confirm || call).block_timestamp * 1000) >= 60 && !(is_invalid_destination_chain || is_invalid_call || is_insufficient_fee || (!gas?.gas_remain_amount && !gas_paid_to_callback && !is_call_from_relayer && !proposal_id)) && (
     <div key="approve" className="flex items-center gap-x-1">
       <button
         disabled={processing}
