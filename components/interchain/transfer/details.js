@@ -84,7 +84,7 @@ export default ({ data }) => {
     getChainData(source_chain_data?.id, chains_data)?.chain_type === 'evm' && {
       id: 'vote',
       title: 'Confirm',
-      status: vote ? 'success' : 'pending',
+      status: vote ? vote.success ? 'success' : 'failed' : 'pending',
       data: vote,
       chain_data: axelar_chain_data,
     },
