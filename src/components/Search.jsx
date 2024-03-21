@@ -8,6 +8,7 @@ import clsx from 'clsx'
 import _ from 'lodash'
 import { FiSearch } from 'react-icons/fi'
 
+import { Spinner } from '@/components/Spinner'
 import { Button } from '@/components/Button'
 import { useNameServicesStore } from '@/components/Profile'
 import { useGlobalStore } from '@/components/Global'
@@ -121,7 +122,7 @@ export function Search() {
           className={clsx(
             'w-full sm:w-80 h-10 bg-white dark:bg-zinc-900 appearance-none border-zinc-200 hover:border-blue-300 focus:border-blue-600 dark:border-zinc-700 dark:hover:border-blue-800 dark:focus:border-blue-500 focus:ring-0 rounded-lg text-sm pl-3',
             searching ? 'text-zinc-400 dark:text-zinc-600' : 'text-zinc-600 dark:text-zinc-400',
-            searchable ? 'pr-10' : 'pr-3',
+            searchable || searching ? 'pr-10' : 'pr-3',
           )}
         />
         {searchable && (
@@ -133,6 +134,7 @@ export function Search() {
             <FiSearch />
           </Button>
         )}
+        {searching && <Spinner className="absolute top-0 right-0 mt-1 mr-1 !px-1" />}
       </div>
     </form>
   )
