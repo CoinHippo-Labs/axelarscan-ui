@@ -1062,7 +1062,7 @@ function Details({ data }) {
           {steps.filter(d => d.status !== 'pending' || d.data?.axelarTransactionHash).map((d, i) => {
             const { logIndex, _logIndex, chain_type, confirmation_txhash, poll_id, axelarTransactionHash, blockNumber, axelarBlockNumber, transaction, receipt, returnValues, error, contract_address, block_timestamp, created_at, proposal_id } = { ...(d.id === 'pay_gas' && isString(d.data) ? data.originData?.gas_paid : d.data) }
             const transactionHash = d.data?.transactionHash || receipt?.transactionHash || receipt?.hash
-            const height = d.data.blockNumber || blockNumber
+            const height = d.data?.blockNumber || blockNumber
             const { url, block_path, transaction_path } = { ...d.chainData?.explorer }
 
             let stepTX
