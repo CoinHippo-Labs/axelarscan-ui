@@ -734,115 +734,117 @@ export default ({ address, data }) => {
           )}
         </div>
       }
-      <div className="sm:bg-slate-50 sm:dark:bg-slate-900 sm:flex sm:flex-col sm:rounded-lg sm:space-y-4 sm:p-6">
-        {balances ?
-          <Datatable
-            columns={[
-              {
-                Header: '#',
-                accessor: 'i',
-                disableSortBy: true,
-                Cell: props => (
-                  <span className="text-black dark:text-white font-medium">
-                    {props.flatRows?.indexOf(props.row) + 1}
-                  </span>
-                ),
-              },
-              {
-                Header: 'Asset',
-                accessor: 'denom',
-                disableSortBy: true,
-                Cell: props => {
-                  const { value } = { ...props }
-                  const { symbol, name, image, price } = { ...getAssetData(value, assets_data) }
-                  return (
-                    <div className="min-w-max flex items-start space-x-2">
-                      {image && (
-                        <Image
-                          src={image}
-                          width={20}
-                          height={20}
-                        />
-                      )}
-                      <div className="flex flex-col">
-                        {(symbol || value) && (
-                          <div className="flex items-center space-x-1">
-                            <div className="flex items-center">
-                              <span className="sm:hidden font-semibold">
-                                {ellipse(symbol || value, 4, 'ibc/')}
-                              </span>
-                              <span className="hidden sm:block font-semibold">
-                                {ellipse(symbol || value, 10, 'ibc/')}
-                              </span>
-                            </div>
-                            {price > 0 && (
-                              <NumberDisplay
-                                value={price}
-                                format="0,0.00"
-                                maxDecimals={2}
-                                prefix="$"
-                                className="text-slate-400 dark:text-slate-500"
-                              />
-                            )}
-                            {!symbol && (
-                              <Copy value={value} />
-                            )}
-                          </div>
+      {address?.startsWith('axelar') && (
+        <div className="sm:bg-slate-50 sm:dark:bg-slate-900 sm:flex sm:flex-col sm:rounded-lg sm:space-y-4 sm:p-6">
+          {balances ?
+            <Datatable
+              columns={[
+                {
+                  Header: '#',
+                  accessor: 'i',
+                  disableSortBy: true,
+                  Cell: props => (
+                    <span className="text-black dark:text-white font-medium">
+                      {props.flatRows?.indexOf(props.row) + 1}
+                    </span>
+                  ),
+                },
+                {
+                  Header: 'Asset',
+                  accessor: 'denom',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    const { symbol, name, image, price } = { ...getAssetData(value, assets_data) }
+                    return (
+                      <div className="min-w-max flex items-start space-x-2">
+                        {image && (
+                          <Image
+                            src={image}
+                            width={20}
+                            height={20}
+                          />
                         )}
-                        <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                          {ellipse(name, 16)}
-                        </span>
+                        <div className="flex flex-col">
+                          {(symbol || value) && (
+                            <div className="flex items-center space-x-1">
+                              <div className="flex items-center">
+                                <span className="sm:hidden font-semibold">
+                                  {ellipse(symbol || value, 4, 'ibc/')}
+                                </span>
+                                <span className="hidden sm:block font-semibold">
+                                  {ellipse(symbol || value, 10, 'ibc/')}
+                                </span>
+                              </div>
+                              {price > 0 && (
+                                <NumberDisplay
+                                  value={price}
+                                  format="0,0.00"
+                                  maxDecimals={2}
+                                  prefix="$"
+                                  className="text-slate-400 dark:text-slate-500"
+                                />
+                              )}
+                              {!symbol && (
+                                <Copy value={value} />
+                              )}
+                            </div>
+                          )}
+                          <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                            {ellipse(name, 16)}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )
+                    )
+                  },
                 },
-              },
-              {
-                Header: 'Balance',
-                accessor: 'amount',
-                disableSortBy: true,
-                Cell: props => {
-                  const { value } = { ...props }
-                  return (
-                    <div className="text-left sm:text-right">
-                      <NumberDisplay
-                        value={value}
-                        format="0,0.00000000"
-                      />
-                    </div>
-                  )
+                {
+                  Header: 'Balance',
+                  accessor: 'amount',
+                  disableSortBy: true,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    return (
+                      <div className="text-left sm:text-right">
+                        <NumberDisplay
+                          value={value}
+                          format="0,0.00000000"
+                        />
+                      </div>
+                    )
+                  },
+                  headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
                 },
-                headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-              },
-              {
-                Header: 'Value',
-                accessor: 'value',
-                sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
-                Cell: props => {
-                  const { value } = { ...props }
-                  return (
-                    <div className="text-left sm:text-right">
-                      <NumberDisplay
-                        value={value}
-                        format="0,0.00a"
-                        prefix="$"
-                        noTooltip={true}
-                      />
-                    </div>
-                  )
+                {
+                  Header: 'Value',
+                  accessor: 'value',
+                  sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
+                  Cell: props => {
+                    const { value } = { ...props }
+                    return (
+                      <div className="text-left sm:text-right">
+                        <NumberDisplay
+                          value={value}
+                          format="0,0.00a"
+                          prefix="$"
+                          noTooltip={true}
+                        />
+                      </div>
+                    )
+                  },
+                  headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
                 },
-                headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
-              },
-            ]}
-            size="small"
-            data={balances}
-            defaultPageSize={PAGE_SIZE}
-            noPagination={balances.length < PAGE_SIZE}
-            className="no-border no-shadow"
-          /> :
-          <Spinner name="ProgressBar" width={36} height={36} />
-        }
-      </div>
+              ]}
+              size="small"
+              data={balances}
+              defaultPageSize={PAGE_SIZE}
+              noPagination={balances.length < PAGE_SIZE}
+              className="no-border no-shadow"
+            /> :
+            <Spinner name="ProgressBar" width={36} height={36} />
+          }
+        </div>
+      )}
       {!isDepositAddress && !equalsIgnoreCase(address, broadcaster_address) && (
         <Tabs value={stakingField} className="tabs pt-8">
           <TabsHeader className="max-w-xs sm:max-w-md">
