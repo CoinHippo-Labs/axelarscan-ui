@@ -247,7 +247,7 @@ export default ({ children }) => {
         }
       }
 
-      const getData = () => {
+      const getData = async () => {
         if (pathname?.startsWith('/tvl') && assets_data) {
           const { data } = { ...await getTVL() }
           if (data) {
