@@ -1616,7 +1616,7 @@ export function GMP({ tx }) {
         })
 
         const _data = success && await getData()
-        if (_data && success && !broadcastResult?.code && !_data.is_insufficient_fee && (destination_chain_type === 'cosmos' ? !data.executed && !_data.executed : !data.approved && !_data.approved)) await approve(_data, true)
+        if (_data && success && !broadcastResult?.code && (destination_chain_type === 'cosmos' ? !data.executed && !_data.executed : !data.approved && !_data.approved)) await approve(_data, true)
       } catch (error) {
         setResponse({ status: 'failed', ...parseError(error) })
       }
