@@ -24,7 +24,7 @@
   "homepage": "https://github.com/CoinHippo-Labs/axelarscan-ui#readme",
   "dependencies": {
     "@antv/g6": "^4.8.22",
-    "@axelar-network/axelarjs-sdk": "0.15.0-alpha.5",
+    "@axelar-network/axelarjs-sdk": "0.15.0",
     "@material-tailwind/react": "^2.1.2",
     "@redefined/name-resolver-js": "^2.10.5",
     "@siddomains/sidjs": "^0.1.29",
