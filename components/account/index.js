@@ -234,7 +234,7 @@ export default () => {
 
   const isCustomAddress = accounts.findIndex(a => equalsIgnoreCase(a.address, address)) > -1
   const data = address && (address.length >= 65 || getKeyType(address, chains_data) === 'evmAddress') && !isCustomAddress ?
-    depositAddressData && { depositAddressData } :
+    depositAddressData && { depositAddressData, balances } :
     (balances || delegations || redelegations || unbondings || rewards || commissions) && {
       balances,
       delegations,

@@ -427,153 +427,153 @@ export default ({ address, data }) => {
   const titleClassName = 'w-40 lg:w-52 text-slate-600 dark:text-slate-400 text-sm lg:text-base font-medium'
 
   return (
-    isDepositAddress ?
-      <div className="bg-slate-50 dark:bg-slate-900 w-fit flex flex-col rounded-lg space-y-4 p-6">
-        <div className={rowClassName}>
-          <span className={titleClassName}>Deposit Address:</span>
-          {data ?
-            address && (
-              <Copy
-                size={20}
-                value={address}
-                title={
-                  <span className="text-sm lg:text-base font-medium">
-                    {ellipse(address, 12)}
-                  </span>
-                }
-              />
-            ) :
-            <Spinner name="ProgressBar" />
-          }
-        </div>
-        <div className={rowClassName}>
-          <span className={titleClassName}>Source:</span>
-          {data ?
-            source_chain_data ?
-              <div className="flex items-center space-x-2">
-                {source_chain_data.image && (
-                  <Image
-                    src={source_chain_data.image}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                )}
-                <span className="text-sm lg:text-base font-medium">
-                  {source_chain_data.name || sender_chain}
-                </span>
-              </div> :
-              sender_address ?
+    <div className="sm:grid xl:grid-cols-2 sm:gap-4 space-y-4 sm:space-y-0">
+      {isDepositAddress ?
+        <div className="bg-slate-50 dark:bg-slate-900 w-fit flex flex-col rounded-lg space-y-4 p-6">
+          <div className={rowClassName}>
+            <span className={titleClassName}>Deposit Address:</span>
+            {data ?
+              address && (
                 <Copy
-                  value={sender_address}
+                  size={20}
+                  value={address}
                   title={
-                    <span className="cursor-pointer text-slate-600 dark:text-slate-200 text-sm lg:text-base font-medium">
-                      {ellipse(sender_address, 8, getKeyType(sender_address, chains_data) === 'evmAddress' ? '0x' : 'axelar')}
+                    <span className="text-sm lg:text-base font-medium">
+                      {ellipse(address, 12)}
                     </span>
                   }
-                /> :
-                '-' :
-            <Spinner name="ProgressBar" />
-          }
-        </div>
-        <div className={rowClassName}>
-          <span className={titleClassName}>Destination:</span>
-          {data ?
-            destination_chain_data ?
-              <div className="flex items-start space-x-2">
-                {destination_chain_data.image && (
-                  <Image
-                    src={destination_chain_data.image}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                )}
-                <div className="flex flex-col">
-                  <span className="text-sm lg:text-base font-medium">
-                    {destination_chain_data.name || recipient_chain}
-                  </span>
-                  {recipient_address && (
-                    <div className="flex items-center space-x-1">
-                      <AccountProfile address={recipient_address} explorer={destination_chain_data.explorer} chain={destination_chain_data.id} />
-                      <ExplorerLink value={recipient_address} explorer={destination_chain_data.explorer} />
-                    </div>
+                />
+              ) :
+              <Spinner name="ProgressBar" />
+            }
+          </div>
+          <div className={rowClassName}>
+            <span className={titleClassName}>Source:</span>
+            {data ?
+              source_chain_data ?
+                <div className="flex items-center space-x-2">
+                  {source_chain_data.image && (
+                    <Image
+                      src={source_chain_data.image}
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
                   )}
-                </div>
-              </div> :
-              recipient_address ?
-                <Copy
-                  value={recipient_address}
-                  title={
-                    <span className="cursor-pointer text-slate-600 dark:text-slate-200 text-sm lg:text-base font-medium">
-                      {ellipse(recipient_address, 8, getKeyType(recipient_address, chains_data) === 'evmAddress' ? '0x' : 'axelar')}
+                  <span className="text-sm lg:text-base font-medium">
+                    {source_chain_data.name || sender_chain}
+                  </span>
+                </div> :
+                sender_address ?
+                  <Copy
+                    value={sender_address}
+                    title={
+                      <span className="cursor-pointer text-slate-600 dark:text-slate-200 text-sm lg:text-base font-medium">
+                        {ellipse(sender_address, 8, getKeyType(sender_address, chains_data) === 'evmAddress' ? '0x' : 'axelar')}
+                      </span>
+                    }
+                  /> :
+                  '-' :
+              <Spinner name="ProgressBar" />
+            }
+          </div>
+          <div className={rowClassName}>
+            <span className={titleClassName}>Destination:</span>
+            {data ?
+              destination_chain_data ?
+                <div className="flex items-start space-x-2">
+                  {destination_chain_data.image && (
+                    <Image
+                      src={destination_chain_data.image}
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  )}
+                  <div className="flex flex-col">
+                    <span className="text-sm lg:text-base font-medium">
+                      {destination_chain_data.name || recipient_chain}
                     </span>
-                  }
-                /> :
-                '-' :
-            <Spinner name="ProgressBar" />
-          }
-        </div>
-        <div className={rowClassName}>
-          <span className={titleClassName}>Asset:</span>
-          {data ?
-            asset_data ?
-              <div className="flex items-center space-x-2">
-                {asset_data.image && (
-                  <Image
-                    src={asset_data.image}
-                    width={24}
-                    height={24}
-                  />
-                )}
-                <span className="text-sm lg:text-base font-medium">
-                  {asset_data.name || symbol || denom}
-                </span>
-              </div> :
-              denom ?
-                <Copy
-                  value={denom}
-                  title={
-                    <span className="cursor-pointer text-slate-600 dark:text-slate-200 font-medium">
-                      {ellipse(denom, 8)}
-                    </span>
-                  }
-                /> :
-                '-' :
-            <Spinner name="ProgressBar" />
-          }
-        </div>
-        <div className={rowClassName}>
-          <span className={titleClassName}>Transfer:</span>
-          {data ?
-            txhash ?
-              <div className="flex flex-col space-y-0.5">
-                <div className="flex items-center space-x-1">
+                    {recipient_address && (
+                      <div className="flex items-center space-x-1">
+                        <AccountProfile address={recipient_address} explorer={destination_chain_data.explorer} chain={destination_chain_data.id} />
+                        <ExplorerLink value={recipient_address} explorer={destination_chain_data.explorer} />
+                      </div>
+                    )}
+                  </div>
+                </div> :
+                recipient_address ?
+                  <Copy
+                    value={recipient_address}
+                    title={
+                      <span className="cursor-pointer text-slate-600 dark:text-slate-200 text-sm lg:text-base font-medium">
+                        {ellipse(recipient_address, 8, getKeyType(recipient_address, chains_data) === 'evmAddress' ? '0x' : 'axelar')}
+                      </span>
+                    }
+                  /> :
+                  '-' :
+              <Spinner name="ProgressBar" />
+            }
+          </div>
+          <div className={rowClassName}>
+            <span className={titleClassName}>Asset:</span>
+            {data ?
+              asset_data ?
+                <div className="flex items-center space-x-2">
+                  {asset_data.image && (
+                    <Image
+                      src={asset_data.image}
+                      width={24}
+                      height={24}
+                    />
+                  )}
+                  <span className="text-sm lg:text-base font-medium">
+                    {asset_data.name || symbol || denom}
+                  </span>
+                </div> :
+                denom ?
+                  <Copy
+                    value={denom}
+                    title={
+                      <span className="cursor-pointer text-slate-600 dark:text-slate-200 font-medium">
+                        {ellipse(denom, 8)}
+                      </span>
+                    }
+                  /> :
+                  '-' :
+              <Spinner name="ProgressBar" />
+            }
+          </div>
+          <div className={rowClassName}>
+            <span className={titleClassName}>Transfer:</span>
+            {data ?
+              txhash ?
+                <div className="flex flex-col space-y-0.5">
+                  <div className="flex items-center space-x-1">
+                    <Link
+                      href={`/transfer/${txhash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 dark:text-blue-500 text-sm lg:text-base font-medium"
+                    >
+                      {ellipse(txhash, 16)}
+                    </Link>
+                    <Copy value={txhash} />
+                  </div>
                   <Link
                     href={`/transfer/${txhash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 dark:text-blue-500 text-sm lg:text-base font-medium"
+                    className="underline text-blue-400 dark:text-blue-500 text-xs font-medium"
                   >
-                    {ellipse(txhash, 16)}
+                    Track the cross-chain transfer
                   </Link>
-                  <Copy value={txhash} />
-                </div>
-                <Link
-                  href={`/transfer/${txhash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-blue-400 dark:text-blue-500 text-xs font-medium"
-                >
-                  Track the cross-chain transfer
-                </Link>
-              </div> :
-              '-' :
-            <Spinner name="ProgressBar" />
-          }
-        </div>
-      </div> :
-      <div className="sm:grid xl:grid-cols-2 sm:gap-4 space-y-4 sm:space-y-0">
+                </div> :
+                '-' :
+              <Spinner name="ProgressBar" />
+            }
+          </div>
+        </div> :
         <div className="w-fit sm:w-full bg-slate-50 dark:bg-slate-900 flex flex-col rounded-lg space-y-4 p-6">
           <div className={rowClassName}>
             <span className={titleClassName}>Address:</span>
@@ -733,138 +733,139 @@ export default ({ address, data }) => {
             </>
           )}
         </div>
-        <div className="sm:bg-slate-50 sm:dark:bg-slate-900 sm:flex sm:flex-col sm:rounded-lg sm:space-y-4 sm:p-6">
-          {balances ?
-            <Datatable
-              columns={[
-                {
-                  Header: '#',
-                  accessor: 'i',
-                  disableSortBy: true,
-                  Cell: props => (
-                    <span className="text-black dark:text-white font-medium">
-                      {props.flatRows?.indexOf(props.row) + 1}
-                    </span>
-                  ),
-                },
-                {
-                  Header: 'Asset',
-                  accessor: 'denom',
-                  disableSortBy: true,
-                  Cell: props => {
-                    const { value } = { ...props }
-                    const { symbol, name, image, price } = { ...getAssetData(value, assets_data) }
-                    return (
-                      <div className="min-w-max flex items-start space-x-2">
-                        {image && (
-                          <Image
-                            src={image}
-                            width={20}
-                            height={20}
-                          />
-                        )}
-                        <div className="flex flex-col">
-                          {(symbol || value) && (
-                            <div className="flex items-center space-x-1">
-                              <div className="flex items-center">
-                                <span className="sm:hidden font-semibold">
-                                  {ellipse(symbol || value, 4, 'ibc/')}
-                                </span>
-                                <span className="hidden sm:block font-semibold">
-                                  {ellipse(symbol || value, 10, 'ibc/')}
-                                </span>
-                              </div>
-                              {price > 0 && (
-                                <NumberDisplay
-                                  value={price}
-                                  format="0,0.00"
-                                  maxDecimals={2}
-                                  prefix="$"
-                                  className="text-slate-400 dark:text-slate-500"
-                                />
-                              )}
-                              {!symbol && (
-                                <Copy value={value} />
-                              )}
+      }
+      <div className="sm:bg-slate-50 sm:dark:bg-slate-900 sm:flex sm:flex-col sm:rounded-lg sm:space-y-4 sm:p-6">
+        {balances ?
+          <Datatable
+            columns={[
+              {
+                Header: '#',
+                accessor: 'i',
+                disableSortBy: true,
+                Cell: props => (
+                  <span className="text-black dark:text-white font-medium">
+                    {props.flatRows?.indexOf(props.row) + 1}
+                  </span>
+                ),
+              },
+              {
+                Header: 'Asset',
+                accessor: 'denom',
+                disableSortBy: true,
+                Cell: props => {
+                  const { value } = { ...props }
+                  const { symbol, name, image, price } = { ...getAssetData(value, assets_data) }
+                  return (
+                    <div className="min-w-max flex items-start space-x-2">
+                      {image && (
+                        <Image
+                          src={image}
+                          width={20}
+                          height={20}
+                        />
+                      )}
+                      <div className="flex flex-col">
+                        {(symbol || value) && (
+                          <div className="flex items-center space-x-1">
+                            <div className="flex items-center">
+                              <span className="sm:hidden font-semibold">
+                                {ellipse(symbol || value, 4, 'ibc/')}
+                              </span>
+                              <span className="hidden sm:block font-semibold">
+                                {ellipse(symbol || value, 10, 'ibc/')}
+                              </span>
                             </div>
-                          )}
-                          <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
-                            {ellipse(name, 16)}
-                          </span>
-                        </div>
+                            {price > 0 && (
+                              <NumberDisplay
+                                value={price}
+                                format="0,0.00"
+                                maxDecimals={2}
+                                prefix="$"
+                                className="text-slate-400 dark:text-slate-500"
+                              />
+                            )}
+                            {!symbol && (
+                              <Copy value={value} />
+                            )}
+                          </div>
+                        )}
+                        <span className="text-slate-400 dark:text-slate-500 text-xs font-medium">
+                          {ellipse(name, 16)}
+                        </span>
                       </div>
-                    )
-                  },
+                    </div>
+                  )
                 },
-                {
-                  Header: 'Balance',
-                  accessor: 'amount',
-                  disableSortBy: true,
-                  Cell: props => {
-                    const { value } = { ...props }
-                    return (
-                      <div className="text-left sm:text-right">
-                        <NumberDisplay
-                          value={value}
-                          format="0,0.00000000"
-                        />
-                      </div>
-                    )
-                  },
-                  headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+              },
+              {
+                Header: 'Balance',
+                accessor: 'amount',
+                disableSortBy: true,
+                Cell: props => {
+                  const { value } = { ...props }
+                  return (
+                    <div className="text-left sm:text-right">
+                      <NumberDisplay
+                        value={value}
+                        format="0,0.00000000"
+                      />
+                    </div>
+                  )
                 },
-                {
-                  Header: 'Value',
-                  accessor: 'value',
-                  sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
-                  Cell: props => {
-                    const { value } = { ...props }
-                    return (
-                      <div className="text-left sm:text-right">
-                        <NumberDisplay
-                          value={value}
-                          format="0,0.00a"
-                          prefix="$"
-                          noTooltip={true}
-                        />
-                      </div>
-                    )
-                  },
-                  headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+                headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+              },
+              {
+                Header: 'Value',
+                accessor: 'value',
+                sortType: (a, b) => a.original.value > b.original.value ? 1 : -1,
+                Cell: props => {
+                  const { value } = { ...props }
+                  return (
+                    <div className="text-left sm:text-right">
+                      <NumberDisplay
+                        value={value}
+                        format="0,0.00a"
+                        prefix="$"
+                        noTooltip={true}
+                      />
+                    </div>
+                  )
                 },
-              ]}
-              size="small"
-              data={balances}
-              defaultPageSize={PAGE_SIZE}
-              noPagination={balances.length < PAGE_SIZE}
-              className="no-border no-shadow"
-            /> :
-            <Spinner name="ProgressBar" width={36} height={36} />
-          }
-        </div>
-        {!equalsIgnoreCase(address, broadcaster_address) && (
-          <Tabs value={stakingField} className="tabs pt-8">
-            <TabsHeader className="max-w-xs sm:max-w-md">
-              {STAKING_FIELDS.map(f => (
-                <Tab
-                  key={f.id}
-                  value={f.id}
-                  onClick={() => setStakingField(f.id)}
-                  className="capitalize text-xs sm:text-base"
-                >
-                  {f.title}
-                </Tab>
-              ))}
-            </TabsHeader>
-            <TabsBody>
-              {STAKING_FIELDS.filter(f => f.id === stakingField).map(f => (
-                <TabPanel key={f.id} value={f.id}>
-                  {renderStaking(f.id)}
-                </TabPanel>
-              ))}
-            </TabsBody>
-          </Tabs>
-        )}
+                headerClassName: 'justify-start sm:justify-end text-left sm:text-right',
+              },
+            ]}
+            size="small"
+            data={balances}
+            defaultPageSize={PAGE_SIZE}
+            noPagination={balances.length < PAGE_SIZE}
+            className="no-border no-shadow"
+          /> :
+          <Spinner name="ProgressBar" width={36} height={36} />
+        }
       </div>
+      {!isDepositAddress && !equalsIgnoreCase(address, broadcaster_address) && (
+        <Tabs value={stakingField} className="tabs pt-8">
+          <TabsHeader className="max-w-xs sm:max-w-md">
+            {STAKING_FIELDS.map(f => (
+              <Tab
+                key={f.id}
+                value={f.id}
+                onClick={() => setStakingField(f.id)}
+                className="capitalize text-xs sm:text-base"
+              >
+                {f.title}
+              </Tab>
+            ))}
+          </TabsHeader>
+          <TabsBody>
+            {STAKING_FIELDS.filter(f => f.id === stakingField).map(f => (
+              <TabPanel key={f.id} value={f.id}>
+                {renderStaking(f.id)}
+              </TabPanel>
+            ))}
+          </TabsBody>
+        </Tabs>
+      )}
+    </div>
   )
 }
