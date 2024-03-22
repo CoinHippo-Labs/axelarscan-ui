@@ -247,9 +247,17 @@ export default ({ children }) => {
         }
       }
 
-      const getData = () => {
+      const getData = async () => {
         if (pathname?.startsWith('/tvl') && assets_data) {
-          toArray(assets_data).filter(a => !a.no_tvl).map(a => a.denom).forEach(a => getAssetData(a))
+          const { data } = { ...await getTVL() }
+          if (data) {
+            toArray(assets_data).filter(a => !a.no_tvl).map(a => a.denom).forEach(a => {
+              const tvlData = data.find(d => d.asset === a)
+              if (tvlData) {
+                dispatch({ type: TVL_DATA, value: { [a]: { ...tvlData } } })
+              }
+            }/*getAssetData(a)*/)
+          }
         }
       }
 
