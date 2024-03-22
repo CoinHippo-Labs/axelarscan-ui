@@ -522,7 +522,7 @@ export function Account({ address }) {
           {isDepositAddress ?
             <>
               <DepositAddress data={data} address={address} />
-              <Balances data={data.balances?.data} />
+              {address.startsWith('axelar1') && <Balances data={data.balances?.data} />}
             </> :
             <>
               <Info data={data} address={address} />
