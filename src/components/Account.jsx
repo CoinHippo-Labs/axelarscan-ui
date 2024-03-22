@@ -520,7 +520,10 @@ export function Account({ address }) {
       {!data ? <Spinner /> :
         <div className="grid sm:grid-cols-3 sm:gap-x-6 gap-y-8 sm:gap-y-12">
           {isDepositAddress ?
-            <DepositAddress data={data} address={address} /> :
+            <>
+              <DepositAddress data={data} address={address} />
+              <Balances data={data.balances?.data} />
+            </> :
             <>
               <Info data={data} address={address} />
               <Balances data={data.balances?.data} />
