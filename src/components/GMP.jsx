@@ -1081,7 +1081,7 @@ function Details({ data }) {
                     stepURL = `/evm-poll/${poll_id}`
                   }
 
-                  if (poll_id) {
+                  if (confirmation_txhash && poll_id) {
                     stepMoreInfos.push((
                       <Copy size={16} key={stepMoreInfos.length} value={poll_id}>
                         <Link
