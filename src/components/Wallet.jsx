@@ -135,11 +135,11 @@ export function CosmosWallet({ connectChainId, children, className }) {
   const { chainId, provider, setChainId, setAddress, setProvider, setSigner } = useCosmosWalletStore()
 
   useEffect(() => {
-    if (chain?.id && walletClient && address) {
-      setChainId(chain.id)
+    if (chainId && signer && address) {
+      setChainId(chainId)
       setAddress(address)
-      setProvider(publicClientToProvider(publicClient))
-      setSigner(walletClientToSigner(walletClient))
+      setProvider(window?.keplr)
+      setSigner(signer)
     }
     else {
       setChainId(null)
