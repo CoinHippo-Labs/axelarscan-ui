@@ -1434,7 +1434,7 @@ export function GMP({ tx }) {
     }
     else if (tx) {
       if (!ended) {
-        const { data } = { ...await searchGMP({ txHash: tx }) }
+        const { data } = { ...await searchGMP(tx.includes('-') ? { messageId: tx } : { txHash: tx }) }
         const d = _.head(data)
 
         if (d) {
