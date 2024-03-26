@@ -491,7 +491,7 @@ export default () => {
                     },
                     refunded?.receipt?.status && {
                       id: 'refund',
-                      title: 'Refunded',
+                      title: 'Gas Refunded',
                       status: 'success',
                       data: refunded,
                       chain_data: source_chain_data,
