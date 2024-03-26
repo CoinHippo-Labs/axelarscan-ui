@@ -3,9 +3,11 @@
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Fragment, useEffect, useState } from 'react'
+import { useTheme } from 'next-themes'
 import { useForm } from 'react-hook-form'
 import { Dialog, Listbox, Transition } from '@headlessui/react'
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Tooltip } from 'recharts'
+import { Sankey } from '@ant-design/plots'
 import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
@@ -519,6 +521,87 @@ function StatsBarChart({
   )
 }
 
+function SankeyChart({
+  i,
+  data,
+  totalValue,
+  field = 'num_txs',
+  title = '',
+  description = '',
+  valueFormat = '0,0',
+  valuePrefix = '',
+}) {
+  const [x, setX] = useState(null)
+  const { resolvedTheme } = useTheme()
+  const { chains } = useGlobalStore()
+
+  const d = toArray(data).find(d => d.key === x)
+  const value = d ? d[field] : data ? totalValue || _.sumBy(data, field) : null
+  const keyString = d ? d.key : data ? null : null
+
+  const chartData = _.orderBy(_.slice(_.orderBy(toArray(data).map(d => ({ source: _.head(split(d.key, { delimiter: '_' })), target: _.last(split(d.key, { delimiter: '_' })), value: d[field] })), ['value'], ['desc']), 0, 25), ['source'], ['asc'])
+  const targetNodes = _.orderBy(Object.entries(_.groupBy(chartData, 'target')).map(([k, v]) => ({ target: k, value: _.sumBy(v, 'value') })), ['value'], ['desc'])
+  const topTarget = getChainData(targetNodes[0]?.target, chains)?.name
+
+  return (
+    <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-2 px-4 sm:px-6 xl:px-8 py-8', i % 2 !== 0 ? 'sm:border-l-0' : '')}>
+      <div className="flex items-start justify-between gap-x-4">
+        <div className="flex flex-col gap-y-0.5">
+          <span className="text-zinc-900 dark:text-zinc-100 text-base font-semibold">
+            {title}
+          </span>
+          {description && (
+            <span className="hidden lg:block text-zinc-400 dark:text-zinc-500 text-sm font-normal">
+              {description}
+            </span>
+          )}
+        </div>
+        {isNumber(value) && (
+          <div className="flex flex-col items-end gap-y-0.5">
+            <Number
+              value={value}
+              format={valueFormat}
+              prefix={valuePrefix}
+              noTooltip={true}
+              className="text-zinc-900 dark:text-zinc-100 !text-base font-semibold"
+            />
+            <span className="text-zinc-400 dark:text-zinc-500 text-sm text-right whitespace-nowrap">
+              {keyString}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="w-full h-full -mb-2.5">
+        {!data ?
+          <div className="w-full h-full flex items-center justify-center">
+            <Spinner />
+          </div> :
+          <Sankey
+            data={chartData.map(d => ({ ...d, source: getChainData(d.source, chains)?.name || d.source, target: `${getChainData(d.target, chains)?.name || d.target} ` }))}
+            layout={{
+              nodeWidth: 0.03,
+              nodeSort: (a, b) => {
+                if (a.key.endsWith(' ')) return b.key.endsWith(' ') ? b.value - a.value : -1
+                else return b.key.endsWith(' ') ? -1 : false && `${a.key} ` === `${topTarget} ` ? Number.MAX_SAFE_INTEGER : b.value - a.value
+              },
+              linkSort: (a, b) => b.value - a.value,
+            }}
+            style={{
+              labelText: d => d.key.trim(),
+              labelFontSize: 14,
+              labelFontWeight: 600,
+              nodeStrokeWidth: 0,
+              nodeFill: d => getChainData(d.key.trim(), chains)?.color,
+              linkFill: d => getChainData(d.source.key, chains)?.color,
+              linkFillOpacity: resolvedTheme === 'dark' ? 0.8 : 0.2,
+            }}
+          />
+        }
+      </div>
+    </div>
+  )
+}
+
 function Charts({ data, granularity }) {
   if (!data) return null
 
@@ -553,6 +636,18 @@ function Charts({ data, granularity }) {
   const hasAirdropActivities = chartData.find(d => d.transfers_airdrop_volume > 0)
   const scale = false && maxVolumePerMean > 5 && !hasAirdropActivities ? 'log' : undefined
   const useStack = maxVolumePerMean <= 5 || maxVolumePerMean > 10 || hasAirdropActivities
+
+  const groupData = (data, by = 'key') => Object.entries(_.groupBy(toArray(data), by)).map(([k, v]) => ({
+    key: _.head(v)?.key || k,
+    num_txs: _.sumBy(v, 'num_txs'),
+    volume: _.sumBy(v, 'volume'),
+    chain: _.orderBy(toArray(_.uniq(toArray(by === 'customKey' ? _.head(v)?.chain : v.map(d => d.chain))).map(d => getChainData(d, chains))), ['i'], ['asc']).map(d => d.id),
+  }))
+
+  const chainPairs = groupData(_.concat(
+    toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s => toArray(s.destinationChains || s.destination_chains).map(d => ({ key: `${s.key}_${d.key}`, num_txs: d.num_txs, volume: d.volume })))),
+    toArray(transfersStats?.data).map(d => ({ key: `${d.source_chain}_${d.destination_chain}`, num_txs: d.num_txs, volume: d.volume })),
+  ))
 
   return (
     <div className="border-b border-b-zinc-200 dark:border-b-zinc-700">
@@ -601,6 +696,23 @@ function Charts({ data, granularity }) {
           description={`Gas fees by ${granularity}`}
           dateFormat={TIME_FORMAT}
           granularity={granularity}
+          valuePrefix="$"
+        />
+        <SankeyChart
+          i={4}
+          data={chainPairs}
+          totalValue={toNumber(_.sumBy(GMPStats?.messages, 'num_txs')) + toNumber(transfersStats?.total)}
+          field="num_txs"
+          title="Transactions"
+          description="Total transactions between chains"
+        />
+        <SankeyChart
+          i={5}
+          data={chainPairs}
+          totalValue={toNumber(GMPTotalVolume) + toNumber(transfersTotalVolume)}
+          field="volume"
+          title="Volume"
+          description="Total volume between chains"
           valuePrefix="$"
         />
       </div>
