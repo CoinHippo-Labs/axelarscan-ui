@@ -579,7 +579,7 @@ function SankeyChart({
           <Sankey
             data={chartData.map(d => ({ ...d, source: getChainData(d.source, chains)?.name || d.source, target: `${getChainData(d.target, chains)?.name || d.target} ` }))}
             layout={{
-              nodeWidth: 0.03,
+              nodeWidth: 0.01,
               nodeSort: (a, b) => {
                 if (a.key.endsWith(' ')) return b.key.endsWith(' ') ? b.value - a.value : -1
                 else return b.key.endsWith(' ') ? -1 : false && `${a.key} ` === `${topTarget} ` ? Number.MAX_SAFE_INTEGER : b.value - a.value
@@ -593,7 +593,7 @@ function SankeyChart({
               nodeStrokeWidth: 0,
               nodeFill: d => getChainData(d.key.trim(), chains)?.color,
               linkFill: d => getChainData(d.source.key, chains)?.color,
-              linkFillOpacity: resolvedTheme === 'dark' ? 0.8 : 0.2,
+              linkFillOpacity: resolvedTheme === 'dark' ? 0.2 : 0.2,
             }}
           />
         }
