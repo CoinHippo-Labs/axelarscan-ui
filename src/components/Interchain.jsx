@@ -7,7 +7,7 @@ import { useTheme } from 'next-themes'
 import { useForm } from 'react-hook-form'
 import { Dialog, Listbox, Transition } from '@headlessui/react'
 import { ResponsiveContainer, BarChart, XAxis, YAxis, Bar, Tooltip } from 'recharts'
-import { Sankey } from '@ant-design/plots'
+import { ResponsiveSankey } from '@nivo/sankey'
 import clsx from 'clsx'
 import _ from 'lodash'
 import moment from 'moment'
@@ -538,10 +538,7 @@ function SankeyChart({
   const d = toArray(data).find(d => d.key === x)
   const value = d ? d[field] : data ? totalValue || _.sumBy(data, field) : null
   const keyString = d ? d.key : data ? null : null
-
-  const chartData = _.orderBy(_.slice(_.orderBy(toArray(data).map(d => ({ source: _.head(split(d.key, { delimiter: '_' })), target: _.last(split(d.key, { delimiter: '_' })), value: d[field] })), ['value'], ['desc']), 0, 25), ['source'], ['asc'])
-  const targetNodes = _.orderBy(Object.entries(_.groupBy(chartData, 'target')).map(([k, v]) => ({ target: k, value: _.sumBy(v, 'value') })), ['value'], ['desc'])
-  const topTarget = getChainData(targetNodes[0]?.target, chains)?.name
+  const chartData = _.slice(_.orderBy(toArray(data).map(d => ({ source: _.head(split(d.key, { delimiter: '_' })), target: _.last(split(d.key, { delimiter: '_' })), value: parseInt(d[field]) })), ['value'], ['desc']), 0, 25).map(d => ({ ...d, source: getChainData(d.source, chains)?.name || d.source, target: `${getChainData(d.target, chains)?.name || d.target} ` }))
 
   return (
     <div className={clsx('border-l border-r border-t border-zinc-200 dark:border-zinc-700 flex flex-col gap-y-2 px-4 sm:px-6 xl:px-8 py-8', i % 2 !== 0 ? 'sm:border-l-0' : '')}>
@@ -576,26 +573,38 @@ function SankeyChart({
           <div className="w-full h-full flex items-center justify-center">
             <Spinner />
           </div> :
-          <Sankey
-            data={chartData.map(d => ({ ...d, source: getChainData(d.source, chains)?.name || d.source, target: `${getChainData(d.target, chains)?.name || d.target} ` }))}
-            layout={{
-              nodeWidth: 0.01,
-              nodeSort: (a, b) => {
-                if (a.key.endsWith(' ')) return b.key.endsWith(' ') ? b.value - a.value : -1
-                else return b.key.endsWith(' ') ? -1 : false && `${a.key} ` === `${topTarget} ` ? Number.MAX_SAFE_INTEGER : b.value - a.value
-              },
-              linkSort: (a, b) => b.value - a.value,
-            }}
-            style={{
-              labelText: d => d.key.trim(),
-              labelFontSize: 14,
-              labelFontWeight: 600,
-              nodeStrokeWidth: 0,
-              nodeFill: d => getChainData(d.key.trim(), chains)?.color,
-              linkFill: d => getChainData(d.source.key, chains)?.color,
-              linkFillOpacity: resolvedTheme === 'dark' ? 0.2 : 0.2,
-            }}
-          />
+          <div className="w-full h-112 font-semibold">
+            <ResponsiveSankey
+              data={{
+                nodes: _.uniq(chartData.flatMap(d => [d.source, d.target])).map(d => ({ id: d, nodeColor: getChainData(d.trim(), chains)?.color })),
+                links: chartData,
+              }}
+              valueFormat={`>-${valuePrefix},`}
+              margin={{ top: 10, bottom: 10 }}
+              theme={{
+                tooltip: {
+                  container: {
+                    background: resolvedTheme === 'dark' ? '#18181b' : '#f4f4f5',
+                    color: resolvedTheme === 'dark' ? '#f4f4f5' : '#18181b',
+                    fontSize: 12,
+                    fontWeight: 400,
+                  },
+                },
+              }}
+              colors={d => d.nodeColor}
+              nodeOpacity={1}
+              nodeHoverOpacity={1}
+              nodeHoverOthersOpacity={0.35}
+              nodeBorderWidth={0}
+              nodeBorderRadius={3}
+              linkOpacity={resolvedTheme === 'dark' ? 0.2 : 0.4}
+              linkHoverOpacity={resolvedTheme === 'dark' ? 0.7 : 0.9}
+              linkHoverOthersOpacity={resolvedTheme === 'dark' ? 0.1 : 0.2}
+              linkBlendMode={resolvedTheme === 'dark' ? 'lighten' : 'darken'}
+              enableLinkGradient={true}
+              labelTextColor={resolvedTheme === 'dark' ? '#f4f4f5' : '#18181b'}
+            />
+          </div>
         }
       </div>
     </div>

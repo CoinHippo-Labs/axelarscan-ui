@@ -30,6 +30,9 @@ module.exports = {
         sans: 'var(--font-inter)',
         display: 'var(--font-lexend)',
       },
+      height: {
+        '112': '28rem',
+      },
       maxWidth: {
         '2xl': '40rem',
       },

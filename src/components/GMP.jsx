@@ -1737,7 +1737,7 @@ export function GMP({ tx }) {
   return (
     <Container className="sm:mt-8">
       {!data ? <Spinner /> :
-        <div className="max-w-6xl flex flex-col gap-y-4">
+        <div className="max-w-7xl flex flex-col gap-y-4">
           <Toaster />
           <Info
             data={data}
