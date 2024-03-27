@@ -38,6 +38,7 @@
     "antd": "^5.13.1",
     "autoprefixer": "^10.4.12",
     "clsx": "^2.1.0",
+    "env-cmd": "^10.1.0",
     "ethers": "^5.7.2",
     "framer-motion": "7.8.1",
     "html-react-parser": "^5.1.1",
