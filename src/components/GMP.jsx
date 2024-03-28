@@ -41,7 +41,8 @@ import IAxelarExecutable from '@/data/contract/interfaces/gmp/IAxelarExecutable.
 const TIME_FORMAT = 'MMM D, YYYY h:mm:ss A z'
 
 export function getStep(data, chains) {
-  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, confirm_failed, confirm_failed_event, approved, executed, error, refunded, is_executed, is_invalid_call, proposal_id } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, confirm_failed, confirm_failed_event, approved, executed, error, refunded, is_executed, is_invalid_call } = { ...data }
+  const { proposal_id } = { ...call }
 
   const sourceChain = call?.chain
   const destinationChain = call?.returnValues?.destinationChain
@@ -108,7 +109,8 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
   const [seeMore, setSeeMore] = useState(false)
   const { chains, assets } = useGlobalStore()
 
-  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, approved, executed, error, refunded, token_sent, token_deployment_initialized, token_deployed, interchain_transfer, interchain_transfer_with_data, token_manager_deployment_started, interchain_token_deployment_started, is_executed, amount, fees, gas, is_insufficient_fee, is_invalid_destination_chain, is_invalid_contract_address, not_enough_gas_to_execute, status, simplified_status, time_spent, proposal_id, callbackData, originData } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, express_executed, confirm, approved, executed, error, refunded, token_sent, token_deployment_initialized, token_deployed, interchain_transfer, interchain_transfer_with_data, token_manager_deployment_started, interchain_token_deployment_started, is_executed, amount, fees, gas, is_insufficient_fee, is_invalid_destination_chain, is_invalid_contract_address, not_enough_gas_to_execute, status, simplified_status, time_spent, callbackData, originData } = { ...data }
+  const { proposal_id } = { ...call }
   const txhash = call?.transactionHash || tx
 
   const sourceChain = approved?.returnValues?.sourceChain || getChainData(call?.chain, chains)?.chain_name || call?.chain
@@ -147,7 +149,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
               <Copy value={txhash}>
                 {url ?
                   <Link
-                    href={`${url}${transaction_path?.replace('{tx}', txhash)}`}
+                    href={proposal_id ? `/proposal/${proposal_id}` : `${url}${transaction_path?.replace('{tx}', txhash)}`}
                     target="_blank"
                     className="text-blue-600 dark:text-blue-500 font-semibold"
                   >
@@ -1096,7 +1098,10 @@ function Details({ data }) {
                   }
                   break
                 default:
-                  if (proposal_id) stepTX = returnValues?.messageId || transactionHash
+                  if (proposal_id) {
+                    stepTX = returnValues?.messageId || transactionHash
+                    stepURL = `/proposal/${proposal_id}`
+                  }
                   else {
                     if (transactionHash) {
                       stepTX = transactionHash
@@ -1319,15 +1324,18 @@ function Details({ data }) {
                     {stepTX && (
                       <div className="flex items-center gap-x-1">
                         <Copy value={stepTX}>
-                          <Link
-                            href={stepURL}
-                            target="_blank"
-                            className="text-blue-600 dark:text-blue-500 font-medium"
-                          >
-                            {ellipse(stepTX)}
-                          </Link>
+                          {stepURL ?
+                            <Link
+                              href={stepURL}
+                              target="_blank"
+                              className="text-blue-600 dark:text-blue-500 font-medium"
+                            >
+                              {ellipse(stepTX)}
+                            </Link> :
+                            ellipse(stepTX)
+                          }
                         </Copy>
-                        <ExplorerLink value={stepTX} chain={d.chainData?.id} />
+                        {!proposal_id && <ExplorerLink value={stepTX} chain={d.chainData?.id} />}
                       </div>
                     )}
                     {stepMoreInfos.length > 0 && (
@@ -1687,7 +1695,8 @@ export function GMP({ tx }) {
 
   const needSwitchChain = (id, type) => id !== (type === 'cosmos' ? cosmosWalletStore?.chainId : chainId)
 
-  const { call, gas_paid, gas_paid_to_callback, confirm, confirm_failed, confirm_failed_event, approved, executed, error, gas, is_executed, is_insufficient_fee, is_call_from_relayer, is_invalid_destination_chain, is_invalid_call, not_enough_gas_to_execute, proposal_id } = { ...data }
+  const { call, gas_paid, gas_paid_to_callback, confirm, confirm_failed, confirm_failed_event, approved, executed, error, gas, is_executed, is_insufficient_fee, is_call_from_relayer, is_invalid_destination_chain, is_invalid_call, not_enough_gas_to_execute } = { ...data }
+  const { proposal_id } = { ...call }
   const sourceChainData = getChainData(call?.chain, chains)
   const destinationChainData = getChainData(call?.returnValues?.destinationChain, chains)
 
