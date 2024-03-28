@@ -317,7 +317,7 @@ export function Overview() {
                   <Tag className="w-fit capitalize bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center gap-x-1">
                     <PiRadioButtonFill size={18} className="text-green-600 dark:text-green-500 -ml-0.5" />
                     <span className="text-base">
-                      Connected chains: {toArray(chains).filter(d => !d.deprecated && (!d.maintainer_id || contracts?.gateway_contracts?.[d.id]?.address)).length}
+                      Connected chains: {toArray(chains).filter(d => !d.disabled && !d.deprecated && (!d.maintainer_id || contracts?.gateway_contracts?.[d.id]?.address)).length}
                     </span>
                   </Tag>
                 )}

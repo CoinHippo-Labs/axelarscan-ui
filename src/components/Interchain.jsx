@@ -362,7 +362,7 @@ export function Summary({ data, params }) {
           </dd>
           <dd className="w-full grid grid-cols-2 gap-x-2 mt-1">
             <Number
-              value={chains.length}
+              value={chains.filter(d => !d.disabled && !d.deprecated && (!d.maintainer_id || !d.no_inflation)).length}
               format="0,0"
               prefix="Number of chains: "
               className="text-zinc-400 dark:text-zinc-500 text-xs"
