@@ -341,16 +341,16 @@ export function GMPs({ address }) {
                     <tr key={d.call.id} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                       <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
                         <div className="flex items-center gap-x-1">
-                          <Copy value={d.call.transactionHash}>
+                          <Copy value={d.call.proposal_id && d.call.returnValues?.messageId ? d.call.returnValues.messageId : d.call.transactionHash}>
                             <Link
                               href={`/gmp/${d.call.returnValues?.messageId ? d.call.returnValues.messageId : `${d.call.chain_type === 'cosmos' && isNumber(d.call.messageIdIndex) ? d.call.axelarTransactionHash : d.call.transactionHash}${d.call.chain_type === 'evm' && d.call.receipt ? isNumber(d.call._logIndex) ? `-${d.call._logIndex}` : isNumber(d.call.logIndex) ? `:${d.call.logIndex}` : '' : d.call.chain_type === 'cosmos' && isNumber(d.call.messageIdIndex) ? `-${d.call.messageIdIndex}` : ''}`}`}
                               target="_blank"
                               className="text-blue-600 dark:text-blue-500 font-semibold"
                             >
-                              {ellipse(d.call.transactionHash)}
+                              {ellipse(d.call.proposal_id && d.call.returnValues?.messageId ? d.call.returnValues.messageId : d.call.transactionHash)}
                             </Link>
                           </Copy>
-                          <ExplorerLink value={d.call.transactionHash} chain={d.call.chain} />
+                          {!d.call.proposal_id && <ExplorerLink value={d.call.transactionHash} chain={d.call.chain} />}
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
