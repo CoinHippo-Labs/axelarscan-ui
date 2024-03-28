@@ -81,7 +81,7 @@ export default ({ id = 'network', data }) => {
           }),
           ['num_txs'], ['desc'],
         )
-        chains_data.filter(c => (!c.maintainer_id || !c.no_inflation) && c.id !== AXELAR).forEach(c => {
+        chains_data.filter(c => !c.disabled && (!c.maintainer_id || !c.no_inflation) && c.id !== AXELAR).forEach(c => {
           [[c.id, AXELAR], [AXELAR, c.id]].map(ids => ids.join('_')).forEach((_id, i) => {
             if (_data.findIndex(d => equalsIgnoreCase(d.id, _id)) < 0) {
               _data.push({
