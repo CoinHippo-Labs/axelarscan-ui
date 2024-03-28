@@ -270,7 +270,7 @@ export function NetworkGraph({ data }) {
         return [[d.sourceChain, AXELAR], [AXELAR, d.destinationChain]].map((ids, i) => ({ ...d, id: ids.join('_'), [i === 0 ? 'destinationChain' : 'sourceChain']: AXELAR }))
       }), 'id')).map(([k, v]) => ({ id: k, ..._.head(v), num_txs: _.sumBy(v, 'num_txs'), volume: _.sumBy(v, 'volume') })), ['num_txs'], ['desc'])
 
-      chains.filter(d => !d.disabled && (!d.maintainer_id || !d.no_inflation) && d.id !== AXELAR).forEach(d => {
+      chains.filter(d => (!d.maintainer_id || !d.no_inflation) && d.id !== AXELAR).forEach(d => {
         [[d.id, AXELAR], [AXELAR, d.id]].map(ids => ids.join('_')).forEach((id, i) => {
           if (_data.findIndex(d => equalsIgnoreCase(d.id, id)) < 0) {
             _data.push({ id, sourceChain: i === 0 ? d.id : AXELAR, destinationChain: i === 0 ? AXELAR : d.id, num_txs: 0 })
