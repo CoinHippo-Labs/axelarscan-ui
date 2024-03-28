@@ -175,7 +175,7 @@ export default ({ data }) => {
         break
       case 'chains':
         const { gateway_contracts } = { ...contracts_data }
-        const chains = toArray(chains_data).filter(c => !c.deprecated && (!c.maintainer_id || gateway_contracts?.[c.id]?.address))
+        const chains = toArray(chains_data).filter(c => !c.disabled && !c.deprecated && (!c.maintainer_id || gateway_contracts?.[c.id]?.address))
         title = 'Connected Chains'
         url = '/interchain'
         loading = !chains_data
