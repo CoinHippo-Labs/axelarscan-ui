@@ -741,6 +741,24 @@ const data = [
     image: '/logos/accounts/eesee.png',
     environment: 'mainnet',
   },
+  {
+    address: '0xEac19c899098951fc6d0e6a7832b090474E2C292',
+    name: 'eesee.io: AssetHub',
+    image: '/logos/accounts/eesee.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0x50C43F95ca9F6b363ea92a0Af7404e30822a728f',
+    name: 'eesee.io: AssetSpoke',
+    image: '/logos/accounts/eesee.png',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xd122A08920f8096D7294f3a449A69bFc83396e0B',
+    name: 'eesee.io: AssetSpoke',
+    image: '/logos/accounts/eesee.png',
+    environment: 'mainnet',
+  },
 ]
 
 export default data
