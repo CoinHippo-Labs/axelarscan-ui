@@ -277,13 +277,13 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                           })}
                         </ol>
                       </nav>
-                      {is_insufficient_fee && !approved && (
+                      {d.is_insufficient_fee && !d.approved && (
                         <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
                           <PiWarningCircle size={16} />
                           <span className="text-xs">Insufficient Fee</span>
                         </div>
                       )}
-                      {not_enough_gas_to_execute && !executed && !is_executed && (
+                      {d.not_enough_gas_to_execute && !d.executed && !d.is_executed && (
                         <div className="flex items-center text-red-600 dark:text-red-500 gap-x-1">
                           <PiWarningCircle size={16} />
                           <span className="text-xs">Insufficient Gas</span>
