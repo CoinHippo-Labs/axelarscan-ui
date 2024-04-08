@@ -500,7 +500,7 @@ export function EVMPolls() {
                                 target="_blank"
                                 className="h-5 flex items-center gap-x-1"
                               >
-                                <IoCheckmarkCircle size={18} className="text-orange-500 dark:text-orange-600" />
+                                <IoCheckmarkCircle size={18} className="text-green-600 dark:text-green-500" />
                                 <span className="text-zinc-400 dark:text-zinc-500">
                                   Initiated
                                 </span>
