@@ -22,13 +22,14 @@ import { equalsIgnoreCase, ellipse } from '@/lib/string'
 
 function Chain({ data }) {
   const { contracts } = useGlobalStore()
-  const { gateway_contracts, gas_service_contracts } = { ...contracts }
+  const { gateway_contracts, gas_service_contracts, interchain_token_service_contract } = { ...contracts }
 
   const { id, chain_id, chain_name, deprecated, endpoints, name, image, explorer, prefix_address, chain_type } = { ...data }
   const { rpc, lcd } = { ...endpoints }
   const { url, address_path } = { ...explorer }
   const gatewayAddress = gateway_contracts?.[id]?.address
   const gasServiceAddress = gas_service_contracts?.[id]?.address
+  const itsAddress = _.head(interchain_token_service_contract?.addresses)
 
   return (
     <li>
@@ -82,6 +83,13 @@ function Chain({ data }) {
               title="Gas Service Address"
               value={gasServiceAddress}
               url={url && `${url}${address_path?.replace('{address}', gasServiceAddress)}`}
+            />
+          )}
+          {itsAddress && (
+            <ValueBox
+              title="ITS Address"
+              value={itsAddress}
+              url={url && `${url}${address_path?.replace('{address}', itsAddress)}`}
             />
           )}
           {toArray(rpc).length > 0 && (
