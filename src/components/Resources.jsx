@@ -149,12 +149,18 @@ function Asset({ data, focusID, onFocus }) {
             />
           </div>
           <div className="flex flex-col items-end gap-y-1">
-            {symbol && <Tag>{symbol}</Tag>}
+            {symbol && (
+              <Tooltip content="Symbol" className="whitespace-nowrap">
+                <Tag>{symbol}</Tag>
+              </Tooltip>
+            )}
             <div className="flex flex-wrap items-center">
               {toArray(_.concat(denom, _.head(denoms))).map(d => (
-                <Tag key={d} className="bg-orange-400 dark:bg-orange-500 font-normal whitespace-nowrap ml-1 mt-1">
-                  {ellipse(d)}
-                </Tag>
+                <Tooltip key={d} content="Denom" className="whitespace-nowrap">
+                  <Tag className="bg-orange-400 dark:bg-orange-500 font-normal whitespace-nowrap ml-1 mt-1">
+                    {ellipse(d)}
+                  </Tag>
+                </Tooltip>
               ))}
             </div>
           </div>
