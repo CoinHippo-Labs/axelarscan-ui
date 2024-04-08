@@ -352,6 +352,7 @@ export function EVMBatches() {
                             const image = tokenData?.image || assetData?.image
 
                             const sourceChainData = getChainData(sourceChain, chains)
+                            const destinationChainData = getChainData(d.chain, chains)
                             const typeElement = (
                               <Tooltip content={c.executed ? 'Executed' : 'Unexecuted'}>
                                 <Tag className={clsx('w-fit capitalize mr-2', c.executed ? 'bg-green-600 dark:bg-green-500' : 'bg-orange-500 dark:bg-orange-600')}>
@@ -391,14 +392,6 @@ export function EVMBatches() {
                                 )}
                                 {sourceChainData && (
                                   <div className="min-w-fit h-6 flex items-center gap-x-1.5 mr-2">
-                                    <Tooltip content={sourceChainData.name} className="whitespace-nowrap">
-                                      <Image
-                                        src={sourceChainData.image}
-                                        alt=""
-                                        width={20}
-                                        height={20}
-                                      />
-                                    </Tooltip>
                                     {sourceTxHash && (
                                       <Link
                                         href={`/gmp/${sourceTxHash}${sourceChainData.chain_type === 'cosmos' && c.id ? `?commandId=${c.id}` : ''}`}
@@ -408,9 +401,27 @@ export function EVMBatches() {
                                         GMP
                                       </Link>
                                     )}
+                                    <Tooltip content={sourceChainData.name} className="whitespace-nowrap">
+                                      <Image
+                                        src={sourceChainData.image}
+                                        alt=""
+                                        width={20}
+                                        height={20}
+                                      />
+                                    </Tooltip>
                                     {contractAddress && (
                                       <>
                                         <MdOutlineCode size={20} className="text-zinc-700 dark:text-zinc-300" />
+                                        {destinationChainData && (
+                                          <Tooltip content={destinationChainData.name} className="whitespace-nowrap">
+                                            <Image
+                                              src={destinationChainData.image}
+                                              alt=""
+                                              width={20}
+                                              height={20}
+                                            />
+                                          </Tooltip>
+                                        )}
                                         <Profile
                                           address={contractAddress}
                                           chain={d.chain}
