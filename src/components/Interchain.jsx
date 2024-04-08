@@ -815,7 +815,7 @@ function Top({
                                 </span>
                               )}
                               {keys.length > 1 && (
-                                <span className="hidden 2xl:block text-zinc-700 dark:text-zinc-300 text-xs font-medium">
+                                <span className="hidden 2xl:hidden text-zinc-700 dark:text-zinc-300 text-xs font-medium">
                                   {name}
                                 </span>
                               )}
