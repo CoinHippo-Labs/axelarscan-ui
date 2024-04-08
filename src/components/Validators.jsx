@@ -8,6 +8,7 @@ import _ from 'lodash'
 
 import { Container } from '@/components/Container'
 import { Image } from '@/components/Image'
+import { Copy } from '@/components/Copy'
 import { Tooltip } from '@/components/Tooltip'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Spinner } from '@/components/Spinner'
@@ -18,7 +19,7 @@ import { useGlobalStore } from '@/components/Global'
 import { getValidatorsVotes, getChainMaintainers } from '@/lib/api/validator'
 import { getChainData } from '@/lib/config'
 import { toArray } from '@/lib/parser'
-import { equalsIgnoreCase } from '@/lib/string'
+import { equalsIgnoreCase, ellipse } from '@/lib/string'
 import { isNumber, toNumber, formatUnits, toFixed, numberFormat } from '@/lib/number'
 
 export const useValidatorStore = create()(set => ({
@@ -179,6 +180,11 @@ export function Validators({ status }) {
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-0.5">
                           <Profile i={i} address={d.operator_address} prefix="axelarvaloper" />
+                          <Copy value={d.operator_address}>
+                            <span className="text-zinc-400 dark:text-zinc-500 font-medium">
+                              {ellipse(d.operator_address, 6, 'axelarvaloper')}
+                            </span>
+                          </Copy>
                           {isNumber(rate) && (
                             <Number
                               value={rate * 100}
@@ -270,7 +276,7 @@ export function Validators({ status }) {
                                   className="text-zinc-400 dark:text-zinc-500"
                                 />
                               </div>
-                              <ProgressBar value={cumulativeQuadraticVotingPower * 100 / totalQuadraticVotingPower} className="bg-red-600 dark:bg-red-500" />
+                              <ProgressBar value={cumulativeQuadraticVotingPower * 100 / totalQuadraticVotingPower} className="bg-orange-600 dark:bg-orange-500" />
                             </div>
                           )}
                         </td>
