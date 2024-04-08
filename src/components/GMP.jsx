@@ -364,6 +364,14 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
               </dd>
             </div>
           )}
+          {interchain_transfer?.contract_address && (
+            <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
+              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Token Address</dt>
+              <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
+                <Profile address={interchain_transfer.contract_address} chain={data.originData?.call?.chain || sourceChain} />
+              </dd>
+            </div>
+          )}
           <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
             <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Sender</dt>
             <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">

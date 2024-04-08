@@ -372,6 +372,17 @@ export function GMPs({ address }) {
                               titleClassName="text-xs"
                             />
                           )}
+                          {!!params?.itsTokenAddress && d.interchain_transfer?.contract_address && (
+                            <Tooltip content="Token Address" className="whitespace-nowrap" parentClassName="!justify-start">
+                              <Profile
+                                address={d.interchain_transfer.contract_address}
+                                chain={d.call.chain}
+                                width={16}
+                                height={16}
+                                className="w-fit text-xs"
+                              />
+                            </Tooltip>
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
