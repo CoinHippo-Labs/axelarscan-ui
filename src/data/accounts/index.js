@@ -707,30 +707,6 @@ const data = [
     environment: 'mainnet',
   },
   {
-    address: '0xbf9813FC8f99759A77D877F812ff065D2070F1cC',
-    name: 'Archly',
-    image: '/logos/accounts/archly.png',
-    environment: 'mainnet',
-  },
-  {
-    address: '0x523073f029C889242beBFbB7eE3BDaB52942a39A',
-    name: 'Archly',
-    image: '/logos/accounts/archly.png',
-    environment: 'mainnet',
-  },
-  {
-    address: '0x877fe019d5320bc5A1ab6d72f05D13ba8A651350',
-    name: 'Archly',
-    image: '/logos/accounts/archly.png',
-    environment: 'mainnet',
-  },
-  {
-    address: '0x0808CC60D8E6c130c2133e4b3B499ba0D0B1aB88',
-    name: 'Archly',
-    image: '/logos/accounts/archly.png',
-    environment: 'mainnet',
-  },
-  {
     address: 'axelar16ml47kyg4we30xeqze3jnyr3yuy06czfyfut2g',
     name: 'Skyskipper',
     environment: 'testnet',
