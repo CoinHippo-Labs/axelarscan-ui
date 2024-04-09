@@ -372,7 +372,7 @@ export function GMPs({ address }) {
                               titleClassName="text-xs"
                             />
                           )}
-                          {!!params?.itsTokenAddress && d.interchain_transfer?.contract_address && (
+                          {d.interchain_transfer?.contract_address && (
                             <Tooltip content="Token Address" className="whitespace-nowrap" parentClassName="!justify-start">
                               <Profile
                                 address={d.interchain_transfer.contract_address}
