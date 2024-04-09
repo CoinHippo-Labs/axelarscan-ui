@@ -234,6 +234,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                                   {d.status === 'failed' ? <MdClose className="w-5 h-5 text-white" /> : <MdCheck className="w-5 h-5 text-white" />}
                                 </div>
                                 <span className={clsx('absolute text-2xs font-medium whitespace-nowrap mt-1', d.status === 'failed' ? 'text-red-600 dark:text-red-500' : 'text-blue-600 dark:text-blue-500', d.title?.length <= 5 ? 'ml-1' : '')}>{d.title}</span>
+                                {d.id === 'express' && <div className="absolute mt-3"><span className="text-2xs font-medium text-green-600 dark:text-green-500">Received</span></div>}
                               </>
                             )
 
