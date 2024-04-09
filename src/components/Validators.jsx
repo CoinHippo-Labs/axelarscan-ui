@@ -276,7 +276,7 @@ export function Validators({ status }) {
                                   className="text-zinc-400 dark:text-zinc-500"
                                 />
                               </div>
-                              <ProgressBar value={cumulativeQuadraticVotingPower * 100 / totalQuadraticVotingPower} className="bg-orange-600 dark:bg-orange-500" />
+                              <ProgressBar value={cumulativeQuadraticVotingPower * 100 / totalQuadraticVotingPower} className="bg-orange-400 dark:bg-orange-500" />
                             </div>
                           )}
                         </td>
