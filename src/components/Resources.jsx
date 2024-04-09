@@ -29,7 +29,7 @@ function Chain({ data }) {
   const { url, address_path } = { ...explorer }
   const gatewayAddress = gateway_contracts?.[id]?.address
   const gasServiceAddress = gas_service_contracts?.[id]?.address
-  const itsAddress = _.head(interchain_token_service_contract?.addresses)
+  const itsAddress = chain_type === 'evm' && _.head(interchain_token_service_contract?.addresses)
 
   return (
     <li>
