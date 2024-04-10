@@ -217,6 +217,10 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                                 case 'confirm':
                                   if (confirmation_txhash) stepURL = `/tx/${confirmation_txhash}`
                                   else if (poll_id) stepURL = `/evm-poll/${poll_id}`
+                                  else if (d.title === 'Waiting for Finality') {
+                                    const finalityTime = estimatedTimeSpent?.confirm ? estimatedTimeSpent.confirm + 15 : 600
+                                    if (timeDiff(call?.block_timestamp * 1000) >= finalityTime) d.title = 'Confirm'
+                                  }
                                   break
                                 case 'executed':
                                   if (transactionHash || axelarTransactionHash) stepURL = `${url}${transaction_path.replace('{tx}', transactionHash || axelarTransactionHash)}`
