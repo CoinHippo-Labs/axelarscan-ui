@@ -322,8 +322,8 @@ export function NetworkGraph({ data }) {
         <ForceGraph2D
           ref={graphRef}
           graphData={{ nodes, links: edges }}
-          width={608}
-          height={608}
+          width={632}
+          height={624}
           backgroundColor={resolvedTheme === 'dark' ? '#18181b' : '#ffffff'}
           showNavInfo={false}
           nodeCanvasObject={nodeCanvasObject}
