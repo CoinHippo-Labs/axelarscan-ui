@@ -287,12 +287,14 @@ export function NetworkGraph({ data }) {
 
           if (id && nodes.findIndex(n => equalsIgnoreCase(n.id, id)) < 0) {
             const { name, image, color } = { ...getChainData(id, chains) }
-            nodes.push({ id, image, label: name, color, num_txs: _.sumBy(_data.filter(d => [d.sourceChain, d.destinationChain].includes(id)), 'num_txs') })
+            if (name) nodes.push({ id, image, label: name, color, num_txs: _.sumBy(_data.filter(d => [d.sourceChain, d.destinationChain].includes(id)), 'num_txs') })
           }
         })
 
-        const { color } = { ...getChainData(d.sourceChain, chains) }
-        edges.push({ data: d, id: d.id, source: d.sourceChain, target: d.destinationChain, color })
+        if (['source', 'destination'].findIndex(s => nodes.findIndex(n => equalsIgnoreCase(n.id, d[`${s}Chain`])) < 0) < 0) {
+          const { color } = { ...getChainData(d.sourceChain, chains) }
+          edges.push({ data: d, id: d.id, source: d.sourceChain, target: d.destinationChain, color })
+        }
       })
 
       const tiers = TIERS.map(d => ({ ...d, threshold: THRESHOLD(nodes.filter(d => d.id !== AXELAR), d.n_sd) }))
@@ -317,13 +319,13 @@ export function NetworkGraph({ data }) {
   const size = 10
 
   return !data || !(ForceGraph2D && graphData && imagesLoaded) ? <Spinner /> :
-    <div className="grid lg:grid-cols-2 lg:gap-x-4 xl:gap-x-8">
-      <div className="-ml-4 -mt-4">
+    <div className="grid lg:grid-cols-2 lg:gap-x-4 xl:gap-x-16">
+      <div className="-ml-4 -mt-4 xl:-mt-2">
         <ForceGraph2D
           ref={graphRef}
           graphData={{ nodes, links: edges }}
-          width={632}
-          height={624}
+          width={648}
+          height={632}
           backgroundColor={resolvedTheme === 'dark' ? '#18181b' : '#ffffff'}
           showNavInfo={false}
           nodeCanvasObject={nodeCanvasObject}
