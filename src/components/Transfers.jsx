@@ -259,7 +259,8 @@ export function Transfers({ address }) {
         const _params = _.cloneDeep(params)
         delete _params.sortBy
 
-        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...await searchTransfers({ ..._params, size, sort }) } })
+        const response = await searchTransfers({ ..._params, size, sort })
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...(response?.total || Object.keys(_params).length > 0 ? response : searchResults?.[generateKeyFromParams(_params)]) } })
         setRefresh(false)
       }
     }
