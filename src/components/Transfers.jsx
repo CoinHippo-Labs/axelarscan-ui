@@ -261,7 +261,7 @@ export function Transfers({ address }) {
 
         const response = await searchTransfers({ ..._params, size, sort })
         setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...(response?.total || Object.keys(_params).length > 0 ? response : searchResults?.[generateKeyFromParams(_params)]) } })
-        setRefresh(false)
+        setRefresh(!response?.total && Object.keys(_params).length === 0 && !searchResults?.[generateKeyFromParams(_params)] ? true : false)
       }
     }
     getData()
