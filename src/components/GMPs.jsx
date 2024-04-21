@@ -28,9 +28,11 @@ import { TimeAgo, TimeSpent } from '@/components/Time'
 import { getParams, getQueryString, Pagination } from '@/components/Pagination'
 import { useGlobalStore } from '@/components/Global'
 import { searchGMP } from '@/lib/api/gmp'
+import { ENVIRONMENT } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
-import { equalsIgnoreCase, toBoolean, ellipse, toTitle } from '@/lib/string'
+import { isString, equalsIgnoreCase, toBoolean, ellipse, toTitle } from '@/lib/string'
 import { isNumber } from '@/lib/number'
+import accounts from '@/data/accounts'
 
 const size = 25
 
@@ -249,6 +251,22 @@ export const getEvent = data => {
 }
 export const normalizeEvent = event => event?.replace('ContractCall', 'callContract')
 
+export function setRecipientAddress(data) {
+  const { call } = { ...data }
+  const { destinationContractAddress, payload } = { ...call?.returnValues }
+  if (!(destinationContractAddress && isString(payload) && payload.length > 130)) return data
+
+  const { name } = { ...toArray(accounts).find(d => equalsIgnoreCase(d.address, destinationContractAddress) && (!d.environment || equalsIgnoreCase(d.environment, ENVIRONMENT))) }
+  switch (name) {
+    case 'Squid':
+      if (destinationContractAddress.startsWith('0x')) data.call.recipientAddress = `0x${payload.substring(90, 130)}`
+      break
+    default:
+      break
+  }
+  return data
+}
+
 const generateKeyFromParams = params => JSON.stringify(params)
 
 export function GMPs({ address }) {
@@ -273,7 +291,9 @@ export function GMPs({ address }) {
         const _params = _.cloneDeep(params)
         delete _params.sortBy
 
-        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...await searchGMP({ ..._params, size, sort }) } })
+        const response = await searchGMP({ ..._params, size, sort })
+        if (response?.data) response.data = response.data.map(d => setRecipientAddress(d))
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...response } })
         setRefresh(false)
       }
     }
@@ -421,7 +441,10 @@ export function GMPs({ address }) {
                                 </div>
                               </Tooltip>
                             </div> :
-                            <Profile address={d.call.returnValues?.destinationContractAddress} chain={d.call.returnValues?.destinationChain} />
+                            <>
+                              <Profile address={d.call.returnValues?.destinationContractAddress} chain={d.call.returnValues?.destinationChain} />
+                              {d.call.recipientAddress && <Profile address={d.call.recipientAddress} chain={d.call.returnValues?.destinationChain} />}
+                            </>
                           }
                         </div>
                       </td>
