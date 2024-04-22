@@ -256,12 +256,13 @@ export function Transfers({ address }) {
     const getData = async () => {
       if (params && toBoolean(refresh)) {
         const sort = params.sortBy === 'value' ? { 'send.value': 'desc' } : undefined
+        if (params.from === 0) delete params.from
         const _params = _.cloneDeep(params)
         delete _params.sortBy
 
         const response = await searchTransfers({ ..._params, size, sort })
-        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...(response?.total || (Object.keys(_params).length > 0 && !(Object.keys(_params).length === 1 && _params.from !== undefined)) ? response : searchResults?.[generateKeyFromParams(_params)]) } })
-        setRefresh(!response?.total && (Object.keys(_params).length === 0 || (Object.keys(_params).length === 1 && _params.from === 0)) && !searchResults?.[generateKeyFromParams(_params)] ? true : false)
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...(response?.total || (Object.keys(_params).length > 0 && !(Object.keys(_params).length === 1 && _params.from !== undefined)) ? response : searchResults?.[generateKeyFromParams(params)]) } })
+        setRefresh(!isNumber(response?.total) && !searchResults?.[generateKeyFromParams(params)] ? true : false)
       }
     }
     getData()
