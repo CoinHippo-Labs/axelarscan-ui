@@ -26,7 +26,7 @@ import { TimeAgo, TimeSpent, TimeUntil } from '@/components/Time'
 import { ExplorerLink } from '@/components/ExplorerLink'
 import { useEVMWalletStore, EVMWallet, useCosmosWalletStore, CosmosWallet } from '@/components/Wallet'
 import { getParams } from '@/components/Pagination'
-import { getEvent, normalizeEvent, setRecipientAddress } from '@/components/GMPs'
+import { getEvent, normalizeEvent, customData } from '@/components/GMPs'
 import { useGlobalStore } from '@/components/Global'
 import { searchGMP, estimateTimeSpent } from '@/lib/api/gmp'
 import { getProvider } from '@/lib/chain/evm'
@@ -1456,7 +1456,7 @@ export function GMP({ tx }) {
     const { commandId } = { ...getParams(searchParams) }
     if (commandId) {
       const { data } = { ...await searchGMP({ commandId }) }
-      const d = setRecipientAddress(_.head(data))
+      const d = customData(_.head(data))
 
       if (d?.call?.transactionHash) router.push(`/gmp/${d.call.transactionHash}`)
       else setData({ ...d })
@@ -1464,7 +1464,7 @@ export function GMP({ tx }) {
     else if (tx) {
       if (!ended) {
         const { data } = { ...await searchGMP(tx.includes('-') ? { messageId: tx } : { txHash: tx }) }
-        const d = setRecipientAddress(_.head(data))
+        const d = customData(_.head(data))
 
         if (d) {
           if (['received', 'failed'].includes(d.simplified_status) && (d.executed || d.error) && (d.refunded || d.not_to_refund)) setEnded(true)
@@ -1473,19 +1473,19 @@ export function GMP({ tx }) {
           if (d.callback?.transactionHash) {
             const { data } = { ...await searchGMP({ txHash: d.callback.transactionHash, txIndex: d.callback.transactionIndex, txLogIndex: d.callback.logIndex }) }
             d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.callback.transactionHash))
-            d.callbackData = setRecipientAddress(d.callbackData)
+            d.callbackData = customData(d.callbackData)
           }
           else if (d.executed?.transactionHash) {
             const { data } = { ...await searchGMP({ txHash: d.executed.transactionHash }) }
             d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.executed.transactionHash))
-            d.callbackData = setRecipientAddress(d.callbackData)
+            d.callbackData = customData(d.callbackData)
           }
 
           // origin
           if (d.call && (d.gas_paid_to_callback || d.is_call_from_relayer)) {
             const { data } = { ...await searchGMP({ txHash: d.call.transactionHash }) }
             d.originData = toArray(data).find(_d => toArray([_d.express_executed?.transactionHash, _d.executed?.transactionHash]).findIndex(tx => equalsIgnoreCase(tx, d.call.transactionHash)) > -1)
-            d.originData = setRecipientAddress(d.originData)
+            d.originData = customData(d.originData)
           }
 
           if (d.call) {

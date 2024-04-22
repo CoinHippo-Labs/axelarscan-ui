@@ -251,19 +251,28 @@ export const getEvent = data => {
 }
 export const normalizeEvent = event => event?.replace('ContractCall', 'callContract')
 
-export function setRecipientAddress(data) {
+const setRecipientAddress = (data, projectName) => {
   const { call } = { ...data }
   const { destinationContractAddress, payload } = { ...call?.returnValues }
   if (!(destinationContractAddress && isString(payload) && payload.length > 130)) return data
 
-  const { name } = { ...toArray(accounts).find(d => equalsIgnoreCase(d.address, destinationContractAddress) && (!d.environment || equalsIgnoreCase(d.environment, ENVIRONMENT))) }
-  switch (name) {
+  switch (projectName) {
     case 'Squid':
       if (destinationContractAddress.startsWith('0x')) data.call.recipientAddress = `0x${payload.substring(90, 130)}`
       break
     default:
       break
   }
+  return data
+}
+
+export const customData = data => {
+  const { call } = { ...data }
+  const { destinationContractAddress } = { ...call?.returnValues }
+  if (!destinationContractAddress) return data
+
+  const { name } = { ...toArray(accounts).find(d => equalsIgnoreCase(d.address, destinationContractAddress) && (!d.environment || equalsIgnoreCase(d.environment, ENVIRONMENT))) }
+  data = setRecipientAddress(data, name)
   return data
 }
 
@@ -292,7 +301,7 @@ export function GMPs({ address }) {
         delete _params.sortBy
 
         const response = await searchGMP({ ..._params, size, sort })
-        if (response?.data) response.data = response.data.map(d => setRecipientAddress(d))
+        if (response?.data) response.data = response.data.map(d => customData(d))
         setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...response } })
         setRefresh(false)
       }
