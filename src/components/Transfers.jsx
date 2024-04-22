@@ -260,8 +260,8 @@ export function Transfers({ address }) {
         delete _params.sortBy
 
         const response = await searchTransfers({ ..._params, size, sort })
-        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...(response?.total || Object.keys(_params).length > 0 ? response : searchResults?.[generateKeyFromParams(_params)]) } })
-        setRefresh(!response?.total && Object.keys(_params).length === 0 && !searchResults?.[generateKeyFromParams(_params)] ? true : false)
+        setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...(response?.total || (Object.keys(_params).length > 0 && !(Object.keys(_params).length === 1 && _params.from !== undefined)) ? response : searchResults?.[generateKeyFromParams(_params)]) } })
+        setRefresh(!response?.total && (Object.keys(_params).length === 0 || (Object.keys(_params).length === 1 && _params.from === 0)) && !searchResults?.[generateKeyFromParams(_params)] ? true : false)
       }
     }
     getData()
