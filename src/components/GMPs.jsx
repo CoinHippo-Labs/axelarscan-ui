@@ -32,7 +32,7 @@ import { ENVIRONMENT } from '@/lib/config'
 import { split, toArray } from '@/lib/parser'
 import { isString, equalsIgnoreCase, toBoolean, ellipse, toTitle } from '@/lib/string'
 import { isNumber } from '@/lib/number'
-import accounts from '@/data/accounts'
+import customGMPs from '@/data/custom/gmp'
 
 const size = 25
 
@@ -251,28 +251,18 @@ export const getEvent = data => {
 }
 export const normalizeEvent = event => event?.replace('ContractCall', 'callContract')
 
-const setRecipientAddress = (data, projectName) => {
+export const customData = async data => {
   const { call } = { ...data }
   const { destinationContractAddress, payload } = { ...call?.returnValues }
-  if (!(destinationContractAddress && isString(payload) && payload.length > 130)) return data
+  if (!(destinationContractAddress && isString(payload))) return data
 
-  switch (projectName) {
-    case 'Squid':
-      if (destinationContractAddress.startsWith('0x')) data.call.recipientAddress = `0x${payload.substring(90, 130)}`
-      break
-    default:
-      break
-  }
-  return data
-}
-
-export const customData = data => {
-  const { call } = { ...data }
-  const { destinationContractAddress } = { ...call?.returnValues }
-  if (!destinationContractAddress) return data
-
-  const { name } = { ...toArray(accounts).find(d => equalsIgnoreCase(d.address, destinationContractAddress) && (!d.environment || equalsIgnoreCase(d.environment, ENVIRONMENT))) }
-  data = setRecipientAddress(data, name)
+  try {
+    const { customize } = { ...toArray(customGMPs).find(d => toArray(d.addresses).findIndex(a => equalsIgnoreCase(a, destinationContractAddress)) > -1 && (!d.environment || equalsIgnoreCase(d.environment, ENVIRONMENT))) }
+    if (typeof customize === 'function') {
+      const customValues = await customize(call.returnValues, ENVIRONMENT)
+      if (typeof customValues === 'object' && !Array.isArray(customValues) && Object.keys({ ...customValues }).length > 0) data.customValues = customValues
+    }
+  } catch (error) {}
   return data
 }
 
@@ -301,7 +291,7 @@ export function GMPs({ address }) {
         delete _params.sortBy
 
         const response = await searchGMP({ ..._params, size, sort })
-        if (response?.data) response.data = response.data.map(d => customData(d))
+        if (response?.data) response.data = await Promise.all(toArray(response.data).map(d => new Promise(async resolve => resolve(await customData(d)))))
         setSearchResults({ ...(refresh ? undefined : searchResults), [generateKeyFromParams(params)]: { ...response } })
         setRefresh(false)
       }
@@ -452,7 +442,7 @@ export function GMPs({ address }) {
                             </div> :
                             <>
                               <Profile address={d.call.returnValues?.destinationContractAddress} chain={d.call.returnValues?.destinationChain} />
-                              {d.call.recipientAddress && <Profile address={d.call.recipientAddress} chain={d.call.returnValues?.destinationChain} />}
+                              {d.customValues?.recipientAddress && <Profile address={d.customValues.recipientAddress} chain={d.call.returnValues?.destinationChain} />}
                             </>
                           }
                         </div>

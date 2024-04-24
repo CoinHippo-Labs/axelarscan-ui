@@ -397,11 +397,11 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
               </div>
             </dd>
           </div>
-          {call.recipientAddress && (
+          {data.customValues?.recipientAddress && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
               <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Recipient</dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
-                <Profile address={data.callbackData?.call?.recipientAddress || call.recipientAddress} chain={data.callbackData?.call?.returnValues?.destinationChain || destinationChain} />
+                <Profile address={data.callbackData?.customValues?.recipientAddress || data.customValues.recipientAddress} chain={data.callbackData?.call?.returnValues?.destinationChain || destinationChain} />
               </dd>
             </div>
           )}
@@ -1456,7 +1456,7 @@ export function GMP({ tx }) {
     const { commandId } = { ...getParams(searchParams) }
     if (commandId) {
       const { data } = { ...await searchGMP({ commandId }) }
-      const d = customData(_.head(data))
+      const d = await customData(_.head(data))
 
       if (d?.call?.transactionHash) router.push(`/gmp/${d.call.transactionHash}`)
       else setData({ ...d })
@@ -1464,7 +1464,7 @@ export function GMP({ tx }) {
     else if (tx) {
       if (!ended) {
         const { data } = { ...await searchGMP(tx.includes('-') ? { messageId: tx } : { txHash: tx }) }
-        const d = customData(_.head(data))
+        const d = await customData(_.head(data))
 
         if (d) {
           if (['received', 'failed'].includes(d.simplified_status) && (d.executed || d.error) && (d.refunded || d.not_to_refund)) setEnded(true)
@@ -1473,19 +1473,19 @@ export function GMP({ tx }) {
           if (d.callback?.transactionHash) {
             const { data } = { ...await searchGMP({ txHash: d.callback.transactionHash, txIndex: d.callback.transactionIndex, txLogIndex: d.callback.logIndex }) }
             d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.callback.transactionHash))
-            d.callbackData = customData(d.callbackData)
+            d.callbackData = await customData(d.callbackData)
           }
           else if (d.executed?.transactionHash) {
             const { data } = { ...await searchGMP({ txHash: d.executed.transactionHash }) }
             d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.executed.transactionHash))
-            d.callbackData = customData(d.callbackData)
+            d.callbackData = await customData(d.callbackData)
           }
 
           // origin
           if (d.call && (d.gas_paid_to_callback || d.is_call_from_relayer)) {
             const { data } = { ...await searchGMP({ txHash: d.call.transactionHash }) }
             d.originData = toArray(data).find(_d => toArray([_d.express_executed?.transactionHash, _d.executed?.transactionHash]).findIndex(tx => equalsIgnoreCase(tx, d.call.transactionHash)) > -1)
-            d.originData = customData(d.originData)
+            d.originData = await customData(d.originData)
           }
 
           if (d.call) {
