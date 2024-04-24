@@ -10,7 +10,7 @@ import _ from 'lodash'
 import moment from 'moment'
 import toast, { Toaster } from 'react-hot-toast'
 import { MdClose, MdCheck, MdOutlineTimer, MdKeyboardArrowRight } from 'react-icons/md'
-import { PiClock, PiWarningCircle, PiCheckCircleFill, PiXCircleFill } from 'react-icons/pi'
+import { PiClock, PiWarningCircle, PiCheckCircleFill, PiXCircleFill, PiInfo } from 'react-icons/pi'
 import { RiTimerFlashLine } from 'react-icons/ri'
 import { FiPlus } from 'react-icons/fi'
 import { RxCaretDown, RxCaretUp } from 'react-icons/rx'
@@ -18,6 +18,7 @@ import { RxCaretDown, RxCaretUp } from 'react-icons/rx'
 import { Container } from '@/components/Container'
 import { Image } from '@/components/Image'
 import { Copy } from '@/components/Copy'
+import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
@@ -201,7 +202,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
                           />
                         </div>
                       )}
-                      <nav aria-label="Progress" className="h-16 overflow-x-auto">
+                      <nav aria-label="Progress" className="h-20 overflow-x-auto">
                         <ol role="list" className="flex items-center">
                           {steps.map((d, i) => {
                             const { confirmation_txhash, poll_id, axelarTransactionHash, receipt, proposal_id } = { ...d.data }
@@ -837,7 +838,12 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
           )}
           {(!data.originData || data.originData.executed) && executed && isNumber((data.originData?.gas || gas)?.gas_used_amount) && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Used</dt>
+              <dt className="flex items-center text-zinc-900 dark:text-zinc-100 text-sm font-medium">
+                <span className="whitespace-nowrap mr-1">Gas Used</span>
+                <Tooltip content="The total gas used to accommodate the cross-chain transaction." className="w-44 text-xs">
+                  <PiInfo className="text-zinc-400 dark:text-zinc-500" />
+                </Tooltip>
+              </dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex items-center gap-x-2">
                   <Number
@@ -863,7 +869,12 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
           )}
           {(!data.originData || data.originData.executed) && executed && ((data.originData?.refunded || refunded)?.receipt?.status || ((((!data.originData || data.originData.executed) && executed) || is_executed || error) && timeDiff(((data.originData?.executed || executed).block_timestamp || (data.originData?.error || error)?.block_timestamp || (data.originData?.approved || approved)?.block_timestamp || (data.originData?.confirm || confirm)?.block_timestamp) * 1000) >= 300)) && isNumber((data.originData?.gas || gas)?.gas_paid_amount) && isNumber((data.originData?.gas || gas).gas_remain_amount) && (
             <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
-              <dt className="text-zinc-900 dark:text-zinc-100 text-sm font-medium">Gas Charged</dt>
+              <dt className="flex items-center text-zinc-900 dark:text-zinc-100 text-sm font-medium">
+                <span className="whitespace-nowrap mr-1">Gas Charged</span>
+                <Tooltip content="The total gas charged to users. This amount may be less than the gas used (Gas Used) due to Axelar's gas subsidy policy." className="w-40 text-xs">
+                  <PiInfo className="text-zinc-400 dark:text-zinc-500" />
+                </Tooltip>
+              </dt>
               <dd className="sm:col-span-3 text-zinc-700 dark:text-zinc-300 text-sm leading-6 mt-1 sm:mt-0">
                 <div className="flex items-center gap-x-2">
                   <Number
