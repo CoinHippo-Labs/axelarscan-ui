@@ -403,11 +403,11 @@ export function Transfers({ address }) {
                       <td className="px-3 py-4 text-left">
                         <div className="flex flex-col gap-y-1">
                           <ChainProfile
-                            value={d.send.destination_chain}
+                            value={d.send.destination_chain || d.link?.destination_chain}
                             className="h-6"
                             titleClassName="font-semibold"
                           />
-                          <Profile address={recipientAddress} chain={d.send.destination_chain} />
+                          <Profile address={recipientAddress} chain={d.send.destination_chain || d.link?.destination_chain} />
                         </div>
                       </td>
                       <td className="px-3 py-4 text-left">
