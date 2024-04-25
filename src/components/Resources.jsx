@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import _ from 'lodash'
@@ -19,6 +19,18 @@ import { getChainData } from '@/lib/config'
 import { getIBCDenomBase64, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase, ellipse } from '@/lib/string'
+
+const chainTypes = [
+  { label: 'All', value: undefined },
+  { label: 'EVM', value: 'evm' },
+  { label: 'Cosmos', value: 'cosmos' },
+]
+
+const assetTypes = [
+  { label: 'All', value: undefined },
+  { label: 'Gateway', value: 'gateway' },
+  { label: 'ITS', value: 'its' },
+]
 
 function Chain({ data }) {
   const { contracts } = useGlobalStore()
@@ -252,12 +264,32 @@ function Asset({ data, focusID, onFocus }) {
   )
 }
 
+const getParams = searchParams => {
+  const params = {}
+  for (const [k, v] of searchParams.entries()) {
+    switch (k) {
+      default:
+        params[k] = v
+        break
+    }
+  }
+  return params
+}
+
+const getQueryString = params => {
+  const qs = new URLSearchParams()
+  Object.entries({ ...params }).filter(([k, v]) => v).forEach(([k, v]) => { qs.append(k, v) })
+  return qs.toString()
+}
+
 const resources = ['chains', 'assets']
 
 export function Resources({ resource }) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const [rendered, setRendered] = useState(false)
+  const [params, setParams] = useState(getParams(searchParams))
   const [input, setInput] = useState('')
   const [assetFocusID, setAssetFocusID] = useState(null)
   const { chains, assets, itsAssets } = useGlobalStore()
@@ -281,15 +313,22 @@ export function Resources({ resource }) {
     }
   }, [router, pathname, rendered, setRendered, resource, setInput, setAssetFocusID])
 
-  const filter = resource => {
+  useEffect(() => {
+    const _params = getParams(searchParams)
+    if (!_.isEqual(_params, params)) setParams(_params)
+  }, [searchParams, params, setParams])
+
+  const filter = (resource, params) => {
+    const { type } = { ...params }
     const words = split(input, { delimiter: ' ', toCase: 'lower' })
+
     switch (resource) {
       case 'chains':
-        return toArray(chains).filter(d => !d.no_inflation || d.deprecated).filter(d => !input || includesStringList(_.uniq(toArray(['id', 'chain_id', 'chain_name', 'name'].map(f => d[f]?.toString()), { toCase: 'lower' })), words))
+        return toArray(chains).filter(d => !type || d.chain_type === type).filter(d => !d.no_inflation || d.deprecated).filter(d => !input || includesStringList(_.uniq(toArray(['id', 'chain_id', 'chain_name', 'name'].map(f => d[f]?.toString()), { toCase: 'lower' })), words))
       case 'assets':
         return _.concat(
-          toArray(assets).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['denom', 'name', 'symbol'].map(f => d[f]), d.denoms, Object.values({ ...d.addresses }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.address, a.ibc_denom]))), { toCase: 'lower' })), words)),
-          toArray(itsAssets).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['name', 'symbol'].map(f => d[f]), Object.values({ ...d.chains }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.tokenAddress]))), { toCase: 'lower' })), words)).map(d => ({ ...d, type: 'its' })),
+          toArray(!type || type === 'gateway' ? assets : []).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['denom', 'name', 'symbol'].map(f => d[f]), d.denoms, Object.values({ ...d.addresses }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.address, a.ibc_denom]))), { toCase: 'lower' })), words)),
+          toArray(!type || type === 'its' ? itsAssets : []).filter(d => !input || includesStringList(_.uniq(toArray(_.concat(['name', 'symbol'].map(f => d[f]), Object.values({ ...d.chains }).flatMap(a => toArray([!equalsIgnoreCase(input, 'axl') && a.symbol, a.tokenAddress]))), { toCase: 'lower' })), words)).map(d => ({ ...d, type: 'its' })),
         )
       default:
         return null
@@ -301,13 +340,13 @@ export function Resources({ resource }) {
       case 'chains':
         return (
           <ul role="list" className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {filter(resource).map((d, i) => <Chain key={i} data={d} />)}
+            {filter(resource, params).map((d, i) => <Chain key={i} data={d} />)}
           </ul>
         )
       case 'assets':
         return (
           <ul role="list" className="w-full mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {filter(resource).map((d, i) => <Asset key={i} data={d} focusID={assetFocusID} onFocus={id => setAssetFocusID(id)} />)}
+            {filter(resource, params).map((d, i) => <Asset key={i} data={d} focusID={assetFocusID} onFocus={id => setAssetFocusID(id)} />)}
           </ul>
         )
       default:
@@ -332,13 +371,30 @@ export function Resources({ resource }) {
             </Link>
           ))}
         </nav>
-        <div className="max-w-sm">
+        <div className="max-w-sm flex flex-col items-start sm:items-end gap-y-2">
           <input
             placeholder={`Search by ${resource === 'assets' ? 'Denom / Symbol / Address' : 'Chain Name / ID'}`}
             value={input}
             onChange={e => setInput(split(e.target.value, { delimiter: ' ', filterBlank: false }).join(' '))}
             className="w-full sm:w-80 h-10 bg-white dark:bg-zinc-900 appearance-none border-zinc-200 hover:border-blue-300 focus:border-blue-600 dark:border-zinc-700 dark:hover:border-blue-800 dark:focus:border-blue-500 focus:ring-0 rounded-lg text-sm text-zinc-600 dark:text-zinc-400 px-3"
           />
+          <div className="max-w-xl flex flex-wrap items-center mt-2">
+            {(resource === 'assets' ? assetTypes : chainTypes).map((d, i) => {
+              const selected = d.value === params.type
+              return (
+                <Link
+                  key={i}
+                  href={`${pathname}?${getQueryString({ ...params, type: d.value })}`}
+                  className={clsx(
+                    'min-w-max flex items-center text-xs sm:text-sm whitespace-nowrap mr-4 mb-1 sm:mb-0',
+                    selected ? 'text-blue-600 dark:text-blue-500 font-semibold' : 'text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300',
+                  )}
+                >
+                  <span>{d.label}</span>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       </div>
       {render(resource)}
