@@ -138,7 +138,7 @@ function Asset({ data, focusID, onFocus }) {
   const _id = type === 'its' ? data.id : denom
   const { id, explorer, chain_type } = { ...(focusID === _id && getChainData(chainSelected, chains)) }
   const { url, contract_path, asset_path } = { ...explorer }
-  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...(type === 'its' ? data.chains?.[native_chain] : addresses?.[native_chain]) }, Object.entries({ ...(type === 'its' ? data.chains : addresses) }).map(([k, v]) => ({ chain: k, ...v })))), 'chain').filter(d => getChainData(d.chain, chains)).map(d => ({ ...d, address: d.address || d.tokenAddress }))
+  addresses = _.uniqBy(toArray(_.concat({ chain: native_chain, ...(type === 'its' ? data.chains?.[native_chain] : addresses?.[native_chain]) }, Object.entries({ ...(type === 'its' ? data.chains : addresses) }).map(([k, v]) => ({ chain: k, ...v })))), 'chain')/*.filter(d => getChainData(d.chain, chains))*/.map(d => ({ ...d, address: d.address || d.tokenAddress }))
   const tokenData = addresses.find(d => d.chain === id)
   const { address, ibc_denom } = { ...tokenData }
   const tokenSymbol = tokenData?.symbol || symbol
