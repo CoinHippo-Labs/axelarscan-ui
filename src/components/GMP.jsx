@@ -1456,6 +1456,7 @@ export function GMP({ tx }) {
   const [ended, setEnded] = useState(null)
   const [estimatedTimeSpent, setEstimatedTimeSpent] = useState(null)
   const [executeData, setExecuteData] = useState(null)
+  const [estimatedGasUsed, setEstimatedGasUsed] = useState(null)
   const [sdk, setSDK] = useState(null)
   const [processing, setProcessing] = useState(false)
   const [response, setResponse] = useState(null)
@@ -1522,6 +1523,40 @@ export function GMP({ tx }) {
                 const { data } = { ...(symbol ? await contract/*.executeWithToken*/.populateTransaction.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount) : await contract/*.execute*/.populateTransaction.execute(commandId, sourceChain, sourceAddress, payload)) }
                 setExecuteData(data)
               } catch (error) {}
+            }
+
+            // find estimated gas used from latest call
+            if (!estimatedGasUsed && d.is_insufficient_fee && !d.confirm && !d.approved && d.call.returnValues?.destinationChain && d.call.returnValues.destinationContractAddress) {
+              const { destinationChain, destinationContractAddress } = { ...d.call.returnValues }
+              const { data } = { ...await searchGMP({ destinationChain, destinationContractAddress, status: 'executed', size: 1 }) }
+              const { express_executed, executed } = { ..._.head(data) }
+              const { gasUsed } = { ...(express_executed || executed)?.receipt }
+              setEstimatedGasUsed(gasUsed ? toNumber(gasUsed) : {
+                ethereum: 400000,
+                binance: 150000,
+                polygon: 400000,
+                'polygon-sepolia': 400000,
+                avalanche: 500000,
+                fantom: 400000,
+                arbitrum: 1000000,
+                'arbitrum-sepolia': 1000000,
+                optimism: 400000,
+                'optimism-sepolia': 400000,
+                base: 400000,
+                'base-sepolia': 400000,
+                mantle: 3000000000,
+                'mantle-sepolia': 3000000000,
+                celo: 400000,
+                kava: 400000,
+                filecoin: 200000000,
+                'filecoin-2': 200000000,
+                linea: 400000,
+                'linea-sepolia': 400000,
+                centrifuge: 1000000,
+                'centrifuge-2': 1000000,
+                scroll: 500000,
+                fraxtal: 400000,
+              }[destinationChain?.toLowerCase()] || 700000)
             }
           }
 
@@ -1620,32 +1655,6 @@ export function GMP({ tx }) {
           offlineSigner: cosmosWalletStore.signer,
           txFee: { gas: '250000', amount: [{ denom: getChainData(chain, chains)?.native_token?.denom, amount: '30000' }] },
         }
-        const estimatedGasUsed = {
-          ethereum: 400000,
-          binance: 150000,
-          polygon: 400000,
-          'polygon-sepolia': 400000,
-          avalanche: 500000,
-          fantom: 400000,
-          arbitrum: 1000000,
-          'arbitrum-sepolia': 1000000,
-          optimism: 400000,
-          'optimism-sepolia': 400000,
-          base: 400000,
-          'base-sepolia': 400000,
-          mantle: 3000000000,
-          'mantle-sepolia': 3000000000,
-          celo: 400000,
-          kava: 400000,
-          filecoin: 200000000,
-          'filecoin-2': 200000000,
-          linea: 400000,
-          'linea-sepolia': 400000,
-          centrifuge: 1000000,
-          'centrifuge-2': 1000000,
-          scroll: 500000,
-          fraxtal: 400000,
-        }[destinationChain?.toLowerCase()] || 700000
 
         console.log('[addGas request]', { chain, destinationChain, transactionHash, logIndex, messageId, estimatedGasUsed, refundAddress: address, token, sendOptions })
         const response = chain_type === 'cosmos' ? await sdk.addGasToCosmosChain({ txHash: transactionHash, messageId, gasLimit: estimatedGasUsed, chain, token, sendOptions }) : await sdk.addNativeGas(chain, transactionHash, estimatedGasUsed, { evmWalletDetails: { useWindowEthereum: true, signer }, destChain: destinationChain, logIndex, refundAddress: address })
