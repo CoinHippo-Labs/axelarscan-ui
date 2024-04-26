@@ -622,7 +622,7 @@ function Details({ data }) {
   )
 }
 
-export function Transfer({ tx }) {
+export function Transfer({ tx, lite }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [data, setData] = useState(null)
@@ -662,7 +662,7 @@ export function Transfer({ tx }) {
       {!data ? <Spinner /> :
         <div className="max-w-5xl flex flex-col gap-y-4">
           <Info data={data} tx={tx} />
-          <Details data={data} />
+          {!lite && <Details data={data} />}
         </div>
       }
     </Container>

@@ -106,7 +106,7 @@ export function getStep(data, chains) {
   ])
 }
 
-function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
+function Info({ data, estimatedTimeSpent, executeData, buttons, tx, lite }) {
   const [seeMore, setSeeMore] = useState(false)
   const { chains, assets } = useGlobalStore()
 
@@ -898,7 +898,7 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
               </dd>
             </div>
           )}
-          {seeMore && (
+          {!lite && seeMore && (
             <>
               {messageId && (
                 <div className="px-4 sm:px-6 py-6 sm:grid sm:grid-cols-4 sm:gap-4">
@@ -1024,15 +1024,17 @@ function Info({ data, estimatedTimeSpent, executeData, buttons, tx }) {
           )}
         </dl>
       </div>
-      <div className="px-4 sm:px-6 pb-4">
-        <button
-          onClick={() => setSeeMore(!seeMore)}
-          className="flex items-center text-blue-600 dark:text-blue-500 text-xs font-medium gap-x-1"
-        >
-          <span>See {seeMore ? 'Less' : 'More'}</span>
-          {seeMore ? <RxCaretUp size={14} /> : <RxCaretDown size={14} />}
-        </button>
-      </div>
+      {!lite && (
+        <div className="px-4 sm:px-6 pb-4">
+          <button
+            onClick={() => setSeeMore(!seeMore)}
+            className="flex items-center text-blue-600 dark:text-blue-500 text-xs font-medium gap-x-1"
+          >
+            <span>See {seeMore ? 'Less' : 'More'}</span>
+            {seeMore ? <RxCaretUp size={14} /> : <RxCaretDown size={14} />}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
@@ -1449,7 +1451,7 @@ function Details({ data }) {
 
 const MIN_GAS_REMAIN_AMOUNT = 0.000001
 
-export function GMP({ tx }) {
+export function GMP({ tx, lite }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [data, setData] = useState(null)
@@ -1804,10 +1806,15 @@ export function GMP({ tx }) {
               execute: executeButton,
             }).filter(([k, v]) => v))}
             tx={tx}
+            lite={lite}
           />
-          {data.originData && <Details data={{ ...data.originData, callbackData: Object.fromEntries(Object.entries(data).filter(([k, v]) => !['originData', 'callbackData'].includes(k))) }} />}
-          <Details data={data} />
-          {data.callbackData && <Details data={{ ...data.callbackData, originData: Object.fromEntries(Object.entries(data).filter(([k, v]) => !['originData', 'callbackData'].includes(k))) }} />}
+          {!lite && (
+            <>
+              {data.originData && <Details data={{ ...data.originData, callbackData: Object.fromEntries(Object.entries(data).filter(([k, v]) => !['originData', 'callbackData'].includes(k))) }} />}
+              <Details data={data} />
+              {data.callbackData && <Details data={{ ...data.callbackData, originData: Object.fromEntries(Object.entries(data).filter(([k, v]) => !['originData', 'callbackData'].includes(k))) }} />}
+            </>
+          )}
         </div>
       }
     </Container>
