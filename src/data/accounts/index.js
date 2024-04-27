@@ -20,6 +20,11 @@ const data = [
     image: '/logos/accounts/axelarnet.svg',
   },
   {
+    address: 'axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5s',
+    name: 'Axelar GMP Account',
+    image: '/logos/accounts/axelarnet.svg',
+  },
+  {
     address: '0x607113F751251267fC0E00927e524cE846AE1205',
     name: 'Sugarcane Express Relayer',
     image: '/logos/accounts/axelarnet.svg',
