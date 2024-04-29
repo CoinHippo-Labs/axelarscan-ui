@@ -1608,7 +1608,7 @@ export function GMP({ tx, lite }) {
           <div className="bg-white rounded-lg shadow-lg flex flex-col gap-y-1 sm:gap-y-0 px-3 py-2.5">
             <div className="flex items-center gap-x-1.5 sm:gap-x-2">
               {icon}
-              <span className="text-zinc-700">{message}</span>
+              <span className="text-zinc-700 whitespace-pre-wrap">{message}</span>
             </div>
             <div className="flex items-center justify-between gap-x-4 ml-6 sm:ml-7 pl-0.5 sm:pl-0">
               <ExplorerLink
