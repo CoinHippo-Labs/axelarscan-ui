@@ -457,7 +457,7 @@ export function Profile({
 
   address = Array.isArray(address) ? toHex(address) : address
   chain = address?.startsWith('axelar') ? 'axelarnet' : chain?.toLowerCase()
-  prefix = !address ? prefix : address.startsWith('axelar') && !prefix?.startsWith('axelar') ? 'axelar' : address.startsWith('0x') ? '0x' : _.head(split(address, { delimiter: '' }).filter(c => isNumber(c))) === '1' ? address.substring(0, address.indexOf('1')) : prefix
+  prefix = !address ? prefix : address.startsWith('axelar') && !prefix?.startsWith('axelar') ? 'axelar1' : address.startsWith('0x') ? '0x' : _.head(split(address, { delimiter: '' }).filter(c => isNumber(c))) === '1' ? address.substring(0, address.indexOf('1') + 1) : prefix
 
   const { interchain_token_service_contract, gateway_contracts, gas_service_contracts } = { ...contracts }
   const itss = toArray(interchain_token_service_contract?.addresses).map(a => ({ address: a, name: 'Interchain Token Service', image: AXELAR_LOGO }))
