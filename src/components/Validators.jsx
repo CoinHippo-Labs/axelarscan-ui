@@ -115,6 +115,19 @@ export function Validators({ status }) {
               <h1 className="text-zinc-900 dark:text-zinc-100 text-base font-semibold leading-6">Validators</h1>
               <p className="mt-2 text-zinc-400 dark:text-zinc-500 text-sm">
                 List of {status || 'active'} validators in Axelar Network with the latest 10K blocks performance.
+                {(!status || status === 'active') && (
+                  <>
+                    &nbsp;
+                    <Link
+                      href="https://www.axelar.network/blog/how-to-stake-the-axl-token-on-the-axelar-network"
+                      target="_blank"
+                      aria-label="How to stake AXL"
+                      className="text-blue-600 dark:text-blue-500 text-sm font-semibold"
+                    >
+                      How to stake AXL
+                    </Link>
+                  </>
+                )}
               </p>
             </div>
             <nav className="flex gap-x-4">
