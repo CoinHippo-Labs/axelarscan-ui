@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import clsx from 'clsx'
 import _ from 'lodash'
 import { MdLocalGasStation } from 'react-icons/md'
 import { PiRadioButtonFill } from 'react-icons/pi'
@@ -11,7 +12,7 @@ import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
-import { Summary } from '@/components/Interchain'
+import { Summary, SankeyChart } from '@/components/Interchain'
 import { NetworkGraph } from '@/components/NetworkGraph'
 import { useGlobalStore } from '@/components/Global'
 import { getRPCStatus } from '@/lib/api/validator'
@@ -257,9 +258,13 @@ function Metrics() {
   )
 }
 
+const sankeyTabs = ['transactions', 'volume']
+
 export function Overview() {
   const [data, setData] = useState(null)
   const [networkGraph, setNetworkGraph] = useState(null)
+  const [chainFocus, setChainFocus] = useState(null)
+  const [sankeyTab, setSankeyTab] = useState(sankeyTabs[0])
   const { chains, contracts, stats } = useGlobalStore()
 
   useEffect(() => {
@@ -332,6 +337,20 @@ export function Overview() {
     getData()
   }, [data, setNetworkGraph])
 
+  const { GMPStats, GMPTotalVolume, transfersStats, transfersTotalVolume } = { ...data }
+
+  const groupData = (data, by = 'key') => Object.entries(_.groupBy(toArray(data), by)).map(([k, v]) => ({
+    key: _.head(v)?.key || k,
+    num_txs: _.sumBy(v, 'num_txs'),
+    volume: _.sumBy(v, 'volume'),
+    chain: _.orderBy(toArray(_.uniq(toArray(by === 'customKey' ? _.head(v)?.chain : v.map(d => d.chain))).map(d => getChainData(d, chains))), ['i'], ['asc']).map(d => d.id),
+  }))
+
+  const chainPairs = groupData(_.concat(
+    toArray(GMPStats?.messages).flatMap(m => toArray(m.sourceChains || m.source_chains).flatMap(s => toArray(s.destinationChains || s.destination_chains).filter(d => !chainFocus || [s.key, d.key].includes(chainFocus)).map(d => ({ key: `${s.key}_${d.key}`, num_txs: d.num_txs, volume: d.volume })))),
+    toArray(transfersStats?.data).filter(d => !chainFocus || [d.source_chain, d.destination_chain].includes(chainFocus)).map(d => ({ key: `${d.source_chain}_${d.destination_chain}`, num_txs: d.num_txs, volume: d.volume })),
+  ))
+
   return (
     <>
       <Metrics />
@@ -342,10 +361,10 @@ export function Overview() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-x-4 gap-y-4 sm:gap-y-0">
                 <h2 className="text-2xl font-semibold">Cross-Chain Activity</h2>
                 {chains && (
-                  <Tag className="w-fit capitalize bg-green-600 dark:bg-green-500 text-white flex items-center gap-x-1">
-                    <PiRadioButtonFill size={18} className="text-white -ml-0.5" />
-                    <span className="text-lg">
-                      Connected chains: {toArray(chains).filter(d => !d.deprecated && (!d.maintainer_id || contracts?.gateway_contracts?.[d.id]?.address)).length}
+                  <Tag className="w-fit capitalize bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center gap-x-1.5">
+                    <PiRadioButtonFill size={18} className="text-green-600 dark:text-green-500 mt-0.5 -ml-0.5" />
+                    <span className="text-lg font-normal">
+                      Connected chains: <span className="text-2xl font-medium ml-0.5">{toArray(chains).filter(d => !d.deprecated && (!d.maintainer_id || contracts?.gateway_contracts?.[d.id]?.address)).length}</span>
                     </span>
                   </Tag>
                 )}
@@ -354,7 +373,44 @@ export function Overview() {
             </div>
             <div className="flex flex-col gap-y-4">
               <h2 className="text-2xl font-semibold">Network Graph</h2>
-              <NetworkGraph data={networkGraph} />
+              <div className="grid lg:grid-cols-3 sm:justify-center lg:justify-end gap-y-8 lg:gap-y-0 lg:gap-x-4">
+                <div className="lg:col-span-2">
+                  <NetworkGraph
+                    data={networkGraph}
+                    hideTable={true}
+                    setChainFocus={chain => setChainFocus(chain)}
+                  />
+                </div>
+                <div className="max-w-xs sm:max-w-2xl lg:max-w-none flex sm:justify-center lg:justify-end">
+                  <SankeyChart
+                    data={chainPairs}
+                    topN={40}
+                    totalValue={sankeyTab === 'transactions' ? toNumber(_.sumBy(GMPStats?.messages, 'num_txs')) + toNumber(transfersStats?.total) : toNumber(GMPTotalVolume) + toNumber(transfersTotalVolume)}
+                    field={sankeyTab === 'transactions' ? 'num_txs' : 'volume'}
+                    title={<div className="max-w-xl flex flex-wrap items-center">
+                      {sankeyTabs.map((d, i) => {
+                        const selected = d === sankeyTab
+                        return (
+                          <div
+                            key={i}
+                            onClick={() => setSankeyTab(d)}
+                            className={clsx(
+                              'min-w-max capitalize flex items-center cursor-pointer font-medium whitespace-nowrap',
+                              selected ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300',
+                              i > 0 ? 'ml-4' : '',
+                            )}
+                          >
+                            <span>{d}</span>
+                          </div>
+                        )
+                      })}
+                    </div>}
+                    valuePrefix={sankeyTab === 'transactions' ? '' : '$'}
+                    noBorder={true}
+                    className="h-144"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         }
