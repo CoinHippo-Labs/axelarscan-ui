@@ -85,7 +85,7 @@ export function SpaceIDProfile({
       {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 8, '0x')}
+      {ellipse(address, 4, '0x')}
     </span>
 
   return name ?
@@ -176,7 +176,7 @@ export function LENSProfile({
       {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 8, '0x')}
+      {ellipse(address, 4, '0x')}
     </span>
 
   return name ?
@@ -266,7 +266,7 @@ export function UnstoppableProfile({
       {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 8, '0x')}
+      {ellipse(address, 4, '0x')}
     </span>
 
   return name ?
@@ -358,7 +358,7 @@ export function ENSProfile({
       {ellipse(name, 16)}
     </span> :
     <span className={clsx('font-medium', className)}>
-      {ellipse(address, 8, '0x')}
+      {ellipse(address, 4, '0x')}
     </span>
 
   return name ?
@@ -567,11 +567,11 @@ export function Profile({
             target="_blank"
             className="text-blue-600 dark:text-blue-500 font-medium"
           >
-            {ellipse(address, 8, prefix)}
+            {ellipse(address, 4, prefix)}
           </Link>
           {!noCopy && <Copy size={width < 24 ? 16 : 18} value={address} />}
         </div> :
-        <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{ellipse(address, 8, prefix)}</span></Copy>
+        <Copy size={width < 24 ? 16 : 18} value={address}><span className={clsx(className)}>{ellipse(address, 4, prefix)}</span></Copy>
   )
 }
 
@@ -640,7 +640,7 @@ export function AssetProfile({
         />
       )}
       <span className={clsx('font-medium whitespace-nowrap', isLink && url ? 'text-blue-600 dark:text-blue-500' : 'text-zinc-900 dark:text-zinc-100', titleClassName)}>
-        {symbol || (value === addressOrDenom ? ellipse(value, 8, '0x') : value)}
+        {symbol || (value === addressOrDenom ? ellipse(value, 4, '0x') : value)}
       </span>
     </div>
   )
