@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'next-themes'
 import ForceGraph2D from 'react-force-graph-2d'
+import clsx from 'clsx'
 import _ from 'lodash'
 import { MdKeyboardDoubleArrowLeft, MdKeyboardDoubleArrowRight } from 'react-icons/md'
 
@@ -246,7 +247,7 @@ const SD = (data, field = 'num_txs') => {
 
 const THRESHOLD = (data, n_sd, field = 'num_txs') => !isNumber(n_sd) ? 0 : MEAN(data, field) + (n_sd * SD(data, field))
 
-export function NetworkGraph({ data }) {
+export function NetworkGraph({ data, hideTable = false, setChainFocus }) {
   const graphRef = useRef()
   const [graphData, setGraphData] = useState(null)
   const [selectedNode, setSelectedNode] = useState(null)
@@ -319,7 +320,7 @@ export function NetworkGraph({ data }) {
   const size = 10
 
   return !data || !(ForceGraph2D && graphData && imagesLoaded) ? <Spinner /> :
-    <div className="grid lg:grid-cols-2 lg:gap-x-4 xl:gap-x-16">
+    <div className={clsx('grid lg:gap-x-4 xl:gap-x-16', !hideTable ? 'lg:grid-cols-2' : 'justify-center')}>
       <div className="-ml-4 -mt-4 xl:-mt-2">
         <ForceGraph2D
           ref={graphRef}
@@ -333,14 +334,17 @@ export function NetworkGraph({ data }) {
           onNodeClick={node => {
             setSelectedNode(node)
             setPage(undefined)
+            if (setChainFocus) setChainFocus(node.id)
           }}
           onLinkClick={() => {
             setSelectedNode(null)
             setPage(undefined)
+            if (setChainFocus) setChainFocus(null)
           }}
           onBackgroundClick={() => {
             setSelectedNode(null)
             setPage(undefined)
+            if (setChainFocus) setChainFocus(null)
           }}
           maxZoom={5}
           minZoom={5}
@@ -349,86 +353,88 @@ export function NetworkGraph({ data }) {
           enableNodeDrag={false}
         />
       </div>
-      <div className="lg:-mt-4">
-        <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">
-          <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
-            <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
-              <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
-                <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
-                  Source
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-left">
-                  Destination
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-right">
-                  Transactions
-                </th>
-                <th scope="col" className="px-3 py-3.5 text-right">
-                  Volume
-                </th>
-                <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right whitespace-nowrap">
-                  Volume / TX
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
-              {filteredData.filter((d, i) => i >= (page - 1) * size && i < page * size).map((d, i) => (
-                <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
-                  <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
-                    <ChainProfile
-                      value={d.sourceChain}
-                      className="h-6"
-                      titleClassName="font-semibold"
-                    />
-                  </td>
-                  <td className="px-3 py-4 text-left">
-                    <ChainProfile
-                      value={d.destinationChain}
-                      className="h-6"
-                      titleClassName="font-semibold"
-                    />
-                  </td>
-                  <td className="px-3 py-4 text-right">
-                    <div className="flex items-center justify-end">
-                      <Number value={d.num_txs} className="text-zinc-900 dark:text-zinc-100 font-medium" />
-                    </div>
-                  </td>
-                  <td className="px-3 py-4 text-right">
-                    <div className="flex items-center justify-end">
-                      <Number
-                        value={d.volume}
-                        format="0,0"
-                        prefix="$"
-                        noTooltip={true}
-                        className="text-zinc-900 dark:text-zinc-100 font-medium"
-                      />
-                    </div>
-                  </td>
-                  <td className="pl-3 pr-4 sm:pr-0 py-4 text-right">
-                    <div className="flex items-center justify-end">
-                      <Number
-                        value={d.volume / d.num_txs}
-                        format="0,0.00"
-                        prefix="$"
-                        noTooltip={true}
-                      />
-                    </div>
-                  </td>
+      {!hideTable && (
+        <div className="lg:-mt-4">
+          <div className="overflow-x-auto lg:overflow-x-visible -mx-4 sm:-mx-0">
+            <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
+              <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
+                <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
+                  <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
+                    Source
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-left">
+                    Destination
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-right">
+                    Transactions
+                  </th>
+                  <th scope="col" className="px-3 py-3.5 text-right">
+                    Volume
+                  </th>
+                  <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right whitespace-nowrap">
+                    Volume / TX
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {filteredData.length > size && (
-          <div className="flex items-center justify-center mt-4">
-            <Pagination
-              data={filteredData}
-              value={page}
-              onChange={page => setPage(page)}
-              sizePerPage={size}
-            />
+              </thead>
+              <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
+                {filteredData.filter((d, i) => i >= (page - 1) * size && i < page * size).map((d, i) => (
+                  <tr key={i} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
+                    <td className="pl-4 sm:pl-0 pr-3 py-4 text-left">
+                      <ChainProfile
+                        value={d.sourceChain}
+                        className="h-6"
+                        titleClassName="font-semibold"
+                      />
+                    </td>
+                    <td className="px-3 py-4 text-left">
+                      <ChainProfile
+                        value={d.destinationChain}
+                        className="h-6"
+                        titleClassName="font-semibold"
+                      />
+                    </td>
+                    <td className="px-3 py-4 text-right">
+                      <div className="flex items-center justify-end">
+                        <Number value={d.num_txs} className="text-zinc-900 dark:text-zinc-100 font-medium" />
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 text-right">
+                      <div className="flex items-center justify-end">
+                        <Number
+                          value={d.volume}
+                          format="0,0"
+                          prefix="$"
+                          noTooltip={true}
+                          className="text-zinc-900 dark:text-zinc-100 font-medium"
+                        />
+                      </div>
+                    </td>
+                    <td className="pl-3 pr-4 sm:pr-0 py-4 text-right">
+                      <div className="flex items-center justify-end">
+                        <Number
+                          value={d.volume / d.num_txs}
+                          format="0,0.00"
+                          prefix="$"
+                          noTooltip={true}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
-      </div>
+          {filteredData.length > size && (
+            <div className="flex items-center justify-center mt-4">
+              <Pagination
+                data={filteredData}
+                value={page}
+                onChange={page => setPage(page)}
+                sizePerPage={size}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </div>
 }
