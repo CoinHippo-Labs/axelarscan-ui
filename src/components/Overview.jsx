@@ -342,9 +342,9 @@ export function Overview() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-x-4 gap-y-4 sm:gap-y-0">
                 <h2 className="text-2xl font-semibold">Cross-Chain Activity</h2>
                 {chains && (
-                  <Tag className="w-fit capitalize bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 flex items-center gap-x-1">
-                    <PiRadioButtonFill size={18} className="text-green-600 dark:text-green-500 -ml-0.5" />
-                    <span className="text-2xl">
+                  <Tag className="w-fit capitalize bg-green-600 dark:bg-green-500 text-white flex items-center gap-x-1">
+                    <PiRadioButtonFill size={18} className="text-white -ml-0.5" />
+                    <span className="text-lg">
                       Connected chains: {toArray(chains).filter(d => !d.deprecated && (!d.maintainer_id || contracts?.gateway_contracts?.[d.id]?.address)).length}
                     </span>
                   </Tag>
