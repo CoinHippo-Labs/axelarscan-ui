@@ -11,6 +11,26 @@ export function Footer() {
         <div className="flex flex-col items-center border-t border-zinc-400/10 py-6 sm:flex-row-reverse sm:justify-between">
           <div className="flex gap-x-6">
             <Link
+              href="https://www.axelar.network/privacy-policy"
+              target="_blank"
+              className="group"
+              aria-label="Privacy Policy"
+            >
+              <span className="text-zinc-500 hover:text-zinc-700 text-sm">
+                Privacy Policy
+              </span>
+            </Link>
+            <Link
+              href="https://www.axelar.network/terms-of-use"
+              target="_blank"
+              className="group"
+              aria-label="Terms of Use"
+            >
+              <span className="text-zinc-500 hover:text-zinc-700 text-sm">
+                Terms of Use
+              </span>
+            </Link>
+            <Link
               href="https://twitter.com/axelarnetwork"
               target="_blank"
               className="group"
@@ -37,8 +57,8 @@ export function Footer() {
               </svg>
             </Link>
           </div>
-          <p className="mt-6 text-sm text-zinc-500 sm:mt-0">
-            Copyright &copy; {new Date().getFullYear()} Interop Labs. All rights reserved.
+          <p className="mt-6 sm:mt-0 text-sm text-zinc-500">
+            Copyright &copy; {new Date().getFullYear()} Axelar Foundation. All rights reserved.
           </p>
         </div>
       </Container>
