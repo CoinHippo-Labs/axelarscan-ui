@@ -254,7 +254,7 @@ export function Header() {
                         <Tag className="w-fit bg-zinc-100 dark:bg-zinc-800 ml-2">
                           <Number
                             value={_.sumBy(data.filter(d => d.value > 0), 'value')}
-                            format="0,0.0a"
+                            format="0,0.00a"
                             prefix="$"
                             noTooltip={true}
                             className="text-green-600 dark:text-green-500 text-xs font-semibold"

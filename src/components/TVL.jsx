@@ -72,7 +72,7 @@ export function TVL() {
                     <span className="whitespace-nowrap">Total Locked</span>
                     <Number
                       value={_.sumBy(data.filter(d => d.value > 0), 'value')}
-                      format="0,0.0a"
+                      format="0,0.00a"
                       prefix="$"
                       noTooltip={true}
                       className="text-green-600 dark:text-green-500 text-xs"
@@ -84,7 +84,7 @@ export function TVL() {
                     <span className="whitespace-nowrap">Moved to EVM</span>
                     <Number
                       value={_.sumBy(data.filter(d => d.value_on_evm > 0), 'value_on_evm')}
-                      format="0,0.0a"
+                      format="0,0.00a"
                       prefix="$"
                       noTooltip={true}
                       className="text-green-600 dark:text-green-500 text-xs"
@@ -96,7 +96,7 @@ export function TVL() {
                     <span className="whitespace-nowrap">Moved to Cosmos</span>
                     <Number
                       value={_.sumBy(data.filter(d => d.value_on_cosmos > 0), 'value_on_cosmos')}
-                      format="0,0.0a"
+                      format="0,0.00a"
                       prefix="$"
                       noTooltip={true}
                       className="text-green-600 dark:text-green-500 text-xs"
