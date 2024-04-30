@@ -442,7 +442,11 @@ export function GMPs({ address }) {
                             </div> :
                             <>
                               <Profile address={d.call.returnValues?.destinationContractAddress} chain={d.call.returnValues?.destinationChain} />
-                              {d.customValues?.recipientAddress && <Profile address={d.customValues.recipientAddress} chain={d.call.returnValues?.destinationChain} />}
+                              {d.customValues?.recipientAddress && (
+                                <Tooltip content="Recipient" parentClassName="!justify-start">
+                                  <Profile address={d.customValues.recipientAddress} chain={d.call.returnValues?.destinationChain} />
+                                </Tooltip>
+                              )}
                             </>
                           }
                         </div>
