@@ -25,7 +25,7 @@
   "dependencies": {
     "@antv/g6": "^4.8.22",
     "@axelar-network/axelarjs-sdk": "0.16.0-alpha.1",
-    "@material-tailwind/react": "^2.1.2",
+    "@material-tailwind/react": "^3.0.0-beta.9",
     "@redefined/name-resolver-js": "^2.10.5",
     "@siddomains/sidjs": "^0.1.29",
     "@solana/spl-token": "^0.3.8",
@@ -60,7 +60,6 @@
     "web3": "^1.10.2"
   },
   "devDependencies": {
-    "@floating-ui/react": "0.26.11",
     "@redux-devtools/extension": "^3.2.5",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.30",
