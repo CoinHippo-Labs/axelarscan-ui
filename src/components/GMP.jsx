@@ -1475,101 +1475,112 @@ export function GMP({ tx, lite }) {
       if (d?.call?.transactionHash) router.push(`/gmp/${d.call.transactionHash}`)
       else setData({ ...d })
     }
-    else if (tx) {
-      if (chains && assets && !ended && !estimatedTimeSpent && !executeData && !estimatedGasUsed) {
-        const { data } = { ...await searchGMP(tx.includes('-') ? { messageId: tx } : { txHash: tx }) }
-        const d = await customData(_.head(data))
+    else if (tx && chains && assets && !ended) {
+      const { data } = { ...await searchGMP(tx.includes('-') ? { messageId: tx } : { txHash: tx }) }
+      const d = await customData(_.head(data))
 
-        if (d) {
-          if (['received', 'failed'].includes(d.simplified_status) && (d.executed || d.error) && (d.refunded || d.not_to_refund)) setEnded(true)
+      if (d) {
+        if (['received', 'failed'].includes(d.simplified_status) && (d.executed || d.error) && (d.refunded || d.not_to_refund)) setEnded(true)
 
-          // callback
-          if (d.callback?.transactionHash) {
-            const { data } = { ...await searchGMP({ txHash: d.callback.transactionHash, txIndex: d.callback.transactionIndex, txLogIndex: d.callback.logIndex }) }
-            d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.callback.transactionHash))
-            d.callbackData = await customData(d.callbackData)
-          }
-          else if (d.executed?.transactionHash) {
-            const { data } = { ...await searchGMP({ txHash: d.executed.transactionHash }) }
-            d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.executed.transactionHash))
-            d.callbackData = await customData(d.callbackData)
-          }
-
-          // origin
-          if (d.call && (d.gas_paid_to_callback || d.is_call_from_relayer)) {
-            const { data } = { ...await searchGMP({ txHash: d.call.transactionHash }) }
-            d.originData = toArray(data).find(_d => toArray([_d.express_executed?.transactionHash, _d.executed?.transactionHash]).findIndex(tx => equalsIgnoreCase(tx, d.call.transactionHash)) > -1)
-            d.originData = await customData(d.originData)
-          }
-
-          if (d.call) {
-            // estimated time spent
-            if (d.call.chain && !estimatedTimeSpent) {
-              const response = await estimateTimeSpent({ sourceChain: d.call.chain, destinationChain: d.call.returnValues?.destinationChain })
-              setEstimatedTimeSpent(toArray(response).find(_d => _d.key === d.call.chain))
-            }
-
-            // execute data
-            if (!executeData && d.approved) {
-              try {
-                const { addresses } = { ...getAssetData(d.call.returnValues?.symbol, assets) }
-                const symbol = d.approved.returnValues?.symbol || addresses?.[d.call.returnValues?.destinationChain?.toLowerCase()]?.symbol || d.call.returnValues?.symbol
-                const commandId = d.approved.returnValues?.commandId || d.command_id
-                const sourceChain = d.approved.returnValues?.sourceChain || getChainData(d.call.chain, chains)?.chain_name
-                const sourceAddress = d.approved.returnValues?.sourceAddress || d.call.returnValues?.sender
-                const contractAddress = d.approved.returnValues?.contractAddress || d.call.returnValues?.destinationContractAddress
-                const payload = d.call.returnValues?.payload
-                const amount = toBigNumber(d.approved.returnValues?.amount || d.call.returnValues?.amount)
-
-                const contract = new Contract(contractAddress, IAxelarExecutable.abi, getProvider(d.call.returnValues?.destinationChain, chains))
-                const { data } = { ...(symbol ? await contract/*.executeWithToken*/.populateTransaction.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount) : await contract/*.execute*/.populateTransaction.execute(commandId, sourceChain, sourceAddress, payload)) }
-                setExecuteData(data)
-              } catch (error) {}
-            }
-
-            // find estimated gas used from latest call
-            if (!estimatedGasUsed && d.is_insufficient_fee && !d.confirm && !d.approved && d.call.returnValues?.destinationChain && d.call.returnValues.destinationContractAddress) {
-              const { destinationChain, destinationContractAddress } = { ...d.call.returnValues }
-              const { data } = { ...await searchGMP({ destinationChain, destinationContractAddress, status: 'executed', size: 1 }) }
-              const { express_executed, executed } = { ..._.head(data) }
-              const { gasUsed } = { ...(express_executed || executed)?.receipt }
-              setEstimatedGasUsed(gasUsed ? toNumber(gasUsed) : {
-                ethereum: 400000,
-                binance: 150000,
-                polygon: 400000,
-                'polygon-sepolia': 400000,
-                avalanche: 500000,
-                fantom: 400000,
-                arbitrum: 1000000,
-                'arbitrum-sepolia': 1000000,
-                optimism: 400000,
-                'optimism-sepolia': 400000,
-                base: 400000,
-                'base-sepolia': 400000,
-                mantle: 3000000000,
-                'mantle-sepolia': 3000000000,
-                celo: 400000,
-                kava: 400000,
-                filecoin: 200000000,
-                'filecoin-2': 200000000,
-                linea: 400000,
-                'linea-sepolia': 400000,
-                centrifuge: 1000000,
-                'centrifuge-2': 1000000,
-                scroll: 500000,
-                fraxtal: 400000,
-              }[destinationChain?.toLowerCase()] || 700000)
-            }
-          }
-
-          console.log('[data]', d)
-          setData(d)
-          return d
+        // callback
+        if (d.callback?.transactionHash) {
+          const { data } = { ...await searchGMP({ txHash: d.callback.transactionHash, txIndex: d.callback.transactionIndex, txLogIndex: d.callback.logIndex }) }
+          d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.callback.transactionHash))
+          d.callbackData = await customData(d.callbackData)
         }
+        else if (d.executed?.transactionHash) {
+          const { data } = { ...await searchGMP({ txHash: d.executed.transactionHash }) }
+          d.callbackData = toArray(data).find(_d => equalsIgnoreCase(_d.call?.transactionHash, d.executed.transactionHash))
+          d.callbackData = await customData(d.callbackData)
+        }
+
+        // origin
+        if (d.call && (d.gas_paid_to_callback || d.is_call_from_relayer)) {
+          const { data } = { ...await searchGMP({ txHash: d.call.transactionHash }) }
+          d.originData = toArray(data).find(_d => toArray([_d.express_executed?.transactionHash, _d.executed?.transactionHash]).findIndex(tx => equalsIgnoreCase(tx, d.call.transactionHash)) > -1)
+          d.originData = await customData(d.originData)
+        }
+
+        console.log('[data]', d)
+        setData(d)
+        return d
       }
     }
     return
-  }, [tx, router, searchParams, chains, assets, ended, setData, estimatedTimeSpent, setEstimatedTimeSpent, executeData, setExecuteData, estimatedGasUsed, setEstimatedGasUsed])
+  }, [tx, router, searchParams, chains, assets, ended, setData])
+
+  // setEstimatedTimeSpent
+  useEffect(() => {
+    const getEstimateTimeSpent = async () => {
+      if (!estimatedTimeSpent && data?.call?.chain) {
+        const response = await estimateTimeSpent({ sourceChain: data.call.chain, destinationChain: data.call.returnValues?.destinationChain })
+        setEstimatedTimeSpent(toArray(response).find(d => d.key === data.call.chain))
+      }
+    }
+    getEstimateTimeSpent()
+  }, [data, estimatedTimeSpent, setEstimatedTimeSpent])
+
+  // setExecuteData
+  useEffect(() => {
+    const getExecuteData = async () => {
+      if (!executeData && data?.call && data.approved) {
+        try {
+          const { call, approved, command_id } = { ...data }
+          const { addresses } = { ...getAssetData(call.returnValues?.symbol, assets) }
+          const symbol = approved.returnValues?.symbol || addresses?.[call.returnValues?.destinationChain?.toLowerCase()]?.symbol || call.returnValues?.symbol
+          const commandId = approved.returnValues?.commandId || command_id
+          const sourceChain = approved.returnValues?.sourceChain || getChainData(call.chain, chains)?.chain_name
+          const sourceAddress = approved.returnValues?.sourceAddress || call.returnValues?.sender
+          const contractAddress = approved.returnValues?.contractAddress || call.returnValues?.destinationContractAddress
+          const payload = call.returnValues?.payload
+          const amount = toBigNumber(approved.returnValues?.amount || call.returnValues?.amount)
+
+          const contract = new Contract(contractAddress, IAxelarExecutable.abi, getProvider(call.returnValues?.destinationChain, chains))
+          const { data } = { ...(symbol ? await contract/*.executeWithToken*/.populateTransaction.executeWithToken(commandId, sourceChain, sourceAddress, payload, symbol, amount) : await contract/*.execute*/.populateTransaction.execute(commandId, sourceChain, sourceAddress, payload)) }
+          setExecuteData(data)
+        } catch (error) {}
+      }
+    }
+    getExecuteData()
+  }, [data, executeData, setExecuteData])
+
+  // setEstimatedGasUsed
+  useEffect(() => {
+    const getEstimatedGasUsed = async () => {
+      if (!estimatedGasUsed && data?.is_insufficient_fee && !data.confirm && !data.approved && data.call?.returnValues?.destinationChain && data.call.returnValues.destinationContractAddress) {
+        const { destinationChain, destinationContractAddress } = { ...data.call.returnValues }
+        const { express_executed, executed } = { ..._.head((await searchGMP({ destinationChain, destinationContractAddress, status: 'executed', size: 1 }))?.data) }
+        const { gasUsed } = { ...(express_executed || executed)?.receipt }
+        setEstimatedGasUsed(gasUsed ? toNumber(gasUsed) : {
+          ethereum: 400000,
+          binance: 150000,
+          polygon: 400000,
+          'polygon-sepolia': 400000,
+          avalanche: 500000,
+          fantom: 400000,
+          arbitrum: 1000000,
+          'arbitrum-sepolia': 1000000,
+          optimism: 400000,
+          'optimism-sepolia': 400000,
+          base: 400000,
+          'base-sepolia': 400000,
+          mantle: 3000000000,
+          'mantle-sepolia': 3000000000,
+          celo: 400000,
+          kava: 400000,
+          filecoin: 200000000,
+          'filecoin-2': 200000000,
+          linea: 400000,
+          'linea-sepolia': 400000,
+          centrifuge: 1000000,
+          'centrifuge-2': 1000000,
+          scroll: 500000,
+          fraxtal: 400000,
+        }[destinationChain?.toLowerCase()] || 700000)
+      }
+    }
+    getEstimatedGasUsed()
+  }, [data, estimatedGasUsed, setEstimatedGasUsed])
 
   useEffect(() => {
     getData()
@@ -1591,7 +1602,7 @@ export function GMP({ tx, lite }) {
 
     toast.remove()
     if (message) {
-      if (hash && chainData?.explorer) {
+      if ((hash && chainData?.explorer) || status === 'failed') {
         let icon
         switch (status) {
           case 'success':
@@ -1610,17 +1621,19 @@ export function GMP({ tx, lite }) {
               {icon}
               <span className="text-zinc-700 whitespace-pre-wrap">{message}</span>
             </div>
-            <div className="flex items-center justify-between gap-x-4 ml-6 sm:ml-7 pl-0.5 sm:pl-0">
-              <ExplorerLink
-                value={hash}
-                chain={chain}
-                iconOnly={false}
-                nonIconClassName="text-zinc-700 text-xs sm:text-sm"
-              />
-              <button onClick={() => setResponse(null)} className="underline text-zinc-400 text-xs sm:text-sm font-light">
-                Dismiss
-              </button>
-            </div>
+            {chainData?.explorer && (
+              <div className="flex items-center justify-between gap-x-4 ml-6 sm:ml-7 pl-0.5 sm:pl-0">
+                <ExplorerLink
+                  value={hash}
+                  chain={chain}
+                  iconOnly={false}
+                  nonIconClassName="text-zinc-700 text-xs sm:text-sm"
+                />
+                <button onClick={() => setResponse(null)} className="underline text-zinc-400 text-xs sm:text-sm font-light">
+                  Dismiss
+                </button>
+              </div>
+            )}
           </div>
         ), { duration: 60000 })
       }
