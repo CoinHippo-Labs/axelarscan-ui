@@ -367,7 +367,7 @@ export function GMPs({ address }) {
                               target="_blank"
                               className="text-blue-600 dark:text-blue-500 font-semibold"
                             >
-                              {ellipse(d.call.proposal_id && d.call.returnValues?.messageId ? d.call.returnValues.messageId : d.call.transactionHash)}
+                              {ellipse(d.call.proposal_id && d.call.returnValues?.messageId ? d.call.returnValues.messageId : d.call.transactionHash, 4, '0x')}
                             </Link>
                           </Copy>
                           {!d.call.proposal_id && <ExplorerLink value={d.call.transactionHash} chain={d.call.chain} />}
@@ -441,11 +441,11 @@ export function GMPs({ address }) {
                               </Tooltip>
                             </div> :
                             <>
-                              <Tooltip content="Contract" parentClassName="!justify-start">
+                              <Tooltip content="Destination Contract" parentClassName="!justify-start">
                                 <Profile address={d.call.returnValues?.destinationContractAddress} chain={d.call.returnValues?.destinationChain} />
                               </Tooltip>
                               {d.customValues?.recipientAddress && (
-                                <Tooltip content="Recipient" parentClassName="!justify-start">
+                                <Tooltip content="Final User Recipient" parentClassName="!justify-start">
                                   <Profile address={d.customValues.recipientAddress} chain={d.call.returnValues?.destinationChain} />
                                 </Tooltip>
                               )}

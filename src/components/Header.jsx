@@ -250,7 +250,7 @@ export function Header() {
                   <NavLink key={i} href={href}>
                     <div className="flex items-center">
                       {title}
-                      {title === 'TVL' && !!data && (
+                      {/*title === 'TVL' && !!data && (
                         <Tag className="w-fit bg-zinc-100 dark:bg-zinc-800 ml-2">
                           <Number
                             value={_.sumBy(data.filter(d => d.value > 0), 'value')}
@@ -260,7 +260,7 @@ export function Header() {
                             className="text-green-600 dark:text-green-500 text-xs font-semibold"
                           />
                         </Tag>
-                      )}
+                      )*/}
                     </div>
                   </NavLink>
                 )

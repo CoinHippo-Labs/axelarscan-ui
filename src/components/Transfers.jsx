@@ -356,7 +356,7 @@ export function Transfers({ address }) {
                               target="_blank"
                               className="text-blue-600 dark:text-blue-500 font-semibold"
                             >
-                              {ellipse(d.send.txhash)}
+                              {ellipse(d.send.txhash, 4, '0x')}
                             </Link>
                           </Copy>
                           <ExplorerLink value={d.send.txhash} chain={d.send.source_chain} />

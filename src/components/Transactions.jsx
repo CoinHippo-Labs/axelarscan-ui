@@ -680,7 +680,7 @@ export function Transactions({ height, address }) {
                             target="_blank"
                             className="text-blue-600 dark:text-blue-500 font-semibold"
                           >
-                            {ellipse(d.txhash)}
+                            {ellipse(d.txhash, 6)}
                           </Link>
                         </Copy>
                       </div>

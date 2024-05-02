@@ -7,6 +7,7 @@ import _ from 'lodash'
 
 import { Container } from '@/components/Container'
 import { Image } from '@/components/Image'
+import { Switch } from '@/components/Switch'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
@@ -18,6 +19,7 @@ import { isNumber, toNumber } from '@/lib/number'
 
 export function TVL() {
   const [data, setData] = useState(null)
+  const [includeITS, setIncludeITS] = useState(false)
   const { chains, assets, itsAssets, tvl } = useGlobalStore()
 
   useEffect(() => {
@@ -44,10 +46,11 @@ export function TVL() {
   }, [chains, assets, itsAssets, tvl, setData])
 
   const loading = !(data && assets && data.length >= assets.filter(d => !d.no_tvl).length - 3)
+  const filteredData = toArray(data).filter(d => includeITS || d.assetType !== 'its')
   const chainsTVL = !loading && _.orderBy(_.uniqBy(chains.filter(d => !d.no_inflation && !d.no_tvl).map(d => {
     return {
       ...d,
-      total_value: _.sumBy(data.map(_d => {
+      total_value: _.sumBy(filteredData.map(_d => {
         const { supply, total } = { ..._d.tvl?.[d.id] }
         return { ..._d, value: toNumber((supply || total) * _d.price) }
       }).filter(d => d.value > 0), 'value'),
@@ -62,16 +65,31 @@ export function TVL() {
             <thead className="sticky top-0 z-20 bg-white dark:bg-zinc-900">
               <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
                 <th scope="col" className="px-3 py-4 text-left">
-                  Asset
+                  <div className="flex flex-col gap-y-0.5">
+                    <span className="whitespace-nowrap">Asset</span>
+                    <Switch
+                      value={includeITS}
+                      onChange={v => setIncludeITS(v)}
+                      title="Including ITS"
+                      groupClassName="!gap-x-1.5"
+                      outerClassName="!h-4 !w-8"
+                      innerClassName="!h-3 !w-3"
+                      labelClassName="h-4 flex items-center"
+                      titleClassName={clsx('text-xs !font-normal', !includeITS && '!text-zinc-400 dark:!text-zinc-500')}
+                    />
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-4 text-left whitespace-nowrap">
-                  Native Chain
+                  <div className="flex flex-col gap-y-0.5">
+                    <span className="whitespace-nowrap">Native Chain</span>
+                    <div className="h-4" />
+                  </div>
                 </th>
                 <th scope="col" className="px-3 py-4 text-right">
                   <div className="flex flex-col items-end gap-y-0.5">
                     <span className="whitespace-nowrap">Total Locked</span>
                     <Number
-                      value={_.sumBy(data.filter(d => d.value > 0), 'value')}
+                      value={_.sumBy(filteredData.filter(d => d.value > 0), 'value')}
                       format="0,0.00a"
                       prefix="$"
                       noTooltip={true}
@@ -83,7 +101,7 @@ export function TVL() {
                   <div className="flex flex-col items-end gap-y-0.5">
                     <span className="whitespace-nowrap">Moved to EVM</span>
                     <Number
-                      value={_.sumBy(data.filter(d => d.value_on_evm > 0), 'value_on_evm')}
+                      value={_.sumBy(filteredData.filter(d => d.value_on_evm > 0), 'value_on_evm')}
                       format="0,0.00a"
                       prefix="$"
                       noTooltip={true}
@@ -95,7 +113,7 @@ export function TVL() {
                   <div className="flex flex-col items-end gap-y-0.5">
                     <span className="whitespace-nowrap">Moved to Cosmos</span>
                     <Number
-                      value={_.sumBy(data.filter(d => d.value_on_cosmos > 0), 'value_on_cosmos')}
+                      value={_.sumBy(filteredData.filter(d => d.value_on_cosmos > 0), 'value_on_cosmos')}
                       format="0,0.00a"
                       prefix="$"
                       noTooltip={true}
@@ -128,7 +146,7 @@ export function TVL() {
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-zinc-900 divide-y divide-zinc-100 dark:divide-zinc-800">
-              {data.filter(d => d.assetData).map(d => (
+              {filteredData.filter(d => d.assetData).map(d => (
                 <tr key={d.asset} className="align-top text-zinc-400 dark:text-zinc-500 text-sm">
                   <td className="sticky left-0 z-10 backdrop-blur backdrop-filter px-3 py-4 text-left">
                     <div className="flex flex-items-center gap-x-2">
