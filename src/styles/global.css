@@ -1,0 +1,11 @@
+.status-message a {
+  @apply underline font-bold;
+}
+
+.linkify a {
+  @apply text-blue-600 dark:text-blue-500 font-semibold;
+}
+
+.ant-btn-primary {
+  @apply !bg-blue-600 !text-white;
+}

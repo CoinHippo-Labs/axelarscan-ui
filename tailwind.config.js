@@ -1,39 +1,48 @@
-const withMT = require('@material-tailwind/react/utils/withMT')
-const colors = require('tailwindcss/colors')
+const formsPlugin = require('@tailwindcss/forms')
+const headlessuiPlugin = require('@headlessui/tailwindcss')
 
-module.exports = withMT({
-  content: [
-    './components/**/*.js',
-    './pages/**/*.js',
-    './styles/globals.css',
-  ],
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ['./src/**/*.{js,jsx,ts,tsx}'],
   darkMode: 'class',
   theme: {
+    fontSize: {
+      '2xs': ['0.65rem', { lineHeight: '0.75rem' }],
+      xs: ['0.75rem', { lineHeight: '1rem' }],
+      sm: ['0.875rem', { lineHeight: '1.5rem' }],
+      base: ['1rem', { lineHeight: '1.75rem' }],
+      lg: ['1.125rem', { lineHeight: '2rem' }],
+      xl: ['1.25rem', { lineHeight: '2rem' }],
+      '2xl': ['1.5rem', { lineHeight: '2rem' }],
+      '3xl': ['2rem', { lineHeight: '2.5rem' }],
+      '4xl': ['2.5rem', { lineHeight: '3.5rem' }],
+      '5xl': ['3rem', { lineHeight: '3.5rem' }],
+      '6xl': ['3.75rem', { lineHeight: '1' }],
+      '7xl': ['4.5rem', { lineHeight: '1.1' }],
+      '8xl': ['6rem', { lineHeight: '1' }],
+      '9xl': ['8rem', { lineHeight: '1' }],
+    },
     extend: {
-      colors: {
-        ...colors,
-        dark: '#000000',
-        light: '#fdfdfd',
-        black: '#000000',
-        white: '#ffffff',
-        slate: {
-          ...colors.slate,
-          900: '#151515',
-          800: '#252525',
-          700: '#353535',
-          600: '#454545',
-          500: '#555555',
-          400: '#b5b5b5',
-          300: '#c5c5c5',
-          200: '#d5d5d5',
-          100: '#e5e5e5',
-          50: '#f5f5f5',
-        },
+      borderRadius: {
+        '4xl': '2rem',
       },
-      screens: {
-        '2.5xl': '1920px',
-        '3xl': '3000px',
+      fontFamily: {
+        sans: 'var(--font-inter)',
+        display: 'var(--font-lexend)',
+      },
+      height: {
+        '112': '28rem',
+        '144': '36rem',
+      },
+      maxWidth: {
+        '2xl': '40rem',
       },
     },
   },
-})
+  variants: {
+    extend: {
+      display: ['group-hover'],
+    },
+  },
+  plugins: [formsPlugin, headlessuiPlugin],
+}
