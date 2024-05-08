@@ -491,8 +491,8 @@ export default [
     environment: 'mainnet',
   },
   {
-    address: '0xC19d317c84e43F93fFeBa146f4f116A6F2B04663',
-    name: 'Stake DAO Ethereum State Sender',
+    address: '0xe742141075767106FeD9F6FFA99f07f33bd66312',
+    name: 'Stake DAO: Ethereum State Sender',
     image: '/logos/accounts/stakeDAO.svg',
     environment: 'mainnet',
   },
@@ -740,7 +740,7 @@ export default [
     name: 'Insrt: $MINT',
     image: '/logos/accounts/insrt.png',
     environment: 'mainnet',
-  },  
+  },
   {
     address: '0xAf753cc76156Ab0f2C9f316049Cc3df267f78e1a',
     name: 'eesee.io: AssetHub',
