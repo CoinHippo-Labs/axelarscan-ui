@@ -19,7 +19,7 @@ import { Transactions } from '@/components/Transactions'
 import { useGlobalStore } from '@/components/Global'
 import { getAccountAmounts } from '@/lib/api/axelarscan'
 import { searchTransfers, searchDepositAddresses } from '@/lib/api/token-transfer'
-import { axelarContract, getAssetData } from '@/lib/config'
+import { axelarContracts, getAssetData } from '@/lib/config'
 import { getInputType, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { equalsIgnoreCase, ellipse } from '@/lib/string'
@@ -494,7 +494,7 @@ export function Account({ address }) {
               return { ...d, value: price > 0 ? d.amount * price : 0 }
             }), ['value'], ['desc'])
 
-            if ((address.length >= 65 || isEVMAddress) && address !== axelarContract) {
+            if ((address.length >= 65 || isEVMAddress) && axelarContracts.findIndex(a => equalsIgnoreCase(a, address)) < 0) {
               const depositAddressData = _.head((await searchDepositAddresses({ address }))?.data)
 
               if (depositAddressData) {
@@ -513,7 +513,7 @@ export function Account({ address }) {
     getData()
   }, [address, router, chains, assets, validators, setData])
 
-  const isDepositAddress = (address && (address.length >= 65 || getInputType(address, chains) === 'evmAddress') && address !== axelarContract) || data?.depositAddressData
+  const isDepositAddress = (address && (address.length >= 65 || getInputType(address, chains) === 'evmAddress') && axelarContracts.findIndex(a => equalsIgnoreCase(a, address)) < 0) || data?.depositAddressData
 
   return (
     <Container className={clsx('sm:mt-8', data ? 'max-w-full' : '')}>

@@ -24,7 +24,7 @@ import { getParams, getQueryString, Pagination } from '@/components/Pagination'
 import { useGlobalStore } from '@/components/Global'
 import { searchTransactions, getTransactions } from '@/lib/api/validator'
 import { searchDepositAddresses } from '@/lib/api/token-transfer'
-import { axelarContract, getAssetData } from '@/lib/config'
+import { axelarContracts, getAssetData } from '@/lib/config'
 import { getIcapAddress, getInputType, toJson, toHex, split, toArray } from '@/lib/parser'
 import { includesStringList } from '@/lib/operator'
 import { getAttributeValue } from '@/lib/cosmos'
@@ -555,7 +555,7 @@ export function Transactions({ height, address }) {
           data = response?.data
           total = response?.total
         }
-        else if ((address?.length >= 65 || addressType === 'evmAddress') && address !== axelarContract) {
+        else if ((address?.length >= 65 || addressType === 'evmAddress') && axelarContracts.findIndex(a => equalsIgnoreCase(a, address)) < 0) {
           const { deposit_address } = { ..._.head((await searchDepositAddresses({ address }))?.data) }
 
           if (deposit_address || addressType === 'evmAddress') {
@@ -564,10 +564,13 @@ export function Transactions({ height, address }) {
             let response
             switch (addressType) {
               case 'axelarAddress':
-                response = await getTransactions({ events: `transfer.sender='${_address}'` })
-                data = _.concat(toArray(response?.data), toArray(data))
+                // response = await getTransactions({ events: `transfer.sender='${_address}'` })
+                // data = _.concat(toArray(response?.data), toArray(data))
 
                 response = await getTransactions({ events: `message.sender='${_address}'` })
+                data = _.concat(toArray(response?.data), toArray(data))
+
+                response = await getTransactions({ events: `transfer.recipient='${_address}'` })
                 data = _.concat(toArray(response?.data), toArray(data))
                 break
               case 'evmAddress':
@@ -580,9 +583,6 @@ export function Transactions({ height, address }) {
             }
 
             response = await getTransactions({ events: `link.depositAddress='${_address}'` })
-            data = _.concat(toArray(response?.data), toArray(data))
-
-            response = await getTransactions({ events: `transfer.recipient='${_address}'` })
             data = _.concat(toArray(response?.data), toArray(data))
             total = data.length
           }
