@@ -303,7 +303,7 @@ export function Transfers({ address }) {
             <table className="min-w-full divide-y divide-zinc-200 dark:divide-zinc-700">
               <thead className="sticky top-0 z-10 bg-white dark:bg-zinc-900">
                 <tr className="text-zinc-800 dark:text-zinc-200 text-sm font-semibold">
-                  <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
+                  <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left whitespace-nowrap">
                     Tx Hash
                   </th>
                   <th scope="col" className="px-3 py-3.5 text-left">
@@ -318,7 +318,7 @@ export function Transfers({ address }) {
                   <th scope="col" className="px-3 py-3.5 text-left">
                     Status
                   </th>
-                  <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right">
+                  <th scope="col" className="pl-3 pr-4 sm:pr-0 py-3.5 text-right whitespace-nowrap">
                     Created at
                   </th>
                 </tr>

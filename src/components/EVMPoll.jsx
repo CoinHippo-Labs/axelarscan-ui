@@ -295,7 +295,7 @@ function Votes({ data }) {
             <th scope="col" className="px-3 py-3.5 text-right whitespace-nowrap">
               Voting Power
             </th>
-            <th scope="col" className="px-3 py-3.5 text-left">
+            <th scope="col" className="px-3 py-3.5 text-left whitespace-nowrap">
               Tx Hash
             </th>
             <th scope="col" className="px-3 py-3.5 text-left">
