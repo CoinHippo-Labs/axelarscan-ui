@@ -135,9 +135,9 @@ function MobileNavigation() {
             as="div"
             className="absolute inset-x-0 top-full mt-4 flex origin-top flex-col rounded-2xl bg-white dark:bg-zinc-800 p-4 text-lg tracking-tight text-zinc-900 dark:text-zinc-100 shadow-xl ring-1 ring-zinc-900/5"
           >
-            <div className="md:hidden">
+            {/*<div className="md:hidden">
               <Search />
-            </div>
+            </div>*/}
             {navigations.map((d, i) => {
               const { title, href, children } = { ...d }
 
@@ -268,7 +268,7 @@ export function Header() {
             </div>
           </div>
           <div className="flex items-center gap-x-4">
-            <div className="hidden md:block">
+            <div className={clsx('block'/*, 'hidden md:block'*/)}>
               <Search />
             </div>
             <div className="hidden xl:block">

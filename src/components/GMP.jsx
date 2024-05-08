@@ -1074,7 +1074,7 @@ function Details({ data }) {
             <th scope="col" className="pl-4 sm:pl-0 pr-3 py-3.5 text-left">
               Step
             </th>
-            <th scope="col" className="px-3 py-3.5 text-left">
+            <th scope="col" className="px-3 py-3.5 text-left whitespace-nowrap">
               Tx Hash
             </th>
             <th scope="col" className="px-3 py-3.5 text-left">

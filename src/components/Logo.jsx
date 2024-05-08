@@ -16,7 +16,7 @@ export function Logo(props) {
         unoptimized
         className="mr-3"
       />
-      <span className="uppercase text-sm font-bold">Axelarscan</span>
+      <span className="hidden md:block uppercase text-sm font-bold">Axelarscan</span>
     </div>
   )
 }
