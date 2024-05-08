@@ -582,8 +582,8 @@ export function Transactions({ height, address }) {
             response = await getTransactions({ events: `link.depositAddress='${_address}'` })
             data = _.concat(toArray(response?.data), toArray(data))
 
-            // response = await getTransactions({ events: `transfer.recipient='${_address}'` })
-            // data = _.concat(toArray(response?.data), toArray(data))
+            response = await getTransactions({ events: `transfer.recipient='${_address}'` })
+            data = _.concat(toArray(response?.data), toArray(data))
             total = data.length
           }
           else {
