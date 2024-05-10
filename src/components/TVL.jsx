@@ -4,10 +4,12 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import clsx from 'clsx'
 import _ from 'lodash'
+import { PiInfo } from 'react-icons/pi'
 
 import { Container } from '@/components/Container'
 import { Image } from '@/components/Image'
 import { Switch } from '@/components/Switch'
+import { Tooltip } from '@/components/Tooltip'
 import { Spinner } from '@/components/Spinner'
 import { Tag } from '@/components/Tag'
 import { Number } from '@/components/Number'
@@ -170,18 +172,26 @@ export function TVL() {
                         />
                       )
 
+                      const isITSNotCanonical = d.assetType === 'its' && Object.values({ ...d.tvl }).findIndex(d => d.contract_data.token_manager_type?.startsWith('lockUnlock')) < 0
                       return (
                         <div key={d.asset} className="flex flex-col items-end gap-y-0.5">
-                          {url ?
-                            <Link
-                              href={url}
-                              target="_blank"
-                              className="contents text-blue-600 dark:text-blue-500"
-                            >
-                              {element}
-                            </Link> :
-                            element
-                          }
+                          <div className="flex items-center space-x-1">
+                            {url ?
+                              <Link
+                                href={url}
+                                target="_blank"
+                                className="contents text-blue-600 dark:text-blue-500"
+                              >
+                                {element}
+                              </Link> :
+                              element
+                            }
+                            {isITSNotCanonical && (
+                              <Tooltip content="The circulating supply retrieved from CoinGecko used for TVL tracking." className="w-56 text-xs text-left">
+                                <PiInfo className="text-zinc-400 dark:text-zinc-500 mb-0.5" />
+                              </Tooltip>
+                            )}
+                          </div>
                           {d.value > 0 && (
                             <Number
                               value={d.value}
