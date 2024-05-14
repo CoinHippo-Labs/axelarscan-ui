@@ -509,7 +509,13 @@ const data = [
   },
   {
     address: '0xC19d317c84e43F93fFeBa146f4f116A6F2B04663',
-    name: 'Stake DAO Ethereum State Sender',
+    name: 'Stake DAO: Ethereum State Sender',
+    image: '/logos/accounts/stakeDAO.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: '0xe742141075767106FeD9F6FFA99f07f33bd66312',
+    name: 'Stake DAO: Ethereum State Sender',
     image: '/logos/accounts/stakeDAO.svg',
     environment: 'mainnet',
   },
