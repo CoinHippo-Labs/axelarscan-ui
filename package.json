@@ -13,8 +13,8 @@
     "build-testnet": "env-cmd -f .env.testnet next build",
     "dev-stagenet": "env-cmd -f .env.stagenet next dev",
     "build-stagenet": "env-cmd -f .env.stagenet next build",
-    "dev-devnet": "env-cmd -f .env.devnet next dev",
-    "build-devnet": "env-cmd -f .env.devnet next build"
+    "dev-devnet-amplifier": "env-cmd -f .env.devnet-amplifier next dev",
+    "build-devnet-amplifier": "env-cmd -f .env.devnet-amplifier next build"
   },
   "repository": {
     "type": "git",
