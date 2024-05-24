@@ -777,4 +777,21 @@ export default [
     image: '/logos/accounts/eesee.png',
     environment: 'mainnet',
   },
+  {
+    address: 'osmo1emhzj4a8c0423mcgkmrkfuu6xxa2xt9ndmhaq0l3heef35m7jfwq7378lu',
+    name: 'Skip',
+    image: '/logos/accounts/skip.svg',
+  },
+  {
+    address: 'neutron1emhzj4a8c0423mcgkmrkfuu6xxa2xt9ndmhaq0l3heef35m7jfwq2rhmke',
+    name: 'Skip',
+    image: '/logos/accounts/skip.svg',
+    environment: 'mainnet',
+  },
+  {
+    address: 'neutron18jgzyha8r25ltxn6u5ng9zajwflhnwzzunlnfunyktjfpextuqfqyjre7j',
+    name: 'Skip',
+    image: '/logos/accounts/skip.svg',
+    environment: 'testnet',
+  },
 ]
